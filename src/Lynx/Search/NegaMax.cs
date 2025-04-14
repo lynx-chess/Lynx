@@ -314,49 +314,62 @@ public sealed partial class Engine
             if (visitedMovesCounter > 0
                 && !pvNode
                 && !isInCheck
-                && isNotGettingCheckmated
-                && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet or bad capture
+                && isNotGettingCheckmated)
             {
-                // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
-                // after searching the first few given by the move ordering algorithm
-                if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                // Quiet or bad capture
+                if (moveScore < EvaluationConstants.PromotionMoveScoreValue)
                 {
-                    break;
-                }
-
-                // 🔍 History pruning -  all quiet moves can be pruned
-                // once we find one with a history score too low
-                if (!isCapture
-                    && moveScore < EvaluationConstants.CounterMoveValue
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                {
-                    break;
-                }
-
-                // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
-                // once it's considered that they don't have potential to raise alpha
-                if (depth <= Configuration.EngineSettings.FP_MaxDepth
-                    && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
-                {
-                    break;
-                }
-
-                // 🔍 PVS SEE pruning
-                if (isCapture)
-                {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
-
-                    if (!SEE.IsGoodCapture(position, move, threshold))
+                    // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
+                    // after searching the first few given by the move ordering algorithm
+                    if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
                     {
-                        continue;
+                        break;
+                    }
+
+                    // 🔍 History pruning -  all quiet moves can be pruned
+                    // once we find one with a history score too low
+                    if (!isCapture
+                        && moveScore < EvaluationConstants.CounterMoveValue
+                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
+                        && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    {
+                        break;
+                    }
+
+                    // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
+                    // once it's considered that they don't have potential to raise alpha
+                    if (depth <= Configuration.EngineSettings.FP_MaxDepth
+                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                    {
+                        break;
+                    }
+
+                    // 🔍 PVS SEE pruning
+                    if (isCapture)
+                    {
+                        var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
+
+                        if (!SEE.IsGoodCapture(position, move, threshold))
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
+
+                        if (!SEE.HasPositiveScore(position, move, threshold))
+                        {
+                            continue;
+                        }
                     }
                 }
                 else
                 {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
-
-                    if (!SEE.HasPositiveScore(position, move, threshold))
+                    // 🔍 Noisy Futility Pruning (FP) - current noisy move can be pruned
+                    // once it's considered that they don't have potential to raise alpha
+                    if (depth <= Configuration.EngineSettings.FP_MaxDepth
+                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                     {
                         continue;
                     }
