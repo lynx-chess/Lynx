@@ -56,9 +56,10 @@ public sealed class SearchResult
     public override string ToString()
     {
         var sb = ObjectPools.StringBuilderPool.Get();
+        sb.EnsureCapacity(128 + (Moves.Length * 5));
 
 #if MULTITHREAD_DEBUG
-        sb.Append("[#" + EngineId + "] ");
+        sb.Append("[#").Append(EngineId).Append("] ");
 #endif
 
         sb.Append(InfoCommand.Id)
@@ -77,10 +78,12 @@ public sealed class SearchResult
 
         if (WDL is not null)
         {
+            var (wdlWin, wdlDraw, wdlLoss) = WDL.Value;
+
             sb.Append(" wdl ")
-              .Append(WDL.Value.WDLWin).Append(' ')
-              .Append(WDL.Value.WDLDraw).Append(' ')
-              .Append(WDL.Value.WDLLoss);
+              .Append(wdlWin).Append(' ')
+              .Append(wdlDraw).Append(' ')
+              .Append(wdlLoss);
         }
 
         sb.Append(" pv ");
