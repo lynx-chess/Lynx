@@ -78,7 +78,8 @@ public sealed partial class Engine
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
                     || (ttElementType == NodeType.Beta && ttScore >= beta))
                 {
-                    // in PV nodes, instead of the cutoff we reduce the depth
+                    // In PV nodes, instead of the cutoff we reduce the depth
+                    // Suggested by Calvin author, originally from Motor
                     if (pvNode)
                     {
                         --depth;
