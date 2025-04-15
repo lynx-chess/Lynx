@@ -142,11 +142,13 @@ public sealed partial class Engine
                 Debug.Assert(ttStaticEval != int.MinValue);
 
                 staticEval = ttStaticEval;
+                staticEval = CorrectStaticEvaluation(position, staticEval);
                 phase = position.Phase();
             }
             else
             {
                 (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                staticEval = CorrectStaticEvaluation(position, staticEval);
                 _tt.SaveStaticEval(position, staticEval, ttPv);
             }
 
@@ -611,6 +613,15 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
+        if (!(isInCheck
+            || bestMove?.IsCapture() == true
+            || bestMove?.IsPromotion() == true
+            || (ttElementType == NodeType.Beta && bestScore <= staticEval)
+            || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+        {
+            UpdateCorrectionHistory(position, bestScore - staticEval, depth);
+        }
+
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
@@ -683,8 +694,11 @@ public sealed partial class Engine
         var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
+        staticEval = CorrectStaticEvaluation(position, staticEval);
+
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
+        // TODO rename to standPat
         int eval =
             (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
