@@ -331,6 +331,16 @@ public sealed class EngineSettings
     [SPSA<int>(-150, -50, 10)]
     public int PVS_SEE_Threshold_Noisy { get; set; } = -117;
 
+    /// <summary>
+    /// Initial value same as <see cref="History_MaxMoveValue"/>
+    /// </summary>
+    public int CorrHistory_MaxValue { get; set; } = 8_192;
+
+    /// <summary>
+    /// Initial value same as <see cref="History_MaxMoveRawBonus"/>
+    /// </summary>
+    public int CorrHistory_MaxRawBonus { get; set; } = 1_896;
+
     #endregion
 }
 
