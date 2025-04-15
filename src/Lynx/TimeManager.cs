@@ -8,7 +8,7 @@ namespace Lynx;
 public static class TimeManager
 {
     /// <summary>
-    /// Values from Stash
+    /// Values from Stash, every attempt to further tune them failed
     /// </summary>
     private static ReadOnlySpan<double> BestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
 
@@ -88,7 +88,7 @@ public static class TimeManager
         double scale = 1.0;
         double scoreStabilityFactor = 1;
 
-        // Node time management: scale soft limit time bound by the proportion of nodes spent
+        // ⌛ Node time management: scale soft limit time bound by the proportion of nodes spent
         //   searching the best move at root level vs the total nodes searched.
         // The more time spent in best move -> the more sure we are about our previous results,
         //   so the less time we spent in the search.
@@ -100,15 +100,15 @@ public static class TimeManager
         double nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
         scale *= nodeTmFactor;
 
-        // Best move stability: The less best move changes, the less time we spend in the search
+        // ⌛ Best move stability: The less best move changes, the less time we spend in the search
         Debug.Assert(BestMoveStabilityValues.Length > 0);
 
         double bestMoveStabilityFactor = BestMoveStabilityValues[Math.Min(bestMoveStability, BestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
+        // ⌛ Score stability: if score improves, we spend less timespend in the search
         if (depth >= Configuration.EngineSettings.ScoreStabiity_MinDepth)
         {
-            // Score stability: if score improves, we spend less timespend in the search
             scoreStabilityFactor = CalculateScoreStability(scoreDelta);
             scale *= scoreStabilityFactor;
         }
