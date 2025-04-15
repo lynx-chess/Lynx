@@ -531,7 +531,7 @@ public static class Constants
 
     public const int KingPawnHashMask = KingPawnHashSize - 1;
 
-    public const int PawnCorrHistorySize = 16_384;
+    public const int PawnCorrHistorySize = 32_768;
 
     public const int PawnCorrHistoryMask = PawnCorrHistorySize - 1;
 
