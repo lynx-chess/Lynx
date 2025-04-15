@@ -23,9 +23,18 @@ public sealed partial class Engine
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Debug("[#{EngineId}] Max depth {Depth} reached",
-                _id, Configuration.EngineSettings.MaxDepth);
-
+            if (IsMainEngine)
+            {
+                _logger.Debug("[#{EngineId}] Max depth {Depth} reached - position {FEN}",
+                    _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+            }
+#if MULTITHREAD_DEBUG
+            else
+            {
+                _logger.Trace("[#{EngineId}] Max depth {Depth} reached - position {FEN}",
+                _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+            }
+#endif
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
@@ -133,11 +142,13 @@ public sealed partial class Engine
                 Debug.Assert(ttStaticEval != int.MinValue);
 
                 staticEval = ttStaticEval;
+                staticEval = CorrectStaticEvaluation(position, staticEval);
                 phase = position.Phase();
             }
             else
             {
                 (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                staticEval = CorrectStaticEvaluation(position, staticEval);
                 _tt.SaveStaticEval(position, staticEval, ttPv);
             }
 
@@ -602,6 +613,15 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
+        if (!(isInCheck
+            || bestMove?.IsCapture() == true
+            || bestMove?.IsPromotion() == true
+            || (ttElementType == NodeType.Beta && bestScore <= staticEval)
+            || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+        {
+            UpdateCorrectionHistory(position, bestScore - staticEval, depth);
+        }
+
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
@@ -627,9 +647,18 @@ public sealed partial class Engine
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Debug("[#{EngineId}] Max depth {Depth} reached in qsearch",
-                _id, Configuration.EngineSettings.MaxDepth);
-
+            if (IsMainEngine)
+            {
+                _logger.Debug("[#{EngineId}] Max depth {Depth} reached in qsearch - position {FEN}",
+                _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+            }
+#if MULTITHREAD_DEBUG
+            else
+            {
+                _logger.Trace("[#{EngineId}] Max depth {Depth} reached in qsearch - position {FEN}",
+                _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+            }
+#endif
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
@@ -665,8 +694,11 @@ public sealed partial class Engine
         var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
+        staticEval = CorrectStaticEvaluation(position, staticEval);
+
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
+        // TODO rename to standPat
         int eval =
             (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore < staticEval)

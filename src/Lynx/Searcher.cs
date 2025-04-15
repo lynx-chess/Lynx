@@ -2,6 +2,7 @@ using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -55,6 +56,9 @@ public sealed class Searcher
         Warmup();
 #endif
 
+        // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
+        // It might help performance though due to preventing that zeroing from happenning during search
+        // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
         _ttWrapper.Clear();
 
         ForceGCCollection();
@@ -228,8 +232,8 @@ public sealed class Searcher
         else
         {
 #if MULTITHREAD_DEBUG
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-                var lastElapsed = sw.ElapsedMilliseconds;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             // Pondering
@@ -247,21 +251,21 @@ public sealed class Searcher
                     .ToArray();
 
 #if MULTITHREAD_DEBUG
-                _logger.Debug("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                _logger.Info("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
                 finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
 #if MULTITHREAD_DEBUG
-                _logger.Debug("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                _logger.Info("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
                 await _absoluteSearchCancellationTokenSource.CancelAsync();
 
 #if MULTITHREAD_DEBUG
-                _logger.Debug("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                _logger.Info("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                 if (finalSearchResult is not null)
@@ -276,7 +280,7 @@ public sealed class Searcher
                     finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-                    _logger.Debug("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                    _logger.Info("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                     // Final info command
@@ -338,8 +342,8 @@ public sealed class Searcher
     private async Task<SearchResult?> MultithreadedSearch(SearchConstraints searchConstraints, SearchConstraints extraEnginesSearchConstraints)
     {
 #if MULTITHREAD_DEBUG
-                    sw = System.Diagnostics.Stopwatch.StartNew();
-                    lastElapsed = sw.ElapsedMilliseconds;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
@@ -355,21 +359,22 @@ public sealed class Searcher
             .ToArray();
 
 #if MULTITHREAD_DEBUG
-                    _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                    lastElapsed = sw.ElapsedMilliseconds;
+        _logger.Info("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
-                    _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                    lastElapsed = sw.ElapsedMilliseconds;
+        _logger.Info("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         await _absoluteSearchCancellationTokenSource.CancelAsync();
 
 #if MULTITHREAD_DEBUG
-                    _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         var totalNodes = finalSearchResult?.Nodes ?? 0;
@@ -435,7 +440,7 @@ public sealed class Searcher
             finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-                        _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            _logger.Info("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
             // Final info command
@@ -476,57 +481,94 @@ public sealed class Searcher
 
     public void NewGame()
     {
+        var sw = Stopwatch.StartNew();
+
         var averageDepth = _mainEngine.AverageDepth;
         if (averageDepth > 0 && averageDepth < int.MaxValue)
         {
             _logger.Info("Average depth: {0}", averageDepth);
         }
 
-        // Hash update
-        if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
+        // Threads update - before hash update to take advantage of multithreaded TT initialization (clearing)
+        // if .Clear() is ever moved to TranspositionTable constructor.
+        var threadsUpdated = UpdateThreads();
+        if (threadsUpdated)
         {
-            _mainEngine.NewGame();
-
-            foreach (var engine in _extraEngines)
-            {
-                engine.NewGame();
-            }
-        }
-        else
-        {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
-
-            _ttWrapper = new TranspositionTable();
-
-            _mainEngine.FreeResources();
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
-
-            AllocateExtraEngines();
+            _logger.Warn("Unexpected threads update - should have happened on 'setoption'");
         }
 
-        // Threads update
-        if (_searchThreadsCount == Configuration.EngineSettings.Threads)
+        // Hash update - after hash update to potentially take advantage of multithreaded TT
+        // initialization (clearing/zeroing), if .Clear() is ever moved to TranspositionTable constructor.
+        var hashUpdated = UpdateHash();
+        if (hashUpdated)
         {
-            foreach (var engine in _extraEngines)
-            {
-                engine.NewGame();
-            }
-        }
-        else
-        {
-            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
-            _searchThreadsCount = Configuration.EngineSettings.Threads;
-
-            AllocateExtraEngines();
+            _logger.Warn("Unexpected hash update - should have happened on 'setoption'\");");
         }
 
-        if (!_firstRun)
+        // We don't need to reset the main engine in case of hash update
+        // because it was alredy reset there, but whetever
+        _mainEngine.NewGame();
+
+        // We don't need to reset the extra engines in case of hash or threads update
+        // because they were alredy reset there, but whetever
+        foreach (var engine in _extraEngines)
+        {
+            engine.NewGame();
+        }
+
+        // During the first run, TT is cleared at the end of the constructor
+        if (!_firstRun && !hashUpdated)
         {
             _ttWrapper.Clear();
         }
         _firstRun = false;
 
+        sw.Stop();
+        _logger.Info("ucinewgame duration: {Time}ms", sw.ElapsedMilliseconds);
+
         ForceGCCollection();
+    }
+
+    public bool UpdateThreads()
+    {
+        if (_searchThreadsCount != Configuration.EngineSettings.Threads)
+        {
+            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
+
+            // Before invoking AllocateExtraEngines
+            _searchThreadsCount = Configuration.EngineSettings.Threads;
+
+            AllocateExtraEngines();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool UpdateHash()
+    {
+        if (_ttWrapper.Size != Configuration.EngineSettings.TranspositionTableSize)
+        {
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
+
+            _ttWrapper = new TranspositionTable();
+
+            // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
+            // It might impact performance though, due to preventing that zeroing from happenning during search
+            // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
+            _ttWrapper.Clear();
+
+            _mainEngine.FreeResources();
+            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+
+            // We need extra engines to know about the nwe TT
+            AllocateExtraEngines();
+
+            return true;
+        }
+
+        return false;
     }
 
     public void Quit()
@@ -555,6 +597,9 @@ public sealed class Searcher
         await engine.PrintBenchResults(results);
     }
 
+    /// <summary>
+    /// Removes existing <see cref="_extraEngines"/> and allocates new ones baed on <see cref="_searchThreadsCount"/>
+    /// </summary>
     private void AllocateExtraEngines()
     {
         // _searchThreadsCount includes _mainEngine

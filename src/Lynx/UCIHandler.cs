@@ -95,8 +95,8 @@ public sealed class UCIHandler
                 case "printsettings":
                     await HandleSettings();
                     break;
-                case "printsysteminfo":
-                    await HandleSystemInfo();
+                case "runtimeconfig":
+                    await HandleRuntimeConfig();
                     break;
                 case "staticeval":
                     await HandleStaticEval(rawCommand, cancellationToken);
@@ -211,6 +211,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.Hash = value;
+                        _searcher.UpdateHash();
                     }
                     break;
                 }
@@ -255,6 +256,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.Threads = value;
+                        _searcher.UpdateThreads();
                     }
                     break;
 #pragma warning restore S1066 // Collapsible "if" statements should be merged
@@ -788,15 +790,45 @@ public sealed class UCIHandler
         await _engineToUci.Writer.WriteAsync(message);
     }
 
-    private async ValueTask HandleSystemInfo()
+    private async ValueTask HandleRuntimeConfig()
     {
         try
         {
-            var simd = Bmi2.X64.IsSupported
-                ? "Bmi2.X64 supported, PEXT BitBoards will be used"
-                : "Bmi2.X64 not supported";
+            await _engineToUci.Writer.WriteAsync("CPU flags:");
+            string[] intrinsics =
+            [
+                $"BMI2 = {Bmi2.IsSupported}",
+                $"SSE4.2 = {Sse42.IsSupported}",
+                $"AVX2 = {Avx2.IsSupported}",
+                $"Avx512BW = {Avx512BW.IsSupported}",
+            ];
 
-            await _engineToUci.Writer.WriteAsync(simd);
+            foreach(var instructionSet in intrinsics)
+            {
+                await _engineToUci.Writer.WriteAsync($"\t- {instructionSet}");
+            }
+
+            if (Sse.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("SSE supported, Prefetch0 will be used for TT prefetching");
+            }
+
+            if (Bmi1.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for BitBoard LSB operations");
+            }
+
+            if (Bmi2.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("BMI2 supported, ParallelBitExtract (PEXT) will be used for slider pieces move generation");
+            }
+
+            await _engineToUci.Writer.WriteAsync("Garbage Collector (GC) settings:");
+
+            foreach (var pair in GC.GetConfigurationVariables())
+            {
+                await _engineToUci.Writer.WriteAsync($"\t- {pair.Key} = {pair.Value}");
+            }
         }
         catch (Exception e)
         {
