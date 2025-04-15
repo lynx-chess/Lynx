@@ -498,8 +498,11 @@ public sealed partial class Engine
 
                     var reducedDepth = newDepth - reduction;
 
-                    // Search with reduced depth and zero window
-                    score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    if (reduction > 0)
+                    {
+                        // Search with reduced depth and zero window
+                        score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    }
 
                     // 🔍 Principal Variation Search (PVS)
                     if (score > alpha && newDepth > reducedDepth)
@@ -641,6 +644,11 @@ public sealed partial class Engine
     [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
     {
+        if (ply > 64)
+        {
+            ;
+        }
+
         var position = Game.CurrentPosition;
 
         cancellationToken.ThrowIfCancellationRequested();
