@@ -72,15 +72,21 @@ public sealed partial class Engine
             ttEntryHasBestMove = ttBestMove != default;
 
             // TT cutoffs
-            if (!pvNode
-                && ttHit
+            if (ttHit
                 && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
                     || (ttElementType == NodeType.Beta && ttScore >= beta))
                 {
-                    return ttScore;
+                    if (pvNode)
+                    {
+                        --depth;
+                    }
+                    else
+                    {
+                        return ttScore;
+                    }
                 }
                 else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
                 {
