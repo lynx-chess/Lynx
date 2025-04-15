@@ -82,6 +82,11 @@ public sealed partial class Engine
                     if (pvNode)
                     {
                         --depth;
+
+                        if (depth <= 0 && !position.IsInCheck())
+                        {
+                            return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                        }
                     }
                     else
                     {
