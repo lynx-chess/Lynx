@@ -177,7 +177,7 @@ public sealed partial class Engine
             + (int)Side.Black];
 
         var correction = pawnCorrHist + nonPawnWhiteCorrHist + nonPawnBlackCorrHist;
-        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale * 3);
+        var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 3));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
