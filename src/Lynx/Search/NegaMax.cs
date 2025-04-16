@@ -83,7 +83,7 @@ public sealed partial class Engine
                     return ttScore;
                 }
                 else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth
-                    && ply < depth * 2) // Extra condition suggested by Sirius author
+                    && ply < depth * 4) // Extra condition suggested by Sirius author
                 {
                     // Extension idea from Stormphrax
                     ++depth;
