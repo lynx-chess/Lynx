@@ -82,11 +82,6 @@ public sealed partial class Engine
                 {
                     return ttScore;
                 }
-                else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
-                {
-                    // Extension idea from Stormphrax
-                    ++depth;
-                }
             }
 
             ttMoveIsCapture = ttHit && ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
