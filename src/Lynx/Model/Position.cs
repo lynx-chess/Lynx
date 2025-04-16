@@ -120,6 +120,8 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
+        Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
+
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         ulong uniqueIdentifierCopy = UniqueIdentifier;
@@ -438,7 +440,7 @@ public class Position : IDisposable
 
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
 
-        // This won't work due to PassedPawnBonusNoEnemiesAheadBonus
+        // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
 
         return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, nonPawnWhiteHashCopy, nonPawnBlackHashCopy, incrementalEvalAccumulatorCopy, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
