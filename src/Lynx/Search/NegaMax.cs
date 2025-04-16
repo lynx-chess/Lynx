@@ -701,8 +701,7 @@ public sealed partial class Engine
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
-        // TODO rename to standPat
-        int eval =
+        int standPat =
             (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
                 || (ttNodeType == NodeType.Beta && ttScore > staticEval))
@@ -719,17 +718,17 @@ public sealed partial class Engine
             }
 
             // Standing pat beta-cutoff (updating alpha after this check)
-            if (eval >= beta)
+            if (standPat >= beta)
             {
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
-                return eval;
+                return standPat;
             }
         }
 
         // Better move
-        if (eval > alpha)
+        if (standPat > alpha)
         {
-            alpha = eval;
+            alpha = standPat;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -742,7 +741,7 @@ public sealed partial class Engine
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
-        int bestScore = eval;
+        int bestScore = standPat;
 
         bool isAnyCaptureValid = false;
 

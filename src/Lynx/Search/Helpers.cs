@@ -104,7 +104,7 @@ public sealed partial class Engine
         var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
         var weight = 2 * Math.Min(16, depth + 1);
 
-        var pawnHash = position._kingPawnUniqueIdentifier
+        var pawnHash = position.KingPawnUniqueIdentifier
             ^ ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
@@ -154,7 +154,7 @@ public sealed partial class Engine
     {
         var sideulong = (ulong)position.Side;
 
-        var pawnHash = position._kingPawnUniqueIdentifier
+        var pawnHash = position.KingPawnUniqueIdentifier
             ^ ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
