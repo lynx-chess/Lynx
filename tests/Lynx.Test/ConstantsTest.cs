@@ -162,4 +162,11 @@ public class ConstantsTest
     {
         Assert.Less(Constants.MaxNumberMovesInAGame, 1024 * 1024, "We'd need to customize ArrayPool due to desired array size requirements");
     }
+
+    [Test]
+    public void PowerOfTwo()
+    {
+        Assert.True(int.IsPow2(KingPawnHashSize));
+        Assert.True(int.IsPow2(PawnCorrHistorySize));
+    }
 }
