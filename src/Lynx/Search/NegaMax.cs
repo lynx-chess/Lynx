@@ -697,6 +697,8 @@ public sealed partial class Engine
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
+        staticEval = CorrectStaticEvaluation(position, staticEval);
+
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
         // TODO rename to standPat

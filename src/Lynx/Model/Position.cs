@@ -52,6 +52,9 @@ public class Position : IDisposable
     public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
     public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
 
+    public int WhiteKing => PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+    public int BlackKing => PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
     /// <summary>
     /// Beware, half move counter isn't take into account
     /// Use alternative constructor instead and set it externally if relevant
@@ -73,6 +76,9 @@ public class Position : IDisposable
 #pragma warning disable S3366 // "this" should not be exposed from constructors
         UniqueIdentifier = ZobristTable.PositionHash(this);
         _kingPawnUniqueIdentifier = ZobristTable.PawnKingHash(this);
+
+        Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
+
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
@@ -109,6 +115,8 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
+        Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
+
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         ulong uniqueIdentifierCopy = UniqueIdentifier;
@@ -423,8 +431,9 @@ public class Position : IDisposable
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        // Asserts won't work due to PassedPawnBonusNoEnemiesAheadBonus
-        //Debug.Assert(ZobristTable.PositionHash(this) != UniqueIdentifier && WasProduceByAValidMove());
+        Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
+
+        // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
 
         return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
