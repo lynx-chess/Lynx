@@ -173,7 +173,7 @@ public sealed partial class Engine
 
         var nonPawnNoSTMIndex = position.NonPawnHash[oppositeSide] & Constants.NonPawnCorrHistoryMask;
 
-        ref var nonPawnNoSTMCorrHist = ref _nonPawnCorrHistory[
+        var nonPawnNoSTMCorrHist = _nonPawnCorrHistory[
             (nonPawnNoSTMIndex * 2 * 2)
             + (side * 2)
             + (ulong)oppositeSide];
