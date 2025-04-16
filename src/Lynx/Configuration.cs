@@ -341,6 +341,10 @@ public sealed class EngineSettings
     /// </summary>
     public int CorrHistory_MaxRawBonus { get; set; } = 1_896;
 
+    public int CorrHistory_PawnWeight { get; set; } = 300;
+
+    public int CorrHistory_NonPawnWeight { get; set; } = 256;
+
     #endregion
 }
 

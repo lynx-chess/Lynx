@@ -537,6 +537,8 @@ public static class Constants
     public const int NonPawnCorrHistoryMask = NonPawnCorrHistorySize - 1;
 
     public const int CorrectionHistoryScale = 256;
+
+    public const int CorrectionHistoryGranularity = 256;
 }
 
 #pragma warning restore IDE0055

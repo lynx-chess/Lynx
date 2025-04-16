@@ -178,9 +178,10 @@ public sealed partial class Engine
             + (side * 2)
             + (ulong)oppositeSide];
 
-        var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist;
+        var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistory_PawnWeight)
+            + ((nonPawnSTMCorrHist + nonPawnNoSTMCorrHist) * Configuration.EngineSettings.CorrHistory_NonPawnWeight);
 
-        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
+        var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryGranularity * Constants.CorrectionHistoryScale));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
