@@ -258,8 +258,9 @@ public sealed partial class Engine
         }
         else
         {
-            staticEval = rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-            // TODO correct static eval
+            rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+
             if (!ttHit)
             {
                 _tt.SaveStaticEval(position, rawStaticEval, ttPv);
