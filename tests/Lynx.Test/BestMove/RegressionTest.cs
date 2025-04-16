@@ -410,4 +410,23 @@ public class RegressionTest : BaseTest
 
         Assert.AreEqual(depth, result.Depth);
     }
+
+    [Test]
+    public void HighSeldepthAtDepth2()
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        var result = engine.BestMove(new("go wtime 3000 btime 3000 winc 3000 binc 3000"));
+        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+
+        // It used to happen at the second repetition, info depth 2 seldepth 124
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
+        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
+        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+    }
 }

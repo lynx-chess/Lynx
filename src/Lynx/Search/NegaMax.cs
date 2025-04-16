@@ -82,7 +82,8 @@ public sealed partial class Engine
                 {
                     return ttScore;
                 }
-                else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
+                else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth
+                    && alpha != beta - 1)
                 {
                     // Extension idea from Stormphrax
                     ++depth;
