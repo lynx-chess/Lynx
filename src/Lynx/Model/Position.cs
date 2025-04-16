@@ -19,10 +19,9 @@ public class Position : IDisposable
 
     public ulong UniqueIdentifier { get; private set; }
 
-    // TODO rename: CamelCase
     public ulong KingPawnUniqueIdentifier { get; private set; }
 
-    public ulong[] NonPawnHash { get; }
+    public ulong[] NonPawnHash { get; private set; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index

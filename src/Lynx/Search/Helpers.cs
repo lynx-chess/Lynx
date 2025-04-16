@@ -180,7 +180,7 @@ public sealed partial class Engine
 
         var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist;
 
-        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
+        var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 3));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
