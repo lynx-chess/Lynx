@@ -168,5 +168,6 @@ public class ConstantsTest
     {
         Assert.True(int.IsPow2(KingPawnHashSize));
         Assert.True(int.IsPow2(PawnCorrHistorySize));
+        Assert.True(int.IsPow2(NonPawnCorrHistorySize));
     }
 }
