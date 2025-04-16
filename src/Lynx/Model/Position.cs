@@ -19,7 +19,8 @@ public class Position : IDisposable
 
     public ulong UniqueIdentifier { get; private set; }
 
-    private ulong _kingPawnUniqueIdentifier;
+    // TODO rename: CamelCase
+    public ulong _kingPawnUniqueIdentifier { get; private set; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -50,6 +51,9 @@ public class Position : IDisposable
     public BitBoard Bishops => PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b];
     public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
     public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
+
+    public int WhiteKing => PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+    public int BlackKing => PieceBitBoards[(int)Piece.k].GetLS1BIndex();
 
     /// <summary>
     /// Beware, half move counter isn't take into account
