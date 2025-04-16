@@ -74,7 +74,8 @@ public sealed partial class Engine
             // TT cutoffs
             if (!pvNode
                 && ttHit
-                && ttDepth >= depth)
+                && ttDepth >= depth
+                && (ttScore <= alpha || cutnode))
             {
                 if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
