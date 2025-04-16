@@ -171,7 +171,7 @@ public sealed partial class Engine
 
         var nonPawnBlackIndex = position.NonPawnBlackHash & Constants.NonPawnCorrHistoryMask;
 
-        ref var nonPawnBlackCorrHist = ref _nonPawnCorrHistory[
+        var nonPawnBlackCorrHist = _nonPawnCorrHistory[
             (nonPawnBlackIndex * 2 * 2)
             + (sideulong * 2)
             + (int)Side.Black];
