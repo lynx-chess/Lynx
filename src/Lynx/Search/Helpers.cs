@@ -123,8 +123,6 @@ public sealed partial class Engine
                     + (scaledBonus * weight))
                 / weightScale;
 
-            weightedEval = Math.Clamp(weightedEval, previousCorrectedScore - maxIncrement, previousCorrectedScore + maxIncrement);
-
             return Math.Clamp(weightedEval, -maxVal, +maxVal);
         }
     }
