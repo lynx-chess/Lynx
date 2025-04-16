@@ -459,6 +459,22 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "lmr_correctedstaticeval":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_CorrectedStaticEval = value;
+                    }
+                    break;
+                }
+            case "lmr_correctedstaticeval_delta":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_CorrectedStaticEval_Delta = value;
+                    }
+                    break;
+                }
 
             case "nmp_mindepth":
                 {

@@ -211,6 +211,15 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
+    public int LMR_CorrectedStaticEval { get; set; } = 100;
+
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_CorrectedStaticEval_Delta { get; set; } = 75;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
     public int LMR_Quiet { get; set; } = 100;
 
     /// <summary>
