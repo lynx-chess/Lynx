@@ -62,13 +62,21 @@ public sealed class SearchResult
         sb.Append("[#").Append(EngineId).Append("] ");
 #endif
 
+        var nps = NodesPerSecond;
+
+        if (HashfullPermill != -1   // Not last info command
+            && Configuration.EngineSettings.EstimateMultithreadedSearchNPS)
+        {
+            nps *= (ulong)Configuration.EngineSettings.Threads;
+        }
+
         sb.Append(InfoCommand.Id)
           .Append(" depth ").Append(Depth)
           .Append(" seldepth ").Append(DepthReached)
           .Append(" multipv 1")
           .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Score) : "mate " + Mate)
           .Append(" nodes ").Append(Nodes)
-          .Append(" nps ").Append(NodesPerSecond)
+          .Append(" nps ").Append(nps)
           .Append(" time ").Append(Time);
 
         if (HashfullPermill != -1)

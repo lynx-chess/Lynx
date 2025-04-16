@@ -109,6 +109,12 @@ public sealed class EngineSettings
 
     public bool IsPonder { get; set; }
 
+    /// <summary>
+    /// Real NPS aren't calculated until the last search command.
+    /// This option enables the report of an NPS estimation by the main thread
+    /// </summary>
+    public bool EstimateMultithreadedSearchNPS { get; set; }
+
     public double SPSA_OB_R_end { get; set; } = 0.02;
 
     #region Time management
