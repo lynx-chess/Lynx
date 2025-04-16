@@ -22,25 +22,7 @@ public class Position : IDisposable
     // TODO rename: CamelCase
     public ulong _kingPawnUniqueIdentifier { get; private set; }
 
-    private readonly ulong[] _nonPawnHash;
-
-    public ulong NonPawnWhiteHash
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            return _nonPawnHash[(int)Side.White];
-        }
-    }
-
-    public ulong NonPawnBlackHash
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            return _nonPawnHash[(int)Side.Black];
-        }
-    }
+    public ulong[] NonPawnHash { get; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -94,16 +76,16 @@ public class Position : IDisposable
         EnPassant = parsedFEN.EnPassant;
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
-        _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
-        _nonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
-        _nonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
+        NonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
+        NonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
+        NonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
 
         _kingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
-        UniqueIdentifier = ZobristTable.PositionHash(this, _kingPawnUniqueIdentifier, _nonPawnHash[(int)Side.White], _nonPawnHash[(int)Side.Black]);
+        UniqueIdentifier = ZobristTable.PositionHash(this, _kingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black]);
 
         Debug.Assert(UniqueIdentifier == ZobristTable.PositionHash(this));
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnWhiteHash);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnBlackHash);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
@@ -118,9 +100,9 @@ public class Position : IDisposable
         UniqueIdentifier = position.UniqueIdentifier;
         _kingPawnUniqueIdentifier = position._kingPawnUniqueIdentifier;
 
-        _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
-        _nonPawnHash[(int)Side.White] = position._nonPawnHash[(int)Side.White];
-        _nonPawnHash[(int)Side.Black] = position._nonPawnHash[(int)Side.Black];
+        NonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
+        NonPawnHash[(int)Side.White] = position.NonPawnHash[(int)Side.White];
+        NonPawnHash[(int)Side.Black] = position.NonPawnHash[(int)Side.Black];
 
         PieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
@@ -146,15 +128,15 @@ public class Position : IDisposable
     public GameState MakeMove(Move move)
     {
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnWhiteHash);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnBlackHash);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
 
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         ulong uniqueIdentifierCopy = UniqueIdentifier;
         ulong kingPawnKeyUniqueIdentifierCopy = _kingPawnUniqueIdentifier;
-        ulong nonPawnWhiteHashCopy = _nonPawnHash[(int)Side.White];
-        ulong nonPawnBlackHashCopy = _nonPawnHash[(int)Side.Black];
+        ulong nonPawnWhiteHashCopy = NonPawnHash[(int)Side.White];
+        ulong nonPawnBlackHashCopy = NonPawnHash[(int)Side.Black];
         int incrementalEvalAccumulatorCopy = _incrementalEvalAccumulator;
         int incrementalPhaseAccumulatorCopy = _incrementalPhaseAccumulator;
         // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
@@ -208,12 +190,12 @@ public class Position : IDisposable
             {
                 // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the KingPawn hash with it, just to remove the pawn (done right above)
                 // We do need to update the NonPawn hash
-                _nonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
+                NonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
             }
         }
         else
         {
-            _nonPawnHash[oldSide] ^= fullPieceMovementHash;
+            NonPawnHash[oldSide] ^= fullPieceMovementHash;
 
             if (piece == (int)Piece.K || piece == (int)Piece.k)
             {
@@ -272,7 +254,7 @@ public class Position : IDisposable
                             }
                             else
                             {
-                                _nonPawnHash[oppositeSide] ^= capturedPieceHash;
+                                NonPawnHash[oppositeSide] ^= capturedPieceHash;
                             }
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
@@ -312,7 +294,7 @@ public class Position : IDisposable
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
                         UniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
+                        NonPawnHash[oldSide] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -340,7 +322,7 @@ public class Position : IDisposable
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
                         UniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
+                        NonPawnHash[oldSide] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -399,7 +381,7 @@ public class Position : IDisposable
                             }
                             else
                             {
-                                _nonPawnHash[oppositeSide] ^= capturedPieceHash;
+                                NonPawnHash[oppositeSide] ^= capturedPieceHash;
                             }
                         }
 
@@ -434,7 +416,7 @@ public class Position : IDisposable
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
                         UniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
+                        NonPawnHash[oldSide] ^= hashChange;
 
                         break;
                     }
@@ -456,7 +438,7 @@ public class Position : IDisposable
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
                         UniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
+                        NonPawnHash[oldSide] ^= hashChange;
 
                         break;
                     }
@@ -491,8 +473,8 @@ public class Position : IDisposable
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnWhiteHash);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnBlackHash);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
 
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
@@ -599,8 +581,8 @@ public class Position : IDisposable
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
         _kingPawnUniqueIdentifier = gameState.KingPawnKey;
-        _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
-        _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
+        NonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
+        NonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
@@ -618,7 +600,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier, _nonPawnHash[(int)Side.White], _nonPawnHash[(int)Side.Black],
+        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black],
             _incrementalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
     }
 
@@ -629,8 +611,8 @@ public class Position : IDisposable
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
         _kingPawnUniqueIdentifier = gameState.KingPawnKey;
-        _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
-        _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
+        NonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
+        NonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
