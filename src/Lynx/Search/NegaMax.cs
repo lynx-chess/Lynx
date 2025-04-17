@@ -72,17 +72,29 @@ public sealed partial class Engine
             ttEntryHasBestMove = ttBestMove != default;
 
             // TT cutoffs
-            if (!pvNode
-                && ttHit
-                && ttDepth >= depth)
+            if (ttHit && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
                     || (ttElementType == NodeType.Beta && ttScore >= beta))
                 {
-                    return ttScore;
+                    // In PV nodes, instead of the cutoff we reduce the depth
+                    // Suggested by Calvin author, originally from Motor
+                    if (pvNode)
+                    {
+                        --depth;
+
+                        if (depth <= 0 && !position.IsInCheck())
+                        {
+                            return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                        }
+                    }
+                    else
+                    {
+                        return ttScore;
+                    }
                 }
-                else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
+                else if (!pvNode && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
                 {
                     // Extension idea from Stormphrax
                     ++depth;
