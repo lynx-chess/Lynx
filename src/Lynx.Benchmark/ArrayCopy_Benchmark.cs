@@ -231,6 +231,13 @@ public class ArrayCopy_Benchmark : BaseBenchmark
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
+    public int[] CopyTo(int[] array)
+    {
+        return CopyToImpl(array);
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
     public int[] ManualLoop(int[] array)
     {
         return ManualLoopImpl(array);
@@ -261,6 +268,14 @@ public class ArrayCopy_Benchmark : BaseBenchmark
     {
         var result = new int[array.Length];
         Array.Copy(array, result, array.Length);
+
+        return result;
+    }
+
+    private static int[] CopyToImpl(int[] array)
+    {
+        var result = new int[array.Length];
+        array.CopyTo(result);
 
         return result;
     }
