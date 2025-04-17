@@ -128,13 +128,13 @@ public sealed partial class Engine
         double improvingRate = 0;
 
         bool isInCheck = position.IsInCheck();
-        int staticEval;
+        int rawStaticEval, staticEval;
         int phase = int.MaxValue;
 
         if (isInCheck)
         {
             ++depth;
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            staticEval = rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
         else if (depth <= 0)
         {
@@ -153,15 +153,15 @@ public sealed partial class Engine
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
-                staticEval = ttStaticEval;
-                staticEval = CorrectStaticEvaluation(position, staticEval);
+                rawStaticEval = ttStaticEval;
+                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
             }
             else
             {
-                (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
-                staticEval = CorrectStaticEvaluation(position, staticEval);
-                _tt.SaveStaticEval(position, staticEval, ttPv);
+                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                _tt.SaveStaticEval(position, rawStaticEval, ttPv);
+                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
 
             Game.UpdateStaticEvalInStack(ply, staticEval);
@@ -270,10 +270,12 @@ public sealed partial class Engine
         }
         else
         {
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+
             if (!ttHit)
             {
-                _tt.SaveStaticEval(position, staticEval, ttPv);
+                _tt.SaveStaticEval(position, rawStaticEval, ttPv);
             }
         }
 
@@ -634,7 +636,7 @@ public sealed partial class Engine
             UpdateCorrectionHistory(position, bestScore - staticEval, depth);
         }
 
-        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+        _tt.RecordHash(position, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }
@@ -703,15 +705,16 @@ public sealed partial class Engine
                 ? ttProbeResult.StaticEval
                 : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
         */
-        var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-        Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+        var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+        Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+
+        var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
         staticEval = CorrectStaticEvaluation(position, staticEval);
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
-        // TODO rename to standPat
-        int eval =
+        int standPat =
             (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
                 || (ttNodeType == NodeType.Beta && ttScore > staticEval))
@@ -724,21 +727,21 @@ public sealed partial class Engine
         {
             if (!ttHit)
             {
-                _tt.SaveStaticEval(position, staticEval, ttPv);
+                _tt.SaveStaticEval(position, rawStaticEval, ttPv);
             }
 
             // Standing pat beta-cutoff (updating alpha after this check)
-            if (eval >= beta)
+            if (standPat >= beta)
             {
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
-                return eval;
+                return standPat;
             }
         }
 
         // Better move
-        if (eval > alpha)
+        if (standPat > alpha)
         {
-            alpha = eval;
+            alpha = standPat;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -751,7 +754,7 @@ public sealed partial class Engine
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
-        int bestScore = eval;
+        int bestScore = standPat;
 
         bool isAnyCaptureValid = false;
 
@@ -843,7 +846,7 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
+        _tt.RecordHash(position, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }
