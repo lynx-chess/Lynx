@@ -214,7 +214,7 @@ public sealed class EngineSettings
     public int LMR_CorrectedStaticEval { get; set; } = 100;
 
     [SPSA<int>(25, 300, 30)]
-    public int LMR_CorrectedStaticEval_Delta { get; set; } = 75;
+    public int LMR_CorrectedStaticEval_Delta { get; set; } = 100;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
