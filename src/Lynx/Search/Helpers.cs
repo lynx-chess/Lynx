@@ -54,10 +54,13 @@ public sealed partial class Engine
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
 
-        return ref _captureHistory[
-            (move.Piece() * pieceOffset)
+        var index = (move.Piece() * pieceOffset)
             + (move.TargetSquare() * targetSquareOffset)
-            + move.CapturedPiece()];
+            + move.CapturedPiece();
+
+        Debug.Assert(index < _captureHistory.Length);
+
+        return ref _captureHistory[index];
     }
 
     /// <summary>
@@ -73,11 +76,14 @@ public sealed partial class Engine
 
         var previousMove = Game.ReadMoveFromStack(ply);
 
-        return ref _continuationHistory[
-            (piece * pieceOffset)
+        var index = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset)
             + (previousMove.Piece() * previousMovePieceOffset)
-            + (previousMove.TargetSquare() * previousMoveTargetSquareOffset)];
+            + (previousMove.TargetSquare() * previousMoveTargetSquareOffset);
+
+        Debug.Assert(index < _continuationHistory.Length);
+
+        return ref _continuationHistory[index];
         //+ 0];
     }
 
@@ -91,25 +97,60 @@ public sealed partial class Engine
 
         var previousMove = Game.ReadMoveFromStack(ply);
 
-        return ref _counterMoves[
-            (previousMove.Piece() * sourceSquareOffset)
-            + previousMove.TargetSquare()];
+        var index = (previousMove.Piece() * sourceSquareOffset)
+            + previousMove.TargetSquare();
+
+        Debug.Assert(index < _counterMoves.Length);
+
+        return ref _counterMoves[index];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
     {
+        var side = (ulong)position.Side;
+        var oppositeSide = Utils.OppositeSide((int)side);
+
         var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
         var weight = 2 * Math.Min(16, depth + 1);
 
-        var pawnHash = position._kingPawnUniqueIdentifier
-            ^ ZobristTable.PieceHash(position.WhiteKing, (int)Piece.K)
-            ^ ZobristTable.PieceHash(position.BlackKing, (int)Piece.k);
+        var pawnHash = position.KingPawnUniqueIdentifier
+            ^ ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
+            ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
         var pawnIndex = pawnHash & Constants.PawnCorrHistoryMask;
-        ref var pawnCorrHistEntry = ref _pawnCorrHistory[(2 * pawnIndex) + (ulong)position.Side];
+
+        var pawnCorrHistIndex = (2 * pawnIndex) + side;
+        Debug.Assert(pawnCorrHistIndex < (ulong)_pawnCorrHistory.Length);
+
+        ref var pawnCorrHistEntry = ref _pawnCorrHistory[pawnCorrHistIndex];
 
         pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
+
+        var nonPawnSTMIndex = position.NonPawnHash[side] & Constants.NonPawnCorrHistoryMask;
+
+        var nonPawnCorrHistSTMIndex =
+            (nonPawnSTMIndex * 2 * 2)
+            + (side * 2)
+            + side;
+
+        Debug.Assert(nonPawnCorrHistSTMIndex < (ulong)_nonPawnCorrHistory.Length);
+
+        ref var nonPawnSTMCorrHistEntry = ref _nonPawnCorrHistory[nonPawnCorrHistSTMIndex];
+
+        nonPawnSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnSTMCorrHistEntry, scaledBonus, weight);
+
+        var nonPawnNoSTMIndex = position.NonPawnHash[oppositeSide] & Constants.NonPawnCorrHistoryMask;
+
+        var nonPawnNoSTMCorrHistIndex = (nonPawnNoSTMIndex * 2 * 2)
+            + (side * 2)
+            + (ulong)oppositeSide;
+
+        Debug.Assert(nonPawnNoSTMCorrHistIndex < (ulong)_nonPawnCorrHistory.Length);
+
+        ref var nonPawnNoSTMCorrHistEntry = ref _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
+
+        nonPawnNoSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnNoSTMCorrHistEntry, scaledBonus, weight);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
@@ -132,14 +173,42 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CorrectStaticEvaluation(Position position, int staticEvaluation)
     {
-        var pawnHash = position._kingPawnUniqueIdentifier
-            ^ ZobristTable.PieceHash(position.WhiteKing, (int)Piece.K)
-            ^ ZobristTable.PieceHash(position.BlackKing, (int)Piece.k);
+        var side = (ulong)position.Side;
+        var oppositeSide = Utils.OppositeSide((int)side);
+
+        var pawnHash = position.KingPawnUniqueIdentifier
+            ^ ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
+            ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
         var pawnIndex = pawnHash & Constants.PawnCorrHistoryMask;
-        var correction = _pawnCorrHistory[(2 * pawnIndex) + (ulong)position.Side];
 
-        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
+        var pawnCorrHistIndex = (2 * pawnIndex) + side;
+        Debug.Assert(pawnCorrHistIndex < (ulong)_pawnCorrHistory.Length);
+
+        var pawnCorrHist = _pawnCorrHistory[pawnCorrHistIndex];
+
+        var nonPawnSTMoveIndex = position.NonPawnHash[side] & Constants.NonPawnCorrHistoryMask;
+
+        var nonPawnSTMoveCorrHistIndex = (nonPawnSTMoveIndex * 2 * 2)
+            + (side * 2)
+            + side;
+
+        Debug.Assert(nonPawnSTMoveCorrHistIndex < (ulong)_nonPawnCorrHistory.Length);
+
+        var nonPawnSTMCorrHist = _nonPawnCorrHistory[nonPawnSTMoveCorrHistIndex];
+
+        var nonPawnNoSTMIndex = position.NonPawnHash[oppositeSide] & Constants.NonPawnCorrHistoryMask;
+
+        var nonPawnNoSTMCorrHistIndex = (nonPawnNoSTMIndex * 2 * 2)
+            + (side * 2)
+            + (ulong)oppositeSide;
+
+        Debug.Assert(nonPawnNoSTMCorrHistIndex < (ulong)_nonPawnCorrHistory.Length);
+
+        var nonPawnNoSTMCorrHist = _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
+
+        var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist;
+        var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 3));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }

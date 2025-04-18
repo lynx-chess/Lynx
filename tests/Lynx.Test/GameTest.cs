@@ -112,10 +112,8 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[4]));
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[5]));
 
-        game.MakeMove(repeatedMoves[6]);
-        Assert.True(game.IsThreefoldRepetition());
-
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[6]));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[7]);
         Assert.True(game.IsThreefoldRepetition());
@@ -153,9 +151,9 @@ public class GameTest : BaseTest
         var eval = winningPosition.StaticEvaluation().Score;
         Assert.AreNotEqual(0, eval);
 
-        Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[5]));
+        Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[4]));
 
-        game.MakeMove(repeatedMoves[6]);
+        game.MakeMove(repeatedMoves[5]);
         Assert.True(game.IsThreefoldRepetition());
     }
 
@@ -241,7 +239,7 @@ public class GameTest : BaseTest
 
         Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.EncodePromotion((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)Piece.q)));   // Promotion
         Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
-        Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
+        Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[0]));
 
 #if DEBUG
         Assert.AreEqual(51, game.MoveHistory.Count);

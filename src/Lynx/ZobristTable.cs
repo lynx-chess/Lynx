@@ -124,11 +124,24 @@ public static class ZobristTable
         return positionHash;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong PositionHash(Position position, ulong kingPawnHash, ulong nonPawnWhiteHash, ulong nonPawnBlackHash)
+    {
+        return kingPawnHash
+            ^ nonPawnWhiteHash
+            ^ nonPawnBlackHash
+            ^ PieceHash(position.WhiteKingSquare, (int)Piece.K)     // Removing king hashes, since they're included in both kingPawn and nonPawn ones
+            ^ PieceHash(position.BlackKingSquare, (int)Piece.k)
+            ^ EnPassantHash((int)position.EnPassant)
+            ^ SideHash((ulong)position.Side)
+            ^ CastleHash(position.Castle);
+    }
+
     /// <summary>
     /// Calculates from scratch the pawn structure hash of a position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong PawnKingHash(Position position)
+    public static ulong KingPawnHash(Position position)
     {
         ulong pawnKingHash = 0;
 
@@ -155,6 +168,29 @@ public static class ZobristTable
         pawnKingHash ^= PieceHash(blackKing, (int)Piece.k);
 
         return pawnKingHash;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong NonPawnSideHash(Position position, int side)
+    {
+        ulong nonPawnSideHash = 0;
+
+        var start = 7 - (6 * side);
+        var end = 12 - (6 * side);
+
+        for (int pieceIndex = start; pieceIndex < end; ++pieceIndex)
+        {
+            var bitboard = position.PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                nonPawnSideHash ^= PieceHash(pieceSquareIndex, pieceIndex);
+            }
+        }
+
+        return nonPawnSideHash;
     }
 
     /// <summary>
