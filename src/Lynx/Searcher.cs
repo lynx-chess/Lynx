@@ -378,23 +378,65 @@ public sealed class Searcher
 #endif
 
         var totalNodes = finalSearchResult?.Nodes ?? 0;
+        var finalTime = finalSearchResult?.Time ?? 0;
 
-        // We wait just for the node count, so there's room for improvement here with thread voting
-        // and other strategies that take other thread results into account
         await foreach (var task in Task.WhenEach(tasks))
         {
             var extraResult = await task;
 
-            if (extraResult != null)
+            if (extraResult is not null)
             {
                 totalNodes += extraResult.Nodes;
-                finalSearchResult ??= extraResult;
+
+                if (finalSearchResult is null)
+                {
+                    finalSearchResult = extraResult;
+                    finalTime = extraResult.Time;
+                    continue;
+                }
+
+                // Thread voting, original impl sligtly corrected based on by Heimdall's (based on Berserk's)
+                if (extraResult.BestMove != default)
+                {
+                    finalSearchResult = finalSearchResult.Mate switch
+                    {
+                        0                                                                       // No mate detected in main thread:
+                            when                                                                //      Extra thread:
+                                extraResult.Mate > 0                                            //          Mate
+                                    || extraResult.Depth > finalSearchResult.Depth              //          ||  Higher depth
+                                    || (extraResult.Depth == finalSearchResult.Depth            //          ||  Same depth, better score
+                                        && extraResult.Score > finalSearchResult.Score)
+
+                                => extraResult,
+                        > 0                                                                     // Mating in main thread:
+                            when                                                                //      Extra thread:
+                                extraResult.Mate > 0                                            //          Still mating
+                                    && (extraResult.Mate < finalSearchResult.Mate               //          &&  [But faster (shorter mate)
+                                        || (extraResult.Mate == finalSearchResult.Mate          //              || Same mating distance, but higher depth]
+                                            && extraResult.Depth > finalSearchResult.Depth))
+
+                                => extraResult,
+
+                        < 0                                                                     // Mated in main thread:
+                            when                                                                //      Extra thread:
+                                extraResult.Depth > finalSearchResult.Depth                     //          Higher depth
+                                    || (extraResult.Depth == finalSearchResult.Depth            //          || Same depth
+                                        && (extraResult.Mate >= 0                               //              && [But mating or at least not mated any more
+                                            || extraResult.Mate < finalSearchResult.Mate))      //                  || Still mated, but longer mate]
+
+                                => extraResult,
+
+                        _ => finalSearchResult
+                    };
+                }
             }
         }
 
         if (finalSearchResult is not null)
         {
             finalSearchResult.Nodes = totalNodes;
+            finalSearchResult.Time = finalTime;
+
             finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
