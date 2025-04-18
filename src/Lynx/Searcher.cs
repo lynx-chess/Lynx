@@ -440,9 +440,9 @@ public sealed class Searcher
 #if MULTITHREAD_DEBUG
                     if (previousEngineId != finalSearchResult.EngineId)
                     {
-                        _logger.Warn("[MT] Engine {EngineId1} result (Depth {Depth1}, best move {BestMove1}, score {Score1}, mate {Mate1}) -> {EngineId2} result (Depth {Depth2}, best move {BestMove2}, score {Score2}, mate {Mate2}) | {FEN}",
-                            previousEngineId, previousDepth, previousBestMove, previousScore, previousMate,
-                            finalSearchResult.EngineId, finalSearchResult.Depth, finalSearchResult.BestMove, finalSearchResult.Score, finalSearchResult.Mate,
+                        _logger.Warn("[MT] #{EngineId1} (Depth {Depth1}, {BestMove1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} result (Depth {Depth2}, {BestMove2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                            previousEngineId, previousDepth, previousBestMove.UCIStringMemoized(), previousScore, previousMate,
+                            finalSearchResult.EngineId, finalSearchResult.Depth, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Score, finalSearchResult.Mate,
                             _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
                     }
 #endif
