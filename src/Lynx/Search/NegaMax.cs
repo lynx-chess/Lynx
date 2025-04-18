@@ -100,7 +100,9 @@ public sealed partial class Engine
                         }
                     }
                 }
-                else if (!pvNode && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
+                else if (!pvNode
+                    && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth
+                    && ply < depth * 4)
                 {
                     // Extension idea from Stormphrax
                     ++depth;
