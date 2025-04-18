@@ -440,7 +440,7 @@ public sealed class Searcher
 #if MULTITHREAD_DEBUG
                     if (previousEngineId != finalSearchResult.EngineId)
                     {
-                        _logger.Warn("[MT] #{EngineId1} (Depth {Depth1}, {BestMove1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} result (Depth {Depth2}, {BestMove2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                        _logger.Info("[MT] #{EngineId1} (Depth {Depth1}, {BestMove1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} result (Depth {Depth2}, {BestMove2}, cp {Score2}, mate {Mate2}) | {FEN}",
                             previousEngineId, previousDepth, previousBestMove.UCIStringMemoized(), previousScore, previousMate,
                             finalSearchResult.EngineId, finalSearchResult.Depth, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Score, finalSearchResult.Mate,
                             _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
@@ -636,8 +636,7 @@ public sealed class Searcher
             {
                 _extraEngines[i] = new Engine(i + 2,
 #if MULTITHREAD_DEBUG
-                    //_engineWriter,
-                    SilentChannelWriter<object>.Instance,
+                    _engineWriter,
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
