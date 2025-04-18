@@ -403,6 +403,7 @@ public sealed class Searcher
                     var previousDepth = finalSearchResult.Depth;
                     var previousScore = finalSearchResult.Score;
                     var previousMate = finalSearchResult.Mate;
+                    var previousBestMove = finalSearchResult.BestMove;
 #endif
 
                     finalSearchResult = finalSearchResult.Mate switch
@@ -439,9 +440,10 @@ public sealed class Searcher
 #if MULTITHREAD_DEBUG
                     if (previousEngineId != finalSearchResult.EngineId)
                     {
-                        _logger.Warn("[MT] Engine {EngineId1} result (Depth {Depth1}, score {Score1}, mate {Mate1}) replaced with engine {EngineId2} one (Depth {Depth2}, score {Score2}, mate {Mate2})",
-                            previousEngineId, previousDepth, previousScore, previousMate,
-                            finalSearchResult.EngineId, finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate);
+                        _logger.Warn("[MT] Engine {EngineId1} result (Depth {Depth1}, best move {BestMove1}, score {Score1}, mate {Mate1}) -> {EngineId2} result (Depth {Depth2}, best move {BestMove2}, score {Score2}, mate {Mate2}) | {FEN}",
+                            previousEngineId, previousDepth, previousBestMove, previousScore, previousMate,
+                            finalSearchResult.EngineId, finalSearchResult.Depth, finalSearchResult.BestMove, finalSearchResult.Score, finalSearchResult.Mate,
+                            _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
                     }
 #endif
                 }
