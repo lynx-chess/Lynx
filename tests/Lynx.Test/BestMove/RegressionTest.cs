@@ -411,6 +411,15 @@ public class RegressionTest : BaseTest
         Assert.AreEqual(depth, result.Depth);
     }
 
+    [TestCase("8/1p1k3b/p1n1pp2/P1B4p/BPP2p2/5P2/3K2PP/8 b - c3 1 1", 30)]
+    public void NegativeDepth(string fen, int depth)
+    {
+        var engine = GetEngine();
+        engine.AdjustPosition($"position fen {fen}");
+
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
     [Test]
     public void HighSeldepthAtDepth2()
     {

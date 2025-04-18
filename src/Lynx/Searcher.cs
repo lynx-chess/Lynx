@@ -359,46 +359,106 @@ public sealed class Searcher
             .ToArray();
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         await _absoluteSearchCancellationTokenSource.CancelAsync();
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         var totalNodes = finalSearchResult?.Nodes ?? 0;
+        var finalTime = finalSearchResult?.Time ?? 0;
 
-        // We wait just for the node count, so there's room for improvement here with thread voting
-        // and other strategies that take other thread results into account
         await foreach (var task in Task.WhenEach(tasks))
         {
             var extraResult = await task;
 
-            if (extraResult != null)
+            if (extraResult is not null)
             {
                 totalNodes += extraResult.Nodes;
-                finalSearchResult ??= extraResult;
+
+                if (finalSearchResult is null)
+                {
+                    finalSearchResult = extraResult;
+                    finalTime = extraResult.Time;
+                    continue;
+                }
+
+                // Thread voting, original impl sligtly corrected based on by Heimdall's (based on Berserk's)
+                if (extraResult.BestMove != default)
+                {
+#if MULTITHREAD_DEBUG
+                    var previousEngineId = finalSearchResult.EngineId;
+                    var previousDepth = finalSearchResult.Depth;
+                    var previousScore = finalSearchResult.Score;
+                    var previousMate = finalSearchResult.Mate;
+                    var previousBestMove = finalSearchResult.BestMove;
+#endif
+
+                    finalSearchResult = finalSearchResult.Mate switch
+                    {
+                        0                                                                       // No mate detected in main thread:
+                            when                                                                //      Extra thread:
+                                extraResult.Mate > 0                                            //          Mate
+                                    || extraResult.Depth > finalSearchResult.Depth              //          ||  Higher depth
+                                    || (extraResult.Depth == finalSearchResult.Depth            //          ||  Same depth, better score
+                                        && extraResult.Score > finalSearchResult.Score)
+
+                                => extraResult,
+                        > 0                                                                     // Mating in main thread:
+                            when                                                                //      Extra thread:
+                                extraResult.Mate > 0                                            //          Still mating
+                                    && (extraResult.Mate < finalSearchResult.Mate               //          &&  [But faster (shorter mate)
+                                        || (extraResult.Mate == finalSearchResult.Mate          //              || Same mating distance, but higher depth]
+                                            && extraResult.Depth > finalSearchResult.Depth))
+
+                                => extraResult,
+
+                        < 0                                                                     // Mated in main thread:
+                            when                                                                //      Extra thread:
+                                extraResult.Depth > finalSearchResult.Depth                     //          Higher depth
+                                    || (extraResult.Depth == finalSearchResult.Depth            //          || Same depth
+                                        && (extraResult.Mate >= 0                               //              && [But mating or at least not mated any more
+                                            || extraResult.Mate < finalSearchResult.Mate))      //                  || Still mated, but longer mate]
+
+                                => extraResult,
+
+                        _ => finalSearchResult
+                    };
+
+#if MULTITHREAD_DEBUG
+                    if (previousEngineId != finalSearchResult.EngineId)
+                    {
+                        _logger.Info("[MT] #{EngineId1} (Depth {Depth1}, {BestMove1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} result (Depth {Depth2}, {BestMove2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                            previousEngineId, previousDepth, previousBestMove.UCIStringMemoized(), previousScore, previousMate,
+                            finalSearchResult.EngineId, finalSearchResult.Depth, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Score, finalSearchResult.Mate,
+                            _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                    }
+#endif
+                }
             }
         }
 
         if (finalSearchResult is not null)
         {
             finalSearchResult.Nodes = totalNodes;
+            finalSearchResult.Time = finalTime;
+
             finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-            _logger.Info("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            _logger.Info("[MT] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
             // Final info command
