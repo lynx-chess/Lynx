@@ -537,6 +537,8 @@ public static class Constants
     public const int NonPawnCorrHistoryMask = NonPawnCorrHistorySize - 1;
 
     public const int CorrectionHistoryScale = 256;
+
+    public const string NumberWithSignFormat = "+#;-#;0";
 }
 
 #pragma warning restore IDE0055
