@@ -214,6 +214,12 @@ public sealed class EngineSettings
     public int LMR_Quiet { get; set; } = 100;
 
     /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_FailLowTTPV { get; set; } = 100;
+
+    /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2
     /// </summary>
     [SPSA<int>(1, 8192, 512)]
