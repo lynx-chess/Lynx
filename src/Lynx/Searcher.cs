@@ -1,4 +1,4 @@
-using Lynx.Model;
+﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -407,29 +407,32 @@ public sealed class Searcher
 
                     finalSearchResult = finalSearchResult.Mate switch
                     {
-                        0                                                                       // No mate detected in main thread:
-                            when                                                                //      Extra thread:
-                                extraResult.Mate > 0                                            //          Mate
-                                    || extraResult.Depth > finalSearchResult.Depth              //          ||  Higher depth
-                                    || (extraResult.Depth == finalSearchResult.Depth            //          ||  Same depth, better score
+                        0                                                                                   // No mate detected in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          Mate
+                                    || extraResult.Depth > finalSearchResult.Depth                          //          ||  Higher depth
+                                    || (extraResult.Depth == finalSearchResult.Depth                        //          ||  Same depth, better score
                                         && extraResult.Score > finalSearchResult.Score)
 
                                 => extraResult,
-                        > 0                                                                     // Mating in main thread:
-                            when                                                                //      Extra thread:
-                                extraResult.Mate > 0                                            //          Still mating
-                                    && (extraResult.Mate < finalSearchResult.Mate               //          &&  [But faster (shorter mate)
-                                        || (extraResult.Mate == finalSearchResult.Mate          //              || Same mating distance, but higher depth]
+                        > 0                                                                                 // Mating in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          Still mating
+                                    && (extraResult.Mate < finalSearchResult.Mate                           //          &&  [But faster (shorter mate)
+                                        || (extraResult.Mate == finalSearchResult.Mate                      //              || Same mating distance, but higher depth]
                                             && extraResult.Depth > finalSearchResult.Depth))
 
                                 => extraResult,
 
-                        < 0                                                                     // Mated in main thread:
-                            when                                                                //      Extra thread:
-                                extraResult.Depth > finalSearchResult.Depth                     //          Higher depth
-                                    || (extraResult.Depth == finalSearchResult.Depth            //          || Same depth
-                                        && (extraResult.Mate >= 0                               //              && [But mating or at least not mated any more
-                                            || extraResult.Mate < finalSearchResult.Mate))      //                  || Still mated, but longer mate]
+                        < 0                                                                                 // Mated in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          We're mating instead (which shouldn't happen, but ¯\_(ツ)_/¯ )
+                                    || (extraResult.Mate < 0                                                //              || Still mated (to avoid replacing a known mate with the result of a thread that hasn't detected the mate yet)
+                                        && extraResult.Mate >= -Configuration.EngineSettings.MaxDepth / 2   //                  && Realistic mated score
+                                        && (extraResult.Depth > finalSearchResult.Depth                     //                  && Higher depth
+                                            || (extraResult.Depth == finalSearchResult.Depth                //                      || Same depth
+                                                && extraResult.Mate < finalSearchResult.Mate                //                          && Still mated, but longer mate
+                                                && extraResult.BestMove != finalSearchResult.BestMove)))    //                          && which is only possible if the best move is not the same (otherwise the shorter mate score is more accurate)
 
                                 => extraResult,
 
