@@ -71,7 +71,8 @@ public sealed class SearchResult
             nps *= (ulong)Configuration.EngineSettings.Threads;
 
             // Remove the 5 less significative digits to hint that this is an estimate
-            nps = nps / 100_000 * 100_000;
+            const int k = 100_000;
+            nps = nps / k * k;
         }
 
         sb.Append(InfoCommand.Id)
