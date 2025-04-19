@@ -129,12 +129,12 @@ public static class EvaluationConstants
     /// <summary>
     /// Max static eval. It doesn't include checkmate values and it's below <see cref="PositiveCheckmateDetectionLimit"/>
     /// </summary>
-    public const int MaxStaticEval = PositiveCheckmateDetectionLimit - 1;
+    public const int MaxStaticEval = PositiveCheckmateDetectionLimit - 1000;
 
     /// <summary>
     /// Min static eval. It doesn't include checkmate values and it's above <see cref="NegativeCheckmateDetectionLimit"/>
     /// </summary>
-    public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1;
+    public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1000;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
