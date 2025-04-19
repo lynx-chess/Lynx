@@ -67,7 +67,11 @@ public sealed class SearchResult
         if (HashfullPermill == -1   // Not last info command
             && Configuration.EngineSettings.EstimateMultithreadedSearchNPS)
         {
+            // Estimate total nps
             nps *= (ulong)Configuration.EngineSettings.Threads;
+
+            // Remove the 5 less significative digits to hint that this is an estimate
+            nps = nps / 100_000 * 100_000;
         }
 
         sb.Append(InfoCommand.Id)
