@@ -100,7 +100,9 @@ public sealed partial class Engine
                         }
                     }
                 }
-                else if (!pvNode && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
+                else if (!pvNode
+                    && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth
+                    && ply < depth * 4) // To avoid weird search explosions, see HighSeldepthAtDepth2 test. Patch suggested by Sirius author
                 {
                     // Extension idea from Stormphrax
                     ++depth;
