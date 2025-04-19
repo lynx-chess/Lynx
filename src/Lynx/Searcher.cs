@@ -648,7 +648,9 @@ public sealed class Searcher
             {
                 _extraEngines[i] = new Engine(i + 2,
 #if MULTITHREAD_DEBUG
-                    _engineWriter,
+                _logger.IsDebugEnabled
+                    ? _engineWriter
+                    : SilentChannelWriter<object>.Instance,
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
