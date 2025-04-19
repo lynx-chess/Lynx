@@ -14,7 +14,6 @@ public sealed class Searcher
     private readonly Logger _logger;
 
     internal const int MainEngineId = 1;
-
     private bool _isProcessingGoCommand;
     private bool _isPonderHit;
 
@@ -440,10 +439,23 @@ public sealed class Searcher
 #if MULTITHREAD_DEBUG
                     if (previousEngineId != finalSearchResult.EngineId)
                     {
-                        _logger.Info("[MT] #{EngineId1} (Depth {Depth1}, {BestMove1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} result (Depth {Depth2}, {BestMove2}, cp {Score2}, mate {Mate2}) | {FEN}",
-                            previousEngineId, previousDepth, previousBestMove.UCIStringMemoized(), previousScore, previousMate,
-                            finalSearchResult.EngineId, finalSearchResult.Depth, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Score, finalSearchResult.Mate,
-                            _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                        if (_logger.IsInfoEnabled)
+                        {
+                            if (previousBestMove != finalSearchResult.BestMove)
+                            {
+                                _logger.Info("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                                    previousEngineId, previousBestMove.UCIStringMemoized(), previousDepth, previousScore, previousMate.ToString(Constants.NumberWithSignFormat),
+                                    finalSearchResult.EngineId, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate.ToString(Constants.NumberWithSignFormat),
+                                    _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                            }
+                        }
+                        else if (_logger.IsDebugEnabled)
+                        {
+                            _logger.Debug("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                                previousEngineId, previousBestMove.UCIStringMemoized(), previousDepth, previousScore, previousMate.ToString(Constants.NumberWithSignFormat),
+                                finalSearchResult.EngineId, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate.ToString(Constants.NumberWithSignFormat),
+                                _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                        }
                     }
 #endif
                 }
