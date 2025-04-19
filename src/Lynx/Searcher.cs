@@ -428,7 +428,8 @@ public sealed class Searcher
                         < 0                                                                                 // Mated in main thread:
                             when                                                                            //      Extra thread:
                                 extraResult.Mate > 0                                                        //          We're mating instead (which shouldn't happen, but ¯\_(ツ)_/¯ )
-                                    || (extraResult.Mate >= -Configuration.EngineSettings.MaxDepth / 2      //              || Realistic mate score
+                                    || (extraResult.Mate < 0                                                //              || Still mated (to avoid replacing a known mate with the result of a thread that hasn't detected the mate yet)
+                                        && extraResult.Mate >= -Configuration.EngineSettings.MaxDepth / 2   //                  && Realistic mated score
                                         && (extraResult.Depth > finalSearchResult.Depth                     //                  && Higher depth
                                             || (extraResult.Depth == finalSearchResult.Depth                //                      || Same depth
                                                 && extraResult.Mate < finalSearchResult.Mate                //                          && Still mated, but longer mate
