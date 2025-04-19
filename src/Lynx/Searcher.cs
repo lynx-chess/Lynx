@@ -446,7 +446,7 @@ public sealed class Searcher
                         {
                             if (previousBestMove != finalSearchResult.BestMove)
                             {
-                                _logger.Info("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                                _logger.Warn("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
                                     previousEngineId, previousBestMove.UCIStringMemoized(), previousDepth, previousScore, previousMate.ToString(Constants.NumberWithSignFormat),
                                     finalSearchResult.EngineId, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate.ToString(Constants.NumberWithSignFormat),
                                     _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
