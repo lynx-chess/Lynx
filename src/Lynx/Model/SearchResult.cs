@@ -63,10 +63,24 @@ public sealed class SearchResult
     public override string ToString()
     {
         var sb = ObjectPools.StringBuilderPool.Get();
+        sb.EnsureCapacity(128 + (Moves.Length * 5));
 
 #if MULTITHREAD_DEBUG
-        sb.Append("[#" + EngineId + "] ");
+        sb.Append("[#").Append(EngineId).Append("] ");
 #endif
+
+        var nps = NodesPerSecond;
+
+        if (HashfullPermill == -1   // Not last info command
+            && Configuration.EngineSettings.EstimateMultithreadedSearchNPS)
+        {
+            // Estimate total nps
+            nps *= (ulong)Configuration.EngineSettings.Threads;
+
+            // Remove the 5 less significative digits to hint that this is an estimate
+            const int k = 100_000;
+            nps = nps / k * k;
+        }
 
         sb.Append(InfoCommand.Id)
           .Append(" depth ").Append(Depth)
@@ -74,7 +88,7 @@ public sealed class SearchResult
           .Append(" multipv 1")
           .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Score) : "mate " + Mate)
           .Append(" nodes ").Append(Nodes)
-          .Append(" nps ").Append(NodesPerSecond)
+          .Append(" nps ").Append(nps)
           .Append(" time ").Append(Time);
 
         if (HashfullPermill != -1)
@@ -84,10 +98,12 @@ public sealed class SearchResult
 
         if (WDL is not null)
         {
+            var (wdlWin, wdlDraw, wdlLoss) = WDL.Value;
+
             sb.Append(" wdl ")
-              .Append(WDL.Value.WDLWin).Append(' ')
-              .Append(WDL.Value.WDLDraw).Append(' ')
-              .Append(WDL.Value.WDLLoss);
+              .Append(wdlWin).Append(' ')
+              .Append(wdlDraw).Append(' ')
+              .Append(wdlLoss);
         }
 
         sb.Append(" pv ");

@@ -109,6 +109,12 @@ public sealed class EngineSettings
 
     public bool IsPonder { get; set; }
 
+    /// <summary>
+    /// Real NPS aren't calculated until the last search command.
+    /// This option enables the report of an NPS estimation by the main thread
+    /// </summary>
+    public bool EstimateMultithreadedSearchNPS { get; set; }
+
     public double SPSA_OB_R_end { get; set; } = 0.02;
 
     #region Time management
@@ -330,6 +336,16 @@ public sealed class EngineSettings
 
     [SPSA<int>(-150, -50, 10)]
     public int PVS_SEE_Threshold_Noisy { get; set; } = -117;
+
+    /// <summary>
+    /// Initial value same as <see cref="History_MaxMoveValue"/>
+    /// </summary>
+    public int CorrHistory_MaxValue { get; set; } = 8_192;
+
+    /// <summary>
+    /// Initial value same as <see cref="History_MaxMoveRawBonus"/>
+    /// </summary>
+    public int CorrHistory_MaxRawBonus { get; set; } = 1_896;
 
     #endregion
 }
