@@ -114,6 +114,8 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
+        Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overriden");
+
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         ref var entry = ref _tt[ttIndex];
 
