@@ -138,6 +138,7 @@ public sealed partial class Engine
         bool isInCheck = position.IsInCheck();
         int rawStaticEval, staticEval;
         int phase = int.MaxValue;
+        ref var stack = ref Game.Stack(ply);
 
         if (isInCheck)
         {
@@ -172,7 +173,7 @@ public sealed partial class Engine
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
 
-            Game.UpdateStaticEvalInStack(ply, staticEval);
+            stack.StaticEval = staticEval;
 
             if (ply >= 2)
             {
@@ -409,7 +410,7 @@ public sealed partial class Engine
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
-            Game.UpdateMoveinStack(ply, move);
+            stack.Move = move;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()
@@ -722,7 +723,8 @@ public sealed partial class Engine
 
         staticEval = CorrectStaticEvaluation(position, staticEval);
 
-        Game.UpdateStaticEvalInStack(ply, staticEval);
+        ref var stack = ref Game.Stack(ply);
+        stack.StaticEval = staticEval;
 
         int standPat =
             (ttNodeType == NodeType.Exact
@@ -809,7 +811,7 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move, isQuiescence: true);
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
-            Game.UpdateMoveinStack(ply, move);
+            stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
