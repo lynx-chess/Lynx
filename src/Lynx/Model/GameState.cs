@@ -2,7 +2,7 @@
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-public readonly struct GameState
+public class GameState
 {
     public readonly ulong ZobristKey;
 
