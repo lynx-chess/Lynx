@@ -4,8 +4,15 @@
 
 public readonly struct SearchConstraints
 {
-    public const int DefaultHardLimitTimeBound  = int.MaxValue;
-    public const int DefaultSoftLimitTimeBound  = int.MaxValue;
+    /// <summary>
+    /// ~<see cref="int.MaxValue"/> / 200.
+    /// Not <see cref="int.MaxValue"/> to avoid overflows in case we're ever attempt to scale it
+    /// </summary>
+    private const int DefaultTimeBound = 10_000_000;
+
+    public const int DefaultHardLimitTimeBound  = DefaultTimeBound;
+
+    public const int DefaultSoftLimitTimeBound  = DefaultTimeBound;
 
     public readonly int HardLimitTimeBound;
 

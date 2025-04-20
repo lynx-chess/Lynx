@@ -19,10 +19,15 @@ public readonly struct TranspositionTable
 
     public TranspositionTable()
     {
+        _logger.Debug("Allocating TT");
+        var sw = Stopwatch.StartNew();
+
         Size = Configuration.EngineSettings.TranspositionTableSize;
 
         var ttLength = CalculateLength(Size);
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+
+        _logger.Info("TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -31,12 +36,13 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
-        _logger.Debug("Clearing TT");
+        var threadCount = Configuration.EngineSettings.Threads;
+
+        _logger.Debug("Zeroing TT using {ThreadCount} thread(s)", threadCount);
         var sw = Stopwatch.StartNew();
 
         var tt = _tt;
         var ttLength = tt.Length;
-        var threadCount = Configuration.EngineSettings.Threads;
         var sizePerThread = ttLength / threadCount;
 
         // Instead of just doing Array.Clear(_tt):
@@ -50,7 +56,7 @@ public readonly struct TranspositionTable
             Array.Clear(tt, start, length);
         });
 
-        _logger.Info("TT clearing time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

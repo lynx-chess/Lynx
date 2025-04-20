@@ -142,9 +142,19 @@ public static class EvaluationConstants
     public const int NoHashEntry = 25_000;
 
     /// <summary>
-    /// Evaluation to be returned when there's one single legal move
+    /// Evaluation to be returned when there's one single legal move.
+    /// It needs to be positive or negative high enough to avoid draw adjudications
+    /// It needs to be negative low enough or positive to avoid loss adjudications
     /// </summary>
-    public const int SingleMoveScore = 666;
+    public const int SingleMoveScore = 66;
+
+    /// <summary>
+    /// It needs to be positive or negative high enough to avoid draw adjudications
+    /// It needs to be negative low enough or positive to avoid loss adjudications
+    /// It needs to be negative low or positive low enough to prevent 'emergency moves' from being chosen over real moves,
+    /// sspecially if those other moves have positive scores
+    /// </summary>
+    public const int EmergencyMoveScore = -66;
 
     #region Move ordering
 
