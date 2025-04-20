@@ -127,6 +127,12 @@ public class Position : IDisposable
         _incrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
     }
 
+    public ulong MinorHash =>
+        PieceUniqueIdentifiers[(int)Piece.N]
+        ^ PieceUniqueIdentifiers[(int)Piece.B]
+        ^ PieceUniqueIdentifiers[(int)Piece.n]
+        ^ PieceUniqueIdentifiers[(int)Piece.b];
+
     #region Move making
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -150,6 +156,8 @@ public class Position : IDisposable
         Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
         Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
         Debug.Assert(arr[(int)Piece.k] == PieceUniqueIdentifiers[(int)Piece.k]);
+
+        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
 #endif
         // No need to make copies of value type, and reference ones are copied inside of the constructor
         var gameState = new GameState(UniqueIdentifier, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black], PieceUniqueIdentifiers,
