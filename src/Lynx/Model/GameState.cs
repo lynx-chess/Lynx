@@ -1,8 +1,10 @@
-﻿namespace Lynx.Model;
+﻿using System.Buffers;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-public readonly struct GameState
+public readonly struct GameState : IDisposable
 {
     public readonly ulong ZobristKey;
 
@@ -11,6 +13,12 @@ public readonly struct GameState
     public readonly ulong NonPawnWhiteKey;
 
     public readonly ulong NonPawnBlackKey;
+
+    #region PieceKeys
+
+    public readonly ulong[] PieceKey;
+
+    #endregion
 
     public readonly int IncremetalEvalAccumulator;
 
@@ -22,18 +30,26 @@ public readonly struct GameState
 
     public readonly bool IsIncrementalEval;
 
-    public GameState(ulong zobristKey, ulong kingPawnKey, ulong nonPawnWhiteKey, ulong nonPawnBlackKey,
+    public GameState(ulong zobristKey, ulong kingPawnKey, ulong nonPawnWhiteKey, ulong nonPawnBlackKey, ulong[] pieceKey,
         int incrementalEvalAccumulator, int incrementalPhaseAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
     {
         ZobristKey = zobristKey;
         KingPawnKey = kingPawnKey;
         NonPawnWhiteKey = nonPawnWhiteKey;
         NonPawnBlackKey = nonPawnBlackKey;
+        PieceKey = ArrayPool<ulong>.Shared.Rent(12);
+        Array.Copy(pieceKey, PieceKey, 12);
+
         IncremetalEvalAccumulator = incrementalEvalAccumulator;
         IncrementalPhaseAccumulator = incrementalPhaseAccumulator;
         EnPassant = enpassant;
         Castle = castle;
         IsIncrementalEval = isIncrementalEval;
+    }
+
+    public void Dispose()
+    {
+        ArrayPool<BitBoard>.Shared.Return(PieceKey, clearArray: true);
     }
 }
 
