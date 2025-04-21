@@ -131,7 +131,9 @@ public class Position : IDisposable
         PieceUniqueIdentifiers[(int)Piece.N]
         ^ PieceUniqueIdentifiers[(int)Piece.B]
         ^ PieceUniqueIdentifiers[(int)Piece.n]
-        ^ PieceUniqueIdentifiers[(int)Piece.b];
+        ^ PieceUniqueIdentifiers[(int)Piece.b]
+        ^ PieceUniqueIdentifiers[(int)Piece.K]
+        ^ PieceUniqueIdentifiers[(int)Piece.k];
 
     #region Move making
 
@@ -150,18 +152,18 @@ public class Position : IDisposable
         Debug.Assert(arr[(int)Piece.B] == PieceUniqueIdentifiers[(int)Piece.B]);
         //Debug.Assert(arr[(int)Piece.R] == PieceUniqueIdentifiers[(int)Piece.R]);
         //Debug.Assert(arr[(int)Piece.Q] == PieceUniqueIdentifiers[(int)Piece.Q]);
-        //Debug.Assert(arr[(int)Piece.K] == PieceUniqueIdentifiers[(int)Piece.K]);
+        Debug.Assert(arr[(int)Piece.K] == PieceUniqueIdentifiers[(int)Piece.K]);
         Debug.Assert(arr[(int)Piece.n] == PieceUniqueIdentifiers[(int)Piece.n]);
         Debug.Assert(arr[(int)Piece.b] == PieceUniqueIdentifiers[(int)Piece.b]);
         //Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
         //Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
-        //Debug.Assert(arr[(int)Piece.k] == PieceUniqueIdentifiers[(int)Piece.k]);
+        Debug.Assert(arr[(int)Piece.k] == PieceUniqueIdentifiers[(int)Piece.k]);
 
         Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
 #endif
         // No need to make copies of value type, and reference ones are copied inside of the constructor
         var gameState = new GameState(UniqueIdentifier, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black],
-            PieceUniqueIdentifiers[(int)Piece.N], PieceUniqueIdentifiers[(int)Piece.n], PieceUniqueIdentifiers[(int)Piece.B], PieceUniqueIdentifiers[(int)Piece.b],
+            PieceUniqueIdentifiers[(int)Piece.N], PieceUniqueIdentifiers[(int)Piece.n], PieceUniqueIdentifiers[(int)Piece.B], PieceUniqueIdentifiers[(int)Piece.b], PieceUniqueIdentifiers[(int)Piece.K], PieceUniqueIdentifiers[(int)Piece.k],
             _incrementalEvalAccumulator, _incrementalPhaseAccumulator, EnPassant, Castle, _isIncrementalEval);
 
         var oldSide = (int)Side;
@@ -634,6 +636,8 @@ public class Position : IDisposable
         PieceUniqueIdentifiers[(int)Piece.n] = gameState.KnightBlackKey;
         PieceUniqueIdentifiers[(int)Piece.B] = gameState.BishopWhiteKey;
         PieceUniqueIdentifiers[(int)Piece.b] = gameState.BishopBlackKey;
+        PieceUniqueIdentifiers[(int)Piece.K] = gameState.KingWhiteKey;
+        PieceUniqueIdentifiers[(int)Piece.k] = gameState.KingBlackKey;
 
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
@@ -653,7 +657,7 @@ public class Position : IDisposable
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
         return new GameState(oldUniqueIdentifier, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black],
-            PieceUniqueIdentifiers[(int)Piece.N], PieceUniqueIdentifiers[(int)Piece.n], PieceUniqueIdentifiers[(int)Piece.B], PieceUniqueIdentifiers[(int)Piece.b],
+            PieceUniqueIdentifiers[(int)Piece.N], PieceUniqueIdentifiers[(int)Piece.n], PieceUniqueIdentifiers[(int)Piece.B], PieceUniqueIdentifiers[(int)Piece.b], PieceUniqueIdentifiers[(int)Piece.K], PieceUniqueIdentifiers[(int)Piece.k],
             _incrementalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
     }
 
@@ -671,6 +675,8 @@ public class Position : IDisposable
         PieceUniqueIdentifiers[(int)Piece.n] = gameState.KnightBlackKey;
         PieceUniqueIdentifiers[(int)Piece.B] = gameState.BishopWhiteKey;
         PieceUniqueIdentifiers[(int)Piece.b] = gameState.BishopBlackKey;
+        PieceUniqueIdentifiers[(int)Piece.K] = gameState.KingWhiteKey;
+        PieceUniqueIdentifiers[(int)Piece.k] = gameState.KingBlackKey;
 
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;

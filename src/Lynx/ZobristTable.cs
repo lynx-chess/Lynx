@@ -217,6 +217,12 @@ public static class ZobristTable
             }
         }
 
+        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        minorHash ^= PieceHash(whiteKing, (int)Piece.K);
+
+        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        minorHash ^= PieceHash(blackKing, (int)Piece.k);
+
         return minorHash;
     }
 

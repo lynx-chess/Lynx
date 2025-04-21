@@ -22,6 +22,10 @@ public readonly struct GameState
 
     public readonly ulong BishopBlackKey;
 
+    public readonly ulong KingWhiteKey;
+
+    public readonly ulong KingBlackKey;
+
     #endregion
 
     public readonly int IncremetalEvalAccumulator;
@@ -34,7 +38,7 @@ public readonly struct GameState
 
     public readonly bool IsIncrementalEval;
 
-    public GameState(ulong zobristKey, ulong kingPawnKey, ulong nonPawnWhiteKey, ulong nonPawnBlackKey, ulong knightWhiteKey, ulong knightBlackKey, ulong bishopWhiteKey, ulong bishopBlackKey,
+    public GameState(ulong zobristKey, ulong kingPawnKey, ulong nonPawnWhiteKey, ulong nonPawnBlackKey, ulong knightWhiteKey, ulong knightBlackKey, ulong bishopWhiteKey, ulong bishopBlackKey, ulong kingWhiteKey, ulong kingBlackKey,
         int incrementalEvalAccumulator, int incrementalPhaseAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
     {
         ZobristKey = zobristKey;
@@ -45,6 +49,8 @@ public readonly struct GameState
         KnightBlackKey = knightBlackKey;
         BishopWhiteKey = bishopWhiteKey;
         BishopBlackKey = bishopBlackKey;
+        KingWhiteKey = kingWhiteKey;
+        KingBlackKey = kingBlackKey;
 
         IncremetalEvalAccumulator = incrementalEvalAccumulator;
         IncrementalPhaseAccumulator = incrementalPhaseAccumulator;
