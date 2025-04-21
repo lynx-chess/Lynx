@@ -139,7 +139,7 @@ public sealed partial class Engine
         var pawnIndex = pawnHash & Constants.PawnCorrHistoryMask;
         var correction = _pawnCorrHistory[(2 * pawnIndex) + (ulong)position.Side];
 
-        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
+        var correctStaticEval = staticEvaluation + (correction / 3 * Constants.CorrectionHistoryScale);
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
