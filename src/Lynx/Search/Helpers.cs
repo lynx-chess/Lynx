@@ -156,7 +156,7 @@ public sealed partial class Engine
         static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
         {
             const int weightScale = 256;
-            var maxIncrement = Configuration.EngineSettings.CorrHistory_MaxRawBonus;
+            //var maxIncrement = Configuration.EngineSettings.CorrHistory_MaxRawBonus;
             var maxVal = Configuration.EngineSettings.CorrHistory_MaxValue;
 
             int weightedEval =
@@ -164,7 +164,7 @@ public sealed partial class Engine
                     + (scaledBonus * weight))
                 / weightScale;
 
-            weightedEval = Math.Clamp(weightedEval, previousCorrectedScore - maxIncrement, previousCorrectedScore + maxIncrement);
+            //weightedEval = Math.Clamp(weightedEval, previousCorrectedScore - maxIncrement, previousCorrectedScore + maxIncrement);
 
             return Math.Clamp(weightedEval, -maxVal, +maxVal);
         }
