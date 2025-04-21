@@ -133,6 +133,12 @@ public class Position : IDisposable
         ^ PieceUniqueIdentifiers[(int)Piece.n]
         ^ PieceUniqueIdentifiers[(int)Piece.b];
 
+    public ulong MajorHash =>
+        PieceUniqueIdentifiers[(int)Piece.R]
+        ^ PieceUniqueIdentifiers[(int)Piece.r]
+        ^ PieceUniqueIdentifiers[(int)Piece.Q]
+        ^ PieceUniqueIdentifiers[(int)Piece.q];
+
     #region Move making
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,6 +147,9 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == MajorHash);
+
 
 #if DEBUG
         Span<ulong> arr = stackalloc ulong[12];
@@ -148,20 +157,20 @@ public class Position : IDisposable
 
         Debug.Assert(arr[(int)Piece.N] == PieceUniqueIdentifiers[(int)Piece.N]);
         Debug.Assert(arr[(int)Piece.B] == PieceUniqueIdentifiers[(int)Piece.B]);
-        //Debug.Assert(arr[(int)Piece.R] == PieceUniqueIdentifiers[(int)Piece.R]);
-        //Debug.Assert(arr[(int)Piece.Q] == PieceUniqueIdentifiers[(int)Piece.Q]);
+        Debug.Assert(arr[(int)Piece.R] == PieceUniqueIdentifiers[(int)Piece.R]);
+        Debug.Assert(arr[(int)Piece.Q] == PieceUniqueIdentifiers[(int)Piece.Q]);
         //Debug.Assert(arr[(int)Piece.K] == PieceUniqueIdentifiers[(int)Piece.K]);
         Debug.Assert(arr[(int)Piece.n] == PieceUniqueIdentifiers[(int)Piece.n]);
         Debug.Assert(arr[(int)Piece.b] == PieceUniqueIdentifiers[(int)Piece.b]);
-        //Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
-        //Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
+        Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
+        Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
         //Debug.Assert(arr[(int)Piece.k] == PieceUniqueIdentifiers[(int)Piece.k]);
 
-        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
 #endif
         // No need to make copies of value type, and reference ones are copied inside of the constructor
         var gameState = new GameState(UniqueIdentifier, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black],
             PieceUniqueIdentifiers[(int)Piece.N], PieceUniqueIdentifiers[(int)Piece.n], PieceUniqueIdentifiers[(int)Piece.B], PieceUniqueIdentifiers[(int)Piece.b],
+            PieceUniqueIdentifiers[(int)Piece.R], PieceUniqueIdentifiers[(int)Piece.r], PieceUniqueIdentifiers[(int)Piece.Q], PieceUniqueIdentifiers[(int)Piece.q],
             _incrementalEvalAccumulator, _incrementalPhaseAccumulator, EnPassant, Castle, _isIncrementalEval);
 
         var oldSide = (int)Side;
@@ -320,7 +329,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -349,7 +358,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -445,7 +454,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         break;
                     }
@@ -468,7 +477,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         break;
                     }
@@ -505,6 +514,8 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == MajorHash);
 
 #if DEBUG
         arr = stackalloc ulong[12];
@@ -512,13 +523,13 @@ public class Position : IDisposable
 
         Debug.Assert(arr[(int)Piece.N] == PieceUniqueIdentifiers[(int)Piece.N]);
         Debug.Assert(arr[(int)Piece.B] == PieceUniqueIdentifiers[(int)Piece.B]);
-        //Debug.Assert(arr[(int)Piece.R] == PieceUniqueIdentifiers[(int)Piece.R]);
-        //Debug.Assert(arr[(int)Piece.Q] == PieceUniqueIdentifiers[(int)Piece.Q]);
+        Debug.Assert(arr[(int)Piece.R] == PieceUniqueIdentifiers[(int)Piece.R]);
+        Debug.Assert(arr[(int)Piece.Q] == PieceUniqueIdentifiers[(int)Piece.Q]);
         //Debug.Assert(arr[(int)Piece.K] == PieceUniqueIdentifiers[(int)Piece.K]);
         Debug.Assert(arr[(int)Piece.n] == PieceUniqueIdentifiers[(int)Piece.n]);
         Debug.Assert(arr[(int)Piece.b] == PieceUniqueIdentifiers[(int)Piece.b]);
-        //Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
-        //Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
+        Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
+        Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
         //Debug.Assert(arr[(int)Piece.k] == PieceUniqueIdentifiers[(int)Piece.k]);
 #endif
 
@@ -634,6 +645,10 @@ public class Position : IDisposable
         PieceUniqueIdentifiers[(int)Piece.n] = gameState.KnightBlackKey;
         PieceUniqueIdentifiers[(int)Piece.B] = gameState.BishopWhiteKey;
         PieceUniqueIdentifiers[(int)Piece.b] = gameState.BishopBlackKey;
+        PieceUniqueIdentifiers[(int)Piece.R] = gameState.RookWhiteKey;
+        PieceUniqueIdentifiers[(int)Piece.r] = gameState.RookBlackKey;
+        PieceUniqueIdentifiers[(int)Piece.Q] = gameState.QueenWhiteKey;
+        PieceUniqueIdentifiers[(int)Piece.q] = gameState.QueenBlackKey;
 
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;

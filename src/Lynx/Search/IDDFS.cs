@@ -48,16 +48,22 @@ public sealed partial class Engine
     private readonly int[] _pawnCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistorySize * 2, pinned: true);
 
     /// <summary>
-    /// <see cref="Constants.PawnCorrHistorySize"/> x 2 x 2
-    /// Side hash x side to move x piece hash side
+    /// <see cref="Constants.NonPawnCorrHistorySize"/> x 2 x 2
+    /// Side non-pawn hash x side to move x piece hash side
     /// </summary>
     private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistorySize * 2 * 2, pinned: true);
 
     /// <summary>
-    /// <see cref="Constants.PawnCorrHistorySize"/> x 2
-    /// Pawn hash x side to move
+    /// <see cref="Constants.MinorCorrHistorySize"/> x 2
+    /// Minor hash x side to move
     /// </summary>
-    private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistorySize * 2, pinned: true);
+    private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistorySize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.MajorCorrHistorySize"/> x 2
+    /// Major hash x side to move
+    /// </summary>
+    private readonly int[] _majorCorrHistory = GC.AllocateArray<int>(Constants.MajorCorrHistorySize * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64

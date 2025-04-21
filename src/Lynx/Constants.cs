@@ -539,6 +539,9 @@ public static class Constants
     public const int MinorCorrHistorySize = 16_384;
     public const int MinorCorrHistoryMask = MinorCorrHistorySize - 1;
 
+    public const int MajorCorrHistorySize = 16_384;
+    public const int MajorCorrHistoryMask = MajorCorrHistorySize - 1;
+
     public const int CorrectionHistoryScale = 256;
 
     public const string NumberWithSignFormat = "+#;-#;0";

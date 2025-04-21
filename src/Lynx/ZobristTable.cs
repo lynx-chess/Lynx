@@ -221,6 +221,33 @@ public static class ZobristTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong MajorHash(Position position)
+    {
+        ulong majorHash = 0;
+
+        for (int pieceIndex = (int)Piece.R; pieceIndex <= (int)Piece.Q; ++pieceIndex)
+        {
+            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            while (whiteBitboard != default)
+            {
+                whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                majorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
+            }
+
+            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            while (blackBitboard != default)
+            {
+                blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                majorHash ^= PieceHash(pieceSquareIndex, pieceIndex + 6);
+            }
+        }
+
+        return majorHash;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PieceUniqueIdentifiers(Position position, Span<ulong> pieceIdentifiers)
     {
         for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.K; ++pieceIndex)
