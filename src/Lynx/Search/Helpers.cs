@@ -232,7 +232,7 @@ public sealed partial class Engine
         var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
 
         var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist + minorCorrHist;
-        var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 4));
+        var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 3));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
