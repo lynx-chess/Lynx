@@ -23,7 +23,7 @@ public class Position : IDisposable
 
     public ulong[] NonPawnHash { get; private set; }
 
-    public ulong[] PieceUniqueIdentifiers { get; private set; }
+    public ulong MinorHash { get; private set; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -80,14 +80,15 @@ public class Position : IDisposable
         NonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
         NonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
         NonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
+        MinorHash = ZobristTable.MinorHash(this);
 
         KingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
         UniqueIdentifier = ZobristTable.PositionHash(this, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black]);
-        PieceUniqueIdentifiers = ArrayPool<ulong>.Shared.Rent(12);
-        ZobristTable.PieceUniqueIdentifiers(this, PieceUniqueIdentifiers);
+
         Debug.Assert(UniqueIdentifier == ZobristTable.PositionHash(this));
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
@@ -106,8 +107,7 @@ public class Position : IDisposable
         NonPawnHash[(int)Side.White] = position.NonPawnHash[(int)Side.White];
         NonPawnHash[(int)Side.Black] = position.NonPawnHash[(int)Side.Black];
 
-        PieceUniqueIdentifiers = ArrayPool<ulong>.Shared.Rent(12);
-        Array.Copy(position.PieceUniqueIdentifiers, PieceUniqueIdentifiers, position.PieceUniqueIdentifiers.Length);
+        MinorHash = position.MinorHash;
 
         PieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
@@ -127,12 +127,6 @@ public class Position : IDisposable
         _incrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
     }
 
-    public ulong MinorHash =>
-        PieceUniqueIdentifiers[(int)Piece.N]
-        ^ PieceUniqueIdentifiers[(int)Piece.B]
-        ^ PieceUniqueIdentifiers[(int)Piece.n]
-        ^ PieceUniqueIdentifiers[(int)Piece.b];
-
     #region Move making
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,27 +135,11 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
-
-#if DEBUG
-        Span<ulong> arr = stackalloc ulong[12];
-        ZobristTable.PieceUniqueIdentifiers(this, arr);
-
-        Debug.Assert(arr[(int)Piece.N] == PieceUniqueIdentifiers[(int)Piece.N]);
-        Debug.Assert(arr[(int)Piece.B] == PieceUniqueIdentifiers[(int)Piece.B]);
-        //Debug.Assert(arr[(int)Piece.R] == PieceUniqueIdentifiers[(int)Piece.R]);
-        //Debug.Assert(arr[(int)Piece.Q] == PieceUniqueIdentifiers[(int)Piece.Q]);
-        //Debug.Assert(arr[(int)Piece.K] == PieceUniqueIdentifiers[(int)Piece.K]);
-        Debug.Assert(arr[(int)Piece.n] == PieceUniqueIdentifiers[(int)Piece.n]);
-        Debug.Assert(arr[(int)Piece.b] == PieceUniqueIdentifiers[(int)Piece.b]);
-        //Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
-        //Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
-        //Debug.Assert(arr[(int)Piece.k] == PieceUniqueIdentifiers[(int)Piece.k]);
-
         Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
-#endif
+
         // No need to make copies of value type, and reference ones are copied inside of the constructor
         var gameState = new GameState(UniqueIdentifier, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black],
-            PieceUniqueIdentifiers[(int)Piece.N], PieceUniqueIdentifiers[(int)Piece.n], PieceUniqueIdentifiers[(int)Piece.B], PieceUniqueIdentifiers[(int)Piece.b],
+            MinorHash,
             _incrementalEvalAccumulator, _incrementalPhaseAccumulator, EnPassant, Castle, _isIncrementalEval);
 
         var oldSide = (int)Side;
@@ -199,8 +177,10 @@ public class Position : IDisposable
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
-        PieceUniqueIdentifiers[piece] ^= sourcePieceHash;
-        PieceUniqueIdentifiers[newPiece] ^= targetPieceHash;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsMinorPiece(int piece) =>
+            piece == (int)Piece.N || piece == (int)Piece.n
+            || piece == (int)Piece.B || piece == (int)Piece.b;
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
@@ -215,6 +195,11 @@ public class Position : IDisposable
                 // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the KingPawn hash with it, just to remove the pawn (done right above)
                 // We do need to update the NonPawn hash
                 NonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
+
+                if (IsMinorPiece(newPiece))
+                {
+                    MinorHash ^= targetPieceHash;
+                }
             }
         }
         else
@@ -228,6 +213,10 @@ public class Position : IDisposable
                 _isIncrementalEval = false;
 
                 KingPawnUniqueIdentifier ^= fullPieceMovementHash;
+            }
+            else if (IsMinorPiece(piece))
+            {
+                MinorHash ^= fullPieceMovementHash;
             }
         }
 
@@ -270,8 +259,6 @@ public class Position : IDisposable
 
                             var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                             UniqueIdentifier ^= capturedPieceHash;
-                            PieceUniqueIdentifiers[capturedPiece] ^= capturedPieceHash;
-
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
                             {
@@ -280,6 +267,11 @@ public class Position : IDisposable
                             else
                             {
                                 NonPawnHash[oppositeSide] ^= capturedPieceHash;
+
+                                if (IsMinorPiece(capturedPiece))
+                                {
+                                    MinorHash ^= capturedPieceHash;
+                                }
                             }
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
@@ -320,7 +312,6 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -349,7 +340,6 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -400,7 +390,6 @@ public class Position : IDisposable
 
                             ulong capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                             UniqueIdentifier ^= capturedPieceHash;
-                            PieceUniqueIdentifiers[capturedPiece] ^= capturedPieceHash;
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
@@ -410,6 +399,11 @@ public class Position : IDisposable
                             else
                             {
                                 NonPawnHash[oppositeSide] ^= capturedPieceHash;
+
+                                if (IsMinorPiece(capturedPiece))
+                                {
+                                    MinorHash ^= capturedPieceHash;
+                                }
                             }
                         }
 
@@ -445,7 +439,6 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         break;
                     }
@@ -468,7 +461,6 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         break;
                     }
@@ -505,22 +497,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
-
-#if DEBUG
-        arr = stackalloc ulong[12];
-        ZobristTable.PieceUniqueIdentifiers(this, arr);
-
-        Debug.Assert(arr[(int)Piece.N] == PieceUniqueIdentifiers[(int)Piece.N]);
-        Debug.Assert(arr[(int)Piece.B] == PieceUniqueIdentifiers[(int)Piece.B]);
-        //Debug.Assert(arr[(int)Piece.R] == PieceUniqueIdentifiers[(int)Piece.R]);
-        //Debug.Assert(arr[(int)Piece.Q] == PieceUniqueIdentifiers[(int)Piece.Q]);
-        //Debug.Assert(arr[(int)Piece.K] == PieceUniqueIdentifiers[(int)Piece.K]);
-        Debug.Assert(arr[(int)Piece.n] == PieceUniqueIdentifiers[(int)Piece.n]);
-        Debug.Assert(arr[(int)Piece.b] == PieceUniqueIdentifiers[(int)Piece.b]);
-        //Debug.Assert(arr[(int)Piece.r] == PieceUniqueIdentifiers[(int)Piece.r]);
-        //Debug.Assert(arr[(int)Piece.q] == PieceUniqueIdentifiers[(int)Piece.q]);
-        //Debug.Assert(arr[(int)Piece.k] == PieceUniqueIdentifiers[(int)Piece.k]);
-#endif
+        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
 
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
@@ -630,10 +607,7 @@ public class Position : IDisposable
         KingPawnUniqueIdentifier = gameState.KingPawnKey;
         NonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
         NonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
-        PieceUniqueIdentifiers[(int)Piece.N] = gameState.KnightWhiteKey;
-        PieceUniqueIdentifiers[(int)Piece.n] = gameState.KnightBlackKey;
-        PieceUniqueIdentifiers[(int)Piece.B] = gameState.BishopWhiteKey;
-        PieceUniqueIdentifiers[(int)Piece.b] = gameState.BishopBlackKey;
+        MinorHash = gameState.MinorKey;
 
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
@@ -1863,7 +1837,7 @@ public class Position : IDisposable
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
         ArrayPool<ulong>.Shared.Return(NonPawnHash, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(PieceUniqueIdentifiers, clearArray: true);
+
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
         ArrayPool<int>.Shared.Return(Board, clearArray: false);
