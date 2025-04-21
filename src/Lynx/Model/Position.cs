@@ -652,9 +652,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black],
-            PieceUniqueIdentifiers[(int)Piece.N], PieceUniqueIdentifiers[(int)Piece.n], PieceUniqueIdentifiers[(int)Piece.B], PieceUniqueIdentifiers[(int)Piece.b],
-            _incrementalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
+        return new GameState(oldUniqueIdentifier, _incrementalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -664,13 +662,6 @@ public class Position : IDisposable
         EnPassant = gameState.EnPassant;
 
         UniqueIdentifier = gameState.ZobristKey;
-        KingPawnUniqueIdentifier = gameState.KingPawnKey;
-        NonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
-        NonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
-        PieceUniqueIdentifiers[(int)Piece.N] = gameState.KnightWhiteKey;
-        PieceUniqueIdentifiers[(int)Piece.n] = gameState.KnightBlackKey;
-        PieceUniqueIdentifiers[(int)Piece.B] = gameState.BishopWhiteKey;
-        PieceUniqueIdentifiers[(int)Piece.b] = gameState.BishopBlackKey;
 
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
