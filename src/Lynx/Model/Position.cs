@@ -320,7 +320,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -349,7 +349,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -445,7 +445,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         break;
                     }
@@ -468,7 +468,7 @@ public class Position : IDisposable
 
                         UniqueIdentifier ^= hashChange;
                         NonPawnHash[oldSide] ^= hashChange;
-                        PieceUniqueIdentifiers[rookIndex] ^= hashChange;
+                        //PieceUniqueIdentifiers[rookIndex] ^= hashChange;
 
                         break;
                     }
