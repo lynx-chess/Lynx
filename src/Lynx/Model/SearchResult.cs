@@ -64,8 +64,9 @@ public sealed class SearchResult
 
         var nps = NodesPerSecond;
 
-        if (HashfullPermill == -1   // Not last info command
-            && Configuration.EngineSettings.EstimateMultithreadedSearchNPS)
+        if (Configuration.EngineSettings.Threads > 1
+            && Configuration.EngineSettings.EstimateMultithreadedSearchNPS
+            && HashfullPermill == -1)   // Not last info command
         {
             // Estimate total nps
             nps *= (ulong)Configuration.EngineSettings.Threads;
