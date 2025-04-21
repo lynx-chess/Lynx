@@ -1,10 +1,8 @@
-﻿using System.Buffers;
-
-namespace Lynx.Model;
+﻿namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-public readonly struct GameState : IDisposable
+public readonly struct GameState
 {
     public readonly ulong ZobristKey;
 
@@ -16,7 +14,13 @@ public readonly struct GameState : IDisposable
 
     #region PieceKeys
 
-    public readonly ulong[] PieceKey;
+    public readonly ulong KnightWhiteKey;
+
+    public readonly ulong KnightBlackKey;
+
+    public readonly ulong BishopWhiteKey;
+
+    public readonly ulong BishopBlackKey;
 
     #endregion
 
@@ -30,26 +34,23 @@ public readonly struct GameState : IDisposable
 
     public readonly bool IsIncrementalEval;
 
-    public GameState(ulong zobristKey, ulong kingPawnKey, ulong nonPawnWhiteKey, ulong nonPawnBlackKey, ulong[] pieceKey,
+    public GameState(ulong zobristKey, ulong kingPawnKey, ulong nonPawnWhiteKey, ulong nonPawnBlackKey, ulong knightWhiteKey, ulong knightBlackKey, ulong bishopWhiteKey, ulong bishopBlackKey,
         int incrementalEvalAccumulator, int incrementalPhaseAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
     {
         ZobristKey = zobristKey;
         KingPawnKey = kingPawnKey;
         NonPawnWhiteKey = nonPawnWhiteKey;
         NonPawnBlackKey = nonPawnBlackKey;
-        PieceKey = ArrayPool<ulong>.Shared.Rent(12);
-        Array.Copy(pieceKey, PieceKey, 12);
+        KnightWhiteKey = knightWhiteKey;
+        KnightBlackKey = knightBlackKey;
+        BishopWhiteKey = bishopWhiteKey;
+        BishopBlackKey = bishopBlackKey;
 
         IncremetalEvalAccumulator = incrementalEvalAccumulator;
         IncrementalPhaseAccumulator = incrementalPhaseAccumulator;
         EnPassant = enpassant;
         Castle = castle;
         IsIncrementalEval = isIncrementalEval;
-    }
-
-    public void Dispose()
-    {
-        ArrayPool<BitBoard>.Shared.Return(PieceKey, clearArray: true);
     }
 }
 

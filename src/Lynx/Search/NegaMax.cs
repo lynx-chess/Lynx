@@ -265,7 +265,7 @@ public sealed partial class Engine
                     //    depth,
                     //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
-                    using var gameState = position.MakeNullMove();
+                    var gameState = position.MakeNullMove();
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
                     position.UnMakeNullMove(gameState);
 
@@ -796,7 +796,7 @@ public sealed partial class Engine
                 continue;
             }
 
-            using var gameState = position.MakeMove(move);
+            var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
