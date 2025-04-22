@@ -193,6 +193,56 @@ public static class ZobristTable
         return nonPawnSideHash;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong MinorHash(Position position)
+    {
+        ulong minorHash = 0;
+
+        for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.B; ++pieceIndex)
+        {
+            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            while (whiteBitboard != default)
+            {
+                whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                minorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
+            }
+
+            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            while (blackBitboard != default)
+            {
+                blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                minorHash ^= PieceHash(pieceSquareIndex, pieceIndex + 6);
+            }
+        }
+
+        return minorHash;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PieceUniqueIdentifiers(Position position, Span<ulong> pieceIdentifiers)
+    {
+        for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.K; ++pieceIndex)
+        {
+            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            while (whiteBitboard != default)
+            {
+                whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                pieceIdentifiers[pieceIndex] ^= PieceHash(pieceSquareIndex, pieceIndex);
+            }
+
+            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            while (blackBitboard != default)
+            {
+                blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                pieceIdentifiers[pieceIndex + 6] ^= PieceHash(pieceSquareIndex, pieceIndex + 6);
+            }
+        }
+    }
+
     /// <summary>
     /// Initializes Zobrist table (long[64][12])
     /// </summary>
