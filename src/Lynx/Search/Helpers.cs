@@ -222,7 +222,7 @@ public sealed partial class Engine
 
         var nonPawnNoSTMCorrHist = _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
 
-        // Minor correction history
+        // Minor correction history - Sirius author original idea
         var minorHash = position.MinorHash;
         var minorIndex = minorHash & Constants.MinorCorrHistoryMask;
 
@@ -231,6 +231,7 @@ public sealed partial class Engine
 
         var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
 
+        // Correction aggregation
         var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist + minorCorrHist;
         var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 3));
 
