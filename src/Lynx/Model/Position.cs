@@ -21,7 +21,7 @@ public class Position : IDisposable
 
     public ulong KingPawnUniqueIdentifier { get; private set; }
 
-    public ulong[] NonPawnHash { get; private set; }
+    public ulong[] NonPawnHash { get; }
 
     public ulong MinorHash { get; private set; }
 

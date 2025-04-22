@@ -411,14 +411,6 @@ public sealed partial class Engine
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.UpdateMoveinStack(ply, move);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void RevertMove()
-            {
-                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                Game.RemoveFromPositionHashHistory();
-                position.UnmakeMove(move, gameState);
-            }
-
             int score = 0;
 
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
@@ -563,7 +555,10 @@ public sealed partial class Engine
             }
 
             // After making a move
-            RevertMove();
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+            Game.RemoveFromPositionHashHistory();
+            position.UnmakeMove(move, gameState);
+
             if (isRoot)
             {
                 var nodesSpentInThisMove = _nodes - previousNodes;
