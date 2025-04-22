@@ -161,8 +161,13 @@ public sealed partial class Engine
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
+                var isTTCapture = position.PieceAt(((Move)ttBestMove).TargetSquare()) != default;
+
                 rawStaticEval = ttStaticEval;
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+                staticEval = isTTCapture
+                    ? rawStaticEval
+                    : CorrectStaticEvaluation(position, rawStaticEval);
+
                 phase = position.Phase();
             }
             else
@@ -720,7 +725,11 @@ public sealed partial class Engine
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
-        staticEval = CorrectStaticEvaluation(position, staticEval);
+        var isTTCapture = ttHit && ttBestMove != default && position.PieceAt(((Move)ttBestMove).TargetSquare()) != default;
+
+        staticEval = isTTCapture
+            ? rawStaticEval
+            : CorrectStaticEvaluation(position, staticEval);
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
