@@ -163,6 +163,16 @@ public sealed partial class Engine
         ref var minorCorrHistEntry = ref _minorCorrHistory[minorCorrHistIndex];
         minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, scaledBonus, weight);
 
+        // Minor correction history
+        var majorHash = position.MajorHash;
+        var majorIndex = majorHash & Constants.MajorCorrHistoryMask;
+
+        var majorCorrHistIndex = (2 * majorIndex) + side;
+        Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
+
+        ref var majorCorrHistEntry = ref _majorCorrHistory[majorCorrHistIndex];
+        majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
@@ -231,7 +241,17 @@ public sealed partial class Engine
 
         var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
 
-        var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist + minorCorrHist;
+        // Major correction history
+        var majorHash = position.MajorHash;
+        var majorIndex = majorHash & Constants.MajorCorrHistoryMask;
+
+        var majorCorrHistIndex = (2 * majorIndex) + side;
+        Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
+
+        var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
+
+        // Correction aggregation
+        var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist + minorCorrHist + majorCorrHist;
         var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 3));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
