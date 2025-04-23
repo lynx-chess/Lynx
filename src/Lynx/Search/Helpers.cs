@@ -112,7 +112,7 @@ public sealed partial class Engine
         var oppositeSide = Utils.OppositeSide((int)side);
 
         var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
-        var weight = 2 * Math.Min(16, depth + 1);
+        var weight = Math.Min(16, depth + 1);
 
         var pawnHash = position.KingPawnUniqueIdentifier
             ^ ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
