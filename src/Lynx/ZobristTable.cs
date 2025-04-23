@@ -15,10 +15,12 @@ public static class ZobristTable
     /// </summary>
     private static readonly ulong[][] _table = Initialize();
 
+#pragma warning disable IDE1006 // Naming Styles
     private static readonly ulong WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
     private static readonly ulong WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
     private static readonly ulong BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
     private static readonly ulong BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+#pragma warning restore IDE1006 // Naming Styles
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];

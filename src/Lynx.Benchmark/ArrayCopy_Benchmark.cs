@@ -243,6 +243,7 @@ namespace Lynx.Benchmark;
 public class ArrayCopy_Benchmark : BaseBenchmark
 {
 #pragma warning disable S2365 // Properties should not make collection or array copies
+#pragma warning disable IDE0305 // Simplify collection initialization
     public static IEnumerable<int[]> Data => [
         [1, 2, 3],
         Enumerable.Range(0,12).ToArray(),
@@ -253,6 +254,7 @@ public class ArrayCopy_Benchmark : BaseBenchmark
         Enumerable.Range(0,1024).ToArray(),
         EvaluationPSQTs._packedPSQT
     ];
+#pragma warning restore IDE0305 // Simplify collection initialization
 #pragma warning restore S2365 // Properties should not make collection or array copies
 
     [Benchmark(Baseline = true)]

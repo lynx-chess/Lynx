@@ -53,7 +53,6 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
 
-
     /// <summary>
     /// 12 x 64
     /// piece x target square
