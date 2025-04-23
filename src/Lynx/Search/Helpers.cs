@@ -114,13 +114,12 @@ public sealed partial class Engine
         var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
         var weight = 2 * Math.Min(16, depth + 1);
 
-        // Pawn correction history
-        var pawnHash = position.KingPawnUniqueIdentifier
-            ^ ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
+        var kingsHash = ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
+        // Pawn correction history
+        var pawnHash = position.KingPawnUniqueIdentifier ^ kingsHash;   // Remove kings hash
         var pawnIndex = pawnHash & Constants.PawnCorrHistoryHashMask;
-
         var pawnCorrHistIndex = (2 * pawnIndex) + side;
         Debug.Assert(pawnCorrHistIndex < (ulong)_pawnCorrHistory.Length);
 
@@ -154,9 +153,8 @@ public sealed partial class Engine
         nonPawnNoSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnNoSTMCorrHistEntry, scaledBonus, weight);
 
         // Minor correction history
-        var minorHash = position.MinorHash;
+        var minorHash = position.MinorHash ^ kingsHash;     // Add kings hash
         var minorIndex = minorHash & Constants.MinorCorrHistoryHashMask;
-
         var minorCorrHistIndex = (2 * minorIndex) + side;
         Debug.Assert(minorCorrHistIndex < (ulong)_minorCorrHistory.Length);
 
@@ -188,13 +186,12 @@ public sealed partial class Engine
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
 
-        // Pawn correction history
-        var pawnHash = position.KingPawnUniqueIdentifier
-            ^ ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
+        var kingsHash = ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
+        // Pawn correction history
+        var pawnHash = position.KingPawnUniqueIdentifier ^ kingsHash;   // Remove kings hash
         var pawnIndex = pawnHash & Constants.PawnCorrHistoryHashMask;
-
         var pawnCorrHistIndex = (2 * pawnIndex) + side;
         Debug.Assert(pawnCorrHistIndex < (ulong)_pawnCorrHistory.Length);
 
@@ -223,9 +220,8 @@ public sealed partial class Engine
         var nonPawnNoSTMCorrHist = _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
 
         // Minor correction history - Sirius author original idea
-        var minorHash = position.MinorHash;
+        var minorHash = position.MinorHash ^ kingsHash;     // Add kings hash
         var minorIndex = minorHash & Constants.MinorCorrHistoryHashMask;
-
         var minorCorrHistIndex = (2 * minorIndex) + side;
         Debug.Assert(minorCorrHistIndex < (ulong)_minorCorrHistory.Length);
 
