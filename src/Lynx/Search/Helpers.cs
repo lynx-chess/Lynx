@@ -153,6 +153,16 @@ public sealed partial class Engine
 
         nonPawnNoSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnNoSTMCorrHistEntry, scaledBonus, weight);
 
+        // Minor correction history
+        var minorHash = position.MinorHash;
+        var minorIndex = minorHash & Constants.MinorCorrHistoryHashMask;
+
+        var minorCorrHistIndex = (2 * minorIndex) + side;
+        Debug.Assert(minorCorrHistIndex < (ulong)_minorCorrHistory.Length);
+
+        ref var minorCorrHistEntry = ref _minorCorrHistory[minorCorrHistIndex];
+        minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, scaledBonus, weight);
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
@@ -212,8 +222,17 @@ public sealed partial class Engine
 
         var nonPawnNoSTMCorrHist = _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
 
+        // Minor correction history - Sirius author original idea
+        var minorHash = position.MinorHash;
+        var minorIndex = minorHash & Constants.MinorCorrHistoryHashMask;
+
+        var minorCorrHistIndex = (2 * minorIndex) + side;
+        Debug.Assert(minorCorrHistIndex < (ulong)_minorCorrHistory.Length);
+
+        var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
+
         // Correction aggregation
-        var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist;
+        var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist + minorCorrHist;
         var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);

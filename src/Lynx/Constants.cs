@@ -536,8 +536,8 @@ public static class Constants
     public const int NonPawnCorrHistoryHashSize = 16_384;
     public const int NonPawnCorrHistoryHashMask = NonPawnCorrHistoryHashSize - 1;
 
-    public const int NonPawnCorrHistorySize = 16_384;
-    public const int NonPawnCorrHistoryMask = NonPawnCorrHistorySize - 1;
+    public const int MinorCorrHistoryHashSize = 16_384;
+    public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
 
     public const int CorrectionHistoryScale = 256;
 
