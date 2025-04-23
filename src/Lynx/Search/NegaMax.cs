@@ -163,7 +163,7 @@ public sealed partial class Engine
 
                 rawStaticEval = ttStaticEval;
 
-                var isTTCapture = position.Board[((Move)ttBestMove).TargetSquare()] != (int)Piece.None;
+                var isTTCapture = ttBestMove != default && position.Board[((Move)ttBestMove).TargetSquare()] != (int)Piece.None;
 
                 // Idea from Perseus
                 staticEval = isTTCapture
