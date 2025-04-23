@@ -13,9 +13,9 @@ public class Position : IDisposable
 {
     private bool _disposedValue;
 
-    private int _incrementalEvalAccumulator;
-    private int _incrementalPhaseAccumulator;
-    private bool _isIncrementalEval;
+    internal int _incrementalEvalAccumulator;
+    internal int _incrementalPhaseAccumulator;
+    internal bool _isIncrementalEval;
 
     public ulong UniqueIdentifier { get; private set; }
 
@@ -143,10 +143,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == MajorHash);
 
-        // No need to make copies of value type, and reference ones are copied inside of the constructor
-        var gameState = new GameState(UniqueIdentifier, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black],
-            MinorHash, MajorHash,
-            _incrementalEvalAccumulator, _incrementalPhaseAccumulator, EnPassant, Castle, _isIncrementalEval);
+        var gameState = new GameState(this);
 
         var oldSide = (int)Side;
         var offset = Utils.PieceOffset(oldSide);
@@ -642,37 +639,32 @@ public class Position : IDisposable
         MinorHash = gameState.MinorKey;
         MajorHash = gameState.MajorKey;
 
-        _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
+        _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeNullMove()
+    public NullMoveGameState MakeNullMove()
     {
-        Side = (Side)Utils.OppositeSide(Side);
-        var oldEnPassant = EnPassant;
-        var oldUniqueIdentifier = UniqueIdentifier;
-        EnPassant = BoardSquare.noSquare;
+        var gameState = new NullMoveGameState(this);
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
-            ^ ZobristTable.EnPassantHash((int)oldEnPassant);
+            ^ ZobristTable.EnPassantHash((int)EnPassant);
 
-        return new GameState(oldUniqueIdentifier, _incrementalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
+        Side = (Side)Utils.OppositeSide(Side);
+        EnPassant = BoardSquare.noSquare;
+
+        return gameState;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnMakeNullMove(GameState gameState)
+    public void UnMakeNullMove(NullMoveGameState gameState)
     {
         Side = (Side)Utils.OppositeSide(Side);
         EnPassant = gameState.EnPassant;
-
         UniqueIdentifier = gameState.ZobristKey;
-
-        _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
-        _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
-        _isIncrementalEval = gameState.IsIncrementalEval;
     }
 
     /// <summary>
