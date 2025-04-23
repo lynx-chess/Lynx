@@ -22,29 +22,32 @@ public readonly struct GameState
 
     public readonly bool IsIncrementalEval;
 
-    public GameState(
-        ulong zobristKey, ulong kingPawnKey, ulong nonPawnWhiteKey, ulong nonPawnBlackKey,
-        int incrementalEvalAccumulator, int incrementalPhaseAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
-        : this(zobristKey, incrementalEvalAccumulator, incrementalPhaseAccumulator, enpassant, castle, isIncrementalEval)
+    public GameState(Position position)
     {
-        KingPawnKey = kingPawnKey;
-        NonPawnWhiteKey = nonPawnWhiteKey;
-        NonPawnBlackKey = nonPawnBlackKey;
+        ZobristKey = position.UniqueIdentifier;
+
+        KingPawnKey = position.KingPawnUniqueIdentifier;
+        NonPawnWhiteKey = position.NonPawnHash[(int)Side.White];
+        NonPawnBlackKey = position.NonPawnHash[(int)Side.Black];
+
+        EnPassant = position.EnPassant;
+        Castle = position.Castle;
+        IncrementalEvalAccumulator = position._incrementalEvalAccumulator;
+        IncrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
+        IsIncrementalEval = position._isIncrementalEval;
     }
+}
 
-    /// <summary>
-    /// For null moves
-    /// </summary>
-    public GameState(ulong zobristKey,
-        int incrementalEvalAccumulator, int incrementalPhaseAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
+public readonly struct NullMoveGameState
+{
+    public readonly ulong ZobristKey;
+
+    public readonly BoardSquare EnPassant;
+
+    public NullMoveGameState(Position position)
     {
-        ZobristKey = zobristKey;
-
-        IncremetalEvalAccumulator = incrementalEvalAccumulator;
-        IncrementalPhaseAccumulator = incrementalPhaseAccumulator;
-        EnPassant = enpassant;
-        Castle = castle;
-        IsIncrementalEval = isIncrementalEval;
+        ZobristKey = position.UniqueIdentifier;
+        EnPassant = position.EnPassant;
     }
 }
 
