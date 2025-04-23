@@ -161,9 +161,11 @@ public sealed partial class Engine
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
-                var isTTCapture = position.PieceAt(((Move)ttBestMove).TargetSquare()) != default;
-
                 rawStaticEval = ttStaticEval;
+
+                var isTTCapture = position.Board[((Move)ttBestMove).TargetSquare()] != (int)Piece.None;
+
+                // Idea from Perseus
                 staticEval = isTTCapture
                     ? rawStaticEval
                     : CorrectStaticEvaluation(position, rawStaticEval);
@@ -723,13 +725,12 @@ public sealed partial class Engine
         var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
-        var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+        var isTTCapture = ttHit && ttBestMove != default && position.Board[((Move)ttBestMove).TargetSquare()] != (int)Piece.None;
 
-        var isTTCapture = ttHit && ttBestMove != default && position.PieceAt(((Move)ttBestMove).TargetSquare()) != default;
-
-        staticEval = isTTCapture
+        // Idea from Perseus
+        var staticEval = isTTCapture
             ? rawStaticEval
-            : CorrectStaticEvaluation(position, staticEval);
+            : CorrectStaticEvaluation(position, rawStaticEval);
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
