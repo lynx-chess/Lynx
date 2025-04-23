@@ -208,7 +208,7 @@ public sealed partial class Engine
         var nonPawnNoSTMCorrHist = _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
 
         var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist;
-        var correctStaticEval = staticEvaluation + (correction / (Constants.CorrectionHistoryScale * 3));
+        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
