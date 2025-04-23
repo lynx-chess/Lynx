@@ -167,7 +167,7 @@ public class ConstantsTest
     public void PowerOfTwo()
     {
         Assert.True(int.IsPow2(KingPawnHashSize));
-        Assert.True(int.IsPow2(PawnCorrHistorySize));
-        Assert.True(int.IsPow2(NonPawnCorrHistorySize));
+        Assert.True(int.IsPow2(PawnCorrHistoryHashSize));
+        Assert.True(int.IsPow2(NonPawnCorrHistoryHashSize));
     }
 }
