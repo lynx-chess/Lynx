@@ -536,9 +536,6 @@ public static class Constants
     public const int NonPawnCorrHistorySize = 16_384;
     public const int NonPawnCorrHistoryMask = NonPawnCorrHistorySize - 1;
 
-    public const int MinorCorrHistorySize = 16_384;
-    public const int MinorCorrHistoryMask = MinorCorrHistorySize - 1;
-
     public const int CorrectionHistoryScale = 256;
 
     public const string NumberWithSignFormat = "+#;-#;0";
