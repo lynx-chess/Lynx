@@ -469,7 +469,7 @@ public class Position : IDisposable
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
 
-        return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, nonPawnWhiteHashCopy, nonPawnBlackHashCopy, incrementalEvalAccumulatorCopy, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
+        return gameState;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -573,8 +573,8 @@ public class Position : IDisposable
         KingPawnUniqueIdentifier = gameState.KingPawnKey;
         NonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
         NonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
-        
-        _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
+
+        _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }
