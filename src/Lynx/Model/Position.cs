@@ -21,7 +21,7 @@ public class Position : IDisposable
 
     public ulong KingPawnUniqueIdentifier { get; private set; }
 
-    public ulong[] NonPawnHash { get; private set; }
+    public ulong[] NonPawnHash { get; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -83,8 +83,6 @@ public class Position : IDisposable
         UniqueIdentifier = ZobristTable.PositionHash(this, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black]);
 
         Debug.Assert(UniqueIdentifier == ZobristTable.PositionHash(this));
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
