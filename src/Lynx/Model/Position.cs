@@ -25,6 +25,8 @@ public class Position : IDisposable
 
     public ulong MinorHash { get; private set; }
 
+    public ulong MinorHash { get; private set; }
+
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
