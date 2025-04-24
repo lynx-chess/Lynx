@@ -53,6 +53,11 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
 
+    /// <summary>
+    /// <see cref="Constants.MinorCorrHistoryHashSize"/> x 2
+    /// Minor hash x side to move
+    /// </summary>
+    private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64
