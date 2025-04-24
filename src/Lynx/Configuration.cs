@@ -347,6 +347,30 @@ public sealed class EngineSettings
     /// </summary>
     public int CorrHistory_MaxRawBonus { get; set; } = 1_896;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 200, 15)]
+    public int CorrHistoryWeight_Pawn { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 200, 15)]
+    public int CorrHistoryWeight_NonPawnSTM { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 200, 15)]
+    public int CorrHistoryWeight_NonPawnNoSTM { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 200, 15)]
+    public int CorrHistoryWeight_Minor { get; set; } = 100;
+
     #endregion
 }
 
