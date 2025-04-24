@@ -721,8 +721,6 @@ public sealed partial class Engine
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
-        staticEval = CorrectStaticEvaluation(position, staticEval);
-
         ref var stack = ref Game.Stack(ply);
         stack.StaticEval = staticEval;
 
