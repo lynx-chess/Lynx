@@ -21,6 +21,7 @@ public class Position : IDisposable
     private ulong _kingPawnUniqueIdentifier;
     private readonly ulong[] _nonPawnHash;
     private ulong _minorHash;
+    private ulong _majorHash;
 
     private readonly ulong[] _pieceBitBoards;
     private readonly ulong[] _occupancyBitBoards;
@@ -39,6 +40,8 @@ public class Position : IDisposable
     public ulong[] NonPawnHash => _nonPawnHash;
 
     public ulong MinorHash => _minorHash;
+
+    public ulong MajorHash => _majorHash;
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -99,6 +102,7 @@ public class Position : IDisposable
         _nonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
 
         _minorHash = ZobristTable.MinorHash(this);
+        _majorHash = ZobristTable.MajorHash(this);
         _kingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
 
         _uniqueIdentifier = ZobristTable.PositionHash(this, _kingPawnUniqueIdentifier, _nonPawnHash[(int)Side.White], _nonPawnHash[(int)Side.Black]);
@@ -118,6 +122,7 @@ public class Position : IDisposable
         _uniqueIdentifier = position._uniqueIdentifier;
         _kingPawnUniqueIdentifier = position._kingPawnUniqueIdentifier;
         _minorHash = position._minorHash;
+        _majorHash = position._majorHash;
 
         _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
         _nonPawnHash[(int)Side.White] = position._nonPawnHash[(int)Side.White];
@@ -150,6 +155,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
         var gameState = new GameState(this);
 
@@ -193,6 +199,11 @@ public class Position : IDisposable
             piece == (int)Piece.N || piece == (int)Piece.n
             || piece == (int)Piece.B || piece == (int)Piece.b;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsMajorPiece(int piece) =>
+            piece == (int)Piece.R || piece == (int)Piece.r
+            || piece == (int)Piece.Q || piece == (int)Piece.q;
+
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
             _kingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
@@ -211,6 +222,10 @@ public class Position : IDisposable
                 {
                     _minorHash ^= targetPieceHash;
                 }
+                else if (IsMajorPiece(newPiece))
+                {
+                    _majorHash ^= targetPieceHash;
+                }
             }
         }
         else
@@ -228,6 +243,10 @@ public class Position : IDisposable
             else if (IsMinorPiece(piece))
             {
                 _minorHash ^= fullPieceMovementHash;
+            }
+            else if (IsMajorPiece(piece))
+            {
+                _majorHash ^= fullPieceMovementHash;
             }
         }
 
@@ -284,6 +303,10 @@ public class Position : IDisposable
                                 {
                                     _minorHash ^= capturedPieceHash;
                                 }
+                                else if (IsMajorPiece(capturedPiece))
+                                {
+                                    _majorHash ^= capturedPieceHash;
+                                }
                             }
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
@@ -324,6 +347,7 @@ public class Position : IDisposable
 
                         _uniqueIdentifier ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -352,6 +376,7 @@ public class Position : IDisposable
 
                         _uniqueIdentifier ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
@@ -416,6 +441,10 @@ public class Position : IDisposable
                                 {
                                     _minorHash ^= capturedPieceHash;
                                 }
+                                else if (IsMajorPiece(capturedPiece))
+                                {
+                                    _majorHash ^= capturedPieceHash;
+                                }
                             }
                         }
 
@@ -451,6 +480,7 @@ public class Position : IDisposable
 
                         _uniqueIdentifier ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
 
                         break;
                     }
@@ -473,6 +503,7 @@ public class Position : IDisposable
 
                         _uniqueIdentifier ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
 
                         break;
                     }
@@ -510,6 +541,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
@@ -618,6 +650,7 @@ public class Position : IDisposable
         _uniqueIdentifier = gameState.ZobristKey;
         _kingPawnUniqueIdentifier = gameState.KingPawnKey;
         _minorHash = gameState.MinorKey;
+        _majorHash = gameState.MajorKey;
         _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
         _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
 
