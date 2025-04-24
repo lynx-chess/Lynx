@@ -23,6 +23,8 @@ public class Position : IDisposable
 
     public ulong[] NonPawnHash { get; }
 
+    public ulong MinorHash { get; private set; }
+
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
@@ -78,6 +80,7 @@ public class Position : IDisposable
         NonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
         NonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
         NonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
+        MinorHash = ZobristTable.MinorHash(this);
 
         KingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
         UniqueIdentifier = ZobristTable.PositionHash(this, KingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black]);
@@ -100,6 +103,8 @@ public class Position : IDisposable
         NonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
         NonPawnHash[(int)Side.White] = position.NonPawnHash[(int)Side.White];
         NonPawnHash[(int)Side.Black] = position.NonPawnHash[(int)Side.Black];
+
+        MinorHash = position.MinorHash;
 
         PieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
@@ -127,6 +132,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
 
         var gameState = new GameState(this);
 
@@ -159,12 +165,16 @@ public class Position : IDisposable
         var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
         var fullPieceMovementHash = sourcePieceHash ^ targetPieceHash;
 
-
         UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ fullPieceMovementHash
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsMinorPiece(int piece) =>
+            piece == (int)Piece.N || piece == (int)Piece.n
+            || piece == (int)Piece.B || piece == (int)Piece.b;
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
@@ -179,6 +189,11 @@ public class Position : IDisposable
                 // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the KingPawn hash with it, just to remove the pawn (done right above)
                 // We do need to update the NonPawn hash
                 NonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
+
+                if (IsMinorPiece(newPiece))
+                {
+                    MinorHash ^= targetPieceHash;
+                }
             }
         }
         else
@@ -192,6 +207,10 @@ public class Position : IDisposable
                 _isIncrementalEval = false;
 
                 KingPawnUniqueIdentifier ^= fullPieceMovementHash;
+            }
+            else if (IsMinorPiece(piece))
+            {
+                MinorHash ^= fullPieceMovementHash;
             }
         }
 
@@ -234,7 +253,6 @@ public class Position : IDisposable
 
                             var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                             UniqueIdentifier ^= capturedPieceHash;
-
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
                             {
@@ -243,6 +261,11 @@ public class Position : IDisposable
                             else
                             {
                                 NonPawnHash[oppositeSide] ^= capturedPieceHash;
+
+                                if (IsMinorPiece(capturedPiece))
+                                {
+                                    MinorHash ^= capturedPieceHash;
+                                }
                             }
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
@@ -370,6 +393,11 @@ public class Position : IDisposable
                             else
                             {
                                 NonPawnHash[oppositeSide] ^= capturedPieceHash;
+
+                                if (IsMinorPiece(capturedPiece))
+                                {
+                                    MinorHash ^= capturedPieceHash;
+                                }
                             }
                         }
 
@@ -463,6 +491,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.PositionHash(this) == UniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.MinorHash(this) == MinorHash);
 
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
@@ -567,10 +596,12 @@ public class Position : IDisposable
         // Updating saved values
         Castle = gameState.Castle;
         EnPassant = gameState.EnPassant;
+
         UniqueIdentifier = gameState.ZobristKey;
         KingPawnUniqueIdentifier = gameState.KingPawnKey;
         NonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
         NonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
+        MinorHash = gameState.MinorKey;
 
         _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
@@ -1795,6 +1826,7 @@ public class Position : IDisposable
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
         ArrayPool<ulong>.Shared.Return(NonPawnHash, clearArray: true);
+
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
         ArrayPool<int>.Shared.Return(Board, clearArray: false);
