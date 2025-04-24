@@ -16,7 +16,7 @@ public readonly struct GameState
 
     public readonly ulong MajorKey;
 
-    public readonly int IncremetalEvalAccumulator;
+    public readonly int IncrementalEvalAccumulator;
 
     public readonly int IncrementalPhaseAccumulator;
 
