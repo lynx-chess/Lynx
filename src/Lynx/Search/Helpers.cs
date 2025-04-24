@@ -161,8 +161,8 @@ public sealed partial class Engine
         ref var minorCorrHistEntry = ref _minorCorrHistory[minorCorrHistIndex];
         minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, scaledBonus, weight);
 
-        // Minor correction history
-        var majorHash = position.MajorHash;
+        // Major correction history
+        var majorHash = position.MajorHash ^ kingsHash;     // Add kings hash
         var majorIndex = majorHash & Constants.MajorCorrHistoryMask;
 
         var majorCorrHistIndex = (2 * majorIndex) + side;
@@ -238,7 +238,7 @@ public sealed partial class Engine
         var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
 
         // Major correction history - Sirius author original idea
-        var majorHash = position.MajorHash;
+        var majorHash = position.MajorHash ^ kingsHash;     // Add kings hash
         var majorIndex = majorHash & Constants.MajorCorrHistoryMask;
 
         var majorCorrHistIndex = (2 * majorIndex) + side;
