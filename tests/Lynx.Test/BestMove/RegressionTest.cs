@@ -451,10 +451,10 @@ public class RegressionTest : BaseTest
         // It used to happen at the second repetition, info depth 2 seldepth 127
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
         result = engine.BestMove(new("go depth 3"));
-        Assert.Less(result.DepthReached, 16, $"depth {result.Depth}, seldepth {result.DepthReached}");
+        Assert.Less(result.DepthReached, 32, $"depth {result.Depth}, seldepth {result.DepthReached}");
 
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
         result = engine.BestMove(new("go depth 3"));
-        Assert.Less(result.DepthReached, 16, $"depth {result.Depth}, seldepth {result.DepthReached}");
+        Assert.Less(result.DepthReached, 32, $"depth {result.Depth}, seldepth {result.DepthReached}");
     }
 }

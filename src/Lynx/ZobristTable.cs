@@ -15,10 +15,12 @@ public static class ZobristTable
     /// </summary>
     private static readonly ulong[][] _table = Initialize();
 
+#pragma warning disable IDE1006 // Naming Styles
     private static readonly ulong WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
     private static readonly ulong WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
     private static readonly ulong BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
     private static readonly ulong BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+#pragma warning restore IDE1006 // Naming Styles
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
@@ -245,29 +247,6 @@ public static class ZobristTable
         }
 
         return majorHash;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PieceUniqueIdentifiers(Position position, Span<ulong> pieceIdentifiers)
-    {
-        for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.K; ++pieceIndex)
-        {
-            var whiteBitboard = position.PieceBitBoards[pieceIndex];
-            while (whiteBitboard != default)
-            {
-                whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
-
-                pieceIdentifiers[pieceIndex] ^= PieceHash(pieceSquareIndex, pieceIndex);
-            }
-
-            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
-            while (blackBitboard != default)
-            {
-                blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
-
-                pieceIdentifiers[pieceIndex + 6] ^= PieceHash(pieceSquareIndex, pieceIndex + 6);
-            }
-        }
     }
 
     /// <summary>

@@ -40,6 +40,8 @@ public readonly struct GameState
         Castle = position.Castle;
         IncrementalEvalAccumulator = position._incrementalEvalAccumulator;
         IncrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
+
+        // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
         IsIncrementalEval = position._isIncrementalEval;
     }
 }

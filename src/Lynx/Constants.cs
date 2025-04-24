@@ -530,14 +530,14 @@ public static class Constants
     public const int KingPawnHashSize = 262_144;
     public const int KingPawnHashMask = KingPawnHashSize - 1;
 
-    public const int PawnCorrHistorySize = 16_384;
-    public const int PawnCorrHistoryMask = PawnCorrHistorySize - 1;
+    public const int PawnCorrHistoryHashSize = 16_384;
+    public const int PawnCorrHistoryHashMask = PawnCorrHistoryHashSize - 1;
 
-    public const int NonPawnCorrHistorySize = 16_384;
-    public const int NonPawnCorrHistoryMask = NonPawnCorrHistorySize - 1;
+    public const int NonPawnCorrHistoryHashSize = 16_384;
+    public const int NonPawnCorrHistoryHashMask = NonPawnCorrHistoryHashSize - 1;
 
-    public const int MinorCorrHistorySize = 16_384;
-    public const int MinorCorrHistoryMask = MinorCorrHistorySize - 1;
+    public const int MinorCorrHistoryHashSize = 16_384;
+    public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
 
     public const int MajorCorrHistorySize = 16_384;
     public const int MajorCorrHistoryMask = MajorCorrHistorySize - 1;
