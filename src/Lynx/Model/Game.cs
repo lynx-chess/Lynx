@@ -240,7 +240,7 @@ public sealed class Game : IDisposable
     public int UpdateStaticEvalInStack(int n, int value) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref PlyStackEntry GameStack(int n) => ref _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+    public ref PlyStackEntry Stack(int n) => ref _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;

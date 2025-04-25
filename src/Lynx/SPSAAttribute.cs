@@ -82,11 +82,13 @@ internal sealed class SPSAAttribute<T> : Attribute
     {
         T val = GetPropertyValue(property);
 
+#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         return KeyValuePair.Create(
             property.Name,
             JsonSerializer.SerializeToNode(
                 new WeatherFactoryOutput<T>(val, MinValue, MaxValue, Step),
-                EngineSettingsJsonSerializerContext.Default.EngineSettings));
+                _jsonSerializerOptions));
+#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
     }
 }
 
