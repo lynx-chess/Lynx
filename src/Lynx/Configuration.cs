@@ -267,7 +267,7 @@ public sealed class EngineSettings
     public int AspirationWindow_MinDepth { get; set; } = 8;
 
     //[SPSA<int>(1, 10, 0.5)]
-    public int RFP_MaxDepth { get; set; } = 7;
+    public int RFP_MaxDepth { get; set; } = 9;
 
     //[SPSA<int>(1, 300, 15)]
     //public int RFP_DepthScalingFactor { get; set; } = 55;
