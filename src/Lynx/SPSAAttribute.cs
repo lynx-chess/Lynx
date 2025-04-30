@@ -25,6 +25,7 @@ internal sealed class SPSAAttribute<T> : Attribute
     public T MinValue { get; }
     public T MaxValue { get; }
     public double Step { get; }
+    public bool Enabled { get; }
 
 #pragma warning disable S3963, CA1810 // "static" fields should be initialized inline
     static SPSAAttribute()
@@ -37,7 +38,7 @@ internal sealed class SPSAAttribute<T> : Attribute
         }
     }
 
-    public SPSAAttribute(T minValue, T maxValue, double step)
+    public SPSAAttribute(T minValue, T maxValue, double step, bool enabled = true)
     {
         if (typeof(T) == typeof(double))
         {
@@ -49,6 +50,7 @@ internal sealed class SPSAAttribute<T> : Attribute
         MinValue = minValue;
         MaxValue = maxValue;
         Step = step;
+        Enabled = enabled;
     }
 
     public string ToOBString(PropertyInfo property)
@@ -236,5 +238,56 @@ public static class SPSAAttributeHelpers
                 _logger.Error(PropertyHasAnUnsupportedType, property.Name, genericSpsa);
             }
         }
+    }
+
+    internal static bool ParseUCIOption(ReadOnlySpan<char> command, Span<Range> commandItems, ReadOnlySpan<char> firstWord, int length)
+    {
+        foreach (var property in typeof(EngineSettings).GetProperties())
+        {
+            if (!property.Name.Equals(firstWord, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var genericType = typeof(SPSAAttribute<>);
+            var spsaArray = property.GetCustomAttributes(genericType).ToArray();
+            var count = spsaArray.Length;
+
+            if (count > 1)
+            {
+                _logger.Warn(PropertyHasMoreThanOne, property.Name, genericType.Name);
+            }
+
+            if (count == 0)
+            {
+                continue;
+            }
+
+            var genericSpsa = spsaArray[0];
+            if (genericSpsa is SPSAAttribute<int> intSpsa)
+            {
+                if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                {
+                    property.SetValue(Configuration.EngineSettings, value);
+
+                    return true;
+                }
+            }
+            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
+            {
+                if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                {
+                    property.SetValue(Configuration.EngineSettings, 0.01 * value);
+
+                    return true;
+                }
+            }
+            else
+            {
+                _logger.Error(PropertyHasAnUnsupportedType, property.Name, genericSpsa);
+            }
+        }
+
+        return false;
     }
 }
