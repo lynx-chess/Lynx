@@ -351,25 +351,25 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 200, 15)]
-    public int CorrHistoryWeight_Pawn { get; set; } = 92;
+    public int CorrHistoryWeight_Pawn { get; set; } = 95;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 200, 15)]
-    public int CorrHistoryWeight_NonPawnSTM { get; set; } = 102;
+    public int CorrHistoryWeight_NonPawnSTM { get; set; } = 104;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 200, 15)]
-    public int CorrHistoryWeight_NonPawnNoSTM { get; set; } = 87;
+    public int CorrHistoryWeight_NonPawnNoSTM { get; set; } = 79;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 200, 15)]
-    public int CorrHistoryWeight_Minor { get; set; } = 66;
+    public int CorrHistoryWeight_Minor { get; set; } = 72;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
