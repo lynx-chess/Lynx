@@ -150,7 +150,7 @@ public sealed class EngineSettings
 
     public int PonderHitMinTimeToContinueSearch { get; set; } = 100;
 
-    public int PonderHitMinDepthToStopSearch { get; set; } = 15;
+    public int PonderHitMinDepthToStopSearch { get; set; } = 5;
 
     #endregion
 
