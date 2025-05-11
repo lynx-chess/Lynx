@@ -33,7 +33,7 @@ public class TranspositionTableTests
 
         var staticEval = position.StaticEvaluation().Score;
 
-        transpositionTable.RecordHash(position, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, false, move: 1234);
+        transpositionTable.RecordHash(position, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, false, move: recordNodeType != NodeType.Alpha ? 1234 : null);
 
         var ttEntry = transpositionTable.ProbeHash(position, ply: 3);
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
@@ -84,7 +84,7 @@ public class TranspositionTableTests
 
         Assert.AreNotEqual(0, tt.Length % Configuration.EngineSettings.Threads, "We want to test the edge case where the last thread clears more items than the rest");
 
-        for(int index = 0; index < tt.Length; ++index)
+        for (int index = 0; index < tt.Length; ++index)
         {
             ref var ttEntry = ref tt.Get(index);
             ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6);

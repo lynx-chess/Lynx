@@ -731,6 +731,56 @@ public sealed class UCIHandler
                     break;
                 }
 
+            case "corrhistory_maxvalue":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistory_MaxValue = value;
+                    }
+                    break;
+                }
+            case "corrhistory_maxrawbonus":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistory_MaxRawBonus = value;
+                    }
+                    break;
+                }
+
+            case "corrhistoryweight_pawn":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_Pawn = value;
+                    }
+                    break;
+                }
+            case "corrhistoryweight_nonpawnstm":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM = value;
+                    }
+                    break;
+                }
+            case "corrhistoryweight_nonpawnnostm":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM = value;
+                    }
+                    break;
+                }
+            case "corrhistoryweight_minor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_Minor = value;
+                    }
+                    break;
+                }
+
             #endregion
 
             default:
@@ -819,7 +869,7 @@ public sealed class UCIHandler
                 $"Avx512BW = {Avx512BW.IsSupported}",
             ];
 
-            foreach(var instructionSet in intrinsics)
+            foreach (var instructionSet in intrinsics)
             {
                 await _engineToUci.Writer.WriteAsync($"\t- {instructionSet}");
             }

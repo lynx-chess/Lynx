@@ -1,4 +1,6 @@
-﻿using Lynx.Model;
+﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+
+using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -19,6 +21,8 @@ public sealed partial class Engine
     private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
+
+        Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
@@ -72,17 +76,33 @@ public sealed partial class Engine
             ttEntryHasBestMove = ttBestMove != default;
 
             // TT cutoffs
-            if (!pvNode
-                && ttHit
-                && ttDepth >= depth)
+            if (ttHit && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
                     || (ttElementType == NodeType.Beta && ttScore >= beta))
                 {
-                    return ttScore;
+                    if (!pvNode)
+                    {
+                        return ttScore;
+                    }
+
+                    // In PV nodes, instead of the cutoff we reduce the depth
+                    // Suggested by Calvin author, originally from Motor
+                    // I had to add the not-in-check guard
+                    if (!position.IsInCheck())
+                    {
+                        --depth;
+
+                        if (depth <= 0)
+                        {
+                            return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                        }
+                    }
                 }
-                else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
+                else if (!pvNode
+                    && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth
+                    && ply < depth * 4) // To avoid weird search explosions, see HighSeldepthAtDepth2 test. Patch suggested by Sirius author
                 {
                     // Extension idea from Stormphrax
                     ++depth;
@@ -118,6 +138,7 @@ public sealed partial class Engine
         bool isInCheck = position.IsInCheck();
         int rawStaticEval, staticEval;
         int phase = int.MaxValue;
+        ref var stack = ref Game.Stack(ply);
 
         if (isInCheck)
         {
@@ -152,7 +173,7 @@ public sealed partial class Engine
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
 
-            Game.UpdateStaticEvalInStack(ply, staticEval);
+            stack.StaticEval = staticEval;
 
             if (ply >= 2)
             {
@@ -266,6 +287,8 @@ public sealed partial class Engine
                 _tt.SaveStaticEval(position, rawStaticEval, ttPv);
             }
         }
+
+        Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
@@ -387,7 +410,7 @@ public sealed partial class Engine
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
-            Game.UpdateMoveinStack(ply, move);
+            stack.Move = move;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()
@@ -703,9 +726,8 @@ public sealed partial class Engine
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
-        staticEval = CorrectStaticEvaluation(position, staticEval);
-
-        Game.UpdateStaticEvalInStack(ply, staticEval);
+        ref var stack = ref Game.Stack(ply);
+        stack.StaticEval = staticEval;
 
         int standPat =
             (ttNodeType == NodeType.Exact
@@ -792,7 +814,7 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move, isQuiescence: true);
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
-            Game.UpdateMoveinStack(ply, move);
+            stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);

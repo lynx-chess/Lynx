@@ -42,16 +42,22 @@ public sealed partial class Engine
     private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
     /// <summary>
-    /// <see cref="Constants.PawnCorrHistorySize"/> x 2
+    /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
     /// Pawn hash x side to move
     /// </summary>
-    private readonly int[] _pawnCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistorySize * 2, pinned: true);
+    private readonly int[] _pawnCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
-    /// <see cref="Constants.PawnCorrHistorySize"/> x 2 x 2
-    /// Side hash x side to move x piece hash side
+    /// <see cref="Constants.NonPawnCorrHistoryHashMask"/> x 2 x 2
+    /// Non-pawn side hash x side to move x piece hash side
     /// </summary>
-    private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistorySize * 2 * 2, pinned: true);
+    private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.MinorCorrHistoryHashSize"/> x 2
+    /// Minor hash x side to move
+    /// </summary>
+    private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -340,7 +346,7 @@ public sealed partial class Engine
                 "[#{EngineId}] Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
                 _id, depth - 1, mate, bestScore, winningMateThreshold);
 
-            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+            if (!isPondering && (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold))
             {
                 if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
                 {
