@@ -833,7 +833,7 @@ public sealed partial class Engine
 
                     if (move.IsCapture())
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(2, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
                     }
 
                     nodeType = NodeType.Beta;
