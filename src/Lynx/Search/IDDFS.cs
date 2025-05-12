@@ -60,6 +60,12 @@ public sealed partial class Engine
     private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
+    /// <see cref="Constants.MajorCorrHistorySize"/> x 2
+    /// Major hash x side to move
+    /// </summary>
+    private readonly int[] _majorCorrHistory = GC.AllocateArray<int>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
     /// 12 x 64
     /// piece x target square
     /// </summary>
