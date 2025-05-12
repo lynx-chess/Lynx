@@ -95,8 +95,8 @@ public sealed class UCIHandler
                 case "printsettings":
                     await HandleSettings();
                     break;
-                case "printsysteminfo":
-                    await HandleSystemInfo();
+                case "runtimeconfig":
+                    await HandleRuntimeConfig();
                     break;
                 case "staticeval":
                     await HandleStaticEval(rawCommand, cancellationToken);
@@ -150,7 +150,7 @@ public sealed class UCIHandler
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
         await SendCommand(IdCommand.NameString, cancellationToken);
-        await SendCommand(IdCommand.VersionString, cancellationToken);
+        await SendCommand(IdCommand.AuthorString, cancellationToken);
 
         foreach (var availableOption in OptionCommand.AvailableOptions)
         {
@@ -211,6 +211,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.Hash = value;
+                        _searcher.UpdateHash();
                     }
                     break;
                 }
@@ -255,6 +256,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.Threads = value;
+                        _searcher.UpdateThreads();
                     }
                     break;
 #pragma warning restore S1066 // Collapsible "if" statements should be merged
@@ -298,6 +300,30 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.ScoreStabiity_MinDepth = value;
+                    }
+                    break;
+                }
+            case "softtimeboundlimitonmate":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBoundLimitOnMate = value;
+                    }
+                    break;
+                }
+            case "ponderhitmintimetocontinuesearch":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.PonderHitMinTimeToContinueSearch = value;
+                    }
+                    break;
+                }
+            case "ponderhitmindepthtostopsearch":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.PonderHitMinDepthToStopSearch = value;
                     }
                     break;
                 }
@@ -422,6 +448,14 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.LMR_InCheck = value;
+                    }
+                    break;
+                }
+            case "lmr_quiet":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Quiet = value;
                     }
                     break;
                 }
@@ -681,6 +715,56 @@ public sealed class UCIHandler
                     break;
                 }
 
+            case "corrhistory_maxvalue":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistory_MaxValue = value;
+                    }
+                    break;
+                }
+            case "corrhistory_maxrawbonus":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistory_MaxRawBonus = value;
+                    }
+                    break;
+                }
+
+            case "corrhistoryweight_pawn":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_Pawn = value;
+                    }
+                    break;
+                }
+            case "corrhistoryweight_nonpawnstm":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM = value;
+                    }
+                    break;
+                }
+            case "corrhistoryweight_nonpawnnostm":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM = value;
+                    }
+                    break;
+                }
+            case "corrhistoryweight_minor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CorrHistoryWeight_Minor = value;
+                    }
+                    break;
+                }
+
             #endregion
 
             default:
@@ -756,15 +840,45 @@ public sealed class UCIHandler
         await _engineToUci.Writer.WriteAsync(message);
     }
 
-    private async ValueTask HandleSystemInfo()
+    private async ValueTask HandleRuntimeConfig()
     {
         try
         {
-            var simd = Bmi2.X64.IsSupported
-                ? "Bmi2.X64 supported, PEXT BitBoards will be used"
-                : "Bmi2.X64 not supported";
+            await _engineToUci.Writer.WriteAsync("CPU flags:");
+            string[] intrinsics =
+            [
+                $"BMI2 = {Bmi2.IsSupported}",
+                $"SSE4.2 = {Sse42.IsSupported}",
+                $"AVX2 = {Avx2.IsSupported}",
+                $"Avx512BW = {Avx512BW.IsSupported}",
+            ];
 
-            await _engineToUci.Writer.WriteAsync(simd);
+            foreach (var instructionSet in intrinsics)
+            {
+                await _engineToUci.Writer.WriteAsync($"\t- {instructionSet}");
+            }
+
+            if (Sse.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("SSE supported, Prefetch0 will be used for TT prefetching");
+            }
+
+            if (Bmi1.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for BitBoard LSB operations");
+            }
+
+            if (Bmi2.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("BMI2 supported, ParallelBitExtract (PEXT) will be used for slider pieces move generation");
+            }
+
+            await _engineToUci.Writer.WriteAsync("Garbage Collector (GC) settings:");
+
+            foreach (var pair in GC.GetConfigurationVariables())
+            {
+                await _engineToUci.Writer.WriteAsync($"\t- {pair.Key} = {pair.Value}");
+            }
         }
         catch (Exception e)
         {

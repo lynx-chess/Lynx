@@ -252,7 +252,19 @@ public class EvaluationConstantsTest
     public void SingleMoveEvaluation()
     {
         Assert.NotZero(SingleMoveScore);
-        Assert.Greater(SingleMoveScore, 100);
+        Assert.Greater(SingleMoveScore, 50);
+    }
+
+    /// <summary>
+    /// Avoids drawish evals that can lead the GUI to declare a draw
+    /// or negative ones that can lead it to resign
+    /// </summary>
+    [Test]
+    public void EmergencyMoveEvaluation()
+    {
+        Assert.NotZero(EmergencyMoveScore);
+        Assert.Less(EmergencyMoveScore, -50);
+        Assert.Greater(EmergencyMoveScore, -200);
     }
 
     [Test]

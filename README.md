@@ -27,10 +27,11 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 
 | Version | Date | Selfplay<br>gain<sup>1</sup><br>[40+0.4] | Estimated<br>elo<sup>2</sup><br>[40+0.4] | [CCRL<br>40/15](https://www.computerchess.org.uk/ccrl/4040/cgi/compare_engines.cgi?class=Single-CPU+engines&only_best_in_class=on&num_best_in_class=1&print=Rating+list)<br>[720+8] | [CCRL<br>Blitz](https://www.computerchess.org.uk/ccrl/404/cgi/compare_engines.cgi?class=Single-CPU+engines&only_best_in_class=on&num_best_in_class=1&print=Rating+list)<br>[120+1] | [MCERL](https://www.chessengeria.eu/mcerl)<br><br>[60+0.6] | [CEGT<br>40/20](http://www.cegt.net/40_40%20Rating%20List/40_40%20All%20Versions/rangliste.html)<br>[600+5] | [CEGT<br>40/4](http://www.cegt.net/40_4_Ratinglist/40_4_AllVersion/rangliste.html)<br>[240+2] | [CEGT<br>5+3 pb](http://www.cegt.net/5Plus3Rating/5Plus3AllVersion/rangliste.html)<br>[300+3] | [UBC](https://e4e6.com/)<br><br>[10+0.1] |
 |---|--|---|---|---|---|---|---|---|---|---|
-| [1.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.9.0) | 2025-03-11 | [+57](https://github.com/lynx-chess/Lynx/commit/f3d97c5c54cf322a38c08615fb7c4378e9a8b3e4#commitcomment-153583124) | [3203](https://github.com/lynx-chess/Lynx/commit/f3d97c5c54cf322a38c08615fb7c4378e9a8b3e4#commitcomment-153583167) |  [3156](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.9.0%2064-bit#Lynx_1_9_0_64-bit) | [3239](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.9.0%2064-bit#Lynx_1_9_0_64-bit) |  | 3068 | 3060 |  | 3194 |
-| [1.8.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.8.0) | 2024-12-20 | [+70](https://github.com/lynx-chess/Lynx/commit/41ae2c878ffeb587c02f016265bafc333207b544#commitcomment-150529143) | [3150](https://github.com/lynx-chess/Lynx/commit/41ae2c878ffeb587c02f016265bafc333207b544#commitcomment-150534767) | [3128](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.8.0%2064-bit#Lynx_1_8_0_64-bit) | [3156](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.8.0%2064-bit#Lynx_1_8_0_64-bit) | 3139 | 3019 |  | 3006 | 3144 |
-| [1.7.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.7.0) | 2024-10-05 | [+176](https://github.com/lynx-chess/Lynx/commit/06da9363b7f38dce5690e8c2c0dcd2914cdfaa30#commitcomment-147596190) | [3101](https://github.com/lynx-chess/Lynx/commit/06da9363b7f38dce5690e8c2c0dcd2914cdfaa30#commitcomment-147596793) | [3097](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.7.0%2064-bit#Lynx_1_7_0_64-bit) | [3128](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.7.0%2064-bit#Lynx_1_7_0_64-bit) | 3216 | 2974 | 2936 | 2959 | 3083 |
-| [1.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.6.0) | 2024-08-15 | [+130](https://github.com/lynx-chess/Lynx/commit/a230d0518bf2743ec0dd27931928719e43ac5334#commitcomment-145366129) | [2952](https://github.com/lynx-chess/Lynx/commit/a230d0518bf2743ec0dd27931928719e43ac5334#commitcomment-145399551) | [2971](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.6.0%2064-bit#Lynx_1_6_0_64-bit) |  | 3059 |  |  |  |  |
+| [1.9.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.9.1) | 2025-04-05 | - | - |  |  |  |  |  | 3080 |  |
+| [1.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.9.0) | 2025-03-11 | [+57](https://github.com/lynx-chess/Lynx/commit/f3d97c5c54cf322a38c08615fb7c4378e9a8b3e4#commitcomment-153583124) | [3203](https://github.com/lynx-chess/Lynx/commit/f3d97c5c54cf322a38c08615fb7c4378e9a8b3e4#commitcomment-153583167) |  [3151](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.9.0%2064-bit#Lynx_1_9_0_64-bit) | [3235](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.9.0%2064-bit#Lynx_1_9_0_64-bit) |  | 3068 | 3060 |  | 3194 |
+| [1.8.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.8.0) | 2024-12-20 | [+70](https://github.com/lynx-chess/Lynx/commit/41ae2c878ffeb587c02f016265bafc333207b544#commitcomment-150529143) | [3150](https://github.com/lynx-chess/Lynx/commit/41ae2c878ffeb587c02f016265bafc333207b544#commitcomment-150534767) | [3126](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.8.0%2064-bit#Lynx_1_8_0_64-bit) | [3151](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.8.0%2064-bit#Lynx_1_8_0_64-bit) | 3139 | 3019 |  | 3006 | 3144 |
+| [1.7.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.7.0) | 2024-10-05 | [+176](https://github.com/lynx-chess/Lynx/commit/06da9363b7f38dce5690e8c2c0dcd2914cdfaa30#commitcomment-147596190) | [3101](https://github.com/lynx-chess/Lynx/commit/06da9363b7f38dce5690e8c2c0dcd2914cdfaa30#commitcomment-147596793) | [3097](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.7.0%2064-bit#Lynx_1_7_0_64-bit) | [3123](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.7.0%2064-bit#Lynx_1_7_0_64-bit) | 3216 | 2974 | 2936 | 2973 | 3083 |
+| [1.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.6.0) | 2024-08-15 | [+130](https://github.com/lynx-chess/Lynx/commit/a230d0518bf2743ec0dd27931928719e43ac5334#commitcomment-145366129) | [2952](https://github.com/lynx-chess/Lynx/commit/a230d0518bf2743ec0dd27931928719e43ac5334#commitcomment-145399551) | [2972](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.6.0%2064-bit#Lynx_1_6_0_64-bit) |  | 3059 |  |  |  |  |
 | [1.5.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.5.1) | 2024-06-21 | [+20](https://github.com/lynx-chess/Lynx/commit/47e7b8799cfac433c1004213e51daf35ae0fcd97#commitcomment-143383668) | [2830](https://github.com/lynx-chess/Lynx/commit/47e7b8799cfac433c1004213e51daf35ae0fcd97#commitcomment-143384223) | [2852](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.5.1%2064-bit#Lynx_1_5_1_64-bit) |  |  |  | 2660 | 2690 |  |
 | [1.5.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.5.0) | 2024-06-09 | [+68](https://github.com/lynx-chess/Lynx/commit/70f23d96a2789ef22440cd0955a8b9557eb2682f#commitcomment-142930790) | [2817](https://github.com/lynx-chess/Lynx/commit/70f23d96a2789ef22440cd0955a8b9557eb2682f#commitcomment-142930835) |  | [2820](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.5.0%2064-bit#Lynx_1_5_0_64-bit) |  |  |  |  |  |
 | [1.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.4.0) | 2024-03-21 | [+91](https://github.com/lynx-chess/Lynx/commit/70a81b9d08482c691b8c8cd6885e3e1eaf2c16b2#commitcomment-140065811) | [2747](https://github.com/lynx-chess/Lynx/commit/70a81b9d08482c691b8c8cd6885e3e1eaf2c16b2#commitcomment-140146920) | [2752](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.4.0%2064-bit#Lynx_1_4_0_64-bit) |  |  |  |  |  |  |
@@ -84,8 +85,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
   Examples:
 
   ```bash
-  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime linux-x64 --self-contained /p:Optimized=true -o /home/your_user/engines/Lynx
-  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime win-x64 --self-contained /p:Optimized=true -o C:/Users/your_user/engines/Lynx
+  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-x64 --self-contained /p:Optimized=true -o /home/your_user/engines/Lynx
+  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime win-x64 --self-contained /p:Optimized=true -o C:/Users/your_user/engines/Lynx
   ```
 
 - The previous steps will generate an executable named `Lynx.Cli(.exe)` and a settings file named `appsettings.json`, which are enough to run Lynx chess engine.
@@ -256,14 +257,14 @@ It can be enabled using `Ponder` UCI command or via `appsettings.json` configura
 
 CEGT maintains a [pondering rating list](http://www.cegt.net/5Plus3Rating/BestVersionsNEW/rangliste.html).
 
-v1.8.0 results of pondering vs no-pondering (40+0.4, Hash 256, balanced book):
+v1.9.1 results of pondering vs no-pondering (40+0.4, Hash 256, balanced book, no adjudications):
 
 ```log
-Score of Lynx 1.8.0 vs Lynx 1.8.0: 552 - 218 - 1730  [0.567] 2500
-...      Lynx 1.8.0 playing White: 329 - 83 - 839  [0.598] 1251
-...      Lynx 1.8.0 playing Black: 223 - 135 - 891  [0.535] 1249
-...      White vs Black: 464 - 306 - 1730  [0.532] 2500
-Elo difference: 46.7 +/- 7.5, LOS: 100.0 %, DrawRatio: 69.2 %
+Score of Lynx 1.9.1 (ponder) vs Lynx 1.9.1: 569 - 255 - 1676  [0.563] 2500
+...      Lynx 1.9.1 (ponder) playing White: 349 - 97 - 804  [0.601] 1250
+...      Lynx 1.9.1 (ponder) playing Black: 220 - 158 - 872  [0.525] 1250
+...      White vs Black: 507 - 317 - 1676  [0.538] 2500
+Elo difference: 43.9 +/- 7.7, LOS: 100.0 %, DrawRatio: 67.0 %
 SPRT: llr 0 (0.0%), lbound -inf, ubound inf
 ```
 
@@ -292,7 +293,7 @@ The following non-standard UCI commands are supported:
 
 - `eval`: shows the current position's static evaluation.
 
-- `printsysteminfo`: shows some internal behavior based on the system where Lynx is running.
+- `runtimeconfig`: shows CPU flags, some internal behavior based on them and GC settings.
 
 ## Credits
 

@@ -15,10 +15,12 @@ public static class ZobristTable
     /// </summary>
     private static readonly ulong[][] _table = Initialize();
 
+#pragma warning disable IDE1006 // Naming Styles
     private static readonly ulong WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
     private static readonly ulong WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
     private static readonly ulong BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
     private static readonly ulong BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+#pragma warning restore IDE1006 // Naming Styles
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
@@ -124,11 +126,24 @@ public static class ZobristTable
         return positionHash;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong PositionHash(Position position, ulong kingPawnHash, ulong nonPawnWhiteHash, ulong nonPawnBlackHash)
+    {
+        return kingPawnHash
+            ^ nonPawnWhiteHash
+            ^ nonPawnBlackHash
+            ^ PieceHash(position.WhiteKingSquare, (int)Piece.K)     // Removing king hashes, since they're included in both kingPawn and nonPawn ones
+            ^ PieceHash(position.BlackKingSquare, (int)Piece.k)
+            ^ EnPassantHash((int)position.EnPassant)
+            ^ SideHash((ulong)position.Side)
+            ^ CastleHash(position.Castle);
+    }
+
     /// <summary>
     /// Calculates from scratch the pawn structure hash of a position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong PawnKingHash(Position position)
+    public static ulong KingPawnHash(Position position)
     {
         ulong pawnKingHash = 0;
 
@@ -155,6 +170,56 @@ public static class ZobristTable
         pawnKingHash ^= PieceHash(blackKing, (int)Piece.k);
 
         return pawnKingHash;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong NonPawnSideHash(Position position, int side)
+    {
+        ulong nonPawnSideHash = 0;
+
+        var start = 7 - (6 * side);
+        var end = 12 - (6 * side);
+
+        for (int pieceIndex = start; pieceIndex < end; ++pieceIndex)
+        {
+            var bitboard = position.PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                nonPawnSideHash ^= PieceHash(pieceSquareIndex, pieceIndex);
+            }
+        }
+
+        return nonPawnSideHash;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong MinorHash(Position position)
+    {
+        ulong minorHash = 0;
+
+        for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.B; ++pieceIndex)
+        {
+            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            while (whiteBitboard != default)
+            {
+                whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                minorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
+            }
+
+            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            while (blackBitboard != default)
+            {
+                blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                minorHash ^= PieceHash(pieceSquareIndex, pieceIndex + 6);
+            }
+        }
+
+        return minorHash;
     }
 
     /// <summary>

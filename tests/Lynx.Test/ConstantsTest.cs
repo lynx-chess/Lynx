@@ -61,18 +61,18 @@ public class ConstantsTest
         for (int square = (int)BoardSquare.a6; square <= (int)BoardSquare.h6; ++square)
         {
             Assert.AreEqual(square + 8, Constants.EnPassantCaptureSquares[square]);
-            Assert.AreEqual(EnPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
+            Assert.AreEqual(_enPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
         }
 
         Assert.AreEqual((int)BoardSquare.d4, Constants.EnPassantCaptureSquares[(int)BoardSquare.d3]);
         for (int square = (int)BoardSquare.a3; square <= (int)BoardSquare.h3; ++square)
         {
             Assert.AreEqual(square - 8, Constants.EnPassantCaptureSquares[square]);
-            Assert.AreEqual(EnPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
+            Assert.AreEqual(_enPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
         }
     }
 
-    private static readonly FrozenDictionary<int, int> EnPassantCaptureSquaresDictionary = new Dictionary<int, int>(16)
+    private static readonly FrozenDictionary<int, int> _enPassantCaptureSquaresDictionary = new Dictionary<int, int>(16)
     {
         [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
         [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,
@@ -161,5 +161,13 @@ public class ConstantsTest
     public void MaxNumberMovesInAGame()
     {
         Assert.Less(Constants.MaxNumberMovesInAGame, 1024 * 1024, "We'd need to customize ArrayPool due to desired array size requirements");
+    }
+
+    [Test]
+    public void PowerOfTwo()
+    {
+        Assert.True(int.IsPow2(KingPawnHashSize));
+        Assert.True(int.IsPow2(PawnCorrHistoryHashSize));
+        Assert.True(int.IsPow2(NonPawnCorrHistoryHashSize));
     }
 }
