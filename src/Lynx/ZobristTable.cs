@@ -10,10 +10,13 @@ namespace Lynx;
 /// </summary>
 public static class ZobristTable
 {
+    private static readonly LynxRandom _random = new(int.MaxValue);
+
     /// <summary>
     /// 64x12
     /// </summary>
     private static readonly ulong[][] _table = Initialize();
+    private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
 
 #pragma warning disable IDE1006 // Naming Styles
     private static readonly ulong WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
@@ -22,8 +25,34 @@ public static class ZobristTable
     private static readonly ulong BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
 #pragma warning restore IDE1006 // Naming Styles
 
+    static ZobristTable()
+    {
+        const int InitialMoves = 60;
+
+        var initialVal = _random.NextUInt64();
+        for (int i = 0; i < InitialMoves; ++i)
+        {
+            _50mrTable[i] = initialVal;
+        }
+
+        for (int i = InitialMoves; i < _50mrTable.Length; i += Configuration.EngineSettings.TT_50MR_Step)
+        {
+            var val = _random.NextUInt64();
+
+            for (int j = i; j < i + Configuration.EngineSettings.TT_50MR_Step && j < _50mrTable.Length; ++j)
+            {
+                _50mrTable[j] = val;
+            }
+        }
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
+    public static ulong HalfMovesWithoutCaptureOrPawnMoveHash(int counter)
+        => _50mrTable[counter];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong PieceHash(int boardSquare, int piece)
+        => _table[boardSquare][piece];
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -229,14 +258,13 @@ public static class ZobristTable
     internal static ulong[][] Initialize()
     {
         var zobristTable = new ulong[64][];
-        var randomInstance = new LynxRandom(int.MaxValue);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
             zobristTable[squareIndex] = new ulong[12];
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                zobristTable[squareIndex][pieceIndex] = randomInstance.NextUInt64();
+                zobristTable[squareIndex][pieceIndex] = _random.NextUInt64();
             }
         }
 
