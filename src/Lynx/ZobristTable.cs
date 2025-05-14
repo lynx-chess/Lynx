@@ -27,19 +27,20 @@ public static class ZobristTable
 
     static ZobristTable()
     {
-        const int InitialMoves = 60;
+        var initialMoves = Configuration.EngineSettings.TT_50MR_Start;
+        var step = Configuration.EngineSettings.TT_50MR_Step;
 
         var initialVal = _random.NextUInt64();
-        for (int i = 0; i < InitialMoves; ++i)
+        for (int i = 0; i < initialMoves; ++i)
         {
             _50mrTable[i] = initialVal;
         }
 
-        for (int i = InitialMoves; i < _50mrTable.Length; i += Configuration.EngineSettings.TT_50MR_Step)
+        for (int i = initialMoves; i < _50mrTable.Length; i += step)
         {
             var val = _random.NextUInt64();
 
-            for (int j = i; j < i + Configuration.EngineSettings.TT_50MR_Step && j < _50mrTable.Length; ++j)
+            for (int j = i; j < i + step && j < _50mrTable.Length; ++j)
             {
                 _50mrTable[j] = val;
             }

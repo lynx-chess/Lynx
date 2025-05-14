@@ -371,6 +371,9 @@ public sealed class EngineSettings
     [SPSA<int>(25, 200, 15)]
     public int CorrHistoryWeight_Minor { get; set; } = 127;
 
+    //[SPSA<int>(5, 60, 5)]
+    public int TT_50MR_Start { get; set; } = 20;
+
     //[SPSA<int>(5, 25, 5)]
     public int TT_50MR_Step { get; set; } = 10;
 
