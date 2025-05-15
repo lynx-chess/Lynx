@@ -764,6 +764,22 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "tt_50mr_start":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.TT_50MR_Start = value;
+                    }
+                    break;
+                }
+            case "tt_50mr_step":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.TT_50MR_Step = value;
+                    }
+                    break;
+                }
 
             #endregion
 
