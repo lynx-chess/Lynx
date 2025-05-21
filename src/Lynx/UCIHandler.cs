@@ -359,7 +359,7 @@ public sealed class UCIHandler
                 $"Avx512BW = {Avx512BW.IsSupported}",
             ];
 
-            foreach(var instructionSet in intrinsics)
+            foreach (var instructionSet in intrinsics)
             {
                 await _engineToUci.Writer.WriteAsync($"\t- {instructionSet}");
             }

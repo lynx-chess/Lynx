@@ -111,7 +111,7 @@ public sealed partial class Engine
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
 
-        var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
+        var scaledBonus = evaluationDelta * EvaluationConstants.CorrectionHistoryScale;
         var weight = 2 * Math.Min(16, depth + 1);
 
         var kingsHash = ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
@@ -228,8 +228,11 @@ public sealed partial class Engine
         var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
 
         // Correction aggregation
-        var correction = pawnCorrHist + nonPawnSTMCorrHist + nonPawnNoSTMCorrHist + minorCorrHist;
-        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
+        var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
+            + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
+            + (nonPawnNoSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM)
+            + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor);
+        var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }

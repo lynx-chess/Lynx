@@ -34,6 +34,10 @@ public static class EvaluationConstants
 
     public const int LMRScaleFactor = 100;
 
+    public const int CorrectionHistoryScale = 256;
+
+    public const int CorrHistScaleFactor = 100;
+
     static EvaluationConstants()
     {
         var quietReductions = LMRReductions[0] = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
