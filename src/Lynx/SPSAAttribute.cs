@@ -51,7 +51,7 @@ internal sealed class SPSAAttribute<T> : Attribute
             maxValue *= _hundred;
             step *= 100;
         }
-        
+
         MinValue = minValue;
         MaxValue = maxValue;
         Step = step;
