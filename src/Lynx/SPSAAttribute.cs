@@ -38,6 +38,11 @@ internal sealed class SPSAAttribute<T> : Attribute
         }
     }
 
+    public SPSAAttribute(bool enabled)
+        : this(T.Zero, T.One, default, enabled)
+    {
+    }
+
     public SPSAAttribute(T minValue, T maxValue, double step, bool enabled = true)
     {
         if (typeof(T) == typeof(double))
@@ -46,7 +51,7 @@ internal sealed class SPSAAttribute<T> : Attribute
             maxValue *= _hundred;
             step *= 100;
         }
-
+        
         MinValue = minValue;
         MaxValue = maxValue;
         Step = step;
@@ -275,7 +280,7 @@ public static class SPSAAttributeHelpers
             }
             else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
             {
-                if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                if (length > 4 && double.TryParse(command[commandItems[4]], out var value))
                 {
                     property.SetValue(Configuration.EngineSettings, 0.01 * value);
 
