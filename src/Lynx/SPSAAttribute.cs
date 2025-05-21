@@ -12,7 +12,7 @@ internal sealed record WeatherFactoryOutput<T>(T value, T min_value, T max_value
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 internal sealed class SPSAAttribute<T> : Attribute
-    where T : INumberBase<T>, IMultiplyOperators<T, T, T>, IConvertible, IParsable<T>, ISpanParsable<T>, IDivisionOperators<T, T, T>
+    where T : INumberBase<T>, IMultiplyOperators<T, T, T>, IConvertible, IParsable<T>, ISpanParsable<T>, IDivisionOperators<T, T, T>, IMinMaxValue<T>
 {
 #pragma warning disable S2743 // Static fields should not be used in generic types
 #pragma warning disable RCS1158 // Static member in generic type should use a type parameter
@@ -39,7 +39,7 @@ internal sealed class SPSAAttribute<T> : Attribute
     }
 
     public SPSAAttribute(bool enabled)
-        : this(T.Zero, T.One, default, enabled)
+        : this(T.MinValue, T.MaxValue, default, enabled)
     {
     }
 
