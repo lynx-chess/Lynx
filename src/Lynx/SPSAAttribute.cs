@@ -249,7 +249,7 @@ public static class SPSAAttributeHelpers
     {
         foreach (var property in typeof(EngineSettings).GetProperties())
         {
-            if (!property.Name.Equals(firstWord, StringComparison.OrdinalIgnoreCase))
+            if (!firstWord.Equals(property.Name, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
