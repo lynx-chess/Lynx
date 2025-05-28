@@ -778,6 +778,9 @@ public sealed partial class Engine
             moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
         }
 
+        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        int visitedMovesCounter = 0;
+
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
@@ -808,6 +811,7 @@ public sealed partial class Engine
             }
 
             ++_nodes;
+            visitedMoves[visitedMovesCounter] = move;
             isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
@@ -831,6 +835,11 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
+                    if (move.IsCapture())
+                    {
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
+                    }
+
                     nodeType = NodeType.Beta;
                     break;
                 }
@@ -847,6 +856,8 @@ public sealed partial class Engine
                     nodeType = NodeType.Exact;
                 }
             }
+
+            ++visitedMovesCounter;
         }
 
         if (!isAnyCaptureValid

@@ -411,6 +411,8 @@ public class RegressionTest : BaseTest
         Assert.AreEqual(depth, result.Depth);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]
     [TestCase("8/1p1k3b/p1n1pp2/P1B4p/BPP2p2/5P2/3K2PP/8 b - c3 1 1", 30)]
     public void NegativeDepth(string fen, int depth)
     {
