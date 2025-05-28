@@ -323,7 +323,7 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
-            var isBestMove = move == ttBestMove;
+            var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
             {
                 continue;
