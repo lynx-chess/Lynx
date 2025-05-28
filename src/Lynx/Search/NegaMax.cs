@@ -676,18 +676,17 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        if (!(isInCheck
-            || isVerifyingSE
-            || bestMove?.IsCapture() == true
-            || bestMove?.IsPromotion() == true
-            || (ttElementType == NodeType.Beta && bestScore <= staticEval)
-            || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
-        {
-            UpdateCorrectionHistory(position, bestScore - staticEval, depth);
-        }
-
         if (!isVerifyingSE)
         {
+            if (!(isInCheck
+                || bestMove?.IsCapture() == true
+                || bestMove?.IsPromotion() == true
+                || (ttElementType == NodeType.Beta && bestScore <= staticEval)
+                || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+            {
+                UpdateCorrectionHistory(position, bestScore - staticEval, depth);
+            }
+
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
         }
 
