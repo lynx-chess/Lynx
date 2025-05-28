@@ -323,8 +323,8 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
-
-            if (isVerifyingSE && move == ttBestMove)
+            var isBestMove = move == ttBestMove;
+            if (isVerifyingSE && isBestMove)
             {
                 continue;
             }
@@ -403,7 +403,7 @@ public sealed partial class Engine
             // If that search fails low, the move is 'singular' (very good) and therefore we extend it
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                move == ttBestMove      // Ensures !isRoot and TT hit
+                isBestMove      // Ensures !isRoot and TT hit
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
