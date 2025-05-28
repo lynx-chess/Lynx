@@ -673,6 +673,7 @@ public sealed partial class Engine
         }
 
         if (!(isInCheck
+            || isVerifyingSE
             || bestMove?.IsCapture() == true
             || bestMove?.IsPromotion() == true
             || (ttElementType == NodeType.Beta && bestScore <= staticEval)
