@@ -397,7 +397,7 @@ public sealed class EngineSettings
     public int SE_TTDepthOffset { get; set; } = 3;
 
     [SPSA<int>(enabled: false)]
-    public int SE_DepthMultiplier { get; set; } = 2;
+    public int SE_DepthMultiplier { get; set; } = 1;
 
     #endregion
 }
