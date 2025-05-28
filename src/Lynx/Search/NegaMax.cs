@@ -670,10 +670,17 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
+            if (isVerifyingSE)
+            {
+                bestScore = alpha;
+            }
+            else
+            {
+                bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
-            nodeType = NodeType.Exact;
-            staticEval = bestScore;
+                nodeType = NodeType.Exact;
+                staticEval = bestScore;
+            }
         }
 
         if (!isVerifyingSE)
