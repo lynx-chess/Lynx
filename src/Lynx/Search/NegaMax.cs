@@ -68,7 +68,7 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
+            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply);
 
             // ttScore shouldn't be used, since it'll be 0 for default structs
             ttHit = ttElementType != NodeType.Unknown && ttElementType != NodeType.None;
@@ -153,7 +153,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -169,7 +169,7 @@ public sealed partial class Engine
             else
             {
                 (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
-                _tt.SaveStaticEval(position, rawStaticEval, ttPv);
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
 
@@ -284,7 +284,7 @@ public sealed partial class Engine
 
             if (!ttHit)
             {
-                _tt.SaveStaticEval(position, rawStaticEval, ttPv);
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
             }
         }
 
@@ -433,7 +433,11 @@ public sealed partial class Engine
             }
             else
             {
-                _tt.PrefetchTTEntry(position);
+                var nextHalfMovesCounter = (move.IsCapture() || move.Piece() == (int)Piece.P || move.Piece() == (int)Piece.p)
+                    ? 0
+                    : Game.HalfMovesWithoutCaptureOrPawnMove + 1;
+
+                _tt.PrefetchTTEntry(position, nextHalfMovesCounter);
 
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
@@ -647,7 +651,7 @@ public sealed partial class Engine
             UpdateCorrectionHistory(position, bestScore - staticEval, depth);
         }
 
-        _tt.RecordHash(position, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+        _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }
@@ -691,7 +695,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttProbeResult = _tt.ProbeHash(position, ply);
+        var ttProbeResult = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
         var ttHit = ttNodeType != NodeType.Unknown && ttNodeType != NodeType.None;
@@ -737,7 +741,7 @@ public sealed partial class Engine
         {
             if (!ttHit)
             {
-                _tt.SaveStaticEval(position, rawStaticEval, ttPv);
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
             }
 
             // Standing pat beta-cutoff (updating alpha after this check)
@@ -867,7 +871,7 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        _tt.RecordHash(position, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
+        _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }
