@@ -397,13 +397,15 @@ public sealed partial class Engine
                 }
             }
 
+            int singular = 0;
+
             // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
             // We check if that's the case by doing a reduced-depth search, excluding TT move and with
             // zero-depth search (using TT score-based alpha/beta values).
             // If that search fails low, the move is 'singular' (very good) and therefore we extend it
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                isBestMove      // Ensures !isRoot and TT hit
+                isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
@@ -416,7 +418,7 @@ public sealed partial class Engine
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
                 if (singularScore < singularBeta)
                 {
-                    ++depth;
+                    ++singular;
                 }
             }
 
@@ -471,7 +473,7 @@ public sealed partial class Engine
 
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
-                var newDepth = depth - 1;
+                var newDepth = depth - 1 + singular;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
