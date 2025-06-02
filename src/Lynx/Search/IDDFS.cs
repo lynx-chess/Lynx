@@ -552,7 +552,7 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
 
         using var position = new Position(Game.PositionBeforeLastSearch);
-        var ttEntry = _tt.ProbeHash(position, ply: 0);
+        var ttEntry = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply: 0);
 
         if (ttEntry.NodeType != NodeType.Unknown)
         {
