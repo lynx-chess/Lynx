@@ -545,7 +545,7 @@ public sealed partial class Engine
                         {
                             ++newDepth;
                         }
-                        else if (shallower && !deeper && depth > 1)
+                        else if (shallower && !deeper && newDepth > 1)
                         {
                             --newDepth;
                         }
