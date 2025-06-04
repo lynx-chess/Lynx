@@ -34,12 +34,30 @@ public sealed partial class Engine
     private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
 
     /// <summary>
-    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
+    /// 12 x 64 x 12 x 64 x <see cref="EvaluationConstants.ContinuationHistoryPlyCount"/>
     /// piece x target square x last piece x last target square x plies back
     /// ply 0 -> Continuation move history
     /// ply 1 -> Follow-up move history
     /// </summary>
     private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
+    /// Pawn hash x side to move
+    /// </summary>
+    private readonly int[] _pawnCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.NonPawnCorrHistoryHashMask"/> x 2 x 2
+    /// Non-pawn side hash x side to move x piece hash side
+    /// </summary>
+    private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.MinorCorrHistoryHashSize"/> x 2
+    /// Minor hash x side to move
+    /// </summary>
+    private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -341,7 +359,7 @@ public sealed partial class Engine
                     _id, depth - 1, mate, bestScore, winningMateThreshold);
             }
 
-            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+            if (!isPondering && (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold))
             {
                 if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
                 {
@@ -568,7 +586,7 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
 
         using var position = new Position(Game.PositionBeforeLastSearch);
-        var ttEntry = _tt.ProbeHash(position, ply: 0);
+        var ttEntry = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply: 0);
 
         if (ttEntry.NodeType != NodeType.Unknown)
         {

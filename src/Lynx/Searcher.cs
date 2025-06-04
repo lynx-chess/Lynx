@@ -1,4 +1,4 @@
-using Lynx.Model;
+﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -14,7 +14,6 @@ public sealed class Searcher
     private readonly Logger _logger;
 
     internal const int MainEngineId = 1;
-
     private bool _isProcessingGoCommand;
     private bool _isPonderHit;
 
@@ -245,49 +244,7 @@ public sealed class Searcher
             // before it was reset in OnGoCommand and therefore stay undetected
             if (!_isPonderHit)
             {
-                var tasks = _extraEngines
-                    .Select(engine =>
-                        Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
-                    .ToArray();
-
-#if MULTITHREAD_DEBUG
-                _logger.Info("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-                finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
-
-#if MULTITHREAD_DEBUG
-                _logger.Info("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-                await _absoluteSearchCancellationTokenSource.CancelAsync();
-
-#if MULTITHREAD_DEBUG
-                _logger.Info("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-                if (finalSearchResult is not null)
-                {
-                    // We wait just for the node count, so there's room for improvement here with thread voting
-                    // and other strategies that take other thread results into account
-                    await foreach (var extraResult in Task.WhenEach(tasks))
-                    {
-                        finalSearchResult.Nodes += (await extraResult)?.Nodes ?? 0;
-                    }
-
-                    finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
-
-#if MULTITHREAD_DEBUG
-                    _logger.Info("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-                    // Final info command
-                    _engineWriter.TryWrite(finalSearchResult);
-
-                    // We don't print bestmove command when ponder + ponderhit though
-                }
+                finalSearchResult = await MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints, isPondering: true);
             }
 
             // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
@@ -339,14 +296,14 @@ public sealed class Searcher
         }
     }
 
-    private async Task<SearchResult?> MultithreadedSearch(SearchConstraints searchConstraints, SearchConstraints extraEnginesSearchConstraints)
+    private async Task<SearchResult?> MultithreadedSearch(SearchConstraints searchConstraints, SearchConstraints extraEnginesSearchConstraints, bool isPondering = false)
     {
 #if MULTITHREAD_DEBUG
         var sw = System.Diagnostics.Stopwatch.StartNew();
         var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+        if (!isPondering && searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
         {
             _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
         }
@@ -355,57 +312,136 @@ public sealed class Searcher
 
         var tasks = _extraEngines
             .Select(engine =>
-                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
             .ToArray();
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+        finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         await _absoluteSearchCancellationTokenSource.CancelAsync();
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         var totalNodes = finalSearchResult?.Nodes ?? 0;
+        var finalTime = finalSearchResult?.Time ?? 0;
 
-        // We wait just for the node count, so there's room for improvement here with thread voting
-        // and other strategies that take other thread results into account
         await foreach (var task in Task.WhenEach(tasks))
         {
             var extraResult = await task;
 
-            if (extraResult != null)
+            if (extraResult is not null)
             {
                 totalNodes += extraResult.Nodes;
-                finalSearchResult ??= extraResult;
+
+                if (finalSearchResult is null)
+                {
+                    finalSearchResult = extraResult;
+                    finalTime = extraResult.Time;
+                    continue;
+                }
+
+                // Thread voting, original impl sligtly corrected based on by Heimdall's (based on Berserk's)
+                if (extraResult.BestMove != default)
+                {
+#if MULTITHREAD_DEBUG
+                    var previousEngineId = finalSearchResult.EngineId;
+                    var previousDepth = finalSearchResult.Depth;
+                    var previousScore = finalSearchResult.Score;
+                    var previousMate = finalSearchResult.Mate;
+                    var previousBestMove = finalSearchResult.BestMove;
+#endif
+
+                    finalSearchResult = finalSearchResult.Mate switch
+                    {
+                        0                                                                                   // No mate detected in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          Mate
+                                    || extraResult.Depth > finalSearchResult.Depth                          //          ||  Higher depth
+                                    || (extraResult.Depth == finalSearchResult.Depth                        //          ||  Same depth, better score
+                                        && extraResult.Score > finalSearchResult.Score)
+
+                                => extraResult,
+                        > 0                                                                                 // Mating in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          Still mating
+                                    && (extraResult.Mate < finalSearchResult.Mate                           //          &&  [But faster (shorter mate)
+                                        || (extraResult.Mate == finalSearchResult.Mate                      //              || Same mating distance, but higher depth]
+                                            && extraResult.Depth > finalSearchResult.Depth))
+
+                                => extraResult,
+
+                        < 0                                                                                 // Mated in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          We're mating instead (which shouldn't happen, but ¯\_(ツ)_/¯ )
+                                    || (extraResult.Mate < 0                                                //              || Still mated (to avoid replacing a known mate with the result of a thread that hasn't detected the mate yet)
+                                        && extraResult.Mate >= -Configuration.EngineSettings.MaxDepth / 2   //                  && Realistic mated score
+                                        && (extraResult.Depth > finalSearchResult.Depth                     //                  && Higher depth
+                                            || (extraResult.Depth == finalSearchResult.Depth                //                      || Same depth
+                                                && extraResult.Mate < finalSearchResult.Mate                //                          && Still mated, but longer mate
+                                                && extraResult.BestMove != finalSearchResult.BestMove)))    //                          && which is only possible if the best move is not the same (otherwise the shorter mate score is more accurate)
+
+                                => extraResult,
+
+                        _ => finalSearchResult
+                    };
+
+#if MULTITHREAD_DEBUG
+                    if (previousEngineId != finalSearchResult.EngineId)
+                    {
+                        if (_logger.IsInfoEnabled)
+                        {
+                            if (previousBestMove != finalSearchResult.BestMove)
+                            {
+                                _logger.Info("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                                    previousEngineId, previousBestMove.UCIStringMemoized(), previousDepth, previousScore, previousMate.ToString(Constants.NumberWithSignFormat),
+                                    finalSearchResult.EngineId, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate.ToString(Constants.NumberWithSignFormat),
+                                    _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                            }
+                        }
+                        else if (_logger.IsDebugEnabled)
+                        {
+                            _logger.Debug("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                                previousEngineId, previousBestMove.UCIStringMemoized(), previousDepth, previousScore, previousMate.ToString(Constants.NumberWithSignFormat),
+                                finalSearchResult.EngineId, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate.ToString(Constants.NumberWithSignFormat),
+                                _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                        }
+                    }
+#endif
+                }
             }
         }
 
         if (finalSearchResult is not null)
         {
             finalSearchResult.Nodes = totalNodes;
+            finalSearchResult.Time = finalTime;
+
             finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-            _logger.Info("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            _logger.Info("[MT] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
             // Final info command
             _engineWriter.TryWrite(finalSearchResult);
 
-            // bestmove command
-            _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+            if (!isPondering)
+            {
+                // bestmove command
+                _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+            }
         }
 
         return finalSearchResult;
@@ -576,7 +612,9 @@ public sealed class Searcher
             {
                 _extraEngines[i] = new Engine(i + 2,
 #if MULTITHREAD_DEBUG
-                    _engineWriter,
+                _logger.IsDebugEnabled
+                    ? _engineWriter
+                    : SilentChannelWriter<object>.Instance,
 #else
                     SilentChannelWriter<object>.Instance,
 #endif

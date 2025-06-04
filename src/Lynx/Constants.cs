@@ -528,8 +528,18 @@ public static class Constants
     /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
     /// </summary>
     public const int KingPawnHashSize = 262_144;
-
     public const int KingPawnHashMask = KingPawnHashSize - 1;
+
+    public const int PawnCorrHistoryHashSize = 16_384;
+    public const int PawnCorrHistoryHashMask = PawnCorrHistoryHashSize - 1;
+
+    public const int NonPawnCorrHistoryHashSize = 16_384;
+    public const int NonPawnCorrHistoryHashMask = NonPawnCorrHistoryHashSize - 1;
+
+    public const int MinorCorrHistoryHashSize = 16_384;
+    public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
+
+    public const string NumberWithSignFormat = "+#;-#;0";
 }
 
 #pragma warning restore IDE0055

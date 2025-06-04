@@ -41,7 +41,8 @@ public class ConfigurationTest
         {
             foreach (var property in reflectionProperties)
             {
-                if (property.PropertyType == typeof(int[]))
+                if (property.PropertyType == typeof(int[])
+                    || property.Name == "EstimateMultithreadedSearchNPS")
                 {
                     continue;
                 }

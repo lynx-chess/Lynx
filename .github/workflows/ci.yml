@@ -81,12 +81,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Update engine version to <current_version>-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
+    - name: Update engine version to <current_version>-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}
       shell: pwsh
       run: |
         $input_path = "Directory.Build.props"
         $regex = "(?<=<Version>).*(?=</Version>)"
-        (Get-Content $input_path) -Replace $regex, "`$0-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}" | Out-File $input_path
+        (Get-Content $input_path) -Replace $regex, "`$0-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}" | Out-File $input_path
 
     - name: Build
       run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true
@@ -94,10 +94,10 @@ jobs:
     - name: Publish CLI
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
 
-    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
+        name: Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
@@ -107,11 +107,11 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: dotnet pack --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
-    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }} NuGet package
       if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v4
       with:
-        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
+        name: Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}
         path: |
           artifacts/nuget/*.nupkg
           artifacts/nuget/*.snupkg
@@ -172,7 +172,7 @@ jobs:
         classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
         filefilters: '+*'
         verbosity: 'Info'
-        title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
+        title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG_URL }})'
         tag: '${{ github.run_number }}_${{ github.run_id }}'
         customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
@@ -352,7 +352,7 @@ jobs:
   #      classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
   #      filefilters: '+*'
   #      verbosity: 'Info'
-  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
+  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG_URL }})'
   #      tag: '${{ github.run_number }}_${{ github.run_id }}'
   #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
@@ -410,7 +410,7 @@ jobs:
   #      classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
   #      filefilters: '+*'
   #      verbosity: 'Info'
-  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
+  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG_URL }})'
   #      tag: '${{ github.run_number }}_${{ github.run_id }}'
   #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
