@@ -139,7 +139,6 @@ public sealed partial class Engine
         if (isInCheck)
         {
             ++depthExtension;
-            staticEval = rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
         if (depth + depthExtension <= 0)
