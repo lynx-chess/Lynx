@@ -53,6 +53,7 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
+        int depthExtension = 0;
 
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
@@ -93,9 +94,9 @@ public sealed partial class Engine
                     // I had to add the not-in-check guard
                     if (!position.IsInCheck())
                     {
-                        --depth;
+                        --depthExtension;
 
-                        if (depth <= 0)
+                        if (depth + depthExtension <= 0)
                         {
                             return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
                         }
@@ -106,7 +107,7 @@ public sealed partial class Engine
                     && ply < depth * 4) // To avoid weird search explosions, see HighSeldepthAtDepth2 test. Patch suggested by Sirius author
                 {
                     // Extension idea from Stormphrax
-                    ++depth;
+                    ++depthExtension;
                 }
             }
 
@@ -120,7 +121,7 @@ public sealed partial class Engine
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
                 && (!ttHit || !ttEntryHasBestMove))
             {
-                --depth;
+                --depthExtension;
             }
         }
 
@@ -143,7 +144,7 @@ public sealed partial class Engine
 
         if (isInCheck)
         {
-            ++depth;
+            ++depthExtension;
             staticEval = rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
         else if (depth <= 0)
@@ -477,7 +478,7 @@ public sealed partial class Engine
 
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
-                var newDepth = depth - 1 + singular;
+                var newDepth = depth + depthExtension - 1 + singular;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
@@ -580,7 +581,7 @@ public sealed partial class Engine
                         {
                             ++newDepth;
                         }
-                        else if (shallower && !deeper && depth > 1)
+                        else if (shallower && !deeper && newDepth > 1)
                         {
                             --newDepth;
                         }
