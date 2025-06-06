@@ -207,6 +207,11 @@ public sealed partial class Engine
 
                     var rfpThreshold = rfpMargin + improvingFactor;
 
+                    if (!ttHit && cutnode)
+                    {
+                        rfpThreshold -= Configuration.EngineSettings.RFP_NoTTHit_CutNode;
+                    }
+
                     if (staticEval - rfpThreshold >= beta)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
