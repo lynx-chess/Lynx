@@ -417,7 +417,7 @@ public sealed partial class Engine
             {
                 position.UnmakeMove(move, gameState);
 
-                var verificationDepth = (depth - 1) / 2;    // TODO tune?
+                var verificationDepth = (depth + depthExtension - 1) / 2;    // TODO tune?
                 var singularBeta = ttScore - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
