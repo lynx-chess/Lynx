@@ -52,6 +52,7 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
+        int depthExtension = 0;
 
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
@@ -92,12 +93,7 @@ public sealed partial class Engine
                     // I had to add the not-in-check guard
                     if (!position.IsInCheck())
                     {
-                        --depth;
-
-                        if (depth <= 0)
-                        {
-                            return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
-                        }
+                        --depthExtension;
                     }
                 }
                 else if (!pvNode
@@ -105,7 +101,7 @@ public sealed partial class Engine
                     && ply < depth * 4) // To avoid weird search explosions, see HighSeldepthAtDepth2 test. Patch suggested by Sirius author
                 {
                     // Extension idea from Stormphrax
-                    ++depth;
+                    ++depthExtension;
                 }
             }
 
@@ -119,7 +115,7 @@ public sealed partial class Engine
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
                 && (!ttHit || !ttEntryHasBestMove))
             {
-                --depth;
+                --depthExtension;
             }
         }
 
@@ -142,10 +138,10 @@ public sealed partial class Engine
 
         if (isInCheck)
         {
-            ++depth;
-            staticEval = rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            ++depthExtension;
         }
-        else if (depth <= 0)
+
+        if (depth + depthExtension <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
@@ -156,7 +152,7 @@ public sealed partial class Engine
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
-        else if (!pvNode)
+        else if (!pvNode && !isInCheck)
         {
             if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
@@ -441,7 +437,7 @@ public sealed partial class Engine
 
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
-                var newDepth = depth - 1;
+                var newDepth = depth + depthExtension - 1;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
