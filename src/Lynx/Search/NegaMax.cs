@@ -95,11 +95,6 @@ public sealed partial class Engine
                     if (!position.IsInCheck())
                     {
                         --depthExtension;
-
-                        if (depth + depthExtension <= 0)
-                        {
-                            return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
-                        }
                     }
                 }
                 else if (!pvNode
@@ -145,9 +140,9 @@ public sealed partial class Engine
         if (isInCheck)
         {
             ++depthExtension;
-            staticEval = rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
-        else if (depth <= 0)
+
+        if (depth + depthExtension <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
@@ -158,7 +153,7 @@ public sealed partial class Engine
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
-        else if (!pvNode)
+        else if (!pvNode && !isInCheck)
         {
             if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
