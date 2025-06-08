@@ -68,7 +68,7 @@ public sealed partial class Engine
 
         Debug.Assert(!pvNode || !cutnode);
 
-        if (!isRoot && !isVerifyingSE)
+        if (!isRoot)
         {
             (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply);
 
@@ -78,7 +78,7 @@ public sealed partial class Engine
             ttEntryHasBestMove = ttBestMove != default;
 
             // TT cutoffs
-            if (ttHit && ttDepth >= depth)
+            if (!isVerifyingSE && ttHit && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
