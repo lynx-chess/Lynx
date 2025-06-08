@@ -264,7 +264,7 @@ public sealed partial class Engine
                     //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                     var gameState = position.MakeNullMove();
-                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+                    var nmpScore = -NegaMax(depth - 1 + depthExtension - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
                     position.UnMakeNullMove(gameState);
 
                     if (nmpScore >= beta)
