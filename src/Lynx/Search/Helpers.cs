@@ -181,8 +181,13 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CorrectStaticEvaluation(Position position, int staticEvaluation)
+    private int CorrectStaticEvaluation(Position position, int staticEvaluation, bool isVerifyingSE)
     {
+        if (isVerifyingSE)
+        {
+            return staticEvaluation;
+        }
+
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
 

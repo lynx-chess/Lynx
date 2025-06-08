@@ -160,14 +160,14 @@ public sealed partial class Engine
                 Debug.Assert(ttStaticEval != int.MinValue);
 
                 rawStaticEval = ttStaticEval;
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+                staticEval = CorrectStaticEvaluation(position, rawStaticEval, isVerifyingSE);
                 phase = position.Phase();
             }
             else
             {
                 (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+                staticEval = CorrectStaticEvaluation(position, rawStaticEval, isVerifyingSE);
             }
 
             stack.StaticEval = staticEval;
@@ -277,7 +277,7 @@ public sealed partial class Engine
         else
         {
             rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-            staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+            staticEval = CorrectStaticEvaluation(position, rawStaticEval, isVerifyingSE);
 
             if (!ttHit)
             {
@@ -758,7 +758,7 @@ public sealed partial class Engine
         var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
-        var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+        var staticEval = CorrectStaticEvaluation(position, rawStaticEval, isVerifyingSE: false);
 
         ref var stack = ref Game.Stack(ply);
         stack.StaticEval = staticEval;
