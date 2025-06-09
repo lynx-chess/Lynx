@@ -608,7 +608,7 @@ public sealed partial class Engine
 
                         // 🔍 Post-LMR continuation history update
                         var rawHistoryBonus = EvaluationConstants.HistoryBonus[depth];
-                        var historyBonus = score > alpha
+                        var historyBonus = score >= beta
                             ? rawHistoryBonus
                             : -rawHistoryBonus;
 
