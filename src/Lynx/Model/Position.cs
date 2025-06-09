@@ -1199,21 +1199,21 @@ public class Position : IDisposable
             // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
-            // Square rule
-            var distanceToPromoting = 7 - rank;
-            var pawnFile = Constants.File[squareIndex];
-            var oppositeSideKingFile = Constants.File[oppositeSideKingSquare];
-
-            if (oppositeSideKingRank >= rank
-                && Math.Abs(oppositeSideKingFile - pawnFile) <= distanceToPromoting)
-            {
-                packedBonus += PassedPawnSquareRuleBonus;
-            }
-
             packedBonus += PassedPawnBonus[bucket][rank]
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+        }
+
+        // Square rule
+        var distanceToPromoting = 7 - rank;
+        var pawnFile = Constants.File[squareIndex];
+        var oppositeSideKingFile = Constants.File[oppositeSideKingSquare];
+
+        if (oppositeSideKingRank >= rank
+            && Math.Abs(oppositeSideKingFile - pawnFile) <= distanceToPromoting)
+        {
+            packedBonus += PassedPawnSquareRuleBonus;
         }
 
         // Pawn phalanx
