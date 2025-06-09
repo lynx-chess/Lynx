@@ -18,7 +18,8 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
+        bool parentWasNullMove = false, bool isVerifyingSE = false)
     {
         var position = Game.CurrentPosition;
 
@@ -77,7 +78,7 @@ public sealed partial class Engine
             ttEntryHasBestMove = ttBestMove != default;
 
             // TT cutoffs
-            if (ttHit && ttDepth >= depth)
+            if (!isVerifyingSE && ttHit && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
@@ -191,7 +192,7 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated)
+            if (isNotGettingCheckmated && !isVerifyingSE)
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
@@ -318,6 +319,12 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
+            var isBestMove = (ShortMove)move == ttBestMove;
+            if (isVerifyingSE && isBestMove)
+            {
+                continue;
+            }
+
             var moveScore = moveScores[moveIndex];
             var isCapture = move.IsCapture();
 
@@ -394,6 +401,35 @@ public sealed partial class Engine
                 continue;
             }
 
+            int singular = 0;
+
+            // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
+            // We check if that's the case by doing a reduced-depth search, excluding TT move and with
+            // zero-depth search (using TT score-based alpha/beta values).
+            // If that search fails low, the move is 'singular' (very good) and therefore we extend it
+            if (
+                //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
+                isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
+                && depth >= Configuration.EngineSettings.SE_MinDepth
+                && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
+                //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ttElementType != NodeType.Alpha)
+            {
+                position.UnmakeMove(move, gameState);
+
+                var verificationDepth = (depth + depthExtension - 1) / 2;    // TODO tune?
+                var singularBeta = ttScore - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
+                singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
+
+                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
+                if (singularScore < singularBeta)
+                {
+                    ++singular;
+                }
+
+                gameState = position.MakeMove(move);
+            }
+
             var previousNodes = _nodes;
             visitedMoves[visitedMovesCounter] = move;
 
@@ -437,7 +473,7 @@ public sealed partial class Engine
 
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
-                var newDepth = depth + depthExtension - 1;
+                var newDepth = depth + depthExtension - 1 + singular;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
@@ -638,16 +674,19 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        if (!(isInCheck
-            || bestMove?.IsCapture() == true
-            || bestMove?.IsPromotion() == true
-            || (ttElementType == NodeType.Beta && bestScore <= staticEval)
-            || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+        if (!isVerifyingSE)
         {
-            UpdateCorrectionHistory(position, bestScore - staticEval, depth);
-        }
+            if (!(isInCheck
+                || bestMove?.IsCapture() == true
+                || bestMove?.IsPromotion() == true
+                || (ttElementType == NodeType.Beta && bestScore <= staticEval)
+                || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+            {
+                UpdateCorrectionHistory(position, bestScore - staticEval, depth);
+            }
 
-        _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+        }
 
         return bestScore;
     }
