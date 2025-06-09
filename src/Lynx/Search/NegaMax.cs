@@ -393,14 +393,6 @@ public sealed partial class Engine
                 }
             }
 
-            var gameState = position.MakeMove(move);
-
-            if (!position.WasProduceByAValidMove())
-            {
-                position.UnmakeMove(move, gameState);
-                continue;
-            }
-
             int singular = 0;
 
             // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
@@ -415,8 +407,6 @@ public sealed partial class Engine
                 //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttElementType != NodeType.Alpha)
             {
-                position.UnmakeMove(move, gameState);
-
                 var verificationDepth = (depth + depthExtension - 1) / 2;    // TODO tune?
                 var singularBeta = ttScore - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
@@ -426,8 +416,14 @@ public sealed partial class Engine
                 {
                     ++singular;
                 }
+            }
 
-                gameState = position.MakeMove(move);
+            var gameState = position.MakeMove(move);
+
+            if (!position.WasProduceByAValidMove())
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
             }
 
             var previousNodes = _nodes;
