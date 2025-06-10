@@ -435,6 +435,11 @@ public sealed partial class Engine
                         ++singularDepthExtensions;
                     }
                 }
+                // Negative extension
+                else if (ttScore >= beta)
+                {
+                    --singularDepthExtensions;
+                }
 
                 gameState = position.MakeMove(move);
             }
