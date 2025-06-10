@@ -401,7 +401,7 @@ public sealed partial class Engine
                 continue;
             }
 
-            int singular = 0;
+            int singularDepthExtensions = 0;
 
             // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
             // We check if that's the case by doing a reduced-depth search, excluding TT move and with
@@ -422,9 +422,18 @@ public sealed partial class Engine
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
+
+                // Singular extension
                 if (singularScore < singularBeta)
                 {
-                    ++singular;
+                    ++singularDepthExtensions;
+
+                    // Double extension
+                    if (!pvNode
+                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
+                    {
+                        ++singularDepthExtensions;
+                    }
                 }
 
                 gameState = position.MakeMove(move);
@@ -473,7 +482,7 @@ public sealed partial class Engine
 
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
-                var newDepth = depth + depthExtension - 1 + singular;
+                var newDepth = depth + depthExtension - 1 + singularDepthExtensions;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
