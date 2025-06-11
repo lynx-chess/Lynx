@@ -435,6 +435,11 @@ public sealed partial class Engine
                         ++singularDepthExtensions;
                     }
                 }
+                // Multicut
+                else if (singularScore >= beta)
+                {
+                    return singularScore;
+                }
                 // Negative extension
                 else if (ttScore >= beta)
                 {
