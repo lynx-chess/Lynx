@@ -436,9 +436,9 @@ public sealed partial class Engine
                     }
                 }
                 // Multicut
-                else if (singularBeta >= beta)
+                else if (singularScore >= beta)
                 {
-                    return singularBeta;
+                    return singularScore;
                 }
                 // Negative extension
                 else if (ttScore >= beta)
