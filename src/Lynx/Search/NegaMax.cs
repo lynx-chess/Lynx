@@ -179,6 +179,8 @@ public sealed partial class Engine
                 improvingRate = evalDiff / 50.0;
             }
 
+            improving |= staticEval >= beta + Configuration.EngineSettings.Improving_BetaMargin;
+
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,

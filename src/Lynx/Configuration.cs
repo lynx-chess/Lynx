@@ -390,6 +390,9 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int TT_50MR_Step { get; set; } = 10;
 
+    [SPSA<int>(50, 150, 10)]
+    public int Improving_BetaMargin { get; set; } = 100;
+
     [SPSA<int>(enabled: false)]
     public int SE_MinDepth { get; set; } = 7;
 
