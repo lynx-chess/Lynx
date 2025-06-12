@@ -719,7 +719,8 @@ public class Position : IDisposable
         //    return result;
         //}
 
-        int packedScore = 0;
+        // Tempo
+        int packedScore = Utils.Pack(16, 8);
         int gamePhase = 0;
 
         var whitePawns = _pieceBitBoards[(int)Piece.P];
