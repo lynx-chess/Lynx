@@ -302,7 +302,11 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedQuiets = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedCaptures = stackalloc Move[pseudoLegalMoves.Length];
+        int visitedQuietsCounter = 0;
+        int visitedCapturesCounter = 0;
+
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -319,8 +323,8 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
-            var isBestMove = (ShortMove)move == ttBestMove;
-            if (isVerifyingSE && isBestMove)
+            var isTTBestMove = (ShortMove)move == ttBestMove;
+            if (isVerifyingSE && isTTBestMove)
             {
                 continue;
             }
@@ -409,7 +413,7 @@ public sealed partial class Engine
             // If that search fails low, the move is 'singular' (very good) and therefore we extend it
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
+                isTTBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
@@ -450,7 +454,6 @@ public sealed partial class Engine
             }
 
             var previousNodes = _nodes;
-            visitedMoves[visitedMovesCounter] = move;
 
             ++_nodes;
             isAnyMoveValid = true;
@@ -628,6 +631,7 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score);
 
+            bool isBestMove = false;
             if (score > bestScore)
             {
                 bestScore = score;
@@ -637,6 +641,7 @@ public sealed partial class Engine
                 {
                     alpha = score;
                     bestMove = move;
+                    isBestMove = true;
 
                     if (pvNode)
                     {
@@ -667,16 +672,30 @@ public sealed partial class Engine
 
                     if (isCapture)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedCaptures, visitedCapturesCounter, move);
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedQuiets, visitedQuietsCounter, move, isRoot, pvNode);
                     }
 
                     nodeType = NodeType.Beta;
 
                     break;
+                }
+            }
+
+            //if (!isBestMove)
+            {
+                if (isCapture)
+                {
+                    visitedCaptures[visitedCapturesCounter] = move;
+                    ++visitedCapturesCounter;
+                }
+                else
+                {
+                    visitedQuiets[visitedQuietsCounter] = move;
+                    ++visitedQuietsCounter;
                 }
             }
 
@@ -832,7 +851,11 @@ public sealed partial class Engine
             moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
         }
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedQuiets = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedCaptures = stackalloc Move[pseudoLegalMoves.Length];
+        int visitedQuietsCounter = 0;
+        int visitedCapturesCounter = 0;
+
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -865,7 +888,6 @@ public sealed partial class Engine
             }
 
             ++_nodes;
-            visitedMoves[visitedMovesCounter] = move;
             isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
@@ -880,6 +902,7 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score, isQuiescence: true);
 
+            bool isBestMove = false;
             if (score > bestScore)
             {
                 bestScore = score;
@@ -891,7 +914,7 @@ public sealed partial class Engine
 
                     if (move.IsCapture())
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedCaptures, visitedCapturesCounter, move);
                     }
 
                     nodeType = NodeType.Beta;
@@ -903,11 +926,26 @@ public sealed partial class Engine
                 {
                     alpha = score;
                     bestMove = move;
+                    isBestMove = true;
 
                     _pVTable[pvIndex] = move;
                     CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
                     nodeType = NodeType.Exact;
+                }
+            }
+
+            //if (!isBestMove)
+            {
+                if (move.IsCapture())
+                {
+                    visitedCaptures[visitedCapturesCounter] = move;
+                    ++visitedCapturesCounter;
+                }
+                else
+                {
+                    visitedQuiets[visitedQuietsCounter] = move;
+                    ++visitedQuietsCounter;
                 }
             }
 
