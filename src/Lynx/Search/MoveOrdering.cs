@@ -172,7 +172,7 @@ public sealed partial class Engine
             continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
         }
 
-        for (int i = 0; i < visitedMovesCounter - 1; ++i)
+        for (int i = 0; i < visitedMovesCounter; ++i)
         {
             var visitedMove = visitedMoves[i];
 
