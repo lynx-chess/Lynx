@@ -436,14 +436,20 @@ public sealed partial class Engine
                     }
                 }
                 // Multicut
-                else if (singularBeta >= beta)
+                else if (singularScore >= beta)
                 {
-                    return singularBeta;
+                    return singularScore;
                 }
                 // Negative extension
                 else if (ttScore >= beta)
                 {
                     --singularDepthExtensions;
+
+                    // Double negative extension
+                    if (ttScore + Configuration.EngineSettings.SE_DoubleNegativeExtensons_Margin >= beta)
+                    {
+                        --singularDepthExtensions;
+                    }
                 }
 
                 gameState = position.MakeMove(move);
