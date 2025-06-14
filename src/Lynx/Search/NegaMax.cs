@@ -685,7 +685,8 @@ public sealed partial class Engine
                 }
             }
 
-            //if (!isBestMove)
+            // Don't penalize alpha raisers - idea by Obsidian author
+            if (!isBestMove)
             {
                 if (isCapture)
                 {
@@ -935,7 +936,8 @@ public sealed partial class Engine
                 }
             }
 
-            //if (!isBestMove)
+            // Don't penalize alpha raisers - idea by Obsidian author
+            if (!isBestMove)
             {
                 if (move.IsCapture())
                 {
