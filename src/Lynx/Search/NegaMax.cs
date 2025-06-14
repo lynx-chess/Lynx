@@ -434,6 +434,12 @@ public sealed partial class Engine
                     {
                         ++singularDepthExtensions;
                     }
+
+                    // Triple extension
+                    if (!isCapture && singularScore + Configuration.EngineSettings.SE_TripleExtensions_Margin < singularBeta)
+                    {
+                        ++singularDepthExtensions;
+                    }
                 }
                 // Multicut
                 else if (singularScore >= beta)
