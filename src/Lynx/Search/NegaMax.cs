@@ -137,7 +137,7 @@ public sealed partial class Engine
         int phase = int.MaxValue;
         ref var stack = ref Game.Stack(ply);
 
-        if (isInCheck)
+        if (isInCheck && !isVerifyingSE)
         {
             ++depthExtension;
         }
