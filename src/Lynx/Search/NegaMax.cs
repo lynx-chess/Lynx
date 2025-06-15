@@ -412,7 +412,7 @@ public sealed partial class Engine
                 isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
-                //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttElementType != NodeType.Alpha)
             {
                 position.UnmakeMove(move, gameState);
