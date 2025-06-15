@@ -452,6 +452,11 @@ public sealed partial class Engine
                     }
                 }
 
+                if (singularDepthExtensions < 0)
+                {
+                    cutnode = true;
+                }
+
                 gameState = position.MakeMove(move);
             }
 
