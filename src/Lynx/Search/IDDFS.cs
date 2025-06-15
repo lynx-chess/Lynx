@@ -66,6 +66,7 @@ public sealed partial class Engine
     private readonly ulong[][] _moveNodeCount;
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+    private readonly int[] _doubleExtensions = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.KingPawnHashSize"/>
@@ -96,6 +97,7 @@ public sealed partial class Engine
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
+        Array.Clear(_doubleExtensions);
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_moveNodeCount[i]);

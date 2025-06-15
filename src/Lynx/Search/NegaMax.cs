@@ -431,9 +431,11 @@ public sealed partial class Engine
 
                     // Double extension
                     if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
+                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
+                        && _doubleExtensions[ply] < Configuration.EngineSettings.SE_DoubleExtensions_Limit)
                     {
                         ++singularDepthExtensions;
+                        ++_doubleExtensions[ply];
                     }
                 }
                 // Multicut
