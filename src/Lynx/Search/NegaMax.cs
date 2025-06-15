@@ -436,7 +436,7 @@ public sealed partial class Engine
                     }
                 }
                 // Multicut
-                else if (singularScore >= beta)
+                else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
                 {
                     return singularScore;
                 }
