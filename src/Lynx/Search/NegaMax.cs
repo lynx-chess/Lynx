@@ -413,7 +413,8 @@ public sealed partial class Engine
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                && ttElementType != NodeType.Alpha)
+                && ttElementType != NodeType.Alpha
+                && 2 * _doubleExtensions[ply] < depth)     // Preventing search explosions
             {
                 position.UnmakeMove(move, gameState);
 
@@ -433,6 +434,7 @@ public sealed partial class Engine
                         && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
                     {
                         ++singularDepthExtensions;
+                        ++_doubleExtensions[ply];
                     }
                 }
                 // Multicut
