@@ -393,13 +393,6 @@ public sealed partial class Engine
                 }
             }
 
-            var gameState = position.MakeMove(move);
-
-            if (!position.WasProduceByAValidMove())
-            {
-                position.UnmakeMove(move, gameState);
-                continue;
-            }
 
             int singularDepthExtensions = 0;
 
@@ -407,15 +400,26 @@ public sealed partial class Engine
             // We check if that's the case by doing a reduced-depth search, excluding TT move and with
             // zero-depth search (using TT score-based alpha/beta values).
             // If that search fails low, the move is 'singular' (very good) and therefore we extend it
-            if (
+
+            var doSE =
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
                 isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                && ttElementType != NodeType.Alpha)
+                && ttElementType != NodeType.Alpha;
+
+            if (doSE)
             {
-                position.UnmakeMove(move, gameState);
+                // Check if the move is legal - TODO replace this with IsLegal() check
+                var seGameState = position.MakeMove(move);
+                var validMove = position.WasProduceByAValidMove();
+                position.UnmakeMove(move, seGameState);
+
+                if (!validMove)
+                {
+                    continue;
+                }
 
                 var verificationDepth = (depth - 1) / 2;    // TODO tune?
                 var singularBeta = ttScore - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
@@ -445,8 +449,14 @@ public sealed partial class Engine
                 {
                     --singularDepthExtensions;
                 }
+            }
 
-                gameState = position.MakeMove(move);
+            var gameState = position.MakeMove(move);
+
+            if (!doSE && !position.WasProduceByAValidMove())
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
             }
 
             var previousNodes = _nodes;
