@@ -441,12 +441,12 @@ public sealed partial class Engine
                     return singularScore;
                 }
                 // Negative extension
-                else if (!pvNode && ttScore >= beta)
+                else if (ttScore >= beta)
                 {
                     --singularDepthExtensions;
 
                     // Double negative extension
-                    if (ttScore + Configuration.EngineSettings.SE_DoubleNegativeExtensons_Margin >= beta)
+                    if (!pvNode && ttScore + Configuration.EngineSettings.SE_DoubleNegativeExtensons_Margin >= beta)
                     {
                         --singularDepthExtensions;
                     }
