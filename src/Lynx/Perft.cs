@@ -41,13 +41,17 @@ public static class Perft
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
-                var state = position.MakeMove(move);
+                bool validMove;
+                using (var newPosition = new Position(position))
+                {
+                    _ = newPosition.MakeMove(move);
+                    validMove = newPosition.WasProduceByAValidMove();
+                }
 
-                if (position.WasProduceByAValidMove())
+                if (validMove)
                 {
                     nodes = PerftRecursiveImpl(position, depth - 1, nodes);
                 }
-                position.UnmakeMove(move, state);
             }
 
             return nodes;
@@ -64,17 +68,20 @@ public static class Perft
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
-                var state = position.MakeMove(move);
+                bool validMove;
+                using (var newPosition = new Position(position))
+                {
+                    _ = newPosition.MakeMove(move);
+                    validMove = newPosition.WasProduceByAValidMove();
+                }
 
-                if (position.WasProduceByAValidMove())
+                if (validMove)
                 {
                     var accumulatedNodes = nodes;
                     nodes = PerftRecursiveImpl(position, depth - 1, nodes);
 
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
-
-                position.UnmakeMove(move, state);
             }
 
             write(string.Empty);

@@ -648,11 +648,9 @@ public static class MoveGenerator
         }
 #endif
 
-        var gameState = position.MakeMove(move);
+        using var newPosition = new Position(position);
+        _ = newPosition.MakeMove(move);
 
-        bool result = position.WasProduceByAValidMove();
-        position.UnmakeMove(move, gameState);
-
-        return result;
+        return newPosition.WasProduceByAValidMove();
     }
 }

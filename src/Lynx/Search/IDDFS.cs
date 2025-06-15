@@ -451,16 +451,20 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
+        var position = Game.CurrentPosition;
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
         {
-            var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
-            Game.CurrentPosition.UnmakeMove(move, gameState);
+            bool validMove;
+            using (var newPosition = new Position(position))
+            {
+                _ = newPosition.MakeMove(move);
+                validMove = newPosition.WasProduceByAValidMove();
+            }
 
-            if (isPositionValid)
+            if (validMove)
             {
                 // We save the first legal move and check if there's at least another one
                 if (firstLegalMove == default)
@@ -484,7 +488,7 @@ public sealed partial class Engine
 
             // We don't have or need any eval, and we return a fake but recognizable one
             // See constant XML for details
-            var score = Game.CurrentPosition.Side == Side.White
+            var score = position.Side == Side.White
                 ? +EvaluationConstants.SingleMoveScore
                 : -EvaluationConstants.SingleMoveScore;
 

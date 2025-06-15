@@ -412,13 +412,13 @@ public sealed partial class Engine
             if (doSE)
             {
                 // Check if the move is legal - TODO replace this with IsLegal() check
-                var seGameState = position.MakeMove(move);
-                var validMove = position.WasProduceByAValidMove();
-                position.UnmakeMove(move, seGameState);
-
-                if (!validMove)
+                using (var newPosition = new Position(position))
                 {
-                    continue;
+                    _ = newPosition.MakeMove(move);
+                    if (!newPosition.WasProduceByAValidMove())
+                    {
+                        continue;
+                    }
                 }
 
                 var verificationDepth = (depth - 1) / 2;    // TODO tune?
