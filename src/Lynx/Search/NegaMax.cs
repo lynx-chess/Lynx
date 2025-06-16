@@ -412,7 +412,7 @@ public sealed partial class Engine
                 isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
-                //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttElementType != NodeType.Alpha
                 && ply < 2 * depth)     // Preventing search explosions
             {
@@ -434,7 +434,6 @@ public sealed partial class Engine
                         && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
                     {
                         ++singularDepthExtensions;
-                        ++_doubleExtensions[ply];
                     }
                 }
                 // Multicut
