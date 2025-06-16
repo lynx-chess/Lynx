@@ -440,10 +440,14 @@ public sealed partial class Engine
                 {
                     return singularScore;
                 }
+                else if (cutnode)
+                {
+                    singularDepthExtensions = -2;
+                }
                 // Negative extension
                 else if (ttScore >= beta)
                 {
-                    --singularDepthExtensions;
+                    singularDepthExtensions = -1;
                 }
 
                 gameState = position.MakeMove(move);
