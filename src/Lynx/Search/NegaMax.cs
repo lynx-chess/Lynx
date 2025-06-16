@@ -446,7 +446,7 @@ public sealed partial class Engine
                     --singularDepthExtensions;
 
                     // Double negative extension
-                    if (ttScore + Configuration.EngineSettings.SE_DoubleNegativeExtensons_Margin >= beta)
+                    if (ttScore >= beta + Configuration.EngineSettings.SE_DoubleNegativeExtensons_Margin)
                     {
                         --singularDepthExtensions;
                     }

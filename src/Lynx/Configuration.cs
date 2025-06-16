@@ -402,7 +402,7 @@ public sealed class EngineSettings
     [SPSA<int>(0, 50, 5)]
     public int SE_DoubleExtensions_Margin { get; set; } = 15;
 
-    [SPSA<int>(25, 10, 5)]
+    [SPSA<int>(25, 100, 5)]
     public int SE_DoubleNegativeExtensons_Margin { get; set; } = 60;
 
     #endregion
