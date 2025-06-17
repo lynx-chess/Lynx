@@ -600,6 +600,19 @@ public sealed partial class Engine
                             --newDepth;
                         }
 
+                        // Idea by Potential author
+                        if (newDepth > 1)
+                        {
+                            var moveHistory = isCapture
+                                ? CaptureHistoryEntry(move)
+                                : quietHistory;
+
+                            if (moveHistory >= Configuration.EngineSettings.History_MaxMoveValue)
+                            {
+                                --newDepth;
+                            }
+                        }
+
                         if (newDepth > reducedDepth)
                         {
                             // Search with full depth but narrowed score bandwidth (zero-window search)
