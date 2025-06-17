@@ -500,7 +500,7 @@ public sealed partial class Engine
 
                 if (isNotGettingCheckmated)
                 {
-                    var isRootExtraReduction = isRoot ? 1 : 0;
+                    var isRootExtraReduction = isRoot ? 2 : 0;
 
                     if (depth >= Configuration.EngineSettings.LMR_MinDepth
                         && visitedMovesCounter >=
