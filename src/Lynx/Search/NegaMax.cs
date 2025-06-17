@@ -496,17 +496,19 @@ public sealed partial class Engine
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
-                if (visitedMovesCounter > 0)
+                if (visitedMovesCounter >= 1)
                 {
                     int reduction = 0;
 
                     if (isNotGettingCheckmated)
                     {
+                        var isRootExtraReduction = isRoot ? 2 : 0;
+
                         if (depth >= Configuration.EngineSettings.LMR_MinDepth
                             && visitedMovesCounter >=
                                 (pvNode
-                                    ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
-                                    : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
+                                    ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV + isRootExtraReduction
+                                    : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV + isRootExtraReduction))
                         {
                             if (isCapture)
                             {
