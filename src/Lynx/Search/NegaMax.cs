@@ -137,11 +137,6 @@ public sealed partial class Engine
         int phase = int.MaxValue;
         ref var stack = ref Game.Stack(ply);
 
-        if (isInCheck)
-        {
-            ++depthExtension;
-        }
-
         if (depth + depthExtension <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
@@ -448,6 +443,11 @@ public sealed partial class Engine
                 }
 
                 gameState = position.MakeMove(move);
+            }
+            // Check extensions
+            else if (isInCheck)
+            {
+                ++depthExtension;
             }
 
             var previousNodes = _nodes;
