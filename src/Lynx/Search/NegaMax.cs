@@ -606,6 +606,15 @@ public sealed partial class Engine
                             // Search with full depth but narrowed score bandwidth (zero-window search)
                             score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                         }
+
+                        // 🔍 Post-LMR continuation history update
+                        var rawHistoryBonus = EvaluationConstants.HistoryBonus[depth];
+                        var historyBonus = score > alpha
+                            ? rawHistoryBonus
+                            : -rawHistoryBonus;
+
+                        ref var contHist = ref ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                        contHist = ScoreHistoryMove(contHist, historyBonus);
                     }
                 }
 
