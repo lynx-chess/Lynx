@@ -433,7 +433,7 @@ public sealed partial class Engine
                     // Double extension
                     if (!pvNode
                         && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
-                        && stack.DoubleExtensions < 5)
+                        && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                     {
                         ++singularDepthExtensions;
                         ++stack.DoubleExtensions;
