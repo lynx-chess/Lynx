@@ -403,7 +403,7 @@ public sealed class EngineSettings
     public int SE_DoubleExtensions_Margin { get; set; } = 15;
 
     [SPSA<int>(enabled: false)]
-    public int SE_DoubleExtensions_Max { get; set; } = 10;
+    public int SE_DoubleExtensions_Max { get; set; } = 6;
 
     #endregion
 }
