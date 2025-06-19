@@ -415,7 +415,8 @@ public sealed partial class Engine
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 && Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttElementType != NodeType.Alpha
-                && ply < 3 * depth)     // Preventing search explosions
+                && ply < 3 * depth     // Preventing search explosions
+                && stack.DoubleExtensions <= Configuration.EngineSettings.SE_Extensions_Max)
             {
                 position.UnmakeMove(move, gameState);
 
