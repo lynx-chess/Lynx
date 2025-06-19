@@ -136,6 +136,7 @@ public sealed partial class Engine
         int rawStaticEval, staticEval;
         int phase = int.MaxValue;
         ref var stack = ref Game.Stack(ply);
+        stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
         if (isInCheck)
         {
@@ -431,9 +432,11 @@ public sealed partial class Engine
 
                     // Double extension
                     if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
+                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
+                        && stack.DoubleExtensions < 5)
                     {
                         ++singularDepthExtensions;
+                        ++stack.DoubleExtensions;
                     }
                 }
                 // Multicut
