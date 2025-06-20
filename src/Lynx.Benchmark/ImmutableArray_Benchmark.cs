@@ -101,86 +101,56 @@ public class ImmutableArrayBenchmark : BaseBenchmark
 
 #pragma warning disable S2386 // Mutable fields should not be "public static"
 #pragma warning disable S3887 // Mutable, non-private fields should not be "readonly"
-    public static readonly int[][][][] RegularArray;
+    public static readonly int[][] RegularArray;
 #pragma warning restore S3887 // Mutable, non-private fields should not be "readonly"
 #pragma warning restore S2386 // Mutable fields should not be "public static"
 
-    public static readonly ImmutableArray<ImmutableArray<ImmutableArray<ImmutableArray<int>>>> ImmutableArray;
+    public static readonly ImmutableArray<ImmutableArray<int>> ImmutableArray;
 
 #pragma warning disable S3963 // "static" fields should be initialized inline
     static ImmutableArrayBenchmark()
 #pragma warning restore S3963 // "static" fields should be initialized inline
     {
-        short[][][][] mgPositionalTables =
+        short[][] mgPositionalTables =
         [
-            [
-                MiddleGamePawnTable,
-                MiddleGameKnightTable,
-                MiddleGameBishopTable,
-                MiddleGameRookTable,
-                MiddleGameQueenTable,
-                MiddleGameKingTable
-            ],
-            [
-                MiddleGameEnemyPawnTable,
-                MiddleGameEnemyKnightTable,
-                MiddleGameEnemyBishopTable,
-                MiddleGameEnemyRookTable,
-                MiddleGameEnemyQueenTable,
-                MiddleGameEnemyKingTable
-            ]
-
-    ];
-
-        short[][][][] egPositionalTables =
-        [
-            [
-                EndGamePawnTable,
-                EndGameKnightTable,
-                EndGameBishopTable,
-                EndGameRookTable,
-                EndGameQueenTable,
-                EndGameKingTable
-            ],
-            [
-                EndGameEnemyPawnTable,
-                EndGameEnemyKnightTable,
-                EndGameEnemyBishopTable,
-                EndGameEnemyRookTable,
-                EndGameEnemyQueenTable,
-                EndGameEnemyKingTable
-            ]
+            MiddleGamePawnTable,
+            MiddleGameKnightTable,
+            MiddleGameBishopTable,
+            MiddleGameRookTable,
+            MiddleGameQueenTable,
+            MiddleGameKingTable
         ];
 
-        RegularArray = new int[2][][][];
+        short[][] egPositionalTables =
+        [
+            EndGamePawnTable,
+            EndGameKnightTable,
+            EndGameBishopTable,
+            EndGameRookTable,
+            EndGameQueenTable,
+            EndGameKingTable
+        ];
 
-        for (int friendEnemy = 0; friendEnemy < 2; ++friendEnemy)
+        RegularArray = new int[12][];
+
+        for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
         {
-            RegularArray[friendEnemy] = new int[PSQTBucketCount][][];
+            RegularArray[piece] = new int[64];
+            RegularArray[piece + 6] = new int[64];
 
-            for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
+            for (int sq = 0; sq < 64; ++sq)
             {
-                RegularArray[friendEnemy][bucket] = new int[12][];
-                for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
-                {
-                    RegularArray[friendEnemy][bucket][piece] = new int[64];
-                    RegularArray[friendEnemy][bucket][piece + 6] = new int[64];
+                RegularArray[piece][sq] = Utils.Pack(
+                    (short)(MiddleGamePieceValues[piece] + mgPositionalTables[piece][sq]),
+                    (short)(EndGamePieceValues[piece] + egPositionalTables[piece][sq]));
 
-                    for (int sq = 0; sq < 64; ++sq)
-                    {
-                        RegularArray[friendEnemy][bucket][piece][sq] = Utils.Pack(
-                            (short)(MiddleGamePieceValues[friendEnemy][bucket][piece] + mgPositionalTables[friendEnemy][piece][bucket][sq]),
-                            (short)(EndGamePieceValues[friendEnemy][bucket][piece] + egPositionalTables[friendEnemy][piece][bucket][sq]));
-
-                        RegularArray[friendEnemy][bucket][piece + 6][sq] = Utils.Pack(
-                            (short)(MiddleGamePieceValues[friendEnemy][bucket][piece + 6] - mgPositionalTables[friendEnemy][piece][bucket][sq ^ 56]),
-                            (short)(EndGamePieceValues[friendEnemy][bucket][piece + 6] - egPositionalTables[friendEnemy][piece][bucket][sq ^ 56]));
-                    }
-                }
+                RegularArray[piece + 6][sq] = Utils.Pack(
+                    (short)(MiddleGamePieceValues[piece + 6] - mgPositionalTables[piece][sq ^ 56]),
+                    (short)(EndGamePieceValues[piece + 6] - egPositionalTables[piece][sq ^ 56]));
             }
         }
 
-        ImmutableArray = RegularArray.Select(arr1 => arr1.Select(arr2 => arr2.Select(arr3 => arr3.ToImmutableArray()).ToImmutableArray()).ToImmutableArray()).ToImmutableArray();
+        ImmutableArray = RegularArray.Select(arr1 => arr1.ToImmutableArray()).ToImmutableArray();
     }
 
     [Benchmark(Baseline = true)]
@@ -197,7 +167,7 @@ public class ImmutableArrayBenchmark : BaseBenchmark
                     {
                         for (int square = 0; square < 64; ++square)
                         {
-                            sum += (ulong)RegularArray[friendEnemy][bucket][piece][square];
+                            sum += (ulong)RegularArray[piece][square];
                         }
                     }
                 }
@@ -221,7 +191,7 @@ public class ImmutableArrayBenchmark : BaseBenchmark
                     {
                         for (int square = 0; square < 64; ++square)
                         {
-                            sum += (ulong)ImmutableArray[friendEnemy][bucket][piece][square];
+                            sum += (ulong)ImmutableArray[piece][square];
                         }
                     }
                 }

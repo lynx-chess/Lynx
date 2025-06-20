@@ -40,7 +40,7 @@ public sealed partial class Engine
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             }
 #endif
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            return position.StaticEvaluation().Score;
         }
 
         _maxDepthReached[ply] = ply;
@@ -166,7 +166,7 @@ public sealed partial class Engine
             }
             else
             {
-                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                (rawStaticEval, phase) = position.StaticEvaluation();
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
@@ -277,7 +277,7 @@ public sealed partial class Engine
         }
         else
         {
-            rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            rawStaticEval = position.StaticEvaluation().Score;
             staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
             if (!ttHit)
@@ -757,7 +757,7 @@ public sealed partial class Engine
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             }
 #endif
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            return position.StaticEvaluation().Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -787,9 +787,9 @@ public sealed partial class Engine
         /*
             var staticEval = ttHit
                 ? ttProbeResult.StaticEval
-                : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
+                : position.StaticEvaluation(_kingPawnHashTable).Score;
         */
-        var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+        var rawStaticEval = position.StaticEvaluation().Score;
         Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
