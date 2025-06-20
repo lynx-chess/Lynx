@@ -77,46 +77,49 @@ public sealed partial class Engine
 
             ttEntryHasBestMove = ttBestMove != default;
 
-            // TT cutoffs
-            if (!isVerifyingSE && ttHit && ttDepth >= depth)
-            {
-                if (ttElementType == NodeType.Exact
-                    || (ttElementType == NodeType.Alpha && ttScore <= alpha)
-                    || (ttElementType == NodeType.Beta && ttScore >= beta))
-                {
-                    if (!pvNode)
-                    {
-                        return ttScore;
-                    }
-
-                    // In PV nodes, instead of the cutoff we reduce the depth
-                    // Suggested by Calvin author, originally from Motor
-                    // I had to add the not-in-check guard
-                    if (!position.IsInCheck())
-                    {
-                        --depthExtension;
-                    }
-                }
-                else if (!pvNode
-                    && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth
-                    && ply < depth * 4) // To avoid weird search explosions, see HighSeldepthAtDepth2 test. Patch suggested by Sirius author
-                {
-                    // Extension idea from Stormphrax
-                    ++depthExtension;
-                }
-            }
-
             ttMoveIsCapture = ttHit && ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
 
-            // Internal iterative reduction (IIR)
-            // If this position isn't found in TT, it has never been searched before,
-            // so the search will be potentially expensive.
-            // Therefore, we search with reduced depth for now, expecting to record a TT move
-            // which we'll be able to use later for the full depth search
-            if (depth >= Configuration.EngineSettings.IIR_MinDepth
-                && (!ttHit || !ttEntryHasBestMove))
+            // TT cutoffs
+            if (!isVerifyingSE)
             {
-                --depthExtension;
+                if (ttHit && ttDepth >= depth)
+                {
+                    if (ttElementType == NodeType.Exact
+                        || (ttElementType == NodeType.Alpha && ttScore <= alpha)
+                        || (ttElementType == NodeType.Beta && ttScore >= beta))
+                    {
+                        if (!pvNode)
+                        {
+                            return ttScore;
+                        }
+
+                        // In PV nodes, instead of the cutoff we reduce the depth
+                        // Suggested by Calvin author, originally from Motor
+                        // I had to add the not-in-check guard
+                        if (!position.IsInCheck())
+                        {
+                            --depthExtension;
+                        }
+                    }
+                    else if (!pvNode
+                        && depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth
+                        && ply < depth * 4) // To avoid weird search explosions, see HighSeldepthAtDepth2 test. Patch suggested by Sirius author
+                    {
+                        // Extension idea from Stormphrax
+                        ++depthExtension;
+                    }
+                }
+
+                // Internal iterative reduction (IIR)
+                // If this position isn't found in TT, it has never been searched before,
+                // so the search will be potentially expensive.
+                // Therefore, we search with reduced depth for now, expecting to record a TT move
+                // which we'll be able to use later for the full depth search
+                if (depth >= Configuration.EngineSettings.IIR_MinDepth
+                    && (!ttHit || !ttEntryHasBestMove))
+                {
+                    --depthExtension;
+                }
             }
         }
 
