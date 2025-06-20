@@ -4,6 +4,8 @@ public struct PlyStackEntry
 {
     public int StaticEval { get; set; }
 
+    public int DoubleExtensions { get; set; }
+
     public Move Move { get; set; }
 
     public PlyStackEntry()
