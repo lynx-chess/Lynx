@@ -193,6 +193,8 @@ public class Position : IDisposable
             piece == (int)Piece.N || piece == (int)Piece.n
             || piece == (int)Piece.B || piece == (int)Piece.b;
 
+        bool isKingMove = false;
+
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
             _kingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
@@ -219,6 +221,7 @@ public class Position : IDisposable
 
             if (piece == (int)Piece.K || piece == (int)Piece.k)
             {
+                isKingMove = true;
                 // King (and castling) moves require calculating king buckets twice and recalculating all related parameters, so skipping incremental eval for those cases for now
                 // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
                 _isIncrementalEval = false;
@@ -248,11 +251,14 @@ public class Position : IDisposable
                 (sameSideBucket, opposideSideBucket) = (opposideSideBucket, sameSideBucket);
             }
 
-            _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, piece, sourceSquare);
-            _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, piece, sourceSquare);
+            if (!isKingMove)
+            {
+                _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, piece, sourceSquare);
+                _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, piece, sourceSquare);
 
-            _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
-            _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
+                _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
+                _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
+            }
 
             _incrementalPhaseAccumulator += extraPhaseIfIncremental;
 
