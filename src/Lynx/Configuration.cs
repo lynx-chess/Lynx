@@ -405,6 +405,9 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int SE_DoubleExtensions_Max { get; set; } = 6;
 
+    [SPSA<int>(enabled: false)]
+    public int SE_DoubleExtensions_Max_Total { get; set; } = 10;
+
     #endregion
 }
 
