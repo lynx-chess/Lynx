@@ -223,8 +223,10 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
+        var rawHistoryBonus = HistoryBonus[depth];
+
         ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
-        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, HistoryBonus[depth]);
+        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
@@ -235,7 +237,7 @@ public sealed partial class Engine
             if (visitedMove.IsCapture())
             {
                 ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
-                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -HistoryBonus[depth]);
+                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryBonus);
             }
         }
     }
