@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, macOS-latest, macOS-13, windows-latest, windows-11-arm]
       fail-fast: false
 
     steps:
@@ -43,33 +43,6 @@ jobs:
 
     - name: Build
       run: make
-
-  make-build-win:
-    continue-on-error: true
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [windows-latest, windows-11-armc]
-      fail-fast: false
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Inject slug/short variables
-      uses: rlespinasse/github-slug-action@v3.x
-
-    - name: Build
-      run: make
-
-    - name: Test with shell
-      run: make -i SHELL='C:/Program Files/Git/usr/bin/bash'
-
-    - name: Test in subdir
-      run: make -i -C sub
-
-    - name: Test with shell in subdir
-      run: make -i SHELL='C:/Program Files/Git/usr/bin/bash' -C sub
 
   build-and-publish:
     runs-on: ${{ matrix.os }}
