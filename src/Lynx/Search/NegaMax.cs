@@ -195,7 +195,7 @@ public sealed partial class Engine
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (isNotGettingCheckmated && !isVerifyingSE)
             {
-                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+                if (!ttPv && depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
