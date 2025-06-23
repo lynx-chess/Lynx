@@ -33,11 +33,16 @@ public sealed class Game : IDisposable
 
     public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove);
 
-    public Game(ReadOnlySpan<char> fen) : this(fen, [], [], [])
+    [Obsolete("Just intended for testing purposes")]
+    public Game(ReadOnlySpan<char> fen) : this(MoveGenerator.Instance, fen, [], [], [])
     {
     }
 
-    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
+    public Game(MoveGenerator moveGenerator, ReadOnlySpan<char> fen) : this(moveGenerator, fen, [], [], [])
+    {
+    }
+
+    public Game(MoveGenerator moveGenerator, ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
         _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
@@ -64,7 +69,7 @@ public sealed class Game : IDisposable
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+            var moveList = moveGenerator.GenerateAllMoves(CurrentPosition, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -149,15 +154,18 @@ public sealed class Game : IDisposable
         return false;
     }
 
+    [Obsolete("Just intended for testing purposes")]
+    public bool Is50MovesRepetition() => Is50MovesRepetition(MoveGenerator.Instance);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition()
+    public bool Is50MovesRepetition(MoveGenerator moveGenerator)
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+        return !CurrentPosition.IsInCheck() || moveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
     }
 
     /// <summary>

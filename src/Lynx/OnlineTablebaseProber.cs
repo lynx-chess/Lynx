@@ -48,6 +48,8 @@ public static class OnlineTablebaseProber
 
     public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
+        var moveGenerator = MoveGenerator.Instance;
+
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
 
@@ -118,7 +120,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= moveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -179,7 +181,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= moveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -242,7 +244,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= moveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -302,7 +304,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= moveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -346,7 +348,7 @@ public static class OnlineTablebaseProber
 
         Move? parsedMove = 0;
 #pragma warning disable CS0618 // Type or member is obsolete
-        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
+        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, moveGenerator.GenerateAllMoves(position), out parsedMove))
         {
             throw new LynxException($"{bestMove.Uci} should be parsable from position {fen}");
         }

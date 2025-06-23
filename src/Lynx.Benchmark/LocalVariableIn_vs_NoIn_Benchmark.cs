@@ -6,6 +6,8 @@ namespace Lynx.Benchmark;
 
 public class LocalVariableIn_vs_NoIn_Benchmark : BaseBenchmark
 {
+    private static readonly MoveGenerator _moveGenerator = MoveGenerator.Instance;
+
     public static IEnumerable<string> Data =>
         [
             Constants.EmptyBoardFEN,
@@ -24,7 +26,7 @@ public class LocalVariableIn_vs_NoIn_Benchmark : BaseBenchmark
         var moves = new List<Move>(50_000);
 
         for (int i = 0; i < 1000; ++i)
-            moves.AddRange(Sort_LocalVariableAndIn(MoveGenerator.GenerateAllMoves(position), position));
+            moves.AddRange(Sort_LocalVariableAndIn(_moveGenerator.GenerateAllMoves(position), position));
 
         return Sort_LocalVariableAndIn(moves, position)[0];
     }
@@ -37,7 +39,7 @@ public class LocalVariableIn_vs_NoIn_Benchmark : BaseBenchmark
         var position = new Position(fen);
 
         for (int i = 0; i < 1000; ++i)
-            moves.AddRange(Sort_NoIn(MoveGenerator.GenerateAllMoves(position), position));
+            moves.AddRange(Sort_NoIn(_moveGenerator.GenerateAllMoves(position), position));
 
         return Sort_NoIn(moves, position)[0];
     }

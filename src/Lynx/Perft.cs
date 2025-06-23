@@ -10,8 +10,12 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
+    private static MoveGenerator _moveGenerator = MoveGenerator_Standard.Instance;
+
     public static void RunPerft(Position position, int depth, Action<string> write)
     {
+        _moveGenerator = MoveGenerator.Instance;
+
         var sw = new Stopwatch();
         sw.Start();
         var nodes = PerftRecursiveImpl(position, depth, 0);
@@ -22,6 +26,8 @@ public static class Perft
 
     public static void RunDivide(Position position, int depth, Action<string> write)
     {
+        _moveGenerator = MoveGenerator.Instance;
+
         var sw = new Stopwatch();
         sw.Start();
         var nodes = DivideImpl(position, depth, 0, write);
@@ -39,7 +45,7 @@ public static class Perft
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            foreach (var move in _moveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -62,7 +68,7 @@ public static class Perft
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            foreach (var move in _moveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 

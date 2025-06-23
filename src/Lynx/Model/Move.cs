@@ -314,7 +314,7 @@ public static class MoveExtensions
     /// EPD representation of a valid move in a position
     /// </summary>
     /// <param name="move">A valid move for the given position</param>
-    public static string ToEPDString(this Move move, Position position)
+    public static string ToEPDString(this Move move, MoveGenerator moveGenerator, Position position)
     {
         var piece = move.Piece();
 
@@ -329,7 +329,7 @@ public static class MoveExtensions
                         ? global::Lynx.Constants.FileString[global::Lynx.Constants.File[move.SourceSquare()]]  // exd5
                         : "")    // d5
                     : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
-                        + DisambiguateMove(move, position))
+                        + DisambiguateMove(moveGenerator, move, position))
                 + (move.IsCapture() == default ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
@@ -387,13 +387,13 @@ public static class MoveExtensions
     /// First file letter, then rank number and finally the whole square.
     /// At least according to https://chess.stackexchange.com/a/1819
     /// </summary>
-    private static string DisambiguateMove(Move move, Position position)
+    private static string DisambiguateMove(MoveGenerator moveGenerator, Move move, Position position)
     {
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
+        var pseudoLegalMoves = moveGenerator.GenerateAllMoves(position, moves).ToArray();
 
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)

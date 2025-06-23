@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
-public static class MoveGenerator
+public abstract class MoveGenerator
 {
 #if DEBUG
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
@@ -40,12 +40,16 @@ public static class MoveGenerator
 
     internal static int Init() => TRUE;
 
+    public static MoveGenerator Instance => Configuration.EngineSettings.IsChess960
+       ? MoveGenerator_DFRC.Instance
+       : MoveGenerator_Standard.Instance;
+
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
-    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
+    internal Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
@@ -58,7 +62,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool)
+    public Span<Move> GenerateAllMoves(Position position, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -81,7 +85,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
+    public Move[] GenerateAllCaptures(Position position, Move[] movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -104,7 +108,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
+    public Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -275,7 +279,7 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
+    internal virtual void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
         if (position.Castle != default)
         {
@@ -409,7 +413,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position)
+    public bool CanGenerateAtLeastAValidMove(Position position)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -530,7 +534,7 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyCastlingMoveValid(Position position)
+    protected virtual bool IsAnyCastlingMoveValid(Position position)
     {
         if (position.Castle != default)
         {

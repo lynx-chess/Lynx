@@ -277,13 +277,13 @@ public sealed partial class Engine
             position = newPosition;
         }
 
-        static void TryParseMove(Position position, int i, int move)
+        void TryParseMove(Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, movePool),
+               _moveGenerator.GenerateAllMoves(position, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
@@ -294,7 +294,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
+    private void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -309,14 +309,14 @@ public sealed partial class Engine
             {
                 //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
 #pragma warning disable CS0618 // Type or member is obsolete
-                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position)} ({position.Side}, {plies})");
+                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(_moveGenerator, position)} ({position.Side}, {plies})");
 #pragma warning restore CS0618 // Type or member is obsolete
             }
         }
     }
 
     [Conditional("DEBUG")]
-    private static void PrintMove(Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
+    private void PrintMove(Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -339,7 +339,7 @@ public sealed partial class Engine
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position),-6} | {evaluation}{(prune ? " | pruning" : "")}");
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(_moveGenerator, position),-6} | {evaluation}{(prune ? " | pruning" : "")}");
 #pragma warning restore CS0618 // Type or member is obsolete
 
             //Console.ResetColor();
