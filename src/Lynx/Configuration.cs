@@ -268,6 +268,9 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int AspirationWindow_Base { get; set; } = 9;
 
+    [SPSA<double>(1, 3, 0.1)]
+    public double AspirationWindow_Multiplier { get; set; } = 1.5;
+
     //[SPSA<int>(5, 30, 1)]
     //public int AspirationWindow_Delta { get; set; } = 13;
 
