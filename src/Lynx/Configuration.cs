@@ -277,8 +277,20 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
 
+    [SPSA<int>(10, 150, 10)]
+    public int ImprovingRate { get; set; } = 50;
+
     [SPSA<int>(enabled: false)]
     public int RFP_MaxDepth { get; set; } = 7;
+
+    [SPSA<int>(50, 150, 10)]
+    public int RFP_Improving_Margin { get; set; } = 80;
+
+    [SPSA<int>(50, 150, 10)]
+    public int RFP_NotImproving_Margin { get; set; } = 100;
+
+    [SPSA<double>(enabled: false)]
+    public double RFP_ImprovingFactor { get; set; } = 0.75;
 
     //[SPSA<int>(1, 300, 15)]
     //public int RFP_DepthScalingFactor { get; set; } = 55;

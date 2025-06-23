@@ -177,7 +177,7 @@ public sealed partial class Engine
             {
                 var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
                 improving = evalDiff >= 0;
-                improvingRate = evalDiff / 50.0;
+                improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
 
             // From smol.cs
@@ -200,8 +200,12 @@ public sealed partial class Engine
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
                     // Improving impl. based on Potential's
-                    var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
-                    var improvingFactor = improvingRate * (0.75 * depth);
+                    var rfpMargin = improving
+                        ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
+                        : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
+
+                    // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
+                    var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
 
                     var rfpThreshold = rfpMargin + improvingFactor;
 
