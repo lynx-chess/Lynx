@@ -274,7 +274,9 @@ public sealed partial class Engine
 
                     if (nmpScore >= beta)
                     {
-                        return nmpScore;
+                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            ? nmpScore
+                            : beta;
                     }
                 }
             }
