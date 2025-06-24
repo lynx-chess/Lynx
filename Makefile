@@ -8,6 +8,12 @@ OUTPUT_DIR=artifacts/Lynx/
 ifeq ($(OS),Windows_NT)
 	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
 		RUNTIME=win-x64
+	else ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+		RUNTIME=win-x64
+	else ifeq ($(PROCESSOR_ARCHITEW6432),ARM64)
+		RUNTIME=win-arm64
+	else ifeq ($(PROCESSOR_ARCHITECTURE),ARM64)
+		RUNTIME=win-arm64
 	else
 		RUNTIME=win-x86
 	endif

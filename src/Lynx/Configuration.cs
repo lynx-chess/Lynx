@@ -268,14 +268,29 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int AspirationWindow_Base { get; set; } = 9;
 
+    [SPSA<double>(1, 3, 0.1)]
+    public double AspirationWindow_Multiplier { get; set; } = 1.5;
+
     //[SPSA<int>(5, 30, 1)]
     //public int AspirationWindow_Delta { get; set; } = 13;
 
     [SPSA<int>(enabled: false)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
 
+    [SPSA<int>(10, 150, 10)]
+    public int ImprovingRate { get; set; } = 50;
+
     [SPSA<int>(enabled: false)]
     public int RFP_MaxDepth { get; set; } = 7;
+
+    [SPSA<int>(50, 150, 10)]
+    public int RFP_Improving_Margin { get; set; } = 80;
+
+    [SPSA<int>(50, 150, 10)]
+    public int RFP_NotImproving_Margin { get; set; } = 100;
+
+    [SPSA<double>(enabled: false)]
+    public double RFP_ImprovingFactor { get; set; } = 0.75;
 
     //[SPSA<int>(1, 300, 15)]
     //public int RFP_DepthScalingFactor { get; set; } = 55;
@@ -401,6 +416,9 @@ public sealed class EngineSettings
 
     [SPSA<int>(0, 50, 5)]
     public int SE_DoubleExtensions_Margin { get; set; } = 15;
+
+    [SPSA<int>(enabled: false)]
+    public int SE_DoubleExtensions_Max { get; set; } = 6;
 
     #endregion
 }
