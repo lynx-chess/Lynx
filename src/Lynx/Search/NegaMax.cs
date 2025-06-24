@@ -618,7 +618,7 @@ public sealed partial class Engine
                             ? rawHistoryBonus
                             : -rawHistoryBonus;
 
-                        ref var contHist = ref ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                        ref var contHist = ref CounterMoveHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
                         contHist = ScoreHistoryMove(contHist, historyBonus);
                     }
                 }
