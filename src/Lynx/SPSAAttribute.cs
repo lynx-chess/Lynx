@@ -194,11 +194,17 @@ public static class SPSAAttributeHelpers
             var genericSpsa = spsaArray[0];
             if (genericSpsa is SPSAAttribute<int> intSpsa)
             {
-                yield return intSpsa.ToWeatherFactoryString(property);
+                if (intSpsa.Enabled)
+                {
+                    yield return intSpsa.ToWeatherFactoryString(property);
+                }
             }
             else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
             {
-                yield return doubleSpsa.ToWeatherFactoryString(property);
+                if (doubleSpsa.Enabled)
+                {
+                    yield return doubleSpsa.ToWeatherFactoryString(property);
+                }
             }
             else
             {
