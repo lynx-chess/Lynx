@@ -438,15 +438,15 @@ public sealed partial class Engine
 
                     if (!pvNode && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                     {
-                        // Double extension
-                        if (singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
-                        {
-                            ++singularDepthExtensions;
-                            ++stack.DoubleExtensions;
-                        }
                         // Triple extension
                         if (!isCapture
                             && singularScore + Configuration.EngineSettings.SE_TripleExtensions_Margin < singularBeta)
+                        {
+                            singularDepthExtensions += 2;
+                            ++stack.DoubleExtensions;
+                        }
+                        // Double extension
+                        else if (singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
                         {
                             ++singularDepthExtensions;
                             ++stack.DoubleExtensions;
