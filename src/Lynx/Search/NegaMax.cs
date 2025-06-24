@@ -138,7 +138,7 @@ public sealed partial class Engine
         ref var stack = ref Game.Stack(ply);
         stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
-        if (isInCheck)
+        if (isInCheck && !isVerifyingSE)
         {
             ++depthExtension;
         }
