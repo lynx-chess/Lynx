@@ -88,7 +88,7 @@ public sealed partial class Engine
             return BaseMoveScore
                 + _quietHistory[piece][targetSquare]
                 + CounterMoveHistoryEntry(piece, targetSquare, ply)
-                + FollowUpHistoryEntry(piece, targetSquare, ply);
+                + (FollowUpHistoryEntry(piece, targetSquare, ply) / 2);
         }
 
         if (ply >= 1)
