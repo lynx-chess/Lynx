@@ -436,19 +436,21 @@ public sealed partial class Engine
                 {
                     ++singularDepthExtensions;
 
-                    // Double extension
-                    if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
-                        && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
+                    if (!pvNode && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                     {
-                        ++singularDepthExtensions;
-                        ++stack.DoubleExtensions;
-                    }
-
-                    // Triple extension
-                    if (!isCapture && singularScore + Configuration.EngineSettings.SE_TripleExtensions_Margin < singularBeta)
-                    {
-                        ++singularDepthExtensions;
+                        // Double extension
+                        if (singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
+                        {
+                            ++singularDepthExtensions;
+                            ++stack.DoubleExtensions;
+                        }
+                        // Triple extension
+                        if (!isCapture
+                            && singularScore + Configuration.EngineSettings.SE_TripleExtensions_Margin < singularBeta)
+                        {
+                            ++singularDepthExtensions;
+                            ++stack.DoubleExtensions;
+                        }
                     }
                 }
                 // Multicut

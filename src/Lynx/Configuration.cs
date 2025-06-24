@@ -421,7 +421,7 @@ public sealed class EngineSettings
     public int SE_DoubleExtensions_Max { get; set; } = 6;
 
     [SPSA<int>(25, 100, 5)]
-    public int SE_TripleExtensions_Margin { get; set; } = 75;
+    public int SE_TripleExtensions_Margin { get; set; } = 100;
 
     #endregion
 }
