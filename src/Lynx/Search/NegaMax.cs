@@ -136,8 +136,9 @@ public sealed partial class Engine
         int rawStaticEval, staticEval;
         int phase = int.MaxValue;
         ref var stack = ref Game.Stack(ply);
+        stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
-        if (isInCheck)
+        if (isInCheck && !isVerifyingSE)
         {
             ++depthExtension;
         }
@@ -176,7 +177,7 @@ public sealed partial class Engine
             {
                 var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
                 improving = evalDiff >= 0;
-                improvingRate = evalDiff / 50.0;
+                improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
 
             // From smol.cs
@@ -199,8 +200,12 @@ public sealed partial class Engine
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
                     // Improving impl. based on Potential's
-                    var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
-                    var improvingFactor = improvingRate * (0.75 * depth);
+                    var rfpMargin = improving
+                        ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
+                        : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
+
+                    // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
+                    var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
 
                     var rfpThreshold = rfpMargin + improvingFactor;
 
@@ -269,7 +274,9 @@ public sealed partial class Engine
 
                     if (nmpScore >= beta)
                     {
-                        return nmpScore;
+                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            ? nmpScore
+                            : beta;
                     }
                 }
             }
@@ -412,12 +419,13 @@ public sealed partial class Engine
                 isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
                 && depth >= Configuration.EngineSettings.SE_MinDepth
                 && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
-                //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                && ttElementType != NodeType.Alpha)
+                && Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ttElementType != NodeType.Alpha
+                && ply < 3 * depth)     // Preventing search explosions
             {
                 position.UnmakeMove(move, gameState);
 
-                var verificationDepth = (depth + depthExtension - 1) / 2;    // TODO tune?
+                var verificationDepth = (depth - 1) / 2;    // TODO tune?
                 var singularBeta = ttScore - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
@@ -430,9 +438,11 @@ public sealed partial class Engine
 
                     // Double extension
                     if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
+                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
+                        && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                     {
                         ++singularDepthExtensions;
+                        ++stack.DoubleExtensions;
                     }
 
                     // Triple extension
@@ -442,7 +452,7 @@ public sealed partial class Engine
                     }
                 }
                 // Multicut
-                else if (singularScore >= beta)
+                else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
                 {
                     return singularScore;
                 }
@@ -502,17 +512,19 @@ public sealed partial class Engine
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
-                if (visitedMovesCounter > 0)
+                if (visitedMovesCounter >= 1)
                 {
                     int reduction = 0;
 
                     if (isNotGettingCheckmated)
                     {
+                        var isRootExtraReduction = isRoot ? 2 : 0;
+
                         if (depth >= Configuration.EngineSettings.LMR_MinDepth
                             && visitedMovesCounter >=
                                 (pvNode
-                                    ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
-                                    : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
+                                    ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV + isRootExtraReduction
+                                    : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV + isRootExtraReduction))
                         {
                             if (isCapture)
                             {
@@ -611,6 +623,15 @@ public sealed partial class Engine
                             // Search with full depth but narrowed score bandwidth (zero-window search)
                             score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                         }
+
+                        // 🔍 Post-LMR continuation history update
+                        var rawHistoryBonus = EvaluationConstants.HistoryBonus[depth];
+                        var historyBonus = score > alpha
+                            ? rawHistoryBonus
+                            : -rawHistoryBonus;
+
+                        ref var contHist = ref ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                        contHist = ScoreHistoryMove(contHist, historyBonus);
                     }
                 }
 
