@@ -45,7 +45,8 @@ public sealed partial class Engine
 
             var capturedPiece = move.CapturedPiece();
 
-            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
+                $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
             return baseCaptureScore
                 + MostValueableVictimLeastValuableAttacker[move.Piece()][capturedPiece]
@@ -147,7 +148,8 @@ public sealed partial class Engine
             var piece = move.Piece();
             var capturedPiece = move.CapturedPiece();
 
-            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
+                $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
             return baseCaptureScore
                 + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
@@ -169,16 +171,15 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
     {
-        // 🔍 Quiet history moves
-        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
+        // 🔍 Quiet history moves
+        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
         int rawHistoryBonus = HistoryBonus[depth];
 
-        _quietHistory[piece][targetSquare] = ScoreHistoryMove(
-            _quietHistory[piece][targetSquare],
-            rawHistoryBonus);
+        ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
+        quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
         if (ply >= 2)
         {
@@ -199,8 +200,7 @@ public sealed partial class Engine
             counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
         }
 
-        // 🔍 History penalty/malus
-        for (int i = 0; i < visitedMovesCounter - 1; ++i)
+        for (int i = 0; i < visitedMovesCounter; ++i)
         {
             var visitedMove = visitedMoves[i];
 
@@ -211,7 +211,7 @@ public sealed partial class Engine
 
                 // Quiet history
                 // When a quiet move fails high, penalize previous visited quiet moves
-                ref var quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
+                quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
                 quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryBonus);
 
                 // Continuation history
@@ -259,8 +259,10 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
+        var rawHistoryBonus = HistoryBonus[depth];
+
         ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
-        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, HistoryBonus[depth]);
+        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
@@ -271,7 +273,7 @@ public sealed partial class Engine
             if (visitedMove.IsCapture())
             {
                 ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
-                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -HistoryBonus[depth]);
+                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryBonus);
             }
         }
     }

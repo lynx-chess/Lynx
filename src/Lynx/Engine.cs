@@ -1,7 +1,6 @@
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
@@ -32,7 +31,7 @@ public sealed partial class Engine : IDisposable
     public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt, bool warmup = false)
+    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
@@ -51,28 +50,11 @@ public sealed partial class Engine : IDisposable
             _moveNodeCount[i] = new ulong[64];
         }
 
-#if !DEBUG
-        if (warmup)
-        {
-            // Temporary channel so that no output is generated
-            _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-            WarmupEngine();
-
-            _engineWriter = engineWriter;
-
-            NewGame();
-        }
-#endif
-
         _logger.Info("Engine {0} initialized", _id);
     }
 
-#pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
-    private void WarmupEngine()
+    public void Warmup()
     {
-        _logger.Info("Warming up engine");
-        var sw = Stopwatch.StartNew();
-
         AdjustPosition(Constants.SuperLongPositionCommand);
 
         const string goWarmupCommand = "go depth 10";   // ~300 ms
@@ -81,16 +63,10 @@ public sealed partial class Engine : IDisposable
         BestMove(command);
 
         Bench(2);
-
-        sw.Stop();
-        _logger.Info("Warm-up finished in {0}ms", sw.ElapsedMilliseconds);
     }
-#pragma warning restore S1144 // Unused private types or members should be removed
 
     private void ResetEngine()
     {
-        _tt.Clear();
-
         // Clear histories
         for (int i = 0; i < 12; ++i)
         {
@@ -103,6 +79,10 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_counterMoves);
 
         Array.Clear(_pawnEvalTable);
+
+        Array.Clear(_pawnCorrHistory);
+        Array.Clear(_nonPawnCorrHistory);
+        Array.Clear(_minorCorrHistory);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
@@ -230,7 +210,7 @@ public sealed partial class Engine : IDisposable
         }
         catch (Exception e)
         {
-            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.CurrentPosition.FEN());
+            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             return null;
         }
         finally

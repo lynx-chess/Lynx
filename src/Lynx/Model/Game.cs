@@ -21,7 +21,7 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Indexed by ply
     /// </summary>
-    private readonly PlyStackEntry[] _gameStack;
+    private readonly PlyStackEntry[] _stack;
 
     private bool _disposedValue;
 
@@ -40,7 +40,7 @@ public sealed class Game : IDisposable
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
-        _gameStack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
 
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
@@ -228,19 +228,22 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UpdateMoveinStack(int n, Move move) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
+    public void UpdateMoveinStack(int n, Move move) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Move ReadMoveFromStack(int n) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
+    public Move ReadMoveFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int ReadStaticEvalFromStack(int n) => _gameStack[n].StaticEval;
+    public int ReadStaticEvalFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n].StaticEval = value;
+    public int UpdateStaticEvalInStack(int n, int value) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref PlyStackEntry GameStack(int n) => ref _gameStack[n];
+    public int ReadDoubleExtensionsFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].DoubleExtensions;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref PlyStackEntry Stack(int n) => ref _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
@@ -258,7 +261,7 @@ public sealed class Game : IDisposable
 
     public void FreeResources()
     {
-        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack, clearArray: true);
+        ArrayPool<PlyStackEntry>.Shared.Return(_stack, clearArray: true);
         ArrayPool<ulong>.Shared.Return(_positionHashHistory);
 
         CurrentPosition.FreeResources();

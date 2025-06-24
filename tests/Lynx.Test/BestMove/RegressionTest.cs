@@ -390,4 +390,73 @@ public class RegressionTest : BaseTest
     {
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
     }
+
+    [Explicit]
+    [Category(Categories.LongRunning)]
+    [TestCase("8/5pk1/6n1/3N4/4Q3/6P1/1q3PK1/8 b - - 0 1", 25)]
+    [TestCase("8/p3k3/1b3p2/5Kp1/1p5p/1P2P2P/P3BP2/8 w - - 0 1", 20)]
+    [TestCase("6k1/4Np2/8/5PP1/2n3K1/8/8/8 b - - 0 1", 20)]
+    [TestCase("8/4Np1k/8/5PPK/2n5/8/8/8 b - - 0 1", 20)]
+    [TestCase("1R6/8/8/5p2/5k2/r7/5K2/8 w - - 0 1", 20)]
+    [TestCase("8/8/5k2/5p2/1R6/r7/6K1/8 w - - 0 1", 20)]
+    [TestCase("8/8/5n2/7k/7p/5P2/6P1/4BK2 w - - 0 1", 20)]
+    [TestCase("3B4/8/8/7k/7p/5P2/4n1PK/8 w - - 0 1", 20)]
+    public void PVTableOverflow(string fen, int depth)
+    {
+        var engine = GetEngine();
+        engine.AdjustPosition($"position fen {fen}");
+
+        var result = engine.BestMove(new($"go depth {depth}"));
+
+        Assert.AreEqual(depth, result.Depth);
+    }
+
+    [Explicit]
+    [Category(Categories.LongRunning)]
+    [TestCase("8/1p1k3b/p1n1pp2/P1B4p/BPP2p2/5P2/3K2PP/8 b - c3 1 1", 30)]
+    public void NegativeDepth(string fen, int depth)
+    {
+        var engine = GetEngine();
+        engine.AdjustPosition($"position fen {fen}");
+
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
+    [Test]
+    public void HighSeldepthAtDepth2()
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        var result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
+        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+
+        // It used to happen at the second repetition, info depth 2 seldepth 127
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
+        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
+        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+    }
+
+    [Test]
+    public void HighSeldepthAtDepth2_FixedDepth()
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        var result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
+        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+
+        // It used to happen at the second repetition, info depth 2 seldepth 127
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        result = engine.BestMove(new("go depth 3"));
+        Assert.Less(result.DepthReached, 32, $"depth {result.Depth}, seldepth {result.DepthReached}");
+
+        engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
+        result = engine.BestMove(new("go depth 3"));
+        Assert.Less(result.DepthReached, 32, $"depth {result.Depth}, seldepth {result.DepthReached}");
+    }
 }

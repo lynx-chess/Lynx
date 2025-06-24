@@ -15,25 +15,56 @@ public readonly struct TranspositionTable
     public readonly int Size;
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
+    public int Length => _tt.Length;
+
     public TranspositionTable()
     {
+        _logger.Debug("Allocating TT");
+        var sw = Stopwatch.StartNew();
+
         Size = Configuration.EngineSettings.TranspositionTableSize;
 
         var ttLength = CalculateLength(Size);
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+
+        _logger.Info("TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
+    /// <summary>
+    /// Multithreaded clearing of the transposition table
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
-        Array.Clear(_tt);
+        var threadCount = Configuration.EngineSettings.Threads;
+
+        _logger.Debug("Zeroing TT using {ThreadCount} thread(s)", threadCount);
+        var sw = Stopwatch.StartNew();
+
+        var tt = _tt;
+        var ttLength = tt.Length;
+        var sizePerThread = ttLength / threadCount;
+
+        // Instead of just doing Array.Clear(_tt):
+        Parallel.For(0, threadCount, i =>
+        {
+            var start = i * sizePerThread;
+            var length = (i == threadCount - 1)
+                ? ttLength - start
+                : sizePerThread;
+
+            Array.Clear(tt, start, length);
+        });
+
+        _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry(Position position)
+    public void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         if (Sse.IsSupported)
         {
-            var index = CalculateTTIndex(position.UniqueIdentifier);
+            var index = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
 
             unsafe
             {
@@ -52,16 +83,21 @@ public readonly struct TranspositionTable
     /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
+    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier, int halfMovesWithoutCaptureOrPawnMove)
+    {
+        var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
+
+        return (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
+    }
 
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int ply)
+    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
@@ -81,9 +117,11 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
+    public void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overriden");
+
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         ref var entry = ref _tt[ttIndex];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
@@ -116,9 +154,9 @@ public readonly struct TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SaveStaticEval(Position position, int staticEval, bool wasPv)
+    public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         ref var entry = ref _tt[ttIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
@@ -213,6 +251,9 @@ public readonly struct TranspositionTable
 
         return items;
     }
+
+    [Obsolete("Only tests")]
+    internal ref TranspositionTableElement Get(int index) => ref _tt[index];
 
     [Conditional("DEBUG")]
     private void Stats()

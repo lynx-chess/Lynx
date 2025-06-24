@@ -95,8 +95,8 @@ public sealed class UCIHandler
                 case "printsettings":
                     await HandleSettings();
                     break;
-                case "printsysteminfo":
-                    await HandleSystemInfo();
+                case "runtimeconfig":
+                    await HandleRuntimeConfig();
                     break;
                 case "staticeval":
                     await HandleStaticEval(rawCommand, cancellationToken);
@@ -150,7 +150,7 @@ public sealed class UCIHandler
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
         await SendCommand(IdCommand.NameString, cancellationToken);
-        await SendCommand(IdCommand.VersionString, cancellationToken);
+        await SendCommand(IdCommand.AuthorString, cancellationToken);
 
         foreach (var availableOption in OptionCommand.AvailableOptions)
         {
@@ -211,6 +211,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.Hash = value;
+                        _searcher.UpdateHash();
                     }
                     break;
                 }
@@ -255,6 +256,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.Threads = value;
+                        _searcher.UpdateThreads();
                     }
                     break;
 #pragma warning restore S1066 // Collapsible "if" statements should be merged
@@ -268,423 +270,11 @@ public sealed class UCIHandler
                     break;
                 }
 
-            #region Time management
-            case "engineguicommunicationtimeoverhead":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.EngineGuiCommunicationTimeOverhead = value;
-                    }
-                    break;
-                }
-            case "nodetmbase":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NodeTmBase = value * 0.01;
-                    }
-                    break;
-                }
-            case "nodetmscale":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NodeTmScale = value * 0.01;
-                    }
-                    break;
-                }
-            case "scorestabiity_mindepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.ScoreStabiity_MinDepth = value;
-                    }
-                    break;
-                }
-            #endregion
-
-            #region Search tuning
-
-            case "lmr_mindepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_MinDepth = value;
-                    }
-                    break;
-                }
-            case "lmr_minfulldepthsearchedmoves_pv":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV = value;
-                    }
-                    break;
-                }
-            case "lmr_minfulldepthsearchedmoves_nonpv":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV = value;
-                    }
-                    break;
-                }
-            case "lmr_base_quiet":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_Base_Quiet = value * 0.01;
-                    }
-                    break;
-                }
-            case "lmr_base_noisy":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_Base_Noisy = value * 0.01;
-                    }
-                    break;
-                }
-            case "lmr_divisor_quiet":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_Divisor_Quiet = value * 0.01;
-                    }
-                    break;
-                }
-            case "lmr_divisor_noisy":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_Divisor_Noisy = value * 0.01;
-                    }
-                    break;
-                }
-            case "lmr_history_divisor_quiet":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_History_Divisor_Quiet = value;
-                    }
-                    break;
-                }
-            case "lmr_history_divisor_noisy":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_History_Divisor_Noisy = value;
-                    }
-                    break;
-                }
-            case "lmr_improving":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_Improving = value;
-                    }
-                    break;
-                }
-            case "lmr_cutnode":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_Cutnode = value;
-                    }
-                    break;
-                }
-            case "lmr_ttpv":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_TTPV = value;
-                    }
-                    break;
-                }
-            case "lmr_ttcapture":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_TTCapture = value;
-                    }
-                    break;
-                }
-            case "lmr_pvnode":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_PVNode = value;
-                    }
-                    break;
-                }
-            case "lmr_incheck":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMR_InCheck = value;
-                    }
-                    break;
-                }
-
-            case "nmp_mindepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NMP_MinDepth = value;
-                    }
-                    break;
-                }
-            case "nmp_basedepthreduction":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NMP_BaseDepthReduction = value;
-                    }
-                    break;
-                }
-            case "nmp_depthincrement":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NMP_DepthIncrement = value;
-                    }
-                    break;
-                }
-            case "nmp_depthdivisor":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NMP_DepthDivisor = value;
-                    }
-                    break;
-                }
-            case "nmp_staticevalbetadivisor":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NMP_StaticEvalBetaDivisor = value;
-                    }
-                    break;
-                }
-            case "nmp_staticevalbetamaxreduction":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction = value;
-                    }
-                    break;
-                }
-
-            //case "aspirationwindow_delta":
-            //    {
-            //        if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-            //        {
-            //            Configuration.EngineSettings.AspirationWindow_Delta = value;
-            //        }
-            //        break;
-            //    }
-            case "aspirationwindow_mindepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.AspirationWindow_MinDepth = value;
-                    }
-                    break;
-                }
-            case "aspirationwindow_base":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.AspirationWindow_Base = value;
-                    }
-                    break;
-                }
-
-            case "rfp_maxdepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.RFP_MaxDepth = value;
-                    }
-                    break;
-                }
-            //case "rfp_depthscalingfactor":
-            //    {
-            //        if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-            //        {
-            //            Configuration.EngineSettings.RFP_DepthScalingFactor = value;
-            //        }
-            //        break;
-            //    }
-
-            case "razoring_maxdepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.Razoring_MaxDepth = value;
-                    }
-                    break;
-                }
-            case "razoring_depth1bonus":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.Razoring_Depth1Bonus = value;
-                    }
-                    break;
-                }
-            case "razoring_notdepth1bonus":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.Razoring_NotDepth1Bonus = value;
-                    }
-                    break;
-                }
-
-            case "iir_mindepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.IIR_MinDepth = value;
-                    }
-                    break;
-                }
-
-            case "lmp_basemovestotry":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMP_BaseMovesToTry = value;
-                    }
-                    break;
-                }
-            case "lmp_movesdepthmultiplier":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMP_MovesDepthMultiplier = value;
-                    }
-                    break;
-                }
-            case "history_maxmovevalue":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.History_MaxMoveValue = value;
-                    }
-                    break;
-                }
-            case "history_maxmoverawbonus":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.History_MaxMoveRawBonus = value;
-                    }
-                    break;
-                }
-            case "history_bestscorebetamargin":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.History_BestScoreBetaMargin = value;
-                    }
-                    break;
-                }
-            case "see_badcapturereduction":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.SEE_BadCaptureReduction = value;
-                    }
-                    break;
-                }
-            case "fp_maxdepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.FP_MaxDepth = value;
-                    }
-                    break;
-                }
-            case "fp_depthscalingfactor":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.FP_DepthScalingFactor = value;
-                    }
-                    break;
-                }
-            case "fp_margin":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.FP_Margin = value;
-                    }
-                    break;
-                }
-            case "historyprunning_maxdepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.HistoryPrunning_MaxDepth = value;
-                    }
-                    break;
-                }
-            case "historyprunning_margin":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.HistoryPrunning_Margin = value;
-                    }
-                    break;
-                }
-            case "tthit_nocutoffextension_maxdepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth = value;
-                    }
-                    break;
-                }
-            case "ttreplacement_depthoffset":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.TTReplacement_DepthOffset = value;
-                    }
-                    break;
-                }
-            case "ttreplacement_ttpvdepthoffset":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.TTReplacement_TTPVDepthOffset = value;
-                    }
-                    break;
-                }
-
-            case "pvs_see_threshold_quiet":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.PVS_SEE_Threshold_Quiet = value;
-                    }
-                    break;
-                }
-            case "pvs_see_threshold_noisy":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.PVS_SEE_Threshold_Noisy = value;
-                    }
-                    break;
-                }
-
-            #endregion
-
             default:
-                _logger.Warn("Unsupported option: {0}", command.ToString());
+                if (!SPSAAttributeHelpers.ParseUCIOption(command, commandItems, lowerCaseFirstWord, length))
+                {
+                    _logger.Warn("Unsupported option: {0}", command.ToString());
+                }
                 break;
         }
 #pragma warning restore S1479 // "switch" statements should not have too many "case" clauses
@@ -756,15 +346,45 @@ public sealed class UCIHandler
         await _engineToUci.Writer.WriteAsync(message);
     }
 
-    private async ValueTask HandleSystemInfo()
+    private async ValueTask HandleRuntimeConfig()
     {
         try
         {
-            var simd = Bmi2.X64.IsSupported
-                ? "Bmi2.X64 supported, PEXT BitBoards will be used"
-                : "Bmi2.X64 not supported";
+            await _engineToUci.Writer.WriteAsync("CPU flags:");
+            string[] intrinsics =
+            [
+                $"BMI2 = {Bmi2.IsSupported}",
+                $"SSE4.2 = {Sse42.IsSupported}",
+                $"AVX2 = {Avx2.IsSupported}",
+                $"Avx512BW = {Avx512BW.IsSupported}",
+            ];
 
-            await _engineToUci.Writer.WriteAsync(simd);
+            foreach (var instructionSet in intrinsics)
+            {
+                await _engineToUci.Writer.WriteAsync($"\t- {instructionSet}");
+            }
+
+            if (Sse.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("SSE supported, Prefetch0 will be used for TT prefetching");
+            }
+
+            if (Bmi1.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for BitBoard LSB operations");
+            }
+
+            if (Bmi2.IsSupported)
+            {
+                await _engineToUci.Writer.WriteAsync("BMI2 supported, ParallelBitExtract (PEXT) will be used for slider pieces move generation");
+            }
+
+            await _engineToUci.Writer.WriteAsync("Garbage Collector (GC) settings:");
+
+            foreach (var pair in GC.GetConfigurationVariables())
+            {
+                await _engineToUci.Writer.WriteAsync($"\t- {pair.Key} = {pair.Value}");
+            }
         }
         catch (Exception e)
         {
