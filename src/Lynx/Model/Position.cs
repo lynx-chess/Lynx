@@ -256,6 +256,7 @@ public class Position : IDisposable
 
             _incrementalPhaseAccumulator += extraPhaseIfIncremental;
 
+            // No need to check for castling if it's incremental eval
             switch (move.SpecialMoveFlag())
             {
                 case SpecialMoveType.None:
@@ -302,62 +303,6 @@ public class Position : IDisposable
 
                         _enPassant = (BoardSquare)enPassantSquare;
                         _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
-
-                        break;
-                    }
-                case SpecialMoveType.ShortCastle:
-                    {
-                        var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                        var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                        var rookIndex = (int)Piece.R + offset;
-
-                        _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                        _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
-
-                        _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                        _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
-                        _board[rookTargetSquare] = rookIndex;
-
-                        var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                        _uniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
-
-                        _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-
-                        _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
-
-                        break;
-                    }
-                case SpecialMoveType.LongCastle:
-                    {
-                        var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                        var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                        var rookIndex = (int)Piece.R + offset;
-
-                        _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                        _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
-
-                        _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                        _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
-                        _board[rookTargetSquare] = rookIndex;
-
-                        var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                        _uniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
-
-                        _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-
-                        _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
 
                         break;
                     }
