@@ -444,10 +444,10 @@ public sealed partial class Engine
                         ++singularDepthExtensions;
                         ++stack.DoubleExtensions;
 
-                        // Low depth extension - extending all moves
-                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        // High depth reduction - reducing all moves. Idea from Potential
+                        if (depth > Configuration.EngineSettings.SE_LowDepthExtension)
                         {
-                            ++depth;
+                            --depth;
                         }
                     }
                 }
