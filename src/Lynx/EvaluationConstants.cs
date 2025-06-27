@@ -6,13 +6,13 @@ public static class EvaluationConstants
 {
     /// <summary>
     /// 20_000 games, 20+0.2, 8moves_v3.epd, no draw or win adj.
-    /// Retained (W,D,L) = (326275, 1812965, 329013) positions.
+    /// Retained (W,D,L) = (272715, 1185060, 273741) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 119;
+    public const int EvalNormalizationCoefficient = 106;
 
-    public static ReadOnlySpan<double> As => [2.08668705, 17.27905217, -9.47568848, 109.88339141];
+    public static ReadOnlySpan<double> As => [-125.11999431, 381.50441206, -387.22057929, 237.10649364];
 
-    public static ReadOnlySpan<double> Bs => [2.02283074, 4.47542663, -28.01679378, 63.99186702];
+    public static ReadOnlySpan<double> Bs => [-19.65335125, 71.35751187, -48.50235437, 46.90811211];
 
     public static ReadOnlySpan<int> GamePhaseByPiece =>
     [
