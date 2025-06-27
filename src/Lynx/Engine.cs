@@ -14,6 +14,8 @@ public sealed partial class Engine : IDisposable
     private readonly int _id;
     private readonly ChannelWriter<object> _engineWriter;
     private readonly TranspositionTable _tt;
+    private MoveGenerator _moveGenerator;
+
     private SearchConstraints _searchConstraints;
 
     private bool _disposedValue;
@@ -28,18 +30,19 @@ public sealed partial class Engine : IDisposable
 
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
-    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
+    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new(), MoveGenerator_Standard.Instance) { }
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
+    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt, MoveGenerator moveGenerator)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
         _engineWriter = engineWriter;
         _tt = tt;
+        _moveGenerator = moveGenerator;
 
         AverageDepth = 0;
-        Game = new Game(Constants.InitialPositionFEN);
+        Game = new Game(_moveGenerator, Constants.InitialPositionFEN);
 
         // Update ResetEngine() after any changes here
         _quietHistory = new int[12][];
@@ -97,9 +100,14 @@ public sealed partial class Engine : IDisposable
     {
         AverageDepth = 0;
         Game.FreeResources();
-        Game = new Game(Constants.InitialPositionFEN);
+        Game = new Game(_moveGenerator, Constants.InitialPositionFEN);
 
         ResetEngine();
+    }
+
+    public void UpdateMoveGenerator(MoveGenerator moveGenerator)
+    {
+        _moveGenerator = moveGenerator;
     }
 
     [SkipLocalsInit]
@@ -107,7 +115,7 @@ public sealed partial class Engine : IDisposable
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         Game.FreeResources();
-        Game = PositionCommand.ParseGame(rawPositionCommand, moves);
+        Game = PositionCommand.ParseGame(_moveGenerator, rawPositionCommand, moves);
     }
 
     /// <summary>

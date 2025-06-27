@@ -474,6 +474,8 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public sealed class OriginalGame
     {
+        private static readonly MoveGenerator _moveGenerator = MoveGenerator.Instance;
+
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
@@ -509,7 +511,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         {
             foreach (var moveString in movesUCIString)
             {
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+                var moveList = _moveGenerator.GenerateAllMoves(CurrentPosition);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
@@ -549,6 +551,8 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public sealed class ImprovedGame
     {
+        private static readonly MoveGenerator _moveGenerator = MoveGenerator.Instance;
+
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
@@ -590,7 +594,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[range];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+                var moveList = _moveGenerator.GenerateAllMoves(CurrentPosition);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
@@ -630,6 +634,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public sealed class ImprovedGame2
     {
+        private static readonly MoveGenerator _moveGenerator = MoveGenerator.Instance;
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
@@ -670,7 +675,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[rangeSpan[i]];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+                var moveList = _moveGenerator.GenerateAllMoves(CurrentPosition, movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {

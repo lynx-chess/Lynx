@@ -110,6 +110,8 @@ public sealed class EngineSettings
 
     public bool IsPonder { get; set; }
 
+    public bool IsChess960 { get; set; }
+
     /// <summary>
     /// Real NPS aren't calculated until the last search command.
     /// This option enables the report of an NPS estimation by the main thread

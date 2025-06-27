@@ -14,6 +14,7 @@ public sealed class Searcher
     private readonly Logger _logger;
 
     internal const int MainEngineId = 1;
+    private bool _isDFRC;
     private bool _isProcessingGoCommand;
     private bool _isPonderHit;
 
@@ -21,6 +22,7 @@ public sealed class Searcher
     private Engine _mainEngine;
     private Engine[] _extraEngines = [];
     private TranspositionTable _ttWrapper;
+    private MoveGenerator _moveGenerator;
 
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
@@ -40,7 +42,14 @@ public sealed class Searcher
         _engineWriter = engineWriter;
 
         _ttWrapper = new TranspositionTable();
-        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+
+        _isDFRC = Configuration.EngineSettings.IsChess960;
+        _moveGenerator = _isDFRC
+            ? MoveGenerator_DFRC.Instance
+            : MoveGenerator_Standard.Instance;
+
+        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, _moveGenerator);
+
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
 
@@ -499,6 +508,12 @@ public sealed class Searcher
             _logger.Warn("Unexpected hash update - should have happened on 'setoption'\");");
         }
 
+        var moveGeneratorUpdated = UpdateMoveGenerator();
+        if (moveGeneratorUpdated)
+        {
+            _logger.Warn("Unexpected chess mode update (Standard/(D)FRC) - should have happened on 'setoption'\");");
+        }
+
         // We don't need to reset the main engine in case of hash update
         // because it was alredy reset there, but whetever
         _mainEngine.NewGame();
@@ -554,10 +569,34 @@ public sealed class Searcher
             _ttWrapper.Clear();
 
             _mainEngine.FreeResources();
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, _moveGenerator);
 
             // We need extra engines to know about the nwe TT
             AllocateExtraEngines();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool UpdateMoveGenerator()
+    {
+        if (_isDFRC != Configuration.EngineSettings.IsChess960)
+        {
+            _isDFRC = Configuration.EngineSettings.IsChess960;
+
+            _logger.Info("Switching chess mode to {NewMode}", _isDFRC ? "(D)RFC" : "Standard");
+
+            _moveGenerator = _isDFRC
+                ? MoveGenerator_DFRC.Instance
+                : MoveGenerator_Standard.Instance;
+
+            _mainEngine.UpdateMoveGenerator(_moveGenerator);
+            foreach(var engine in _extraEngines)
+            {
+                engine.UpdateMoveGenerator(_moveGenerator);
+            }
 
             return true;
         }
@@ -576,7 +615,7 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper, _moveGenerator);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -585,7 +624,7 @@ public sealed class Searcher
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        using var engine = new Engine(-1, _engineWriter, in _ttWrapper);
+        using var engine = new Engine(-1, _engineWriter, in _ttWrapper, _moveGenerator);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
@@ -618,7 +657,8 @@ public sealed class Searcher
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
-                    in _ttWrapper);
+                    in _ttWrapper,
+                    _moveGenerator);
             }
         }
         else
@@ -657,7 +697,7 @@ public sealed class Searcher
         Parallel.For(0, warmupCount, i =>
         {
             var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-            var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
+            var engine = new Engine(-i, silentEngineWriter, in _ttWrapper, _moveGenerator);
 
             engine.Warmup();
         });
