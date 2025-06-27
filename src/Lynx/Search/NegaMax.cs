@@ -510,7 +510,7 @@ public sealed partial class Engine
                 {
                     int reduction = 0;
 
-                    if (isNotGettingCheckmated)
+                    if (isNotGettingCheckmated && !isInCheck)
                     {
                         var isRootExtraReduction = isRoot ? 2 : 0;
 
