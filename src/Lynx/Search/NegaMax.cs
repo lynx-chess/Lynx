@@ -454,6 +454,12 @@ public sealed partial class Engine
                 else if (ttScore >= beta)
                 {
                     --singularDepthExtensions;
+
+                    // Double negative extension
+                    if (ttScore + Configuration.EngineSettings.SE_DoubleNegativeExtensons_Margin >= beta)
+                    {
+                        --singularDepthExtensions;
+                    }
                 }
 
                 gameState = position.MakeMove(move);
