@@ -458,6 +458,14 @@ public sealed partial class Engine
 
                 gameState = position.MakeMove(move);
             }
+            // Low depth extensions
+            else if (!isInCheck
+                && depth <= Configuration.EngineSettings.SE_LowDepthExtensions_MaxDepth
+                && staticEval <= alpha - Configuration.EngineSettings.SE_LowDepthExtensions_Margin
+                && ttElementType == NodeType.Beta)
+            {
+                singularDepthExtensions = 1;
+            }
 
             var previousNodes = _nodes;
             visitedMoves[visitedMovesCounter] = move;
