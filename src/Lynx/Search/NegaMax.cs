@@ -75,7 +75,7 @@ public sealed partial class Engine
             // ttScore shouldn't be used, since it'll be 0 for default structs
             ttHit = ttElementType != NodeType.Unknown && ttElementType != NodeType.None;
 
-            ttEntryHasBestMove = ttBestMove != default;
+            ttEntryHasBestMove = ttHit && ttBestMove != default;
 
             // TT cutoffs
             if (!isVerifyingSE && ttHit && ttDepth >= depth)
@@ -106,7 +106,7 @@ public sealed partial class Engine
                 }
             }
 
-            ttMoveIsCapture = ttHit && ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
+            ttMoveIsCapture = ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
 
             // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
@@ -114,7 +114,7 @@ public sealed partial class Engine
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
-                && (!ttHit || !ttEntryHasBestMove))
+                && !ttEntryHasBestMove)
             {
                 --depthExtension;
             }
