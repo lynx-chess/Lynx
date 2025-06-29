@@ -443,6 +443,12 @@ public sealed partial class Engine
                     {
                         ++singularDepthExtensions;
                         ++stack.DoubleExtensions;
+
+                        // Low depth extension - extending all moves
+                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        {
+                            ++depth;
+                        }
                     }
                 }
                 // Multicut
