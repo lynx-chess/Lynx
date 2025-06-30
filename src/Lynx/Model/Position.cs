@@ -124,13 +124,13 @@ public class Position : IDisposable
         _nonPawnHash[(int)Side.Black] = position._nonPawnHash[(int)Side.Black];
 
         _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
-        Array.Copy(position._pieceBitBoards, _pieceBitBoards, position._pieceBitBoards.Length);
+        Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
 
         _occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
-        Array.Copy(position._occupancyBitBoards, _occupancyBitBoards, position._occupancyBitBoards.Length);
+        Array.Copy(position._occupancyBitBoards, _occupancyBitBoards, 3);
 
         _board = ArrayPool<int>.Shared.Rent(64);
-        Array.Copy(position._board, _board, position._board.Length);
+        Array.Copy(position._board, _board, 64);
 
         _side = position._side;
         _castle = position._castle;
