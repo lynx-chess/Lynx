@@ -25,8 +25,10 @@ public class Position : IDisposable
     private readonly ulong[] _pieceBitBoards;
     private readonly ulong[] _occupancyBitBoards;
     private readonly int[] _board;
-    private byte _castle;
 
+    internal readonly BitBoard[] _attacks;
+
+    private byte _castle;
     private BoardSquare _enPassant;
     private Side _side;
 
@@ -89,6 +91,8 @@ public class Position : IDisposable
         _pieceBitBoards = parsedFEN._pieceBitBoards;
         _occupancyBitBoards = parsedFEN._occupancyBitBoards;
         _board = parsedFEN._board;
+        _attacks = ArrayPool<ulong>.Shared.Rent(12);
+
         _side = parsedFEN.Side;
         _castle = parsedFEN._castle;
         _enPassant = parsedFEN._enPassant;
@@ -132,6 +136,9 @@ public class Position : IDisposable
         _board = ArrayPool<int>.Shared.Rent(64);
         Array.Copy(position._board, _board, position._board.Length);
 
+        _attacks = ArrayPool<BitBoard>.Shared.Rent(12);
+        Array.Copy(position._attacks, _attacks, 12);
+
         _side = position._side;
         _castle = position._castle;
         _enPassant = position._enPassant;
@@ -152,6 +159,8 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
 
         var gameState = new GameState(this);
+
+        Array.Clear(_attacks);
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -566,6 +575,20 @@ public class Position : IDisposable
         _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
         _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
 
+        _attacks[(int)Piece.P] = gameState.WhitePawnAttacks;
+        _attacks[(int)Piece.N] = gameState.WhiteKnightAttacks;
+        _attacks[(int)Piece.B] = gameState.WhiteBishopAttacks;
+        _attacks[(int)Piece.R] = gameState.WhiteRookAttacks;
+        _attacks[(int)Piece.Q] = gameState.WhiteQueenAttacks;
+        _attacks[(int)Piece.K] = gameState.WhiteKingAttacks;
+
+        _attacks[(int)Piece.p] = gameState.BlackPawnAttacks;
+        _attacks[(int)Piece.n] = gameState.BlackKnightAttacks ;
+        _attacks[(int)Piece.b] = gameState.BlackBishopAttacks ;
+        _attacks[(int)Piece.r] = gameState.BlackRookAttacks ;
+        _attacks[(int)Piece.q] = gameState.BlackQueenAttacks ;
+        _attacks[(int)Piece.k] = gameState.BlackKingAttacks;
+
         _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
@@ -672,6 +695,9 @@ public class Position : IDisposable
 
         BitBoard whitePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
         BitBoard blackPawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
+
+        _attacks[(int)Piece.P] = whitePawnAttacks;
+        _attacks[(int)Piece.p] = blackPawnAttacks;
 
         var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
@@ -1164,6 +1190,7 @@ public class Position : IDisposable
 
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
+        _attacks[(int)Piece.R + Utils.PieceOffset(pieceSide)] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1215,6 +1242,7 @@ public class Position : IDisposable
         //var oppositeQueensIndex = (int)Piece.q - offset;
 
         var attacks = Attacks.KnightAttacks[squareIndex];
+        _attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1247,6 +1275,7 @@ public class Position : IDisposable
 
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
+        _attacks[(int)Piece.B + offset] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1301,6 +1330,7 @@ public class Position : IDisposable
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
+        _attacks[(int)Piece.Q + Utils.PieceOffset(pieceSide)] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1322,6 +1352,9 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
+        var attacks = Attacks.KingAttacks[squareIndex];
+        _attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
+
         // Virtual mobility (as if Queen)
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, _occupancyBitBoards[(int)Side.Both])

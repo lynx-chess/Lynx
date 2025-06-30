@@ -14,6 +14,24 @@ public readonly struct GameState
 
     public readonly ulong MinorKey;
 
+    public readonly BitBoard WhitePawnAttacks;
+    public readonly BitBoard BlackPawnAttacks;
+
+    public readonly BitBoard WhiteKnightAttacks;
+    public readonly BitBoard BlackKnightAttacks;
+
+    public readonly BitBoard WhiteBishopAttacks;
+    public readonly BitBoard BlackBishopAttacks;
+
+    public readonly BitBoard WhiteRookAttacks;
+    public readonly BitBoard BlackRookAttacks;
+
+    public readonly BitBoard WhiteQueenAttacks;
+    public readonly BitBoard BlackQueenAttacks;
+
+    public readonly BitBoard WhiteKingAttacks;
+    public readonly BitBoard BlackKingAttacks;
+
     public readonly int IncrementalEvalAccumulator;
 
     public readonly int IncrementalPhaseAccumulator;
@@ -32,6 +50,22 @@ public readonly struct GameState
         NonPawnWhiteKey = position.NonPawnHash[(int)Side.White];
         NonPawnBlackKey = position.NonPawnHash[(int)Side.Black];
         MinorKey = position.MinorHash;
+
+        var attacks = position._attacks;
+
+        WhitePawnAttacks = attacks[(int)Piece.P];
+        WhiteKnightAttacks = attacks[(int)Piece.N];
+        WhiteBishopAttacks = attacks[(int)Piece.B];
+        WhiteRookAttacks = attacks[(int)Piece.R];
+        WhiteQueenAttacks = attacks[(int)Piece.Q];
+        WhiteKingAttacks = attacks[(int)Piece.K];
+
+        BlackPawnAttacks = attacks[(int)Piece.p];
+        BlackKnightAttacks = attacks[(int)Piece.n];
+        BlackBishopAttacks = attacks[(int)Piece.b];
+        BlackRookAttacks = attacks[(int)Piece.r];
+        BlackQueenAttacks = attacks[(int)Piece.q];
+        BlackKingAttacks = attacks[(int)Piece.k];
 
         EnPassant = position.EnPassant;
         Castle = position.Castle;
