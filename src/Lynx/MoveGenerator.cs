@@ -283,14 +283,14 @@ public static class MoveGenerator
 
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = position.IsSquareAttackedBySide(Constants.WhiteKingSourceSquare, Side.Black);
+                bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
                     && (position.Castle & (int)CastlingRights.WK) != default
                     && !occupancy.GetBit(BoardSquare.f1)
                     && !occupancy.GetBit(BoardSquare.g1)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.f1, Side.Black)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.g1, Side.Black))
+                    && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black))
                 {
                     movePool[localIndex++] = WhiteShortCastle;
 
@@ -303,8 +303,8 @@ public static class MoveGenerator
                     && !occupancy.GetBit(BoardSquare.d1)
                     && !occupancy.GetBit(BoardSquare.c1)
                     && !occupancy.GetBit(BoardSquare.b1)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.d1, Side.Black)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.c1, Side.Black))
+                    && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black))
                 {
                     movePool[localIndex++] = WhiteLongCastle;
 
@@ -314,14 +314,14 @@ public static class MoveGenerator
             }
             else
             {
-                bool ise8Attacked = position.IsSquareAttackedBySide(Constants.BlackKingSourceSquare, Side.White);
+                bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
 
                 if ((!ise8Attacked
                     && (position.Castle & (int)CastlingRights.BK) != default)
                     && !occupancy.GetBit(BoardSquare.f8)
                     && !occupancy.GetBit(BoardSquare.g8)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.f8, Side.White)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.g8, Side.White))
+                    && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White))
                 {
                     movePool[localIndex++] = BlackShortCastle;
 
@@ -334,8 +334,8 @@ public static class MoveGenerator
                     && !occupancy.GetBit(BoardSquare.d8)
                     && !occupancy.GetBit(BoardSquare.c8)
                     && !occupancy.GetBit(BoardSquare.b8)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.d8, Side.White)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.c8, Side.White))
+                    && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White))
                 {
                     movePool[localIndex++] = BlackLongCastle;
 
@@ -536,14 +536,14 @@ public static class MoveGenerator
 
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = position.IsSquareAttackedBySide(Constants.WhiteKingSourceSquare, Side.Black);
+                bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
                     && (position.Castle & (int)CastlingRights.WK) != default
                     && !occupancy.GetBit(BoardSquare.f1)
                     && !occupancy.GetBit(BoardSquare.g1)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.f1, Side.Black)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.g1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black)
                     && IsValidMove(position, WhiteShortCastle))
                 {
                     return true;
@@ -554,8 +554,8 @@ public static class MoveGenerator
                     && !occupancy.GetBit(BoardSquare.d1)
                     && !occupancy.GetBit(BoardSquare.c1)
                     && !occupancy.GetBit(BoardSquare.b1)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.d1, Side.Black)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.c1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black)
                     && IsValidMove(position, WhiteLongCastle))
                 {
                     return true;
@@ -563,14 +563,14 @@ public static class MoveGenerator
             }
             else
             {
-                bool ise8Attacked = position.IsSquareAttackedBySide(Constants.BlackKingSourceSquare, Side.White);
+                bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
                     && (position.Castle & (int)CastlingRights.BK) != default
                     && !occupancy.GetBit(BoardSquare.f8)
                     && !occupancy.GetBit(BoardSquare.g8)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.f8, Side.White)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.g8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White)
                     && IsValidMove(position, BlackShortCastle))
                 {
                     return true;
@@ -581,8 +581,8 @@ public static class MoveGenerator
                     && !occupancy.GetBit(BoardSquare.d8)
                     && !occupancy.GetBit(BoardSquare.c8)
                     && !occupancy.GetBit(BoardSquare.b8)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.d8, Side.White)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.c8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White)
                     && IsValidMove(position, BlackLongCastle))
                 {
                     return true;
