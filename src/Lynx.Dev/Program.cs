@@ -346,7 +346,7 @@ static void _21_IsSquareAttacked()
 
     position.PrintAttackedSquares(Side.Black);
 
-    Console.WriteLine(position.IsSquareAttacked((int)BoardSquare.e4, Side.Black));
+    Console.WriteLine(position.IsSquareAttacked((int)BoardSquare.e4, (int)Side.Black));
 
     Console.WriteLine("=====================================");
 

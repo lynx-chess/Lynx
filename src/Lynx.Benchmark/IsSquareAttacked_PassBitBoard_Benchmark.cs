@@ -142,7 +142,7 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (position.IsSquareAttacked(squareIndex, position.Side))
+                if (position.IsSquareAttacked(squareIndex, (int)position.Side))
                 {
                     b = true;
                 }

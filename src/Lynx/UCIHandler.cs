@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json;
@@ -133,7 +134,7 @@ public sealed class UCIHandler
     private void HandlePosition(ReadOnlySpan<char> command)
     {
 #if DEBUG
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
         _searcher.PrintCurrentPosition();
 #endif
 

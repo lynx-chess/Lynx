@@ -1533,12 +1533,6 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedBySide(int squaredIndex, Side sideToMove) => IsSquareAttacked(squaredIndex, (int)sideToMove);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttacked(int squareIndex, Side sideToMove) => IsSquareAttacked(squareIndex, (int)sideToMove);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsSquareAttacked(int squareIndex, int sideToMove)
     {
         Debug.Assert(sideToMove != (int)Side.Both);
