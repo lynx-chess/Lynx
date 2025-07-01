@@ -18,7 +18,8 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
+        bool parentWasNullMove = false, bool isVerifyingSE = false)
     {
         var position = Game.CurrentPosition;
 
@@ -52,6 +53,7 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
+        int depthExtension = 0;
 
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
@@ -73,10 +75,10 @@ public sealed partial class Engine
             // ttScore shouldn't be used, since it'll be 0 for default structs
             ttHit = ttElementType != NodeType.Unknown && ttElementType != NodeType.None;
 
-            ttEntryHasBestMove = ttBestMove != default;
+            ttEntryHasBestMove = ttHit && ttBestMove != default;
 
             // TT cutoffs
-            if (ttHit && ttDepth >= depth)
+            if (!isVerifyingSE && ttHit && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Alpha && ttScore <= alpha)
@@ -92,12 +94,7 @@ public sealed partial class Engine
                     // I had to add the not-in-check guard
                     if (!position.IsInCheck())
                     {
-                        --depth;
-
-                        if (depth <= 0)
-                        {
-                            return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
-                        }
+                        --depthExtension;
                     }
                 }
                 else if (!pvNode
@@ -105,11 +102,11 @@ public sealed partial class Engine
                     && ply < depth * 4) // To avoid weird search explosions, see HighSeldepthAtDepth2 test. Patch suggested by Sirius author
                 {
                     // Extension idea from Stormphrax
-                    ++depth;
+                    ++depthExtension;
                 }
             }
 
-            ttMoveIsCapture = ttHit && ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
+            ttMoveIsCapture = ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
 
             // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
@@ -117,9 +114,9 @@ public sealed partial class Engine
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
-                && (!ttHit || !ttEntryHasBestMove))
+                && !ttEntryHasBestMove)
             {
-                --depth;
+                --depthExtension;
             }
         }
 
@@ -139,13 +136,14 @@ public sealed partial class Engine
         int rawStaticEval, staticEval;
         int phase = int.MaxValue;
         ref var stack = ref Game.Stack(ply);
+        stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
-        if (isInCheck)
+        if (isInCheck && !isVerifyingSE)
         {
-            ++depth;
-            staticEval = rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            ++depthExtension;
         }
-        else if (depth <= 0)
+
+        if (depth + depthExtension <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
@@ -156,7 +154,7 @@ public sealed partial class Engine
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
-        else if (!pvNode)
+        else if (!pvNode && !isInCheck)
         {
             if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
@@ -179,7 +177,7 @@ public sealed partial class Engine
             {
                 var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
                 improving = evalDiff >= 0;
-                improvingRate = evalDiff / 50.0;
+                improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
 
             // From smol.cs
@@ -195,15 +193,19 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated)
+            if (isNotGettingCheckmated && !isVerifyingSE)
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
                     // Improving impl. based on Potential's
-                    var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
-                    var improvingFactor = improvingRate * (0.75 * depth);
+                    var rfpMargin = improving
+                        ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
+                        : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
+
+                    // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
+                    var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
 
                     var rfpThreshold = rfpMargin + improvingFactor;
 
@@ -272,7 +274,9 @@ public sealed partial class Engine
 
                     if (nmpScore >= beta)
                     {
-                        return nmpScore;
+                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            ? nmpScore
+                            : beta;
                     }
                 }
             }
@@ -322,6 +326,12 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
+            var isBestMove = (ShortMove)move == ttBestMove;
+            if (isVerifyingSE && isBestMove)
+            {
+                continue;
+            }
+
             var moveScore = moveScores[moveIndex];
             var isCapture = move.IsCapture();
 
@@ -398,6 +408,63 @@ public sealed partial class Engine
                 continue;
             }
 
+            int singularDepthExtensions = 0;
+
+            // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
+            // We check if that's the case by doing a reduced-depth search, excluding TT move and with
+            // zero-depth search (using TT score-based alpha/beta values).
+            // If that search fails low, the move is 'singular' (very good) and therefore we extend it
+            if (
+                //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
+                isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
+                && depth >= Configuration.EngineSettings.SE_MinDepth
+                && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
+                && Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ttElementType != NodeType.Alpha
+                && ply < 3 * depth)     // Preventing search explosions
+            {
+                position.UnmakeMove(move, gameState);
+
+                var verificationDepth = (depth - 1) / 2;    // TODO tune?
+                var singularBeta = ttScore - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
+                singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
+
+                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
+
+                // Singular extension
+                if (singularScore < singularBeta)
+                {
+                    ++singularDepthExtensions;
+
+                    // Double extension
+                    if (!pvNode
+                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
+                        && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
+                    {
+                        ++singularDepthExtensions;
+                        ++stack.DoubleExtensions;
+
+                        // Low depth extension - extending all moves
+                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        {
+                            ++depth;
+                        }
+                    }
+                }
+                // Multicut
+                else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
+                {
+                    return singularScore;
+                }
+                // Negative extension
+                else if (ttScore >= beta)
+                {
+                    --singularDepthExtensions;
+                }
+
+                gameState = position.MakeMove(move);
+            }
+
             var previousNodes = _nodes;
             visitedMoves[visitedMovesCounter] = move;
 
@@ -441,21 +508,23 @@ public sealed partial class Engine
 
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
-                var newDepth = depth - 1;
+                var newDepth = depth + depthExtension - 1 + singularDepthExtensions;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
-                if (visitedMovesCounter > 0)
+                if (visitedMovesCounter >= 1)
                 {
                     int reduction = 0;
 
                     if (isNotGettingCheckmated)
                     {
+                        var isRootExtraReduction = isRoot ? 2 : 0;
+
                         if (depth >= Configuration.EngineSettings.LMR_MinDepth
                             && visitedMovesCounter >=
                                 (pvNode
-                                    ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
-                                    : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
+                                    ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV + isRootExtraReduction
+                                    : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV + isRootExtraReduction))
                         {
                             if (isCapture)
                             {
@@ -554,6 +623,15 @@ public sealed partial class Engine
                             // Search with full depth but narrowed score bandwidth (zero-window search)
                             score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                         }
+
+                        // 🔍 Post-LMR continuation history update
+                        var rawHistoryBonus = EvaluationConstants.HistoryBonus[depth];
+                        var historyBonus = score > alpha
+                            ? rawHistoryBonus
+                            : -rawHistoryBonus;
+
+                        ref var contHist = ref ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                        contHist = ScoreHistoryMove(contHist, historyBonus);
                     }
                 }
 
@@ -642,16 +720,19 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        if (!(isInCheck
-            || bestMove?.IsCapture() == true
-            || bestMove?.IsPromotion() == true
-            || (ttElementType == NodeType.Beta && bestScore <= staticEval)
-            || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+        if (!isVerifyingSE)
         {
-            UpdateCorrectionHistory(position, bestScore - staticEval, depth);
-        }
+            if (!(isInCheck
+                || bestMove?.IsCapture() == true
+                || bestMove?.IsPromotion() == true
+                || (ttElementType == NodeType.Beta && bestScore <= staticEval)
+                || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+            {
+                UpdateCorrectionHistory(position, bestScore - staticEval, depth);
+            }
 
-        _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+        }
 
         return bestScore;
     }

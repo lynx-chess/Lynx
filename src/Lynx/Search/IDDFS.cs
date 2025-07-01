@@ -183,7 +183,7 @@ public sealed partial class Engine
                         Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
-                        window = Math.Min(EvaluationConstants.MaxEval, window + (window >> 1));   // window / 2
+                        window = Math.Min(EvaluationConstants.MaxEval, (int)(window * Configuration.EngineSettings.AspirationWindow_Multiplier));
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestScore)     // Fail low

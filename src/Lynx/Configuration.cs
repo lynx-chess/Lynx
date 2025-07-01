@@ -174,73 +174,73 @@ public sealed class EngineSettings
     public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
     [SPSA<double>(0.1, 2, 0.2)]
-    public double LMR_Base_Quiet { get; set; } = 0.79;
+    public double LMR_Base_Quiet { get; set; } = 0.57;
 
     [SPSA<double>(0.1, 2, 0.2)]
-    public double LMR_Base_Noisy { get; set; } = 0.38;
+    public double LMR_Base_Noisy { get; set; } = 0.29;
 
     [SPSA<double>(1, 5, 0.2)]
-    public double LMR_Divisor_Quiet { get; set; } = 2.71;
+    public double LMR_Divisor_Quiet { get; set; } = 3.38;
 
     [SPSA<double>(1, 5, 0.2)]
-    public double LMR_Divisor_Noisy { get; set; } = 2.84;
+    public double LMR_Divisor_Noisy { get; set; } = 2.42;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_Improving { get; set; } = 107;
+    public int LMR_Improving { get; set; } = 76;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_Cutnode { get; set; } = 100;
+    public int LMR_Cutnode { get; set; } = 58;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_TTPV { get; set; } = 113;
+    public int LMR_TTPV { get; set; } = 56;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_TTCapture { get; set; } = 68;
+    public int LMR_TTCapture { get; set; } = 90;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_PVNode { get; set; } = 89;
+    public int LMR_PVNode { get; set; } = 45;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_InCheck { get; set; } = 51;
+    public int LMR_InCheck { get; set; } = 47;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_Quiet { get; set; } = 70;
+    public int LMR_Quiet { get; set; } = 42;
 
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2
     /// </summary>
     [SPSA<int>(1, 8192, 512)]
-    public int LMR_History_Divisor_Quiet { get; set; } = 2687;
+    public int LMR_History_Divisor_Quiet { get; set; } = 2280;
 
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
     /// </summary>
     [SPSA<int>(1, 8192, 512)]
-    public int LMR_History_Divisor_Noisy { get; set; } = 3816;
+    public int LMR_History_Divisor_Noisy { get; set; } = 5905;
 
     [SPSA<int>(20, 100, 8)]
-    public int LMR_DeeperBase { get; set; } = 52;
+    public int LMR_DeeperBase { get; set; } = 50;
 
     [SPSA<int>(enabled: false)]
     public int LMR_DeeperDepthMultiplier { get; set; } = 2;
@@ -260,7 +260,7 @@ public sealed class EngineSettings
     public int NMP_DepthDivisor { get; set; } = 3;
 
     [SPSA<int>(50, 350, 15)]
-    public int NMP_StaticEvalBetaDivisor { get; set; } = 104;
+    public int NMP_StaticEvalBetaDivisor { get; set; } = 97;
 
     [SPSA<int>(enabled: false)]
     public int NMP_StaticEvalBetaMaxReduction { get; set; } = 3;
@@ -268,14 +268,29 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int AspirationWindow_Base { get; set; } = 9;
 
+    [SPSA<double>(1, 3, 0.1)]
+    public double AspirationWindow_Multiplier { get; set; } = 1.24;
+
     //[SPSA<int>(5, 30, 1)]
     //public int AspirationWindow_Delta { get; set; } = 13;
 
     [SPSA<int>(enabled: false)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
 
+    [SPSA<int>(10, 150, 10)]
+    public int ImprovingRate { get; set; } = 45;
+
     [SPSA<int>(enabled: false)]
     public int RFP_MaxDepth { get; set; } = 7;
+
+    [SPSA<int>(50, 150, 10)]
+    public int RFP_Improving_Margin { get; set; } = 85;
+
+    [SPSA<int>(50, 150, 10)]
+    public int RFP_NotImproving_Margin { get; set; } = 104;
+
+    [SPSA<double>(enabled: false)]
+    public double RFP_ImprovingFactor { get; set; } = 0.75;
 
     //[SPSA<int>(1, 300, 15)]
     //public int RFP_DepthScalingFactor { get; set; } = 55;
@@ -284,10 +299,10 @@ public sealed class EngineSettings
     public int Razoring_MaxDepth { get; set; } = 2;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_Depth1Bonus { get; set; } = 67;
+    public int Razoring_Depth1Bonus { get; set; } = 103;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_NotDepth1Bonus { get; set; } = 196;
+    public int Razoring_NotDepth1Bonus { get; set; } = 199;
 
     [SPSA<int>(enabled: false)]
     public int IIR_MinDepth { get; set; } = 4;
@@ -320,16 +335,16 @@ public sealed class EngineSettings
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 92;
+    public int FP_DepthScalingFactor { get; set; } = 85;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 102;
+    public int FP_Margin { get; set; } = 84;
 
     [SPSA<int>(enabled: false)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -113;
+    public int HistoryPrunning_Margin { get; set; } = -738;
 
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
@@ -343,10 +358,10 @@ public sealed class EngineSettings
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
 
     [SPSA<int>(-100, -10, 10)]
-    public int PVS_SEE_Threshold_Quiet { get; set; } = -40;
+    public int PVS_SEE_Threshold_Quiet { get; set; } = -37;
 
     [SPSA<int>(-150, -50, 10)]
-    public int PVS_SEE_Threshold_Noisy { get; set; } = -107;
+    public int PVS_SEE_Threshold_Noisy { get; set; } = -98;
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveValue"/>
@@ -370,25 +385,43 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 200, 15)]
-    public int CorrHistoryWeight_NonPawnSTM { get; set; } = 96;
+    public int CorrHistoryWeight_NonPawnSTM { get; set; } = 63;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 200, 15)]
-    public int CorrHistoryWeight_NonPawnNoSTM { get; set; } = 100;
+    public int CorrHistoryWeight_NonPawnNoSTM { get; set; } = 124;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 200, 15)]
-    public int CorrHistoryWeight_Minor { get; set; } = 127;
+    public int CorrHistoryWeight_Minor { get; set; } = 136;
 
     [SPSA<int>(enabled: false)]
     public int TT_50MR_Start { get; set; } = 20;
 
     [SPSA<int>(enabled: false)]
     public int TT_50MR_Step { get; set; } = 10;
+
+    [SPSA<int>(enabled: false)]
+    public int SE_MinDepth { get; set; } = 7;
+
+    [SPSA<int>(enabled: false)]
+    public int SE_TTDepthOffset { get; set; } = 3;
+
+    [SPSA<int>(enabled: false)]
+    public int SE_DepthMultiplier { get; set; } = 1;
+
+    [SPSA<int>(0, 50, 5)]
+    public int SE_DoubleExtensions_Margin { get; set; } = 7;
+
+    [SPSA<int>(enabled: false)]
+    public int SE_DoubleExtensions_Max { get; set; } = 6;
+
+    [SPSA<int>(enabled: false)]
+    public int SE_LowDepthExtension { get; set; } = 9;
 
     #endregion
 }
