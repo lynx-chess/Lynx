@@ -32,6 +32,9 @@ public readonly struct GameState
     public readonly BitBoard WhiteKingAttacks;
     public readonly BitBoard BlackKingAttacks;
 
+    public readonly BitBoard WhiteAttacks;
+    public readonly BitBoard BlackAttacks;
+
     public readonly int IncrementalEvalAccumulator;
 
     public readonly int IncrementalPhaseAccumulator;
@@ -66,6 +69,9 @@ public readonly struct GameState
         BlackRookAttacks = attacks[(int)Piece.r];
         BlackQueenAttacks = attacks[(int)Piece.q];
         BlackKingAttacks = attacks[(int)Piece.k];
+
+        WhiteAttacks = position._attacksBySide[(int)Side.White];
+        BlackAttacks = position._attacksBySide[(int)Side.Black];
 
         EnPassant = position.EnPassant;
         Castle = position.Castle;

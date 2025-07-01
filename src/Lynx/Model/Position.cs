@@ -27,6 +27,7 @@ public class Position : IDisposable
     private readonly int[] _board;
 
     internal readonly BitBoard[] _attacks;
+    internal readonly BitBoard[] _attacksBySide;
 
     private byte _castle;
     private BoardSquare _enPassant;
@@ -92,6 +93,7 @@ public class Position : IDisposable
         _occupancyBitBoards = parsedFEN._occupancyBitBoards;
         _board = parsedFEN._board;
         _attacks = ArrayPool<ulong>.Shared.Rent(12);
+        _attacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
 
         _side = parsedFEN.Side;
         _castle = parsedFEN._castle;
@@ -139,6 +141,10 @@ public class Position : IDisposable
         _attacks = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position._attacks, _attacks, 12);
 
+        _attacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
+        _attacksBySide[(int)Side.White] = position._attacksBySide[(int)Side.White];
+        _attacksBySide[(int)Side.Black] = position._attacksBySide[(int)Side.Black];
+
         _side = position._side;
         _castle = position._castle;
         _enPassant = position._enPassant;
@@ -161,6 +167,7 @@ public class Position : IDisposable
         var gameState = new GameState(this);
 
         Array.Clear(_attacks);
+        Array.Clear(_attacksBySide);
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -583,11 +590,14 @@ public class Position : IDisposable
         _attacks[(int)Piece.K] = gameState.WhiteKingAttacks;
 
         _attacks[(int)Piece.p] = gameState.BlackPawnAttacks;
-        _attacks[(int)Piece.n] = gameState.BlackKnightAttacks ;
-        _attacks[(int)Piece.b] = gameState.BlackBishopAttacks ;
-        _attacks[(int)Piece.r] = gameState.BlackRookAttacks ;
-        _attacks[(int)Piece.q] = gameState.BlackQueenAttacks ;
+        _attacks[(int)Piece.n] = gameState.BlackKnightAttacks;
+        _attacks[(int)Piece.b] = gameState.BlackBishopAttacks;
+        _attacks[(int)Piece.r] = gameState.BlackRookAttacks;
+        _attacks[(int)Piece.q] = gameState.BlackQueenAttacks;
         _attacks[(int)Piece.k] = gameState.BlackKingAttacks;
+
+        _attacksBySide[(int)Side.White] = gameState.WhiteAttacks;
+        _attacksBySide[(int)Side.Black] = gameState.BlackAttacks;
 
         _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
@@ -966,6 +976,23 @@ public class Position : IDisposable
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & _occupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
+
+        // TODO set _attackedBySide here or lazily?
+        _attacksBySide[(int)Side.White] =
+            _attacks[(int)Piece.P]
+            | _attacks[(int)Piece.N]
+            | _attacks[(int)Piece.B]
+            | _attacks[(int)Piece.R]
+            | _attacks[(int)Piece.Q]
+            | _attacks[(int)Piece.K];
+
+        _attacksBySide[(int)Side.Black] =
+            _attacks[(int)Piece.p]
+            | _attacks[(int)Piece.n]
+            | _attacks[(int)Piece.b]
+            | _attacks[(int)Piece.r]
+            | _attacks[(int)Piece.q]
+            | _attacks[(int)Piece.k];
 
         if (gamePhase > MaxPhase)    // Early promotions
         {
@@ -1511,7 +1538,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsSquareAttacked(int squareIndex, Side sideToMove)
     {
-        Utils.Assert(sideToMove != Side.Both);
+        Debug.Assert(sideToMove != Side.Both);
 
         var sideToMoveInt = (int)sideToMove;
         var offset = Utils.PieceOffset(sideToMoveInt);
@@ -1785,6 +1812,7 @@ public class Position : IDisposable
         Console.WriteLine(separator);
     }
 
+    [Conditional("DEBUG")]
     public void PrintAttackedSquares(Side sideToMove)
     {
         const string separator = "____________________________________________________";
