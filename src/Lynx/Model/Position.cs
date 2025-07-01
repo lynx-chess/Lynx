@@ -642,7 +642,7 @@ public class Position : IDisposable
         var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
-            && !IsSquareAttacked(oppositeKingSquare, _side);
+            && !IsSquareAttacked(oppositeKingSquare, (int)_side);
     }
 
     /// <summary>
@@ -657,7 +657,7 @@ public class Position : IDisposable
         Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].CountBits() == 1);
         var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].GetLS1BIndex();
 
-        return !IsSquareAttacked(oppositeKingSquare, _side);
+        return !IsSquareAttacked(oppositeKingSquare, (int)_side);
     }
 
     #endregion
@@ -1533,20 +1533,32 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedBySide(int squaredIndex, Side sideToMove) => IsSquareAttacked(squaredIndex, sideToMove);
+    public bool IsSquareAttackedBySide(int squaredIndex, Side sideToMove) => IsSquareAttacked(squaredIndex, (int)sideToMove);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttacked(int squareIndex, Side sideToMove)
-    {
-        Debug.Assert(sideToMove != Side.Both);
+    public bool IsSquareAttacked(int squareIndex, Side sideToMove) => IsSquareAttacked(squareIndex, (int)sideToMove);
 
-        var sideToMoveInt = (int)sideToMove;
-        var offset = Utils.PieceOffset(sideToMoveInt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSquareAttacked(int squareIndex, int sideToMove)
+    {
+        Debug.Assert(sideToMove != (int)Side.Both);
+
+        if (_attacksBySide[(int)Side.White] != 0)
+        {
+            Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
+
+            Debug.Assert(_attacks[(int)Piece.K] != 0);
+            Debug.Assert(_attacks[(int)Piece.k] != 0);
+
+            return _attacksBySide[sideToMove].GetBit(squareIndex);
+        }
+
+        var offset = Utils.PieceOffset((int)sideToMove);
         var bothSidesOccupancy = _occupancyBitBoards[(int)Side.Both];
 
         // I tried to order them from most to least likely - not tested
         return
-            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset)
+            IsSquareAttackedByPawns(squareIndex, sideToMove, offset)
             || IsSquareAttackedByKing(squareIndex, offset)
             || IsSquareAttackedByKnights(squareIndex, offset)
             || IsSquareAttackedByBishops(squareIndex, offset, bothSidesOccupancy, out var bishopAttacks)
@@ -1561,6 +1573,16 @@ public class Position : IDisposable
         var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
 
         var kingSquare = _pieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
+
+        if (_attacksBySide[(int)Side.White] != 0)
+        {
+            Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
+
+            Debug.Assert(_attacks[(int)Piece.K] != 0);
+            Debug.Assert(_attacks[(int)Piece.k] != 0);
+
+            return IsSquareAttacked(kingSquare, oppositeSideInt);
+        }
 
         var bothSidesOccupancy = _occupancyBitBoards[(int)Side.Both];
 
@@ -1829,7 +1851,7 @@ public class Position : IDisposable
 
                 var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
-                var pieceRepresentation = IsSquareAttacked(squareIndex, sideToMove)
+                var pieceRepresentation = IsSquareAttacked(squareIndex, (int)sideToMove)
                     ? '1'
                     : '.';
 
