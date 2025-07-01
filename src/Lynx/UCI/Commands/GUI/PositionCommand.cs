@@ -21,7 +21,7 @@ public sealed class PositionCommand : IGUIBaseCommand
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Span<Move> movePool)
+    public static Game ParseGame(MoveGenerator moveGenerator, ReadOnlySpan<char> positionCommandSpan, Span<Move> movePool)
     {
         try
         {
@@ -50,17 +50,19 @@ public sealed class PositionCommand : IGUIBaseCommand
             Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
             movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            return new Game(fen, movesSection, moves, movePool);
+            return new Game(moveGenerator, fen, movesSection, moves, movePool);
         }
         catch (Exception e)
         {
             _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
-            return new Game(Constants.InitialPositionFEN);
+            return new Game(moveGenerator, Constants.InitialPositionFEN);
         }
     }
 
     public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
     {
+        var moveGenerator = MoveGenerator.Instance;
+
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
@@ -68,7 +70,7 @@ public sealed class PositionCommand : IGUIBaseCommand
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
+            moveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

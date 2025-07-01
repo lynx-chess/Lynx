@@ -145,7 +145,7 @@ public sealed partial class Engine
 
         if (depth + depthExtension <= 0)
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            if (_moveGenerator.CanGenerateAtLeastAValidMove(position))
             {
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
@@ -295,7 +295,7 @@ public sealed partial class Engine
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
+        var pseudoLegalMoves = _moveGenerator.GenerateAllMoves(position, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
 
@@ -489,7 +489,7 @@ public sealed partial class Engine
 
             int score = 0;
 
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
+            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition(_moveGenerator)))
             {
                 score = 0;
 
@@ -840,7 +840,7 @@ public sealed partial class Engine
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
+        var pseudoLegalMoves = _moveGenerator.GenerateAllCaptures(position, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -942,7 +942,7 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
+            && !_moveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 
