@@ -2,7 +2,6 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json;
