@@ -132,6 +132,7 @@ public sealed class OptionCommand : IEngineBaseCommand
             $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
             $"option name Ponder type check default {Configuration.EngineSettings.IsPonder}",
             $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
+            $"option name MoveOverhead type spin default {Configuration.EngineSettings.MoveOverhead} min 1 max {Constants.MaxMoveOverhead}",
             .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : []
         ];
 
