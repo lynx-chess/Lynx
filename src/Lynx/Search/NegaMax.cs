@@ -404,7 +404,7 @@ public sealed partial class Engine
 
             if (!position.WasProduceByAValidMove())
             {
-                position.UnmakeMove(move, gameState);
+                position.UnmakeMove(move, in gameState);
                 continue;
             }
 
@@ -484,7 +484,7 @@ public sealed partial class Engine
             {
                 Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
                 Game.RemoveFromPositionHashHistory();
-                position.UnmakeMove(move, gameState);
+                position.UnmakeMove(move, in gameState);
             }
 
             int score = 0;
@@ -887,7 +887,7 @@ public sealed partial class Engine
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
-                position.UnmakeMove(move, gameState);
+                position.UnmakeMove(move, in gameState);
                 continue;
             }
 
@@ -903,7 +903,7 @@ public sealed partial class Engine
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
-            position.UnmakeMove(move, gameState);
+            position.UnmakeMove(move, in gameState);
 
             PrintMove(position, ply, move, score, isQuiescence: true);
 
