@@ -133,7 +133,7 @@ public sealed class UCIHandler
     private void HandlePosition(ReadOnlySpan<char> command)
     {
 #if DEBUG
-        var sw = Stopwatch.StartNew();
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         _searcher.PrintCurrentPosition();
 #endif
 
