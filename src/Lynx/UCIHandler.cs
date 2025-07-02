@@ -270,6 +270,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "moveoverhead":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.MoveOverhead = value;
+                    }
+                    break;
+                }
 
             default:
                 if (!SPSAAttributeHelpers.ParseUCIOption(command, commandItems, lowerCaseFirstWord, length))
