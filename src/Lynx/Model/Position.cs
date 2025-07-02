@@ -582,23 +582,6 @@ public class Position : IDisposable
         _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
         _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
 
-        _attacks[(int)Piece.P] = gameState.WhitePawnAttacks;
-        _attacks[(int)Piece.N] = gameState.WhiteKnightAttacks;
-        _attacks[(int)Piece.B] = gameState.WhiteBishopAttacks;
-        _attacks[(int)Piece.R] = gameState.WhiteRookAttacks;
-        _attacks[(int)Piece.Q] = gameState.WhiteQueenAttacks;
-        _attacks[(int)Piece.K] = gameState.WhiteKingAttacks;
-
-        _attacks[(int)Piece.p] = gameState.BlackPawnAttacks;
-        _attacks[(int)Piece.n] = gameState.BlackKnightAttacks;
-        _attacks[(int)Piece.b] = gameState.BlackBishopAttacks;
-        _attacks[(int)Piece.r] = gameState.BlackRookAttacks;
-        _attacks[(int)Piece.q] = gameState.BlackQueenAttacks;
-        _attacks[(int)Piece.k] = gameState.BlackKingAttacks;
-
-        _attacksBySide[(int)Side.White] = gameState.WhiteAttacks;
-        _attacksBySide[(int)Side.Black] = gameState.BlackAttacks;
-
         _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
