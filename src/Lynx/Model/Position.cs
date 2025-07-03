@@ -92,7 +92,7 @@ public class Position : IDisposable
         _pieceBitBoards = parsedFEN._pieceBitBoards;
         _occupancyBitBoards = parsedFEN._occupancyBitBoards;
         _board = parsedFEN._board;
-        _attacks = ArrayPool<ulong>.Shared.Rent(12);
+        _attacks = ArrayPool<BitBoard>.Shared.Rent(12);
         _attacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
 
         _side = parsedFEN.Side;
@@ -481,6 +481,9 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
+        Array.Clear(_attacks);
+        Array.Clear(_attacksBySide);
+
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
         _side = (Side)side;
