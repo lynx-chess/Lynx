@@ -1306,7 +1306,10 @@ public class Position : IDisposable
                 ? Constants.DarkSquaresBitBoard
                 : Constants.LightSquaresBitBoard);
 
-        packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawns.CountBits()];
+        // Allowing playing positions with > 8 pawns
+        var sameColorPawnsCount = sameColorPawns.CountBits() % 9;
+
+        packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawnsCount];
 
         // Blocked central pawns
         var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
