@@ -157,7 +157,7 @@ public sealed class Game : IDisposable
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+        return !CurrentPosition.IsInCheck_Threats() || MoveGenerator.CanGenerateAtLeastAValidMove_Threats(CurrentPosition);
     }
 
     /// <summary>

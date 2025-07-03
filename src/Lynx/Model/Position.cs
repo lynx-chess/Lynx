@@ -1523,18 +1523,6 @@ public class Position : IDisposable
     {
         Debug.Assert(sideToMove != (int)Side.Both);
 
-        // True for movegen, except IDDFS.OnlyOneLegalMove one, and IsInCheck
-        // False for IsValid/WasProduceByAValidMove
-        if (_attacksBySide[(int)Side.White] != 0)
-        {
-            Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
-
-            Debug.Assert(_attacks[(int)Piece.K] != 0);
-            Debug.Assert(_attacks[(int)Piece.k] != 0);
-
-            return _attacksBySide[sideToMove].GetBit(squareIndex);
-        }
-
         var offset = Utils.PieceOffset((int)sideToMove);
         var bothSidesOccupancy = _occupancyBitBoards[(int)Side.Both];
 
@@ -1549,23 +1537,25 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSquareAttacked_Threats(int squareIndex, int sideToMove)
+    {
+        Debug.Assert(sideToMove != (int)Side.Both);
+
+        Debug.Assert(_attacksBySide[(int)Side.White] != 0);
+        Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
+        Debug.Assert(_attacks[(int)Piece.K] != 0);
+        Debug.Assert(_attacks[(int)Piece.k] != 0);
+
+        return _attacksBySide[sideToMove].GetBit(squareIndex);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsInCheck()
     {
         var oppositeSideInt = Utils.OppositeSide(_side);
         var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
 
         var kingSquare = _pieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
-
-        if (_attacksBySide[(int)Side.White] != 0)
-        {
-            Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
-
-            Debug.Assert(_attacks[(int)Piece.K] != 0);
-            Debug.Assert(_attacks[(int)Piece.k] != 0);
-
-            return IsSquareAttacked(kingSquare, oppositeSideInt);
-        }
-
         var bothSidesOccupancy = _occupancyBitBoards[(int)Side.Both];
 
         // I tried to order them from most to least likely - not tested
@@ -1575,6 +1565,17 @@ public class Position : IDisposable
             || IsSquareAttackedByQueens(oppositeSideOffset, bishopAttacks, rookAttacks)
             || IsSquareAttackedByKnights(kingSquare, oppositeSideOffset)
             || IsSquareAttackedByPawns(kingSquare, oppositeSideInt, oppositeSideOffset);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsInCheck_Threats()
+    {
+        var oppositeSideInt = Utils.OppositeSide(_side);
+        var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
+
+        var kingSquare = _pieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
+
+        return IsSquareAttacked_Threats(kingSquare, oppositeSideInt);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -81,29 +81,6 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
-    {
-        Debug.Assert(position.Side != Side.Both);
-
-        int localIndex = 0;
-
-        var offset = Utils.PieceOffset(position.Side);
-
-        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
-
-        return movePool[..localIndex];
-    }
-
-    /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
@@ -347,6 +324,82 @@ public static class MoveGenerator
     }
 
     /// <summary>
+    /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
+    /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateCastlingMoves_Threats(ref int localIndex, Span<Move> movePool, Position position)
+    {
+        if (position.Castle != default)
+        {
+            ulong occupancy = position.OccupancyBitBoards[(int)Side.Both];
+
+            if (position.Side == Side.White)
+            {
+                bool ise1Attacked = position.IsSquareAttacked_Threats(Constants.WhiteKingSourceSquare, (int)Side.Black);
+
+                if (!ise1Attacked
+                    && (position.Castle & (int)CastlingRights.WK) != default
+                    && !occupancy.GetBit(BoardSquare.f1)
+                    && !occupancy.GetBit(BoardSquare.g1)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.f1, (int)Side.Black)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.g1, (int)Side.Black))
+                {
+                    movePool[localIndex++] = WhiteShortCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
+                }
+
+                if (!ise1Attacked
+                    && (position.Castle & (int)CastlingRights.WQ) != default
+                    && !occupancy.GetBit(BoardSquare.d1)
+                    && !occupancy.GetBit(BoardSquare.c1)
+                    && !occupancy.GetBit(BoardSquare.b1)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.d1, (int)Side.Black)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.c1, (int)Side.Black))
+                {
+                    movePool[localIndex++] = WhiteLongCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
+                }
+            }
+            else
+            {
+                bool ise8Attacked = position.IsSquareAttacked_Threats(Constants.BlackKingSourceSquare, (int)Side.White);
+
+                if ((!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BK) != default)
+                    && !occupancy.GetBit(BoardSquare.f8)
+                    && !occupancy.GetBit(BoardSquare.g8)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.f8, (int)Side.White)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.g8, (int)Side.White))
+                {
+                    movePool[localIndex++] = BlackShortCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
+                }
+
+                if (!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BQ) != default
+                    && !occupancy.GetBit(BoardSquare.d8)
+                    && !occupancy.GetBit(BoardSquare.c8)
+                    && !occupancy.GetBit(BoardSquare.b8)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.d8, (int)Side.White)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.c8, (int)Side.White))
+                {
+                    movePool[localIndex++] = BlackLongCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Generate Knight, Bishop, Rook and Queen moves
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
@@ -433,6 +486,37 @@ public static class MoveGenerator
         catch (Exception e)
         {
             _logger.Error(e, $"Error in {nameof(CanGenerateAtLeastAValidMove)}");
+            return false;
+        }
+#endif
+    }
+
+    /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool CanGenerateAtLeastAValidMove_Threats(Position position)
+    {
+        Debug.Assert(position.Side != Side.Both);
+
+        var offset = Utils.PieceOffset(position.Side);
+
+#if DEBUG
+        try
+        {
+#endif
+        return IsAnyPawnMoveValid(position, offset)
+            || IsAnyPieceMoveValid((int)Piece.K + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+            || IsAnyCastlingMoveValid_Threats(position);
+#if DEBUG
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, $"Error in {nameof(CanGenerateAtLeastAValidMove_Threats)}");
             return false;
         }
 #endif
@@ -583,6 +667,72 @@ public static class MoveGenerator
                     && !occupancy.GetBit(BoardSquare.b8)
                     && !position.IsSquareAttacked((int)BoardSquare.d8, (int)Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, (int)Side.White)
+                    && IsValidMove(position, BlackLongCastle))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsAnyCastlingMoveValid_Threats(Position position)
+    {
+        if (position.Castle != default)
+        {
+            var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+
+            if (position.Side == Side.White)
+            {
+                bool ise1Attacked = position.IsSquareAttacked_Threats(Constants.WhiteKingSourceSquare, (int)Side.Black);
+
+                if (!ise1Attacked
+                    && (position.Castle & (int)CastlingRights.WK) != default
+                    && !occupancy.GetBit(BoardSquare.f1)
+                    && !occupancy.GetBit(BoardSquare.g1)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.f1, (int)Side.Black)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.g1, (int)Side.Black)
+                    && IsValidMove(position, WhiteShortCastle))
+                {
+                    return true;
+                }
+
+                if (!ise1Attacked
+                    && (position.Castle & (int)CastlingRights.WQ) != default
+                    && !occupancy.GetBit(BoardSquare.d1)
+                    && !occupancy.GetBit(BoardSquare.c1)
+                    && !occupancy.GetBit(BoardSquare.b1)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.d1, (int)Side.Black)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.c1, (int)Side.Black)
+                    && IsValidMove(position, WhiteLongCastle))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                bool ise8Attacked = position.IsSquareAttacked_Threats(Constants.BlackKingSourceSquare, (int)Side.White);
+
+                if (!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BK) != default
+                    && !occupancy.GetBit(BoardSquare.f8)
+                    && !occupancy.GetBit(BoardSquare.g8)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.f8, (int)Side.White)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.g8, (int)Side.White)
+                    && IsValidMove(position, BlackShortCastle))
+                {
+                    return true;
+                }
+
+                if ((!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BQ) != default)
+                    && !occupancy.GetBit(BoardSquare.d8)
+                    && !occupancy.GetBit(BoardSquare.c8)
+                    && !occupancy.GetBit(BoardSquare.b8)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.d8, (int)Side.White)
+                    && !position.IsSquareAttacked_Threats((int)BoardSquare.c8, (int)Side.White)
                     && IsValidMove(position, BlackLongCastle))
                 {
                     return true;

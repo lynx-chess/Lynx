@@ -816,7 +816,7 @@ public sealed partial class Engine
             ? ttScore
             : staticEval;
 
-        var isInCheck = position.IsInCheck();
+        var isInCheck = position.IsInCheck_Threats();
 
         if (!isInCheck)
         {
@@ -942,11 +942,11 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
+            && !MoveGenerator.CanGenerateAtLeastAValidMove_Threats(position)) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 
-            bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;
