@@ -6274,6 +6274,56 @@ public static class EvaluationParams
 		Pack(-49, 421)
 	];
 
+	public static readonly int[] PawnThreats =
+	[
+        Pack(0, 10),
+        Pack(1, 11),
+        Pack(2, 12),
+        Pack(3, 13),
+        Pack(4, 14),
+        Pack(5, 15),
+    ];
+
+	public static readonly int[] KnightThreats =
+	[
+        Pack(0, 10),
+        Pack(1, 11),
+        Pack(2, 12),
+        Pack(3, 13),
+        Pack(4, 14),
+        Pack(5, 15),
+    ];
+
+	public static readonly int[] BishopThreats =
+	[
+        Pack(0, 10),
+        Pack(1, 11),
+        Pack(2, 12),
+        Pack(3, 13),
+        Pack(4, 14),
+        Pack(5, 15),
+    ];
+
+	public static readonly int[] RookThreats =
+	[
+        Pack(0, 10),
+        Pack(1, 11),
+        Pack(2, 12),
+        Pack(3, 13),
+        Pack(4, 14),
+        Pack(5, 15),
+    ];
+
+	public static readonly int[] QueenThreats =
+	[
+        Pack(0, 10),
+        Pack(1, 11),
+        Pack(2, 12),
+        Pack(3, 13),
+        Pack(4, 14),
+        Pack(5, 15),
+    ];
+
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
 	[
 		[
