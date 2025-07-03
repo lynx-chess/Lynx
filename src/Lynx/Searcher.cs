@@ -650,7 +650,7 @@ public sealed class Searcher
     private void Warmup()
     {
         _logger.Debug("Warming-up engine");
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
         var warmupCount = Math.Min(8, _extraEngines.Length + 1);
 
