@@ -1313,10 +1313,6 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.B] * checks;
 
-        // Major threats
-        packedBonus += BishopRookThreatsBonus * (attacks & _pieceBitBoards[oppositeRooksIndex]).CountBits();
-        packedBonus += BishopQueenThreatsBonus * (attacks & _pieceBitBoards[oppositeQueensIndex]).CountBits();
-
         return packedBonus;
     }
 
