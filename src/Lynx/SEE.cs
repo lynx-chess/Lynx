@@ -234,7 +234,7 @@ public static class SEE
             }
         }
 
-        System.Diagnostics.Debug.Fail($"Unexpected outcome of {nameof(PopLeastValuableAttacker)}: no attacker returned");
+        Debug.Fail($"Unexpected outcome of {nameof(PopLeastValuableAttacker)}: no attacker returned");
 
         return (int)Piece.Unknown;
     }
