@@ -1229,10 +1229,6 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
-        //var offset = Utils.PieceOffset(pieceSide);
-        //var oppositeRooksIndex = (int)Piece.r - offset;
-        //var oppositeQueensIndex = (int)Piece.q - offset;
-
         var attacks = Attacks.KnightAttacks[squareIndex];
         _attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
 
@@ -1250,9 +1246,6 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.N] * checks;
 
-        // Major threats
-        //packedBonus += MinorMajorThreatsBonus * (_pieceBitBoards[oppositeRooksIndex] | _pieceBitBoards[oppositeQueensIndex]).CountBits();
-
         return packedBonus;
     }
 
@@ -1262,8 +1255,6 @@ public class Position : IDisposable
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
 
         var offset = Utils.PieceOffset(pieceSide);
-        var oppositeRooksIndex = (int)Piece.r - offset;
-        var oppositeQueensIndex = (int)Piece.q - offset;
 
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
@@ -1436,8 +1427,9 @@ public class Position : IDisposable
 
         var oppositeSide = Utils.OppositeSide(side);
         var oppositeSideOffset = 6 - offset;
+        var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
 
-        var knightThreats = _attacks[(int)Piece.N + offset] & OccupancyBitBoards[oppositeSide];
+        var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
         while (knightThreats != 0)
         {
             knightThreats = knightThreats.WithoutLS1B(out var square);
@@ -1445,7 +1437,7 @@ public class Position : IDisposable
             packedBonus += KnightThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
-        var bishopThreats = _attacks[(int)Piece.B + offset] & OccupancyBitBoards[oppositeSide];
+        var bishopThreats = _attacks[(int)Piece.B + offset] & oppositeSidePieces;
         while (bishopThreats != 0)
         {
             bishopThreats = bishopThreats.WithoutLS1B(out var square);
@@ -1453,7 +1445,7 @@ public class Position : IDisposable
             packedBonus += BishopThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
-        var rookThreats = _attacks[(int)Piece.R + offset] & OccupancyBitBoards[oppositeSide];
+        var rookThreats = _attacks[(int)Piece.R + offset] & oppositeSidePieces;
         while (rookThreats != 0)
         {
             rookThreats = rookThreats.WithoutLS1B(out var square);
@@ -1461,7 +1453,7 @@ public class Position : IDisposable
             packedBonus += RookThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
-        var queenThreats = _attacks[(int)Piece.Q + offset] & OccupancyBitBoards[oppositeSide];
+        var queenThreats = _attacks[(int)Piece.Q + offset] & oppositeSidePieces;
         while (queenThreats != 0)
         {
             queenThreats = queenThreats.WithoutLS1B(out var square);
