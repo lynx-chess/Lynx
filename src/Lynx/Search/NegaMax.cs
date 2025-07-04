@@ -625,10 +625,9 @@ public sealed partial class Engine
                         }
 
                         // 🔍 Post-LMR continuation history update
-                        var rawHistoryBonus = EvaluationConstants.HistoryBonus[depth];
                         var historyBonus = score > alpha
-                            ? rawHistoryBonus
-                            : -rawHistoryBonus;
+                            ? EvaluationConstants.HistoryBonus[depth]
+                            : -EvaluationConstants.HistoryMalus[depth];
 
                         ref var contHist = ref ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
                         contHist = ScoreHistoryMove(contHist, historyBonus);

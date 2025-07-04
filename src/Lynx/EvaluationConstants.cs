@@ -27,10 +27,8 @@ public static class EvaluationConstants
     /// </summary>
     public static readonly int[][][] LMRReductions = new int[2][][];
 
-    /// <summary>
-    /// [0, 4, 136, 276, 424, 580, 744, 916, 1096, 1284, 1480, 1684, 1896, 1896, 1896, 1896, ...]
-    /// </summary>
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
+    public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
     public const int LMRScaleFactor = 100;
 
@@ -60,8 +58,16 @@ public static class EvaluationConstants
             }
 
             HistoryBonus[searchDepth] = Math.Min(
-                Configuration.EngineSettings.History_MaxMoveRawBonus,
-                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
+                Configuration.EngineSettings.History_Bonus_MaxIncrement,
+                Configuration.EngineSettings.History_Bonus_Constant
+                + (Configuration.EngineSettings.History_Bonus_Linear * searchDepth)
+                + (Configuration.EngineSettings.History_Bonus_Quadratic * searchDepth * searchDepth));
+
+            HistoryMalus[searchDepth] = Math.Min(
+                Configuration.EngineSettings.History_Malus_MaxDecrement,
+                Configuration.EngineSettings.History_Malus_Constant
+                + (Configuration.EngineSettings.History_Malus_Linear * searchDepth)
+                + (Configuration.EngineSettings.History_Malus_Quadratic * searchDepth * searchDepth));
         }
     }
 

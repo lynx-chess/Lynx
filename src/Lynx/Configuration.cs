@@ -325,11 +325,29 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int History_MaxMoveValue { get; set; } = 8_192;
 
-    /// <summary>
-    /// 1896: constant from depth 12
-    /// </summary>
-    [SPSA<int>(enabled: false)]
-    public int History_MaxMoveRawBonus { get; set; } = 1_896;
+    [SPSA<int>(512, 4096, 250)]
+    public int History_Bonus_MaxIncrement { get; set; } = 1_896;
+
+    [SPSA<int>(1, 500, 35)]
+    public int History_Bonus_Constant { get; set; } = 150;
+
+    [SPSA<int>(1, 500, 35)]
+    public int History_Bonus_Linear { get; set; } = 150;
+
+    [SPSA<int>(1, 10, 1)]
+    public int History_Bonus_Quadratic { get; set; } = 5;
+
+    [SPSA<int>(512, 4096, 250)]
+    public int History_Malus_MaxDecrement { get; set; } = 1_896;
+
+    [SPSA<int>(1, 500, 35)]
+    public int History_Malus_Constant { get; set; } = 150;
+
+    [SPSA<int>(1, 500, 35)]
+    public int History_Malus_Linear { get; set; } = 150;
+
+    [SPSA<int>(1, 10, 1)]
+    public int History_Malus_Quadratic { get; set; } = 5;
 
     [SPSA<int>(enabled: false)]
     public int CounterMoves_MinDepth { get; set; } = 3;
