@@ -59,15 +59,15 @@ public static class EvaluationConstants
 
             HistoryBonus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_Bonus_MaxIncrement,
-                Configuration.EngineSettings.History_Bonus_Constant
+                (int)(Configuration.EngineSettings.History_Bonus_Constant
                 + (Configuration.EngineSettings.History_Bonus_Linear * searchDepth)
-                + (Configuration.EngineSettings.History_Bonus_Quadratic * searchDepth * searchDepth));
+                + (Configuration.EngineSettings.History_Bonus_Quadratic * searchDepth * searchDepth)));
 
             HistoryMalus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_Malus_MaxDecrement,
-                Configuration.EngineSettings.History_Malus_Constant
+                (int)(Configuration.EngineSettings.History_Malus_Constant
                 + (Configuration.EngineSettings.History_Malus_Linear * searchDepth)
-                + (Configuration.EngineSettings.History_Malus_Quadratic * searchDepth * searchDepth));
+                + (Configuration.EngineSettings.History_Malus_Quadratic * searchDepth * searchDepth)));
         }
     }
 

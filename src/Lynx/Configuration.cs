@@ -334,8 +334,8 @@ public sealed class EngineSettings
     [SPSA<int>(1, 500, 35)]
     public int History_Bonus_Linear { get; set; } = 150;
 
-    [SPSA<int>(1, 10, 1)]
-    public int History_Bonus_Quadratic { get; set; } = 5;
+    [SPSA<double>(1, 10, 0.5)]
+    public double History_Bonus_Quadratic { get; set; } = 5;
 
     [SPSA<int>(512, 4096, 250)]
     public int History_Malus_MaxDecrement { get; set; } = 1_896;
@@ -346,8 +346,8 @@ public sealed class EngineSettings
     [SPSA<int>(1, 500, 35)]
     public int History_Malus_Linear { get; set; } = 150;
 
-    [SPSA<int>(1, 10, 1)]
-    public int History_Malus_Quadratic { get; set; } = 5;
+    [SPSA<double>(1, 10, 1)]
+    public double History_Malus_Quadratic { get; set; } = 5;
 
     [SPSA<int>(enabled: false)]
     public int CounterMoves_MinDepth { get; set; } = 3;
