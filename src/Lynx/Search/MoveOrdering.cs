@@ -176,7 +176,14 @@ public sealed partial class Engine
         {
             var visitedMove = visitedMoves[i];
 
-            if (!visitedMove.IsCapture())
+            if (visitedMove.IsCapture())
+            {
+                // 🔍 Noisy history penalty / malus
+                // When a quiet move fails high, penalize previous visited noisy moves
+                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
+                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryBonus);
+            }
+            else
             {
                 var visitedMovePiece = visitedMove.Piece();
                 var visitedMoveTargetSquare = visitedMove.TargetSquare();
