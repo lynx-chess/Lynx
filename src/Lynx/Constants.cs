@@ -99,7 +99,8 @@ public static class Constants
     /// </summary>
     public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
-    /// <summary>8   0 0 0 0 0 0 0 0
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
     /// 7   0 0 0 0 0 0 0 0
     /// 6   0 0 0 0 0 0 0 0
     /// 5   0 0 0 0 0 0 0 0
