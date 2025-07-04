@@ -27,6 +27,7 @@ public class Position : IDisposable
     private readonly int[] _board;
 
     internal readonly BitBoard[] _attacks;
+    internal readonly BitBoard[] _attacksBySide;
 
     private byte _castle;
     private BoardSquare _enPassant;
@@ -92,6 +93,7 @@ public class Position : IDisposable
         _occupancyBitBoards = parsedFEN._occupancyBitBoards;
         _board = parsedFEN._board;
         _attacks = ArrayPool<BitBoard>.Shared.Rent(12);
+        _attacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
 
         _side = parsedFEN.Side;
         _castle = parsedFEN._castle;
@@ -139,6 +141,10 @@ public class Position : IDisposable
         _attacks = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position._attacks, _attacks, 12);
 
+        _attacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
+        _attacksBySide[(int)Side.White] = position._attacksBySide[(int)Side.White];
+        _attacksBySide[(int)Side.Black] = position._attacksBySide[(int)Side.Black];
+
         _side = position._side;
         _castle = position._castle;
         _enPassant = position._enPassant;
@@ -161,6 +167,7 @@ public class Position : IDisposable
         var gameState = new GameState(this);
 
         Array.Clear(_attacks);
+        Array.Clear(_attacksBySide);
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -475,6 +482,7 @@ public class Position : IDisposable
     public void UnmakeMove(Move move, GameState gameState)
     {
         Array.Clear(_attacks);
+        Array.Clear(_attacksBySide);
 
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
@@ -954,6 +962,23 @@ public class Position : IDisposable
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & _occupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
+
+        // TODO set _attackedBySide here or lazily?
+        _attacksBySide[(int)Side.White] =
+            _attacks[(int)Piece.P]
+            | _attacks[(int)Piece.N]
+            | _attacks[(int)Piece.B]
+            | _attacks[(int)Piece.R]
+            | _attacks[(int)Piece.Q]
+            | _attacks[(int)Piece.K];
+
+        _attacksBySide[(int)Side.Black] =
+            _attacks[(int)Piece.p]
+            | _attacks[(int)Piece.n]
+            | _attacks[(int)Piece.b]
+            | _attacks[(int)Piece.r]
+            | _attacks[(int)Piece.q]
+            | _attacks[(int)Piece.k];
 
         // Threats
         packedScore += Threats(Side.White)
