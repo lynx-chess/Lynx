@@ -457,7 +457,7 @@ public sealed partial class Engine
                     return singularScore;
                 }
                 // Negative extension
-                else if (ttScore >= beta)
+                else if (!pvNode && ttScore >= beta)
                 {
                     --singularDepthExtensions;
                 }
