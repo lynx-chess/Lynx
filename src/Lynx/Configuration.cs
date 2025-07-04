@@ -118,15 +118,24 @@ public sealed class EngineSettings
 
     public double SPSA_OB_R_end { get; set; } = 0.02;
 
-    #region Time management
-
     /// <summary>
     /// Time overhead to take into account engine-gui communication process overhead
     /// </summary>
-    public int EngineGuiCommunicationTimeOverhead { get; set; } = 50;
+    private int _moveOverhead = 50;
+    public int MoveOverhead
+    {
+        get => _moveOverhead;
+        set => _moveOverhead =
+            Math.Clamp(
+                value,
+                1,
+                Constants.MaxMoveOverhead);
+    }
+
+    #region Time management
 
     /// <summary>
-    /// Min milliseconds left after substracting <see cref="EngineGuiCommunicationTimeOverhead"/>
+    /// Min milliseconds left after substracting <see cref="MoveOverhead"/>
     /// from wtime/btime or movetime. This min value is used to avoid 0 or negative time left.
     /// Resulting milliseconds left are later used to calculate hard and soft time bounds
     /// </summary>

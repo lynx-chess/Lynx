@@ -218,8 +218,9 @@ public sealed partial class Engine
 
                         if (bestScore < -EvaluationConstants.CheckMateBaseEvaluation)
                         {
-                            //_logger.Warn( // TODO bug
-                            _logger.Info(
+                            // TODO bug
+                            _logger.Warn(
+                            //_logger.Info(
                                 "[#{EngineId}] Depth {Depth}: potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
                                 _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
 

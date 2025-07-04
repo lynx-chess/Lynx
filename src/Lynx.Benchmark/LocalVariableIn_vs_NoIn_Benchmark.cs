@@ -73,14 +73,14 @@ public static class BenchmarkLegacyMoveExtensions
         if (move.IsCapture())
         {
             var sourcePiece = move.Piece();
-            int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
+            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
             var targetSquare = move.TargetSquare();
             var oppositeSide = Utils.OppositeSide(position.Side);
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
-            var limit = (int)Model.Piece.K + oppositeSideOffset;
+            var limit = (int)Piece.K + oppositeSideOffset;
             for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
             {
                 if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
