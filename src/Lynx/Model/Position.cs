@@ -1451,7 +1451,7 @@ public class Position : IDisposable
         var oppositeSideOffset = 6 - offset;
         var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
 
-        var defendedSquares = _attacksBySide[oppositeSide] & oppositeSidePieces;
+        var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset] & oppositeSidePieces;
 
         var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
         while (knightThreats != 0)
