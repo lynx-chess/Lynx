@@ -6274,6 +6274,16 @@ public static class EvaluationParams
 		Pack(25, 12)
 	];
 
+	public static readonly int[] KnightThreatsBonus_Defended =
+	[
+        Pack(-7, 3),
+        Pack(18, 26),
+        Pack(0, 0),
+        Pack(44, 3),
+        Pack(36, 72),
+        Pack(-84, -3)
+    ];
+
 	public static readonly int[] BishopThreatsBonus =
 	[
 		Pack(-7, 3),
@@ -6283,6 +6293,16 @@ public static class EvaluationParams
 		Pack(36, 72),
 		Pack(-84, -3)
 	];
+
+	public static readonly int[] BishopThreatsBonus_Defended =
+	[
+        Pack(-14, 13),
+        Pack(-1, 21),
+        Pack(8, 17),
+        Pack(-53, -3),
+        Pack(51, 3),
+        Pack(-85, 32)
+    ];
 
 	public static readonly int[] RookThreatsBonus =
 	[
@@ -6294,6 +6314,16 @@ public static class EvaluationParams
 		Pack(-85, 32)
 	];
 
+	public static readonly int[] RookThreatsBonus_Defended =
+	[
+        Pack(-4, 1),
+        Pack(1, 3),
+        Pack(-3, 27),
+        Pack(4, -9),
+        Pack(8, -0),
+        Pack(-7, 85)
+    ];
+
 	public static readonly int[] QueenThreatsBonus =
 	[
 		Pack(-4, 1),
@@ -6303,6 +6333,16 @@ public static class EvaluationParams
 		Pack(8, -0),
 		Pack(-7, 85)
 	];
+
+	public static readonly int[] QueenThreatsBonus_Defended =
+	[
+        Pack(-12, 3),
+        Pack(-2, 86),
+        Pack(27, 25),
+        Pack(60, -11),
+        Pack(27, -42),
+        Pack(25, 12)
+    ];
 
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
 	[

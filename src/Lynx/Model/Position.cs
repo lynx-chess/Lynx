@@ -963,9 +963,8 @@ public class Position : IDisposable
             * ((blackPawnAttacks & _occupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
-        // TODO set _attackedBySide here or lazily?
         _attacksBySide[(int)Side.White] =
-            _attacks[(int)Piece.P]
+            whitePawnAttacks
             | _attacks[(int)Piece.N]
             | _attacks[(int)Piece.B]
             | _attacks[(int)Piece.R]
@@ -973,7 +972,7 @@ public class Position : IDisposable
             | _attacks[(int)Piece.K];
 
         _attacksBySide[(int)Side.Black] =
-            _attacks[(int)Piece.p]
+            blackPawnAttacks
             | _attacks[(int)Piece.n]
             | _attacks[(int)Piece.b]
             | _attacks[(int)Piece.r]
@@ -981,8 +980,8 @@ public class Position : IDisposable
             | _attacks[(int)Piece.k];
 
         // Threats
-        packedScore += Threats(Side.White)
-            - Threats(Side.Black);
+        packedScore += Threats((int)Side.White, (int)Side.Black)
+            - Threats((int)Side.Black, (int)Side.White);
 
         if (gamePhase > MaxPhase)    // Early promotions
         {
@@ -1445,21 +1444,24 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(Side side)
+    private int Threats(int side, int oppositeSide)
     {
         int packedBonus = 0;
         var offset = Utils.PieceOffset(side);
-
-        var oppositeSide = Utils.OppositeSide(side);
         var oppositeSideOffset = 6 - offset;
         var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
+
+        var defendedSquares = _attacksBySide[oppositeSide] & oppositeSidePieces;
 
         var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
         while (knightThreats != 0)
         {
             knightThreats = knightThreats.WithoutLS1B(out var square);
             var attackedPiece = Board[square];
-            packedBonus += KnightThreatsBonus[attackedPiece - oppositeSideOffset];
+
+            packedBonus += defendedSquares.GetBit(square)
+                ? KnightThreatsBonus_Defended[attackedPiece - oppositeSideOffset]
+                : KnightThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
         var bishopThreats = _attacks[(int)Piece.B + offset] & oppositeSidePieces;
@@ -1467,7 +1469,10 @@ public class Position : IDisposable
         {
             bishopThreats = bishopThreats.WithoutLS1B(out var square);
             var attackedPiece = Board[square];
-            packedBonus += BishopThreatsBonus[attackedPiece - oppositeSideOffset];
+
+            packedBonus += defendedSquares.GetBit(square)
+                ? BishopThreatsBonus_Defended[attackedPiece - oppositeSideOffset]
+                : BishopThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
         var rookThreats = _attacks[(int)Piece.R + offset] & oppositeSidePieces;
@@ -1475,7 +1480,10 @@ public class Position : IDisposable
         {
             rookThreats = rookThreats.WithoutLS1B(out var square);
             var attackedPiece = Board[square];
-            packedBonus += RookThreatsBonus[attackedPiece - oppositeSideOffset];
+
+            packedBonus += defendedSquares.GetBit(square)
+                ? RookThreatsBonus_Defended[attackedPiece - oppositeSideOffset]
+                : RookThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
         var queenThreats = _attacks[(int)Piece.Q + offset] & oppositeSidePieces;
@@ -1483,7 +1491,10 @@ public class Position : IDisposable
         {
             queenThreats = queenThreats.WithoutLS1B(out var square);
             var attackedPiece = Board[square];
-            packedBonus += QueenThreatsBonus[attackedPiece - oppositeSideOffset];
+
+            packedBonus += defendedSquares.GetBit(square)
+                ? QueenThreatsBonus_Defended[attackedPiece - oppositeSideOffset]
+                : QueenThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
         return packedBonus;
