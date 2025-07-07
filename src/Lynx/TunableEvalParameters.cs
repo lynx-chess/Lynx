@@ -6264,6 +6264,26 @@ public static class EvaluationParams
 		Pack(-48, 418)
 	];
 
+	public static readonly int[] PawnThreatsBonus =
+	[
+		Pack(-5, 16),
+		Pack(-2, 38),
+		Pack(25, 11),
+		Pack(67, -25),
+		Pack(30, -48),
+		Pack(24, 9)
+	];
+
+	public static readonly int[] PawnThreatsBonus_Defended =
+	[
+		Pack(-12, 1),
+		Pack(-1, 74),
+		Pack(27, 31),
+		Pack(55, 2),
+		Pack(23, -36),
+		Pack(25, 22)
+	];
+
 	public static readonly int[] KnightThreatsBonus =
 	[
 		Pack(-5, 16),

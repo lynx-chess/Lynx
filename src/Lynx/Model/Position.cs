@@ -1453,6 +1453,17 @@ public class Position : IDisposable
 
         var defendedSquares = _attacksBySide[oppositeSide] & oppositeSidePieces;
 
+        var pawnThreats = _attacks[(int)Piece.P + offset] & oppositeSidePieces;
+        while (pawnThreats != 0)
+        {
+            pawnThreats = pawnThreats.WithoutLS1B(out var square);
+            var attackedPiece = Board[square];
+
+            packedBonus += defendedSquares.GetBit(square)
+                ? PawnThreatsBonus_Defended[attackedPiece - oppositeSideOffset]
+                : PawnThreatsBonus[attackedPiece - oppositeSideOffset];
+        }
+
         var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
         while (knightThreats != 0)
         {
