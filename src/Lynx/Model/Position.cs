@@ -983,6 +983,10 @@ public class Position : IDisposable
         packedScore += Threats((int)Side.White, (int)Side.Black)
             - Threats((int)Side.Black, (int)Side.White);
 
+        // Checks
+        packedScore += Checks((int)Side.White, (int)Side.Black)
+            - Checks((int)Side.Black, (int)Side.White);
+
         if (gamePhase > MaxPhase)    // Early promotions
         {
             gamePhase = MaxPhase;
@@ -1229,12 +1233,7 @@ public class Position : IDisposable
             packedBonus += SemiOpenFileRookBonus;
         }
 
-        // Checks
-        var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
-        var checks = (attacks & enemyKingCheckThreats).CountBits();
-
-        packedBonus += CheckBonus[(int)Piece.R] * checks;
-
+        // Connected rooks
         if ((attacks & _pieceBitBoards[pieceIndex]).CountBits() >= 1)
         {
             var rank = Constants.Rank[squareIndex];
@@ -1262,15 +1261,7 @@ public class Position : IDisposable
                 & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks)))
             .CountBits();
 
-        var packedBonus = KnightMobilityBonus[attacksCount];
-
-        // Checks
-        var enemyKingCheckThreats = Attacks.KnightAttacks[oppositeSideKingSquare];
-        var checks = (attacks & enemyKingCheckThreats).CountBits();
-
-        packedBonus += CheckBonus[(int)Piece.N] * checks;
-
-        return packedBonus;
+        return KnightMobilityBonus[attacksCount];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1322,12 +1313,6 @@ public class Position : IDisposable
             packedBonus += BishopInUnblockedLongDiagonalBonus;
         }
 
-        // Checks
-        var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
-        var checks = (attacks & enemyKingCheckThreats).CountBits();
-
-        packedBonus += CheckBonus[(int)Piece.B] * checks;
-
         return packedBonus;
     }
 
@@ -1344,15 +1329,7 @@ public class Position : IDisposable
                 & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks)))
             .CountBits();
 
-        var packedBonus = QueenMobilityBonus[attacksCount];
-
-        // Checks
-        var enemyKingCheckThreats = Attacks.QueenAttacks(oppositeSideKingSquare, occupancy);
-        var checks = (attacks & enemyKingCheckThreats).CountBits();
-
-        packedBonus += CheckBonus[(int)Piece.Q] * checks;
-
-        return packedBonus;
+        return QueenMobilityBonus[attacksCount];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1532,6 +1509,42 @@ public class Position : IDisposable
             var attackedPiece = Board[square];
 
             packedBonus += QueenThreatsBonus[attackedPiece - oppositeSideOffset];
+        }
+
+        return packedBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int Checks(int side, int oppositeSide)
+    {
+        int packedBonus = 0;
+
+        var offset = Utils.PieceOffset(side);
+        var occupancy = OccupancyBitBoards[(int)Side.Both];
+
+        var oppositeSideKingSquare = PieceBitBoards[(int)Piece.k - offset].GetLS1BIndex();
+        var oppositeSideAttacks = _attacksBySide[oppositeSide];
+
+        Span<BitBoard> checkThreats = stackalloc BitBoard[5];
+
+        var bishopAttacks = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
+        var rookAttacks = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
+
+        checkThreats[(int)Piece.N] = Attacks.KnightAttacks[oppositeSideKingSquare];
+        checkThreats[(int)Piece.B] = bishopAttacks;
+        checkThreats[(int)Piece.R] = rookAttacks;
+        checkThreats[(int)Piece.Q] = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
+
+        for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
+        {
+            var checks = _attacks[piece + offset] & checkThreats[piece];
+            var checksCount = checks.CountBits();
+
+            var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
+            var safeChecksCount = checksCount - unsafeChecksCount;
+
+            packedBonus += SafeCheckBonus[piece] * safeChecksCount;
+            packedBonus += UnsafeCheckBonus[piece] * unsafeChecksCount;
         }
 
         return packedBonus;

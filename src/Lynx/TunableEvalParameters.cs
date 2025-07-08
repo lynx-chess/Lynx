@@ -6116,16 +6116,25 @@ public static class EvaluationParams
 		Pack(0, 0)
 	];
 
-	public static readonly int[] CheckBonus =
-	[
-		Pack(0, 0),
-		Pack(17, 3),
-		Pack(17, 14),
-		Pack(33, 3),
-		Pack(13, 19)
-	];
+    public static readonly int[] SafeCheckBonus =
+    [
+        Pack(0, 0),
+        Pack(86, -3),
+        Pack(19, 19),
+        Pack(55, 1),
+        Pack(30, 23)
+    ];
 
-	public static readonly TaperedEvaluationTermByRank FriendlyKingDistanceToPassedPawnBonus =
+    public static readonly int[] UnsafeCheckBonus =
+    [
+        Pack(0, 0),
+        Pack(2, -1),
+        Pack(17, 14),
+        Pack(26, 1),
+        Pack(9, 11)
+    ];
+
+    public static readonly TaperedEvaluationTermByRank FriendlyKingDistanceToPassedPawnBonus =
 	[
 		Pack(0, 0),
 		Pack(30, 33),
