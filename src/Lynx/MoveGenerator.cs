@@ -287,8 +287,7 @@ public static class MoveGenerator
 
                 if (!ise1Attacked
                     && (position.Castle & (int)CastlingRights.WK) != default
-                    && !occupancy.GetBit(BoardSquare.f1)
-                    && !occupancy.GetBit(BoardSquare.g1)
+                    && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f1, (int)Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, (int)Side.Black))
                 {
@@ -300,9 +299,7 @@ public static class MoveGenerator
 
                 if (!ise1Attacked
                     && (position.Castle & (int)CastlingRights.WQ) != default
-                    && !occupancy.GetBit(BoardSquare.d1)
-                    && !occupancy.GetBit(BoardSquare.c1)
-                    && !occupancy.GetBit(BoardSquare.b1)
+                    && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d1, (int)Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, (int)Side.Black))
                 {
@@ -318,8 +315,7 @@ public static class MoveGenerator
 
                 if ((!ise8Attacked
                     && (position.Castle & (int)CastlingRights.BK) != default)
-                    && !occupancy.GetBit(BoardSquare.f8)
-                    && !occupancy.GetBit(BoardSquare.g8)
+                    && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, (int)Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, (int)Side.White))
                 {
@@ -331,9 +327,7 @@ public static class MoveGenerator
 
                 if (!ise8Attacked
                     && (position.Castle & (int)CastlingRights.BQ) != default
-                    && !occupancy.GetBit(BoardSquare.d8)
-                    && !occupancy.GetBit(BoardSquare.c8)
-                    && !occupancy.GetBit(BoardSquare.b8)
+                    && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, (int)Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, (int)Side.White))
                 {
@@ -421,13 +415,13 @@ public static class MoveGenerator
         try
         {
 #endif
-        return IsAnyPawnMoveValid(position, offset)
-            || IsAnyPieceMoveValid((int)Piece.K + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-            || IsAnyCastlingMoveValid(position);
+            return IsAnyPawnMoveValid(position, offset)
+                || IsAnyPieceMoveValid((int)Piece.K + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+                || IsAnyCastlingMoveValid(position);
 #if DEBUG
         }
         catch (Exception e)
@@ -540,8 +534,7 @@ public static class MoveGenerator
 
                 if (!ise1Attacked
                     && (position.Castle & (int)CastlingRights.WK) != default
-                    && !occupancy.GetBit(BoardSquare.f1)
-                    && !occupancy.GetBit(BoardSquare.g1)
+                    && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f1, (int)Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, (int)Side.Black)
                     && IsValidMove(position, WhiteShortCastle))
@@ -551,9 +544,7 @@ public static class MoveGenerator
 
                 if (!ise1Attacked
                     && (position.Castle & (int)CastlingRights.WQ) != default
-                    && !occupancy.GetBit(BoardSquare.d1)
-                    && !occupancy.GetBit(BoardSquare.c1)
-                    && !occupancy.GetBit(BoardSquare.b1)
+                    && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d1, (int)Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, (int)Side.Black)
                     && IsValidMove(position, WhiteLongCastle))
@@ -567,8 +558,7 @@ public static class MoveGenerator
 
                 if (!ise8Attacked
                     && (position.Castle & (int)CastlingRights.BK) != default
-                    && !occupancy.GetBit(BoardSquare.f8)
-                    && !occupancy.GetBit(BoardSquare.g8)
+                    && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, (int)Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, (int)Side.White)
                     && IsValidMove(position, BlackShortCastle))
@@ -578,9 +568,7 @@ public static class MoveGenerator
 
                 if ((!ise8Attacked
                     && (position.Castle & (int)CastlingRights.BQ) != default)
-                    && !occupancy.GetBit(BoardSquare.d8)
-                    && !occupancy.GetBit(BoardSquare.c8)
-                    && !occupancy.GetBit(BoardSquare.b8)
+                    && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, (int)Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, (int)Side.White)
                     && IsValidMove(position, BlackLongCastle))
