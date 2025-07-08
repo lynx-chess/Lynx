@@ -1449,6 +1449,7 @@ public class Position : IDisposable
         int packedBonus = 0;
 
         var offset = Utils.PieceOffset(side);
+
         var oppositeSideOffset = 6 - offset;
         var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
 
@@ -1532,6 +1533,26 @@ public class Position : IDisposable
             var attackedPiece = Board[square];
 
             packedBonus += QueenThreatsBonus[attackedPiece - oppositeSideOffset];
+        }
+
+        var kingThreats = _attacks[(int)Piece.K + offset] & oppositeSidePieces;
+
+        var defendedKingThreats = kingThreats & defendedSquares;
+        while (defendedKingThreats != 0)
+        {
+            defendedKingThreats = defendedKingThreats.WithoutLS1B(out var square);
+            var attackedPiece = Board[square];
+
+            packedBonus += KingThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
+        }
+
+        var undefendedKingThreats = kingThreats & (~defendedSquares);
+        while (undefendedKingThreats != 0)
+        {
+            undefendedKingThreats = undefendedKingThreats.WithoutLS1B(out var square);
+            var attackedPiece = Board[square];
+
+            packedBonus += KingThreatsBonus[attackedPiece - oppositeSideOffset];
         }
 
         return packedBonus;

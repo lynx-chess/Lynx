@@ -6344,6 +6344,26 @@ public static class EvaluationParams
 		Pack(28, 43)
 	];
 
+	public static readonly int[] KingThreatsBonus =
+	[
+		Pack(-3, -1),
+		Pack(5, 13),
+		Pack(-1, 40),
+		Pack(3, -5),
+		Pack(5, -4),
+		Pack(-6, 89)
+	];
+
+	public static readonly int[] KingThreatsBonus_Defended =
+	[
+		Pack(-7, 5),
+		Pack(-2, -15),
+		Pack(-6, -1),
+		Pack(8, -29),
+		Pack(6, 6),
+		Pack(28, 43)
+	];
+
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
 	[
 		[
