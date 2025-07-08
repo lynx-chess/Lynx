@@ -1558,7 +1558,7 @@ public class Position : IDisposable
 
         for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
         {
-            var checks = _attacks[piece + offset] & checkThreats[piece];
+            var checks = _attacks[piece + offset] & checkThreats[piece] & (~_attacks[(int)Piece.p - offset]);
             var checksCount = checks.CountBits();
 
             var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
