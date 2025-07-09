@@ -370,8 +370,17 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
-    [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -3;
+    [SPSA<int>(-4000, +4000, 400)]
+    public int HistoryPrunning_Quiet_Constant { get; set; } = -1000;
+
+    [SPSA<int>(-4000, -1000, 150)]
+    public int HistoryPrunning_Quiet_Linear { get; set; } = -2000;
+
+    [SPSA<int>(-4000, +4000, 400)]
+    public int HistoryPrunning_Noisy_Constant { get; set; } = -1000;
+
+    [SPSA<int>(-4000, -1000, 150)]
+    public int HistoryPrunning_Noisy_Quadratic { get; set; } = -1000;
 
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;

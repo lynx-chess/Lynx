@@ -363,11 +363,23 @@ public sealed partial class Engine
 
                 // 🔍 History pruning -  all quiet moves can be pruned
                 // once we find one with a history score too low
-                if (!isCapture
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                if (depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)    // TODO use LMR depth
                 {
-                    break;
+                    if (isCapture)
+                    {
+                        if (CaptureHistoryEntry(move) <
+                            Configuration.EngineSettings.HistoryPrunning_Noisy_Constant
+                            + (Configuration.EngineSettings.HistoryPrunning_Noisy_Quadratic * depth * depth))
+                        {
+                            break;
+                        }
+                    }
+                    else if (QuietHistory() <
+                        Configuration.EngineSettings.HistoryPrunning_Quiet_Constant
+                        + (Configuration.EngineSettings.HistoryPrunning_Quiet_Linear * depth))
+                    {
+                        break;
+                    }
                 }
 
                 // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
@@ -444,7 +456,7 @@ public sealed partial class Engine
                         ++stack.DoubleExtensions;
 
                         // Low depth extension - extending all moves
-                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
                         {
                             ++depth;
                         }
