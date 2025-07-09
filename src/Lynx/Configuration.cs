@@ -347,7 +347,7 @@ public sealed class EngineSettings
     public int History_Malus_Linear { get; set; } = 161;
 
     [SPSA<double>(1, 10, 1)]
-    public double History_Malus_Quadratic { get; set; } = 6;
+    public double History_Malus_Quadratic { get; set; } = 5.73;
 
     [SPSA<int>(enabled: false)]
     public int CounterMoves_MinDepth { get; set; } = 3;
