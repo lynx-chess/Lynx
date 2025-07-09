@@ -326,34 +326,34 @@ public sealed class EngineSettings
     public int History_MaxMoveValue { get; set; } = 8_192;
 
     [SPSA<int>(512, 4096, 250)]
-    public int History_Bonus_MaxIncrement { get; set; } = 2106;
+    public int History_Bonus_MaxIncrement { get; set; } = 1726;
 
     [SPSA<int>(1, 500, 35)]
-    public int History_Bonus_Constant { get; set; } = 147;
+    public int History_Bonus_Constant { get; set; } = 181;
 
     [SPSA<int>(1, 500, 35)]
-    public int History_Bonus_Linear { get; set; } = 185;
+    public int History_Bonus_Linear { get; set; } = 196;
 
     [SPSA<double>(1, 10, 0.5)]
-    public double History_Bonus_Quadratic { get; set; } = 4;
+    public double History_Bonus_Quadratic { get; set; } = 4.45;
 
     [SPSA<int>(512, 4096, 250)]
-    public int History_Malus_MaxDecrement { get; set; } = 1744;
+    public int History_Malus_MaxDecrement { get; set; } = 1956;
 
     [SPSA<int>(1, 500, 35)]
-    public int History_Malus_Constant { get; set; } = 186;
+    public int History_Malus_Constant { get; set; } = 137;
 
     [SPSA<int>(1, 500, 35)]
-    public int History_Malus_Linear { get; set; } = 218;
+    public int History_Malus_Linear { get; set; } = 93;
 
     [SPSA<double>(1, 10, 1)]
-    public double History_Malus_Quadratic { get; set; } = 6;
+    public double History_Malus_Quadratic { get; set; } = 7.50;
 
     [SPSA<int>(enabled: false)]
     public int CounterMoves_MinDepth { get; set; } = 3;
 
     [SPSA<int>(0, 200, 10)]
-    public int History_BestScoreBetaMargin { get; set; } = 136;
+    public int History_BestScoreBetaMargin { get; set; } = 107;
 
     [SPSA<int>(enabled: false)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
@@ -371,7 +371,7 @@ public sealed class EngineSettings
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -3;
+    public int HistoryPrunning_Margin { get; set; } = -835;
 
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
