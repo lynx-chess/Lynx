@@ -1546,29 +1546,28 @@ public class Position : IDisposable
         var oppositeSideKingSquare = PieceBitBoards[(int)Piece.k - offset].GetLS1BIndex();
         var oppositeSideAttacks = _attacksBySide[oppositeSide];
 
-        Span<BitBoard> checkThreats = stackalloc BitBoard[5];
-
         var bishopAttacks = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var rookAttacks = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
 
-        checkThreats[(int)Piece.N] = Attacks.KnightAttacks[oppositeSideKingSquare];
-        checkThreats[(int)Piece.B] = bishopAttacks;
-        checkThreats[(int)Piece.R] = rookAttacks;
-        checkThreats[(int)Piece.Q] = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
+        packedBonus += CalculateCheckThreats(oppositeSideAttacks, (int)Piece.N, _attacks[(int)Piece.N + offset], Attacks.KnightAttacks[oppositeSideKingSquare]);
+        packedBonus += CalculateCheckThreats(oppositeSideAttacks, (int)Piece.B, _attacks[(int)Piece.B + offset], bishopAttacks);
+        packedBonus += CalculateCheckThreats(oppositeSideAttacks, (int)Piece.R, _attacks[(int)Piece.R + offset], rookAttacks);
+        packedBonus += CalculateCheckThreats(oppositeSideAttacks, (int)Piece.Q, _attacks[(int)Piece.Q + offset], Attacks.QueenAttacks(rookAttacks, bishopAttacks));
 
-        for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
+        return packedBonus;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CalculateCheckThreats(BitBoard oppositeSideAttacks, int piece, BitBoard pieceAttacks, BitBoard checkThreats)
         {
-            var checks = _attacks[piece + offset] & checkThreats[piece];
+            var checks = pieceAttacks & checkThreats;
             var checksCount = checks.CountBits();
 
             var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
             var safeChecksCount = checksCount - unsafeChecksCount;
 
-            packedBonus += SafeCheckBonus[piece] * safeChecksCount;
-            packedBonus += UnsafeCheckBonus[piece] * unsafeChecksCount;
+            return (SafeCheckBonus[piece] * safeChecksCount)
+                + (UnsafeCheckBonus[piece] * unsafeChecksCount);
         }
-
-        return packedBonus;
     }
 
     /// <summary>
