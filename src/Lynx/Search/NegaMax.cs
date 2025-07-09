@@ -349,25 +349,27 @@ public sealed partial class Engine
             // LMP, HP and FP can happen either before after MakeMove
             // PVS SEE pruning needs to happen before MakeMove in a make-unmake framework (it needs original position)
             if (visitedMovesCounter > 0
-                && !pvNode
                 && !isInCheck
                 && isNotGettingCheckmated
                 && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet or bad capture
             {
-                // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
-                // after searching the first few given by the move ordering algorithm
-                if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                if (!pvNode)
                 {
-                    break;
-                }
+                    // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
+                    // after searching the first few given by the move ordering algorithm
+                    if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                    {
+                        break;
+                    }
 
-                // 🔍 History pruning -  all quiet moves can be pruned
-                // once we find one with a history score too low
-                if (!isCapture
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                {
-                    break;
+                    // 🔍 History pruning -  all quiet moves can be pruned
+                    // once we find one with a history score too low
+                    if (!isCapture
+                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
+                        && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    {
+                        break;
+                    }
                 }
 
                 // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
@@ -378,23 +380,26 @@ public sealed partial class Engine
                     break;
                 }
 
-                // 🔍 PVS SEE pruning
-                if (isCapture)
+                if (!pvNode)
                 {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
-
-                    if (!SEE.IsGoodCapture(position, move, threshold))
+                    // 🔍 PVS SEE pruning
+                    if (isCapture)
                     {
-                        continue;
+                        var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
+
+                        if (!SEE.IsGoodCapture(position, move, threshold))
+                        {
+                            continue;
+                        }
                     }
-                }
-                else
-                {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
-
-                    if (!SEE.HasPositiveScore(position, move, threshold))
+                    else
                     {
-                        continue;
+                        var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
+
+                        if (!SEE.HasPositiveScore(position, move, threshold))
+                        {
+                            continue;
+                        }
                     }
                 }
             }
@@ -444,7 +449,7 @@ public sealed partial class Engine
                         ++stack.DoubleExtensions;
 
                         // Low depth extension - extending all moves
-                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
                         {
                             ++depth;
                         }
