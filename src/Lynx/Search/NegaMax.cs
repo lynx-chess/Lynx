@@ -368,7 +368,7 @@ public sealed partial class Engine
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
                     && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
-                    break;
+                    continue;
                 }
 
                 // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
