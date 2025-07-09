@@ -1551,12 +1551,13 @@ public class Position : IDisposable
         var bishopAttacks = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var rookAttacks = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
 
+        checkThreats[(int)Piece.P] = Attacks.PawnAttacks[side][oppositeSideKingSquare];
         checkThreats[(int)Piece.N] = Attacks.KnightAttacks[oppositeSideKingSquare];
         checkThreats[(int)Piece.B] = bishopAttacks;
         checkThreats[(int)Piece.R] = rookAttacks;
         checkThreats[(int)Piece.Q] = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
 
-        for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
+        for (int piece = (int)Piece.P; piece < (int)Piece.K; ++piece)
         {
             var checks = _attacks[piece + offset] & checkThreats[piece];
             var checksCount = checks.CountBits();
