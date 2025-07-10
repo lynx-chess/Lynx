@@ -138,157 +138,167 @@ public sealed partial class Engine
         ref var stack = ref Game.Stack(ply);
         stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
-        if (isInCheck && !isVerifyingSE)
+        if (isInCheck)
         {
-            ++depthExtension;
+            rawStaticEval = EvaluationConstants.NoHashEntry;
+            staticEval = EvaluationConstants.NoHashEntry;
+
+            if (!isVerifyingSE)
+            {
+                ++depthExtension;
+            }
+
+            Debug.Assert(depth + depthExtension > 0);
         }
-
-        if (depth + depthExtension <= 0)
+        else
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            if (depth + depthExtension <= 0)
             {
-                return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
-            }
-
-            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
-            return finalPositionEvaluation;
-        }
-        else if (!pvNode && !isInCheck)
-        {
-            if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
-            {
-                Debug.Assert(ttStaticEval != int.MinValue);
-
-                rawStaticEval = ttStaticEval;
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
-                phase = position.Phase();
-            }
-            else
-            {
-                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
-                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
-            }
-
-            stack.StaticEval = staticEval;
-
-            if (ply >= 2)
-            {
-                var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
-                improving = evalDiff >= 0;
-                improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
-            }
-
-            // From smol.cs
-            // ttEvaluation can be used as a better positional evaluation:
-            // If the score is outside what the current bounds are, but it did match flag and depth,
-            // then we can trust that this score is more accurate than the current static evaluation,
-            // and we can update our static evaluation for better accuracy in pruning
-            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
-            {
-                staticEval = ttScore;
-            }
-
-            bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
-
-            // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated && !isVerifyingSE)
-            {
-                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+                if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
                 {
-                    // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-                    // Return formula by Ciekce, instead of just returning static eval
-                    // Improving impl. based on Potential's
-                    var rfpMargin = improving
-                        ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
-                        : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
+                    return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                }
 
-                    // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
-                    var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
+                var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
+                _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+                return finalPositionEvaluation;
+            }
+            else if (!pvNode)
+            {
+                if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
+                {
+                    Debug.Assert(ttStaticEval != int.MinValue);
 
-                    var rfpThreshold = rfpMargin + improvingFactor;
+                    rawStaticEval = ttStaticEval;
+                    staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+                    phase = position.Phase();
+                }
+                else
+                {
+                    (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                    _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                    staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+                }
 
-                    if (staticEval - rfpThreshold >= beta)
+                stack.StaticEval = staticEval;
+
+                if (ply >= 2)
+                {
+                    var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
+                    improving = evalDiff >= 0;
+                    improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
+                }
+
+                // From smol.cs
+                // ttEvaluation can be used as a better positional evaluation:
+                // If the score is outside what the current bounds are, but it did match flag and depth,
+                // then we can trust that this score is more accurate than the current static evaluation,
+                // and we can update our static evaluation for better accuracy in pruning
+                if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+                {
+                    staticEval = ttScore;
+                }
+
+                bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
+                // Fail-high pruning (moves with high scores) - prune more when improving
+                if (isNotGettingCheckmated && !isVerifyingSE)
+                {
+                    if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                     {
-#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (staticEval + beta) / 2;
-#pragma warning restore S3949 // Calculations should not overflow
-                    }
+                        // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                        // Return formula by Ciekce, instead of just returning static eval
+                        // Improving impl. based on Potential's
+                        var rfpMargin = improving
+                            ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
+                            : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
 
-                    // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                    if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
-                    {
-                        var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+                        // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
+                        var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
 
-                        if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                        var rfpThreshold = rfpMargin + improvingFactor;
+
+                        if (staticEval - rfpThreshold >= beta)
                         {
-                            if (depth == 1)
+#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
+                            return (staticEval + beta) / 2;
+#pragma warning restore S3949 // Calculations should not overflow
+                        }
+
+                        // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+                        if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                        {
+                            var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                            if (score < beta)               // Static evaluation + bonus indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
-
-                                return qSearchScore > score
-                                    ? qSearchScore
-                                    : score;
-                            }
-
-                            score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                            if (score < beta)               // Static evaluation indicates fail-low node
-                            {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
-                                if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                                if (depth == 1)
                                 {
+                                    var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+
                                     return qSearchScore > score
                                         ? qSearchScore
                                         : score;
                                 }
+
+                                score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                                if (score < beta)               // Static evaluation indicates fail-low node
+                                {
+                                    var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                    if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                                    {
+                                        return qSearchScore > score
+                                            ? qSearchScore
+                                            : score;
+                                    }
+                                }
                             }
                         }
                     }
-                }
 
-                var staticEvalBetaDiff = staticEval - beta;
+                    var staticEvalBetaDiff = staticEval - beta;
 
-                // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
-                if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                    && staticEvalBetaDiff >= 0
-                    && !parentWasNullMove
-                    && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                    && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
-                {
-                    var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
-                        + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
-                        + Math.Min(
-                            Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
-                            staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
-
-                    // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                    //var nmpReduction = Math.Min(
-                    //    depth,
-                    //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
-
-                    var gameState = position.MakeNullMove();
-                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
-                    position.UnMakeNullMove(gameState);
-
-                    if (nmpScore >= beta)
+                    // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
+                    if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                        && staticEvalBetaDiff >= 0
+                        && !parentWasNullMove
+                        && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                        && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
                     {
-                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                            ? nmpScore
-                            : beta;
+                        var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
+                            + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
+                            + Math.Min(
+                                Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
+                                staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
+
+                        // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
+                        //var nmpReduction = Math.Min(
+                        //    depth,
+                        //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+
+                        var gameState = position.MakeNullMove();
+                        var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+                        position.UnMakeNullMove(gameState);
+
+                        if (nmpScore >= beta)
+                        {
+                            return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                                ? nmpScore
+                                : beta;
+                        }
                     }
                 }
             }
-        }
-        else
-        {
-            rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-            staticEval = CorrectStaticEvaluation(position, rawStaticEval);
-
-            if (!ttHit)
+            else
             {
-                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+
+                if (!ttHit)
+                {
+                    _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                }
             }
         }
 
@@ -444,7 +454,7 @@ public sealed partial class Engine
                         ++stack.DoubleExtensions;
 
                         // Low depth extension - extending all moves
-                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
                         {
                             ++depth;
                         }
@@ -798,9 +808,15 @@ public sealed partial class Engine
             var staticEval = ttHit
                 ? ttProbeResult.StaticEval
                 : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
-        */
-        var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+
         Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+        */
+
+        var isInCheck = position.IsInCheck();
+
+        var rawStaticEval = !isInCheck
+            ? position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score
+            : EvaluationConstants.NoHashEntry;
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
@@ -814,7 +830,6 @@ public sealed partial class Engine
             ? ttScore
             : staticEval;
 
-        var isInCheck = position.IsInCheck();
 
         if (!isInCheck)
         {
