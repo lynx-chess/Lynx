@@ -124,8 +124,8 @@ public class EvaluationConstantsTest
     public void NoHashEntryConstant()
     {
         Assert.Greater(NoHashEntry, _sensibleEvaluation);
-        Assert.Greater(PositiveCheckmateDetectionLimit, NoHashEntry);
-        Assert.Greater(-NegativeCheckmateDetectionLimit, NoHashEntry);
+        Assert.Greater(NoHashEntry, MaxEval);
+        Assert.Greater(NoHashEntry, -MinEval);
     }
 
     [Test]
