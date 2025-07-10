@@ -692,8 +692,8 @@ public class Position : IDisposable
         BitBoard whitePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
         BitBoard blackPawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
 
-        _attacks[(int)Piece.P] = whitePawnAttacks;
-        _attacks[(int)Piece.p] = blackPawnAttacks;
+        _attacksBySide[(int)Side.White] = _attacks[(int)Piece.P] = whitePawnAttacks;
+        _attacksBySide[(int)Side.Black] = _attacks[(int)Piece.p] = blackPawnAttacks;
 
         var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
@@ -947,6 +947,8 @@ public class Position : IDisposable
             KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
 
+        AssertAttackPopulation();
+
         // Bishop pair bonus
         if (_pieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
@@ -962,22 +964,6 @@ public class Position : IDisposable
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & _occupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
-
-        _attacksBySide[(int)Side.White] =
-            whitePawnAttacks
-            | _attacks[(int)Piece.N]
-            | _attacks[(int)Piece.B]
-            | _attacks[(int)Piece.R]
-            | _attacks[(int)Piece.Q]
-            | _attacks[(int)Piece.K];
-
-        _attacksBySide[(int)Side.Black] =
-            blackPawnAttacks
-            | _attacks[(int)Piece.n]
-            | _attacks[(int)Piece.b]
-            | _attacks[(int)Piece.r]
-            | _attacks[(int)Piece.q]
-            | _attacks[(int)Piece.k];
 
         // Threats
         packedScore += Threats((int)Side.White, (int)Side.Black)
@@ -1211,6 +1197,7 @@ public class Position : IDisposable
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
         _attacks[(int)Piece.R + Utils.PieceOffset(pieceSide)] |= attacks;
+        _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1254,6 +1241,7 @@ public class Position : IDisposable
     {
         var attacks = Attacks.KnightAttacks[squareIndex];
         _attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
+        _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1274,6 +1262,7 @@ public class Position : IDisposable
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
         _attacks[(int)Piece.B + offset] |= attacks;
+        _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1322,6 +1311,7 @@ public class Position : IDisposable
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
         _attacks[(int)Piece.Q + Utils.PieceOffset(pieceSide)] |= attacks;
+        _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var attacksCount =
@@ -1337,6 +1327,7 @@ public class Position : IDisposable
     {
         var attacks = Attacks.KingAttacks[squareIndex];
         _attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
+        _attacksBySide[pieceSide] |= attacks;
 
         // Virtual mobility (as if Queen)
         var attacksCount =
@@ -1948,6 +1939,24 @@ public class Position : IDisposable
     }
 
 #pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
+
+    [Conditional("DEBUG")]
+    private void AssertAttackPopulation()
+    {
+        Debug.Assert(PieceBitBoards[(int)Piece.P] == 0 || _attacks[(int)Piece.P] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.N] == 0 || _attacks[(int)Piece.N] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.B] == 0 || _attacks[(int)Piece.B] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.R] == 0 || _attacks[(int)Piece.R] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.Q] == 0 || _attacks[(int)Piece.Q] != 0);
+        Debug.Assert(_attacks[(int)Piece.K] != 0);
+
+        Debug.Assert(PieceBitBoards[(int)Piece.p] == 0 || _attacks[(int)Piece.p] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.n] == 0 || _attacks[(int)Piece.n] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.b] == 0 || _attacks[(int)Piece.b] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.r] == 0 || _attacks[(int)Piece.r] != 0);
+        Debug.Assert(PieceBitBoards[(int)Piece.q] == 0 || _attacks[(int)Piece.q] != 0);
+        Debug.Assert(_attacks[(int)Piece.k] != 0);
+    }
 
     public void FreeResources()
     {
