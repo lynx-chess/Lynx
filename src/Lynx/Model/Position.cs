@@ -1449,8 +1449,8 @@ public class Position : IDisposable
 
         var defendedSquares =
             _attacks[(int)Piece.P + oppositeSideOffset]
-            | _doubleAttacksBySide[oppositeSide];
-        //| (_attacksBySide[oppositeSide] & (~_doubleAttacksBySide[side]));
+            //| _doubleAttacksBySide[oppositeSide];
+            | (_attacksBySide[oppositeSide] & (~_doubleAttacksBySide[side]));
 
         var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
 
