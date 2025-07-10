@@ -1420,7 +1420,7 @@ public class Position : IDisposable
         }
     }
 
-    private static int[][] DefendedThreatsBonus =>
+    private static readonly int[][] _defendedThreatsBonus =
     [
         [],
         KnightThreatsBonus_Defended,
@@ -1430,7 +1430,7 @@ public class Position : IDisposable
         KingThreatsBonus_Defended
     ];
 
-    private static int[][] UndefendedThreatsBonus =>
+    private static readonly int[][] _undefendedThreatsBonus =
     [
         [],
         KnightThreatsBonus,
@@ -1465,7 +1465,7 @@ public class Position : IDisposable
                 defended = defended.WithoutLS1B(out var square);
                 var attackedPiece = Board[square];
 
-                packedBonus += DefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += _defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
 
             var undefended = threats[i] & ~defendedSquares;
@@ -1474,7 +1474,7 @@ public class Position : IDisposable
                 undefended = undefended.WithoutLS1B(out var square);
                 var attackedPiece = Board[square];
 
-                packedBonus += UndefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += _undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
         }
 
