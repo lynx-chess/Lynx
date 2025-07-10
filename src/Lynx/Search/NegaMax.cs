@@ -140,8 +140,7 @@ public sealed partial class Engine
 
         if (isInCheck)
         {
-            rawStaticEval = EvaluationConstants.NoHashEntry;
-            staticEval = EvaluationConstants.NoHashEntry;
+            staticEval = rawStaticEval = EvaluationConstants.NoHashEntry;
 
             if (!isVerifyingSE)
             {
@@ -814,11 +813,18 @@ public sealed partial class Engine
 
         var isInCheck = position.IsInCheck();
 
-        var rawStaticEval = !isInCheck
-            ? position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score
-            : EvaluationConstants.NoHashEntry;
+        int rawStaticEval, staticEval;
 
-        var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+        if (!isInCheck)
+        {
+            rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+        }
+        else
+        {
+            staticEval = rawStaticEval = EvaluationConstants.NoHashEntry;
+        }
+
 
         ref var stack = ref Game.Stack(ply);
         stack.StaticEval = staticEval;
