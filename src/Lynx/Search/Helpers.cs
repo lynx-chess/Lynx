@@ -111,8 +111,8 @@ public sealed partial class Engine
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
 
-        var scaledBonus = evaluationDelta * EvaluationConstants.CorrectionHistoryScale;
-        var weight = 2 * Math.Min(16, depth + 1);
+        var maxBonus = Configuration.EngineSettings.CorrHistory_MaxRawBonus;
+        var bonus = Math.Clamp(evaluationDelta, -maxBonus, +maxBonus);
 
         var kingsHash = ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
@@ -124,7 +124,7 @@ public sealed partial class Engine
         Debug.Assert(pawnCorrHistIndex < (ulong)_pawnCorrHistory.Length);
 
         ref var pawnCorrHistEntry = ref _pawnCorrHistory[pawnCorrHistIndex];
-        pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
+        pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, bonus);
 
         // Non-pawn correction history - side to move
         var nonPawnSTMIndex = position.NonPawnHash[side] & Constants.NonPawnCorrHistoryHashMask;
@@ -137,7 +137,7 @@ public sealed partial class Engine
         Debug.Assert(nonPawnCorrHistSTMIndex < (ulong)_nonPawnCorrHistory.Length);
 
         ref var nonPawnSTMCorrHistEntry = ref _nonPawnCorrHistory[nonPawnCorrHistSTMIndex];
-        nonPawnSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnSTMCorrHistEntry, scaledBonus, weight);
+        nonPawnSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnSTMCorrHistEntry, bonus);
 
         // Non-pawn correction history - not side to move
         var nonPawnNoSTMIndex = position.NonPawnHash[oppositeSide] & Constants.NonPawnCorrHistoryHashMask;
@@ -150,7 +150,7 @@ public sealed partial class Engine
 
         ref var nonPawnNoSTMCorrHistEntry = ref _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
 
-        nonPawnNoSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnNoSTMCorrHistEntry, scaledBonus, weight);
+        nonPawnNoSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnNoSTMCorrHistEntry, bonus);
 
         // Minor correction history
         var minorHash = position.MinorHash ^ kingsHash;     // Add kings hash
@@ -159,24 +159,16 @@ public sealed partial class Engine
         Debug.Assert(minorCorrHistIndex < (ulong)_minorCorrHistory.Length);
 
         ref var minorCorrHistEntry = ref _minorCorrHistory[minorCorrHistIndex];
-        minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, scaledBonus, weight);
+        minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, bonus);
 
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
+        static int UpdateCorrectionHistory(int previousCorrectedScore, int bonus)
         {
-            const int weightScale = 256;
-            var maxIncrement = Configuration.EngineSettings.CorrHistory_MaxRawBonus;
-            var maxVal = Configuration.EngineSettings.CorrHistory_MaxValue;
-
-            int weightedEval =
-                ((previousCorrectedScore * (weightScale - weight))
-                    + (scaledBonus * weight))
-                / weightScale;
-
-            weightedEval = Math.Clamp(weightedEval, previousCorrectedScore - maxIncrement, previousCorrectedScore + maxIncrement);
-
-            return Math.Clamp(weightedEval, -maxVal, +maxVal);
+            // Gravity
+            return previousCorrectedScore
+                + bonus
+                - (previousCorrectedScore * Math.Abs(bonus) / Configuration.EngineSettings.CorrHistory_MaxValue);
         }
     }
 
