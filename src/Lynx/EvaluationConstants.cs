@@ -149,7 +149,7 @@ public static class EvaluationConstants
     /// <summary>
     /// Outside of the evaluation ranges (higher than <see cref="MaxEval"/>)
     /// </summary>
-    public const int NoHashEntry = 32_666;
+    public const int NoScore = -32_666;
 
     /// <summary>
     /// Evaluation to be returned when there's one single legal move.

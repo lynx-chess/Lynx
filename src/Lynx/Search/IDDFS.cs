@@ -594,7 +594,7 @@ public sealed partial class Engine
             ttBestMove = ttEntry.BestMove;
             score = ttEntry.Score;
 
-            if (ttEntry.Score == EvaluationConstants.NoHashEntry)
+            if (ttEntry.Score == EvaluationConstants.NoScore)
             {
                 score = ttEntry.StaticEval;
             }
