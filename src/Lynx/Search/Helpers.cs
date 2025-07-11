@@ -112,7 +112,7 @@ public sealed partial class Engine
         var oppositeSide = Utils.OppositeSide((int)side);
 
         var maxBonus = Configuration.EngineSettings.CorrHistory_MaxRawBonus;
-        var bonus = Math.Clamp(evaluationDelta, -maxBonus, +maxBonus);
+        var bonus = Math.Clamp(evaluationDelta * 8 / depth, -maxBonus, +maxBonus);  // TODO tune
 
         var kingsHash = ZobristTable.PieceHash(position.WhiteKingSquare, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
