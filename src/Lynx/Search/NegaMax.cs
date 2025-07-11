@@ -811,19 +811,22 @@ public sealed partial class Engine
 
         if (!isInCheck)
         {
+            //// Using TT score as better eval
+            //var staticEval = ttHit
+            //    ? ttProbeResult.StaticEval
+            //    : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
+
+            //Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
+
             rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            if (!ttHit)
+            {
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+            }
 
             // Correction history
             staticEval = CorrectStaticEvaluation(position, rawStaticEval);
-
-            /*
-             // Using TT score as better eval
-    var staticEval = ttHit
-        ? ttProbeResult.StaticEval
-        : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
-
-Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
-*/
+            stack.StaticEval = staticEval;
 
             standPat =
                 (ttNodeType == NodeType.Exact
@@ -831,13 +834,6 @@ Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "
                     || (ttNodeType == NodeType.Beta && ttScore > staticEval))
                 ? ttScore
                 : staticEval;
-
-            stack.StaticEval = staticEval;
-
-            if (!ttHit)
-            {
-                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
-            }
 
             // Standing pat beta-cutoff (updating alpha after this check)
             if (standPat >= beta)
@@ -855,7 +851,7 @@ Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "
         else
         {
             staticEval = rawStaticEval = EvaluationConstants.NoScore;
-            standPat = EvaluationConstants.NegativeCheckmateDetectionLimit + ply;
+            standPat = -EvaluationConstants.CheckMateBaseEvaluation + ply;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
