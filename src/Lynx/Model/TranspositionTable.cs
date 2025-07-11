@@ -91,7 +91,7 @@ public readonly struct TranspositionTable
     }
 
     /// <summary>
-    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
+    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoScore"/> is returned otherwise
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,7 +102,7 @@ public readonly struct TranspositionTable
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, EvaluationConstants.NoHashEntry, default, default);
+            return (EvaluationConstants.NoScore, default, default, EvaluationConstants.NoScore, default, default);
         }
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
@@ -160,7 +160,7 @@ public readonly struct TranspositionTable
         ref var entry = ref _tt[ttIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoHashEntry, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
+        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
     }
 
     /// <summary>
