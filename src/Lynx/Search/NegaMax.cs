@@ -57,7 +57,7 @@ public sealed partial class Engine
 
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
-        int ttScore = EvaluationConstants.NoHashEntry;
+        int ttScore = EvaluationConstants.NoScore;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
@@ -800,7 +800,7 @@ public sealed partial class Engine
                 : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
         */
         var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-        Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+        Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
