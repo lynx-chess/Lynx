@@ -163,14 +163,14 @@ public class PositionTest
         }
     }
 
-    [TestCase("k7/8/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
+    [TestCase("k7/8/8/4B3/8/8/8/7K w - - 0 1", Description = "B")]
+    [TestCase("k7/8/8/4b3/8/8/8/7K w - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K w - - 0 1", Description = "N+N")]
     [TestCase("k7/8/8/2nn4/8/8/8/7K w - - 0 1", Description = "n+n")]
-    [TestCase("k7/8/8/3B4/8/8/8/7K b - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K b - - 0 1", Description = "b")]
+    [TestCase("k7/8/8/4B3/8/8/8/7K b - - 0 1", Description = "B")]
+    [TestCase("k7/8/8/4b3/8/8/8/7K b - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K b - - 0 1", Description = "N+N")]
@@ -908,9 +908,9 @@ public class PositionTest
     [TestCase("1k6/1b6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "b")]
     [TestCase("1k6/8/8/8/8/8/1N6/1K6 w - - 0 1", true, 1, "N")]
     [TestCase("1k6/1n6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "n")]
-    [TestCase("1k6/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
+    [TestCase("1k6/8/8/8/8/8/2R5/1K6 w - - 0 1", false, 2, "R")]
     [TestCase("rk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 2, "r")]
-    [TestCase("1k6/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
+    [TestCase("1k6/8/8/8/8/8/2Q5/1K6 w - - 0 1", false, 4, "Q")]
     [TestCase("qk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 4, "q")]
     public void StaticEvaluation_PawnlessEndgames_SinglePiece(string fen, bool isDrawExpected, int expectedPhase, string _)
     {
