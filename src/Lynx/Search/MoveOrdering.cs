@@ -86,7 +86,7 @@ public sealed partial class Engine
 
             return baseCaptureScore
                 + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
-                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                + (MoveOrderingMVVMultiplier * SEE.PieceValues[capturedPiece])
                 + CaptureHistoryEntry(move);
         }
 
@@ -143,7 +143,7 @@ public sealed partial class Engine
 
             return baseCaptureScore
                 + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
-                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                + (MoveOrderingMVVMultiplier * SEE.PieceValues[capturedPiece])
                 + CaptureHistoryEntry(move);
         }
 

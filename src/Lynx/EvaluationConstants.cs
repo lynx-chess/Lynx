@@ -185,6 +185,8 @@ public static class EvaluationConstants
 
     public const int BadCaptureMoveBaseScoreValue = 16_384;
 
+    public const int MoveOrderingMVVMultiplier = 10;
+
     //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 
     /// <summary>
