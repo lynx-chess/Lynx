@@ -1417,11 +1417,30 @@ public class Position : IDisposable
         int packedBonus = 0;
 
         var offset = Utils.PieceOffset(side);
-
         var oppositeSideOffset = 6 - offset;
         var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
 
         var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset];
+
+        var pawnThreats = _attacks[(int)Piece.P + offset] & oppositeSidePieces;
+
+        var defendedPawnThreats = pawnThreats & defendedSquares;
+        while (defendedPawnThreats != 0)
+        {
+            defendedPawnThreats = defendedPawnThreats.WithoutLS1B(out var square);
+            var attackedPiece = Board[square];
+
+            packedBonus += PawnThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
+        }
+
+        var undefendedPawnThreats = pawnThreats & (~defendedSquares);
+        while (undefendedPawnThreats != 0)
+        {
+            undefendedPawnThreats = undefendedPawnThreats.WithoutLS1B(out var square);
+            var attackedPiece = Board[square];
+
+            packedBonus += PawnThreatsBonus[attackedPiece - oppositeSideOffset];
+        }
 
         var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
 
