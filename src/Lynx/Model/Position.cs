@@ -1594,8 +1594,12 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int DoubleAttacks()
     {
+        var white = OccupancyBitBoards[(int)Side.White];
+        var black = OccupancyBitBoards[(int)Side.Black];
+
         return DoubleAttacksBonus *
-            (_doubleAttacksBySide[(int)Side.White].CountBits() - _doubleAttacksBySide[(int)Side.Black].CountBits());
+            ((_doubleAttacksBySide[(int)Side.White] & black).CountBits()
+            - (_doubleAttacksBySide[(int)Side.Black] & white).CountBits());
     }
 
     /// <summary>
