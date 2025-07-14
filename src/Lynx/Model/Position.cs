@@ -1598,7 +1598,9 @@ public class Position : IDisposable
         var packedScore = 0;
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
 
-        var doubleAttacks = _doubleAttacksBySide[side] & OccupancyBitBoards[oppositeSide];
+        var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset];
+
+        var doubleAttacks = _doubleAttacksBySide[side] & OccupancyBitBoards[oppositeSide] & (~defendedSquares);
 
         while (doubleAttacks != 0)
         {
