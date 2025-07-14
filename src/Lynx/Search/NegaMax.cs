@@ -57,7 +57,7 @@ public sealed partial class Engine
 
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
-        int ttScore = EvaluationConstants.NoHashEntry;
+        int ttScore = EvaluationConstants.NoScore;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
@@ -364,7 +364,6 @@ public sealed partial class Engine
                 // 🔍 History pruning -  all quiet moves can be pruned
                 // once we find one with a history score too low
                 if (!isCapture
-                    && moveScore < EvaluationConstants.CounterMoveValue
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
                     && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
@@ -625,10 +624,9 @@ public sealed partial class Engine
                         }
 
                         // 🔍 Post-LMR continuation history update
-                        var rawHistoryBonus = EvaluationConstants.HistoryBonus[depth];
                         var historyBonus = score > alpha
-                            ? rawHistoryBonus
-                            : -rawHistoryBonus;
+                            ? EvaluationConstants.HistoryBonus[depth]
+                            : -EvaluationConstants.HistoryMalus[depth];
 
                         ref var contHist = ref ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
                         contHist = ScoreHistoryMove(contHist, historyBonus);
@@ -802,7 +800,7 @@ public sealed partial class Engine
                 : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
         */
         var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-        Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+        Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
