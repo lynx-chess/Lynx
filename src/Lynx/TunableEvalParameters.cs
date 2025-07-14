@@ -6058,12 +6058,17 @@ public static class EvaluationParams
 	/// </summary>
 	public const int PieceAttackedByPawnPenalty = -2097201;
 
-	/// <summary>
-	/// <see cref="Utils.Pack(5, 5)"/>
-	/// </summary>
-	public const int DoubleAttacksBonus = 327685;
+	public static readonly int[] DoubleAttacksBonus =
+    [
+        Pack(2, 4),
+        Pack(19, 12),
+        Pack(27, 26),
+        Pack(61, 77),
+        Pack(214, 197),
+        Pack(-45, 400)
+    ];
 
-	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+    public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
 		Pack(0, 0),
 		Pack(2, 4),

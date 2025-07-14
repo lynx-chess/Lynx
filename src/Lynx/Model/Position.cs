@@ -990,7 +990,8 @@ public class Position : IDisposable
             - Checks((int)Side.Black, (int)Side.White);
 
         // Double attacks
-        packedScore += DoubleAttacks();
+        packedScore += DoubleAttacks((int)Side.White, (int)Side.Black)
+            - DoubleAttacks((int)Side.Black, (int)Side.White);
 
         if (gamePhase > MaxPhase)    // Early promotions
         {
@@ -1592,14 +1593,22 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int DoubleAttacks()
+    private int DoubleAttacks(int side, int oppositeSide)
     {
-        var white = OccupancyBitBoards[(int)Side.White];
-        var black = OccupancyBitBoards[(int)Side.Black];
+        var packedScore = 0;
+        var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
 
-        return DoubleAttacksBonus *
-            ((_doubleAttacksBySide[(int)Side.White] & black).CountBits()
-            - (_doubleAttacksBySide[(int)Side.Black] & white).CountBits());
+        var doubleAttacks = _doubleAttacksBySide[side] & OccupancyBitBoards[oppositeSide];
+
+        while (doubleAttacks != 0)
+        {
+            doubleAttacks = doubleAttacks.WithoutLS1B(out var squareIndex);
+
+            var attackedPiece = Board[squareIndex];
+            packedScore += DoubleAttacksBonus[attackedPiece - oppositeSideOffset];
+        }
+
+        return packedScore;
     }
 
     /// <summary>
