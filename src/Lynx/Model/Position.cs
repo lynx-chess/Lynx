@@ -966,8 +966,8 @@ public class Position : IDisposable
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats(whiteBucket, (int)Side.White, (int)Side.Black)
-            - Threats(blackBucket, (int)Side.Black, (int)Side.White);
+        packedScore += Threats(blackBucket, (int)Side.White, (int)Side.Black)
+            - Threats(whiteBucket, (int)Side.Black, (int)Side.White);
 
         // Checks
         packedScore += Checks((int)Side.White, (int)Side.Black)
