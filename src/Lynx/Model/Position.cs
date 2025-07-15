@@ -960,11 +960,6 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
-        // Pieces attacked by pawns bonus
-        packedScore += PieceAttackedByPawnPenalty
-            * ((blackPawnAttacks & _occupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
-                - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
-
         // Threats
         packedScore += Threats((int)Side.White, (int)Side.Black)
             - Threats((int)Side.Black, (int)Side.White);
@@ -1422,6 +1417,26 @@ public class Position : IDisposable
         var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
 
         var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset];
+
+        var pawnThreats = _attacks[(int)Piece.P + offset] & oppositeSidePieces;
+
+        var defendedPawnThreats = pawnThreats & defendedSquares;
+        while (defendedPawnThreats != 0)
+        {
+            defendedPawnThreats = defendedPawnThreats.WithoutLS1B(out var square);
+            var attackedPiece = Board[square];
+
+            packedBonus += PawnThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
+        }
+
+        var undefendedPawnThreats = pawnThreats & (~defendedSquares);
+        while (undefendedPawnThreats != 0)
+        {
+            undefendedPawnThreats = undefendedPawnThreats.WithoutLS1B(out var square);
+            var attackedPiece = Board[square];
+
+            packedBonus += PawnThreatsBonus[attackedPiece - oppositeSideOffset];
+        }
 
         var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
 
