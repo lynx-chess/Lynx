@@ -85,7 +85,6 @@ public sealed partial class Engine
                 : BadCaptureMoveBaseScoreValue;
 
             return baseCaptureScore
-                + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 + (MoveOrderingMVVMultiplier * SEE.PieceValues[capturedPiece])
                 + CaptureHistoryEntry(move);
         }
@@ -142,7 +141,6 @@ public sealed partial class Engine
                 $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
             return baseCaptureScore
-                + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 + (MoveOrderingMVVMultiplier * SEE.PieceValues[capturedPiece])
                 + CaptureHistoryEntry(move);
         }
