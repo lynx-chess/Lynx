@@ -59,8 +59,8 @@ public sealed partial class Engine
         var targetSquare = move.TargetSquare();
         var oppositeSide = Utils.OppositeSide(position.Side);
 
-        var isStartSquareAttacked = position.AttacksBySide[oppositeSide].GetBit(sourceSquare) ? 1 : 0;
-        var isTargetSquareAttacked = position.AttacksBySide[oppositeSide].GetBit(targetSquare) ? 1 : 0;
+        var isStartSquareAttacked = position.IsSquareAttackedThreats(sourceSquare, oppositeSide) ? 1 : 0;
+        var isTargetSquareAttacked = position.IsSquareAttackedThreats(targetSquare, oppositeSide) ? 1 : 0;
 
         var index = (move.Piece() * pieceOffset)
             + (targetSquare * targetSquareOffset)

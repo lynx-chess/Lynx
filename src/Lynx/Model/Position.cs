@@ -1652,6 +1652,26 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSquareAttackedThreats(int squareIndex, int sideToMove)
+    {
+        Debug.Assert(sideToMove != (int)Side.Both);
+
+        // True for movegen, except IDDFS.OnlyOneLegalMove one, and IsInCheck
+        // False for IsValid/WasProduceByAValidMove
+        if (_attacksBySide[(int)Side.White] != 0)
+        {
+            Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
+
+            Debug.Assert(_attacks[(int)Piece.K] != 0);
+            Debug.Assert(_attacks[(int)Piece.k] != 0);
+
+            return _attacksBySide[sideToMove].GetBit(squareIndex);
+        }
+
+        return IsSquareAttacked(squareIndex, (Side)sideToMove);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsInCheck()
     {
         var oppositeSideInt = Utils.OppositeSide(_side);
