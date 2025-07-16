@@ -53,7 +53,7 @@ public sealed partial class Engine
     {
         const int pieceOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
-        const int startSquareOffset = 2;
+        const int startSquareAttackedOffset = 2;
 
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
@@ -64,7 +64,7 @@ public sealed partial class Engine
 
         var index = (move.Piece() * pieceOffset)
             + (targetSquare * targetSquareOffset)
-            + (isStartSquareAttacked * startSquareOffset)
+            + (isStartSquareAttacked * startSquareAttackedOffset)
             + isTargetSquareAttacked;
 
         return ref _quietHistory[index];
