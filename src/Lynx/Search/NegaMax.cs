@@ -334,12 +334,14 @@ public sealed partial class Engine
 
             var moveScore = moveScores[moveIndex];
             var isCapture = move.IsCapture();
+            // We precalculate it, since position instance will change sides depending on when we invoke QuietHistory() local method
+            var oppositeSide = Utils.OppositeSide(position.Side);
 
             int? quietHistory = null;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             int QuietHistory() => quietHistory ??=
-                QuietHistoryEntry(position, move)
+                QuietHistoryEntry(position, oppositeSide, move)
                 + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
