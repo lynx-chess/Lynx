@@ -301,7 +301,7 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
+            moveScores[i] = ScoreMove(position, pseudoLegalMoves[i], ply, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -339,7 +339,7 @@ public sealed partial class Engine
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             int QuietHistory() => quietHistory ??=
-                _quietHistory[move.Piece()][move.TargetSquare()]
+                QuietHistoryEntry(position, move)
                 + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
@@ -696,7 +696,7 @@ public sealed partial class Engine
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(position, historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
                     }
 
                     nodeType = NodeType.Beta;

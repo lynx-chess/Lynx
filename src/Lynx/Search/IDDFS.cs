@@ -22,10 +22,10 @@ public sealed partial class Engine
     private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     /// <summary>
-    /// 12 x 64
-    /// piece x target square
+    /// 12 x 64 x 2 x 2
+    /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly int[][] _quietHistory;
+    private readonly int[] _quietHistory = GC.AllocateArray<int>(12 * 64 * 2 * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
@@ -606,7 +606,7 @@ public sealed partial class Engine
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, ttBestMove);
+            moveScores[i] = ScoreMove(position, pseudoLegalMoves[i], 0, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)

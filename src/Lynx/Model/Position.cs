@@ -67,6 +67,8 @@ public class Position : IDisposable
     /// </summary>
     public byte Castle { get => _castle; private set => _castle = value; }
 
+    public BitBoard[] AttacksBySide => _attacksBySide;
+
 #pragma warning restore RCS1085 // Use auto-implemented property
 
     public BitBoard Queens => _pieceBitBoards[(int)Piece.Q] | _pieceBitBoards[(int)Piece.q];
