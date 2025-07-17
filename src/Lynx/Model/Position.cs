@@ -970,8 +970,8 @@ public class Position : IDisposable
             - Threats((int)Side.Black, (int)Side.White);
 
         // Checks
-        packedScore += Checks((int)Side.White, (int)Side.Black)
-            - Checks((int)Side.Black, (int)Side.White);
+        packedScore += Checks((int)Side.White, (int)Side.Black, blackBucket)
+            - Checks((int)Side.Black, (int)Side.White, whiteBucket);
 
         if (gamePhase > MaxPhase)    // Early promotions
         {
@@ -1527,7 +1527,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Checks(int side, int oppositeSide)
+    private int Checks(int side, int oppositeSide, int oppositeSideBucket)
     {
         int packedBonus = 0;
 
@@ -1555,8 +1555,8 @@ public class Position : IDisposable
             var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
             var safeChecksCount = checksCount - unsafeChecksCount;
 
-            packedBonus += SafeCheckBonus[piece] * safeChecksCount;
-            packedBonus += UnsafeCheckBonus[piece] * unsafeChecksCount;
+            packedBonus += SafeCheckBonus[oppositeSideBucket][piece] * safeChecksCount;
+            packedBonus += UnsafeCheckBonus[oppositeSideBucket][piece] * unsafeChecksCount;
         }
 
         return packedBonus;
