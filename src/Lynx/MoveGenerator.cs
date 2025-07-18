@@ -162,8 +162,8 @@ public static class MoveGenerator
 
                     // Double pawn push
                     // Inside of the single pawn push if because singlePush square cannot be occupied either
-                    if ((sourceRank == 2 && position.Side == Side.Black)
-                        || (sourceRank == 7 && position.Side == Side.White))
+                    if ((sourceRank == 2)        // position.Side == Side.Black is always true, otherwise targetRank would be 1
+                        || (sourceRank == 7))    // position.Side == Side.White is always true, otherwise targetRank would be 8
                     {
                         var doublePushSquare = sourceSquare + (2 * pawnPush);
 
