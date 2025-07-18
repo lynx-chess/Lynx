@@ -78,6 +78,36 @@ public static class MoveGenerator
     }
 
     /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<Move> GenerateAllMoves_DoubleChecks(Position position, Span<Move> movePool)
+    {
+        Debug.Assert(position.Side != Side.Both);
+
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+        var oppositeSide = Utils.OppositeSide(position.Side);
+        var sameSideKing = position.PieceBitBoards[(int)Piece.K + offset];
+
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
+
+        if (position._attacks[oppositeSide] == 0
+            || (sameSideKing & position._doubleAttacksBySide[oppositeSide]) == 0)
+        {
+            GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
+            GenerateCastlingMoves(ref localIndex, movePool, position);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position);
+        }
+
+        return movePool[..localIndex];
+    }
+
+    /// <summary>
     /// Generates all psuedo-legal captures from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,6 +126,36 @@ public static class MoveGenerator
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
+
+        return movePool[..localIndex];
+    }
+
+    /// <summary>
+    /// Generates all psuedo-legal captures from <paramref name="position"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<Move> GenerateAllCaptures_DoubleChecks(Position position, Span<Move> movePool)
+    {
+        Debug.Assert(position.Side != Side.Both);
+
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+        var oppositeSide = Utils.OppositeSide(position.Side);
+        var sameSideKing = position.PieceBitBoards[(int)Piece.K + offset];
+
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+
+        if (position._attacks[oppositeSide] == 0
+            || (sameSideKing & position._doubleAttacksBySide[oppositeSide]) == 0)
+        {
+            GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
+            GenerateCastlingMoves(ref localIndex, movePool, position);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
+        }
 
         return movePool[..localIndex];
     }

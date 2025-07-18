@@ -295,7 +295,7 @@ public sealed partial class Engine
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves_DoubleChecks(position, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
 
@@ -838,7 +838,7 @@ public sealed partial class Engine
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures_DoubleChecks(position, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
