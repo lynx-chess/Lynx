@@ -28,6 +28,7 @@ public class Position : IDisposable
 
     internal readonly BitBoard[] _attacks;
     internal readonly BitBoard[] _attacksBySide;
+    internal readonly BitBoard[] _doubleAttacksBySide;
 
     private byte _castle;
     private BoardSquare _enPassant;
@@ -94,6 +95,7 @@ public class Position : IDisposable
         _board = parsedFEN._board;
         _attacks = ArrayPool<BitBoard>.Shared.Rent(12);
         _attacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
+        _doubleAttacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
 
         _side = parsedFEN.Side;
         _castle = parsedFEN._castle;
@@ -145,6 +147,10 @@ public class Position : IDisposable
         _attacksBySide[(int)Side.White] = position._attacksBySide[(int)Side.White];
         _attacksBySide[(int)Side.Black] = position._attacksBySide[(int)Side.Black];
 
+        _doubleAttacksBySide = ArrayPool<BitBoard>.Shared.Rent(2);
+        _doubleAttacksBySide[(int)Side.White] = position._doubleAttacksBySide[(int)Side.White];
+        _doubleAttacksBySide[(int)Side.Black] = position._doubleAttacksBySide[(int)Side.Black];
+
         _side = position._side;
         _castle = position._castle;
         _enPassant = position._enPassant;
@@ -168,6 +174,7 @@ public class Position : IDisposable
 
         _attacks.AsSpan().Clear();
         _attacksBySide.AsSpan().Clear();
+        _doubleAttacksBySide.AsSpan().Clear();
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -483,6 +490,7 @@ public class Position : IDisposable
     {
         _attacks.AsSpan().Clear();
         _attacksBySide.AsSpan().Clear();
+        _doubleAttacksBySide.AsSpan().Clear();
 
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
@@ -689,11 +697,19 @@ public class Position : IDisposable
         var whitePawns = _pieceBitBoards[(int)Piece.P];
         var blackPawns = _pieceBitBoards[(int)Piece.p];
 
-        BitBoard whitePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
-        BitBoard blackPawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
+        ulong whitePawnRightAttacts = whitePawns.ShiftUpRight();
+        ulong whitePawnsLeftAttacks = whitePawns.ShiftUpLeft();
+        BitBoard whitePawnAttacks = whitePawnRightAttacts | whitePawnsLeftAttacks;
+
+        ulong blackPawnsRightAttacks = blackPawns.ShiftDownRight();
+        ulong blackPawnsLeftAttacks = blackPawns.ShiftDownLeft();
+        BitBoard blackPawnAttacks = blackPawnsRightAttacks | blackPawnsLeftAttacks;
 
         _attacksBySide[(int)Side.White] = _attacks[(int)Piece.P] = whitePawnAttacks;
         _attacksBySide[(int)Side.Black] = _attacks[(int)Piece.p] = blackPawnAttacks;
+
+        _doubleAttacksBySide[(int)Side.White] = (whitePawnRightAttacts & whitePawnsLeftAttacks);
+        _doubleAttacksBySide[(int)Side.Black] = (blackPawnsRightAttacks & blackPawnsLeftAttacks);
 
         var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
@@ -1196,7 +1212,9 @@ public class Position : IDisposable
 
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
+
         _attacks[(int)Piece.R + Utils.PieceOffset(pieceSide)] |= attacks;
+        _doubleAttacksBySide[pieceSide] |= (attacks & _attacksBySide[pieceSide]);
         _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
@@ -1240,7 +1258,9 @@ public class Position : IDisposable
     private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KnightAttacks[squareIndex];
+
         _attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
+        _doubleAttacksBySide[pieceSide] |= (attacks & _attacksBySide[pieceSide]);
         _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
@@ -1261,7 +1281,9 @@ public class Position : IDisposable
 
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
+
         _attacks[(int)Piece.B + offset] |= attacks;
+        _doubleAttacksBySide[pieceSide] |= (attacks & _attacksBySide[pieceSide]);
         _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
@@ -1310,7 +1332,9 @@ public class Position : IDisposable
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
+
         _attacks[(int)Piece.Q + Utils.PieceOffset(pieceSide)] |= attacks;
+        _doubleAttacksBySide[pieceSide] |= (attacks & _attacksBySide[pieceSide]);
         _attacksBySide[pieceSide] |= attacks;
 
         // Mobility
@@ -1326,7 +1350,9 @@ public class Position : IDisposable
     internal int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KingAttacks[squareIndex];
+
         _attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
+        _doubleAttacksBySide[pieceSide] |= (attacks & _attacksBySide[pieceSide]);
         _attacksBySide[pieceSide] |= attacks;
 
         // Virtual mobility (as if Queen)
@@ -1965,6 +1991,7 @@ public class Position : IDisposable
         ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(_attacks, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(_attacksBySide, clearArray: true);
+        ArrayPool<BitBoard>.Shared.Return(_doubleAttacksBySide, clearArray: true);
 
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
