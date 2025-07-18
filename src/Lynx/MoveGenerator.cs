@@ -143,7 +143,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -165,7 +165,7 @@ public static class MoveGenerator
                     {
                         var doublePushSquare = sourceSquare + (2 * pawnPush);
 
-                        if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare))
+                        if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare))
                         {
                             movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                         }
@@ -225,7 +225,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -452,7 +452,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -475,7 +475,7 @@ public static class MoveGenerator
                 // Inside of the if because singlePush square cannot be occupied either
 
                 var doublePushSquare = sourceSquare + (2 * pawnPush);
-                if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
+                if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare)
                     && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White))
                     && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
                 {
