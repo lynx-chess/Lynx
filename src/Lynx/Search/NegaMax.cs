@@ -154,7 +154,7 @@ public sealed partial class Engine
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
-        else if (!pvNode && !isInCheck)
+        else if (!pvNode && !isInCheck && !isVerifyingSE)
         {
             if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
@@ -193,7 +193,7 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated && !isVerifyingSE)
+            if (isNotGettingCheckmated)
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
