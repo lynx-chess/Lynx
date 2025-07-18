@@ -78,9 +78,37 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool, bool isInCheck)
+    {
+        Debug.Assert(position.Side != Side.Both);
+
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+
+        GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
+
+        if (!isInCheck)
+        {
+            GenerateCastlingMoves(ref localIndex, movePool, position);
+        }
+
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position);
+
+        return movePool[..localIndex];
+    }
+
+    /// <summary>
+    /// Generates all psuedo-legal captures from <paramref name="position"/>
+    /// </summary>
+    [Obsolete("dev and test only")]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
@@ -91,6 +119,34 @@ public static class MoveGenerator
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
+
+        return movePool[..localIndex];
+    }
+
+    /// <summary>
+    /// Generates all psuedo-legal captures from <paramref name="position"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, bool isInCheck)
+    {
+        Debug.Assert(position.Side != Side.Both);
+
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+
+        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
+
+        if (!isInCheck)
+        {
+            GenerateCastlingMoves(ref localIndex, movePool, position);
+        }
+
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
@@ -399,6 +455,37 @@ public static class MoveGenerator
                 || IsAnyPieceMoveValid((int)Piece.N + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.R + offset, position)
                 || IsAnyCastlingMoveValid(position);
+#if DEBUG
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, $"Error in {nameof(CanGenerateAtLeastAValidMove)}");
+            return false;
+        }
+#endif
+    }
+
+    /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool CanGenerateAtLeastAValidMove(Position position, bool isInCheck)
+    {
+        Debug.Assert(position.Side != Side.Both);
+
+        var offset = Utils.PieceOffset(position.Side);
+
+#if DEBUG
+        try
+        {
+#endif
+            return IsAnyPawnMoveValid(position, offset)
+                || IsAnyPieceMoveValid((int)Piece.K + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+                || (!isInCheck && IsAnyCastlingMoveValid(position));
 #if DEBUG
         }
         catch (Exception e)
