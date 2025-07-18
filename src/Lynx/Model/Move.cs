@@ -134,7 +134,13 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapturedPiece(int move, int capturedPiece) => move | (capturedPiece << 20);
+    public static Move EncodePromotionFromPawnMove(Move pawnMove, int promotedPiece)
+    {
+        return pawnMove | promotedPiece;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move EncodeCapturedPiece(Move move, int capturedPiece) => move | (capturedPiece << 20);
 
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
