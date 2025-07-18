@@ -41,7 +41,7 @@ public static class MoveGenerator
     internal static int Init() => TRUE;
 
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
@@ -55,7 +55,7 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool)
@@ -78,30 +78,7 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
-    {
-        Debug.Assert(position.Side != Side.Both);
-
-        int localIndex = 0;
-
-        var offset = Utils.PieceOffset(position.Side);
-
-        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
-
-        return movePool[..localIndex];
-    }
-
-    /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal captures from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
@@ -143,7 +120,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -165,9 +142,9 @@ public static class MoveGenerator
                     if ((sourceRank == 2)        // position.Side == Side.Black is always true, otherwise targetRank would be 1
                         || (sourceRank == 7))    // position.Side == Side.White is always true, otherwise targetRank would be 8
                     {
-                        var doublePushSquare = sourceSquare + (2 * pawnPush);
+                        var doublePushSquare = singlePushSquare + pawnPush;
 
-                        if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare))
+                        if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare))
                         {
                             movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                         }
@@ -229,7 +206,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -410,7 +387,7 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool CanGenerateAtLeastAValidMove(Position position)
@@ -460,7 +437,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -474,20 +451,23 @@ public static class MoveGenerator
                         return true;
                     }
                 }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece)))
+                else
                 {
-                    return true;
-                }
+                    if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece)))
+                    {
+                        return true;
+                    }
 
-                // Double pawn push
-                // Inside of the if because singlePush square cannot be occupied either
-
-                var doublePushSquare = sourceSquare + (2 * pawnPush);
-                if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
-                    && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White))
-                    && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
-                {
-                    return true;
+                    // Double pawn push
+                    // Inside of the if because singlePush square cannot be occupied either
+                    var doublePushSquare = singlePushSquare + pawnPush;
+                    if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare)
+                        && (sourceRank == 2         // position.Side == Side.Black is always true, otherwise targetRank would be 1
+                            || sourceRank == 7)     // position.Side == Side.White is always true, otherwise targetRank would be 8
+                        && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
+                    {
+                        return true;
+                    }
                 }
             }
 
