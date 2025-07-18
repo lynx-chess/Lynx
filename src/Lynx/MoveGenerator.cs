@@ -128,10 +128,12 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
+                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
+                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
+                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+
+                    localIndex += 4;
                 }
                 else
                 {
@@ -142,7 +144,7 @@ public static class MoveGenerator
                     if ((sourceRank == 2)        // position.Side == Side.Black is always true, otherwise targetRank would be 1
                         || (sourceRank == 7))    // position.Side == Side.White is always true, otherwise targetRank would be 8
                     {
-                        var doublePushSquare = sourceSquare + (2 * pawnPush);
+                        var doublePushSquare = singlePushSquare + pawnPush;
 
                         if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare))
                         {
@@ -173,10 +175,12 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B + offset);
+                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
+                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R + offset);
+                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
+                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B + offset);
+
+                    localIndex += 4;
                 }
                 else
                 {
@@ -214,10 +218,12 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
+                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
+                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
+                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+
+                    localIndex += 4;
                 }
             }
 
@@ -242,10 +248,12 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B + offset);
+                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
+                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R + offset);
+                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
+                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B + offset);
+
+                    localIndex += 4;
                 }
                 else
                 {
@@ -453,20 +461,23 @@ public static class MoveGenerator
                         return true;
                     }
                 }
-                else if (IsValidMove(position, singlePawnPush))
+                else
                 {
-                    return true;
-                }
+                    if (IsValidMove(position, singlePawnPush))
+                    {
+                        return true;
+                    }
 
-                // Double pawn push
-                // Inside of the if because singlePush square cannot be occupied either
-
-                var doublePushSquare = sourceSquare + (2 * pawnPush);
-                if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare)
-                    && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White))
-                    && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
-                {
-                    return true;
+                    // Double pawn push
+                    // Inside of the if because singlePush square cannot be occupied either
+                    var doublePushSquare = singlePushSquare + pawnPush;
+                    if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare)
+                        && (sourceRank == 2         // position.Side == Side.Black is always true, otherwise targetRank would be 1
+                            || sourceRank == 7)     // position.Side == Side.White is always true, otherwise targetRank would be 8
+                        && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
+                    {
+                        return true;
+                    }
                 }
             }
 
