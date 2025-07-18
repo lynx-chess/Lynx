@@ -544,13 +544,13 @@ public sealed partial class Engine
                                     reduction += Configuration.EngineSettings.LMR_Improving;
                                 }
 
-                                if (cutnode)
-                                {
-                                    reduction += Configuration.EngineSettings.LMR_Cutnode;
-                                }
-
                                 if (!ttPv)
                                 {
+                                    if (cutnode)
+                                    {
+                                        reduction += Configuration.EngineSettings.LMR_Cutnode;
+                                    }
+
                                     reduction += Configuration.EngineSettings.LMR_TTPV;
                                 }
 
