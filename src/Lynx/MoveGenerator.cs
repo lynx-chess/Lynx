@@ -128,10 +128,12 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+                    var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
+
+                    movePool[localIndex] = knightPromo + 3;         // Q
+                    movePool[localIndex + 1] = knightPromo + 2;     // R
+                    movePool[localIndex + 2] = knightPromo;         // N
+                    movePool[localIndex + 3] = knightPromo + 1;     // B
 
                     localIndex += 4;
                 }
@@ -175,10 +177,12 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B + offset);
+                    var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
+
+                    movePool[localIndex] = knightPromo + 3;         // Q
+                    movePool[localIndex + 1] = knightPromo + 2;     // R
+                    movePool[localIndex + 2] = knightPromo;         // N
+                    movePool[localIndex + 3] = knightPromo + 1;     // B;
 
                     localIndex += 4;
                 }
@@ -218,10 +222,12 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+                    var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
+
+                    movePool[localIndex] = knightPromo + 3;         // Q
+                    movePool[localIndex + 1] = knightPromo + 2;     // R
+                    movePool[localIndex + 2] = knightPromo;         // N
+                    movePool[localIndex + 3] = knightPromo + 1;     // B
 
                     localIndex += 4;
                 }
@@ -248,10 +254,12 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    movePool[localIndex] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex + 1] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex + 2] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex + 3] = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B + offset);
+                    var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
+
+                    movePool[localIndex] = knightPromo + 3;         // Q
+                    movePool[localIndex + 1] = knightPromo + 2;     // R
+                    movePool[localIndex + 2] = knightPromo;         // N
+                    movePool[localIndex + 3] = knightPromo + 1;     // B
 
                     localIndex += 4;
                 }
@@ -453,10 +461,11 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset)))
+                    var queenPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
+                    if (IsValidMove(position, queenPromo)               // Q
+                        || IsValidMove(position, queenPromo - 1)        // R
+                        || IsValidMove(position, queenPromo - 3)        // N
+                        || IsValidMove(position, queenPromo - 2))       // B
                     {
                         return true;
                     }
@@ -503,10 +512,12 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B + offset)))
+                    var queenPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
+
+                    if (IsValidMove(position, queenPromo)               // Q
+                        || IsValidMove(position, queenPromo - 1)        // R
+                        || IsValidMove(position, queenPromo - 3)        // N
+                        || IsValidMove(position, queenPromo - 2))       // B
                     {
                         return true;
                     }
