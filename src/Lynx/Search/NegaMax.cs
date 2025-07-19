@@ -905,6 +905,18 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score, isQuiescence: true);
 
+            // Improving alpha
+            if (score > alpha)
+            {
+                alpha = score;
+                bestMove = move;
+
+                _pVTable[pvIndex] = move;
+                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+
+                nodeType = NodeType.Exact;
+            }
+
             if (score > bestScore)
             {
                 bestScore = score;
@@ -921,18 +933,6 @@ public sealed partial class Engine
 
                     nodeType = NodeType.Beta;
                     break;
-                }
-
-                // Improving alpha
-                if (score > alpha)
-                {
-                    alpha = score;
-                    bestMove = move;
-
-                    _pVTable[pvIndex] = move;
-                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
-
-                    nodeType = NodeType.Exact;
                 }
             }
 
