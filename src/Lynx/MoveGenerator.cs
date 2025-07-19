@@ -521,11 +521,9 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    var queenPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
-                    if (IsValidMove(position, queenPromo)               // Q
-                        || IsValidMove(position, queenPromo - 1)        // R
-                        || IsValidMove(position, queenPromo - 3)        // N
-                        || IsValidMove(position, queenPromo - 2))       // B
+                    // If any of the promotions isn't valid, it means that the pawn move unveils a discovered check, or that the promoted piece doesn't stop an existing check in the 8th rank
+                    // Therefore none of the other promotions will be valid either
+                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset)))
                     {
                         return true;
                     }
@@ -572,12 +570,9 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    var queenPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset);
-
-                    if (IsValidMove(position, queenPromo)               // Q
-                        || IsValidMove(position, queenPromo - 1)        // R
-                        || IsValidMove(position, queenPromo - 3)        // N
-                        || IsValidMove(position, queenPromo - 2))       // B
+                    // If any of the promotions that capture the same piece isn't valid, it means that the pawn move unveils a discovered check, or that the capture doesn't stop an existing check in the 8th rank
+                    // Therefore none of the other promotions capturing the same piece will be valid either
+                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset)))
                     {
                         return true;
                     }
