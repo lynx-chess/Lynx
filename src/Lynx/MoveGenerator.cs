@@ -91,13 +91,19 @@ public static class MoveGenerator
         var oppositeSide = Utils.OppositeSide(position.Side);
         var sameSideKing = position.PieceBitBoards[(int)Piece.K + offset];
 
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
+        bool noDoubleChecks = position._attacks[oppositeSide] == 0
+            || (sameSideKing & position._doubleAttacksBySide[oppositeSide]) == 0;
 
-        if (position._attacks[oppositeSide] == 0
-            || (sameSideKing & position._doubleAttacksBySide[oppositeSide]) == 0)
+        if (noDoubleChecks)
         {
             GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
             GenerateCastlingMoves(ref localIndex, movePool, position);
+        }
+
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
+
+        if (noDoubleChecks)
+        {
             GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
             GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
             GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
@@ -144,13 +150,19 @@ public static class MoveGenerator
         var oppositeSide = Utils.OppositeSide(position.Side);
         var sameSideKing = position.PieceBitBoards[(int)Piece.K + offset];
 
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+        bool noDoubleChecks = position._attacks[oppositeSide] == 0
+            || (sameSideKing & position._doubleAttacksBySide[oppositeSide]) == 0;
 
-        if (position._attacks[oppositeSide] == 0
-            || (sameSideKing & position._doubleAttacksBySide[oppositeSide]) == 0)
+        if (noDoubleChecks)
         {
             GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
             GenerateCastlingMoves(ref localIndex, movePool, position);
+        }
+
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+
+        if (noDoubleChecks)
+        {
             GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
             GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
             GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
