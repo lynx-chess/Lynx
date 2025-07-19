@@ -98,16 +98,15 @@ public static class MoveGenerator
         {
             GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
             GenerateCastlingMoves(ref localIndex, movePool, position);
-        }
-
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
-
-        if (noDoubleChecks)
-        {
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
             GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
             GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
             GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
             GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position);
+        }
+        else
+        {
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
         }
 
         return movePool[..localIndex];
@@ -157,16 +156,15 @@ public static class MoveGenerator
         {
             GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
             GenerateCastlingMoves(ref localIndex, movePool, position);
-        }
-
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
-
-        if (noDoubleChecks)
-        {
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
             GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
             GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
             GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
             GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
+        }
+        else
+        {
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
         }
 
         return movePool[..localIndex];
