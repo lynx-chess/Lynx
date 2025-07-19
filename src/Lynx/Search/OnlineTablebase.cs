@@ -20,7 +20,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                    tablebaseResult.BestMove, score: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
+                    tablebaseResult.BestMove, score: 0, targetDepth: 0, 1, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
                     Depth = 666,                // In case some guis proritize the info command with biggest depth
