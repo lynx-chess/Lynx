@@ -1004,6 +1004,11 @@ public class Position : IDisposable
 
                             break;
                         }
+                    //case 4:
+                    //    {
+                    //        // Rook vs 2 minors should be a draw
+
+                    //    }
                     case 3:
                         {
                             var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
@@ -1013,12 +1018,10 @@ public class Position : IDisposable
                                 return (0, gamePhase);
                             }
 
+                            // Rook vs a minor is a draw
                             // Without rooks, only BB vs N is a win and BN vs N can have some chances
-                            // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
-                            //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
-                            //{
-                            //    packedScore >>= 1; // /2
-                            //}
+
+                            eval >>= 1; // /2
 
                             break;
                         }
