@@ -1053,7 +1053,7 @@ public class Position : IDisposable
                     && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
                         Constants.DarkSquares[blackBishops.GetLS1BIndex()])
                 {
-                    eval >>= 1; // /2
+                    eval >>= 2; // /4
                 }
             }
         }
