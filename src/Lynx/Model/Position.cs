@@ -1004,16 +1004,23 @@ public class Position : IDisposable
 
                             break;
                         }
-                    //case 4:
-                    //    {
-                    //        // Rook vs 2 minors should be a draw
+                    case 4:
+                        {
+                            // Rook vs 2 minors should be a draw
+                            // Rook and minor vs minor it doesn't matter if it's reduced
+                            if ((_pieceBitBoards[(int)Piece.Q] | _pieceBitBoards[(int)Piece.q]) == 0)
+                            {
+                                eval >>= 1; // /2
+                            }
 
-                    //    }
+                            break;
+                        }
                     case 3:
                         {
                             var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
 
-                            if (_pieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
+                            // NN vs N, NN vs B
+                            if (_pieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)
                             {
                                 return (0, gamePhase);
                             }
