@@ -55,9 +55,8 @@ public sealed partial class Engine
 
             // History move or 0 if not found
             return BaseMoveScore
-                + depth >= Configuration.EngineSettings.History_LowDepth
-                ? _quietHistory[move.Piece()][move.TargetSquare()]
-                : _lowDepthQuietHistory[move.Piece()][move.TargetSquare()];
+                + _quietHistory[move.Piece()][move.TargetSquare()]
+                + _lowDepthQuietHistory[move.Piece()][move.TargetSquare()] >> 2;    // / 4
         }
 
         // Queen promotion
@@ -166,14 +165,15 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
-        int rawHistoryBonus = HistoryBonus[depth];
-        int rawHistoryMalus = HistoryMalus[depth];
-
         // Idea by Alayan in Ethereal: don't update history on low depths
         if (depth >= Configuration.EngineSettings.History_LowDepth || visitedMovesCounter > 1)
         {
             // 🔍 Quiet history moves
             // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
+
+            int rawHistoryBonus = HistoryBonus[depth];
+            int rawHistoryMalus = HistoryMalus[depth];
+
             ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
             quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
@@ -211,6 +211,9 @@ public sealed partial class Engine
         else
         {
             // 🔍 Low depth quiet history moves
+            int rawHistoryBonus = LowDepthHistoryBonus[depth];
+            int rawHistoryMalus = LowDepthHistoryMalus[depth];
+
             ref var lowDepthQuietHistoryEntry = ref _lowDepthQuietHistory[piece][targetSquare];
             lowDepthQuietHistoryEntry = ScoreHistoryMove(lowDepthQuietHistoryEntry, rawHistoryBonus);
 
