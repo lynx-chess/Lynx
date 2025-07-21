@@ -323,6 +323,9 @@ public sealed class EngineSettings
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
 
     [SPSA<int>(enabled: false)]
+    public int History_LowDepth { get; set; } = 3;
+
+    [SPSA<int>(enabled: false)]
     public int History_MaxMoveValue { get; set; } = 8_192;
 
     [SPSA<int>(512, 4096, 250)]

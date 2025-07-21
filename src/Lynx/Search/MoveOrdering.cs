@@ -164,14 +164,14 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
+        int rawHistoryBonus = HistoryBonus[depth];
+        int rawHistoryMalus = HistoryMalus[depth];
+
         // Idea by Alayan in Ethereal: don't update history on low depths
-        if (depth >= 3 || visitedMovesCounter > 1)
+        if (depth >= Configuration.EngineSettings.History_LowDepth || visitedMovesCounter > 1)
         {
             // 🔍 Quiet history moves
             // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
-            int rawHistoryBonus = HistoryBonus[depth];
-            int rawHistoryMalus = HistoryMalus[depth];
-
             ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
             quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
@@ -203,6 +203,25 @@ public sealed partial class Engine
                         ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
                         continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
                     }
+                }
+            }
+        }
+        else
+        {
+            // 🔍 Low depth quiet history moves
+            ref var lowDepthQuietHistoryEntry = ref _lowDepthQuietHistory[piece][targetSquare];
+            lowDepthQuietHistoryEntry = ScoreHistoryMove(lowDepthQuietHistoryEntry, rawHistoryBonus);
+
+            for (int i = 0; i < visitedMovesCounter; ++i)
+            {
+                var visitedMove = visitedMoves[i];
+
+                if (!visitedMove.IsCapture())
+                {
+                    // 🔍 Quiet history penalty / malus
+                    // When a quiet move fails high, penalize previous visited quiet moves
+                    lowDepthQuietHistoryEntry = ref _lowDepthQuietHistory[visitedMove.Piece()][visitedMove.TargetSquare()];
+                    lowDepthQuietHistoryEntry = ScoreHistoryMove(lowDepthQuietHistoryEntry, -rawHistoryMalus);
                 }
             }
         }

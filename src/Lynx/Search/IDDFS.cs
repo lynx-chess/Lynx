@@ -28,6 +28,12 @@ public sealed partial class Engine
     private readonly int[][] _quietHistory;
 
     /// <summary>
+    /// 12 x 64
+    /// piece x target square
+    /// </summary>
+    private readonly int[][] _lowDepthQuietHistory;
+
+    /// <summary>
     /// 12 x 64 x 12,
     /// piece x target square x captured piece
     /// </summary>
