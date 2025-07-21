@@ -986,10 +986,10 @@ public class Position : IDisposable
 
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
-        // Pawnless endgames
+        // Few pieces endgames
         if (gamePhase <= 5)
         {
-            // Pawnless endgames with few pieces
+            // Pawnless endgames
             if (totalPawnsCount == 0)
             {
                 switch (gamePhase)
@@ -1006,7 +1006,10 @@ public class Position : IDisposable
                         }
                     //case 4:
                     //    {
-                    //        // Rook vs 2 minors should be a draw
+                                // Rook vs 2 minors should be a draw
+                                // Rook vs rook should be a draw
+                                // 2 minors vs 2 minors should be a draw
+                                // Other combinations (Q, Rm vs m) should win
 
                     //    }
                     case 3:
