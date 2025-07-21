@@ -987,23 +987,23 @@ public class Position : IDisposable
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
         // Pawnless endgames
-        if (gamePhase <= 3)
+        if (gamePhase <= 5)
         {
             // Pawnless endgames with few pieces
             if (totalPawnsCount == 0)
             {
                 switch (gamePhase)
                 {
-                    //case 5:
-                    //    {
-                    //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
-                    //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
-                    //        {
-                    //            packedScore >>= 1; // /2
-                    //        }
+                    case 5:
+                        {
+                            // RB vs R, RN vs R - scale it down due to the chances of it being a draw
+                            if (_pieceBitBoards[(int)Piece.R].CountBits() == 1 && _pieceBitBoards[(int)Piece.r].CountBits() == 1)
+                            {
+                                eval >>= 1; // /2
+                            }
 
-                    //        break;
-                    //    }
+                            break;
+                        }
                     //case 4:
                     //    {
                     //        // Rook vs 2 minors should be a draw
