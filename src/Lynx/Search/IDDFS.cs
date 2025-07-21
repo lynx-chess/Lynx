@@ -612,7 +612,7 @@ public sealed partial class Engine
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 1, 0, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)

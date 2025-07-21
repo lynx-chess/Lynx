@@ -12,7 +12,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, int ply, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -55,7 +55,9 @@ public sealed partial class Engine
 
             // History move or 0 if not found
             return BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()];
+                + depth >= Configuration.EngineSettings.History_LowDepth
+                ? _quietHistory[move.Piece()][move.TargetSquare()]
+                : _lowDepthQuietHistory[move.Piece()][move.TargetSquare()];
         }
 
         // Queen promotion
