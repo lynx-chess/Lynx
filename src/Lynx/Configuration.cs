@@ -255,7 +255,7 @@ public sealed class EngineSettings
     public int LMR_DeeperDepthMultiplier { get; set; } = 2;
 
     [SPSA<int>(enabled: false)]
-    public int NMP_MinDepth { get; set; } = 3;
+    public int NMP_MinDepth { get; set; } = 2;
 
     [SPSA<int>(enabled: false)]
     public int NMP_BaseDepthReduction { get; set; } = 2;
