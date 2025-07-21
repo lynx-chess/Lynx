@@ -1006,9 +1006,9 @@ public class Position : IDisposable
                         }
                     case 4:
                         {
-                            // Rook vs 2 minors should be a draw
-                            // Rook and minor vs minor it doesn't matter if it's reduced
-                            if ((_pieceBitBoards[(int)Piece.Q] | _pieceBitBoards[(int)Piece.q]) == 0)
+                            // Rook vs 2 minors and R vs r should be a draw
+                            if ((_pieceBitBoards[(int)Piece.R] != 0 && (_pieceBitBoards[(int)Piece.B] | _pieceBitBoards[(int)Piece.N]) == 0)
+								|| ((_pieceBitBoards[(int)Piece.r] != 0 && (_pieceBitBoards[(int)Piece.b] | _pieceBitBoards[(int)Piece.n]) == 0)))
                             {
                                 eval >>= 1; // /2
                             }
