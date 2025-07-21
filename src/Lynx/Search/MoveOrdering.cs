@@ -56,7 +56,7 @@ public sealed partial class Engine
             // History move or 0 if not found
             return BaseMoveScore
                 + _quietHistory[move.Piece()][move.TargetSquare()]
-                + _lowDepthQuietHistory[move.Piece()][move.TargetSquare()] >> 1;    // /2
+                + _lowDepthQuietHistory[move.Piece()][move.TargetSquare()];
         }
 
         // Queen promotion
