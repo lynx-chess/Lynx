@@ -1006,10 +1006,10 @@ public class Position : IDisposable
                         }
                     //case 4:
                     //    {
-                                // Rook vs 2 minors should be a draw
-                                // Rook vs rook should be a draw
-                                // 2 minors vs 2 minors should be a draw
-                                // Other combinations (Q, Rm vs m) should win
+                    // Rook vs 2 minors should be a draw
+                    // Rook vs rook should be a draw
+                    // 2 minors vs 2 minors should be a draw
+                    // Other combinations (Q, Rm vs m) should win
 
                     //    }
                     case 3:
@@ -1051,9 +1051,12 @@ public class Position : IDisposable
             {
                 var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
 
-                if (gamePhase == 1                                                  // Only one piece
-                    && _pieceBitBoards[(int)Piece.B + winningSideOffset] != 0       // A bishop
-                    && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)    // Pawns exclusively in A and H files
+                // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
+                // TODO implement that
+                // For now, we reduce all endgames that only have one bishop and A/H pawns
+                if (gamePhase == 1
+                    && _pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
+                    && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
                 {
                     eval >>= 1; // /2
                 }
