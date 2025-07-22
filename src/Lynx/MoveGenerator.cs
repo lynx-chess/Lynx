@@ -90,7 +90,7 @@ public static class MoveGenerator
         var offset = Utils.PieceOffset(position.Side);
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position);
+        GenerateCastlingMoves_ThreatsAvailable(ref localIndex, movePool, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
@@ -276,7 +276,7 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
+    internal static void GenerateCastlingMoves_ThreatsAvailable(ref int localIndex, Span<Move> movePool, Position position)
     {
         if (position.Castle != default)
         {
@@ -285,34 +285,11 @@ public static class MoveGenerator
             if (position.Side == Side.White)
             {
                 var blackAttacks = position._attacksBySide[(int)Side.Black];
-
-                var areShortCastleSquaresFree = (occupancy & Constants.WhiteShortCastleFreeSquares) == 0;
-                var areLongCastleSquaresFree = (occupancy & Constants.WhiteLongCastleFreeSquares) == 0;
-
-                bool areShortCastleSquaresAttacked, areLongCastleSquaresAttacked;
-
-                if (blackAttacks != 0)
-                {
-                    areShortCastleSquaresAttacked = (blackAttacks & Constants.WhiteShortCastleNonAttackableSquares) != 0;
-                    areLongCastleSquaresAttacked = (blackAttacks & Constants.WhiteLongCastleNonAttackableSquares) != 0;
-                }
-                else
-                {
-                    bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
-
-                    areShortCastleSquaresAttacked =
-                        ise1Attacked
-                        || position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
-                        || position.IsSquareAttacked((int)BoardSquare.g1, Side.Black);
-
-                    areLongCastleSquaresAttacked =
-                        ise1Attacked
-                        || position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
-                        || position.IsSquareAttacked((int)BoardSquare.c1, Side.Black);
-                }
+                Debug.Assert(blackAttacks != 0);
 
                 if ((position.Castle & (int)CastlingRights.WK) != default
-                   && areShortCastleSquaresFree && !areShortCastleSquaresAttacked)
+                   && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0                  // Free squares
+                   && (blackAttacks & Constants.WhiteShortCastleNonAttackableSquares) == 0)     // Non-attacked squares
                 {
                     movePool[localIndex++] = WhiteShortCastle;
 
@@ -321,7 +298,8 @@ public static class MoveGenerator
                 }
 
                 if ((position.Castle & (int)CastlingRights.WQ) != default
-                    && areLongCastleSquaresFree && !areLongCastleSquaresAttacked)
+                    && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0                  // Free squares
+                    && (blackAttacks & Constants.WhiteLongCastleNonAttackableSquares) == 0)     // Non-attacked squares
                 {
                     movePool[localIndex++] = WhiteLongCastle;
 
@@ -332,34 +310,11 @@ public static class MoveGenerator
             else
             {
                 var whiteAttacks = position._attacksBySide[(int)Side.White];
-
-                var areShortCastleSquaresFree = (occupancy & Constants.BlackShortCastleFreeSquares) == 0;
-                var areLongCastleSquaresFree = (occupancy & Constants.BlackLongCastleFreeSquares) == 0;
-
-                bool areShortCastleSquaresAttacked, areLongCastleSquaresAttacked;
-
-                if (whiteAttacks != 0)
-                {
-                    areShortCastleSquaresAttacked = (whiteAttacks & Constants.BlackShortCastleNonAttackableSquares) != 0;
-                    areLongCastleSquaresAttacked = (whiteAttacks & Constants.BlackLongCastleNonAttackableSquares) != 0;
-                }
-                else
-                {
-                    bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
-
-                    areShortCastleSquaresAttacked =
-                        ise8Attacked
-                        || position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
-                        || position.IsSquareAttacked((int)BoardSquare.g8, Side.White);
-
-                    areLongCastleSquaresAttacked =
-                        ise8Attacked
-                        || position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
-                        || position.IsSquareAttacked((int)BoardSquare.c8, Side.White);
-                }
+                Debug.Assert(whiteAttacks != 0);
 
                 if ((position.Castle & (int)CastlingRights.BK) != default
-                   && areShortCastleSquaresFree && !areShortCastleSquaresAttacked)
+                   && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
+                   && (whiteAttacks & Constants.BlackShortCastleNonAttackableSquares) == 0)
                 {
                     movePool[localIndex++] = BlackShortCastle;
 
@@ -368,7 +323,78 @@ public static class MoveGenerator
                 }
 
                 if ((position.Castle & (int)CastlingRights.BQ) != default
-                    && areLongCastleSquaresFree && !areLongCastleSquaresAttacked)
+                    && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
+                    && (whiteAttacks & Constants.BlackLongCastleNonAttackableSquares) == 0)
+                {
+                    movePool[localIndex++] = BlackLongCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
+    /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
+    {
+        if (position.Castle != default)
+        {
+            ulong occupancy = position.OccupancyBitBoards[(int)Side.Both];
+
+            if (position.Side == Side.White)
+            {
+                bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
+
+                if (!ise1Attacked
+                    && (position.Castle & (int)CastlingRights.WK) != default
+                    && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
+                    && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black))
+                {
+                    movePool[localIndex++] = WhiteShortCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
+                }
+
+                if (!ise1Attacked
+                    && (position.Castle & (int)CastlingRights.WQ) != default
+                    && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
+                    && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
+                    && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black))
+                {
+                    movePool[localIndex++] = WhiteLongCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
+                }
+            }
+            else
+            {
+                bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
+
+                if ((!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BK) != default)
+                    && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
+                    && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White))
+                {
+                    movePool[localIndex++] = BlackShortCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
+                }
+
+                if (!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BQ) != default
+                    && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
+                    && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
+                    && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White))
                 {
                     movePool[localIndex++] = BlackLongCastle;
 
