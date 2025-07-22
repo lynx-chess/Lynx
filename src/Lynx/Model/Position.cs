@@ -978,70 +978,111 @@ public class Position : IDisposable
             gamePhase = MaxPhase;
         }
 
-        int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
-
-        // Pawnless endgames with few pieces
-        if (gamePhase <= 3 && totalPawnsCount == 0)
-        {
-            switch (gamePhase)
-            {
-                //case 5:
-                //    {
-                //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
-                //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
-                //        {
-                //            packedScore >>= 1; // /2
-                //        }
-
-                //        break;
-                //    }
-                case 3:
-                    {
-                        var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
-
-                        if (_pieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
-                        {
-                            return (0, gamePhase);
-                        }
-
-                        // Without rooks, only BB vs N is a win and BN vs N can have some chances
-                        // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
-                        //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
-                        //{
-                        //    packedScore >>= 1; // /2
-                        //}
-
-                        break;
-                    }
-                case 2:
-                    {
-                        var whiteKnightsCount = _pieceBitBoards[(int)Piece.N].CountBits();
-
-                        if (whiteKnightsCount + _pieceBitBoards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
-                                || whiteKnightsCount + _pieceBitBoards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
-                        {
-                            return (0, gamePhase);
-                        }
-
-                        break;
-                    }
-                case 1:
-                case 0:
-                    {
-                        return (0, gamePhase);
-                    }
-            }
-        }
-
         int endGamePhase = MaxPhase - gamePhase;
 
         var middleGameScore = Utils.UnpackMG(packedScore);
         var endGameScore = Utils.UnpackEG(packedScore);
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / MaxPhase;
 
+        int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
+
+        // Few pieces endgames
+        if (gamePhase <= 5)
+        {
+            // Pawnless endgames
+            if (totalPawnsCount == 0)
+            {
+                switch (gamePhase)
+                {
+                    case 5:
+                        {
+                            // RB vs R, RN vs R - scale it down due to the chances of it being a draw
+                            if (_pieceBitBoards[(int)Piece.R].CountBits() == 1 && _pieceBitBoards[(int)Piece.r].CountBits() == 1)
+                            {
+                                eval >>= 1; // /2
+                            }
+
+                            break;
+                        }
+                    //case 4:
+                    //    {
+                    // Rook vs 2 minors should be a draw
+                    // Rook vs rook should be a draw
+                    // 2 minors vs 2 minors should be a draw
+                    // Other combinations (Q, Rm vs m) should win
+
+                    //    }
+                    case 3:
+                        {
+                            var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
+
+                            if (_pieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
+                            {
+                                return (0, gamePhase);
+                            }
+
+                            // Rook vs a minor is a draw
+                            // Without rooks, only BB vs N is a win and BN vs N can have some chances
+
+                            eval >>= 1; // /2
+
+                            break;
+                        }
+                    case 2:
+                        {
+                            var whiteKnightsCount = _pieceBitBoards[(int)Piece.N].CountBits();
+
+                            if (whiteKnightsCount + _pieceBitBoards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
+                                    || whiteKnightsCount + _pieceBitBoards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
+                            {
+                                return (0, gamePhase);
+                            }
+
+                            break;
+                        }
+                    case 1:
+                    case 0:
+                        {
+                            return (0, gamePhase);
+                        }
+                }
+            }
+            else
+            {
+                var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
+
+                if (gamePhase == 1)
+                {
+                    // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
+                    // TODO implement that
+                    // For now, we reduce all endgames that only have one bishop and A/H pawns
+                    if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
+                        && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
+                    {
+                        eval >>= 1; // /2
+                    }
+                }
+                else if (gamePhase == 2)
+                {
+                    var whiteBishops = _pieceBitBoards[(int)Piece.B];
+                    var blackBishops = _pieceBitBoards[(int)Piece.b];
+
+                    // Opposite color bishop endgame with pawns are drawish
+                    if (whiteBishops > 0
+                        && blackBishops > 0
+                        && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
+                            Constants.DarkSquares[blackBishops.GetLS1BIndex()])
+                    {
+                        eval >>= 1; // /2
+                    }
+                }
+            }
+        }
+
         // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
+        // 50 moves rule distance scaling
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
 
         eval = Math.Clamp(eval, MinStaticEval, MaxStaticEval);
