@@ -986,23 +986,31 @@ public class Position : IDisposable
 
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
-        // Pawnless endgames
-        if (gamePhase <= 3)
+        // Few pieces endgames
+        if (gamePhase <= 5)
         {
-            // Pawnless endgames with few pieces
+            // Pawnless endgames
             if (totalPawnsCount == 0)
             {
                 switch (gamePhase)
                 {
-                    //case 5:
-                    //    {
-                    //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
-                    //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
-                    //        {
-                    //            packedScore >>= 1; // /2
-                    //        }
+                    case 5:
+                        {
+                            // RB vs R, RN vs R - scale it down due to the chances of it being a draw
+                            if (_pieceBitBoards[(int)Piece.R].CountBits() == 1 && _pieceBitBoards[(int)Piece.r].CountBits() == 1)
+                            {
+                                eval >>= 1; // /2
+                            }
 
-                    //        break;
+                            break;
+                        }
+                    //case 4:
+                    //    {
+                                // Rook vs 2 minors should be a draw
+                                // Rook vs rook should be a draw
+                                // 2 minors vs 2 minors should be a draw
+                                // Other combinations (Q, Rm vs m) should win
+
                     //    }
                     case 3:
                         {
@@ -1013,12 +1021,10 @@ public class Position : IDisposable
                                 return (0, gamePhase);
                             }
 
+                            // Rook vs a minor is a draw
                             // Without rooks, only BB vs N is a win and BN vs N can have some chances
-                            // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
-                            //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
-                            //{
-                            //    packedScore >>= 1; // /2
-                            //}
+
+                            eval >>= 1; // /2
 
                             break;
                         }
