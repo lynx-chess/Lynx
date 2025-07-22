@@ -1047,6 +1047,17 @@ public class Position : IDisposable
                         }
                 }
             }
+            else
+            {
+                var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
+
+                if (gamePhase == 1                                                  // Only one piece
+                    && _pieceBitBoards[(int)Piece.B + winningSideOffset] != 0       // A bishop
+                    && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)    // Pawns exclusively in A and H files
+                {
+                    eval >>= 1; // /2
+                }
+            }
 
             if (gamePhase == 2)
             {
