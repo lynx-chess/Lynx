@@ -1052,32 +1052,50 @@ public class Position : IDisposable
             }
             else
             {
-                var winningSideOffset = Utils.PieceOffset(eval >= 0);
-
-                 if (gamePhase == 1)
+                switch (gamePhase)
                 {
-                    // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
-                    // TODO implement that
-                    // For now, we reduce all endgames that only have one bishop and A/H pawns
-                    if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
-                        && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
-                    {
-                        eval >>= 1; // /2
-                    }
-                }
-                else if (gamePhase == 2)
-                {
-                    var whiteBishops = _pieceBitBoards[(int)Piece.B];
-                    var blackBishops = _pieceBitBoards[(int)Piece.b];
+                    case 1:
+                        {
+                            var winningSideOffset = Utils.PieceOffset(eval >= 0);
 
-                    // Opposite color bishop endgame with pawns are drawish
-                    if (whiteBishops > 0
-                        && blackBishops > 0
-                        && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
-                            Constants.DarkSquares[blackBishops.GetLS1BIndex()])
-                    {
-                        eval >>= 1; // /2
-                    }
+                            // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
+                            // TODO implement that
+                            // For now, we reduce all endgames that only have one bishop and A/H pawns
+                            if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
+                                && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
+                            {
+                                eval >>= 1; // /2
+                            }
+
+                            break;
+                        }
+                    case 2:
+                        {
+                            var whiteBishops = _pieceBitBoards[(int)Piece.B];
+                            var blackBishops = _pieceBitBoards[(int)Piece.b];
+
+                            // Opposite color bishop endgame with pawns are drawish
+                            if (whiteBishops > 0
+                                && blackBishops > 0
+                                && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
+                                    Constants.DarkSquares[blackBishops.GetLS1BIndex()])
+                            {
+                                eval >>= 1; // /2
+                            }
+
+                            break;
+                        }
+                    case 4:
+                        {
+                            // Rook endgames with pawns are drawish
+                            if (_pieceBitBoards[(int)Piece.R] != 0
+                                && _pieceBitBoards[(int)Piece.r] != 0)
+                            {
+                                eval >>= 1; // /2
+                            }
+
+                            break;
+                        }
                 }
             }
         }
