@@ -1087,10 +1087,10 @@ public class Position : IDisposable
                         }
                     case 4:
                         {
-                            // Rook endgames with pawns are drawish
+                            // Rook endgames with one pawn are drawish
                             if (_pieceBitBoards[(int)Piece.R] != 0
                                 && _pieceBitBoards[(int)Piece.r] != 0
-                                && totalPawnsCount <= 2)
+                                && totalPawnsCount == 1)
                             {
                                 eval >>= 1; // /2
                             }
