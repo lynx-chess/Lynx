@@ -1004,14 +1004,17 @@ public class Position : IDisposable
 
                             break;
                         }
-                    //case 4:
-                    //    {
-                    // Rook vs 2 minors should be a draw
-                    // Rook vs rook should be a draw
-                    // 2 minors vs 2 minors should be a draw
-                    // Other combinations (Q, Rm vs m) should win
+                    case 4:
+                        {
+                            // Rook vs 2 minors and R vs r should be a draw
+                            if ((_pieceBitBoards[(int)Piece.R] != 0 && (_pieceBitBoards[(int)Piece.B] | _pieceBitBoards[(int)Piece.N]) == 0)
+                                || ((_pieceBitBoards[(int)Piece.r] != 0 && (_pieceBitBoards[(int)Piece.b] | _pieceBitBoards[(int)Piece.n]) == 0)))
+                            {
+                                eval >>= 1; // /2
+                            }
 
-                    //    }
+                            break;
+                        }
                     case 3:
                         {
                             var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
