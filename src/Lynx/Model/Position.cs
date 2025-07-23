@@ -1089,7 +1089,8 @@ public class Position : IDisposable
                         {
                             // Rook endgames with pawns are drawish
                             if (_pieceBitBoards[(int)Piece.R] != 0
-                                && _pieceBitBoards[(int)Piece.r] != 0)
+                                && _pieceBitBoards[(int)Piece.r] != 0
+                                && totalPawnsCount <= 3)
                             {
                                 eval >>= 1; // /2
                             }
