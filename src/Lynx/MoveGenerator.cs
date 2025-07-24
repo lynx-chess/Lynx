@@ -476,7 +476,7 @@ public static class MoveGenerator
         {
 #endif
             return IsAnyPawnMoveValid(position, offset)
-                || IsAnyPieceMoveValid((int)Piece.K + offset, position)
+                || IsAnyKingMoveValid((int)Piece.K + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.B + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.N + offset, position)
@@ -648,9 +648,8 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generate Knight, Bishop, Rook and Queen moves
+    /// Also valid for Kings, but less performant thatn <see cref="IsAnyKingMoveValid(int, Position)"/>
     /// </summary>
-    /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyPieceMoveValid(int piece, Position position)
     {
@@ -680,6 +679,36 @@ public static class MoveGenerator
                 {
                     return true;
                 }
+            }
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsAnyKingMoveValid(int piece, Position position)
+    {
+        var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+
+        var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
+            & ~position.OccupancyBitBoards[(int)position.Side]
+            & ~position._attacksBySide[Utils.OppositeSide(position.Side)];
+
+        while (attacks != default)
+        {
+            attacks = attacks.WithoutLS1B(out var targetSquare);
+
+            if (occupancy.GetBit(targetSquare))
+            {
+                if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
+                {
+                    return true;
+                }
+            }
+            else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+            {
+                return true;
             }
         }
 
