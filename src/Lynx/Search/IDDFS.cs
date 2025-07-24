@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
+using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -293,7 +294,7 @@ public sealed partial class Engine
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
             }
 
-            for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
+            for (int i = 0; i < lastSearchResult?.PVLength; ++i)
             {
                 _pVTable[i] = lastSearchResult.Moves[i];
             }
@@ -493,7 +494,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                firstLegalMove, score, 0, [firstLegalMove])
+                firstLegalMove, score, 0, 1, [firstLegalMove])
             {
                 DepthReached = 0,
                 Nodes = 0,
@@ -513,7 +514,14 @@ public sealed partial class Engine
         int bestScore, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
-        var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
+        var pvLength = pvTableSpan.IndexOf(0); // i.e. if index 3 is 0, the length is 3 (ind 0, 1, 2)
+
+        pvTableSpan = pvTableSpan[..pvLength];
+
+        var pvMoves = ArrayPool<Move>.Shared.Rent(pvLength);
+        Debug.Assert(pvMoves.Length >= pvTableSpan.Length, $"{pvMoves.Length} >!= {pvTableSpan.Length}, with length {pvLength}");
+
+        pvTableSpan.CopyTo(pvMoves);
 
         var maxDepthReached = _maxDepthReached.Max();
 
@@ -524,7 +532,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-            pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
+            pvMoves.FirstOrDefault(), bestScore, depth, pvLength, pvMoves, mate)
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,
@@ -641,7 +649,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                move, singleMoveEval, 0, [move])
+                move, singleMoveEval, 0, 1, [move])
             {
                 DepthReached = 0
             };
@@ -653,6 +661,6 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-            firstLegalMove, 0, 0, [firstLegalMove]);
+            firstLegalMove, 0, 0, 1, [firstLegalMove]);
     }
 }
