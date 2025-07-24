@@ -237,7 +237,7 @@ public sealed class EngineSettings
     public int LMR_Quiet { get; set; } = 84;
 
     [SPSA<int>(enabled: false)]
-    public int History_MinDepth { get; set; } = 3;
+    public int History_MinDepth { get; set; } = 2;
 
     [SPSA<int>(enabled: false)]
     public int History_MinVisitedMoves { get; set; } = 2;
