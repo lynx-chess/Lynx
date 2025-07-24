@@ -342,7 +342,8 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generate Knight, Bishop, Rook and Queen moves
+    /// Generate Knight, Bishop, Rook and Queen moves.
+    /// Could also generate King moves (except castling), but <see cref="GenerateKingMoves(ref int, Span{int}, int, Position)"/> is more efficient
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -405,7 +406,8 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generate Knight, Bishop, Rook and Queen capture moves
+    /// Generate Knight, Bishop, Rook and Queen capture moves.
+    /// Could also generate King captures, but <see cref="GenerateKingCaptures(ref int, Span{int}, int, Position)"/> is more efficient.
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -432,14 +434,13 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generate Knight, Bishop, Rook and Queen capture moves
+    /// Generate King capture moves
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
-
         var oppositeSide = Utils.OppositeSide(position.Side);
 
         var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
@@ -449,6 +450,7 @@ public static class MoveGenerator
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
+
             var capturedPiece = position.Board[targetSquare];
             movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
         }
