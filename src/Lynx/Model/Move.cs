@@ -70,6 +70,19 @@ public static class MoveExtensions
             | (((capturedPiece == (int)Model.Piece.None) ? 0 : 1) << IsCaptureOffset);
     }
 
+    /// <summary>
+    /// Encodes capturing move
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece, int capturedPiece)
+    {
+        return (sourceSquare << SourceSquareOffset)
+            | (targetSquare << TargetSquareOffset)
+            | (piece << PieceOffset)
+            | (capturedPiece << CapturedPieceOffset)
+            | (1 << IsCaptureOffset);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeDoublePawnPush(int sourceSquare, int targetSquare, int piece)
     {
@@ -122,19 +135,6 @@ public static class MoveExtensions
             | (piece << PieceOffset)
             | ((int)Model.Piece.None << CapturedPieceOffset)
             | (int)SpecialMoveType.LongCastle << SpecialMoveFlagOffset;
-    }
-
-    /// <summary>
-    /// Encodes capturing move
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece, int capturedPiece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset)
-            | (1 << IsCaptureOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
