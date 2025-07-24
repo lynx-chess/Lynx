@@ -557,7 +557,7 @@ public static class MoveGenerator
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece)))
+                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
             {
                 return true;
             }
@@ -716,19 +716,7 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsValidMove(Position position, Move move)
     {
-#if DEBUG
-        // After introducing Position.Board, captured piece will always be populared here
-        if (move.IsCapture())
-        {
-            Debug.Assert(move.CapturedPiece() != (int)Piece.None);
-        }
-        else
-        {
-            Debug.Assert(
-                move.CapturedPiece() == (int)Piece.None
-                || move.CapturedPiece() == 0);  // In case of CanGenerateAnyValidMoves() / IsValidMove() scenarios, when we can't pre-populate with Piece.None since otherwise the | captured piece of MoveExtensions.EncodeCapturedPiece() wouldn't work
-        }
-#endif
+        Debug.Assert(move.IsCapture() ? move.CapturedPiece() != (int)Piece.None : move.CapturedPiece() == (int)Piece.None);
 
         var gameState = position.MakeMove(move);
 

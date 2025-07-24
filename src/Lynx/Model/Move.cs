@@ -52,7 +52,8 @@ public static class MoveExtensions
     {
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset);
+            | (piece << PieceOffset)
+            | ((int)Model.Piece.None << CapturedPieceOffset);
     }
 
     /// <summary>
@@ -75,6 +76,7 @@ public static class MoveExtensions
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
+            | ((int)Model.Piece.None << CapturedPieceOffset)
             | (int)SpecialMoveType.DoublePawnPush << SpecialMoveFlagOffset;
     }
 
@@ -90,7 +92,7 @@ public static class MoveExtensions
     }
 
     /// <summary>
-    ///  Override when captured piece (aka side) isn't provided
+    ///  Override when captured piece (aka side) isn't provided (not needed for IsValidMove)
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeEnPassant(int sourceSquare, int targetSquare, int piece)
@@ -108,6 +110,7 @@ public static class MoveExtensions
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
+            | ((int)Model.Piece.None << CapturedPieceOffset)
             | (int)SpecialMoveType.ShortCastle << SpecialMoveFlagOffset;
     }
 
@@ -117,6 +120,7 @@ public static class MoveExtensions
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
+            | ((int)Model.Piece.None << CapturedPieceOffset)
             | (int)SpecialMoveType.LongCastle << SpecialMoveFlagOffset;
     }
 
@@ -139,7 +143,8 @@ public static class MoveExtensions
         return promotedPiece
             | (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset);
+            | (piece << PieceOffset)
+            | ((int)Model.Piece.None << CapturedPieceOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
