@@ -480,6 +480,8 @@ public static class Constants
 
     public const BitBoard CentralSquares = 0x1818000000;
 
+    public const BitBoard NotAorH = 0x7e7e7e7e7e7e00;
+
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
     public const int AbsoluteMaxDepth = 255;
