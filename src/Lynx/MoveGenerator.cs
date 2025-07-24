@@ -388,12 +388,6 @@ public static class MoveGenerator
             & ~position.OccupancyBitBoards[(int)position.Side]
             & ~position._attacksBySide[Utils.OppositeSide(position.Side)];
 
-        if(attacks != (_pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
-            & ~position.OccupancyBitBoards[(int)position.Side]))
-        {
-            ;
-        }
-
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
