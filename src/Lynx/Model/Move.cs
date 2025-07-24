@@ -44,12 +44,29 @@ public static class MoveExtensions
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// Encodes non-capturing moves
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move Encode(int sourceSquare, int targetSquare, int piece)
     {
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset);
+    }
+
+    /// <summary>
+    /// Encodes capture and non-capturing moves
+    /// </summary>
+    /// <param name="capturedPiece">Captured piece, or otherwise <see cref="Model.Piece.None"/> if there's not capture</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move Encode(int sourceSquare, int targetSquare, int piece, int capturedPiece)
+    {
+        return (sourceSquare << SourceSquareOffset)
+            | (targetSquare << TargetSquareOffset)
+            | (piece << PieceOffset)
+            | (capturedPiece << CapturedPieceOffset)
+            | (((capturedPiece == (int)Model.Piece.None) ? 0 : 1) << IsCaptureOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,6 +120,9 @@ public static class MoveExtensions
             | (int)SpecialMoveType.LongCastle << SpecialMoveFlagOffset;
     }
 
+    /// <summary>
+    /// Encodes capturing move
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece, int capturedPiece)
     {
@@ -135,12 +155,11 @@ public static class MoveExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotionFromPawnMove(Move pawnMove, int promotedPiece)
-    {
-        return pawnMove | promotedPiece;
-    }
+        => pawnMove | promotedPiece;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapturedPiece(Move move, int capturedPiece) => move | (capturedPiece << 20);
+    public static Move EncodeCapturedPiece(Move move, int capturedPiece)
+        => move | (capturedPiece << CapturedPieceOffset);
 
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
@@ -256,7 +275,7 @@ public static class MoveExtensions
     public static int PromotedPiece(this Move move) => move & 0xF;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsPromotion(this Move move) => (move & 0xF) != default;
+    public static bool IsPromotion(this Move move) => (move & 0xF) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SourceSquare(this Move move) => (move & 0x3F0) >> SourceSquareOffset;
@@ -271,7 +290,7 @@ public static class MoveExtensions
     public static int CapturedPiece(this Move move) => (move & 0xF0_0000) >> CapturedPieceOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCapture(this Move move) => (move & 0x100_0000) >> IsCaptureOffset != default;
+    public static bool IsCapture(this Move move) => (move & 0x100_0000) >> IsCaptureOffset != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & 0xE00_0000) >> SpecialMoveFlagOffset);

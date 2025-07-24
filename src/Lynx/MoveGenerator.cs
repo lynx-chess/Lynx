@@ -376,15 +376,9 @@ public static class MoveGenerator
             {
                 attacks = attacks.WithoutLS1B(out targetSquare);
 
-                if (occupancy.GetBit(targetSquare))
-                {
-                    var capturedPiece = position.Board[targetSquare];
-                    movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
-                }
-                else
-                {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
-                }
+                Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
             }
         }
     }
@@ -407,15 +401,9 @@ public static class MoveGenerator
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
-            if (occupancy.GetBit(targetSquare))
-            {
-                var capturedPiece = position.Board[targetSquare];
-                movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
-            }
-            else
-            {
-                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
-            }
+            Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+            movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
         }
     }
 
@@ -688,14 +676,9 @@ public static class MoveGenerator
             {
                 attacks = attacks.WithoutLS1B(out targetSquare);
 
-                if (occupancy.GetBit(targetSquare))
-                {
-                    if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
-                    {
-                        return true;
-                    }
-                }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+                Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+                if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
                 {
                     return true;
                 }
@@ -719,14 +702,9 @@ public static class MoveGenerator
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
-            if (occupancy.GetBit(targetSquare))
-            {
-                if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
-                {
-                    return true;
-                }
-            }
-            else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+            Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+            if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
             {
                 return true;
             }
