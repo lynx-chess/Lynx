@@ -105,6 +105,7 @@ public static class MoveGenerator
     {
         int sourceSquare, targetSquare;
 
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
@@ -120,7 +121,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
+            if (!occupancy.GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
@@ -148,7 +149,7 @@ public static class MoveGenerator
                     {
                         var doublePushSquare = singlePushSquare + pawnPush;
 
-                        if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare))
+                        if (!occupancy.GetBit(doublePushSquare))
                         {
                             movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                         }
@@ -199,6 +200,7 @@ public static class MoveGenerator
     {
         int sourceSquare, targetSquare;
 
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
@@ -214,7 +216,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
+            if (!occupancy.GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
@@ -280,7 +282,7 @@ public static class MoveGenerator
     {
         if (position.Castle != default)
         {
-            ulong occupancy = position.OccupancyBitBoards[(int)Side.Both];
+            var occupancy = position.OccupancyBitBoards[(int)Side.Both];
 
             if (position.Side == Side.White)
             {
@@ -349,20 +351,21 @@ public static class MoveGenerator
     internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         int sourceSquare, targetSquare;
 
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
-            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
             {
                 attacks = attacks.WithoutLS1B(out targetSquare);
 
-                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                if (occupancy.GetBit(targetSquare))
                 {
                     var capturedPiece = position.Board[targetSquare];
                     movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
@@ -383,6 +386,7 @@ public static class MoveGenerator
     internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var oppositeSide = Utils.OppositeSide(position.Side);
         int sourceSquare, targetSquare;
 
@@ -390,7 +394,7 @@ public static class MoveGenerator
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
-            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
                 & position.OccupancyBitBoards[oppositeSide];
 
             while (attacks != default)
@@ -442,6 +446,7 @@ public static class MoveGenerator
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
         var bitboard = position.PieceBitBoards[piece];
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
 
         while (bitboard != default)
         {
@@ -453,7 +458,7 @@ public static class MoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(singlePushSquare))
+            if (!occupancy.GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
@@ -478,7 +483,7 @@ public static class MoveGenerator
                     // Double pawn push
                     // Inside of the if because singlePush square cannot be occupied either
                     var doublePushSquare = singlePushSquare + pawnPush;
-                    if (!position.OccupancyBitBoards[(int)Side.Both].GetBit(doublePushSquare)
+                    if (!occupancy.GetBit(doublePushSquare)
                         && (sourceRank == 2         // position.Side == Side.Black is always true, otherwise targetRank would be 1
                             || sourceRank == 7)     // position.Side == Side.White is always true, otherwise targetRank would be 8
                         && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
@@ -595,20 +600,21 @@ public static class MoveGenerator
     private static bool IsAnyPieceMoveValid(int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         int sourceSquare, targetSquare;
 
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
-            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
             {
                 attacks = attacks.WithoutLS1B(out targetSquare);
 
-                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                if (occupancy.GetBit(targetSquare))
                 {
                     if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
                     {
