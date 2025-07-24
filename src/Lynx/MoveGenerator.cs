@@ -111,6 +111,8 @@ public static class MoveGenerator
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
         var bitboard = position.PieceBitBoards[piece];
 
+        var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
+
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
@@ -157,7 +159,7 @@ public static class MoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+            var attacks = pawnAttacks[sourceSquare];
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
@@ -200,11 +202,15 @@ public static class MoveGenerator
     {
         int sourceSquare, targetSquare;
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
         var bitboard = position.PieceBitBoards[piece];
+
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
+
+        var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
 
         while (bitboard != default)
         {
@@ -235,7 +241,7 @@ public static class MoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+            var attacks = pawnAttacks[sourceSquare];
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
@@ -245,7 +251,7 @@ public static class MoveGenerator
             }
 
             // Captures
-            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+            var attackedSquares = attacks & oppositeSidePieces;
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
@@ -351,15 +357,19 @@ public static class MoveGenerator
     internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         int sourceSquare, targetSquare;
+
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        ulong squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
+
+        var pieceAttacks = _pieceAttacks[piece];
 
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
-            var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
-                & ~position.OccupancyBitBoards[(int)position.Side];
+            var attacks = pieceAttacks(sourceSquare, occupancy)
+                & squaresNotOccupiedByUs;
 
             while (attacks != default)
             {
@@ -386,16 +396,20 @@ public static class MoveGenerator
     internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var oppositeSide = Utils.OppositeSide(position.Side);
         int sourceSquare, targetSquare;
+
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
+
+        var pieceAttacks = _pieceAttacks[piece];
 
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
-            var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
-                & position.OccupancyBitBoards[oppositeSide];
+            var attacks = pieceAttacks(sourceSquare, occupancy)
+                & oppositeSidePieces;
 
             while (attacks != default)
             {
@@ -446,7 +460,9 @@ public static class MoveGenerator
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
         var bitboard = position.PieceBitBoards[piece];
+
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
 
         while (bitboard != default)
         {
@@ -504,7 +520,7 @@ public static class MoveGenerator
             }
 
             // Captures
-            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+            var attackedSquares = attacks & oppositeSidePieces;
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
@@ -600,15 +616,19 @@ public static class MoveGenerator
     private static bool IsAnyPieceMoveValid(int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         int sourceSquare, targetSquare;
+
+        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        var squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
+
+        var pieceAttacks = _pieceAttacks[piece];
 
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
-            var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
-                & ~position.OccupancyBitBoards[(int)position.Side];
+            var attacks = pieceAttacks(sourceSquare, occupancy)
+                & squaresNotOccupiedByUs;
 
             while (attacks != default)
             {
