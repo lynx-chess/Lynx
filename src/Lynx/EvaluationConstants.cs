@@ -30,6 +30,9 @@ public static class EvaluationConstants
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
+    public static readonly int[] LowDepthHistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
+    public static readonly int[] LowDepthHistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
+
     public const int LMRScaleFactor = 100;
 
     public const int CorrectionHistoryScale = 256;
@@ -68,6 +71,18 @@ public static class EvaluationConstants
                 Configuration.EngineSettings.History_Malus_Constant
                 + (Configuration.EngineSettings.History_Malus_Linear * searchDepth)
                 + (Configuration.EngineSettings.History_Malus_Quadratic * searchDepth * searchDepth));
+
+            LowDepthHistoryBonus[searchDepth] = Math.Min(
+                Configuration.EngineSettings.History_LowDepth_Bonus_MaxIncrement,
+                Configuration.EngineSettings.History_LowDepth_Bonus_Constant
+                + (Configuration.EngineSettings.History_LowDepth_Bonus_Linear * searchDepth)
+                + (Configuration.EngineSettings.History_LowDepth_Bonus_Quadratic * searchDepth * searchDepth));
+
+            LowDepthHistoryMalus[searchDepth] = Math.Min(
+                Configuration.EngineSettings.History_LowDepth_Malus_MaxDecrement,
+                Configuration.EngineSettings.History_LowDepth_Malus_Constant
+                + (Configuration.EngineSettings.History_LowDepth_Malus_Linear * searchDepth)
+                + (Configuration.EngineSettings.History_LowDepth_Malus_Quadratic * searchDepth * searchDepth));
         }
     }
 

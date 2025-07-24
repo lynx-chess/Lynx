@@ -12,7 +12,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, int ply, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -55,7 +55,8 @@ public sealed partial class Engine
 
             // History move or 0 if not found
             return BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()];
+                + _quietHistory[move.Piece()][move.TargetSquare()]
+                + _lowDepthQuietHistory[move.Piece()][move.TargetSquare()] >> 1;    // /2
         }
 
         // Queen promotion
@@ -169,6 +170,7 @@ public sealed partial class Engine
         {
             // 🔍 Quiet history moves
             // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
+
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
@@ -203,6 +205,28 @@ public sealed partial class Engine
                         ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
                         continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
                     }
+                }
+            }
+        }
+        else
+        {
+            // 🔍 Low depth quiet history moves
+            int rawHistoryBonus = LowDepthHistoryBonus[depth];
+            int rawHistoryMalus = LowDepthHistoryMalus[depth];
+
+            ref var lowDepthQuietHistoryEntry = ref _lowDepthQuietHistory[piece][targetSquare];
+            lowDepthQuietHistoryEntry = ScoreHistoryMove(lowDepthQuietHistoryEntry, rawHistoryBonus);
+
+            for (int i = 0; i < visitedMovesCounter; ++i)
+            {
+                var visitedMove = visitedMoves[i];
+
+                if (!visitedMove.IsCapture())
+                {
+                    // 🔍 Quiet history penalty / malus
+                    // When a quiet move fails high, penalize previous visited quiet moves
+                    lowDepthQuietHistoryEntry = ref _lowDepthQuietHistory[visitedMove.Piece()][visitedMove.TargetSquare()];
+                    lowDepthQuietHistoryEntry = ScoreHistoryMove(lowDepthQuietHistoryEntry, -rawHistoryMalus);
                 }
             }
         }

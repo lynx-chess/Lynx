@@ -702,7 +702,7 @@ static void _54_ScoreMove()
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, default, default, default)}");
     }
 
     position = new Position(TrickyPosition);
@@ -711,7 +711,7 @@ static void _54_ScoreMove()
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, default, default, default)}");
     }
 }
 

@@ -301,7 +301,7 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], depth, ply, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;

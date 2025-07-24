@@ -43,10 +43,12 @@ public sealed partial class Engine : IDisposable
 
         // Update ResetEngine() after any changes here
         _quietHistory = new int[12][];
+        _lowDepthQuietHistory = new int[12][];
         _moveNodeCount = new ulong[12][];
         for (int i = 0; i < _quietHistory.Length; ++i)
         {
             _quietHistory[i] = new int[64];
+            _lowDepthQuietHistory[i] = new int[64];
             _moveNodeCount[i] = new ulong[64];
         }
 
@@ -71,6 +73,7 @@ public sealed partial class Engine : IDisposable
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_quietHistory[i]);
+            Array.Clear(_lowDepthQuietHistory[i]);
             Array.Clear(_moveNodeCount[i]);
         }
 
