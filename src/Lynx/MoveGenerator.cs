@@ -68,7 +68,7 @@ public static class MoveGenerator
 
         GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
@@ -91,7 +91,7 @@ public static class MoveGenerator
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
@@ -376,6 +376,41 @@ public static class MoveGenerator
     }
 
     /// <summary>
+    /// Generate King moves
+    /// </summary>
+    /// <param name="piece"><see cref="Piece"/></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
+    {
+        var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
+
+        var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            & ~position.OccupancyBitBoards[(int)position.Side]
+            & ~position._attacksBySide[Utils.OppositeSide(position.Side)];
+
+        if(attacks != (_pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            & ~position.OccupancyBitBoards[(int)position.Side]))
+        {
+            ;
+        }
+
+        while (attacks != default)
+        {
+            attacks = attacks.WithoutLS1B(out var targetSquare);
+
+            if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+            {
+                var capturedPiece = position.Board[targetSquare];
+                movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
+            }
+            else
+            {
+                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
+            }
+        }
+    }
+
+    /// <summary>
     /// Generate Knight, Bishop, Rook and Queen capture moves
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
@@ -399,6 +434,29 @@ public static class MoveGenerator
                 var capturedPiece = position.Board[targetSquare];
                 movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
             }
+        }
+    }
+
+    /// <summary>
+    /// Generate Knight, Bishop, Rook and Queen capture moves
+    /// </summary>
+    /// <param name="piece"><see cref="Piece"/></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
+    {
+        var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
+
+        var oppositeSide = Utils.OppositeSide(position.Side);
+
+        var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            & position.OccupancyBitBoards[oppositeSide]
+            & ~position._attacksBySide[oppositeSide];
+
+        while (attacks != default)
+        {
+            attacks = attacks.WithoutLS1B(out var targetSquare);
+            var capturedPiece = position.Board[targetSquare];
+            movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
         }
     }
 
