@@ -165,7 +165,7 @@ public sealed partial class Engine
         var targetSquare = move.TargetSquare();
 
         // Idea by Alayan in Ethereal: don't update history on low depths
-        if (depth >= 3 || visitedMovesCounter > 1)
+        if (depth >= Configuration.EngineSettings.History_MinDepth || visitedMovesCounter >= Configuration.EngineSettings.History_MinVisitedMoves)
         {
             // 🔍 Quiet history moves
             // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
