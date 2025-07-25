@@ -135,7 +135,7 @@ public static class TimeManager
                 complexityBase * Math.Log(depth) * Math.Abs(staticEval - score),
                 0, complexityMax);
 
-            double complexityFactor = factorBase + (complexity / complexityDivisor);
+            double complexityFactor = Math.Max(factorBase + (complexity / complexityDivisor), 1.0);
 
             scale *= complexityFactor;
         }
