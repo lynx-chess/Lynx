@@ -161,7 +161,7 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
-    public int TM_Complexity_MinDepth { get; set; } = 0;
+    public int TM_Complexity_MinDepth { get; set; } = 7;
 
     [SPSA<double>(enabled: false)]
     public double TM_Complexity_Base { get; set; } = 0.8;
