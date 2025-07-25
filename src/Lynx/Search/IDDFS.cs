@@ -271,7 +271,7 @@ public sealed partial class Engine
                     _bestMoveStability = 0;
                 }
 
-                _scoreDelta = oldScore - bestScore;
+                _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isPondering));
