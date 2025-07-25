@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Lynx;
 public static class TimeManager
@@ -77,7 +78,12 @@ public static class TimeManager
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, int depth, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability, int scoreDelta)
+    public static int SoftLimit(
+        SearchConstraints searchConstraints, int depth,
+        ulong bestMoveNodeCount, ulong totalNodeCount,  // Node TM
+        int bestMoveStability,                          // Best move stability
+        int scoreDelta,                                 // Score stability
+        int mate, int staticEval, int score)            // Complexity
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -111,6 +117,27 @@ public static class TimeManager
         {
             scoreStabilityFactor = CalculateScoreStability(scoreDelta);
             scale *= scoreStabilityFactor;
+        }
+
+        // ⌛ Complexity: the higher the depth and the difference between score and static eval,
+        // the more time we allocate. Idea by Tarnished author
+        // Depth 1, staticEval - score = 0    -> complexityFactor = base (0.7)
+        // Depth 30, staticEval - score = 500 -> complexityFactor = base + max / divisior (1.2)
+        if (depth >= Configuration.EngineSettings.TM_Complexity_MinDepth
+            && mate == 0)
+        {
+            double complexityBase = Configuration.EngineSettings.TM_Complexity_Base;
+            double complexityMax = Configuration.EngineSettings.TM_Complexity_Max;
+            double complexityDivisor = Configuration.EngineSettings.TM_Complexity_Divisor;
+            double factorBase = Configuration.EngineSettings.TM_Complexity_FactorBase;
+
+            double complexity = Math.Clamp(
+                complexityBase * Math.Log(depth) * Math.Abs(staticEval - score),
+                0, complexityMax);
+
+            double complexityFactor = factorBase + (complexity / complexityDivisor);
+
+            scale *= complexityFactor;
         }
 
         int newSoftTimeLimit = Math.Min(

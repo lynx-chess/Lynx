@@ -82,6 +82,7 @@ public sealed partial class Engine
 
     private int _bestMoveStability;
     private int _scoreDelta;
+    private int _rootStaticEval;
 
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
@@ -132,6 +133,8 @@ public sealed partial class Engine
             // Not clearing _captureHistory on purpose
 
             int mate = 0;
+
+            _rootStaticEval = Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
 
             do
             {
@@ -268,7 +271,7 @@ public sealed partial class Engine
                     _bestMoveStability = 0;
                 }
 
-                _scoreDelta = oldScore - lastSearchResult.Score;
+                _scoreDelta = oldScore - bestScore;
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isPondering));
@@ -423,7 +426,7 @@ public sealed partial class Engine
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
             var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
-            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
+            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta, mate, _rootStaticEval, bestScore);
 
             if (_logger.IsEnabled(logLevel))
             {
