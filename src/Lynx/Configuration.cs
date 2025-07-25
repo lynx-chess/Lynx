@@ -158,10 +158,10 @@ public sealed class EngineSettings
     public double NodeTmScale { get; set; } = 1.66;
 
     [SPSA<int>(enabled: false)]
-    public int ScoreStabiity_MinDepth { get; set; } = 0;
+    public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
-    public int TM_Complexity_MinDepth { get; set; } = 4;
+    public int TM_Complexity_MinDepth { get; set; } = 0;
 
     [SPSA<double>(enabled: false)]
     public double TM_Complexity_Base { get; set; } = 0.8;
