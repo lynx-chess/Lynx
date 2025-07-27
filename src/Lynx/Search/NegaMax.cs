@@ -338,8 +338,9 @@ public sealed partial class Engine
             int? quietHistory = null;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            int QuietHistory() => quietHistory ??=
+            int QuietHistory(Position position) => quietHistory ??=
                 _quietHistory[move.Piece()][move.TargetSquare()]
+                + PawnHistoryEntry(position.KingPawnUniqueIdentifier, move.Piece(), move.TargetSquare())
                 + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
@@ -365,7 +366,7 @@ public sealed partial class Engine
                 // once we find one with a history score too low
                 if (!isCapture
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && QuietHistory(position) < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -573,7 +574,7 @@ public sealed partial class Engine
 
                                 // -= history/(maxHistory/2)
 
-                                reduction -= QuietHistory() / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+                                reduction -= QuietHistory(position) / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
                             }
                         }
 
