@@ -214,7 +214,7 @@ public sealed partial class Engine
 
                     // 🔍 Pawn history penalty / malus
                     pawnHistoryEntry = ref PawnHistoryEntry(pawnKey, piece, targetSquare);
-                    pawnHistoryEntry = ScoreHistoryMove(pawnHistoryEntry, rawHistoryBonus);
+                    pawnHistoryEntry = ScoreHistoryMove(pawnHistoryEntry, -rawHistoryBonus);
 
                     if (!isRoot)
                     {
