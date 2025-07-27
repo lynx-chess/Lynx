@@ -42,6 +42,12 @@ public sealed partial class Engine
     private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
     /// <summary>
+    /// <see cref="Constants.PawnHistorySize"/> x 12 x 64
+    /// pawn key x piece x target square
+    /// </summary>
+    private readonly int[] _pawnHistory = GC.AllocateArray<int>(Constants.PawnHistorySize * 12 * 64, pinned: true);
+
+    /// <summary>
     /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
     /// Pawn hash x side to move
     /// </summary>
@@ -606,7 +612,7 @@ public sealed partial class Engine
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, position.KingPawnUniqueIdentifier, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)

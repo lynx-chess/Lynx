@@ -88,6 +88,23 @@ public sealed partial class Engine
     }
 
     /// <summary>
+    /// [<see cref="Constants.PawnHistorySize"/>][12][64]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ref int PawnHistoryEntry(ulong pawnKey, int piece, int targetSquare)
+    {
+        const int pawnKeyOffset = 12 * 64;
+        const int pieceOffset = 64;
+
+        var keyIndex = (int)(pawnKey & Constants.PawnHistoryMask);
+
+        return ref _pawnHistory[
+            (keyIndex * pawnKeyOffset)
+            + (piece * pieceOffset)
+            + targetSquare];
+    }
+
+    /// <summary>
     /// [12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

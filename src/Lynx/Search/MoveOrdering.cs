@@ -9,10 +9,11 @@ namespace Lynx;
 public sealed partial class Engine
 {
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>,
+    /// <see cref="_killerMoves"/>, <see cref="_counterMoves"/>, <see cref="_quietHistory"/>, <see cref="_captureHistory"/> and <see cref="_continuationHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int ply, ulong pawnKey, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -47,15 +48,23 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
+                var piece = move.Piece();
+                var targetSquare = move.TargetSquare();
+
                 // Counter move history
                 return BaseMoveScore
-                    + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + _quietHistory[piece][targetSquare]
+                    + PawnHistoryEntry(pawnKey, piece, targetSquare)
+                    + ContinuationHistoryEntry(piece, targetSquare, ply - 1);
             }
+
+            var movePiece = move.Piece();
+            var moveTargetSquare = move.TargetSquare();
 
             // History move or 0 if not found
             return BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()];
+                + PawnHistoryEntry(pawnKey, movePiece, moveTargetSquare)
+                + _quietHistory[movePiece][moveTargetSquare];
         }
 
         // Queen promotion
@@ -101,7 +110,7 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/> and <see cref="_captureHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMoveQSearch(Move move, ShortMove bestMoveTTCandidate = default)
@@ -159,7 +168,7 @@ public sealed partial class Engine
     /// Quiet history, contination history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
     {
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
@@ -174,6 +183,10 @@ public sealed partial class Engine
 
             ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
             quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
+
+            // 🔍 Pawn history
+            ref var pawnHistoryEntry = ref PawnHistoryEntry(position.KingPawnUniqueIdentifier, piece, targetSquare);
+            pawnHistoryEntry = ScoreHistoryMove(pawnHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
             {
@@ -196,6 +209,10 @@ public sealed partial class Engine
                     // When a quiet move fails high, penalize previous visited quiet moves
                     quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
                     quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
+
+                    // 🔍 Pawn history penalty / malus
+                    pawnHistoryEntry = ref PawnHistoryEntry(position.KingPawnUniqueIdentifier, piece, targetSquare);
+                    pawnHistoryEntry = ScoreHistoryMove(pawnHistoryEntry, rawHistoryBonus);
 
                     if (!isRoot)
                     {
