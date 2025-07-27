@@ -39,6 +39,10 @@ public class Position : IDisposable
 
     public ulong KingPawnUniqueIdentifier => _kingPawnUniqueIdentifier;
 
+    public ulong PawnUniqueIdentifier => _kingPawnUniqueIdentifier
+        ^ ZobristTable.PieceHash(WhiteKingSquare, (int)Piece.K)
+        ^ ZobristTable.PieceHash(BlackKingSquare, (int)Piece.k);
+
     public ulong[] NonPawnHash => _nonPawnHash;
 
     public ulong MinorHash => _minorHash;
@@ -1054,7 +1058,7 @@ public class Position : IDisposable
             {
                 var winningSideOffset = Utils.PieceOffset(eval >= 0);
 
-                 if (gamePhase == 1)
+                if (gamePhase == 1)
                 {
                     // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
                     // TODO implement that

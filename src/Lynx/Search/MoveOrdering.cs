@@ -184,8 +184,10 @@ public sealed partial class Engine
             ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
             quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
+            var pawnKey = position.PawnUniqueIdentifier;
+
             // 🔍 Pawn history
-            ref var pawnHistoryEntry = ref PawnHistoryEntry(position.KingPawnUniqueIdentifier, piece, targetSquare);
+            ref var pawnHistoryEntry = ref PawnHistoryEntry(pawnKey, piece, targetSquare);
             pawnHistoryEntry = ScoreHistoryMove(pawnHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
@@ -211,7 +213,7 @@ public sealed partial class Engine
                     quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
                     // 🔍 Pawn history penalty / malus
-                    pawnHistoryEntry = ref PawnHistoryEntry(position.KingPawnUniqueIdentifier, piece, targetSquare);
+                    pawnHistoryEntry = ref PawnHistoryEntry(pawnKey, piece, targetSquare);
                     pawnHistoryEntry = ScoreHistoryMove(pawnHistoryEntry, rawHistoryBonus);
 
                     if (!isRoot)

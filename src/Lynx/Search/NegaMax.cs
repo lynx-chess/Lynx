@@ -301,7 +301,7 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, position.KingPawnUniqueIdentifier, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, position.PawnUniqueIdentifier, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -340,7 +340,7 @@ public sealed partial class Engine
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             int QuietHistory(Position position) => quietHistory ??=
                 _quietHistory[move.Piece()][move.TargetSquare()]
-                + PawnHistoryEntry(position.KingPawnUniqueIdentifier, move.Piece(), move.TargetSquare())
+                + PawnHistoryEntry(position.PawnUniqueIdentifier, move.Piece(), move.TargetSquare())
                 + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
