@@ -226,6 +226,14 @@ public static class Utils
         return ((1 << piece) & MinorPieceMask) != 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsMajorPiece(int piece)
+    {
+        const int MajorPieceMask = (1 << (int)Piece.R) | (1 << (int)Piece.r) | (1 << (int)Piece.Q) | (1 << (int)Piece.q);
+
+        return ((1 << piece) & MajorPieceMask) != 0;
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {
