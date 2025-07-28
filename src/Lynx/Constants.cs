@@ -587,9 +587,9 @@ public static class Constants
     public const int KingPawnHashMask = KingPawnHashSize - 1;
 
     /// <summary>
-    /// 1024 * 12 * 64 entries, ~3MB
+    /// ~6MB
     /// </summary>
-    public const int PawnHistorySize = 1024;
+    public const int PawnHistorySize = 2048;
     public const int PawnHistoryMask = PawnHistorySize - 1;
 
     public const int PawnCorrHistoryHashSize = 16_384;
