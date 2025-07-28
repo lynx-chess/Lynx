@@ -204,6 +204,14 @@ public class Position : IDisposable
             ^ ZobristTable.EnPassantHash((int)_enPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(_castle);                      // We clear the existing castle rights
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsMinorPiece(int piece)
+        {
+            const int MinorPieceMask = (1 << (int)Piece.N) | (1 << (int)Piece.n) | (1 << (int)Piece.B) | (1 << (int)Piece.b);
+
+            return ((1 << piece) & MinorPieceMask) != 0;
+        }
+
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
             _kingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
@@ -218,7 +226,7 @@ public class Position : IDisposable
                 // We do need to update the NonPawn hash
                 _nonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
 
-                if (Utils.IsMinorPiece(newPiece))
+                if (IsMinorPiece(newPiece))
                 {
                     _minorHash ^= targetPieceHash;
                 }
@@ -236,7 +244,7 @@ public class Position : IDisposable
 
                 _kingPawnUniqueIdentifier ^= fullPieceMovementHash;
             }
-            else if (Utils.IsMinorPiece(piece))
+            else if (IsMinorPiece(piece))
             {
                 _minorHash ^= fullPieceMovementHash;
             }
@@ -292,7 +300,7 @@ public class Position : IDisposable
                             {
                                 _nonPawnHash[oppositeSide] ^= capturedPieceHash;
 
-                                if (Utils.IsMinorPiece(capturedPiece))
+                                if (IsMinorPiece(capturedPiece))
                                 {
                                     _minorHash ^= capturedPieceHash;
                                 }
@@ -368,7 +376,7 @@ public class Position : IDisposable
                             {
                                 _nonPawnHash[oppositeSide] ^= capturedPieceHash;
 
-                                if (Utils.IsMinorPiece(capturedPiece))
+                                if (IsMinorPiece(capturedPiece))
                                 {
                                     _minorHash ^= capturedPieceHash;
                                 }
