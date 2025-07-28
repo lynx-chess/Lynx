@@ -723,8 +723,8 @@ public sealed partial class Engine
             if (!(isInCheck
                 || bestMove?.IsCapture() == true
                 || bestMove?.IsPromotion() == true
-                || (ttElementType == NodeType.Beta && bestScore <= staticEval)
-                || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+                || (nodeType == NodeType.Beta && bestScore <= staticEval)
+                || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
             {
                 UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
