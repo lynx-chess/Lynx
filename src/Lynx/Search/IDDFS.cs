@@ -455,7 +455,7 @@ public sealed partial class Engine
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, EvaluationContext.Empty, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
@@ -601,7 +601,7 @@ public sealed partial class Engine
         }
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves);
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, EvaluationContext.Empty, pseudoLegalMoves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)

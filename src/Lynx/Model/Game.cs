@@ -64,7 +64,7 @@ public sealed class Game : IDisposable
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, EvaluationContext.Empty, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -150,14 +150,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition()
+    public bool Is50MovesRepetition(EvaluationContext evaluationContext)
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, evaluationContext);
     }
 
     /// <summary>

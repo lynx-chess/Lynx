@@ -118,7 +118,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, EvaluationContext.Empty);
 
                     foreach (var move in bestMoveList)
                     {
@@ -179,7 +179,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, EvaluationContext.Empty);
 
                     foreach (var move in bestMoveList)
                     {
@@ -242,7 +242,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, EvaluationContext.Empty);
 
                     foreach (var move in bestMoveList)
                     {
@@ -302,7 +302,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, EvaluationContext.Empty);
 
                     foreach (var move in bestMoveList)
                     {
@@ -346,7 +346,7 @@ public static class OnlineTablebaseProber
 
         Move? parsedMove = 0;
 #pragma warning disable CS0618 // Type or member is obsolete
-        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
+        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position, EvaluationContext.Empty), out parsedMove))
         {
             throw new LynxException($"{bestMove.Uci} should be parsable from position {fen}");
         }

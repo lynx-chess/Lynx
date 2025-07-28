@@ -68,7 +68,7 @@ public sealed class PositionCommand : IGUIBaseCommand
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
+            MoveGenerator.GenerateAllMoves(game.CurrentPosition, EvaluationContext.Empty, movePool),
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

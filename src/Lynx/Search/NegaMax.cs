@@ -135,6 +135,7 @@ public sealed partial class Engine
         bool isInCheck = position.IsInCheck();
         int rawStaticEval, staticEval;
         int phase = int.MaxValue;
+        EvaluationContext evaluationContext = new();
         ref var stack = ref Game.Stack(ply);
         stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
@@ -145,7 +146,7 @@ public sealed partial class Engine
 
         if (depth + depthExtension <= 0)
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext))
             {
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
@@ -166,7 +167,7 @@ public sealed partial class Engine
             }
             else
             {
-                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                (rawStaticEval, phase, evaluationContext) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
@@ -295,7 +296,7 @@ public sealed partial class Engine
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, evaluationContext, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
 
@@ -488,7 +489,7 @@ public sealed partial class Engine
 
             int score = 0;
 
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
+            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition(evaluationContext)))
             {
                 score = 0;
 
@@ -799,7 +800,7 @@ public sealed partial class Engine
                 ? ttProbeResult.StaticEval
                 : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
         */
-        var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+        (var rawStaticEval, var _, var evaluationContext) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
         Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
@@ -838,7 +839,7 @@ public sealed partial class Engine
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, evaluationContext, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -940,7 +941,7 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext)) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 
