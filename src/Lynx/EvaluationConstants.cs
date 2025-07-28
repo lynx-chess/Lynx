@@ -32,7 +32,7 @@ public static class EvaluationConstants
 
     public const int LMRScaleFactor = 100;
 
-    public const int CorrectionHistoryScale = 256;
+    public const int CorrectionHistoryScale = 20;
 
     public const int CorrHistScaleFactor = 100;
 
