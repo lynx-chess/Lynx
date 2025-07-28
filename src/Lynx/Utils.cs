@@ -218,6 +218,14 @@ public static class Utils
         return (short)((packed + 0x8000) >> 16);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsMinorPiece(int piece)
+    {
+        const int MinorPieceMask = (1 << (int)Piece.N) | (1 << (int)Piece.n) | (1 << (int)Piece.B) | (1 << (int)Piece.b);
+
+        return ((1 << piece) & MinorPieceMask) != 0;
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {
