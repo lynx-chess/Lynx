@@ -130,4 +130,22 @@ public class UtilsTest
     {
         Assert.AreEqual(1, Utils.CalculateNps(0, 0));
     }
+
+    [TestCase(Piece.P, false)]
+    [TestCase(Piece.N, true)]
+    [TestCase(Piece.B, true)]
+    [TestCase(Piece.R, false)]
+    [TestCase(Piece.Q, false)]
+    [TestCase(Piece.K, false)]
+    [TestCase(Piece.p, false)]
+    [TestCase(Piece.n, true)]
+    [TestCase(Piece.b, true)]
+    [TestCase(Piece.r, false)]
+    [TestCase(Piece.q, false)]
+    [TestCase(Piece.k, false)]
+    [TestCase(Piece.None, false)]
+    public void IsMinorPiece(Piece piece, bool isMinor)
+    {
+        Assert.AreEqual(isMinor, Utils.IsMinorPiece((int)piece));
+    }
 }
