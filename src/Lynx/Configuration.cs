@@ -400,13 +400,13 @@ public sealed class EngineSettings
     /// Initial value same as <see cref="History_MaxMoveValue"/>
     /// </summary>
     [SPSA<int>(enabled: false)]
-    public int CorrHistory_MaxValue { get; set; } = 8_192;
+    public int CorrHistory_MaxValue { get; set; } = 1_024;
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveRawBonus"/>
     /// </summary>
     [SPSA<int>(enabled: false)]
-    public int CorrHistory_MaxRawBonus { get; set; } = 1_896;
+    public int CorrHistory_MaxRawBonus { get; set; } = 256;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
