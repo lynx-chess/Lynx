@@ -236,6 +236,12 @@ public sealed class EngineSettings
     [SPSA<int>(25, 300, 30)]
     public int LMR_Quiet { get; set; } = 84;
 
+    [SPSA<int>(enabled: false)]
+    public int History_MinDepth { get; set; } = 3;
+
+    [SPSA<int>(enabled: false)]
+    public int History_MinVisitedMoves { get; set; } = 2;
+
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2
     /// </summary>
