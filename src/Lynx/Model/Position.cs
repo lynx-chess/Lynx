@@ -1494,7 +1494,7 @@ public class Position : IDisposable
         while (defendedKnightThreats != 0)
         {
             defendedKnightThreats = defendedKnightThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KnightThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1503,7 +1503,7 @@ public class Position : IDisposable
         while (undefendedKnightThreats != 0)
         {
             undefendedKnightThreats = undefendedKnightThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KnightThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1514,7 +1514,7 @@ public class Position : IDisposable
         while (defendedBishopThreats != 0)
         {
             defendedBishopThreats = defendedBishopThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += BishopThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1523,7 +1523,7 @@ public class Position : IDisposable
         while (undefendedBishopThreats != 0)
         {
             undefendedBishopThreats = undefendedBishopThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += BishopThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1534,7 +1534,7 @@ public class Position : IDisposable
         while (defendedRookThreats != 0)
         {
             defendedRookThreats = defendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += RookThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1543,7 +1543,7 @@ public class Position : IDisposable
         while (undefendedRookThreats != 0)
         {
             undefendedRookThreats = undefendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += RookThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1554,7 +1554,7 @@ public class Position : IDisposable
         while (defendedQueenThreats != 0)
         {
             defendedQueenThreats = defendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += QueenThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1563,7 +1563,7 @@ public class Position : IDisposable
         while (undefendedQueenThreats != 0)
         {
             undefendedQueenThreats = undefendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += QueenThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1574,7 +1574,7 @@ public class Position : IDisposable
         while (defendedKingThreats != 0)
         {
             defendedKingThreats = defendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KingThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1583,7 +1583,7 @@ public class Position : IDisposable
         while (undefendedKingThreats != 0)
         {
             undefendedKingThreats = undefendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KingThreatsBonus[attackedPiece - oppositeSideOffset];
         }
