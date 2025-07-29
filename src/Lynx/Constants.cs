@@ -595,6 +595,9 @@ public static class Constants
     public const int MinorCorrHistoryHashSize = 16_384;
     public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
 
+    public const int MajorCorrHistoryHashSize = 16_384;
+    public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
+
     public const string NumberWithSignFormat = "+#;-#;0";
 }
 
