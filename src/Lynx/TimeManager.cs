@@ -182,7 +182,7 @@ public static class TimeManager
     /// <returns></returns>
     private static int MovesDivisor(int expectedMovesLeft)
     {
-        return expectedMovesLeft * 3 / 2;
+        return (int)(expectedMovesLeft * Configuration.EngineSettings.MoveDivisor);
     }
 
     /// <summary>

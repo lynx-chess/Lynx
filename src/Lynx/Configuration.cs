@@ -142,13 +142,16 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int MinSearchTime { get; set; } = 50;
 
-    [SPSA<double>(enabled: false)]
+    [SPSA<double>(0.25, 0.75, 0.025)]
     public double HardTimeBoundMultiplier { get; set; } = 0.52;
+
+    [SPSA<double>(1.0, 2.0, 0.05)]
+    public double MoveDivisor { get; set; } = 1.5;
 
     [SPSA<double>(enabled: false)]
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    [SPSA<double>(enabled: false)]
+    [SPSA<double>(0.5, 1, 0.025)]
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
     [SPSA<double>(1, 3, 0.1)]
