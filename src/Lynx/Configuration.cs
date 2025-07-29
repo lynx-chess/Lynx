@@ -263,8 +263,11 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int NMP_MinDepth { get; set; } = 3;
 
-    [SPSA<int>(enabled: false)]
-    public int NMP_Margin { get; set; } = +30;
+    [SPSA<int>(50, 300, 25)]
+    public int NMP_Margin_Base { get; set; } = 175;
+
+    [SPSA<int>(-50, 0, 5)]
+    public int NMP_Margin_DepthFactor { get; set; } = -25;
 
     [SPSA<int>(enabled: false)]
     public int NMP_BaseDepthReduction { get; set; } = 2;
