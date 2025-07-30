@@ -200,9 +200,12 @@ public sealed partial class Engine
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
                     // Improving impl. based on Potential's
-                    var rfpMargin = improving
-                        ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
-                        : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
+                    var rfpMargin =
+						(improving
+							? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
+							: Configuration.EngineSettings.RFP_NotImproving_Margin * depth)
+						- 50;
+
 
                     // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
                     var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
