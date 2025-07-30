@@ -133,7 +133,7 @@ public sealed partial class Engine
         double improvingRate = 0;
 
         bool isInCheck = position.IsInCheck();
-        int rawStaticEval, staticEval;
+        int rawStaticEval, staticEval, eval;
         int phase = int.MaxValue;
         ref var stack = ref Game.Stack(ply);
         stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
@@ -161,21 +161,21 @@ public sealed partial class Engine
                 Debug.Assert(ttStaticEval != int.MinValue);
 
                 rawStaticEval = ttStaticEval;
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+                eval = staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
             }
             else
             {
                 (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+                eval = staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
 
-            stack.StaticEval = staticEval;
+            stack.StaticEval = eval;
 
             if (ply >= 2)
             {
-                var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
+                var evalDiff = eval - Game.ReadStaticEvalFromStack(ply - 2);
                 improving = evalDiff >= 0;
                 improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
@@ -185,12 +185,12 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit && ttElementType != (ttScore > eval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttScore;
+                eval = ttScore;
             }
 
-            bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
+            bool isNotGettingCheckmated = eval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (isNotGettingCheckmated)
@@ -209,17 +209,17 @@ public sealed partial class Engine
 
                     var rfpThreshold = rfpMargin + improvingFactor;
 
-                    if (staticEval - rfpThreshold >= beta)
+                    if (eval - rfpThreshold >= beta)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (staticEval + beta) / 2;
+                        return (eval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
                     }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
                     if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
                     {
-                        var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+                        var score = eval + Configuration.EngineSettings.Razoring_Depth1Bonus;
 
                         if (score < beta)               // Static evaluation + bonus indicates fail-low node
                         {
@@ -248,12 +248,12 @@ public sealed partial class Engine
                     }
                 }
 
-                var staticEvalBetaDiff = staticEval - beta;
+                var evalBetaDiff = eval - beta;
 
                 // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
                 if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                    && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin_Absolute
-                    && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin_Base + (depth * Configuration.EngineSettings.NMP_Margin_DepthFactor)
+                    && evalBetaDiff >= Configuration.EngineSettings.NMP_Margin_Absolute
+                    && staticEval >= beta + Configuration.EngineSettings.NMP_Margin_Base + (depth * Configuration.EngineSettings.NMP_Margin_DepthFactor)
                     && !parentWasNullMove
                     && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                     && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
@@ -262,7 +262,7 @@ public sealed partial class Engine
                         + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
                         + Math.Min(
                             Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
-                            staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
+                            evalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
 
                     // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                     //var nmpReduction = Math.Min(
@@ -285,7 +285,7 @@ public sealed partial class Engine
         else
         {
             rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-            staticEval = CorrectStaticEvaluation(position, rawStaticEval);
+            eval = staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
             if (!ttHit)
             {
@@ -374,7 +374,7 @@ public sealed partial class Engine
                 // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                 // once it's considered that they don't have potential to raise alpha
                 if (depth <= Configuration.EngineSettings.FP_MaxDepth
-                    && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                    && eval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                 {
                     break;
                 }
@@ -680,7 +680,7 @@ public sealed partial class Engine
 
                     var historyDepth = depth;
 
-                    if (staticEval <= alpha)
+                    if (eval <= alpha)
                     {
                         ++historyDepth;
                     }
@@ -716,7 +716,7 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
-            staticEval = bestScore;
+            eval = bestScore;
         }
 
         if (!isVerifyingSE)
@@ -724,10 +724,10 @@ public sealed partial class Engine
             if (!(isInCheck
                 || bestMove?.IsCapture() == true
                 || bestMove?.IsPromotion() == true
-                || (nodeType == NodeType.Beta && bestScore <= staticEval)
-                || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
+                || (nodeType == NodeType.Beta && bestScore <= eval)
+                || (nodeType == NodeType.Alpha && bestScore >= eval)))
             {
-                UpdateCorrectionHistory(position, bestScore - staticEval, depth);
+                UpdateCorrectionHistory(position, bestScore - eval, depth);
             }
 
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
