@@ -6167,7 +6167,32 @@ public static class EvaluationParams
 		Pack(45, 50)
 	];
 
-	public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus =
+    public static readonly TaperedEvaluationTermByRank FriendlyKingDistanceToPassedPromotionSquareBonus =
+    [
+        Pack(0, 0),
+        Pack(-27, -13),
+        Pack(-10, -6),
+        Pack(8, 7),
+        Pack(18, 20),
+        Pack(30, 35),
+        Pack(34, 53),
+        Pack(45, 50)
+    ];
+
+    public static readonly TaperedEvaluationTermByRank EnemyKingDistanceToPassedPromotionSquarePenalty =
+    [
+        Pack(0, 0),
+        Pack(30, 33),
+        Pack(16, 27),
+        Pack(10, 14),
+        Pack(12, 8),
+        Pack(18, 6),
+        Pack(16, 5),
+        Pack(21, -3)
+    ];
+
+
+    public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus =
 	[
 		Pack(-14, -21),
 		Pack(-10, -8),

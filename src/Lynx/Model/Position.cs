@@ -1239,10 +1239,21 @@ public class Position : IDisposable
             // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
+            // Kings distance to promotion square
+            var pawnDistanceToPromotionSquare = 7 - rank;
+            var promotionSquare = squareIndex + (pieceIndex == (int)Piece.p
+                ? +(8 * pawnDistanceToPromotionSquare)
+                : -(8 * pawnDistanceToPromotionSquare));
+
+            var friendlyKingPromotionSquareDistance = Constants.ChebyshevDistance[promotionSquare][sameSideKingSquare];
+            var enemyKingPromotionSquareDistance = Constants.ChebyshevDistance[promotionSquare][oppositeSideKingSquare];
+
             packedBonus += PassedPawnBonus[bucket][rank]
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
-                + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+                + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]
+                + FriendlyKingDistanceToPassedPromotionSquareBonus[friendlyKingPromotionSquareDistance]
+                + EnemyKingDistanceToPassedPromotionSquarePenalty[enemyKingPromotionSquareDistance];
         }
 
         // Pawn phalanx
