@@ -1075,7 +1075,7 @@ public class Position : IDisposable
             {
                 var winningSideOffset = Utils.PieceOffset(eval >= 0);
 
-                 if (gamePhase == 1)
+                if (gamePhase == 1)
                 {
                     // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
                     // TODO implement that
@@ -1204,6 +1204,7 @@ public class Position : IDisposable
 
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
+        int pushSquare;
         ulong passedPawnsMask;
 
         if (pieceIndex == (int)Piece.p)
@@ -1211,10 +1212,12 @@ public class Position : IDisposable
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
+            pushSquare = squareIndex + 8;
         }
         else
         {
             passedPawnsMask = Masks.WhitePassedPawnMasks[squareIndex];
+            pushSquare = squareIndex - 8;
         }
 
         // Isolated pawn
@@ -1233,11 +1236,11 @@ public class Position : IDisposable
                 packedBonus += PassedPawnBonusNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
             }
 
-            // King distance to passed pawn
-            var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+            // King distance to passed pawn - using square in front of it
+            var friendlyKingDistance = Constants.ChebyshevDistance[pushSquare][sameSideKingSquare];
 
-            // Enemy king distance to passed pawn
-            var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
+            // Enemy king distance to passed pawn - using square in front of it
+            var enemyKingDistance = Constants.ChebyshevDistance[pushSquare][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][rank]
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
