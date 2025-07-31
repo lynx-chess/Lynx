@@ -461,6 +461,11 @@ public sealed partial class Engine
                     --singularDepthExtensions;
                 }
 
+                if (singularDepthExtensions < 0)
+                {
+                    cutnode = true;
+                }
+
                 gameState = position.MakeMove(move);
             }
 
