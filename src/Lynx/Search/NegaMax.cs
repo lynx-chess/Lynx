@@ -207,7 +207,13 @@ public sealed partial class Engine
                     // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
                     var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
 
-                    var rfpThreshold = rfpMargin + improvingFactor;
+                    // Corrplexity idea by Potential author
+                    var corrplexity = Math.Abs(staticEval - rawStaticEval);
+                    var corrplexityFactor = corrplexity >= Configuration.EngineSettings.RFP_Corrplexity_Margin
+                        ? Configuration.EngineSettings.RFP_Corrplexity_Factor * corrplexity
+                        : 0;
+
+                    var rfpThreshold = rfpMargin + improvingFactor + corrplexityFactor;
 
                     if (staticEval - rfpThreshold >= beta)
                     {
