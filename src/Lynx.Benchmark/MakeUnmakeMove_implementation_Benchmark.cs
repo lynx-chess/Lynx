@@ -1550,7 +1550,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<Move> GenerateAllMoves(MakeMovePosition position, Move[]? movePool = null, bool capturesOnly = false)
         {
-            movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            movePool ??= new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             int localIndex = 0;
 
             var offset = Utils.PieceOffset(position.Side);

@@ -101,7 +101,7 @@ namespace Lynx.Benchmark;
 /// </summary>
 public class TryParseFromUCIString_Benchmark : BaseBenchmark
 {
-    private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+    private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
     public static IEnumerable<string> Data =>
     [
@@ -123,7 +123,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public Game Span(string positionCommand)
     {
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         return PositionCommand.ParseGame(positionCommand, movePool);
     }

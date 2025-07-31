@@ -459,4 +459,14 @@ public class RegressionTest : BaseTest
         result = engine.BestMove(new("go depth 3"));
         Assert.Less(result.DepthReached, 32, $"depth {result.Depth}, seldepth {result.DepthReached}");
     }
+
+    [Test]
+    public void PositionWithOver256PseudolegalMoves()
+    {
+        var engine = GetEngine();
+
+        // 265 pseudolegal moves at the time of writing this
+        engine.AdjustPosition("position fen QQQQQQBk/Q6B/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1");
+        Assert.DoesNotThrow(() => engine.BestMove(new("go depth 50")));
+    }
 }
