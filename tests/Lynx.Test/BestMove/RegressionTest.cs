@@ -463,9 +463,26 @@ public class RegressionTest : BaseTest
 #pragma warning disable S4144 // Methods should not have identical implementations
 
     [TestCase("QQQQQQBk/Q6B/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1", 50)]   // 265 pseudolegal moves at the time of writing this
-    [TestCase("qqqqkqqq/1p1p1p1p/pPpPpPpP/P1P1P1P1/8/P6P/PP2K1PP/QQRQ1RQQ b - - 4 1", 20, Category = Categories.LongRunning, Explicit = true)]
-    [TestCase("qqqq2kq/1p1p1p1p/pPpPpPpQ/P1P5/8/P6P/PP2KQPP/3R1R1Q b - - 1 1", 20, Category = Categories.LongRunning, Explicit = true)]
     public void PositionWithOver256PseudolegalMoves(string fen, int depth)
+    {
+        var engine = GetEngine();
+
+        // 265 pseudolegal moves at the time of writing this
+        engine.AdjustPosition($"position fen {fen}");
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
+    [Explicit]
+    [Category(Categories.LongRunning)]
+    [TestCase("qqqqkqqq/1p1p1p1p/pPpPpPpP/P1P1P1P1/8/P6P/PP2K1PP/QQRQ1RQQ b - - 4 1", 20)]
+    [TestCase("qqqq2kq/1p1p1p1p/pPpPpPpQ/P1P5/8/P6P/PP2KQPP/3R1R1Q b - - 1 1", 20)]
+    [TestCase("8/1p1k1p1p/pPpP1P1P/P1P1P1PP/1P4P1/P1QQ1Q1P/PR2K3/8 b - - 1 1", 20)]
+    [TestCase("8/1p1k1p1p/pPpP1P1P/P1P1P1P1/1P5P/PR1Q1QP1/P3K2P/2Q5 b - - 1 1", 20)]
+    [TestCase("4k3/1p3p1Q/pPpP1P1P/P1P1P1PP/1P4P1/P1QQ3P/PR2K3/8 b - - 1 1", 20)]
+    [TestCase("2k5/1p3QPP/pPpPPPP1/P1P2Q1P/1P5P/P1Q5/PR2K3/8 b - - 1 1", 20)]
+    [TestCase("3k4/1p3p1p/pPpP1P1P/P1P1P1PP/1P4P1/P2Q1Q1P/PRQ1K3/8 b - - 0 1", 20)]
+    [TestCase("k7/1p1p1p1p/pPpPpPpP/P1P1PRP1/1P5P/P2Q2P1/PR2KQ1P/Q1Q4Q b - - 1 1", 20)]
+    public void PositionWithMoreThan8Pawns(string fen, int depth)
     {
         var engine = GetEngine();
 
