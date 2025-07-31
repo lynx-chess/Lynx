@@ -240,10 +240,10 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_CorrectedStaticEval { get; set; } = 125;
+    public int LMR_Corrplexity { get; set; } = 125;
 
     [SPSA<int>(25, 300, 30)]
-    public int LMR_CorrectedStaticEval_Delta { get; set; } = 90;
+    public int LMR_Corrplexity_Delta { get; set; } = 90;
 
     [SPSA<int>(enabled: false)]
     public int History_MinDepth { get; set; } = 3;

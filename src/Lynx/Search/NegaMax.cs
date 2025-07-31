@@ -569,9 +569,9 @@ public sealed partial class Engine
                                     reduction -= Configuration.EngineSettings.LMR_InCheck;
                                 }
 
-                                if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_CorrectedStaticEval_Delta)
+                                if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
                                 {
-                                    reduction -= Configuration.EngineSettings.LMR_CorrectedStaticEval;
+                                    reduction -= Configuration.EngineSettings.LMR_Corrplexity;
                                 }
 
                                 reduction /= EvaluationConstants.LMRScaleFactor;
