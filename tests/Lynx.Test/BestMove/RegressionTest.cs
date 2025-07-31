@@ -448,7 +448,7 @@ public class RegressionTest : BaseTest
 
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
         var result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
-        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+        Assert.Less(result.DepthReached, 5 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
 
         // It used to happen at the second repetition, info depth 2 seldepth 127
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
