@@ -236,6 +236,15 @@ public sealed class EngineSettings
     [SPSA<int>(25, 300, 30)]
     public int LMR_Quiet { get; set; } = 84;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_CorrectedStaticEval { get; set; } = 125;
+
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_CorrectedStaticEval_Delta { get; set; } = 90;
+
     [SPSA<int>(enabled: false)]
     public int History_MinDepth { get; set; } = 3;
 
