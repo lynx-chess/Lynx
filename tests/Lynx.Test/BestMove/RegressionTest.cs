@@ -460,13 +460,19 @@ public class RegressionTest : BaseTest
         Assert.Less(result.DepthReached, 32, $"depth {result.Depth}, seldepth {result.DepthReached}");
     }
 
-    [Test]
-    public void PositionWithOver256PseudolegalMoves()
+#pragma warning disable S4144 // Methods should not have identical implementations
+
+    [TestCase("QQQQQQBk/Q6B/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1", 50)]   // 265 pseudolegal moves at the time of writing this
+    [TestCase("qqqqkqqq/1p1p1p1p/pPpPpPpP/P1P1P1P1/8/P6P/PP2K1PP/QQRQ1RQQ b - - 4 1", 20, Category = Categories.LongRunning, Explicit = true)]
+    [TestCase("qqqq2kq/1p1p1p1p/pPpPpPpQ/P1P5/8/P6P/PP2KQPP/3R1R1Q b - - 1 1", 20, Category = Categories.LongRunning, Explicit = true)]
+    public void PositionWithOver256PseudolegalMoves(string fen, int depth)
     {
         var engine = GetEngine();
 
         // 265 pseudolegal moves at the time of writing this
-        engine.AdjustPosition("position fen QQQQQQBk/Q6B/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1");
-        Assert.DoesNotThrow(() => engine.BestMove(new("go depth 50")));
+        engine.AdjustPosition($"position fen {fen}");
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
     }
+
+#pragma warning restore S4144 // Methods should not have identical implementations
 }
