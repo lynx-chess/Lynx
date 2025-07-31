@@ -209,9 +209,7 @@ public sealed partial class Engine
 
                     // Corrplexity idea by Potential author
                     var corrplexity = Math.Abs(staticEval - rawStaticEval);
-                    var corrplexityFactor = corrplexity >= Configuration.EngineSettings.RFP_Corrplexity_Margin
-                        ? Configuration.EngineSettings.RFP_Corrplexity_Factor
-                        : 0;
+                    var corrplexityFactor = corrplexity / Configuration.EngineSettings.RFP_Corrplexity_Divisor;
 
                     var rfpThreshold = rfpMargin + improvingFactor + corrplexityFactor;
 

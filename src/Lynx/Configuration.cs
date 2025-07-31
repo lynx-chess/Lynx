@@ -321,11 +321,7 @@ public sealed class EngineSettings
 
     //[SPSA<int>(50, 250, 20)] // TODO
     [SPSA<double>(enabled: false)]
-    public int RFP_Corrplexity_Margin { get; set; } = 90;
-
-    //[SPSA<int>(0, 50, 5)] // TODO
-    [SPSA<double>(enabled: false)]
-    public int RFP_Corrplexity_Factor { get; set; } = 20;
+    public int RFP_Corrplexity_Divisor { get; set; } = 10;
 
     //[SPSA<int>(1, 300, 15)]
     //public int RFP_DepthScalingFactor { get; set; } = 55;
