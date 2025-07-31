@@ -480,6 +480,8 @@ public static class Constants
 
     public const BitBoard CentralSquares = 0x1818000000;
 
+    public const BitBoard NotAorH = 0x7e7e7e7e7e7e00;
+
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
     public const int AbsoluteMaxDepth = 255;
@@ -592,6 +594,9 @@ public static class Constants
 
     public const int MinorCorrHistoryHashSize = 16_384;
     public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
+
+    public const int MajorCorrHistoryHashSize = 16_384;
+    public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
 }

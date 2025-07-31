@@ -164,41 +164,45 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
-        // 🔍 Quiet history moves
-        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
-        int rawHistoryBonus = HistoryBonus[depth];
-        int rawHistoryMalus = HistoryMalus[depth];
-
-        ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
-        quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
-
-        if (!isRoot)
+        // Idea by Alayan in Ethereal: don't update history on low depths
+        if (depth >= Configuration.EngineSettings.History_MinDepth || visitedMovesCounter >= Configuration.EngineSettings.History_MinVisitedMoves)
         {
-            // 🔍 Continuation history
-            // - Counter move history (continuation history, ply - 1)
-            ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-            continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
-        }
+            // 🔍 Quiet history moves
+            // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
+            int rawHistoryBonus = HistoryBonus[depth];
+            int rawHistoryMalus = HistoryMalus[depth];
 
-        for (int i = 0; i < visitedMovesCounter; ++i)
-        {
-            var visitedMove = visitedMoves[i];
+            ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
+            quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
-            if (!visitedMove.IsCapture())
+            if (!isRoot)
             {
-                var visitedMovePiece = visitedMove.Piece();
-                var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                // 🔍 Continuation history
+                // - Counter move history (continuation history, ply - 1)
+                ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
+                continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
+            }
 
-                // 🔍 Quiet history penalty / malus
-                // When a quiet move fails high, penalize previous visited quiet moves
-                quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
-                quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
+            for (int i = 0; i < visitedMovesCounter; ++i)
+            {
+                var visitedMove = visitedMoves[i];
 
-                if (!isRoot)
+                if (!visitedMove.IsCapture())
                 {
-                    // 🔍 Continuation history penalty / malus
-                    ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                    continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                    var visitedMovePiece = visitedMove.Piece();
+                    var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                    // 🔍 Quiet history penalty / malus
+                    // When a quiet move fails high, penalize previous visited quiet moves
+                    quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
+                    quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
+
+                    if (!isRoot)
+                    {
+                        // 🔍 Continuation history penalty / malus
+                        ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
+                        continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                    }
                 }
             }
         }

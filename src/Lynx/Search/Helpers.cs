@@ -161,6 +161,15 @@ public sealed partial class Engine
         ref var minorCorrHistEntry = ref _minorCorrHistory[minorCorrHistIndex];
         minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, scaledBonus, weight);
 
+        // Major correction history
+        var majorHash = position.MajorHash ^ kingsHash;     // Add kings hash
+        var majorIndex = majorHash & Constants.MajorCorrHistoryHashMask;
+        var majorCorrHistIndex = (2 * majorIndex) + side;
+        Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
+
+        ref var majorCorrHistEntry = ref _majorCorrHistory[majorCorrHistIndex];
+        majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
@@ -227,11 +236,20 @@ public sealed partial class Engine
 
         var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
 
+        // Major correction history - Sirius author original idea
+        var majorHash = position.MajorHash ^ kingsHash;     // Add kings hash
+        var majorIndex = majorHash & Constants.MajorCorrHistoryHashMask;
+        var majorCorrHistIndex = (2 * majorIndex) + side;
+        Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
+
+        var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
             + (nonPawnNoSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM)
-            + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor);
+            + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
+            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major);
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);

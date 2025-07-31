@@ -57,7 +57,7 @@ public sealed partial class Engine
 
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
-        int ttScore = EvaluationConstants.NoHashEntry;
+        int ttScore = EvaluationConstants.NoScore;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
@@ -154,7 +154,7 @@ public sealed partial class Engine
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
-        else if (!pvNode && !isInCheck)
+        else if (!pvNode && !isInCheck && !isVerifyingSE)
         {
             if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
@@ -193,7 +193,7 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated && !isVerifyingSE)
+            if (isNotGettingCheckmated)
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
@@ -252,7 +252,7 @@ public sealed partial class Engine
 
                 // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
                 if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                    && staticEvalBetaDiff >= 0
+                    && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin
                     && !parentWasNullMove
                     && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                     && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
@@ -444,7 +444,7 @@ public sealed partial class Engine
                         ++stack.DoubleExtensions;
 
                         // Low depth extension - extending all moves
-                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
                         {
                             ++depth;
                         }
@@ -567,6 +567,11 @@ public sealed partial class Engine
                                 if (position.IsInCheck())   // i.e. move gives check
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_InCheck;
+                                }
+
+                                if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_CorrectedStaticEval_Delta)
+                                {
+                                    reduction -= Configuration.EngineSettings.LMR_CorrectedStaticEval;
                                 }
 
                                 reduction /= EvaluationConstants.LMRScaleFactor;
@@ -723,8 +728,8 @@ public sealed partial class Engine
             if (!(isInCheck
                 || bestMove?.IsCapture() == true
                 || bestMove?.IsPromotion() == true
-                || (ttElementType == NodeType.Beta && bestScore <= staticEval)
-                || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+                || (nodeType == NodeType.Beta && bestScore <= staticEval)
+                || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
             {
                 UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
@@ -800,7 +805,7 @@ public sealed partial class Engine
                 : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
         */
         var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-        Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+        Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
