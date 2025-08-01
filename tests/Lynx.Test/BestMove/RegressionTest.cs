@@ -462,7 +462,10 @@ public class RegressionTest : BaseTest
 
 #pragma warning disable S4144 // Methods should not have identical implementations
 
+    [TestCase("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNNK1B1 w - - 0 1", 50)]  // 216 legal moves
+    [TestCase("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNN1KB1 w - - 0 1", 50)]  // 218 legal moves
     [TestCase("QQQQQQBk/Q6B/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1", 50)]   // 265 pseudolegal moves at the time of writing this
+    [TestCase("kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1", 50)]  // 270 pseudolegal and legal moves at the time of writing this
     public void PositionWithMoreThan256PseudolegalMoves(string fen, int depth)
     {
         var engine = GetEngine();

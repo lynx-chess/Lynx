@@ -372,11 +372,8 @@ public static class Constants
     /// <summary>
     /// 218 or 224 seems to be the known limit of legal moves
     /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
-    /// </summary>
-    public const int MaxNumberOfLegalMovesInAPosition = 256;
-
-    /// <summary>
-    /// We generally need to account for a number higher than <see cref="MaxNumberOfLegalMovesInAPosition"/> due to pseudolegal movegen
+    /// We generally need to account for a number higher than that due to pseudolegal movegen
+    /// Regardless, we want to support positions like kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1 (270 pseudolegal and legal moves)
     /// </summary>
     public const int MaxNumberOfPseudolegalMovesInAPosition = 512;
 
