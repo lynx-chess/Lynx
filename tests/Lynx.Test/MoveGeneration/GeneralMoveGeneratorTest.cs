@@ -31,7 +31,7 @@ public class GeneralMoveGeneratorTest
     }
 
     [TestCase("QQQQQQBk/Q6B/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1")]   // 265 pseudolegal moves at the time of writing this
-    public void PositionWithOver256PseudolegalMoves(string fen)
+    public void PositionWithMoreThan256PseudolegalMoves(string fen)
     {
         // 265 pseudolegal moves at the time of writing this
         var position = new Position(fen);
