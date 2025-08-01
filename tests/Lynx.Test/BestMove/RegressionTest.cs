@@ -483,6 +483,7 @@ public class RegressionTest : BaseTest
     [TestCase("3k4/1p3p1p/pPpP1P1P/P1P1P1PP/1P4P1/P2Q1Q1P/PRQ1K3/8 b - - 0 1", 20)]
     [TestCase("k7/1p1p1p1p/pPpPpPpP/P1P1PRP1/1P5P/P2Q2P1/PR2KQ1P/Q1Q4Q b - - 1 1", 20)]
     [TestCase("rnbqkbnr/pppppppp/pPpPpPpP/PpPpPpPp/pPpPpPpP/PpPpPpPp/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 20)]
+    [TestCase("1k6/3Q4/1p1p1p1p/pPpPpPpP/P1P1P1P1/8/PPPPPPPP/RRRRKRRR w - - 0 1", 20)]
     public void PositionWithMoreThan8Pawns(string fen, int depth)
     {
         var engine = GetEngine();
