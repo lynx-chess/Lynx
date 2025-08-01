@@ -467,13 +467,10 @@ public class RegressionTest : BaseTest
     {
         var engine = GetEngine();
 
-        // 265 pseudolegal moves at the time of writing this
         engine.AdjustPosition($"position fen {fen}");
         Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
     }
 
-    [Explicit]
-    [Category(Categories.LongRunning)]
     [TestCase("qqqqkqqq/1p1p1p1p/pPpPpPpP/P1P1P1P1/8/P6P/PP2K1PP/QQRQ1RQQ b - - 4 1", 20)]
     [TestCase("qqqq2kq/1p1p1p1p/pPpPpPpQ/P1P5/8/P6P/PP2KQPP/3R1R1Q b - - 1 1", 20)]
     [TestCase("8/1p1k1p1p/pPpP1P1P/P1P1P1PP/1P4P1/P1QQ1Q1P/PR2K3/8 b - - 1 1", 20)]
@@ -488,7 +485,18 @@ public class RegressionTest : BaseTest
     {
         var engine = GetEngine();
 
-        // 265 pseudolegal moves at the time of writing this
+        engine.AdjustPosition($"position fen {fen}");
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
+    [TestCase("NNNNNNNk/N6N/N2N3N/N1NNN2N/N2NNN1N/N3N2N/N6N/KNNNNNNN w - - 0 1", 20)]
+    [TestCase("BBBBBBBk/B5pB/B2B3B/B1BBB2B/B2BBB1B/B3B2B/B6B/KBBBBBBB w - - 0 1", 20)]
+    [TestCase("RRRRRRnk/R6n/R2R3R/R1RRR2R/R2RRR1R/R3R2R/R6R/KRRRRRRR w - - 0 1", 20)]
+    [TestCase("QQQQQQnk/Q5nn/Q2Q3Q/Q1QQQ2Q/Q2QQQ1Q/Q3Q2Q/Q6Q/KQQQQQQQ w - - 0 1", 20)]
+    public void PositionWithMoreThan10Pieces(string fen, int depth)
+    {
+        var engine = GetEngine();
+
         engine.AdjustPosition($"position fen {fen}");
         Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
     }
