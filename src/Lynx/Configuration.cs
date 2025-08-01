@@ -236,6 +236,15 @@ public sealed class EngineSettings
     [SPSA<int>(25, 300, 30)]
     public int LMR_Quiet { get; set; } = 84;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_Corrplexity { get; set; } = 125;
+
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_Corrplexity_Delta { get; set; } = 90;
+
     [SPSA<int>(enabled: false)]
     public int History_MinDepth { get; set; } = 3;
 
@@ -262,6 +271,9 @@ public sealed class EngineSettings
 
     [SPSA<int>(enabled: false)]
     public int NMP_MinDepth { get; set; } = 3;
+
+    [SPSA<int>(enabled: false)]
+    public int NMP_Margin { get; set; } = +30;
 
     [SPSA<int>(enabled: false)]
     public int NMP_BaseDepthReduction { get; set; } = 2;
@@ -296,7 +308,7 @@ public sealed class EngineSettings
     public int ImprovingRate { get; set; } = 59;
 
     [SPSA<int>(enabled: false)]
-    public int RFP_MaxDepth { get; set; } = 7;
+    public int RFP_MaxDepth { get; set; } = 9;
 
     [SPSA<int>(50, 150, 10)]
     public int RFP_Improving_Margin { get; set; } = 83;
@@ -431,6 +443,12 @@ public sealed class EngineSettings
     /// </summary>
     [SPSA<int>(25, 200, 15)]
     public int CorrHistoryWeight_Minor { get; set; } = 149;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 200, 15)]
+    public int CorrHistoryWeight_Major { get; set; } = 150;
 
     [SPSA<int>(enabled: false)]
     public int TT_50MR_Start { get; set; } = 20;

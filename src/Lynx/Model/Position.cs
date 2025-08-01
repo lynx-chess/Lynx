@@ -21,6 +21,7 @@ public class Position : IDisposable
     private ulong _kingPawnUniqueIdentifier;
     private readonly ulong[] _nonPawnHash;
     private ulong _minorHash;
+    private ulong _majorHash;
 
     private readonly ulong[] _pieceBitBoards;
     private readonly ulong[] _occupancyBitBoards;
@@ -39,6 +40,8 @@ public class Position : IDisposable
     public ulong[] NonPawnHash => _nonPawnHash;
 
     public ulong MinorHash => _minorHash;
+
+    public ulong MajorHash => _majorHash;
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -100,6 +103,7 @@ public class Position : IDisposable
         _nonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
 
         _minorHash = ZobristTable.MinorHash(this);
+        _majorHash = ZobristTable.MajorHash(this);
         _kingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
 
         _uniqueIdentifier = ZobristTable.PositionHash(this, _kingPawnUniqueIdentifier, _nonPawnHash[(int)Side.White], _nonPawnHash[(int)Side.Black]);
@@ -119,6 +123,7 @@ public class Position : IDisposable
         _uniqueIdentifier = position._uniqueIdentifier;
         _kingPawnUniqueIdentifier = position._kingPawnUniqueIdentifier;
         _minorHash = position._minorHash;
+        _majorHash = position._majorHash;
 
         _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
         _nonPawnHash[(int)Side.White] = position._nonPawnHash[(int)Side.White];
@@ -151,6 +156,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
         var gameState = new GameState(this);
 
@@ -189,11 +195,6 @@ public class Position : IDisposable
             ^ ZobristTable.EnPassantHash((int)_enPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(_castle);                      // We clear the existing castle rights
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsMinorPiece(int piece) =>
-            piece == (int)Piece.N || piece == (int)Piece.n
-            || piece == (int)Piece.B || piece == (int)Piece.b;
-
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
             _kingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
@@ -208,9 +209,13 @@ public class Position : IDisposable
                 // We do need to update the NonPawn hash
                 _nonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
 
-                if (IsMinorPiece(newPiece))
+                if (Utils.IsMinorPiece(newPiece))
                 {
                     _minorHash ^= targetPieceHash;
+                }
+                else if (Utils.IsMajorPiece(newPiece))
+                {
+                    _majorHash ^= targetPieceHash;
                 }
             }
         }
@@ -226,9 +231,13 @@ public class Position : IDisposable
 
                 _kingPawnUniqueIdentifier ^= fullPieceMovementHash;
             }
-            else if (IsMinorPiece(piece))
+            else if (Utils.IsMinorPiece(piece))
             {
                 _minorHash ^= fullPieceMovementHash;
+            }
+            else if (Utils.IsMajorPiece(piece))
+            {
+                _majorHash ^= fullPieceMovementHash;
             }
         }
 
@@ -282,9 +291,13 @@ public class Position : IDisposable
                             {
                                 _nonPawnHash[oppositeSide] ^= capturedPieceHash;
 
-                                if (IsMinorPiece(capturedPiece))
+                                if (Utils.IsMinorPiece(capturedPiece))
                                 {
                                     _minorHash ^= capturedPieceHash;
+                                }
+                                else if (Utils.IsMajorPiece(capturedPiece))
+                                {
+                                    _majorHash ^= capturedPieceHash;
                                 }
                             }
 
@@ -358,9 +371,13 @@ public class Position : IDisposable
                             {
                                 _nonPawnHash[oppositeSide] ^= capturedPieceHash;
 
-                                if (IsMinorPiece(capturedPiece))
+                                if (Utils.IsMinorPiece(capturedPiece))
                                 {
                                     _minorHash ^= capturedPieceHash;
+                                }
+                                else if (Utils.IsMajorPiece(capturedPiece))
+                                {
+                                    _majorHash ^= capturedPieceHash;
                                 }
                             }
                         }
@@ -397,6 +414,7 @@ public class Position : IDisposable
 
                         _uniqueIdentifier ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
 
                         break;
                     }
@@ -419,6 +437,7 @@ public class Position : IDisposable
 
                         _uniqueIdentifier ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
 
                         break;
                     }
@@ -456,6 +475,7 @@ public class Position : IDisposable
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
@@ -564,6 +584,7 @@ public class Position : IDisposable
         _uniqueIdentifier = gameState.ZobristKey;
         _kingPawnUniqueIdentifier = gameState.KingPawnKey;
         _minorHash = gameState.MinorKey;
+        _majorHash = gameState.MajorKey;
         _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
         _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
 
@@ -1456,7 +1477,7 @@ public class Position : IDisposable
         while (defendedKnightThreats != 0)
         {
             defendedKnightThreats = defendedKnightThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KnightThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1465,7 +1486,7 @@ public class Position : IDisposable
         while (undefendedKnightThreats != 0)
         {
             undefendedKnightThreats = undefendedKnightThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KnightThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1476,7 +1497,7 @@ public class Position : IDisposable
         while (defendedBishopThreats != 0)
         {
             defendedBishopThreats = defendedBishopThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += BishopThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1485,7 +1506,7 @@ public class Position : IDisposable
         while (undefendedBishopThreats != 0)
         {
             undefendedBishopThreats = undefendedBishopThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += BishopThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1496,7 +1517,7 @@ public class Position : IDisposable
         while (defendedRookThreats != 0)
         {
             defendedRookThreats = defendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += RookThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1505,7 +1526,7 @@ public class Position : IDisposable
         while (undefendedRookThreats != 0)
         {
             undefendedRookThreats = undefendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += RookThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1516,7 +1537,7 @@ public class Position : IDisposable
         while (defendedQueenThreats != 0)
         {
             defendedQueenThreats = defendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += QueenThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1525,7 +1546,7 @@ public class Position : IDisposable
         while (undefendedQueenThreats != 0)
         {
             undefendedQueenThreats = undefendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += QueenThreatsBonus[attackedPiece - oppositeSideOffset];
         }
@@ -1536,7 +1557,7 @@ public class Position : IDisposable
         while (defendedKingThreats != 0)
         {
             defendedKingThreats = defendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KingThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
         }
@@ -1545,7 +1566,7 @@ public class Position : IDisposable
         while (undefendedKingThreats != 0)
         {
             undefendedKingThreats = undefendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
+            var attackedPiece = _board[square];
 
             packedBonus += KingThreatsBonus[attackedPiece - oppositeSideOffset];
         }

@@ -253,7 +253,7 @@ public sealed partial class Engine
 
                 // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
                 if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                    && staticEvalBetaDiff >= 0
+                    && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin
                     && !parentWasNullMove
                     && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                     && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
@@ -570,6 +570,11 @@ public sealed partial class Engine
                                     reduction -= Configuration.EngineSettings.LMR_InCheck;
                                 }
 
+                                if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
+                                {
+                                    reduction -= Configuration.EngineSettings.LMR_Corrplexity;
+                                }
+
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // -= history/(maxHistory/2)
@@ -724,8 +729,8 @@ public sealed partial class Engine
             if (!(isInCheck
                 || bestMove?.IsCapture() == true
                 || bestMove?.IsPromotion() == true
-                || (ttElementType == NodeType.Beta && bestScore <= staticEval)
-                || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+                || (nodeType == NodeType.Beta && bestScore <= staticEval)
+                || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
             {
                 UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
