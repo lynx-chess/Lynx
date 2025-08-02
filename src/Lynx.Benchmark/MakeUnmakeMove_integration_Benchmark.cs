@@ -1412,7 +1412,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
 #endif
 
-            movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            movePool ??= new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             int localIndex = 0;
 
             var offset = Utils.PieceOffset(position.Side);
