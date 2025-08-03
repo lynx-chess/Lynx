@@ -210,7 +210,7 @@ public static class SEE
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
             ? PieceValues[move.CapturedPiece()]
-            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + (move.CapturedPiece() != (int)Piece.None ? PieceValues[move.CapturedPiece()] : 0);
+            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + PieceValues[move.CapturedPiece()];
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
