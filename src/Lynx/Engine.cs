@@ -83,6 +83,7 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_pawnCorrHistory);
         Array.Clear(_nonPawnCorrHistory);
         Array.Clear(_minorCorrHistory);
+        Array.Clear(_majorCorrHistory);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
@@ -105,7 +106,7 @@ public sealed partial class Engine : IDisposable
     [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
     }

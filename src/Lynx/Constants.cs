@@ -370,10 +370,12 @@ public static class Constants
     public static readonly int MaxMoveOverhead = 60_000;
 
     /// <summary>
-    /// 218 or 224 seems to be the known limit
+    /// 218 or 224 seems to be the known limit of legal moves
     /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
+    /// We generally need to account for a number higher than that due to pseudolegal movegen
+    /// Regardless, we want to support positions like kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1 (270 pseudolegal and legal moves)
     /// </summary>
-    public const int MaxNumberOfPossibleMovesInAPosition = 250;
+    public const int MaxNumberOfPseudolegalMovesInAPosition = 512;
 
     public const int MaxNumberMovesInAGame = 2048;
 
@@ -594,6 +596,9 @@ public static class Constants
 
     public const int MinorCorrHistoryHashSize = 16_384;
     public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
+
+    public const int MajorCorrHistoryHashSize = 16_384;
+    public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
 }

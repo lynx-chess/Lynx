@@ -60,6 +60,12 @@ public sealed partial class Engine
     private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
+    /// <see cref="Constants.MajorCorrHistoryHashSize"/> x 2
+    /// Major hash x side to move
+    /// </summary>
+    private readonly int[] _majorCorrHistory = GC.AllocateArray<int>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
     /// 12 x 64
     /// piece x target square
     /// </summary>
@@ -454,7 +460,7 @@ public sealed partial class Engine
     {
         bool onlyOneLegalMove = false;
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
@@ -600,7 +606,7 @@ public sealed partial class Engine
             }
         }
 
-        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];

@@ -422,7 +422,7 @@ public static class MoveExtensions
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
 
         var movesWithSameSimpleRepresentation = pseudoLegalMoves

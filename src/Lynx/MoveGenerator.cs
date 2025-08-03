@@ -47,7 +47,7 @@ public static class MoveGenerator
     [Obsolete("dev and test only")]
     internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         return (capturesOnly
             ? GenerateAllCaptures(position, moves)

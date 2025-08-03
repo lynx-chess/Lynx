@@ -410,7 +410,7 @@ static void _23_Castling_Moves()
     position.Print();
 
     int index = 0;
-    var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+    var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
     MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
