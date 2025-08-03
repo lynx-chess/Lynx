@@ -37,7 +37,7 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
 
-        var captureMove = moves.Single(m => m.IsCapture());
+        var captureMove = moves.Single(m => m.CapturedPiece() != (int)Piece.None);
 
         // Act
         var newPosition = new Position(position);
@@ -83,7 +83,7 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var captureMove = moves.Single(m => m.IsCapture());
+        var captureMove = moves.Single(m => m.CapturedPiece() != (int)Piece.None);
 
         // Act
         var newPosition = new Position(position);
@@ -759,7 +759,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && !m.IsCapture()
+            && m.CapturedPiece() == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -786,7 +786,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && !m.IsCapture()
+            && m.CapturedPiece() == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -813,7 +813,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && !m.IsCapture()
+            && m.CapturedPiece() == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -840,7 +840,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && !m.IsCapture()
+            && m.CapturedPiece() == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -867,7 +867,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.IsCapture()
+            && m.CapturedPiece() != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         Assert.AreEqual((int)BoardSquare.a8, rookCapture.TargetSquare());
@@ -896,7 +896,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.IsCapture()
+            && m.CapturedPiece() != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.e5);
 
         Assert.AreEqual((int)BoardSquare.h8, rookCapture.TargetSquare());
@@ -925,7 +925,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.IsCapture()
+            && m.CapturedPiece() != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.e5);
 
         Assert.AreEqual((int)BoardSquare.a1, rookCapture.TargetSquare());
@@ -954,7 +954,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.IsCapture()
+            && m.CapturedPiece() != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         Assert.AreEqual((int)BoardSquare.h1, rookCapture.TargetSquare());
@@ -997,7 +997,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.IsCapture()
+            && m.CapturedPiece() != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         // Act
@@ -1038,7 +1038,7 @@ public class PositionMakeMoveTest
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.IsCapture()
+            && m.CapturedPiece() != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         // Act

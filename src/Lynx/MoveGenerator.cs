@@ -716,8 +716,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsValidMove(Position position, Move move)
     {
-        Debug.Assert(move.IsCapture() ? move.CapturedPiece() != (int)Piece.None : move.CapturedPiece() == (int)Piece.None);
-
         var gameState = position.MakeMove(move);
 
         bool result = position.WasProduceByAValidMove();

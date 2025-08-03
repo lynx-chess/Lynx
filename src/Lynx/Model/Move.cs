@@ -295,9 +295,6 @@ public static class MoveExtensions
     public static int CapturedPiece(this Move move) => (move & CapturedPieceMask) >> CapturedPieceOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCapture(this Move move) => move.CapturedPiece() != (int)Model.Piece.None;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & SpecialMoveMask) >> SpecialMoveFlagOffset);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -321,6 +318,7 @@ public static class MoveExtensions
     internal static string ToEPDString(this Move move)
     {
         var piece = move.Piece();
+        var capturedPiece = move.CapturedPiece();
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return move.SpecialMoveFlag() switch
@@ -329,11 +327,12 @@ public static class MoveExtensions
             SpecialMoveType.LongCastle => "O-O-O",
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
-                    ? (move.IsCapture()
+                    ? (capturedPiece != (int)Model.Piece.None
                         ? Constants.Coordinates[move.SourceSquare()][..^1]  // exd5
                         : "")    // d5
                     : char.ToUpperInvariant(Constants.AsciiPieces[move.Piece()]))
-                + (move.IsCapture() == default ? "" : "x")
+
+                + (capturedPiece == (int)Model.Piece.None ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
         };
@@ -347,6 +346,7 @@ public static class MoveExtensions
     public static string ToEPDString(this Move move, Position position)
     {
         var piece = move.Piece();
+        var capturedPiece = move.CapturedPiece();
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return move.SpecialMoveFlag() switch
@@ -355,12 +355,12 @@ public static class MoveExtensions
             SpecialMoveType.LongCastle => "O-O-O",
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
-                    ? (move.IsCapture()
+                    ? (capturedPiece != (int)Model.Piece.None
                         ? global::Lynx.Constants.FileString[global::Lynx.Constants.File[move.SourceSquare()]]  // exd5
                         : "")    // d5
                     : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
                         + DisambiguateMove(move, position))
-                + (move.IsCapture() == default ? "" : "x")
+                + (capturedPiece == (int)Model.Piece.None ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
         };

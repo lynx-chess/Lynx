@@ -15,8 +15,8 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.IsLongCastle()));
         Assert.True(moves.Exists(m => m.IsEnPassant()));
         Assert.True(moves.Exists(m => m.PromotedPiece() != default));
-        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.IsCapture()));
-        Assert.True(moves.Exists(m => m.PromotedPiece() != default && !m.IsCapture()));
+        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() != (int)Piece.None));
+        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() == (int)Piece.None));
         Assert.True(moves.Exists(m => m.IsDoublePawnPush()));
 
         Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
@@ -26,8 +26,8 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.IsLongCastle()));
         Assert.True(captures.Exists(m => m.IsEnPassant()));
         Assert.True(captures.Exists(m => m.PromotedPiece() != default));
-        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.IsCapture()));
-        Assert.True(captures.Exists(m => m.PromotedPiece() != default && !m.IsCapture()));
+        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() != (int)Piece.None));
+        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() == (int)Piece.None));
         Assert.False(captures.Exists(m => m.IsDoublePawnPush()));
     }
 }
