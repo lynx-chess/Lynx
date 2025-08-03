@@ -132,7 +132,7 @@ public static class Utils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Update50movesRule(Move moveToPlay, int halfMovesWithoutCaptureOrPawnMove)
     {
-        if (moveToPlay.IsCapture())
+        if (moveToPlay.CapturedPiece() != (int)Piece.None)
         {
             return halfMovesWithoutCaptureOrPawnMove >= 100
                 ? halfMovesWithoutCaptureOrPawnMove

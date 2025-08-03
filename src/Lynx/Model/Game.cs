@@ -93,8 +93,9 @@ public sealed class Game : IDisposable
     /// </remarks>
     /// <returns>true if threefol/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Update50movesRule(Move moveToPlay, bool isCapture)
+    public bool Update50movesRule(Move moveToPlay)
     {
+        var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
         if (isCapture)
         {
             if (HalfMovesWithoutCaptureOrPawnMove < 100)
@@ -198,7 +199,7 @@ public sealed class Game : IDisposable
             MoveHistory.Add(moveToPlay);
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
-            Update50movesRule(moveToPlay, moveToPlay.IsCapture());
+            Update50movesRule(moveToPlay);
         }
         else
         {

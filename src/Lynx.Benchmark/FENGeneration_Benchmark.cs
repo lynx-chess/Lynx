@@ -420,7 +420,7 @@ internal struct StructCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -519,7 +519,7 @@ internal struct StructCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -760,7 +760,7 @@ internal readonly struct ReadonlyStructCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -860,7 +860,7 @@ internal readonly struct ReadonlyStructCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1108,7 +1108,7 @@ internal class ClassCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1206,7 +1206,7 @@ internal class ClassCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1454,7 +1454,7 @@ internal record class RecordClassCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1552,7 +1552,7 @@ internal record class RecordClassCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1800,7 +1800,7 @@ internal record struct RecordStructCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1898,7 +1898,7 @@ internal record struct RecordStructCustomPosition
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;

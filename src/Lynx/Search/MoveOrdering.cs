@@ -21,7 +21,8 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
         var isPromotion = promotedPiece != default;
-        var isCapture = move.IsCapture();
+        var capturedPiece = move.CapturedPiece();
+        var isCapture = capturedPiece != (int)Piece.None;
 
         if (!isCapture && !isPromotion)
         {
@@ -63,7 +64,7 @@ public sealed partial class Engine
         {
             if (isCapture)
             {
-                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+                return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
             return PromotionMoveScoreValue
@@ -75,8 +76,6 @@ public sealed partial class Engine
         if (isCapture)
         {
             var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
-
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
@@ -113,14 +112,15 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
         var isPromotion = promotedPiece != default;
-        var isCapture = move.IsCapture();
+        var capturedPiece = move.CapturedPiece();
+        var isCapture = capturedPiece != (int)Piece.None;
 
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
             if (isCapture)
             {
-                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+                return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
             return PromotionMoveScoreValue
@@ -136,8 +136,6 @@ public sealed partial class Engine
                 : BadCaptureMoveBaseScoreValue;
 
             var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
-
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
@@ -186,8 +184,9 @@ public sealed partial class Engine
             for (int i = 0; i < visitedMovesCounter; ++i)
             {
                 var visitedMove = visitedMoves[i];
+                var capturedPiece = visitedMove.CapturedPiece();
 
-                if (!visitedMove.IsCapture())
+                if (capturedPiece == (int)Piece.None)
                 {
                     var visitedMovePiece = visitedMove.Piece();
                     var visitedMoveTargetSquare = visitedMove.TargetSquare();
@@ -246,8 +245,9 @@ public sealed partial class Engine
         for (int i = 0; i < visitedMovesCounter; ++i)
         {
             var visitedMove = visitedMoves[i];
+            var capturedPiece = visitedMove.CapturedPiece();
 
-            if (visitedMove.IsCapture())
+            if (capturedPiece != (int)Piece.None)
             {
                 ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
                 captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
