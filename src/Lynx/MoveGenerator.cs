@@ -376,15 +376,9 @@ public static class MoveGenerator
             {
                 attacks = attacks.WithoutLS1B(out targetSquare);
 
-                if (occupancy.GetBit(targetSquare))
-                {
-                    var capturedPiece = position.Board[targetSquare];
-                    movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
-                }
-                else
-                {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
-                }
+                Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
             }
         }
     }
@@ -407,15 +401,9 @@ public static class MoveGenerator
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
-            if (occupancy.GetBit(targetSquare))
-            {
-                var capturedPiece = position.Board[targetSquare];
-                movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
-            }
-            else
-            {
-                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
-            }
+            Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+            movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
         }
     }
 
@@ -569,7 +557,7 @@ public static class MoveGenerator
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece)))
+                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
             {
                 return true;
             }
@@ -688,14 +676,9 @@ public static class MoveGenerator
             {
                 attacks = attacks.WithoutLS1B(out targetSquare);
 
-                if (occupancy.GetBit(targetSquare))
-                {
-                    if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
-                    {
-                        return true;
-                    }
-                }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+                Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+                if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
                 {
                     return true;
                 }
@@ -719,14 +702,9 @@ public static class MoveGenerator
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
-            if (occupancy.GetBit(targetSquare))
-            {
-                if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
-                {
-                    return true;
-                }
-            }
-            else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+            Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+
+            if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
             {
                 return true;
             }
@@ -738,19 +716,7 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsValidMove(Position position, Move move)
     {
-#if DEBUG
-        // After introducing Position.Board, captured piece will always be populared here
-        if (move.IsCapture())
-        {
-            Debug.Assert(move.CapturedPiece() != (int)Piece.None);
-        }
-        else
-        {
-            Debug.Assert(
-                move.CapturedPiece() == (int)Piece.None
-                || move.CapturedPiece() == 0);  // In case of CanGenerateAnyValidMoves() / IsValidMove() scenarios, when we can't pre-populate with Piece.None since otherwise the | captured piece of MoveExtensions.EncodeCapturedPiece() wouldn't work
-        }
-#endif
+        Debug.Assert(move.IsCapture() ? move.CapturedPiece() != (int)Piece.None : move.CapturedPiece() == (int)Piece.None);
 
         var gameState = position.MakeMove(move);
 
