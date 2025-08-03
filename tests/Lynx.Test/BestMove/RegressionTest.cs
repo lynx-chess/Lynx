@@ -388,7 +388,7 @@ public class RegressionTest : BaseTest
         Description = "RR vs RB, where if the side with the bishop exchanges the rooks, they lose")]
     public void PawnlessEndgames(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 20);
     }
 
     [Explicit]
