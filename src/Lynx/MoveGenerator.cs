@@ -45,20 +45,20 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
-    internal static Move[] GenerateAllMoves(Position position, EvaluationContext evaluationContext, bool capturesOnly = false)
+    internal static Move[] GenerateAllMoves(Position position, ref readonly EvaluationContext evaluationContext, bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         return (capturesOnly
-            ? GenerateAllCaptures(position, evaluationContext, moves)
-            : GenerateAllMoves(position, evaluationContext, moves)).ToArray();
+            ? GenerateAllCaptures(position, in evaluationContext, moves)                // TODO: in required?
+            : GenerateAllMoves(position, in evaluationContext, moves)).ToArray();
     }
 
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllMoves(Position position, EvaluationContext evaluationContext, Span<Move> movePool)
+    public static Span<Move> GenerateAllMoves(Position position, ref readonly EvaluationContext evaluationContext, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -68,7 +68,7 @@ public static class MoveGenerator
 
         GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
-        GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset, position, evaluationContext);
+        GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset, position, in evaluationContext);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
@@ -81,7 +81,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, EvaluationContext evaluationContext, Span<Move> movePool)
+    public static Span<Move> GenerateAllCaptures(Position position, ref readonly EvaluationContext evaluationContext, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -91,7 +91,7 @@ public static class MoveGenerator
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
-        GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, evaluationContext);
+        GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, in evaluationContext);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
@@ -388,7 +388,7 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, Position position, EvaluationContext evaluationContext)
+    internal static void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, Position position, ref readonly EvaluationContext evaluationContext)
     {
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
@@ -445,7 +445,7 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, EvaluationContext evaluationContext)
+    internal static void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, ref readonly EvaluationContext evaluationContext)
     {
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
         var oppositeSide = Utils.OppositeSide(position.Side);
@@ -467,7 +467,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position, EvaluationContext evaluationContext)
+    public static bool CanGenerateAtLeastAValidMove(Position position, ref readonly EvaluationContext evaluationContext)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -478,7 +478,7 @@ public static class MoveGenerator
         {
 #endif
             return IsAnyPawnMoveValid(position, offset)
-                || IsAnyKingMoveValid((int)Piece.K + offset, position, evaluationContext)
+                || IsAnyKingMoveValid((int)Piece.K + offset, position, in evaluationContext)    // in?
                 || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.B + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.N + offset, position)
@@ -689,7 +689,7 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyKingMoveValid(int piece, Position position, EvaluationContext evaluationContext)
+    private static bool IsAnyKingMoveValid(int piece, Position position, ref readonly EvaluationContext evaluationContext)
     {
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];

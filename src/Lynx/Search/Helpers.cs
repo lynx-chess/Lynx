@@ -299,9 +299,13 @@ public sealed partial class Engine
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, EvaluationContext.Empty, movePool),
+               MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";

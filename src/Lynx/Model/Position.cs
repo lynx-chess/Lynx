@@ -659,17 +659,21 @@ public class Position : IDisposable
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="_side"/>.
     /// </summary>
-    public (int Score, int Phase, EvaluationContext EvaluationContext) StaticEvaluation() => StaticEvaluation(0);
+    public (int Score, int Phase) StaticEvaluation() => StaticEvaluation(0);
 
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="_side"/>.
     /// </summary>
-    public (int Score, int Phase, EvaluationContext EvaluationContext) StaticEvaluation(int movesWithoutCaptureOrPawnMove)
+    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove)
     {
         var kingPawnTable = new PawnTableElement[Constants.KingPawnHashSize];
 
-        return StaticEvaluation(movesWithoutCaptureOrPawnMove, kingPawnTable);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return StaticEvaluation(movesWithoutCaptureOrPawnMove, kingPawnTable, ref evaluationContext);
     }
 
     /// <summary>
@@ -677,7 +681,7 @@ public class Position : IDisposable
     /// That is, positive scores always favour playing <see cref="_side"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, int Phase, EvaluationContext EvaluationContext) StaticEvaluation(int movesWithoutCaptureOrPawnMove, PawnTableElement[] pawnEvalTable)
+    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove, PawnTableElement[] pawnEvalTable, ref EvaluationContext evaluationContext)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -697,7 +701,6 @@ public class Position : IDisposable
         BitBoard whitePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
         BitBoard blackPawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
 
-        EvaluationContext evaluationContext = new();
         evaluationContext.AttacksBySide[(int)Side.White] = evaluationContext.Attacks[(int)Piece.P] = whitePawnAttacks;
         evaluationContext.AttacksBySide[(int)Side.Black] = evaluationContext.Attacks[(int)Piece.p] = blackPawnAttacks;
 
@@ -778,7 +781,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    packedScore += AdditionalPieceEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -795,7 +798,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    packedScore -= AdditionalPieceEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
         }
@@ -911,7 +914,7 @@ public class Position : IDisposable
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -933,7 +936,7 @@ public class Position : IDisposable
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
 
@@ -950,10 +953,10 @@ public class Position : IDisposable
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(evaluationContext, whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(evaluationContext, blackKing, (int)Side.Black, whitePawnAttacks);
+            KingAdditionalEvaluation(ref  evaluationContext, whiteKing, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(ref evaluationContext, blackKing, (int)Side.Black, whitePawnAttacks);
 
-        AssertAttackPopulation(evaluationContext);
+        AssertAttackPopulation(ref evaluationContext);
 
         // Bishop pair bonus
         if (_pieceBitBoards[(int)Piece.B].CountBits() >= 2)
@@ -1027,7 +1030,7 @@ public class Position : IDisposable
 
                             if (_pieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
                             {
-                                return (0, gamePhase, evaluationContext);
+                                return (0, gamePhase);
                             }
 
                             // Rook vs a minor is a draw
@@ -1044,7 +1047,7 @@ public class Position : IDisposable
                             if (whiteKnightsCount + _pieceBitBoards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
                                     || whiteKnightsCount + _pieceBitBoards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
                             {
-                                return (0, gamePhase, evaluationContext);
+                                return (0, gamePhase);
                             }
 
                             break;
@@ -1052,7 +1055,7 @@ public class Position : IDisposable
                     case 1:
                     case 0:
                         {
-                            return (0, gamePhase, evaluationContext);
+                            return (0, gamePhase);
                         }
                 }
             }
@@ -1100,7 +1103,7 @@ public class Position : IDisposable
             ? eval
             : -eval;
 
-        return (sideEval, gamePhase, evaluationContext);
+        return (sideEval, gamePhase);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1152,14 +1155,14 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int AdditionalPieceEvaluation(EvaluationContext evaluationContext, int pieceSquareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int AdditionalPieceEvaluation(ref EvaluationContext evaluationContext, int pieceSquareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
     }
@@ -1168,16 +1171,16 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [Obsolete("Test only")]
-    internal int AdditionalPieceEvaluation(EvaluationContext evaluationContext, int bucket, int oppositeSideBucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    internal int AdditionalPieceEvaluation(ref EvaluationContext evaluationContext, int bucket, int oppositeSideBucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
 
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
     }
@@ -1240,7 +1243,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int RookAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
@@ -1287,7 +1290,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(EvaluationContext evaluationContext, int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int KnightAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KnightAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
@@ -1303,7 +1306,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int BishopAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
 
@@ -1356,7 +1359,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(EvaluationContext evaluationContext, int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int QueenAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
@@ -1373,7 +1376,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(EvaluationContext evaluationContext, int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KingAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
@@ -1991,7 +1994,7 @@ public class Position : IDisposable
 #pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
 
     [Conditional("DEBUG")]
-    private void AssertAttackPopulation(EvaluationContext evaluationContext)
+    private void AssertAttackPopulation(ref readonly EvaluationContext evaluationContext)
     {
         var attacks = evaluationContext.Attacks;
 
