@@ -18,10 +18,12 @@ public static class ZobristTable
     private static readonly ulong[][] _table;
     private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
 
+#pragma warning disable IDE1006 // Naming Styles
     private static readonly ulong _WK_Hash;
     private static readonly ulong _WQ_Hash;
     private static readonly ulong _BK_Hash;
     private static readonly ulong _BQ_Hash;
+#pragma warning restore IDE1006 // Naming Styles
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
 
