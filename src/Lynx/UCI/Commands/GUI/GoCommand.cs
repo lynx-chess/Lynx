@@ -44,7 +44,7 @@ namespace Lynx.UCI.Commands.GUI;
 ///	* infinite
 ///		search until the "stop" command. Do not exit the search without being told so in this mode!
 /// </summary>
-public sealed class GoCommand : IGUIBaseCommand
+public sealed class GoCommand
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

@@ -119,7 +119,7 @@ namespace Lynx.UCI.Commands.Engine;
 /// </summary>
 #pragma warning restore RCS1243 // Duplicate word in a comment.
 
-public sealed class OptionCommand : IEngineBaseCommand
+public sealed class OptionCommand
 {
     public const string Id = "option";
 

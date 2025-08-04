@@ -103,7 +103,7 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
         return InfoCommand_Benchmark.SearchResultInfo_Copilot(result).Length;
     }
 
-    public sealed class InfoCommand_Benchmark : IEngineBaseCommand
+    public sealed class InfoCommand_Benchmark
     {
         public const string Id = "info";
 
