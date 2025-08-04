@@ -135,7 +135,7 @@ public sealed partial class Engine
         bool isInCheck = position.IsInCheck();
         int rawStaticEval, staticEval;
         int phase = int.MaxValue;
-        EvaluationContext evaluationContext = new();
+        EvaluationContext evaluationContext = EvaluationContext.Empty;
         ref var stack = ref Game.Stack(ply);
         stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
