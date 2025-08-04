@@ -403,7 +403,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 ^ ZobristTable.EnPassantHash((int)position.EnPassant)
                 ^ ZobristTable.CastleHash(position.Castle);
 
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -520,7 +520,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -637,7 +637,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                  // We clear the existing castling rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -743,7 +743,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -865,7 +865,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositePawnIndex = (int)Piece.p - offset;
 
@@ -982,7 +982,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             {
                 case SpecialMoveType.None:
                     {
-                        if (move.IsCapture())
+                        if (move.CapturedPiece() != (int)Piece.None)
                         {
                             var capturedSquare = targetSquare;
                             capturedPiece = move.CapturedPiece();
@@ -1093,7 +1093,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             PieceBitBoards[piece].SetBit(sourceSquare);
             OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
 
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1171,7 +1171,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             PieceBitBoards[piece].SetBit(sourceSquare);
             OccupancyBitBoards[side].SetBit(sourceSquare);
 
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositePawnIndex = (int)Piece.p - offset;
 
@@ -1252,7 +1252,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             {
                 case SpecialMoveType.None:
                     {
-                        if (move.IsCapture())
+                        if (move.CapturedPiece() != (int)Piece.None)
                         {
                             PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
                             OccupancyBitBoards[oppositeSide].SetBit(targetSquare);

@@ -334,7 +334,7 @@ public sealed partial class Engine
             }
 
             var moveScore = moveScores[moveIndex];
-            var isCapture = move.IsCapture();
+            var isCapture = move.CapturedPiece() != (int)Piece.None;
 
             int? quietHistory = null;
 
@@ -475,7 +475,7 @@ public sealed partial class Engine
 
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-            var canBeRepetition = Game.Update50movesRule(move, isCapture);
+            var canBeRepetition = Game.Update50movesRule(move);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
 
@@ -500,7 +500,7 @@ public sealed partial class Engine
             }
             else
             {
-                var nextHalfMovesCounter = (move.IsCapture() || move.Piece() == (int)Piece.P || move.Piece() == (int)Piece.p)
+                var nextHalfMovesCounter = (move.CapturedPiece() != (int)Piece.None || move.Piece() == (int)Piece.P || move.Piece() == (int)Piece.p)
                     ? 0
                     : Game.HalfMovesWithoutCaptureOrPawnMove + 1;
 
@@ -727,7 +727,7 @@ public sealed partial class Engine
         if (!isVerifyingSE)
         {
             if (!(isInCheck
-                || bestMove?.IsCapture() == true
+                || (bestMove?.CapturedPiece() != null && bestMove?.CapturedPiece() != (int)Piece.None)
                 || bestMove?.IsPromotion() == true
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
                 || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
@@ -920,7 +920,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    if (move.IsCapture())
+                    if (move.CapturedPiece() != (int)Piece.None)
                     {
                         UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
                     }
@@ -950,7 +950,7 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;

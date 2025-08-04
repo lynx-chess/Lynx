@@ -271,10 +271,10 @@ public class Position : IDisposable
             {
                 case SpecialMoveType.None:
                     {
-                        if (move.IsCapture())
+                        var capturedPiece = move.CapturedPiece();
+                        if (capturedPiece != (int)Piece.None)
                         {
                             var capturedSquare = targetSquare;
-                            var capturedPiece = move.CapturedPiece();
 
                             _pieceBitBoards[capturedPiece].PopBit(capturedSquare);
                             _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
@@ -351,10 +351,11 @@ public class Position : IDisposable
             {
                 case SpecialMoveType.None:
                     {
-                        if (move.IsCapture())
+                        var capturedPiece = move.CapturedPiece();
+
+                        if (capturedPiece != (int)Piece.None)
                         {
                             var capturedSquare = targetSquare;
-                            var capturedPiece = move.CapturedPiece();
 
                             _pieceBitBoards[capturedPiece].PopBit(capturedSquare);
                             _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
@@ -514,9 +515,10 @@ public class Position : IDisposable
         {
             case SpecialMoveType.None:
                 {
-                    if (move.IsCapture())
+                    var capturedPiece = move.CapturedPiece();
+
+                    if (capturedPiece != (int)Piece.None)
                     {
-                        var capturedPiece = move.CapturedPiece();
 
                         _pieceBitBoards[capturedPiece].SetBit(targetSquare);
                         _occupancyBitBoards[oppositeSide].SetBit(targetSquare);
@@ -1058,7 +1060,7 @@ public class Position : IDisposable
             {
                 var winningSideOffset = Utils.PieceOffset(eval >= 0);
 
-                 if (gamePhase == 1)
+                if (gamePhase == 1)
                 {
                     // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
                     // TODO implement that
@@ -1315,8 +1317,8 @@ public class Position : IDisposable
         // Mobility
         var attacksCount =
             (attacks
-                & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks)))
-            .CountBits();
+                & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks))
+            ).CountBits();
 
         var packedBonus = BishopMobilityBonus[attacksCount];
 
