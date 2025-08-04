@@ -1,5 +1,7 @@
 ﻿namespace Lynx.Model;
 
+#pragma warning disable CA1051 // Do not declare visible instance fields
+
 public ref struct EvaluationContext
 {
     public Span<BitBoard> Attacks;
@@ -14,3 +16,5 @@ public ref struct EvaluationContext
         AttacksBySide.Clear();
     }
 }
+
+#pragma warning restore CA1051 // Do not declare visible instance fields
