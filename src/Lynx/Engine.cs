@@ -106,7 +106,7 @@ public sealed partial class Engine : IDisposable
     [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
     }

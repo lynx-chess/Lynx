@@ -295,7 +295,7 @@ public sealed partial class Engine
 
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, evaluationContext, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
@@ -843,7 +843,7 @@ public sealed partial class Engine
             alpha = standPat;
         }
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, evaluationContext, moves);
         if (pseudoLegalMoves.Length == 0)
         {

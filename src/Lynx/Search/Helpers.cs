@@ -297,7 +297,7 @@ public sealed partial class Engine
 
         static void TryParseMove(Position position, int i, int move)
         {
-            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
