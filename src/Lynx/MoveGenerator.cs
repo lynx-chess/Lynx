@@ -322,8 +322,8 @@ public static class MoveGenerator
             {
                 bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
 
-                if ((!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BK) != default)
+                if (!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BK) != default
                     && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White))
@@ -636,8 +636,8 @@ public static class MoveGenerator
                     return true;
                 }
 
-                if ((!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BQ) != default)
+                if (!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BQ) != default
                     && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White)
