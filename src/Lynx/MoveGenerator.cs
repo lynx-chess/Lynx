@@ -23,6 +23,7 @@ public static class MoveGenerator
     /// </summary>
     private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
     [
+#pragma warning disable IDE0350 // Use implicitly typed lambda
         (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
         (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
@@ -36,6 +37,7 @@ public static class MoveGenerator
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
         (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+#pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
     internal static int Init() => TRUE;
