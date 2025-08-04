@@ -719,7 +719,7 @@ public static class MoveGenerator
         var gameState = position.MakeMove(move);
 
         bool result = position.WasProduceByAValidMove();
-        position.UnmakeMove(move, gameState);
+        position.UnmakeMove(move, in gameState);
 
         return result;
     }

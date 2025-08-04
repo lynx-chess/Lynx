@@ -500,7 +500,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnmakeMove(Move move, GameState gameState)
+    public void UnmakeMove(Move move, in GameState gameState)
     {
         _attacks.AsSpan().Clear();
         _attacksBySide.AsSpan().Clear();
