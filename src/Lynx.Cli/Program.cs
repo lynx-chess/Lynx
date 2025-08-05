@@ -13,7 +13,7 @@ var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
     .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: false)
-    .AddJsonFile($"appsettings.tournament.json", optional: true, reloadOnChange: false)
+    .AddJsonFile("appsettings.tournament.json", optional: true, reloadOnChange: false)
     .AddEnvironmentVariables()
     .Build();
 

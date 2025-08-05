@@ -8,13 +8,13 @@ public class GeneratePawnMovesTest
 {
     private static IEnumerable<Move> GeneratePawnMoves(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     private static IEnumerable<Move> GeneratePawnCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
@@ -30,12 +30,12 @@ public class GeneratePawnMovesTest
             Assert.True(1 == whiteMoves.Count(m =>
                 m.SourceSquare() == square
                 && m.TargetSquare() == square - 8
-                && !m.IsCapture()));
+                && m.CapturedPiece() == (int)Piece.None));
 
             Assert.True(1 == whiteMoves.Count(m =>
                  m.SourceSquare() == square
                 && m.TargetSquare() == square - 16
-                && !m.IsCapture()));
+                && m.CapturedPiece() == (int)Piece.None));
         }
 
         Assert.AreEqual(whiteMoves.Count(), ReferenceMoveGenerator.GeneratePawnMovesForReference(position, 0).Count());
@@ -48,12 +48,12 @@ public class GeneratePawnMovesTest
             Assert.True(1 == blackMoves.Count(m =>
                 m.SourceSquare() == square
                 && m.TargetSquare() == square + 8
-                && !m.IsCapture()));
+                && m.CapturedPiece() == (int)Piece.None));
 
             Assert.True(1 == blackMoves.Count(m =>
                 m.SourceSquare() == square
                 && m.TargetSquare() == square + 16
-                && !m.IsCapture()));
+                && m.CapturedPiece() == (int)Piece.None));
         }
 
         Assert.AreEqual(blackMoves.Count(), ReferenceMoveGenerator.GeneratePawnMovesForReference(position, 6).Count());
@@ -85,24 +85,24 @@ public class GeneratePawnMovesTest
         Assert.True(1 == whiteMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a2
             && m.TargetSquare() == (int)BoardSquare.b3
-            && m.IsCapture()));
+            && m.CapturedPiece() != (int)Piece.None));
 
         Assert.True(1 == whiteMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.c2
             && m.TargetSquare() == (int)BoardSquare.b3
-            && m.IsCapture()));
+            && m.CapturedPiece() != (int)Piece.None));
 
-        whiteMoves = GeneratePawnCaptures(position).ToList();
+        whiteMoves = [.. GeneratePawnCaptures(position)];
 
         Assert.True(1 == whiteMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a2
             && m.TargetSquare() == (int)BoardSquare.b3
-            && m.IsCapture()));
+            && m.CapturedPiece() != (int)Piece.None));
 
         Assert.True(1 == whiteMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.c2
             && m.TargetSquare() == (int)BoardSquare.b3
-            && m.IsCapture()));
+            && m.CapturedPiece() != (int)Piece.None));
 
         position = new Position("8/ppp/1B6/8/8/8/8/K1k5 b - - 0 1");
 
@@ -111,24 +111,24 @@ public class GeneratePawnMovesTest
         Assert.True(1 == blackMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a7
             && m.TargetSquare() == (int)BoardSquare.b6
-            && m.IsCapture()));
+            && m.CapturedPiece() != (int)Piece.None));
 
         Assert.True(1 == blackMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.c7
             && m.TargetSquare() == (int)BoardSquare.b6
-             && m.IsCapture()));
+             && m.CapturedPiece() != (int)Piece.None));
 
-        blackMoves = GeneratePawnCaptures(position).ToList();
+        blackMoves = [.. GeneratePawnCaptures(position)];
 
         Assert.True(1 == blackMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a7
             && m.TargetSquare() == (int)BoardSquare.b6
-            && m.IsCapture()));
+            && m.CapturedPiece() != (int)Piece.None));
 
         Assert.True(1 == blackMoves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.c7
             && m.TargetSquare() == (int)BoardSquare.b6
-             && m.IsCapture()));
+             && m.CapturedPiece() != (int)Piece.None));
     }
 
     [Test]
@@ -139,10 +139,10 @@ public class GeneratePawnMovesTest
         var whiteMoves = GeneratePawnMoves(position).ToList();
 
         Assert.AreEqual(8, whiteMoves.Count);
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && !m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && !m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && !m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && !m.IsCapture()));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.CapturedPiece() == (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.CapturedPiece() == (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.CapturedPiece() == (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.CapturedPiece() == (int)Piece.None));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.a8));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.h8));
 
@@ -167,20 +167,20 @@ public class GeneratePawnMovesTest
         var whiteMoves = GeneratePawnMoves(position).ToList();
 
         Assert.AreEqual(8, whiteMoves.Count);
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.IsCapture()));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.CapturedPiece() != (int)Piece.None));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.b8));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.g8));
 
-        whiteMoves = GeneratePawnCaptures(position).ToList();
+        whiteMoves = [.. GeneratePawnCaptures(position)];
 
         Assert.AreEqual(8, whiteMoves.Count);
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.IsCapture()));
-        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.IsCapture()));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.CapturedPiece() != (int)Piece.None));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.b8));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.g8));
 
@@ -189,20 +189,20 @@ public class GeneratePawnMovesTest
         var blackMoves = GeneratePawnMoves(position).ToList();
 
         Assert.AreEqual(8, blackMoves.Count);
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.IsCapture()));
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.IsCapture()));
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.IsCapture()));
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.IsCapture()));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.CapturedPiece() != (int)Piece.None));
         Assert.AreEqual(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquare.b1));
         Assert.AreEqual(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquare.g1));
 
-        blackMoves = GeneratePawnCaptures(position).ToList();
+        blackMoves = [.. GeneratePawnCaptures(position)];
 
         Assert.AreEqual(8, blackMoves.Count);
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.IsCapture()));
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.IsCapture()));
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.IsCapture()));
-        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.IsCapture()));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.CapturedPiece() != (int)Piece.None));
         Assert.AreEqual(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquare.b1));
         Assert.AreEqual(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquare.g1));
     }
@@ -214,11 +214,11 @@ public class GeneratePawnMovesTest
         var position = new Position(fen);
         var moves = GeneratePawnMoves(position);
         Assert.AreEqual(1, moves.Count());
-        Assert.AreEqual(1, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
+        Assert.AreEqual(1, moves.Count(m => m.IsEnPassant() && m.CapturedPiece() != (int)Piece.None));
 
         moves = GeneratePawnCaptures(position);
         Assert.AreEqual(1, moves.Count());
-        Assert.AreEqual(1, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
+        Assert.AreEqual(1, moves.Count(m => m.IsEnPassant() && m.CapturedPiece() != (int)Piece.None));
     }
 
     [TestCase("7k/8/8/PpP5/8/Q7/8/7K w - b6 0 1")]
@@ -227,15 +227,15 @@ public class GeneratePawnMovesTest
     {
         var position = new Position(fen);
         var moves = GeneratePawnMoves(position);
-        Assert.AreEqual(2, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
+        Assert.AreEqual(2, moves.Count(m => m.IsEnPassant() && m.CapturedPiece() != (int)Piece.None));
 
         moves = GeneratePawnCaptures(position);
-        Assert.AreEqual(2, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
+        Assert.AreEqual(2, moves.Count(m => m.IsEnPassant() && m.CapturedPiece() != (int)Piece.None));
     }
 
     [TestCase("K1k5/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 w - - 0 1", Description = "Blocked position")]
     [TestCase("K1k5/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 b - - 0 1", Description = "Blocked position")]
-    [TestCase("K1k5/8/8/N7/P7/1p6/8/8 w - - 0 1", Description = "Backwards/inverse capture")]
+    [TestCase("K1k5/8/8/N7/P7/1p6/8 w - - 0 1", Description = "Backwards/inverse capture")]
     [TestCase("K1k5/8/8/1P6/p7/n7/8/8 b - - 0 1", Description = "Backwards/inverse capture")]
     public void ShouldNotGenerateMoves(string fen)
     {

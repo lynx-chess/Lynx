@@ -7,13 +7,13 @@ public class GenerateQueenMovesTest
 {
     private static IEnumerable<Move> GenerateQueenMoves(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
     private static IEnumerable<Move> GenerateQueenCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
@@ -151,6 +151,6 @@ public class GenerateQueenMovesTest
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenCaptures(position);
 
-        Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece() == piece && m.IsCapture()));
+        Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
     }
 }

@@ -10,7 +10,7 @@
 ///	After that the engine should sent "uciok" to acknowledge the uci mode.
 ///	If no uciok is sent within a certain time period, the engine task will be killed by the GUI.
 /// </summary>
-public sealed class UCICommand : IGUIBaseCommand
+public sealed class UCICommand
 {
     public const string Id = "uci";
 }

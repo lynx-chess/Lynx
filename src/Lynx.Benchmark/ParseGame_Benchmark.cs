@@ -368,7 +368,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public static class ParseGame_ImprovedClass4
     {
-        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         public const string Id = "position";
 
@@ -420,7 +420,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public static class ParseGame_ImprovedClass5
     {
-        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         public const string Id = "position";
 
