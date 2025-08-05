@@ -2016,6 +2016,7 @@ public class Position : IDisposable
         Debug.Assert(PieceBitBoards[(int)Piece.R] == 0 || _attacks[(int)Piece.R] != 0);
         Debug.Assert(PieceBitBoards[(int)Piece.Q] == 0 || _attacks[(int)Piece.Q] != 0);
         Debug.Assert(_attacks[(int)Piece.K] != 0);
+        Debug.Assert(_attacksBySide[(int)Side.White] != 0);
 
         Debug.Assert(PieceBitBoards[(int)Piece.p] == 0 || _attacks[(int)Piece.p] != 0);
         Debug.Assert(PieceBitBoards[(int)Piece.n] == 0 || _attacks[(int)Piece.n] != 0);
@@ -2023,6 +2024,7 @@ public class Position : IDisposable
         Debug.Assert(PieceBitBoards[(int)Piece.r] == 0 || _attacks[(int)Piece.r] != 0);
         Debug.Assert(PieceBitBoards[(int)Piece.q] == 0 || _attacks[(int)Piece.q] != 0);
         Debug.Assert(_attacks[(int)Piece.k] != 0);
+        Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
     }
 
     public void FreeResources()
