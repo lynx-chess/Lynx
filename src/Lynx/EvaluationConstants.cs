@@ -23,7 +23,7 @@ public static class EvaluationConstants
     public const int MaxPhase = 24;
 
     /// <summary>
-    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
+    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/>
     /// </summary>
     public static readonly int[][][] LMRReductions = new int[2][][];
 
@@ -43,10 +43,10 @@ public static class EvaluationConstants
 
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
-            quietReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
-            noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+            quietReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
+            for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPseudolegalMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
                 quietReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     LMRScaleFactor *
@@ -147,9 +147,9 @@ public static class EvaluationConstants
     public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1;
 
     /// <summary>
-    /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
+    /// Outside of the evaluation ranges (higher than <see cref="MaxEval"/>)
     /// </summary>
-    public const int NoHashEntry = 25_000;
+    public const int NoScore = -32_666;
 
     /// <summary>
     /// Evaluation to be returned when there's one single legal move.

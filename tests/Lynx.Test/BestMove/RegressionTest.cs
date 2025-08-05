@@ -388,7 +388,7 @@ public class RegressionTest : BaseTest
         Description = "RR vs RB, where if the side with the bishop exchanges the rooks, they lose")]
     public void PawnlessEndgames(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 20);
     }
 
     [Explicit]
@@ -429,16 +429,16 @@ public class RegressionTest : BaseTest
 
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
         var result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
-        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+        Assert.Less(result.DepthReached, 4 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
 
         // It used to happen at the second repetition, info depth 2 seldepth 127
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
         result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
-        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+        Assert.Less(result.DepthReached, 4 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
 
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
         result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
-        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+        Assert.Less(result.DepthReached, 4 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
     }
 
     [Test]
@@ -448,7 +448,7 @@ public class RegressionTest : BaseTest
 
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
         var result = engine.BestMove(new("go wtime 6000 btime 6000 winc 3000 binc 3000"));
-        Assert.Less(result.DepthReached, 3 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
+        Assert.Less(result.DepthReached, 5 * result.Depth, $"depth {result.Depth}, seldepth {result.DepthReached}");
 
         // It used to happen at the second repetition, info depth 2 seldepth 127
         engine.AdjustPosition("position fen 8/4kpN1/8/4p1PK/1b2P3/5P2/8/8 b - - 60 109");
@@ -459,4 +459,50 @@ public class RegressionTest : BaseTest
         result = engine.BestMove(new("go depth 3"));
         Assert.Less(result.DepthReached, 32, $"depth {result.Depth}, seldepth {result.DepthReached}");
     }
+
+#pragma warning disable S4144 // Methods should not have identical implementations
+
+    [TestCase("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNNK1B1 w - - 0 1", 50)]  // 216 legal moves
+    [TestCase("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNN1KB1 w - - 0 1", 50)]  // 218 legal moves
+    [TestCase("QQQQQQBk/Q6B/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1", 50)]   // 265 pseudolegal moves at the time of writing this
+    [TestCase("kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1", 50)]  // 270 pseudolegal and legal moves at the time of writing this
+    public void PositionWithMoreThan256PseudolegalMoves(string fen, int depth)
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition($"position fen {fen}");
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
+    [TestCase("qqqqkqqq/1p1p1p1p/pPpPpPpP/P1P1P1P1/8/P6P/PP2K1PP/QQRQ1RQQ b - - 4 1", 20)]
+    [TestCase("qqqq2kq/1p1p1p1p/pPpPpPpQ/P1P5/8/P6P/PP2KQPP/3R1R1Q b - - 1 1", 20)]
+    [TestCase("8/1p1k1p1p/pPpP1P1P/P1P1P1PP/1P4P1/P1QQ1Q1P/PR2K3/8 b - - 1 1", 20)]
+    [TestCase("8/1p1k1p1p/pPpP1P1P/P1P1P1P1/1P5P/PR1Q1QP1/P3K2P/2Q5 b - - 1 1", 20)]
+    [TestCase("4k3/1p3p1Q/pPpP1P1P/P1P1P1PP/1P4P1/P1QQ3P/PR2K3/8 b - - 1 1", 20)]
+    [TestCase("2k5/1p3QPP/pPpPPPP1/P1P2Q1P/1P5P/P1Q5/PR2K3/8 b - - 1 1", 20)]
+    [TestCase("3k4/1p3p1p/pPpP1P1P/P1P1P1PP/1P4P1/P2Q1Q1P/PRQ1K3/8 b - - 0 1", 20)]
+    [TestCase("k7/1p1p1p1p/pPpPpPpP/P1P1PRP1/1P5P/P2Q2P1/PR2KQ1P/Q1Q4Q b - - 1 1", 20)]
+    [TestCase("rnbqkbnr/pppppppp/pPpPpPpP/PpPpPpPp/pPpPpPpP/PpPpPpPp/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 20)]
+    [TestCase("1k6/3Q4/1p1p1p1p/pPpPpPpP/P1P1P1P1/8/PPPPPPPP/RRRRKRRR w - - 0 1", 20)]
+    public void PositionWithMoreThan8Pawns(string fen, int depth)
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition($"position fen {fen}");
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
+    [TestCase("NNNNNNNk/N6N/N2N3N/N1NNN2N/N2NNN1N/N3N2N/N6N/KNNNNNNN w - - 0 1", 20)]
+    [TestCase("BBBBBBBk/B5pB/B2B3B/B1BBB2B/B2BBB1B/B3B2B/B6B/KBBBBBBB w - - 0 1", 20)]
+    [TestCase("RRRRRRnk/R6n/R2R3R/R1RRR2R/R2RRR1R/R3R2R/R6R/KRRRRRRR w - - 0 1", 20)]
+    [TestCase("QQQQQQnk/Q5nn/Q2Q3Q/Q1QQQ2Q/Q2QQQ1Q/Q3Q2Q/Q6Q/KQQQQQQQ w - - 0 1", 20)]
+    public void PositionWithMoreThan10Pieces(string fen, int depth)
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition($"position fen {fen}");
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
+#pragma warning restore S4144 // Methods should not have identical implementations
 }

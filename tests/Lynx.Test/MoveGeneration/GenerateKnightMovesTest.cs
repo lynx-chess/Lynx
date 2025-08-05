@@ -7,13 +7,13 @@ public class GenerateKnightMovesTest
 {
     private static IEnumerable<Move> GenerateKnightMoves(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     private static IEnumerable<Move> GenerateKnightCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
@@ -190,7 +190,7 @@ public class GenerateKnightMovesTest
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 
-        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
+        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.e5
@@ -227,7 +227,7 @@ public class GenerateKnightMovesTest
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 
-        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
+        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.b6

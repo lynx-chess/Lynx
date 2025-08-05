@@ -127,7 +127,9 @@ public class InfoCommand_Benchmark : BaseBenchmark
         return InfoCommand_StringBuilder_256.SearchResultInfo(result).Length;
     }
 
-    public sealed class InfoCommand_StringAddition : IEngineBaseCommand
+#pragma warning disable S1118 // Utility classes should not have public constructors
+
+    public sealed class InfoCommand_StringAddition
     {
         public const string Id = "info";
 
@@ -149,7 +151,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class InfoCommand_StringBuilder_256 : IEngineBaseCommand
+    public sealed class InfoCommand_StringBuilder_256
     {
         public const string Id = "info";
 
@@ -181,7 +183,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class InfoCommand_StringBuilder_128 : IEngineBaseCommand
+    public sealed class InfoCommand_StringBuilder_128
     {
         public const string Id = "info";
 
@@ -212,4 +214,6 @@ public class InfoCommand_Benchmark : BaseBenchmark
             return sb.ToString();
         }
     }
+
+#pragma warning restore S1118 // Utility classes should not have public constructors
 }

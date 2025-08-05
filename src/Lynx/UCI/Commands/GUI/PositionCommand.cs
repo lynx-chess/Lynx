@@ -12,7 +12,7 @@ namespace Lynx.UCI.Commands.GUI;
 ///	Note: no "new" command is needed. However, if this position is from a different game than
 ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
 /// </summary>
-public sealed class PositionCommand : IGUIBaseCommand
+public sealed class PositionCommand
 {
     public const string Id = "position";
 
@@ -64,7 +64,7 @@ public sealed class PositionCommand : IGUIBaseCommand
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,

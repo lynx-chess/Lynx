@@ -57,7 +57,7 @@ public sealed partial class Engine
 
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
-        int ttScore = EvaluationConstants.NoHashEntry;
+        int ttScore = EvaluationConstants.NoScore;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
@@ -154,7 +154,7 @@ public sealed partial class Engine
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
-        else if (!pvNode && !isInCheck)
+        else if (!pvNode && !isInCheck && !isVerifyingSE)
         {
             if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
@@ -193,7 +193,7 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated && !isVerifyingSE)
+            if (isNotGettingCheckmated)
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
@@ -252,7 +252,7 @@ public sealed partial class Engine
 
                 // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
                 if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                    && staticEvalBetaDiff >= 0
+                    && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin
                     && !parentWasNullMove
                     && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                     && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
@@ -294,7 +294,7 @@ public sealed partial class Engine
 
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
@@ -333,7 +333,7 @@ public sealed partial class Engine
             }
 
             var moveScore = moveScores[moveIndex];
-            var isCapture = move.IsCapture();
+            var isCapture = move.CapturedPiece() != (int)Piece.None;
 
             int? quietHistory = null;
 
@@ -444,7 +444,7 @@ public sealed partial class Engine
                         ++stack.DoubleExtensions;
 
                         // Low depth extension - extending all moves
-                        if(depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
                         {
                             ++depth;
                         }
@@ -474,7 +474,7 @@ public sealed partial class Engine
 
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-            var canBeRepetition = Game.Update50movesRule(move, isCapture);
+            var canBeRepetition = Game.Update50movesRule(move);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
 
@@ -499,7 +499,7 @@ public sealed partial class Engine
             }
             else
             {
-                var nextHalfMovesCounter = (move.IsCapture() || move.Piece() == (int)Piece.P || move.Piece() == (int)Piece.p)
+                var nextHalfMovesCounter = (move.CapturedPiece() != (int)Piece.None || move.Piece() == (int)Piece.P || move.Piece() == (int)Piece.p)
                     ? 0
                     : Game.HalfMovesWithoutCaptureOrPawnMove + 1;
 
@@ -567,6 +567,11 @@ public sealed partial class Engine
                                 if (position.IsInCheck())   // i.e. move gives check
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_InCheck;
+                                }
+
+                                if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
+                                {
+                                    reduction -= Configuration.EngineSettings.LMR_Corrplexity;
                                 }
 
                                 reduction /= EvaluationConstants.LMRScaleFactor;
@@ -721,10 +726,10 @@ public sealed partial class Engine
         if (!isVerifyingSE)
         {
             if (!(isInCheck
-                || bestMove?.IsCapture() == true
+                || (bestMove?.CapturedPiece() != null && bestMove?.CapturedPiece() != (int)Piece.None)
                 || bestMove?.IsPromotion() == true
-                || (ttElementType == NodeType.Beta && bestScore <= staticEval)
-                || (ttElementType == NodeType.Alpha && bestScore >= staticEval)))
+                || (nodeType == NodeType.Beta && bestScore <= staticEval)
+                || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
             {
                 UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
@@ -800,7 +805,7 @@ public sealed partial class Engine
                 : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
         */
         var rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-        Debug.Assert(rawStaticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+        Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
         var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
@@ -837,7 +842,7 @@ public sealed partial class Engine
             alpha = standPat;
         }
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
         if (pseudoLegalMoves.Length == 0)
         {
@@ -914,7 +919,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    if (move.IsCapture())
+                    if (move.CapturedPiece() != (int)Piece.None)
                     {
                         UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
                     }
@@ -944,7 +949,7 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;
