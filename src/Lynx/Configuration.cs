@@ -146,13 +146,13 @@ public sealed class EngineSettings
     public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
     [SPSA<double>(1.0, 2.0, 0.05)]
-    public double MoveDivisor { get; set; } = 1.41;
+    public double MoveDivisor { get; set; } = 1.50;
 
     [SPSA<double>(enabled: false)]
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
     [SPSA<double>(0.5, 1, 0.025)]
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.84;
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.80;
 
     [SPSA<double>(1, 3, 0.1)]
     public double NodeTmBase { get; set; } = 2.56;
