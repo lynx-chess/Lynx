@@ -1226,7 +1226,7 @@ public class Position : IDisposable
         }
 
         // Passed pawn
-        if (rank >= 3
+        if (rank >= 2
             && (_pieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
         {
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
