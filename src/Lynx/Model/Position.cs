@@ -989,8 +989,8 @@ public class Position : IDisposable
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats((int)Side.White, (int)Side.Black)
-            - Threats((int)Side.Black, (int)Side.White);
+        packedScore += Threats(offset: 0, oppositeSidePieces: OccupancyBitBoards[(int)Side.Black])
+            - Threats(offset: 6, oppositeSidePieces: OccupancyBitBoards[(int)Side.White]);
 
         // Checks
         packedScore += Checks((int)Side.White, (int)Side.Black)
@@ -1499,25 +1499,18 @@ public class Position : IDisposable
     ];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(int side, int oppositeSide)
+    private int Threats(int offset, ulong oppositeSidePieces)
     {
         int packedBonus = 0;
 
-        var offset = Utils.PieceOffset(side);
         var oppositeSideOffset = 6 - offset;
-        var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
         var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset];
-
-        Span<BitBoard> threats = stackalloc BitBoard[6];
-        threats[(int)Piece.N] = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
-        threats[(int)Piece.B] = _attacks[(int)Piece.B + offset] & oppositeSidePieces;
-        threats[(int)Piece.R] = _attacks[(int)Piece.R + offset] & oppositeSidePieces;
-        threats[(int)Piece.Q] = _attacks[(int)Piece.Q + offset] & oppositeSidePieces;
-        threats[(int)Piece.K] = _attacks[(int)Piece.K + offset] & oppositeSidePieces;
 
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
-            var defended = threats[i] & defendedSquares;
+            var threats = _attacks[i + offset] & oppositeSidePieces;
+
+            var defended = threats & defendedSquares;
             while (defended != 0)
             {
                 defended = defended.WithoutLS1B(out var square);
@@ -1526,82 +1519,14 @@ public class Position : IDisposable
                 packedBonus += _defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
 
-            var undefended = threats[i] & ~defendedSquares;
+            var undefended = threats & ~defendedSquares;
             while (undefended != 0)
             {
                 undefended = undefended.WithoutLS1B(out var square);
                 var attackedPiece = Board[square];
 
-            packedBonus += BishopThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedBishopThreats = bishopThreats & (~defendedSquares);
-        while (undefendedBishopThreats != 0)
-        {
-            undefendedBishopThreats = undefendedBishopThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
-
-            packedBonus += BishopThreatsBonus[attackedPiece - oppositeSideOffset];
-        }
-
-        var rookThreats = _attacks[(int)Piece.R + offset] & oppositeSidePieces;
-
-        var defendedRookThreats = rookThreats & defendedSquares;
-        while (defendedRookThreats != 0)
-        {
-            defendedRookThreats = defendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
-
-            packedBonus += RookThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedRookThreats = rookThreats & (~defendedSquares);
-        while (undefendedRookThreats != 0)
-        {
-            undefendedRookThreats = undefendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
-
-            packedBonus += RookThreatsBonus[attackedPiece - oppositeSideOffset];
-        }
-
-        var queenThreats = _attacks[(int)Piece.Q + offset] & oppositeSidePieces;
-
-        var defendedQueenThreats = queenThreats & defendedSquares;
-        while (defendedQueenThreats != 0)
-        {
-            defendedQueenThreats = defendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
-
-            packedBonus += QueenThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedQueenThreats = queenThreats & (~defendedSquares);
-        while (undefendedQueenThreats != 0)
-        {
-            undefendedQueenThreats = undefendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
-
-            packedBonus += QueenThreatsBonus[attackedPiece - oppositeSideOffset];
-        }
-
-        var kingThreats = _attacks[(int)Piece.K + offset] & oppositeSidePieces;
-
-        var defendedKingThreats = kingThreats & defendedSquares;
-        while (defendedKingThreats != 0)
-        {
-            defendedKingThreats = defendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
-
-            packedBonus += KingThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedKingThreats = kingThreats & (~defendedSquares);
-        while (undefendedKingThreats != 0)
-        {
-            undefendedKingThreats = undefendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = Board[square];
-
-            packedBonus += KingThreatsBonus[attackedPiece - oppositeSideOffset];
+                packedBonus += _undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+            }
         }
 
         return packedBonus;
