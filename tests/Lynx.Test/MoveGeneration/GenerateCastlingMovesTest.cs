@@ -16,7 +16,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -36,7 +36,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -64,7 +64,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -90,7 +90,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -114,7 +114,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -142,7 +142,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -160,7 +160,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -178,7 +178,7 @@ public class GenerateCastlingMovesTest
         var position = new Position(fen);
 
         int index = 0;
-        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 

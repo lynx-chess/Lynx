@@ -691,11 +691,11 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
 #pragma warning restore S127 // "for" loop stop conditions should be invariant
     }
 
-    private static readonly ReadOnlyMemory<char> InfiniteMemory = "infinite".AsMemory();
-    private static readonly ReadOnlyMemory<char> PonderMemory = "ponder".AsMemory();
-    private static readonly ReadOnlyMemory<char> NodesMemory = "nodes".AsMemory();
-    private static readonly ReadOnlyMemory<char> MateMemory = "mate".AsMemory();
-    private static readonly ReadOnlyMemory<char> SearchMovesMemory = "searchmoves".AsMemory();
+    private static readonly ReadOnlyMemory<char> _infiniteMemory = "infinite".AsMemory();
+    private static readonly ReadOnlyMemory<char> _ponderMemory = "ponder".AsMemory();
+    private static readonly ReadOnlyMemory<char> _nodesMemory = "nodes".AsMemory();
+    private static readonly ReadOnlyMemory<char> _mateMemory = "mate".AsMemory();
+    private static readonly ReadOnlyMemory<char> _searchMovesMemory = "searchmoves".AsMemory();
 
     private static readonly Dictionary<ReadOnlyMemory<char>, Action<GoCommandParsingAlternatives_Benchmark, int>> _commandActions2 = new()
     {
@@ -725,25 +725,25 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                     action(this, value);
                 }
             }
-            else if (key.Equals(InfiniteMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_infiniteMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 Infinite = true;
             }
-            else if (key.Equals(PonderMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_ponderMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 Ponder = true;
             }
-            else if (key.Equals(NodesMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_nodesMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Warn("nodes not supported in go command, it will be safely ignored");
                 ++i;
             }
-            else if (key.Equals(MateMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_mateMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Warn("mate not supported in go command, it will be safely ignored");
                 ++i;
             }
-            else if (key.Equals(SearchMovesMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_searchMovesMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 const string message = "searchmoves not supported in go command";
                 _logger.Error(message);
@@ -785,25 +785,25 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                     action(this, value);
                 }
             }
-            else if (key.Equals(InfiniteMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_infiniteMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 Infinite = true;
             }
-            else if (key.Equals(PonderMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_ponderMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 Ponder = true;
             }
-            else if (key.Equals(NodesMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_nodesMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Warn("nodes not supported in go command, it will be safely ignored");
                 ++i;
             }
-            else if (key.Equals(MateMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_mateMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Warn("mate not supported in go command, it will be safely ignored");
                 ++i;
             }
-            else if (key.Equals(SearchMovesMemory.Span, StringComparison.OrdinalIgnoreCase))
+            else if (key.Equals(_searchMovesMemory.Span, StringComparison.OrdinalIgnoreCase))
             {
                 const string message = "searchmoves not supported in go command";
                 _logger.Error(message);

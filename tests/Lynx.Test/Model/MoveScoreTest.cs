@@ -34,7 +34,7 @@ public class MoveScoreTest : BaseTest
         Assert.AreEqual("e5g6", allMoves[6].UCIString());     // NxP
         Assert.AreEqual("f3h3", allMoves[7].UCIString());     // QxP
 
-        foreach (var move in allMoves.Where(move => !move.IsCapture() && !move.IsCastle()))
+        foreach (var move in allMoves.Where(move => move.CapturedPiece() == (int)Piece.None && !move.IsCastle()))
         {
             Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(move, default, default));
         }

@@ -92,7 +92,7 @@ public class MoveToEPDStringTest
     {
         var position = new Position(fen);
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
 
         var ambiguousMoves = pseudoLegalMoves

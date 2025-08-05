@@ -99,6 +99,58 @@ public static class Constants
     /// </summary>
     public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 1 1 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard WhiteShortCastleFreeSquares = 0x6000000000000000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 1 1 1 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard WhiteLongCastleFreeSquares = 0xe00000000000000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 1 1 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard BlackShortCastleFreeSquares = 0x60;
+
+    /// <summary>
+    /// 8   0 1 1 1 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard BlackLongCastleFreeSquares = 0xe;
+
     public static readonly string[] Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
@@ -315,11 +367,15 @@ public static class Constants
 
     public static readonly int MaxThreadCount = Array.MaxLength + 1;
 
+    public static readonly int MaxMoveOverhead = 60_000;
+
     /// <summary>
-    /// 218 or 224 seems to be the known limit
+    /// 218 or 224 seems to be the known limit of legal moves
     /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
+    /// We generally need to account for a number higher than that due to pseudolegal movegen
+    /// Regardless, we want to support positions like kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1 (270 pseudolegal and legal moves)
     /// </summary>
-    public const int MaxNumberOfPossibleMovesInAPosition = 250;
+    public const int MaxNumberOfPseudolegalMovesInAPosition = 512;
 
     public const int MaxNumberMovesInAGame = 2048;
 
@@ -426,6 +482,8 @@ public static class Constants
 
     public const BitBoard CentralSquares = 0x1818000000;
 
+    public const BitBoard NotAorH = 0x7e7e7e7e7e7e00;
+
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
     public const int AbsoluteMaxDepth = 255;
@@ -528,8 +586,21 @@ public static class Constants
     /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
     /// </summary>
     public const int KingPawnHashSize = 262_144;
-
     public const int KingPawnHashMask = KingPawnHashSize - 1;
+
+    public const int PawnCorrHistoryHashSize = 16_384;
+    public const int PawnCorrHistoryHashMask = PawnCorrHistoryHashSize - 1;
+
+    public const int NonPawnCorrHistoryHashSize = 16_384;
+    public const int NonPawnCorrHistoryHashMask = NonPawnCorrHistoryHashSize - 1;
+
+    public const int MinorCorrHistoryHashSize = 16_384;
+    public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
+
+    public const int MajorCorrHistoryHashSize = 16_384;
+    public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
+
+    public const string NumberWithSignFormat = "+#;-#;0";
 }
 
 #pragma warning restore IDE0055

@@ -7,13 +7,13 @@ public class GenerateRookMovesTest
 {
     private static IEnumerable<Move> GenerateRookMoves(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     private static IEnumerable<Move> GenerateRookCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
@@ -195,7 +195,7 @@ public class GenerateRookMovesTest
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a1
             && m.TargetSquare() == (int)BoardSquare.a6
-            && m.IsCapture() != default));
+            && m.CapturedPiece() != (int)Piece.None));
     }
 
     /// <summary>

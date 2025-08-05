@@ -8,7 +8,7 @@ namespace Lynx;
 public static class TimeManager
 {
     /// <summary>
-    /// Values from Stash
+    /// Values from Stash, every attempt to further tune them failed
     /// </summary>
     private static ReadOnlySpan<double> BestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
 
@@ -34,7 +34,7 @@ public static class TimeManager
         }
 
         // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
-        var engineGuiCommunicationTimeOverhead = Configuration.EngineSettings.EngineGuiCommunicationTimeOverhead;
+        var engineGuiCommunicationTimeOverhead = Configuration.EngineSettings.MoveOverhead;
 
         if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
         {
@@ -50,13 +50,13 @@ public static class TimeManager
             var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
             softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
-            _logger.Info("[TM] Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-            _logger.Info("[TM] Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+            _logger.Info("[TM] Soft time bound: {0}ms", softLimitTimeBound);
+            _logger.Info("[TM] Hard time bound: {0}ms", hardLimitTimeBound);
         }
         else if (goCommand.MoveTime > 0)
         {
             softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
-            _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
+            _logger.Info("Time to move: {0}ms", hardLimitTimeBound);
         }
         else if (goCommand.Depth > 0)
         {
@@ -88,7 +88,7 @@ public static class TimeManager
         double scale = 1.0;
         double scoreStabilityFactor = 1;
 
-        // Node time management: scale soft limit time bound by the proportion of nodes spent
+        // ⌛ Node time management: scale soft limit time bound by the proportion of nodes spent
         //   searching the best move at root level vs the total nodes searched.
         // The more time spent in best move -> the more sure we are about our previous results,
         //   so the less time we spent in the search.
@@ -100,15 +100,15 @@ public static class TimeManager
         double nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
         scale *= nodeTmFactor;
 
-        // Best move stability: The less best move changes, the less time we spend in the search
+        // ⌛ Best move stability: The less best move changes, the less time we spend in the search
         Debug.Assert(BestMoveStabilityValues.Length > 0);
 
         double bestMoveStabilityFactor = BestMoveStabilityValues[Math.Min(bestMoveStability, BestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
+        // ⌛ Score stability: if score improves, we spend less timespend in the search
         if (depth >= Configuration.EngineSettings.ScoreStabiity_MinDepth)
         {
-            // Score stability: if score improves, we spend less timespend in the search
             scoreStabilityFactor = CalculateScoreStability(scoreDelta);
             scale *= scoreStabilityFactor;
         }
