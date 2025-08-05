@@ -54,7 +54,7 @@ public class RegisterCommand_Benchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public RegisterCommandBenchmark_RegisterCommandSpanSplitStruct SpanSplitStruct(string command) => new(command);
 
-    public sealed class RegisterCommandBenchmark_RegisterCommandStringSplit : IGUIBaseCommand
+    public sealed class RegisterCommandBenchmark_RegisterCommandStringSplit
     {
         public const string Id = "register";
 
@@ -106,7 +106,7 @@ public class RegisterCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class RegisterCommandBenchmark_RegisterCommandSpanSplit : IGUIBaseCommand
+    public sealed class RegisterCommandBenchmark_RegisterCommandSpanSplit
     {
         public const string Id = "register";
 

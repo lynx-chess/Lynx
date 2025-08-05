@@ -410,7 +410,7 @@ static void _23_Castling_Moves()
     position.Print();
 
     int index = 0;
-    var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+    var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
     MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -469,7 +469,7 @@ static void PrintMoveList(IEnumerable<Move> moves)
         sb.AppendFormat("{0,-3}", i + 1)
           .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece()])
           .AppendFormat("{0,-4}", Constants.Coordinates[move.SourceSquare()])
-          .AppendFormat("{0,-2}", isCapture(move.IsCapture()))
+          .AppendFormat("{0,-2}", isCapture(move.CapturedPiece() != (int)Piece.None))
           .AppendFormat("{0,-4}", Constants.Coordinates[move.TargetSquare()])
           .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush()))
           .AppendFormat("{0,-3}", bts(move.IsEnPassant()))

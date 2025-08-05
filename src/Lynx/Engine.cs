@@ -28,7 +28,9 @@ public sealed partial class Engine : IDisposable
 
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
+#pragma warning disable EPS09 // Pass an argument for an 'in' parameter explicitly
     public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
+#pragma warning restore EPS09 // Pass an argument for an 'in' parameter explicitly
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
     public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
@@ -106,7 +108,7 @@ public sealed partial class Engine : IDisposable
     [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
     }
