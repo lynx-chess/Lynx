@@ -1503,29 +1503,34 @@ public class Position : IDisposable
     {
         int packedBonus = 0;
 
+        var board = Board.AsSpan();
+        var attacks = _attacks.AsSpan();
+        var defendedThreatsBonus = _defendedThreatsBonus.AsSpan();
+        var undefendedThreatsBonus = _undefendedThreatsBonus.AsSpan();
+
         var oppositeSideOffset = 6 - offset;
-        var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset];
+        var defendedSquares = attacks[(int)Piece.P + oppositeSideOffset];
 
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
-            var threats = _attacks[i + offset] & oppositeSidePieces;
+            var threats = attacks[i + offset] & oppositeSidePieces;
 
             var defended = threats & defendedSquares;
             while (defended != 0)
             {
                 defended = defended.WithoutLS1B(out var square);
-                var attackedPiece = Board[square];
+                var attackedPiece = board[square];
 
-                packedBonus += _defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
 
             var undefended = threats & ~defendedSquares;
             while (undefended != 0)
             {
                 undefended = undefended.WithoutLS1B(out var square);
-                var attackedPiece = Board[square];
+                var attackedPiece = board[square];
 
-                packedBonus += _undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
         }
 
