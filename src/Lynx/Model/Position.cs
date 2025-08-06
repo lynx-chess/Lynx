@@ -1505,10 +1505,10 @@ public class Position : IDisposable
         var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
         int packedBonus = 0;
 
-        var attacks = _attacks.AsSpan();
-        var board = _board.AsSpan();
-        var defendedThreatsBonus = _defendedThreatsBonus.AsSpan();
-        var undefendedThreatsBonus = _undefendedThreatsBonus.AsSpan();
+        var attacks = _attacks;
+        var board = _board;
+        var defendedThreatsBonus = _defendedThreatsBonus;
+        var undefendedThreatsBonus = _undefendedThreatsBonus;
 
         var defendedSquares = attacks[(int)Piece.P + oppositeSideOffset];
 
