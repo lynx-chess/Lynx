@@ -989,8 +989,8 @@ public class Position : IDisposable
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats(offset: 0, oppositeSidePieces: OccupancyBitBoards[(int)Side.Black])
-            - Threats(offset: 6, oppositeSidePieces: OccupancyBitBoards[(int)Side.White]);
+        packedScore += Threats(oppositeSide: (int)Side.Black)
+            - Threats(oppositeSide: (int)Side.White);
 
         // Checks
         packedScore += Checks((int)Side.White, (int)Side.Black)
@@ -1499,22 +1499,23 @@ public class Position : IDisposable
     ];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(int offset, ulong oppositeSidePieces)
+    private int Threats(int oppositeSide)
     {
+        var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
         int packedBonus = 0;
 
-        var oppositeSideOffset = 6 - offset;
         var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset];
 
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
-            var threats = _attacks[i + offset] & oppositeSidePieces;
+            var threats = _attacks[6 + i - oppositeSideOffset] & oppositeSidePieces;
 
             var defended = threats & defendedSquares;
             while (defended != 0)
             {
                 defended = defended.WithoutLS1B(out var square);
-                var attackedPiece = Board[square];
+                var attackedPiece = _board[square];
 
                 packedBonus += _defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
@@ -1523,7 +1524,7 @@ public class Position : IDisposable
             while (undefended != 0)
             {
                 undefended = undefended.WithoutLS1B(out var square);
-                var attackedPiece = Board[square];
+                var attackedPiece = _board[square];
 
                 packedBonus += _undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
