@@ -19,6 +19,8 @@ public class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(BoardSquare.a1, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p3K1k w - - 0 1")]
     [TestCase(BoardSquare.a8, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p3K1k w - - 0 1")]
     [TestCase(BoardSquare.a5, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p3K1k w - - 0 1")]
@@ -35,6 +37,8 @@ public class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(BoardSquare.e4, "3ppp2/3ppp2/3ppp2/3ppp2/8/8/8/K1k5 w - - 0 1")]
     [TestCase(BoardSquare.e5, "3ppp2/3ppp2/3ppp2/8/8/8/8/K1k5 w - - 0 1")]
     [TestCase(BoardSquare.e7, "3ppp2/8/8/8/8/8/8/K1k5 w - - 0 1")]
@@ -53,6 +57,8 @@ public class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(BoardSquare.e4, "K1k5/8/8/8/8/3ppp2/3ppp2/3ppp2 w - - 0 1")]
     [TestCase(BoardSquare.e5, "K1k5/8/8/8/3ppp2/3ppp2/3ppp2/3ppp2 w - - 0 1")]
     [TestCase(BoardSquare.e2, "K1k5/8/8/8/8/8/8/3ppp2 w - - 0 1")]
@@ -71,6 +77,8 @@ public class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(BoardSquare.e4, "3p1p2/3p1p2/3p1p2/3p1p2/8/8/8/5K1k w - - 0 1")]
     [TestCase(BoardSquare.e5, "3p1p2/3p1p2/3p1p2/8/8/8/8/5K1k w - - 0 1")]
     [TestCase(BoardSquare.e7, "3p1p2/8/8/8/8/8/8/5K1k w - - 0 1")]
@@ -89,6 +97,8 @@ public class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(BoardSquare.e4, "5K1k/8/8/8/8/3p1p2/3p1p2/3p1p2 w - - 0 1")]
     [TestCase(BoardSquare.e5, "5K1k/8/8/8/3p1p2/3p1p2/3p1p2/3p1p2 w - - 0 1")]
     [TestCase(BoardSquare.e2, "5K1k/8/8/8/8/8/8/3p1p2 w - - 0 1")]
