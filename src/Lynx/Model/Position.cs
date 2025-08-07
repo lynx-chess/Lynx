@@ -117,6 +117,8 @@ public class Position : IDisposable
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
+
+        Validate();
     }
 
     /// <summary>
@@ -157,6 +159,8 @@ public class Position : IDisposable
         _isIncrementalEval = position._isIncrementalEval;
         _incrementalEvalAccumulator = position._incrementalEvalAccumulator;
         _incrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
+
+        Validate();
     }
 
     #region Move making
@@ -611,6 +615,8 @@ public class Position : IDisposable
         _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
+
+        Validate();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -625,6 +631,8 @@ public class Position : IDisposable
         _side = (Side)Utils.OppositeSide(_side);
         _enPassant = BoardSquare.noSquare;
 
+        Validate();
+
         return gameState;
     }
 
@@ -634,6 +642,8 @@ public class Position : IDisposable
         _side = (Side)Utils.OppositeSide(_side);
         _enPassant = gameState.EnPassant;
         _uniqueIdentifier = gameState.ZobristKey;
+
+        Validate();
     }
 
     /// <summary>
@@ -666,10 +676,246 @@ public class Position : IDisposable
         Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].CountBits() == 1);
         var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].GetLS1BIndex();
 
+#if DEBUG
+        var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
+
+        if (isValid)
+        {
+            Validate();
+        }
+
+        return isValid;
+#else
         return !IsSquareAttacked(oppositeKingSquare, _side);
+#endif
     }
 
-    #endregion
+    /// <summary>
+    /// Inspired by rawr's validation method
+    /// </summary>
+    [Conditional("DEBUG")]
+    public void Validate()
+    {
+        Debug.Assert(Side != Side.Both);
+
+        // No pawns in 1 and 8 ranks
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & Constants.PawnSquares) == PieceBitBoards[(int)Piece.P], "Position validation failed", "White pawn(s) un 1-8");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & Constants.PawnSquares) == PieceBitBoards[(int)Piece.p], "Position validation failed", "Black pawn(s) un 1-8");
+
+        // No side occupancy overlap
+        Debug.Assert((OccupancyBitBoards[(int)Side.White] & OccupancyBitBoards[(int)Side.Black]) == 0, "Position validation failed", "White and Black overlap");
+
+        // Side.Both occupancy overlap
+        Debug.Assert((OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black]) == OccupancyBitBoards[(int)Side.Both], "Position validation failed", "Occupancy not correct");
+
+        // No piece overlap
+        // Pawns
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        // Knights
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.n] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        // Bishops
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.b] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        // Rooks
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.r] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        // Queens
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.q] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        // Kings
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.K] & PieceBitBoards[(int)Piece.k]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.P]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.N]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.B]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.R]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.Q]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.K]) == 0, "Position validation failed", "Piece overlap");
+
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.p]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.n]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.b]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.r]) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((PieceBitBoards[(int)Piece.k] & PieceBitBoards[(int)Piece.q]) == 0, "Position validation failed", "Piece overlap");
+
+        // Castling rights and king/rook positions
+        if ((Castle & (int)CastlingRights.WK) != 0)
+        {
+            Debug.Assert(PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteKingSourceSquare), "Position validation failed", "No white king on e1 when short castling rights");
+            Debug.Assert(PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1), "Position validation failed", "No white rook on h1 when short castling rights");
+
+        }
+
+        if ((Castle & (int)CastlingRights.WQ) != 0)
+        {
+            Debug.Assert(PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteKingSourceSquare), "Position validation failed", "No white king on e1 when long castling rights");
+            Debug.Assert(PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1), "Position validation failed", "No white rook on a1 when long castling rights");
+        }
+
+        if ((Castle & (int)CastlingRights.BK) != 0)
+        {
+            Debug.Assert(PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackKingSourceSquare), "Position validation failed", "No black king on e8 when short castling rights");
+            Debug.Assert(PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8), "Position validation failed", "No black rook on h8 when short castling rights");
+
+        }
+
+        if ((Castle & (int)CastlingRights.BQ) != 0)
+        {
+            Debug.Assert(PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackKingSourceSquare), "Position validation failed", "No black king on e8 when long castling rights");
+            Debug.Assert(PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8), "Position validation failed", "No black rook on a8 when long castling rights");
+        }
+
+        // En-passant and pawn to be captured position
+        if (_enPassant != BoardSquare.noSquare)
+        {
+            if (Side == Side.White)
+            {
+                Debug.Assert(_pieceBitBoards[(int)Piece.p].GetBit(Constants.EnPassantCaptureSquares[(int)_enPassant]), "Position validation failed", "No black pawn on en-passant capture square");
+            }
+            else
+            {
+                Debug.Assert(_pieceBitBoards[(int)Piece.P].GetBit(Constants.EnPassantCaptureSquares[(int)_enPassant]), "Position validation failed", "No white pawn on en-passant capture square");
+            }
+        }
+
+        // Can't capture opponent's king
+        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex(), Side), "Position validation failed", "Can't capture opponent's king");
+    }
+
+#endregion
 
     #region Evaluation
 
