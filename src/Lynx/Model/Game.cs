@@ -137,11 +137,13 @@ public sealed class Game : IDisposable
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
+        var positionHashHistory = _positionHashHistory;
+
         // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
         var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
         for (int i = _positionHashHistoryPointer - 3; i >= limit; i -= 2)
         {
-            if (currentHash == _positionHashHistory[i])
+            if (currentHash == positionHashHistory[i])
             {
                 return true;
             }
