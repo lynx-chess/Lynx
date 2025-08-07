@@ -889,31 +889,34 @@ public class Position : IDisposable
         Debug.Assert(whiteKings.CountBits() == 1, $"Position {FEN()} validation failed", "More than one white king");
         Debug.Assert(blackKings.CountBits() == 1, $"Position {FEN()} validation failed", "More than one black king");
 
-        // Castling rights and king/rook positions
-        if ((Castle & (int)CastlingRights.WK) != 0)
+        if (Castle != 0)
         {
-            Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), $"Position {FEN()} validation failed", "No white king on e1 when short castling rights");
-            Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), $"Position {FEN()} validation failed", "No white rook on h1 when short castling rights");
+            // Castling rights and king/rook positions
+            if ((Castle & (int)CastlingRights.WK) != 0)
+            {
+                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), $"Position {FEN()} validation failed", "No white king on e1 when short castling rights");
+                Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), $"Position {FEN()} validation failed", "No white rook on h1 when short castling rights");
 
-        }
+            }
 
-        if ((Castle & (int)CastlingRights.WQ) != 0)
-        {
-            Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), $"Position {FEN()} validation failed", "No white king on e1 when long castling rights");
-            Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), $"Position {FEN()} validation failed", "No white rook on a1 when long castling rights");
-        }
+            if ((Castle & (int)CastlingRights.WQ) != 0)
+            {
+                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), $"Position {FEN()} validation failed", "No white king on e1 when long castling rights");
+                Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), $"Position {FEN()} validation failed", "No white rook on a1 when long castling rights");
+            }
 
-        if ((Castle & (int)CastlingRights.BK) != 0)
-        {
-            Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), $"Position {FEN()} validation failed", "No black king on e8 when short castling rights");
-            Debug.Assert(blackRooks.GetBit(BoardSquare.h8), $"Position {FEN()} validation failed", "No black rook on h8 when short castling rights");
+            if ((Castle & (int)CastlingRights.BK) != 0)
+            {
+                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), $"Position {FEN()} validation failed", "No black king on e8 when short castling rights");
+                Debug.Assert(blackRooks.GetBit(BoardSquare.h8), $"Position {FEN()} validation failed", "No black rook on h8 when short castling rights");
 
-        }
+            }
 
-        if ((Castle & (int)CastlingRights.BQ) != 0)
-        {
-            Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), $"Position {FEN()} validation failed", "No black king on e8 when long castling rights");
-            Debug.Assert(blackRooks.GetBit(BoardSquare.a8), $"Position {FEN()} validation failed", "No black rook on a8 when long castling rights");
+            if ((Castle & (int)CastlingRights.BQ) != 0)
+            {
+                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), $"Position {FEN()} validation failed", "No black king on e8 when long castling rights");
+                Debug.Assert(blackRooks.GetBit(BoardSquare.a8), $"Position {FEN()} validation failed", "No black rook on a8 when long castling rights");
+            }
         }
 
         // En-passant and pawn to be captured position
@@ -940,7 +943,7 @@ public class Position : IDisposable
         Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex(), Side), $"Position {FEN()} validation failed", "Can't capture opponent's king");
     }
 
-#endregion
+    #endregion
 
     #region Evaluation
 
