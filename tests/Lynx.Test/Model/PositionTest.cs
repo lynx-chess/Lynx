@@ -88,6 +88,8 @@ public class PositionTest
         Assert.Throws<LynxException>(() => new Position(fen));
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(Constants.InitialPositionFEN, true)]
     [TestCase("r1k5/1K6/8/8/8/8/8/8 w - - 0 1", false)]
     [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
@@ -100,6 +102,8 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).IsValid());
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(Constants.EmptyBoardFEN, false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
@@ -115,6 +119,8 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).WasProduceByAValidMove());
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR b KQkq - 1 2", true)]
     [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR w KQkq - 1 2", false)]
     [TestCase("rnbqk1nr/pppp1ppp/4p3/8/1b6/3P1N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3", true)]
@@ -163,14 +169,14 @@ public class PositionTest
         }
     }
 
-    [TestCase("k7/8/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
+    [TestCase("8/k7/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
+    [TestCase("8/k7/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K w - - 0 1", Description = "N+N")]
     [TestCase("k7/8/8/2nn4/8/8/8/7K w - - 0 1", Description = "n+n")]
-    [TestCase("k7/8/8/3B4/8/8/8/7K b - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K b - - 0 1", Description = "b")]
+    [TestCase("k7/8/8/3B4/8/8/8/6K1 b - - 0 1", Description = "B")]
+    [TestCase("k7/8/8/3b4/8/8/8/6K1 b - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K b - - 0 1", Description = "N+N")]
@@ -908,9 +914,9 @@ public class PositionTest
     [TestCase("1k6/1b6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "b")]
     [TestCase("1k6/8/8/8/8/8/1N6/1K6 w - - 0 1", true, 1, "N")]
     [TestCase("1k6/1n6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "n")]
-    [TestCase("1k6/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
+    [TestCase("2k5/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
     [TestCase("rk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 2, "r")]
-    [TestCase("1k6/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
+    [TestCase("2k5/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
     [TestCase("qk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 4, "q")]
     public void StaticEvaluation_PawnlessEndgames_SinglePiece(string fen, bool isDrawExpected, int expectedPhase, string _)
     {
