@@ -1155,7 +1155,7 @@ public class Position : IDisposable
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(ref  evaluationContext, whiteKing, (int)Side.White, blackPawnAttacks)
+            KingAdditionalEvaluation(ref evaluationContext, whiteKing, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(ref evaluationContext, blackKing, (int)Side.Black, whitePawnAttacks);
 
         AssertAttackPopulation(ref evaluationContext);
@@ -1699,6 +1699,8 @@ public class Position : IDisposable
         var undefendedThreatsBonus = _undefendedThreatsBonus;
 
         var defendedSquares = attacks[(int)Piece.P + oppositeSideOffset];
+        var totalDefendedThreats = 0;
+        //var totalUndefendedThreats = 0;
 
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
@@ -1711,6 +1713,7 @@ public class Position : IDisposable
                 var attackedPiece = board[square];
 
                 packedBonus += defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                ++totalDefendedThreats;
             }
 
             var undefended = threats & ~defendedSquares;
@@ -1720,8 +1723,11 @@ public class Position : IDisposable
                 var attackedPiece = board[square];
 
                 packedBonus += undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                //++totalUndefendedThreats;
             }
         }
+
+        packedBonus += TotalThreats_Defended[Math.Min(totalDefendedThreats, 7)];
 
         return packedBonus;
     }
