@@ -12,13 +12,18 @@ public class GeneralMoveGeneratorTest
     public void DiscoveredCheckAfterEnPassantCapture()
     {
         var originalPosition = new Position("8/8/8/k1pP3R/8/8/8/n4K2 w - c6 0 1");
+
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, moves).ToArray().Single(m => m.IsEnPassant());
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, ref evaluationContext, moves).ToArray().Single(m => m.IsEnPassant());
         var positionAfterEnPassant = new Position(originalPosition);
         positionAfterEnPassant.MakeMove(enPassantMove);
 
         moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, ref evaluationContext, moves))
         {
             var newPosition = new Position(positionAfterEnPassant);
             newPosition.MakeMove(move);
@@ -37,7 +42,11 @@ public class GeneralMoveGeneratorTest
         var position = new Position(fen);
 
         Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var allMoves = MoveGenerator.GenerateAllMoves(position, moveSpan);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        var allMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moveSpan);
 
         Assert.LessOrEqual(allMoves.Length, Constants.MaxNumberOfPseudolegalMovesInAPosition);
     }

@@ -204,6 +204,10 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
         public TryParseFromUCIString_Benchmark_Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
         {
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
             for (int i = 0; i < rangeSpan.Length; ++i)
             {
                 if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -211,7 +215,8 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[rangeSpan[i]];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+
+                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
