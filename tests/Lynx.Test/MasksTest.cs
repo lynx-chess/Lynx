@@ -5,6 +5,8 @@ namespace Lynx.Test;
 
 public class MasksTest
 {
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(BoardSquare.a8, "PPPPPPPP/8/8/8/8/8/8/K1k5 w - - 0 1")]
     [TestCase(BoardSquare.c8, "PPPPPPPP/8/8/8/8/8/8/K1k5 w - - 0 1")]
     [TestCase(BoardSquare.b2, "K1k5/8/8/8/8/8/PPPPPPPP/8 w - - 0 1")]
