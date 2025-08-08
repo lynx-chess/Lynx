@@ -45,7 +45,7 @@ public class GenerateKingMovesTest
     /// 4   . . . . . . . .
     /// 3   . . N . . . . .
     /// 2   n K r . . . . .
-    /// 1   b p . . . . . .
+    /// 1   b b . . . . . .
     ///     a b c d e f g h
     ///     Side:       White
     ///     Enpassant:  no
@@ -55,7 +55,7 @@ public class GenerateKingMovesTest
     [Test]
     public void KingMoves_White()
     {
-        var position = new Position("8/8/6k1/8/8/2N5/nKr5/bp6 w - - 0 1");
+        var position = new Position("8/8/6k1/8/8/2N5/nKr5/bb6 w - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingMoves(position);
@@ -153,7 +153,7 @@ public class GenerateKingMovesTest
     /// 4   . . . . . . . .
     /// 3   . . N . . . . .
     /// 2   n K r . . . . .
-    /// 1   b p . . . . . .
+    /// 1   b b . . . . . .
     ///     a b c d e f g h
     ///     Side:       White
     ///     Enpassant:  no
