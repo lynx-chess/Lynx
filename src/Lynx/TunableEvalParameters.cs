@@ -6382,6 +6382,18 @@ public static class EvaluationParams
 		Pack(0, 0)
 	];
 
+	public static readonly int[] TotalThreats_Defended =
+	[
+		Pack(-16, 18),
+		Pack(-75, 14),
+		Pack(-41, 16),
+		Pack(-22, 6),
+		Pack(-232, -157),
+        Pack(15, 35),
+        Pack(-71, 30),
+        Pack(4, 2)
+    ];
+
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
 	[
 		[
