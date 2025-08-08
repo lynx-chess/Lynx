@@ -714,86 +714,86 @@ public class Position : IDisposable
         Debug.Assert((whitePawns & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
         Debug.Assert((whitePawns & whiteKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((whitePawns & blackPawns) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whitePawns & blackKnights) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whitePawns & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whitePawns & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whitePawns & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whitePawns & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((blackPawns & blackKnights) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackPawns & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackPawns & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackPawns & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackPawns & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         // Knights
-        Debug.Assert((whiteKnights & whiteBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & whiteRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & whiteQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & whiteKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteKnights & whiteBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & whiteRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & whiteKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((whiteKnights & blackPawns) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & blackKnights) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKnights & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((blackKnights & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackKnights & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackKnights & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackKnights & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((blackKnights & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackKnights & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackKnights & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackKnights & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         // Bishops
-        Debug.Assert((whiteBishops & whiteRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteBishops & whiteQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteBishops & whiteKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteBishops & whiteRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & whiteKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((whiteBishops & blackPawns) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteBishops & blackKnights) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteBishops & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteBishops & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteBishops & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteBishops & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         Debug.Assert((blackBishops & blackRooks) == 0, failureMessage, pieceOverlapMessage);
         Debug.Assert((blackBishops & blackQueens) == 0, failureMessage, pieceOverlapMessage);
         Debug.Assert((blackBishops & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         // Rooks
-        Debug.Assert((whiteRooks & whiteQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteRooks & whiteKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteRooks & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & whiteKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((whiteRooks & blackPawns) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteRooks & blackKnights) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteRooks & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteRooks & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteRooks & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteRooks & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((blackRooks & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((blackRooks & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((blackRooks & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackRooks & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         // Queens
-        Debug.Assert((whiteQueens & whiteKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteQueens & whiteKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((whiteQueens & blackPawns) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteQueens & blackKnights) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteQueens & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteQueens & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteQueens & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteQueens & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
-        Debug.Assert((blackQueens & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((blackQueens & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         // Kings
-        Debug.Assert((whiteKings & blackPawns) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKings & blackKnights) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKings & blackBishops) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKings & blackRooks) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKings & blackQueens) == 0, failureMessage,  pieceOverlapMessage);
-        Debug.Assert((whiteKings & blackKings) == 0, failureMessage,  pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         // 1 king per side
         Debug.Assert(whiteKings.CountBits() == 1, failureMessage, "More than one white king");
