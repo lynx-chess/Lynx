@@ -712,235 +712,235 @@ public class Position : IDisposable
         var blackKings = PieceBitBoards[(int)Piece.k];
 
         // No pawns in 1 and 8 ranks
-        Debug.Assert((whitePawns & Constants.PawnSquares) == whitePawns, $"Position {FEN()} validation failed", "White pawn(s) un 1-8");
-        Debug.Assert((blackPawns & Constants.PawnSquares) == blackPawns, $"Position {FEN()} validation failed", "Black pawn(s) un 1-8");
+        Debug.Assert((whitePawns & Constants.PawnSquares) == whitePawns, "Position validation failed", "White pawn(s) un 1-8");
+        Debug.Assert((blackPawns & Constants.PawnSquares) == blackPawns, "Position validation failed", "Black pawn(s) un 1-8");
 
         // No side occupancy overlap
-        Debug.Assert((OccupancyBitBoards[(int)Side.White] & OccupancyBitBoards[(int)Side.Black]) == 0, $"Position {FEN()} validation failed", "White and Black overlap");
+        Debug.Assert((OccupancyBitBoards[(int)Side.White] & OccupancyBitBoards[(int)Side.Black]) == 0, "Position validation failed", "White and Black overlap");
 
         // Side.Both occupancy overlap
-        Debug.Assert((OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black]) == OccupancyBitBoards[(int)Side.Both], $"Position {FEN()} validation failed", "Occupancy not correct");
+        Debug.Assert((OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black]) == OccupancyBitBoards[(int)Side.Both], "Position validation failed", "Occupancy not correct");
 
         // No piece overlap
         // Pawns
 
-        Debug.Assert((whitePawns & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whitePawns & whiteKnights) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((whitePawns & whiteBishops) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((whitePawns & whiteRooks) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((whitePawns & whiteQueens) == 0, "Position validation failed", "Piece overlap");
+        Debug.Assert((whitePawns & whiteKings) == 0, "Position validation failed", "Piece overlap");
 
-        Debug.Assert((whitePawns & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whitePawns & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whitePawns & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whitePawns & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whitePawns & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whitePawns & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whitePawns & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whitePawns & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackPawns & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackPawns & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackPawns & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackPawns & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackPawns & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackPawns & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
         // Knights
-        Debug.Assert((whiteKnights & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteKnights & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((whiteKnights & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKnights & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteKnights & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKnights & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackKnights & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackKnights & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackKnights & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKnights & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackKnights & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKnights & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
         // Bishops
-        Debug.Assert((whiteBishops & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteBishops & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((whiteBishops & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteBishops & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackBishops & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackBishops & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackBishops & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackBishops & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackBishops & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackBishops & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
         // Rooks
-        Debug.Assert((whiteRooks & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteRooks & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((whiteRooks & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteRooks & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteBishops & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteRooks & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteRooks & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteBishops & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackRooks & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackRooks & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackRooks & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackRooks & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackRooks & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackRooks & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
         // Queens
-        Debug.Assert((whiteQueens & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteQueens & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((whiteQueens & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteQueens & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteQueens & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteQueens & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackQueens & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackQueens & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackQueens & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackQueens & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackQueens & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackQueens & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
         // Kings
-        Debug.Assert((whiteKings & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteKings & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((whiteKings & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((whiteKings & blackKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((whiteKings & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & blackQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((whiteKings & blackKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackKings & whitePawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & whiteKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & whiteBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & whiteRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & whiteQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & whiteKings) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackKings & whitePawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & whiteKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & whiteBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & whiteRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & whiteQueens) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & whiteKings) == 0, "Position validation failed",  "Piece overlap");
 
-        Debug.Assert((blackKings & blackPawns) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & blackKnights) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & blackBishops) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & blackRooks) == 0, $"Position {FEN()} validation failed", "Piece overlap");
-        Debug.Assert((blackKings & blackQueens) == 0, $"Position {FEN()} validation failed", "Piece overlap");
+        Debug.Assert((blackKings & blackPawns) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & blackKnights) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & blackBishops) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & blackRooks) == 0, "Position validation failed",  "Piece overlap");
+        Debug.Assert((blackKings & blackQueens) == 0, "Position validation failed",  "Piece overlap");
 
         // 1 king per side
-        Debug.Assert(whiteKings.CountBits() == 1, $"Position {FEN()} validation failed", "More than one white king");
-        Debug.Assert(blackKings.CountBits() == 1, $"Position {FEN()} validation failed", "More than one black king");
+        Debug.Assert(whiteKings.CountBits() == 1, "Position validation failed", "More than one white king");
+        Debug.Assert(blackKings.CountBits() == 1, "Position validation failed", "More than one black king");
 
         if (Castle != 0)
         {
             // Castling rights and king/rook positions
             if ((Castle & (int)CastlingRights.WK) != 0)
             {
-                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), $"Position {FEN()} validation failed", "No white king on e1 when short castling rights");
-                Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), $"Position {FEN()} validation failed", "No white rook on h1 when short castling rights");
+                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), "Position validation failed", "No white king on e1 when short castling rights");
+                Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), "Position validation failed", "No white rook on h1 when short castling rights");
 
             }
 
             if ((Castle & (int)CastlingRights.WQ) != 0)
             {
-                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), $"Position {FEN()} validation failed", "No white king on e1 when long castling rights");
-                Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), $"Position {FEN()} validation failed", "No white rook on a1 when long castling rights");
+                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), "Position validation failed", "No white king on e1 when long castling rights");
+                Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), "Position validation failed", "No white rook on a1 when long castling rights");
             }
 
             if ((Castle & (int)CastlingRights.BK) != 0)
             {
-                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), $"Position {FEN()} validation failed", "No black king on e8 when short castling rights");
-                Debug.Assert(blackRooks.GetBit(BoardSquare.h8), $"Position {FEN()} validation failed", "No black rook on h8 when short castling rights");
+                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), "Position validation failed", "No black king on e8 when short castling rights");
+                Debug.Assert(blackRooks.GetBit(BoardSquare.h8), "Position validation failed", "No black rook on h8 when short castling rights");
 
             }
 
             if ((Castle & (int)CastlingRights.BQ) != 0)
             {
-                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), $"Position {FEN()} validation failed", "No black king on e8 when long castling rights");
-                Debug.Assert(blackRooks.GetBit(BoardSquare.a8), $"Position {FEN()} validation failed", "No black rook on a8 when long castling rights");
+                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), "Position validation failed", "No black king on e8 when long castling rights");
+                Debug.Assert(blackRooks.GetBit(BoardSquare.a8), "Position validation failed", "No black rook on a8 when long castling rights");
             }
         }
 
         // En-passant and pawn to be captured position
         if (_enPassant != BoardSquare.noSquare)
         {
-            Debug.Assert(!OccupancyBitBoards[(int)Side.Both].GetBit(_enPassant), $"Position {FEN()} validation failed", $"Non-empty en passant square {_enPassant}");
+            Debug.Assert(!OccupancyBitBoards[(int)Side.Both].GetBit(_enPassant), "Position validation failed", $"Non-empty en passant square {_enPassant}");
 
             var rank = Constants.Rank[(int)_enPassant];
-            Debug.Assert(rank == 2 || rank == 5, $"Position {FEN()} validation failed", $"Wrong en-passant rank for {_enPassant}");
+            Debug.Assert(rank == 2 || rank == 5, "Position validation failed", $"Wrong en-passant rank for {_enPassant}");
 
             var pawnToCaptureSquare = Constants.EnPassantCaptureSquares[(int)_enPassant];
 
             if (Side == Side.White)
             {
-                Debug.Assert(blackPawns.GetBit(pawnToCaptureSquare), $"Position {FEN()} validation failed", $"No black pawn on en-passant capture square for {_enPassant}");
+                Debug.Assert(blackPawns.GetBit(pawnToCaptureSquare), "Position validation failed", $"No black pawn on en-passant capture square for {_enPassant}");
             }
             else
             {
-                Debug.Assert(whitePawns.GetBit(pawnToCaptureSquare), $"Position {FEN()} validation failed", $"No white pawn on en-passant capture square for {_enPassant}");
+                Debug.Assert(whitePawns.GetBit(pawnToCaptureSquare), "Position validation failed", $"No white pawn on en-passant capture square for {_enPassant}");
             }
         }
 
         // Can't capture opponent's king
-        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex(), Side), $"Position {FEN()} validation failed", "Can't capture opponent's king");
+        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex(), Side), "Position validation failed", "Can't capture opponent's king");
     }
 
     #endregion
