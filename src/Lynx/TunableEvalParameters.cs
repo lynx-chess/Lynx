@@ -6061,22 +6061,22 @@ public static class EvaluationParams
 	/// <summary>
 	/// <see cref="Utils.Pack(27, -9)"/>
 	/// </summary>
-	public const int KingRingDefenders_Knight = -589797;
+	public const int KingRingAttackerBonus_Knight = -589797;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(16, -1)"/>
 	/// </summary>
-	public const int KingRingDefenders_Bishop = -65520;
+	public const int KingRingAttackerBonus_Bishop = -65520;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(13, -1)"/>
 	/// </summary>
-	public const int KingRingDefenders_Rook = -65523;
+	public const int KingRingAttackerBonus_Rook = -65523;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(3, 2)"/>
 	/// </summary>
-	public const int KingRingDefenders_Queen = 131075;
+	public const int KingRingAttackerBonus_Queen = 131075;
 
 	public static readonly int[] PieceProtectedByPawnBonus =
 	[

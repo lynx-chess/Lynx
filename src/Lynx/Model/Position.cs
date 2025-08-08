@@ -1504,7 +1504,7 @@ public class Position : IDisposable
 
         // King ring defenders
         var kingRingDefenders = attacks & oppositeSideKingRing;
-        packedBonus += kingRingDefenders.CountBits() * KingRingDefenders_Rook;
+        packedBonus += kingRingDefenders.CountBits() * KingRingAttackerBonus_Rook;
 
         return packedBonus;
     }
@@ -1526,7 +1526,7 @@ public class Position : IDisposable
 
         // King ring defenders
         var kingRingDefenders = attacks & oppositeSideKingRing;
-        packedBonus += kingRingDefenders.CountBits() * KingRingDefenders_Knight;
+        packedBonus += kingRingDefenders.CountBits() * KingRingAttackerBonus_Knight;
 
         return packedBonus;
     }
@@ -1583,7 +1583,7 @@ public class Position : IDisposable
 
         // King ring defenders
         var kingRingDefenders = attacks & oppositeSideKingRing;
-        packedBonus += kingRingDefenders.CountBits() * KingRingDefenders_Bishop;
+        packedBonus += kingRingDefenders.CountBits() * KingRingAttackerBonus_Bishop;
 
         return packedBonus;
     }
@@ -1606,7 +1606,7 @@ public class Position : IDisposable
 
         // King ring defenders
         var kingRingDefenders = attacks & oppositeSideKingRing;
-        packedBonus += kingRingDefenders.CountBits() * KingRingDefenders_Queen;
+        packedBonus += kingRingDefenders.CountBits() * KingRingAttackerBonus_Queen;
 
         return packedBonus;
     }
