@@ -6053,10 +6053,30 @@ public static class EvaluationParams
 	/// </summary>
 	public const int BishopInUnblockedLongDiagonalBonus = 851987;
 
+    /// <summary>
+    /// <see cref="Utils.Pack(28, 68)"/>
+    /// </summary>
+    public const int KingRingDefenders_Knight = 4456476;
+
 	/// <summary>
-	/// <see cref="Utils.Pack(-50, -32)"/>
-	/// </summary>
-	public const int PieceAttackedByPawnPenalty = -2097202;
+    /// <see cref="Utils.Pack(23, 0)"/>
+    /// </summary>
+    public const int KingRingDefenders_Bishop = 23;
+
+    /// <summary>
+    /// <see cref="Utils.Pack(19, 13)"/>
+    /// </summary>
+    public const int KingRingDefenders_Rook = 851987;
+
+    /// <summary>
+    /// <see cref="Utils.Pack(-4, -20)"/>
+    /// </summary>
+    public const int KingRingDefenders_Queen = -1310724;
+
+    /// <summary>
+    /// <see cref="Utils.Pack(-50, -32)"/>
+    /// </summary>
+    public const int PieceAttackedByPawnPenalty = -2097202;
 
 	public static readonly int[] PieceProtectedByPawnBonus =
 	[
