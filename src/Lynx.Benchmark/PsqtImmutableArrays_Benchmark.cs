@@ -391,23 +391,23 @@ public class PsqtImmutableArrays_Benchmark : BaseBenchmark
             -53, -34, -21, -11, -28, -14, -24, -43
         ];
 
-        public static readonly ImmutableArray<int> MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToImmutableArray();
-        public static readonly ImmutableArray<int> EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToImmutableArray();
+        public static readonly ImmutableArray<int> MiddleGamePawnTableBlack = [.. MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56])];
+        public static readonly ImmutableArray<int> EndGamePawnTableBlack = [.. EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56])];
 
-        public static readonly ImmutableArray<int> MiddleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => -MiddleGameKnightTable[index ^ 56]).ToImmutableArray();
-        public static readonly ImmutableArray<int> EndGameKnightTableBlack = EndGameKnightTable.Select((_, index) => -EndGameKnightTable[index ^ 56]).ToImmutableArray();
+        public static readonly ImmutableArray<int> MiddleGameKnightTableBlack = [.. MiddleGameKnightTable.Select((_, index) => -MiddleGameKnightTable[index ^ 56])];
+        public static readonly ImmutableArray<int> EndGameKnightTableBlack = [.. EndGameKnightTable.Select((_, index) => -EndGameKnightTable[index ^ 56])];
 
-        public static readonly ImmutableArray<int> MiddleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => -MiddleGameBishopTable[index ^ 56]).ToImmutableArray();
-        public static readonly ImmutableArray<int> EndGameBishopTableBlack = EndGameBishopTable.Select((_, index) => -EndGameBishopTable[index ^ 56]).ToImmutableArray();
+        public static readonly ImmutableArray<int> MiddleGameBishopTableBlack = [.. MiddleGameBishopTable.Select((_, index) => -MiddleGameBishopTable[index ^ 56])];
+        public static readonly ImmutableArray<int> EndGameBishopTableBlack = [.. EndGameBishopTable.Select((_, index) => -EndGameBishopTable[index ^ 56])];
 
-        public static readonly ImmutableArray<int> MiddleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => -MiddleGameRookTable[index ^ 56]).ToImmutableArray();
-        public static readonly ImmutableArray<int> EndGameRookTableBlack = EndGameRookTable.Select((_, index) => -EndGameRookTable[index ^ 56]).ToImmutableArray();
+        public static readonly ImmutableArray<int> MiddleGameRookTableBlack = [.. MiddleGameRookTable.Select((_, index) => -MiddleGameRookTable[index ^ 56])];
+        public static readonly ImmutableArray<int> EndGameRookTableBlack = [.. EndGameRookTable.Select((_, index) => -EndGameRookTable[index ^ 56])];
 
-        public static readonly ImmutableArray<int> MiddleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => -MiddleGameQueenTable[index ^ 56]).ToImmutableArray();
-        public static readonly ImmutableArray<int> EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => -EndGameQueenTable[index ^ 56]).ToImmutableArray();
+        public static readonly ImmutableArray<int> MiddleGameQueenTableBlack = [.. MiddleGameQueenTable.Select((_, index) => -MiddleGameQueenTable[index ^ 56])];
+        public static readonly ImmutableArray<int> EndGameQueenTableBlack = [.. EndGameQueenTable.Select((_, index) => -EndGameQueenTable[index ^ 56])];
 
-        public static readonly ImmutableArray<int> MiddleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56]).ToImmutableArray();
-        public static readonly ImmutableArray<int> EndGameKingTableBlack = EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56]).ToImmutableArray();
+        public static readonly ImmutableArray<int> MiddleGameKingTableBlack = [.. MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56])];
+        public static readonly ImmutableArray<int> EndGameKingTableBlack = [.. EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56])];
 
         public static readonly ImmutableArray<ImmutableArray<int>> MiddleGamePositionalTables =
         [
@@ -617,23 +617,23 @@ public class PsqtImmutableArrays_Benchmark : BaseBenchmark
         -53, -34, -21, -11, -28, -14, -24, -43
     ];
 
-        public static readonly int[] MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToArray();
-        public static readonly int[] EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToArray();
+        public static readonly int[] MiddleGamePawnTableBlack = [.. MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56])];
+        public static readonly int[] EndGamePawnTableBlack = [.. EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56])];
 
-        public static readonly int[] MiddleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => -MiddleGameKnightTable[index ^ 56]).ToArray();
-        public static readonly int[] EndGameKnightTableBlack = EndGameKnightTable.Select((_, index) => -EndGameKnightTable[index ^ 56]).ToArray();
+        public static readonly int[] MiddleGameKnightTableBlack = [.. MiddleGameKnightTable.Select((_, index) => -MiddleGameKnightTable[index ^ 56])];
+        public static readonly int[] EndGameKnightTableBlack = [.. EndGameKnightTable.Select((_, index) => -EndGameKnightTable[index ^ 56])];
 
-        public static readonly int[] MiddleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => -MiddleGameBishopTable[index ^ 56]).ToArray();
-        public static readonly int[] EndGameBishopTableBlack = EndGameBishopTable.Select((_, index) => -EndGameBishopTable[index ^ 56]).ToArray();
+        public static readonly int[] MiddleGameBishopTableBlack = [.. MiddleGameBishopTable.Select((_, index) => -MiddleGameBishopTable[index ^ 56])];
+        public static readonly int[] EndGameBishopTableBlack = [.. EndGameBishopTable.Select((_, index) => -EndGameBishopTable[index ^ 56])];
 
-        public static readonly int[] MiddleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => -MiddleGameRookTable[index ^ 56]).ToArray();
-        public static readonly int[] EndGameRookTableBlack = EndGameRookTable.Select((_, index) => -EndGameRookTable[index ^ 56]).ToArray();
+        public static readonly int[] MiddleGameRookTableBlack = [.. MiddleGameRookTable.Select((_, index) => -MiddleGameRookTable[index ^ 56])];
+        public static readonly int[] EndGameRookTableBlack = [.. EndGameRookTable.Select((_, index) => -EndGameRookTable[index ^ 56])];
 
-        public static readonly int[] MiddleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => -MiddleGameQueenTable[index ^ 56]).ToArray();
-        public static readonly int[] EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => -EndGameQueenTable[index ^ 56]).ToArray();
+        public static readonly int[] MiddleGameQueenTableBlack = [.. MiddleGameQueenTable.Select((_, index) => -MiddleGameQueenTable[index ^ 56])];
+        public static readonly int[] EndGameQueenTableBlack = [.. EndGameQueenTable.Select((_, index) => -EndGameQueenTable[index ^ 56])];
 
-        public static readonly int[] MiddleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56]).ToArray();
-        public static readonly int[] EndGameKingTableBlack = EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56]).ToArray();
+        public static readonly int[] MiddleGameKingTableBlack = [.. MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56])];
+        public static readonly int[] EndGameKingTableBlack = [.. EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56])];
 
         public static readonly int[][] MiddleGamePositionalTables =
         [

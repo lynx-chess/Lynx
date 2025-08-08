@@ -23,6 +23,7 @@ public static class MoveGenerator
     /// </summary>
     private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
     [
+#pragma warning disable IDE0350 // Use implicitly typed lambda
         (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
         (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
@@ -36,6 +37,7 @@ public static class MoveGenerator
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
         (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+#pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
     internal static int Init() => TRUE;
@@ -103,8 +105,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateAllPawnMoves(ref int localIndex, Span<Move> movePool, Position position, int offset)
     {
-        int sourceSquare, targetSquare;
-
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
@@ -115,7 +115,7 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            bitboard = bitboard.WithoutLS1B(out sourceSquare);
+            bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
@@ -172,7 +172,7 @@ public static class MoveGenerator
             var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
             while (attackedSquares != default)
             {
-                attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
+                attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
@@ -200,7 +200,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, Position position, int offset)
     {
-        int sourceSquare, targetSquare;
 
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
@@ -214,7 +213,7 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            bitboard = bitboard.WithoutLS1B(out sourceSquare);
+            bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
@@ -254,7 +253,7 @@ public static class MoveGenerator
             var attackedSquares = attacks & oppositeSidePieces;
             while (attackedSquares != default)
             {
-                attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
+                attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
@@ -322,8 +321,8 @@ public static class MoveGenerator
             {
                 bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
 
-                if ((!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BK) != default)
+                if (!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BK) != default
                     && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White))
@@ -358,7 +357,6 @@ public static class MoveGenerator
     internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
-        int sourceSquare, targetSquare;
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         ulong squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
@@ -367,14 +365,14 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            bitboard = bitboard.WithoutLS1B(out sourceSquare);
+            bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var attacks = pieceAttacks(sourceSquare, occupancy)
                 & squaresNotOccupiedByUs;
 
             while (attacks != default)
             {
-                attacks = attacks.WithoutLS1B(out targetSquare);
+                attacks = attacks.WithoutLS1B(out int targetSquare);
 
                 Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
 
@@ -417,7 +415,6 @@ public static class MoveGenerator
     {
         var bitboard = position.PieceBitBoards[piece];
         var oppositeSide = Utils.OppositeSide(position.Side);
-        int sourceSquare, targetSquare;
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
@@ -426,14 +423,14 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            bitboard = bitboard.WithoutLS1B(out sourceSquare);
+            bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var attacks = pieceAttacks(sourceSquare, occupancy)
                 & oppositeSidePieces;
 
             while (attacks != default)
             {
-                attacks = attacks.WithoutLS1B(out targetSquare);
+                attacks = attacks.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
                 movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
             }
@@ -497,7 +494,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyPawnMoveValid(Position position, int offset)
     {
-        int sourceSquare, targetSquare;
 
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
@@ -509,7 +505,7 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            bitboard = bitboard.WithoutLS1B(out sourceSquare);
+            bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
@@ -566,7 +562,7 @@ public static class MoveGenerator
             var attackedSquares = attacks & oppositeSidePieces;
             while (attackedSquares != default)
             {
-                attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
+                attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
@@ -636,8 +632,8 @@ public static class MoveGenerator
                     return true;
                 }
 
-                if ((!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BQ) != default)
+                if (!ise8Attacked
+                    && (position.Castle & (int)CastlingRights.BQ) != default
                     && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White)
@@ -658,7 +654,6 @@ public static class MoveGenerator
     private static bool IsAnyPieceMoveValid(int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
-        int sourceSquare, targetSquare;
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
@@ -667,14 +662,14 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            bitboard = bitboard.WithoutLS1B(out sourceSquare);
+            bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var attacks = pieceAttacks(sourceSquare, occupancy)
                 & squaresNotOccupiedByUs;
 
             while (attacks != default)
             {
-                attacks = attacks.WithoutLS1B(out targetSquare);
+                attacks = attacks.WithoutLS1B(out int targetSquare);
 
                 Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
 

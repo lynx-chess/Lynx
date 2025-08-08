@@ -1528,6 +1528,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// </summary>
         private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
         [
+#pragma warning disable IDE0350 // Use implicitly typed lambda
             (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White][origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             MakeMoveAttacks.BishopAttacks,
@@ -1541,6 +1542,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             MakeMoveAttacks.RookAttacks,
             MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
+#pragma warning restore IDE0350 // Use implicitly typed lambda
         ];
 
         /// <summary>

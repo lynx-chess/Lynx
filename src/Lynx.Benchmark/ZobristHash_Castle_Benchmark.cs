@@ -139,6 +139,9 @@ using System.Runtime.CompilerServices;
 using static Lynx.Benchmark.LocalZobristTable;
 
 namespace Lynx.Benchmark;
+
+#pragma warning disable IDE1006 // Naming Styles
+
 public class ZobristHash_Castle_Benchmark : BaseBenchmark
 {
     [Params(1, 10, 100, 1_000, 10_000)]
@@ -455,7 +458,9 @@ file static class LocalZobristTable
             (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>            // KQ   | kq
                 WK_Hash_XOR_WQ_Hash_XOR_BK_Hash_XOR_BQ_Hash,
 
+#pragma warning disable S112 // General or reserved exceptions should never be thrown
             _ => throw new($"Unexpected castle encoded number: {castle}")
+#pragma warning restore S112 // General or reserved exceptions should never be thrown
         };
     }
 
@@ -478,3 +483,5 @@ file static class LocalZobristTable
         return zobristTable;
     }
 }
+
+#pragma warning restore IDE1006 // Naming Styles
