@@ -6382,7 +6382,7 @@ public static class EvaluationParams
 		Pack(0, 0)
 	];
 
-	public static readonly TaperedEvaluationTermByRank TotalThreats_Defended =
+	public static readonly TaperedEvaluationTermByRank TotalThreats_Undefended =
 	[
 		Pack(15, -7),
 		Pack(5, -2),

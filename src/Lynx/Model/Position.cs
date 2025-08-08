@@ -1699,8 +1699,7 @@ public class Position : IDisposable
         var undefendedThreatsBonus = _undefendedThreatsBonus;
 
         var defendedSquares = attacks[(int)Piece.P + oppositeSideOffset];
-        var totalDefendedThreats = 0;
-        //var totalUndefendedThreats = 0;
+        var totalUndefendedThreats = 0;
 
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
@@ -1713,7 +1712,6 @@ public class Position : IDisposable
                 var attackedPiece = board[square];
 
                 packedBonus += defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
-                ++totalDefendedThreats;
             }
 
             var undefended = threats & ~defendedSquares;
@@ -1723,11 +1721,11 @@ public class Position : IDisposable
                 var attackedPiece = board[square];
 
                 packedBonus += undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
-                //++totalUndefendedThreats;
+                ++totalUndefendedThreats;
             }
         }
 
-        packedBonus += TotalThreats_Defended[Math.Min(totalDefendedThreats, 7)];
+        packedBonus += TotalThreats_Undefended[Math.Min(totalUndefendedThreats, 7)];
 
         return packedBonus;
     }
