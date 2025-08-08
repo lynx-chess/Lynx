@@ -1619,7 +1619,7 @@ public class Position : IDisposable
     {
         var ownPawnsAroundKingCount = (Attacks.KingAttacks[squareIndex] & sameSidePawns).CountBits();
 
-        return ownPawnsAroundKingCount * KingShieldBonus;
+        return KingShieldBonus[ownPawnsAroundKingCount];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
