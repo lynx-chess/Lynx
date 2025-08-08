@@ -50,7 +50,7 @@ public class GenerateKingMovesTest
     ///     Side:       White
     ///     Enpassant:  no
     ///     Castling:   -- | --
-    ///     FEN:        8/8/6k1/8/8/2N5/nKr5/bp6 w - - 0 1
+    ///     FEN:        8/8/6k1/8/8/2N5/nKr5/bb6 w - - 0 1
     /// </summary>
     [Test]
     public void KingMoves_White()
