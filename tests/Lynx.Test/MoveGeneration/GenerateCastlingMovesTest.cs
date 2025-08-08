@@ -7,10 +7,10 @@ public class GenerateCastlingMovesTest
 {
 #pragma warning disable RCS1098, S4144 // Methods should not have identical implementations
 
-    [TestCase("1k6/8/8/8/8/8/RRRRRRRR/RN2K2R w KQkq - 0 1")]
-    [TestCase("7r/1k6/8/8/8/8/8/RN2K2R w KQkq - 0 1", Description = "Attacking the rook")]
-    [TestCase("rn2k2r/rrrrrrrr/8/8/8/8/8/1K6 b KQkq - 0 1")]
-    [TestCase("rbnqk2r/8/8/8/8/8/1K6/7R b KQkq - 0 1", Description = "Attacking the rook")]
+    [TestCase("1k6/8/8/8/8/8/RRRRRRRR/RN2K2R w KQ - 0 1")]
+    [TestCase("7r/1k6/8/8/8/8/8/RN2K2R w KQ - 0 1", Description = "Attacking the rook")]
+    [TestCase("rn2k2r/rrrrrrrr/8/8/8/8/8/1K6 b kq - 0 1")]
+    [TestCase("rbnqk2r/8/8/8/8/8/1K6/7R b kq - 0 1", Description = "Attacking the rook")]
     public void ShortCastle(string fen)
     {
         var position = new Position(fen);
@@ -25,12 +25,12 @@ public class GenerateCastlingMovesTest
         Assert.True(1 == moves.Count(m => m.IsCastle() && m.IsShortCastle()));
     }
 
-    [TestCase("1k6/8/8/8/8/8/PPPPPPPP/R3KBNR w KQkq - 0 1")]
-    [TestCase("r7/1k6/8/8/8/8/8/R3KBNR w KQkq - 0 1", Description = "Attacking the rook")]
-    [TestCase("1r6/1k6/8/8/8/8/8/R3KBNR w KQkq - 0 1", Description = "Attacking square next to the rook")]
-    [TestCase("r3k1nr/8/8/8/8/8/8/1K6 b KQkq - 0 1")]
-    [TestCase("r3k1nr/8/8/8/8/8/1K6/R7 b KQkq - 0 1", Description = "Attacking the rook")]
-    [TestCase("r3k1nr/8/8/8/8/8/1K6/1R6 b KQkq - 0 1", Description = "Attacking square next to the rook")]
+    [TestCase("1k6/8/8/8/8/8/PPPPPPPP/R3KBNR w KQ - 0 1")]
+    [TestCase("r7/1k6/8/8/8/8/8/R3KBNR w KQ - 0 1", Description = "Attacking the rook")]
+    [TestCase("1r6/1k6/8/8/8/8/8/R3KBNR w KQ - 0 1", Description = "Attacking square next to the rook")]
+    [TestCase("r3k1nr/8/8/8/8/8/8/1K6 b kq - 0 1")]
+    [TestCase("r3k1nr/8/8/8/8/8/1K6/R7 b kq - 0 1", Description = "Attacking the rook")]
+    [TestCase("r3k1nr/8/8/8/8/8/1K6/1R6 b kq - 0 1", Description = "Attacking square next to the rook")]
     public void LongCastle(string fen)
     {
         var position = new Position(fen);
