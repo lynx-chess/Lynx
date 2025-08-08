@@ -8,13 +8,21 @@ public class GenerateQueenMovesTest
     private static IEnumerable<Move> GenerateQueenMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
     private static IEnumerable<Move> GenerateQueenCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

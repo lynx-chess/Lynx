@@ -47,6 +47,24 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
+    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return (capturesOnly
+            ? GenerateAllCaptures(position, in evaluationContext, moves)                // TODO: in required?
+            : GenerateAllMoves(position, in evaluationContext, moves)).ToArray();
+    }
+
+    /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
+    /// </summary>
+    /// <param name="capturesOnly">Filters out all moves but captures</param>
+    [Obsolete("dev and test only")]
     internal static Move[] GenerateAllMoves(Position position, ref readonly EvaluationContext evaluationContext, bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];

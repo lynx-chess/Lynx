@@ -223,11 +223,16 @@ public class RegressionTest : BaseTest
     {
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
-        Assert.False(engine.Game.Is50MovesRepetition());
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        Assert.False(engine.Game.Is50MovesRepetition(ref evaluationContext));
         var bestMove = engine.BestMove(new GoCommand("go depth 1"));
 
         engine.AdjustPosition(positionCommand + " " + bestMove.BestMove.UCIString());
-        Assert.IsFalse(engine.Game.Is50MovesRepetition());
+        Assert.IsFalse(engine.Game.Is50MovesRepetition(ref evaluationContext));
     }
 
     // 8/2Q4p/4pppk/4P3/8/7P/q4PK1/1q6 w - - 0 1 - || PV Qc7 Kh6 e5 b1=Q Qxb1 Qxb1 exf6, with b1=Q as the first invalid move there
