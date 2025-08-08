@@ -143,7 +143,7 @@ public class GenerateQueenMovesTest
     [TestCase("K1k5/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/8 w - - 0 1", 8)]
     [TestCase("K1k5/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 8)]
     [TestCase("n1n1n3/8/p1Q1p3/8/p1p1p1p1/8/4p1Q1/K1k4n w - - 0 1", 12)]
-    [TestCase("P1P1P3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/K1k4N b - - 0 1", 12)]
+    [TestCase("N1N1N3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/K1k4N b - - 0 1", 12)]
     public void QueenMoves_CapturesOnly(string fen, int expectedCaptures)
     {
         var position = new Position(fen);

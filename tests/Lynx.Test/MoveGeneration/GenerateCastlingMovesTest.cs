@@ -152,9 +152,9 @@ public class GenerateCastlingMovesTest
     [TestCase("4r3/1k6/8/8/8/8/8/RNBQK2R w KQ - 0 1")]
     [TestCase("5r2/1k6/8/8/8/8/8/RNBQK2R w KQ - 0 1")]
     [TestCase("6r1/1k6/8/8/8/8/8/RNBQK2R w KQ - 0 1")]
-    [TestCase("rnbqk2r/8/8/8/8/8/1K6/4R3 b KQ - 0 1")]
-    [TestCase("rnbqk2r/8/8/8/8/8/1K6/5R2 b KQ - 0 1")]
-    [TestCase("rnbqk2r/8/8/8/8/8/1K6/6R1 b KQ - 0 1")]
+    [TestCase("rnbqk2r/8/8/8/8/8/1K6/4R3 b kq - 0 1")]
+    [TestCase("rnbqk2r/8/8/8/8/8/1K6/5R2 b kq - 0 1")]
+    [TestCase("rnbqk2r/8/8/8/8/8/1K6/6R1 b kq - 0 1")]
     public void ShouldNotShortCastleWhenAttackedSquares(string fen)
     {
         var position = new Position(fen);
@@ -171,7 +171,6 @@ public class GenerateCastlingMovesTest
     [TestCase("3r4/1k6/8/8/8/8/8/R3K1NR w KQ - 0 1")]
     [TestCase("4r3/1k6/8/8/8/8/8/R3K1NR w KQ - 0 1")]
     [TestCase("r3kqnr/8/8/8/8/8/1K6/2R5 b kq - 1 2")]
-    [TestCase("r3kqnr/8/8/8/8/8/1R6/1K6 b kq - 1 2")]
     [TestCase("r3kqnr/8/8/8/8/8/3R4/3K4 b kq - 1 2")]
     [TestCase("r3kqnr/8/8/8/8/8/4R3/3K4 b kq - 1 2")]
     public void ShouldNotLongCastleWhenAttackedSquares(string fen)
