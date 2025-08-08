@@ -379,22 +379,25 @@ public sealed partial class Engine
                 }
 
                 // 🔍 PVS SEE pruning
-                if (isCapture)
+                if (!ttPv)
                 {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
-
-                    if (!SEE.IsGoodCapture(position, move, threshold))
+                    if (isCapture)
                     {
-                        continue;
+                        var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
+
+                        if (!SEE.IsGoodCapture(position, move, threshold))
+                        {
+                            continue;
+                        }
                     }
-                }
-                else
-                {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
-
-                    if (!SEE.HasPositiveScore(position, move, threshold))
+                    else
                     {
-                        continue;
+                        var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
+
+                        if (!SEE.HasPositiveScore(position, move, threshold))
+                        {
+                            continue;
+                        }
                     }
                 }
             }
