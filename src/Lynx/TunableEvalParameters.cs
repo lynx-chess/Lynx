@@ -6046,7 +6046,7 @@ public static class EvaluationParams
 	/// <summary>
 	/// <see cref="Utils.Pack(23, 0)"/>
 	/// </summary>
-	public const int KingShieldBonus_Defended = 23;
+	public const int KingShieldBonus_Defended = 4456476;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(28, 68)"/>
