@@ -6044,6 +6044,11 @@ public static class EvaluationParams
 	public const int KingShieldBonus = 23;
 
 	/// <summary>
+	/// <see cref="Utils.Pack(23, 0)"/>
+	/// </summary>
+	public const int KingShieldBonus_Defended = 23;
+
+	/// <summary>
 	/// <see cref="Utils.Pack(28, 68)"/>
 	/// </summary>
 	public const int BishopPairBonus = 4456476;
