@@ -4,7 +4,7 @@ namespace Lynx;
 
 public static class MoveGeneratorWrapper
 {
-    public static MoveGeneratorBase MoveGenerator {
+    public static IMoveGenerator MoveGenerator {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get;
         private set; } = MoveGenerator_Standard.Instance;

@@ -1,10 +1,14 @@
 ﻿namespace Lynx;
 
-public sealed class MoveGenerator_Standard : MoveGeneratorBase
+public sealed class MoveGenerator_Standard : IMoveGenerator
 {
 #pragma warning disable CA1000 // Do not declare static members on generic types
     public static MoveGenerator_Standard Instance { get; } = new();
 #pragma warning restore CA1000 // Do not declare static members on generic types
+
+    private const int TRUE = 1;
+
+    internal static int Init() => TRUE;
 
     /// <summary>
     /// Explicit static constructor to tell C# compiler not to mark type as beforefieldinit

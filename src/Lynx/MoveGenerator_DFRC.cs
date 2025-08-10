@@ -1,12 +1,14 @@
-﻿using Lynx.Model;
+﻿namespace Lynx;
 
-namespace Lynx;
-
-public sealed class MoveGenerator_DFRC : MoveGeneratorBase
+public sealed class MoveGenerator_DFRC : IMoveGenerator
 {
 #pragma warning disable CA1000 // Do not declare static members on generic types
     public static MoveGenerator_DFRC Instance { get; } = new();
 #pragma warning restore CA1000 // Do not declare static members on generic types
+
+    private const int TRUE = 1;
+
+    internal static int Init() => TRUE;
 
     /// <summary>
     /// Explicit static constructor to tell C# compiler not to mark type as beforefieldinit
@@ -18,15 +20,15 @@ public sealed class MoveGenerator_DFRC : MoveGeneratorBase
 
     private MoveGenerator_DFRC() { }
 
-    /// <inheritdoc/>
-    internal override void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, Position position)
-    {
-        base.GenerateCastlingMoves(ref localIndex, movePool, position);
-    }
+    ///// <inheritdoc/>
+    //internal void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, Position position)
+    //{
+    //    base.GenerateCastlingMoves(ref localIndex, movePool, position);
+    //}
 
-    /// <inheritdoc/>
-    protected override bool IsAnyCastlingMoveValid(Position position)
-    {
-        return base.IsAnyCastlingMoveValid(position);
-    }
+    ///// <inheritdoc/>
+    //protected bool IsAnyCastlingMoveValid(Position position)
+    //{
+    //    return base.IsAnyCastlingMoveValid(position);
+    //}
 }

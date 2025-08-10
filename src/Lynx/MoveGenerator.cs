@@ -4,13 +4,11 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
-public abstract class MoveGeneratorBase
+public interface IMoveGenerator
 {
 #if DEBUG
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
-
-    private const int TRUE = 1;
 
     public static readonly int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
     public static readonly int WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
@@ -39,8 +37,6 @@ public abstract class MoveGeneratorBase
         (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 #pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
-
-    internal static int Init() => TRUE;
 
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
