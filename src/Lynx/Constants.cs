@@ -340,14 +340,14 @@ public static class Constants
 
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474
-    ///                                 CastlingRights  Binary  Decimal
-    ///  K & R didn't move              1111 & 1111  =  1111    15
-    ///  White King moved               1111 & 1100  =  1100    12
-    ///  White kingside Rook moved      1111 & 1110  =  1110    14
-    ///  White queenside Rook moved     1111 & 1101  =  1101    13
-    ///  Black King moved               1111 & 0011  =  1011    3
-    ///  Black kingside Rook moved      1111 & 1011  =  1011    11
-    ///  Black queenside Rook moved     1111 & 0111  =  0111    7
+    ///                                             CastlingRights  Binary  Decimal
+    ///  K & R didn't move                          1111 & 1111  =  1111    15
+    ///  White King moved                           1111 & 1100  =  1100    12
+    ///  White kingside Rook moved or captured      1111 & 1110  =  1110    14
+    ///  White queenside Rook moved or captured     1111 & 1101  =  1101    13
+    ///  Black King moved                           1111 & 0011  =  1011    3
+    ///  Black kingside Rook moved or captured      1111 & 1011  =  1011    11
+    ///  Black queenside Rook moved or captured     1111 & 0111  =  0111    7
     /// </summary>
     public static ReadOnlySpan<byte> CastlingRightsUpdateConstants =>
     [
