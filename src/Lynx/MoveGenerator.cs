@@ -280,7 +280,8 @@ public interface IMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
-        if (position.Castle != default)
+        var castlingRights = position.Castle;
+        if (castlingRights != default)
         {
             var occupancy = position.OccupancyBitBoards[(int)Side.Both];
 
@@ -289,7 +290,7 @@ public interface IMoveGenerator
                 bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
-                    && (position.Castle & (int)CastlingRights.WK) != default
+                    && (castlingRights & (int)CastlingRights.WK) != default
                     && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black))
@@ -301,7 +302,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise1Attacked
-                    && (position.Castle & (int)CastlingRights.WQ) != default
+                    && (castlingRights & (int)CastlingRights.WQ) != default
                     && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black))
@@ -317,7 +318,7 @@ public interface IMoveGenerator
                 bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BK) != default
+                    && (castlingRights & (int)CastlingRights.BK) != default
                     && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White))
@@ -329,7 +330,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BQ) != default
+                    && (castlingRights & (int)CastlingRights.BQ) != default
                     && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White))
@@ -587,7 +588,9 @@ public interface IMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected bool IsAnyCastlingMoveValid(Position position)
     {
-        if (position.Castle != default)
+        var castlingRights = position.Castle;
+
+        if (castlingRights != default)
         {
             var occupancy = position.OccupancyBitBoards[(int)Side.Both];
 
@@ -596,7 +599,7 @@ public interface IMoveGenerator
                 bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
-                    && (position.Castle & (int)CastlingRights.WK) != default
+                    && (castlingRights & (int)CastlingRights.WK) != default
                     && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black)
@@ -606,7 +609,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise1Attacked
-                    && (position.Castle & (int)CastlingRights.WQ) != default
+                    && (castlingRights & (int)CastlingRights.WQ) != default
                     && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black)
@@ -620,7 +623,7 @@ public interface IMoveGenerator
                 bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BK) != default
+                    && (castlingRights & (int)CastlingRights.BK) != default
                     && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White)
@@ -630,7 +633,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise8Attacked
-                    && (position.Castle & (int)CastlingRights.BQ) != default
+                    && (castlingRights & (int)CastlingRights.BQ) != default
                     && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White)
