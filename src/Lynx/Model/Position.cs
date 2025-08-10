@@ -117,6 +117,8 @@ public class Position : IDisposable
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
+
+        Validate();
     }
 
     /// <summary>
@@ -157,6 +159,8 @@ public class Position : IDisposable
         _isIncrementalEval = position._isIncrementalEval;
         _incrementalEvalAccumulator = position._incrementalEvalAccumulator;
         _incrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
+
+        Validate();
     }
 
     #region Move making
@@ -611,6 +615,8 @@ public class Position : IDisposable
         _incrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
+
+        Validate();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -625,6 +631,8 @@ public class Position : IDisposable
         _side = (Side)Utils.OppositeSide(_side);
         _enPassant = BoardSquare.noSquare;
 
+        Validate();
+
         return gameState;
     }
 
@@ -634,6 +642,8 @@ public class Position : IDisposable
         _side = (Side)Utils.OppositeSide(_side);
         _enPassant = gameState.EnPassant;
         _uniqueIdentifier = gameState.ZobristKey;
+
+        Validate();
     }
 
     /// <summary>
@@ -666,7 +676,199 @@ public class Position : IDisposable
         Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].CountBits() == 1);
         var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].GetLS1BIndex();
 
+#if DEBUG
+        var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
+
+        if (isValid)
+        {
+            Validate();
+        }
+
+        return isValid;
+#else
         return !IsSquareAttacked(oppositeKingSquare, _side);
+#endif
+    }
+
+    /// <summary>
+    /// Inspired by rawr's validation method
+    /// </summary>
+    [Conditional("DEBUG")]
+    public void Validate()
+    {
+        const string failureMessage = "Position validation failed";
+
+        Debug.Assert(Side != Side.Both, failureMessage, "Side == Side.Both");
+
+        var whitePawns = PieceBitBoards[(int)Piece.P];
+        var blackPawns = PieceBitBoards[(int)Piece.p];
+        var whiteKnights = PieceBitBoards[(int)Piece.N];
+        var whiteBishops = PieceBitBoards[(int)Piece.B];
+        var whiteRooks = PieceBitBoards[(int)Piece.R];
+        var whiteQueens = PieceBitBoards[(int)Piece.Q];
+        var whiteKings = PieceBitBoards[(int)Piece.K];
+        var blackKnights = PieceBitBoards[(int)Piece.n];
+        var blackBishops = PieceBitBoards[(int)Piece.b];
+        var blackRooks = PieceBitBoards[(int)Piece.r];
+        var blackQueens = PieceBitBoards[(int)Piece.q];
+        var blackKings = PieceBitBoards[(int)Piece.k];
+
+        // No pawns in 1 and 8 ranks
+        Debug.Assert((whitePawns & Constants.PawnSquares) == whitePawns, failureMessage, "White pawn(s) un 1-8");
+        Debug.Assert((blackPawns & Constants.PawnSquares) == blackPawns, failureMessage, "Black pawn(s) un 1-8");
+
+        // No side occupancy overlap
+        Debug.Assert((OccupancyBitBoards[(int)Side.White] & OccupancyBitBoards[(int)Side.Black]) == 0, failureMessage, "White and Black overlap");
+
+        // Side.Both occupancy overlap
+        Debug.Assert((OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black]) == OccupancyBitBoards[(int)Side.Both], failureMessage, "Occupancy not correct");
+
+        // No piece overlap
+        const string pieceOverlapMessage = "Piece overlap";
+        // Pawns
+        Debug.Assert((whitePawns & whiteKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & whiteBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & whiteRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & whiteKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((whitePawns & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whitePawns & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((blackPawns & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackPawns & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        // Knights
+        Debug.Assert((whiteKnights & whiteBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & whiteRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & whiteKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((whiteKnights & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKnights & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((blackKnights & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackKnights & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackKnights & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackKnights & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        // Bishops
+        Debug.Assert((whiteBishops & whiteRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & whiteKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((whiteBishops & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteBishops & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((blackBishops & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackBishops & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackBishops & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        // Rooks
+        Debug.Assert((whiteRooks & whiteQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & whiteKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((whiteRooks & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteRooks & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((blackRooks & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((blackRooks & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        // Queens
+        Debug.Assert((whiteQueens & whiteKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((whiteQueens & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteQueens & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        Debug.Assert((blackQueens & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        // Kings
+        Debug.Assert((whiteKings & blackPawns) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackKnights) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackBishops) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackRooks) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackQueens) == 0, failureMessage, pieceOverlapMessage);
+        Debug.Assert((whiteKings & blackKings) == 0, failureMessage, pieceOverlapMessage);
+
+        // 1 king per side
+        Debug.Assert(whiteKings.CountBits() == 1, failureMessage, "More than one white king");
+        Debug.Assert(blackKings.CountBits() == 1, failureMessage, "More than one black king");
+
+        if (Castle != 0)
+        {
+            // Castling rights and king/rook positions
+            if ((Castle & (int)CastlingRights.WK) != 0)
+            {
+                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
+                Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
+
+            }
+
+            if ((Castle & (int)CastlingRights.WQ) != 0)
+            {
+                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
+                Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), failureMessage, "No white rook on a1 when long castling rights");
+            }
+
+            if ((Castle & (int)CastlingRights.BK) != 0)
+            {
+                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
+                Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
+
+            }
+
+            if ((Castle & (int)CastlingRights.BQ) != 0)
+            {
+                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
+                Debug.Assert(blackRooks.GetBit(BoardSquare.a8), failureMessage, "No black rook on a8 when long castling rights");
+            }
+        }
+
+        // En-passant and pawn to be captured position
+        if (_enPassant != BoardSquare.noSquare)
+        {
+            Debug.Assert(!OccupancyBitBoards[(int)Side.Both].GetBit(_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
+
+            var rank = Constants.Rank[(int)_enPassant];
+            Debug.Assert(rank == 2 || rank == 5, failureMessage, $"Wrong en-passant rank for {_enPassant}");
+
+            var pawnToCaptureSquare = Constants.EnPassantCaptureSquares[(int)_enPassant];
+
+            if (Side == Side.White)
+            {
+                Debug.Assert(blackPawns.GetBit(pawnToCaptureSquare), failureMessage, $"No black pawn on en-passant capture square for {_enPassant}");
+            }
+            else
+            {
+                Debug.Assert(whitePawns.GetBit(pawnToCaptureSquare), failureMessage, $"No white pawn on en-passant capture square for {_enPassant}");
+            }
+        }
+
+        // Can't capture opponent's king
+        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
     }
 
     #endregion
@@ -989,8 +1191,8 @@ public class Position : IDisposable
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats((int)Side.White, (int)Side.Black)
-            - Threats((int)Side.Black, (int)Side.White);
+        packedScore += Threats(oppositeSide: (int)Side.Black)
+            - Threats(oppositeSide: (int)Side.White);
 
         // Checks
         packedScore += Checks((int)Side.White, (int)Side.Black)
@@ -1478,116 +1680,61 @@ public class Position : IDisposable
         }
     }
 
+    private static readonly int[][] _defendedThreatsBonus =
+    [
+        [],
+        KnightThreatsBonus_Defended,
+        BishopThreatsBonus_Defended,
+        RookThreatsBonus_Defended,
+        QueenThreatsBonus_Defended,
+        KingThreatsBonus_Defended
+    ];
+
+    private static readonly int[][] _undefendedThreatsBonus =
+    [
+        [],
+        KnightThreatsBonus,
+        BishopThreatsBonus,
+        RookThreatsBonus,
+        QueenThreatsBonus,
+        KingThreatsBonus
+    ];
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(int side, int oppositeSide)
+    private int Threats(int oppositeSide)
     {
+        var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
         int packedBonus = 0;
 
-        var offset = Utils.PieceOffset(side);
+        var attacks = _attacks;
+        var board = _board;
+        var defendedThreatsBonus = _defendedThreatsBonus;
+        var undefendedThreatsBonus = _undefendedThreatsBonus;
 
-        var oppositeSideOffset = 6 - offset;
-        var oppositeSidePieces = OccupancyBitBoards[oppositeSide];
+        var defendedSquares = attacks[(int)Piece.P + oppositeSideOffset];
 
-        var defendedSquares = _attacks[(int)Piece.P + oppositeSideOffset];
-
-        var knightThreats = _attacks[(int)Piece.N + offset] & oppositeSidePieces;
-
-        var defendedKnightThreats = knightThreats & defendedSquares;
-        while (defendedKnightThreats != 0)
+        for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
-            defendedKnightThreats = defendedKnightThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
+            var threats = attacks[6 + i - oppositeSideOffset] & oppositeSidePieces;
 
-            packedBonus += KnightThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
+            var defended = threats & defendedSquares;
+            while (defended != 0)
+            {
+                defended = defended.WithoutLS1B(out var square);
+                var attackedPiece = board[square];
 
-        var undefendedKnightThreats = knightThreats & (~defendedSquares);
-        while (undefendedKnightThreats != 0)
-        {
-            undefendedKnightThreats = undefendedKnightThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
+                packedBonus += defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+            }
 
-            packedBonus += KnightThreatsBonus[attackedPiece - oppositeSideOffset];
-        }
+            var undefended = threats & ~defendedSquares;
+            while (undefended != 0)
+            {
+                undefended = undefended.WithoutLS1B(out var square);
+                var attackedPiece = board[square];
 
-        var bishopThreats = _attacks[(int)Piece.B + offset] & oppositeSidePieces;
-
-        var defendedBishopThreats = bishopThreats & defendedSquares;
-        while (defendedBishopThreats != 0)
-        {
-            defendedBishopThreats = defendedBishopThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += BishopThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedBishopThreats = bishopThreats & (~defendedSquares);
-        while (undefendedBishopThreats != 0)
-        {
-            undefendedBishopThreats = undefendedBishopThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += BishopThreatsBonus[attackedPiece - oppositeSideOffset];
-        }
-
-        var rookThreats = _attacks[(int)Piece.R + offset] & oppositeSidePieces;
-
-        var defendedRookThreats = rookThreats & defendedSquares;
-        while (defendedRookThreats != 0)
-        {
-            defendedRookThreats = defendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += RookThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedRookThreats = rookThreats & (~defendedSquares);
-        while (undefendedRookThreats != 0)
-        {
-            undefendedRookThreats = undefendedRookThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += RookThreatsBonus[attackedPiece - oppositeSideOffset];
-        }
-
-        var queenThreats = _attacks[(int)Piece.Q + offset] & oppositeSidePieces;
-
-        var defendedQueenThreats = queenThreats & defendedSquares;
-        while (defendedQueenThreats != 0)
-        {
-            defendedQueenThreats = defendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += QueenThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedQueenThreats = queenThreats & (~defendedSquares);
-        while (undefendedQueenThreats != 0)
-        {
-            undefendedQueenThreats = undefendedQueenThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += QueenThreatsBonus[attackedPiece - oppositeSideOffset];
-        }
-
-        var kingThreats = _attacks[(int)Piece.K + offset] & oppositeSidePieces;
-
-        var defendedKingThreats = kingThreats & defendedSquares;
-        while (defendedKingThreats != 0)
-        {
-            defendedKingThreats = defendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += KingThreatsBonus_Defended[attackedPiece - oppositeSideOffset];
-        }
-
-        var undefendedKingThreats = kingThreats & (~defendedSquares);
-        while (undefendedKingThreats != 0)
-        {
-            undefendedKingThreats = undefendedKingThreats.WithoutLS1B(out var square);
-            var attackedPiece = _board[square];
-
-            packedBonus += KingThreatsBonus[attackedPiece - oppositeSideOffset];
+                packedBonus += undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+            }
         }
 
         return packedBonus;
@@ -2016,6 +2163,7 @@ public class Position : IDisposable
         Debug.Assert(PieceBitBoards[(int)Piece.R] == 0 || _attacks[(int)Piece.R] != 0);
         Debug.Assert(PieceBitBoards[(int)Piece.Q] == 0 || _attacks[(int)Piece.Q] != 0);
         Debug.Assert(_attacks[(int)Piece.K] != 0);
+        Debug.Assert(_attacksBySide[(int)Side.White] != 0);
 
         Debug.Assert(PieceBitBoards[(int)Piece.p] == 0 || _attacks[(int)Piece.p] != 0);
         Debug.Assert(PieceBitBoards[(int)Piece.n] == 0 || _attacks[(int)Piece.n] != 0);
@@ -2023,6 +2171,7 @@ public class Position : IDisposable
         Debug.Assert(PieceBitBoards[(int)Piece.r] == 0 || _attacks[(int)Piece.r] != 0);
         Debug.Assert(PieceBitBoards[(int)Piece.q] == 0 || _attacks[(int)Piece.q] != 0);
         Debug.Assert(_attacks[(int)Piece.k] != 0);
+        Debug.Assert(_attacksBySide[(int)Side.Black] != 0);
     }
 
     public void FreeResources()

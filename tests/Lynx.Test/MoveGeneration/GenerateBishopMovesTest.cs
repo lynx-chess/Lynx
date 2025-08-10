@@ -18,8 +18,8 @@ public class GenerateBishopMovesTest
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
-    [TestCase("k7/8/8/8/8/8/P1P2P1P/RNBQKBNR w KQkq - 0 1", 14)]
-    [TestCase("rnbqkbnr/p1p2p1p/8/8/8/8/8/K7 b KQkq - 0 1", 14)]
+    [TestCase("k7/8/8/8/8/8/P1P2P1P/RNBQKBNR w KQ - 0 1", 14)]
+    [TestCase("rnbqkbnr/p1p2p1p/8/8/8/8/8/K7 b kq - 0 1", 14)]
     [TestCase("1K1k4/8/8/3B4/8/8/8/8 w - - 0 1", 13)]
     [TestCase("1K1k4/8/8/3b4/8/8/8/8 b - - 0 1", 13)]
     [TestCase("1K1k4/2N1N3/1N1P1N2/2PBP3/1N1P1N2/2N1N3/3N4/8 w - - 0 1", 13)]
