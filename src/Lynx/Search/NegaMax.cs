@@ -431,13 +431,12 @@ public sealed partial class Engine
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 
                 // Singular extension
-                if (singularScore < singularBeta)
+                if (singularScore < singularBeta && !pvNode)
                 {
                     ++singularDepthExtensions;
 
                     // Double extension
-                    if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
+                    if (singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
                         && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                     {
                         ++singularDepthExtensions;
