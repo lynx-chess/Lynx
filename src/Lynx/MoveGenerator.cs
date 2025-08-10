@@ -278,7 +278,7 @@ public interface IMoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal virtual void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
+    internal void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
         if (position.Castle != default)
         {
@@ -585,7 +585,7 @@ public interface IMoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected virtual bool IsAnyCastlingMoveValid(Position position)
+    protected bool IsAnyCastlingMoveValid(Position position)
     {
         if (position.Castle != default)
         {
