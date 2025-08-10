@@ -17,13 +17,7 @@ public static class ZobristTable
     /// </summary>
     private static readonly ulong[][] _table;
     private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
-
-#pragma warning disable IDE1006 // Naming Styles
-    private static readonly ulong _WK_Hash;
-    private static readonly ulong _WQ_Hash;
-    private static readonly ulong _BK_Hash;
-    private static readonly ulong _BQ_Hash;
-#pragma warning restore IDE1006 // Naming Styles
+    private static readonly ulong[] _castleHashes = GC.AllocateArray<ulong>(4, pinned: true);
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
 
@@ -32,10 +26,7 @@ public static class ZobristTable
         _table = InitializeZobristTable();
         Initialize50mrTable();
 
-        _WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
-        _WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
-        _BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
-        _BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+        InitializeCastlingTable();
     }
 
 #pragma warning restore CA1810 // Initialize reference type static fields inline
@@ -94,32 +85,20 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong CastleHash(byte castle)
     {
-        return castle switch
+        var newHash = 0UL;
+
+        if (castle != 0)
         {
-            0 => 0,                                // -    | -
+            for (int i = 0; i < 4; ++i)
+            {
+                if ((castle & (1 << i)) != 0)
+                {
+                    newHash ^= _castleHashes[i];
+                }
+            }
+        }
 
-            (byte)CastlingRights.WK => _WK_Hash,    // K    | -
-            (byte)CastlingRights.WQ => _WQ_Hash,    // Q    | -
-            (byte)CastlingRights.BK => _BK_Hash,    // -    | k
-            (byte)CastlingRights.BQ => _BQ_Hash,    // -    | q
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => _WK_Hash ^ _WQ_Hash,    // KQ   | -
-            (byte)CastlingRights.WK | (byte)CastlingRights.BK => _WK_Hash ^ _BK_Hash,    // K    | k
-            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => _WK_Hash ^ _BQ_Hash,    // K    | q
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WQ_Hash ^ _BK_Hash,    // Q    | k
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WQ_Hash ^ _BQ_Hash,    // Q    | q
-            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _BK_Hash ^ _BQ_Hash,    // -    | kq
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WK_Hash ^ _WQ_Hash ^ _BK_Hash,    // KQ   | k
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WK_Hash ^ _WQ_Hash ^ _BQ_Hash,    // KQ   | q
-            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WK_Hash ^ _BK_Hash ^ _BQ_Hash,    // K    | kq
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,    // Q    | kq
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
-                _WK_Hash ^ _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,
-
-            _ => throw new LynxException($"Unexpected castle encoded number: {castle}")
-        };
+        return newHash;
     }
 
     /// <summary>
@@ -311,5 +290,14 @@ public static class ZobristTable
                 _50mrTable[j] = val;
             }
         }
+    }
+
+    private static void InitializeCastlingTable()
+    {
+        // Same order as in CastlingRights enum
+        _castleHashes[0] = _table[(int)BoardSquare.a8][(int)Piece.p];   // WK
+        _castleHashes[1] = _table[(int)BoardSquare.b8][(int)Piece.p];   // WQ
+        _castleHashes[2] = _table[(int)BoardSquare.c8][(int)Piece.p];   // BK
+        _castleHashes[3] = _table[(int)BoardSquare.d8][(int)Piece.p];   // BQ
     }
 }
