@@ -1640,8 +1640,8 @@ public class Position : IDisposable
         // King pawn shield bonus could be included next to pawn additional eval
         var ownPawnsAroundKing = attacks & sameSidePawns;
         var ownPawnsAroundKingCount = ownPawnsAroundKing.CountBits();
-        var defendedPawnsCount = (ownPawnsAroundKing & _doubleAttacksBySide[pieceSide]).CountBits();
-        var undefendedPawnsCount = ownPawnsAroundKingCount - defendedPawnsCount;
+        var undefendedPawnsCount = (ownPawnsAroundKing & _attacks[(int)Piece.p - kingSideOffset]).CountBits();
+        var defendedPawnsCount = ownPawnsAroundKingCount - undefendedPawnsCount;
 
         packedBonus += (undefendedPawnsCount * KingShieldBonus)
             + (defendedPawnsCount * KingShieldBonus_Defended);
