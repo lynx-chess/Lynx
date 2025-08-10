@@ -281,6 +281,7 @@ public interface IMoveGenerator
     internal void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
         var castlingRights = position.Castle;
+
         if (castlingRights != default)
         {
             var occupancy = position.OccupancyBitBoards[(int)Side.Both];
