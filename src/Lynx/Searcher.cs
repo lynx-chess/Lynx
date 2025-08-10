@@ -634,7 +634,8 @@ public sealed class Searcher
         _ = ZobristTable.SideHash();
         _ = Masks.IsolatedPawnMasks;
         _ = EvaluationConstants.HistoryBonus[1];
-        _ = MoveGenerator.Init();
+        _ = MoveGenerator_Standard.Init();
+        _ = MoveGenerator_DFRC.Init();
         _ = GoCommand.Init();
     }
 

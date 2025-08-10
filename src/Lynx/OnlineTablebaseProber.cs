@@ -10,6 +10,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using static Lynx.MoveGeneratorWrapper;
+
 namespace Lynx;
 
 #pragma warning disable CA1851, S2302 // Possible multiple enumerations of 'IEnumerable' collection

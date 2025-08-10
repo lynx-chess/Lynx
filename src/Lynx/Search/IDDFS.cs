@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
+using static Lynx.MoveGeneratorWrapper;
+
 namespace Lynx;
 
 public sealed partial class Engine

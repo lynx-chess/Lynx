@@ -39,7 +39,7 @@ public static class Perft
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            foreach (var move in MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -62,7 +62,7 @@ public static class Perft
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            foreach (var move in MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
