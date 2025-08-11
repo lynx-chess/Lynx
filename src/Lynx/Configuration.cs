@@ -154,7 +154,7 @@ public sealed class EngineSettings
     [SPSA<double>(0.5, 1, 0.025)]
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.81;
 
-    [SPSA<double>(1, 3, 0.1)]
+    [SPSA<double>(1.5, 3.5, 0.1)]
     public double NodeTmBase { get; set; } = 2.74;
 
     [SPSA<double>(0.5, 2.5, 0.1)]
@@ -191,7 +191,7 @@ public sealed class EngineSettings
     [SPSA<double>(0.1, 2, 0.2)]
     public double LMR_Base_Noisy { get; set; } = 0.21;
 
-    [SPSA<double>(1, 5, 0.2)]
+    [SPSA<double>(2, 6, 0.2)]
     public double LMR_Divisor_Quiet { get; set; } = 4.31;
 
     [SPSA<double>(1, 5, 0.2)]
@@ -263,7 +263,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
     /// </summary>
-    [SPSA<int>(1, 8192, 512)]
+    [SPSA<int>(4_096, 12_288, 512)]
     public int LMR_History_Divisor_Noisy { get; set; } = 7706;
 
     [SPSA<int>(20, 100, 8)]
@@ -453,7 +453,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
-    [SPSA<int>(25, 200, 15)]
+    [SPSA<int>(50, 250, 15)]
     public int CorrHistoryWeight_Major { get; set; } = 179;
 
     [SPSA<int>(enabled: false)]

@@ -817,30 +817,30 @@ public class Position : IDisposable
         Debug.Assert(whiteKings.CountBits() == 1, failureMessage, "More than one white king");
         Debug.Assert(blackKings.CountBits() == 1, failureMessage, "More than one black king");
 
-        if (Castle != 0)
+        if (_castle != 0)
         {
             // Castling rights and king/rook positions
-            if ((Castle & (int)CastlingRights.WK) != 0)
+            if ((_castle & (int)CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
 
             }
 
-            if ((Castle & (int)CastlingRights.WQ) != 0)
+            if ((_castle & (int)CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), failureMessage, "No white rook on a1 when long castling rights");
             }
 
-            if ((Castle & (int)CastlingRights.BK) != 0)
+            if ((_castle & (int)CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
 
             }
 
-            if ((Castle & (int)CastlingRights.BQ) != 0)
+            if ((_castle & (int)CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.a8), failureMessage, "No black rook on a8 when long castling rights");
