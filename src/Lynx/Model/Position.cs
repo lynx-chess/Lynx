@@ -214,50 +214,62 @@ public class Position : IDisposable
             ^ ZobristTable.EnPassantHash((int)_enPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(_castle);                      // We clear the existing castle rights
 
-        if (piece == (int)Piece.P || piece == (int)Piece.p)
+        switch (piece % (int)Piece.p)
         {
-            _kingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
-
-            if (promotedPiece == default)
-            {
-                _kingPawnUniqueIdentifier ^= targetPieceHash;   // We add pawn again to end square
-            }
-            else
-            {
-                // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the KingPawn hash with it, just to remove the pawn (done right above)
-                // We do need to update the NonPawn hash
-                _nonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
-
-                if (Utils.IsMinorPiece(newPiece))
+            case (int)Piece.P:
                 {
-                    _minorHash ^= targetPieceHash;
+                    _kingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
+
+                    if (promotedPiece == default)
+                    {
+                        _kingPawnUniqueIdentifier ^= targetPieceHash;   // We add pawn again to end square
+                    }
+                    else
+                    {
+                        // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the KingPawn hash with it, just to remove the pawn (done right above)
+                        // We do need to update the NonPawn hash
+                        _nonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
+
+                        if (Utils.IsMinorPiece(newPiece))
+                        {
+                            _minorHash ^= targetPieceHash;
+                        }
+                        else if (Utils.IsMajorPiece(newPiece))
+                        {
+                            _majorHash ^= targetPieceHash;
+                        }
+                    }
+
+                    break;
                 }
-                else if (Utils.IsMajorPiece(newPiece))
+            case (int)Piece.N:
+            case (int)Piece.B:
                 {
-                    _majorHash ^= targetPieceHash;
+                    _nonPawnHash[oldSide] ^= fullPieceMovementHash;
+                    _minorHash ^= fullPieceMovementHash;
+
+                    break;
                 }
-            }
-        }
-        else
-        {
-            _nonPawnHash[oldSide] ^= fullPieceMovementHash;
+            case (int)Piece.R:
+            case (int)Piece.Q:  // TODO split for FRC
+                {
+                    _nonPawnHash[oldSide] ^= fullPieceMovementHash;
+                    _majorHash ^= fullPieceMovementHash;
 
-            if (piece == (int)Piece.K || piece == (int)Piece.k)
-            {
-                // King (and castling) moves require calculating king buckets twice and recalculating all related parameters, so skipping incremental eval for those cases for now
-                // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
-                _isIncrementalEval = false;
+                    break;
+                }
+            case (int)Piece.K:
+                {
+                    _nonPawnHash[oldSide] ^= fullPieceMovementHash;
 
-                _kingPawnUniqueIdentifier ^= fullPieceMovementHash;
-            }
-            else if (Utils.IsMinorPiece(piece))
-            {
-                _minorHash ^= fullPieceMovementHash;
-            }
-            else if (Utils.IsMajorPiece(piece))
-            {
-                _majorHash ^= fullPieceMovementHash;
-            }
+                    // King (and castling) moves require calculating king buckets twice and recalculating all related parameters, so skipping incremental eval for those cases for now
+                    // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
+                    _isIncrementalEval = false;
+
+                    _kingPawnUniqueIdentifier ^= fullPieceMovementHash;
+
+                    break;
+                }
         }
 
         _enPassant = BoardSquare.noSquare;
