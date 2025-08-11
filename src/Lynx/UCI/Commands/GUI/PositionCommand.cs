@@ -68,7 +68,7 @@ public sealed class PositionCommand
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
+            MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

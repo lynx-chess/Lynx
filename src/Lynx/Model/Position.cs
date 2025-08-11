@@ -2030,6 +2030,7 @@ public class Position : IDisposable
         sb.Append(' ');
         var length = sb.Length;
 
+        // TODO X-FEN support
         if ((_castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
@@ -2109,6 +2110,7 @@ public class Position : IDisposable
         Console.WriteLine();
         Console.WriteLine($"    Side:\t{_side}");
         Console.WriteLine($"    Enpassant:\t{(_enPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_enPassant])}");
+        // TODO X-FEN
         Console.WriteLine($"    Castling:\t" +
             $"{((_castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
             $"{((_castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +
