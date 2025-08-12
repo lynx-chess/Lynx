@@ -41,12 +41,14 @@ public sealed partial class Engine
             }
 
             var targetSquare = move.TargetSquare();
+            var piece = move.Piece();
             int bonus = 0;
 
+            // Bonus for avoiding a capture threat
             var oppositeSideAttacks = evaluationContext.Attacks[Utils.OppositeSide(Game.CurrentPosition.Side)];
             if (oppositeSideAttacks.GetBit(move.SourceSquare()) && !oppositeSideAttacks.GetBit(targetSquare))
             {
-                bonus = EvadeCaptureMoveBonus;
+                bonus = EvadeCaptureMoveBonus + piece;
             }
 
             if (ply >= 1)
@@ -59,14 +61,14 @@ public sealed partial class Engine
 
                 // Counter move history
                 return BaseMoveScore
-                    + _quietHistory[move.Piece()][targetSquare]
-                    + ContinuationHistoryEntry(move.Piece(), targetSquare, ply - 1)
+                    + _quietHistory[piece][targetSquare]
+                    + ContinuationHistoryEntry(piece, targetSquare, ply - 1)
                     + bonus;
             }
 
             // History move or 0 if not found
             return BaseMoveScore
-                + _quietHistory[move.Piece()][targetSquare]
+                + _quietHistory[piece][targetSquare]
                 + bonus;
         }
 
