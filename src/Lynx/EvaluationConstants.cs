@@ -192,6 +192,8 @@ public static class EvaluationConstants
     /// </summary>
     public const int BaseMoveScore = int.MinValue / 2;
 
+    public const int EvadeCaptureMoveBonus = 32_768;
+
     #endregion
 
     public const int ContinuationHistoryPlyCount = 1;
