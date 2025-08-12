@@ -192,7 +192,7 @@ public static class EvaluationConstants
     /// </summary>
     public const int BaseMoveScore = int.MinValue / 2;
 
-    public static readonly int EvadeCaptureMoveMalus = -1024;
+    public static readonly int EvadeCaptureMoveMalus = 1024;
 
     #endregion
 

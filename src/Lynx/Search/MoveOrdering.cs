@@ -45,12 +45,13 @@ public sealed partial class Engine
             int bonus = 0;
 
             // Bonus for avoiding a capture threat
+            var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide(Game.CurrentPosition.Side)];
             var oppositePawnAttacks = evaluationContext.Attacks[(int)Piece.p - Utils.PieceOffset(Game.CurrentPosition.Side)];
 
-            if (!oppositePawnAttacks.GetBit(move.SourceSquare())
-                && oppositePawnAttacks.GetBit(targetSquare))
+            if (oppositeSideAttacks.GetBit(move.SourceSquare())
+                && !oppositePawnAttacks.GetBit(targetSquare))
             {
-                bonus = EvadeCaptureMoveMalus - piece;
+                bonus = EvadeCaptureMoveMalus + piece;
             }
 
             if (ply >= 1)
