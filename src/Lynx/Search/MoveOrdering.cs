@@ -45,10 +45,12 @@ public sealed partial class Engine
             int bonus = 0;
 
             // Bonus for avoiding a capture threat
-            var oppositeSideAttacks = evaluationContext.Attacks[Utils.OppositeSide(Game.CurrentPosition.Side)];
-            if (oppositeSideAttacks.GetBit(move.SourceSquare()) && !oppositeSideAttacks.GetBit(targetSquare))
+            var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide(Game.CurrentPosition.Side)];
+
+            if (!oppositeSideAttacks.GetBit(move.SourceSquare())
+                && oppositeSideAttacks.GetBit(targetSquare))
             {
-                bonus = EvadeCaptureMoveBonus + piece;
+                bonus = EvadeCaptureMoveMalus - piece;
             }
 
             if (ply >= 1)

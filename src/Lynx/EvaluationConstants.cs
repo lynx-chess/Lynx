@@ -192,11 +192,7 @@ public static class EvaluationConstants
     /// </summary>
     public const int BaseMoveScore = int.MinValue / 2;
 
-    /// <summary>
-    /// Value that compensates any history, positive or negative (hence the x2)
-    /// 32_768
-    /// </summary>
-    public static readonly int EvadeCaptureMoveBonus = Configuration.EngineSettings.History_MaxMoveValue * 2 * (1 + ContinuationHistoryPlyCount);
+    public static readonly int EvadeCaptureMoveMalus = -1024;
 
     #endregion
 
