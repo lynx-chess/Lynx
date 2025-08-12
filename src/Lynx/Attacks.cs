@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using Lynx.Model;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
@@ -31,6 +32,29 @@ public static class Attacks
     public static BitBoard[][] PawnAttacks { get; }
     public static BitBoard[] KnightAttacks { get; }
     public static BitBoard[] KingAttacks { get; }
+
+    /// <summary>
+    /// Indexed by <see cref="Piece"/>.
+    /// Checks are not considered
+    /// </summary>
+    public static readonly Func<int, BitBoard, BitBoard>[] PieceAttacks =
+    [
+#pragma warning disable IDE0350 // Use implicitly typed lambda
+        (int origin, BitBoard _) => PawnAttacks![(int)Side.White][origin],
+        (int origin, BitBoard _) => KnightAttacks![origin],
+        BishopAttacks,
+        RookAttacks,
+        QueenAttacks,
+        (int origin, BitBoard _) => KingAttacks![origin],
+
+        (int origin, BitBoard _) => PawnAttacks![(int)Side.Black][origin],
+        (int origin, BitBoard _) => KnightAttacks![origin],
+        BishopAttacks,
+        RookAttacks,
+        QueenAttacks,
+        (int origin, BitBoard _) => KingAttacks![origin],
+#pragma warning restore IDE0350 // Use implicitly typed lambda
+    ];
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
     static Attacks()

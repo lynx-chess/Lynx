@@ -349,6 +349,12 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int History_MaxMoveValue { get; set; } = 8_192;
 
+    /// <summary>
+    /// Half of <see cref="History_MaxMoveValue"/>
+    /// </summary>
+    [SPSA<int>(enabled: false)]
+    public int MightGiveCheck_MoveBonus { get; set; } = 4_096;
+
     [SPSA<int>(512, 4096, 250)]
     public int History_Bonus_MaxIncrement { get; set; } = 2440;
 

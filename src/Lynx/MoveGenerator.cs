@@ -17,29 +17,6 @@ public static class MoveGenerator
     public static readonly int BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
     public static readonly int BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k);
 
-    /// <summary>
-    /// Indexed by <see cref="Piece"/>.
-    /// Checks are not considered
-    /// </summary>
-    private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
-    [
-#pragma warning disable IDE0350 // Use implicitly typed lambda
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
-        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-        Attacks.BishopAttacks,
-        Attacks.RookAttacks,
-        Attacks.QueenAttacks,
-        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
-
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
-        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-        Attacks.BishopAttacks,
-        Attacks.RookAttacks,
-        Attacks.QueenAttacks,
-        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
-#pragma warning restore IDE0350 // Use implicitly typed lambda
-    ];
-
     internal static int Init() => TRUE;
 
     /// <summary>
@@ -381,7 +358,7 @@ public static class MoveGenerator
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         ulong squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
 
-        var pieceAttacks = _pieceAttacks[piece];
+        var pieceAttacks = Attacks.PieceAttacks[piece];
 
         while (bitboard != default)
         {
@@ -411,7 +388,7 @@ public static class MoveGenerator
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
 
-        var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
+        var attacks = Attacks.PieceAttacks[piece](sourceSquare, occupancy)
             & ~position.OccupancyBitBoards[(int)position.Side]
             & ~evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
 
@@ -439,7 +416,7 @@ public static class MoveGenerator
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
 
-        var pieceAttacks = _pieceAttacks[piece];
+        var pieceAttacks = Attacks.PieceAttacks[piece];
 
         while (bitboard != default)
         {
@@ -467,7 +444,7 @@ public static class MoveGenerator
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
         var oppositeSide = Utils.OppositeSide(position.Side);
 
-        var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+        var attacks = Attacks.PieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
             & position.OccupancyBitBoards[oppositeSide]
             & ~evaluationContext.AttacksBySide[oppositeSide];
 
@@ -680,7 +657,7 @@ public static class MoveGenerator
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
 
-        var pieceAttacks = _pieceAttacks[piece];
+        var pieceAttacks = Attacks.PieceAttacks[piece];
 
         while (bitboard != default)
         {
@@ -711,7 +688,7 @@ public static class MoveGenerator
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
 
-        var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
+        var attacks = Attacks.PieceAttacks[piece](sourceSquare, occupancy)
             & ~position.OccupancyBitBoards[(int)position.Side]
             & ~evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
 

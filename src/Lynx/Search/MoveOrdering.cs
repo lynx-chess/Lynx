@@ -40,6 +40,10 @@ public sealed partial class Engine
                 return SecondKillerMoveValue;
             }
 
+            var mightGiveCheckBonus = MoveMightGiveCheck(move)
+                ? Configuration.EngineSettings.MightGiveCheck_MoveBonus
+                : 0;
+
             if (ply >= 1)
             {
                 // Countermove
@@ -50,12 +54,14 @@ public sealed partial class Engine
 
                 // Counter move history
                 return BaseMoveScore
+                    + mightGiveCheckBonus
                     + _quietHistory[move.Piece()][move.TargetSquare()]
                     + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
             }
 
             // History move or 0 if not found
             return BaseMoveScore
+                + mightGiveCheckBonus
                 + _quietHistory[move.Piece()][move.TargetSquare()];
         }
 

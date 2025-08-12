@@ -261,6 +261,20 @@ public sealed partial class Engine
         _moveNodeCount[move.Piece()][move.TargetSquare()] += nodesToAdd;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool MoveMightGiveCheck(Move move)
+    {
+        var position = Game.CurrentPosition;
+        var newOccupancy = position.OccupancyBitBoards[(int)Side.Both];
+        newOccupancy.PopBit(move.SourceSquare());
+        newOccupancy.SetBit(move.TargetSquare());
+
+        var newAttacks = Attacks.PieceAttacks[move.Piece()](move.TargetSquare(), newOccupancy);
+        var oppositeSideKing = position.PieceBitBoards[(int)Piece.k - Utils.PieceOffset(position.Side)];
+
+        return (newAttacks & oppositeSideKing) != 0;
+    }
+
     #region Debugging
 
 #pragma warning disable S125 // Sections of code should not be commented out
