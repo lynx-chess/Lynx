@@ -89,7 +89,6 @@ public static class FENParser
             var match = fen[..end];
 
             ParseBoardSection(pieceBitBoards, board, rankIndex, match);
-            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
             fen = fen[(end + 1)..];
             end = fen.IndexOf('/');
@@ -97,8 +96,17 @@ public static class FENParser
         }
 
         ParseBoardSection(pieceBitBoards, board, rankIndex, fen[..fen.IndexOf(' ')]);
-        PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
+        // Populate occupancies
+        for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
+        {
+            occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
+            occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
+        }
+
+        occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void ParseBoardSection(BitBoard[] pieceBitBoards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
         {
             int fileIndex = 0;
@@ -137,17 +145,6 @@ public static class FENParser
                     Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
                 }
             }
-        }
-
-        static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
-        {
-            for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
-            {
-                occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
-            }
-
-            occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
         }
     }
 
