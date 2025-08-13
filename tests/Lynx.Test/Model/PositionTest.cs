@@ -996,11 +996,16 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         while (!bitBoard.Empty())
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(ref evaluationContext ,0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
@@ -1023,9 +1028,14 @@ public class PositionTest
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(bitBoard, (int)Side.Black, whitePawnAttacks));
+            ? position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)

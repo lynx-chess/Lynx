@@ -8,13 +8,21 @@ public class GenerateKnightMovesTest
     private static IEnumerable<Move> GenerateKnightMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     private static IEnumerable<Move> GenerateKnightCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     [TestCase(Constants.InitialPositionFEN, 4)]
