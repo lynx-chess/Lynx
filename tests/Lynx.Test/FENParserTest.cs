@@ -230,9 +230,9 @@ public class FENParserTest
         Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
     }
 
-    [TestCase("K1k/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
-    [TestCase("K1k/8/8/8/8/8/8/8 w KQkq - 1 1", 1)]
-    [TestCase("K1k/8/8/8/8/8/8/8 w KQkq - 51 1", 51)]
+    [TestCase("K6k/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
+    [TestCase("K6k/8/8/8/8/8/8/8 w KQkq - 1 1", 1)]
+    [TestCase("K6k/8/8/8/8/8/8/8 w KQkq - 51 1", 51)]
     public void HalfMoveClock(string fen, int expectedHalfMoves)
     {
         var result = FENParser.ParseFEN(fen);
