@@ -1,4 +1,72 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿/*
+ *  BenchmarkDotNet v0.14.0, Ubuntu 24.04.2 LTS (Noble Numbat)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.304
+ *    [Host]     : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+ *
+ *  | Method             | fen                  | Mean     | Error   | StdDev  | Ratio | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |------------------- |--------------------- |---------:|--------:|--------:|------:|-------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original  | 8/k7/(...)- 0 1 [39] | 328.1 ns | 0.66 ns | 0.62 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | 8/k7/(...)- 0 1 [39] | 487.3 ns | 1.80 ns | 1.59 ns |  1.49 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |        |        |           |             |
+ *  | ParseFEN_Original  | r1b1k(...) 1024 [88] | 440.1 ns | 1.75 ns | 1.64 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r1b1k(...) 1024 [88] | 598.2 ns | 1.37 ns | 1.22 ns |  1.36 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |        |        |           |             |
+ *  | ParseFEN_Original  | r2q1r(...)- 0 9 [68] | 401.8 ns | 1.29 ns | 1.21 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r2q1r(...)- 0 9 [68] | 566.1 ns | 2.95 ns | 2.61 ns |  1.41 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |        |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 404.0 ns | 1.20 ns | 1.07 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r3k2r(...)- 0 1 [68] | 571.8 ns | 2.13 ns | 2.00 ns |  1.42 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |        |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 406.8 ns | 1.91 ns | 1.60 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r3k2r(...)- 0 1 [68] | 566.0 ns | 2.15 ns | 1.91 ns |  1.39 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |        |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)6 0 1 [67] | 404.7 ns | 2.34 ns | 2.19 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | rnbqk(...)6 0 1 [67] | 591.5 ns | 1.56 ns | 1.38 ns |  1.46 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |        |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)- 0 1 [56] | 380.8 ns | 1.12 ns | 0.99 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | rnbqk(...)- 0 1 [56] | 563.9 ns | 1.38 ns | 1.22 ns |  1.48 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |        |        |           |             |
+ *  | ParseFEN_Original  | rq2k2(...)- 0 1 [71] | 404.3 ns | 1.63 ns | 1.52 ns |  1.00 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | rq2k2(...)- 0 1 [71] | 567.5 ns | 1.22 ns | 1.09 ns |  1.40 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.3932) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.304
+ *    [Host]     : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.8 (9.0.825.36511), X64 RyuJIT AVX2
+ *
+ *  | Method             | fen                  | Mean     | Error   | StdDev  | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |------------------- |--------------------- |---------:|--------:|--------:|------:|--------:|-------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original  | 8/k7/(...)- 0 1 [39] | 332.1 ns | 1.62 ns | 1.52 ns |  1.00 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | 8/k7/(...)- 0 1 [39] | 450.0 ns | 1.55 ns | 1.37 ns |  1.35 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | r1b1k(...) 1024 [88] | 434.7 ns | 2.22 ns | 2.08 ns |  1.00 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r1b1k(...) 1024 [88] | 533.7 ns | 2.13 ns | 1.99 ns |  1.23 |    0.01 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | r2q1r(...)- 0 9 [68] | 407.7 ns | 2.11 ns | 1.97 ns |  1.00 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r2q1r(...)- 0 9 [68] | 502.4 ns | 4.84 ns | 4.29 ns |  1.23 |    0.01 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 407.9 ns | 2.91 ns | 2.72 ns |  1.00 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r3k2r(...)- 0 1 [68] | 464.3 ns | 4.15 ns | 3.88 ns |  1.14 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 366.7 ns | 2.68 ns | 2.51 ns |  1.00 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | r3k2r(...)- 0 1 [68] | 486.2 ns | 4.02 ns | 3.76 ns |  1.33 |    0.01 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)6 0 1 [67] | 390.2 ns | 4.70 ns | 4.39 ns |  1.00 |    0.02 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | rnbqk(...)6 0 1 [67] | 519.9 ns | 5.06 ns | 4.48 ns |  1.33 |    0.02 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)- 0 1 [56] | 379.4 ns | 2.60 ns | 2.43 ns |  1.00 |    0.01 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | rnbqk(...)- 0 1 [56] | 480.3 ns | 1.53 ns | 1.28 ns |  1.27 |    0.01 | 0.0343 | 0.0010 |     584 B |        1.00 |
+ *  |                    |                      |          |         |         |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | rq2k2(...)- 0 1 [71] | 384.7 ns | 5.61 ns | 5.25 ns |  1.00 |    0.02 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *  | ParseFEN_tsoj      | rq2k2(...)- 0 1 [71] | 467.2 ns | 2.13 ns | 1.88 ns |  1.21 |    0.02 | 0.0348 | 0.0010 |     584 B |        1.00 |
+ *
+ */
+
+using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using NLog;
 using System.Buffers;
@@ -11,7 +79,7 @@ namespace Lynx.Benchmark;
 
 #pragma warning disable S112, S6667 // General or reserved exceptions should never be thrown
 
-public partial class ParseFEN_tsoj_Benchmark : BaseBenchmark
+public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 {
     public static IEnumerable<string> Data =>
     [
@@ -31,7 +99,7 @@ public partial class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public ParseResult ParseFEN_Improved1(string fen) => ParseFEN_FENParser_tsoj.ParseFEN(fen);
+    public ParseResult ParseFEN_tsoj(string fen) => ParseFEN_FENParser_tsoj.ParseFEN(fen);
 
     public static class ParseFEN_FENParser_Original
     {
