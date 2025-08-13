@@ -3,7 +3,6 @@ using NLog;
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
 using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/);
 
@@ -81,31 +80,40 @@ public static class FENParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards, int[] board)
     {
-        var rankIndex = 0;
-        var end = fen.IndexOf('/');
+        // r1b1k1n1/1p1p1p1p/n1n1n1n1/1n1n1n1n/n1n1n1n1/1n1n1n1n/P1P1P1P1/R1B1K1N1 w HQhq - 0 1 produces 88 chars transformed fens
+        Span<char> transformedFen = stackalloc char[128];
+        int index = 0;
 
-        while (end != -1)
+        foreach (var ch in fen)
         {
-            var match = fen[..end];
+            if (ch == '/')
+            {
+                continue;
+            }
 
-            ParseBoardSection(pieceBitBoards, board, rankIndex, match);
-            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+            if (char.IsDigit(ch))
+            {
+                var count = ch - '0';
+                for (int i = 0; i < count; ++i)
+                {
+                    transformedFen[index++] = '1';
+                }
 
-            fen = fen[(end + 1)..];
-            end = fen.IndexOf('/');
-            ++rankIndex;
+                continue;
+            }
+
+            transformedFen[index++] = ch;
         }
 
-        ParseBoardSection(pieceBitBoards, board, rankIndex, fen[..fen.IndexOf(' ')]);
-        PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+        Debug.Assert(transformedFen[64] == ' ');
 
-        static void ParseBoardSection(BitBoard[] pieceBitBoards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
+        for (int rank = 7; rank >= 0; --rank)
         {
-            int fileIndex = 0;
-
-            foreach (var ch in boardfenSection)
+            for (int file = 0; file < 8; ++file)
             {
-                var piece = ch switch
+                var squareIndex = BitBoardExtensions.SquareIndex(7 - rank, file);
+
+                var piece = transformedFen[squareIndex] switch
                 {
                     'P' => Piece.P,
                     'N' => Piece.N,
@@ -126,18 +134,14 @@ public static class FENParser
 
                 if (piece != Piece.None)
                 {
-                    var square = BitBoardExtensions.SquareIndex(rankIndex, fileIndex);
-                    pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(square);
-                    board[square] = (int)piece;
-                    ++fileIndex;
+                    pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(squareIndex);
+                    board[squareIndex] = (int)piece;
                 }
-                else
-                {
-                    fileIndex += ch - '0';
-                    Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
-                }
+
             }
         }
+
+        PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
         static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
