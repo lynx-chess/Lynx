@@ -185,15 +185,17 @@ public sealed partial class Engine
                 improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
 
+            var ttCorrectedStaticEval = staticEval;
+
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            //if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
-            //{
-            //    staticEval = ttScore;
-            //}
+            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            {
+                ttCorrectedStaticEval = ttScore;
+            }
 
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
@@ -253,7 +255,7 @@ public sealed partial class Engine
                     }
                 }
 
-                var staticEvalBetaDiff = staticEval - beta;
+                var staticEvalBetaDiff = ttCorrectedStaticEval - beta;
 
                 // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
                 if (depth >= Configuration.EngineSettings.NMP_MinDepth
