@@ -161,7 +161,7 @@ public sealed partial class Engine
         }
         else if (!pvNode && !isInCheck && !isVerifyingSE)
         {
-            if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
+            if (ttHit)
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
