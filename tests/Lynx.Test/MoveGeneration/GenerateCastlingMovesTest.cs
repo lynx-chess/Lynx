@@ -129,7 +129,7 @@ public class GenerateCastlingMovesTest
     [TestCase("1k6/8/8/8/8/8/PPPPPPPP/R2qK1BR w KQ - 0 1")]
     [TestCase("1k6/8/8/8/8/8/PPPPPPPP/RNBQK1BR w KQ - 0 1")]
     [TestCase("1k6/8/8/8/8/8/PPPPPPPP/RnbqK1BR w KQ - 0 1")]
-    [TestCase("rn2k1br/pppppppp/8/8/8/8/1K6 b kq - 0 1")]
+    [TestCase("rn2k1br/pppppppp/8/8/8/8/8/1K6 b kq - 0 1")]
     [TestCase("rN2k1br/pppppppp/8/8/8/8/8/1K6 b kq - 0 1")]
     [TestCase("r1b1k1br/pppppppp/8/8/8/8/8/1K6 b kq - 0 1")]
     [TestCase("r1B1k1br/pppppppp/8/8/8/8/8/1K6 b kq - 0 1")]
