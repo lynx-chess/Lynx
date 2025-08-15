@@ -157,9 +157,11 @@ public sealed partial class Engine
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+
             return finalPositionEvaluation;
         }
-        else if (!pvNode && !isInCheck && !isVerifyingSE)
+
+        if (!pvNode && !isInCheck && !isVerifyingSE)
         {
             if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
