@@ -199,9 +199,9 @@ public sealed partial class Engine
 
             bool isNotGettingCheckmated = ttCorrectedStaticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
-            // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated)
+            if(isNotGettingCheckmated)
             {
+                // Fail-high pruning (moves with high scores) - prune more when improving
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
@@ -218,9 +218,9 @@ public sealed partial class Engine
 
                     if (staticEval - rfpThreshold >= beta)
                     {
-#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
+    #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                         return (staticEval + beta) / 2;
-#pragma warning restore S3949 // Calculations should not overflow
+    #pragma warning restore S3949 // Calculations should not overflow
                     }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
@@ -254,37 +254,37 @@ public sealed partial class Engine
                         }
                     }
                 }
+            }
+          
+            var staticEvalBetaDiff = staticEval - beta;
 
-                var staticEvalBetaDiff = staticEval - beta;
+            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
+            if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin
+                && !parentWasNullMove
+                && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+            {
+                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
+                    + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
+                    + Math.Min(
+                        Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
+                        staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
 
-                // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
-                if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                    && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin
-                    && !parentWasNullMove
-                    && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                    && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+                // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
+                //var nmpReduction = Math.Min(
+                //    depth,
+                //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+
+                var gameState = position.MakeNullMove();
+                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+                position.UnMakeNullMove(gameState);
+
+                if (nmpScore >= beta)
                 {
-                    var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
-                        + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
-                        + Math.Min(
-                            Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
-                            staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
-
-                    // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                    //var nmpReduction = Math.Min(
-                    //    depth,
-                    //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
-
-                    var gameState = position.MakeNullMove();
-                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
-                    position.UnMakeNullMove(gameState);
-
-                    if (nmpScore >= beta)
-                    {
-                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                            ? nmpScore
-                            : beta;
-                    }
+                    return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                        ? nmpScore
+                        : beta;
                 }
             }
         }
