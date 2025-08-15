@@ -199,7 +199,7 @@ public sealed partial class Engine
 
             bool isNotGettingCheckmated = ttCorrectedStaticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
-            if(isNotGettingCheckmated)
+            if (isNotGettingCheckmated)
             {
                 // Fail-high pruning (moves with high scores) - prune more when improving
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
@@ -218,9 +218,9 @@ public sealed partial class Engine
 
                     if (staticEval - rfpThreshold >= beta)
                     {
-    #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
+#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                         return (staticEval + beta) / 2;
-    #pragma warning restore S3949 // Calculations should not overflow
+#pragma warning restore S3949 // Calculations should not overflow
                     }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
@@ -255,7 +255,7 @@ public sealed partial class Engine
                     }
                 }
             }
-          
+
             var staticEvalBetaDiff = staticEval - beta;
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
