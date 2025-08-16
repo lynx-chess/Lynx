@@ -171,11 +171,6 @@ public struct TranspositionTable
 
                 // Bucket policy to discard very old entries
 
-                if (candidateEntry.Type != NodeType.None)
-                {
-                    ;
-                }
-
                 // Always take an empty entry, or one with just static eval
                 if (candidateEntry.Key == 0 || candidateEntry.Type == NodeType.None)
                 {
@@ -190,8 +185,6 @@ public struct TranspositionTable
 
                 // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
                 // Current formula from Stormphrax
-
-
                 var value = CalculateBucketWeight(candidateEntry, _age);
 
                 if (value < minValue)
@@ -249,7 +242,6 @@ public struct TranspositionTable
             throw new LynxException();
         }
 #endif
-
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
