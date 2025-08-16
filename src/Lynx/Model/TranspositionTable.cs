@@ -250,20 +250,9 @@ public struct TranspositionTable
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         ref var bucket = ref _tt[ttIndex];
 
-        for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
-        {
-            ref var entry = ref bucket[i];
-
-            // TODO test again
-            //if ((ushort)position.UniqueIdentifier != entry.Key)
-            //{
-            //    continue;
-            //}
-
-            // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-            // TODO is this just OK for bucketing, overriding the first entry?
-            entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null, _age);
-        }
+        ref var firstEntry = ref bucket[0];
+        // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
+        firstEntry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null, _age);
     }
 
     /// <summary>
