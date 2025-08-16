@@ -262,7 +262,7 @@ public struct TranspositionTable
 
             // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
             // TODO is this just OK for bucketing, overriding the first entry?
-            //entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null, _age);
+            entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null, _age);
         }
     }
 
