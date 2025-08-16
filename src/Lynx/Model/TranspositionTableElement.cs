@@ -60,7 +60,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Max age, 15
     /// </summary>
-    public const int MaxAge = 0xF0;
+    public const int MaxAge = 0b1111;
     public const int AgeMask = MaxAge - 1 ;
 
     /// <summary>
