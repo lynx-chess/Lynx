@@ -154,13 +154,9 @@ public readonly struct TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
+    public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, bool wasPv)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        ref var entry = ref _tt[ttIndex];
-
-        // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
+        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
     }
 
     /// <summary>
