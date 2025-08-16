@@ -118,16 +118,14 @@ public struct TranspositionTable
         {
             ref var entry = ref bucket[i];
 
-            if ((ushort)position.UniqueIdentifier != entry.Key)
+            if ((ushort)position.UniqueIdentifier == entry.Key)
             {
-                continue;
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+
+                return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
             }
-
-            // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-            // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-            var recalculatedScore = RecalculateMateScores(entry.Score, ply);
-
-            return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
         }
 
         return (EvaluationConstants.NoScore, default, default, EvaluationConstants.NoScore, default, default);
@@ -147,11 +145,11 @@ public struct TranspositionTable
 
         ref TranspositionTableElement entry = ref bucket[0];
 
-        if (entry.Key != 0 || entry.Type != NodeType.None)
+        if (entry.Key != 0 && entry.Type != NodeType.None)
         {
             int minValue = int.MaxValue;
 
-            for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
+            for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
             {
                 ref var candidateEntry = ref bucket[i];
 
@@ -160,13 +158,13 @@ public struct TranspositionTable
                 // Always take an empty entry, or one with just static eval
                 if (entry.Key == 0 || nodeType == NodeType.None)
                 {
-                    entry = candidateEntry;
+                    entry = /*ref*/ candidateEntry;
                 }
 
                 // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
                 // Current formula from Stormphrax
 
-                // Another way ot doing:
+                // Another way of doing:
                 // var ageDiff = age - entry.Age
                 // if (ageDiff <0) ageDiff += maxAge
                 var relativeAge = (_age - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
@@ -176,7 +174,7 @@ public struct TranspositionTable
                 if (value < minValue)
                 {
                     minValue = value;
-                    entry = candidateEntry;
+                    entry = /*ref*/ candidateEntry;
                 }
             }
         }
@@ -257,7 +255,7 @@ public struct TranspositionTable
             for (int i = 0; i < 1_000; ++i)
             {
                 var bucket = _tt[i];
-                for(int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
                 {
                     if (bucket[j].Key != default)
                     {
