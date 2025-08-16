@@ -96,6 +96,7 @@ public sealed class Searcher
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
+        _firstRun = false;
         _isProcessingGoCommand = true;
 
         if (!_absoluteSearchCancellationTokenSource.TryReset())
