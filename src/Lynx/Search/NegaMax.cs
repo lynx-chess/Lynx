@@ -62,7 +62,7 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
         int ttScore = EvaluationConstants.NoScore;
-        int ttStaticEval = int.MinValue;
+        int ttStaticEval = EvaluationConstants.NoScore;
         int ttDepth = default;
         bool ttWasPv = false;
 
@@ -163,10 +163,8 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck && !isVerifyingSE)
         {
-            if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
+            if (ttHit && ttStaticEval != EvaluationConstants.NoScore)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
-                Debug.Assert(ttStaticEval != int.MinValue);
-
                 rawStaticEval = ttStaticEval;
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
@@ -788,7 +786,7 @@ public sealed partial class Engine
         var ttProbeResult = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
-        var ttHit = ttNodeType != NodeType.Unknown && ttNodeType != NodeType.None;
+        var ttHit = ttNodeType != NodeType.Unknown;
         var ttPv = pvNode || ttProbeResult.WasPv;
 
         // QS TT cutoff
