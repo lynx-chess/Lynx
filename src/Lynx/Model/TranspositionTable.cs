@@ -157,6 +157,10 @@ public struct TranspositionTable
             return value;
         }
 
+#if DEBUG
+        int bucketIndex = 0;
+#endif
+
         if (entry.Key != 0 && entry.Type != NodeType.None)
         {
             int minValue = CalculateBucketWeight(entry, _age);
@@ -167,10 +171,20 @@ public struct TranspositionTable
 
                 // Bucket policy to discard very old entries
 
+                if (candidateEntry.Type != NodeType.None)
+                {
+                    ;
+                }
+
                 // Always take an empty entry, or one with just static eval
                 if (candidateEntry.Key == 0 || candidateEntry.Type == NodeType.None)
                 {
-                    entry = /*ref*/ candidateEntry;
+                    entry = ref candidateEntry;
+
+#if DEBUG
+                    bucketIndex = i;
+#endif
+
                     break;
                 }
 
@@ -183,7 +197,11 @@ public struct TranspositionTable
                 if (value < minValue)
                 {
                     minValue = value;
-                    entry = /*ref*/ candidateEntry;
+                    entry = ref candidateEntry;
+
+#if DEBUG
+                    bucketIndex = i;
+#endif
                 }
             }
         }
@@ -217,6 +235,21 @@ public struct TranspositionTable
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
         entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, _age);
+
+#if DEBUG
+        Debug.Assert(bucket[bucketIndex].Score == recalculatedScore);
+        Debug.Assert(bucket[bucketIndex].Type == nodeType);
+        Debug.Assert(bucket[bucketIndex].Age == _age);
+        Debug.Assert(_tt[ttIndex][bucketIndex].Score == recalculatedScore);
+        Debug.Assert(_tt[ttIndex][bucketIndex].Type == nodeType);
+        Debug.Assert(bucket[bucketIndex].Age == _age);
+
+        if (_tt[ttIndex][bucketIndex].Score != recalculatedScore)
+        {
+            throw new LynxException();
+        }
+#endif
+
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -237,7 +270,7 @@ public struct TranspositionTable
 
             // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
             // TODO is this just OK for bucketing, overriding the first entry?
-            entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null, _age);
+            //entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null, _age);
         }
     }
 

@@ -10,6 +10,8 @@ public struct TranspositionTableBucket
     private TranspositionTableElement _ttEntry;
 #pragma warning restore S1144 // Unused private types or members should be removed
 
+    // TODO Add byte padding to align with 32 or 64 bytes
+
     /// <summary>
     /// Struct size in bytes
     /// </summary>
