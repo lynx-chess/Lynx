@@ -192,7 +192,7 @@ public struct TranspositionTable
         bool shouldReplace =
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
-            //|| entry.Age != _age                                // Different age
+            || entry.Age != _age                                // Different age
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
