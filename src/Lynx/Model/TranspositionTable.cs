@@ -145,9 +145,21 @@ public struct TranspositionTable
 
         ref TranspositionTableElement entry = ref bucket[0];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CalculateBucketWeight(TranspositionTableElement entry, int ttAge)
+        {
+            // Another way of doing:
+            // var ageDiff = age - entry.Age
+            // if (ageDiff <0) ageDiff += maxAge
+            var relativeAge = (ttAge - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
+
+            var value = entry.Depth - (2 * relativeAge);
+            return value;
+        }
+
         if (entry.Key != 0 && entry.Type != NodeType.None)
         {
-            int minValue = int.MaxValue;
+            int minValue = CalculateBucketWeight(entry, _age);
 
             for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
             {
@@ -164,12 +176,8 @@ public struct TranspositionTable
                 // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
                 // Current formula from Stormphrax
 
-                // Another way of doing:
-                // var ageDiff = age - entry.Age
-                // if (ageDiff <0) ageDiff += maxAge
-                var relativeAge = (_age - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
 
-                var value = entry.Depth - (2 * relativeAge);
+                var value = CalculateBucketWeight(candidateEntry, _age);
 
                 if (value < minValue)
                 {
