@@ -625,6 +625,8 @@ public static class Constants
     public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
+
+    public const int TranspositionTableElementsPerBucket = 1;
 }
 
 #pragma warning restore IDE0055

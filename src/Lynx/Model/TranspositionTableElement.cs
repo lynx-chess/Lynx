@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
@@ -46,11 +47,21 @@ public struct TranspositionTableElement
     /// 1 byte
     /// Binary move bits    Hexadecimal
     /// 0000 0001              0x1           Was PV (0-1)
-    /// 0000 1110              0xE           NodeType (0-3)
+    /// 0000 1110              0xE           NodeType (0-4)
+    /// 1111 0000              0xE           NodeType (0-4)
     /// </summary>
-    private byte _type_WasPv;
+    private byte _age_type_WasPv;
 
     private const int NodeTypeOffset = 1;
+    private const int NodeTypeMask = 0xE;
+
+    private const int AgeOffset = 4;
+
+    /// <summary>
+    /// Max age, 15
+    /// </summary>
+    public const int MaxAge = 0xF0;
+    public const int AgeMask = MaxAge - 1 ;
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
@@ -106,13 +117,19 @@ public struct TranspositionTableElement
     public readonly NodeType Type
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (NodeType)((_type_WasPv & 0xE) >> NodeTypeOffset);
+        get => (NodeType)((_age_type_WasPv & NodeTypeMask) >> NodeTypeOffset);
     }
 
     public readonly bool WasPv
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => (_type_WasPv & 0x1) == 1;
+        get => (_age_type_WasPv & 0x1) == 1;
+    }
+
+    public readonly int Age
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => (_age_type_WasPv /*& AgeExtractionMask*/) >> AgeOffset;
     }
 
     /// <summary>
@@ -125,13 +142,16 @@ public struct TranspositionTableElement
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move)
+    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move, int age)
     {
+        Debug.Assert(age <= MaxAge);
+        Debug.Assert(nodeType != NodeType.Unknown);
+
         _key = (ushort)key;
         _score = (short)score;
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
-        _type_WasPv = (byte)(wasPv | ((int)nodeType << NodeTypeOffset));
+        _age_type_WasPv = (byte)(wasPv | ((int)nodeType << NodeTypeOffset) | age << AgeOffset);
         _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 }
