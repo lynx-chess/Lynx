@@ -626,7 +626,7 @@ public static class Constants
 
     public const string NumberWithSignFormat = "+#;-#;0";
 
-    public const int TranspositionTableElementsPerBucket = 3;
+    public const int TranspositionTableElementsPerBucket = 1;
 }
 
 #pragma warning restore IDE0055

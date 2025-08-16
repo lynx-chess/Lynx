@@ -145,59 +145,59 @@ public struct TranspositionTable
 
         ref TranspositionTableElement entry = ref bucket[0];
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CalculateBucketWeight(TranspositionTableElement entry, int ttAge)
-        {
-            // Another way of doing:
-            // var ageDiff = age - entry.Age
-            // if (ageDiff <0) ageDiff += maxAge
-            var relativeAge = (ttAge - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//        static int CalculateBucketWeight(TranspositionTableElement entry, int ttAge)
+//        {
+//            // Another way of doing:
+//            // var ageDiff = age - entry.Age
+//            // if (ageDiff <0) ageDiff += maxAge
+//            var relativeAge = (ttAge - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
 
-            var value = entry.Depth - (2 * relativeAge);
-            return value;
-        }
+//            var value = entry.Depth - (2 * relativeAge);
+//            return value;
+//        }
 
-#if DEBUG
-        int bucketIndex = 0;
-#endif
+//#if DEBUG
+//        int bucketIndex = 0;
+//#endif
 
-        if (entry.Key != 0 && entry.Type != NodeType.None)
-        {
-            int minValue = CalculateBucketWeight(entry, _age);
+//        if (entry.Key != 0 && entry.Type != NodeType.None)
+//        {
+//            int minValue = CalculateBucketWeight(entry, _age);
 
-            for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
-            {
-                ref var candidateEntry = ref bucket[i];
+//            for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
+//            {
+//                ref var candidateEntry = ref bucket[i];
 
-                // Bucket policy to discard very old entries
+//                // Bucket policy to discard very old entries
 
-                // Always take an empty entry, or one with just static eval
-                if (candidateEntry.Key == 0 || candidateEntry.Type == NodeType.None)
-                {
-                    entry = ref candidateEntry;
+//                // Always take an empty entry, or one with just static eval
+//                if (candidateEntry.Key == 0 || candidateEntry.Type == NodeType.None)
+//                {
+//                    entry = ref candidateEntry;
 
-#if DEBUG
-                    bucketIndex = i;
-#endif
+//#if DEBUG
+//                    bucketIndex = i;
+//#endif
 
-                    break;
-                }
+//                    break;
+//                }
 
-                // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
-                // Current formula from Stormphrax
-                var value = CalculateBucketWeight(candidateEntry, _age);
+//                // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
+//                // Current formula from Stormphrax
+//                var value = CalculateBucketWeight(candidateEntry, _age);
 
-                if (value < minValue)
-                {
-                    minValue = value;
-                    entry = ref candidateEntry;
+//                if (value < minValue)
+//                {
+//                    minValue = value;
+//                    entry = ref candidateEntry;
 
-#if DEBUG
-                    bucketIndex = i;
-#endif
-                }
-            }
-        }
+//#if DEBUG
+//                    bucketIndex = i;
+//#endif
+//                }
+//            }
+//        }
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
@@ -229,19 +229,19 @@ public struct TranspositionTable
 
         entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, _age);
 
-#if DEBUG
-        Debug.Assert(bucket[bucketIndex].Score == recalculatedScore);
-        Debug.Assert(bucket[bucketIndex].Type == nodeType);
-        Debug.Assert(bucket[bucketIndex].Age == _age);
-        Debug.Assert(_tt[ttIndex][bucketIndex].Score == recalculatedScore);
-        Debug.Assert(_tt[ttIndex][bucketIndex].Type == nodeType);
-        Debug.Assert(bucket[bucketIndex].Age == _age);
+//#if DEBUG
+//        Debug.Assert(bucket[bucketIndex].Score == recalculatedScore);
+//        Debug.Assert(bucket[bucketIndex].Type == nodeType);
+//        Debug.Assert(bucket[bucketIndex].Age == _age);
+//        Debug.Assert(_tt[ttIndex][bucketIndex].Score == recalculatedScore);
+//        Debug.Assert(_tt[ttIndex][bucketIndex].Type == nodeType);
+//        Debug.Assert(bucket[bucketIndex].Age == _age);
 
-        if (_tt[ttIndex][bucketIndex].Score != recalculatedScore)
-        {
-            throw new LynxException();
-        }
-#endif
+//        if (_tt[ttIndex][bucketIndex].Score != recalculatedScore)
+//        {
+//            throw new LynxException();
+//        }
+//#endif
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
