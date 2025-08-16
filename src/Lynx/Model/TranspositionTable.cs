@@ -8,6 +8,7 @@ namespace Lynx.Model;
 public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    public static readonly TTResult EmptyTTResult = new(EvaluationConstants.NoScore, default, default, EvaluationConstants.NoScore, default, default);
 
     private readonly TranspositionTableElement[] _tt = [];
 
@@ -95,21 +96,24 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply)
+    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTResult result) // [MaybeNullWhen(false)]
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoScore, default, default, EvaluationConstants.NoScore, default, default);
+            result = EmptyTTResult;
+            return false;
         }
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
         var recalculatedScore = RecalculateMateScores(entry.Score, ply);
 
-        return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+        result = new TTResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+
+        return entry.Type != NodeType.Unknown && entry.Type != NodeType.None;
     }
 
     /// <summary>
