@@ -168,9 +168,10 @@ public struct TranspositionTable
                 // Bucket policy to discard very old entries
 
                 // Always take an empty entry, or one with just static eval
-                if (candidateEntry.Key == 0 || nodeType == NodeType.None)
+                if (candidateEntry.Key == 0 || candidateEntry.Type == NodeType.None)
                 {
                     entry = /*ref*/ candidateEntry;
+                    break;
                 }
 
                 // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
