@@ -59,7 +59,7 @@ public sealed partial class Engine
         bool pvNode = beta - alpha > 1;
         int depthExtension = 0;
 
-        TTResult ttEntry;
+        TTProbeResult ttEntry;
         bool ttWasPv;
 
         bool ttHit = false;
