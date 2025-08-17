@@ -59,8 +59,8 @@ public sealed partial class Engine
         bool pvNode = beta - alpha > 1;
         int depthExtension = 0;
 
-        TTResult ttEntry = TranspositionTable.EmptyTTResult;
-        var ttWasPv = false;
+        TTResult ttEntry;
+        bool ttWasPv;
 
         bool ttHit = false;
         bool ttEntryHasBestMove = false;
@@ -120,8 +120,13 @@ public sealed partial class Engine
                 --depthExtension;
             }
         }
+        else
+        {
+            ttEntry = default;
+            ttWasPv = false;
+        }
 
-        var ttPv = pvNode || ttWasPv;
+            var ttPv = pvNode || ttWasPv;
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).

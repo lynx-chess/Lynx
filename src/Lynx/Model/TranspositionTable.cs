@@ -8,7 +8,6 @@ namespace Lynx.Model;
 public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    public static readonly TTResult EmptyTTResult = new(EvaluationConstants.NoScore, default, default, EvaluationConstants.NoScore, default, default);
 
     private readonly TranspositionTableElement[] _tt = [];
 
@@ -103,7 +102,7 @@ public readonly struct TranspositionTable
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            result = EmptyTTResult;
+            result = default;
             return false;
         }
 
