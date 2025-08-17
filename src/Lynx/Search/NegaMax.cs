@@ -165,7 +165,10 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck && !isVerifyingSE)
         {
-            if (ttHit || ttEntry.NodeType == NodeType.None)
+            var ttNodeType = ttEntry.NodeType;
+            var ttScore = ttEntry.Score;
+
+            if (ttHit || ttNodeType == NodeType.None)
             //if (ttHit && ttEntry.StaticEval != EvaluationConstants.NoScore)
             {
                 Debug.Assert(ttEntry.StaticEval != EvaluationConstants.NoScore);
@@ -195,7 +198,7 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            //if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            //if (ttHit && ttNodeType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             //{
             //    staticEval = ttScore;
             //}
@@ -261,7 +264,7 @@ public sealed partial class Engine
                 && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                && (ttEntry.NodeType != NodeType.Alpha || ttEntry.Score >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+                && (ttNodeType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
                 var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
                     + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
@@ -299,6 +302,8 @@ public sealed partial class Engine
 
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
 
+        var ttBestMove = ttEntry.BestMove;
+
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
 
@@ -306,7 +311,7 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttEntry.BestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -331,7 +336,7 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
-            var isBestMove = (ShortMove)move == ttEntry.BestMove;
+            var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
             {
                 continue;
