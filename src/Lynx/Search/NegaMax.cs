@@ -59,8 +59,8 @@ public sealed partial class Engine
         bool pvNode = beta - alpha > 1;
         int depthExtension = 0;
 
-        TTResult ttEntry;
-        bool ttWasPv;
+        TTResult ttEntry = new();
+        bool ttWasPv = false;
 
         bool ttHit = false;
         bool ttEntryHasBestMove = false;
@@ -70,7 +70,7 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out ttEntry);
+            ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, ref ttEntry);
 
             ttWasPv = ttEntry.WasPv;
             ttEntryHasBestMove = ttHit && ttEntry.BestMove != default;
@@ -120,13 +120,8 @@ public sealed partial class Engine
                 --depthExtension;
             }
         }
-        else
-        {
-            ttEntry = default;
-            ttWasPv = false;
-        }
 
-            var ttPv = pvNode || ttWasPv;
+        var ttPv = pvNode || ttWasPv;
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
@@ -788,7 +783,8 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var ttProbeResult);
+        TTResult ttProbeResult = new();
+        var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, ref ttProbeResult);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
         var ttPv = pvNode || ttProbeResult.WasPv;

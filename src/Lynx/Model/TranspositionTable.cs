@@ -95,14 +95,13 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTResult result) // [MaybeNullWhen(false)]
+    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, ref TTResult result) // [MaybeNullWhen(false)]
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            result = default;
             return false;
         }
 
@@ -110,7 +109,12 @@ public readonly struct TranspositionTable
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
         var recalculatedScore = RecalculateMateScores(entry.Score, ply);
 
-        result = new TTResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+        result.Score = recalculatedScore;
+        result.BestMove = entry.Move;
+        result.NodeType = entry.Type;
+        result.StaticEval = entry.StaticEval;
+        result.Depth = entry.Depth;
+        result.WasPv = entry.WasPv;
 
         return entry.Type != NodeType.Unknown && entry.Type != NodeType.None;
     }

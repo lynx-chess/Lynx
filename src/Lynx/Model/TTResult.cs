@@ -2,28 +2,24 @@
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-public readonly ref struct TTResult
+public ref struct TTResult
 {
-    public readonly int Score = EvaluationConstants.NoScore;
+    public int Score;
 
-    public readonly short BestMove;
+    public short BestMove;
 
-    public readonly NodeType NodeType;
+    public NodeType NodeType;
 
-    public readonly int StaticEval = EvaluationConstants.NoScore;
+    public int StaticEval;
 
-    public readonly int Depth;
+    public int Depth;
 
-    public readonly bool WasPv;
+    public bool WasPv;
 
-    public TTResult(int score, short bestMove, NodeType nodeType, int staticEval, int depth, bool wasPv)
+    public TTResult()
     {
-        Score = score;
-        BestMove = bestMove;
-        NodeType = nodeType;
-        StaticEval = staticEval;
-        Depth = depth;
-        WasPv = wasPv;
+        Score = EvaluationConstants.NoScore;
+        StaticEval = EvaluationConstants.NoScore;
     }
 }
 
