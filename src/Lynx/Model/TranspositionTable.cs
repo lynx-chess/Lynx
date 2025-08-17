@@ -95,7 +95,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, ref TTResult result) // [MaybeNullWhen(false)]
+    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, ref TTProbeResult result) // [MaybeNullWhen(false)]
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex];

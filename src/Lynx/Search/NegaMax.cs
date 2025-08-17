@@ -59,7 +59,7 @@ public sealed partial class Engine
         bool pvNode = beta - alpha > 1;
         int depthExtension = 0;
 
-        TTResult ttEntry = new();
+        TTProbeResult ttEntry = new();
         bool ttWasPv = false;
 
         bool ttHit = false;
@@ -783,7 +783,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        TTResult ttProbeResult = new();
+        TTProbeResult ttProbeResult = new();
         var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, ref ttProbeResult);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;

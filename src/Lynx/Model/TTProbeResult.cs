@@ -2,21 +2,21 @@
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-public ref struct TTResult
+public ref struct TTProbeResult
 {
     public int Score;
-
-    public short BestMove;
-
-    public NodeType NodeType;
 
     public int StaticEval;
 
     public int Depth;
 
+    public short BestMove;
+
+    public NodeType NodeType;
+
     public bool WasPv;
 
-    public TTResult()
+    public TTProbeResult()
     {
         Score = EvaluationConstants.NoScore;
         StaticEval = EvaluationConstants.NoScore;
