@@ -1395,6 +1395,7 @@ public class Position : IDisposable
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
+        ulong oppositeSidePassedPawnsMask;
         int pushSquare;
 
         if (pieceIndex == (int)Piece.p)
@@ -1403,10 +1404,12 @@ public class Position : IDisposable
             oppositeSide = (int)Side.White;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
             pushSquare = squareIndex + 8;
+            oppositeSidePassedPawnsMask = Masks.WhitePassedPawnMasks[squareIndex];
         }
         else
         {
             passedPawnsMask = Masks.WhitePassedPawnMasks[squareIndex];
+            oppositeSidePassedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
             pushSquare = squareIndex - 8;
         }
 
@@ -1419,7 +1422,8 @@ public class Position : IDisposable
         }
         // Backwards pawn
         else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
-            && oppositeSidePawns.GetBit(pushSquare))
+            && oppositeSidePawns.GetBit(pushSquare)
+            && (_pieceBitBoards[pieceIndex] & oppositeSidePassedPawnsMask) == 0)
         {
             packedBonus += BackwardsPawnBonus[rank];
         }
