@@ -126,7 +126,7 @@ public sealed partial class Engine
             ttWasPv = false;
         }
 
-            var ttPv = pvNode || ttWasPv;
+        var ttPv = pvNode || ttWasPv;
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
@@ -220,10 +220,10 @@ public sealed partial class Engine
 
                 var rfpThreshold = rfpMargin + improvingFactor;
 
-                    if (ttCorrectedStaticEval - rfpThreshold >= beta)
-                    {
+                if (ttCorrectedStaticEval - rfpThreshold >= beta)
+                {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
+                    return (ttCorrectedStaticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
                 }
 
@@ -303,6 +303,18 @@ public sealed partial class Engine
         }
 
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
+
+        var corrplexity = Math.Abs(staticEval - rawStaticEval);
+
+        // Corrplexity Extension - original idea by Potential author
+        if (ttHit && ttEntryHasBestMove
+            && corrplexity > Configuration.EngineSettings.Corrplexity_Extension_Delta
+            && !Game.CorrplexityExtensionFromStack(ply))
+        //&& staticEval != ttCorrectedStaticEval)
+        {
+            ++depthExtension;
+            stack.CorrplexityExtension = true;
+        }
 
         var ttBestMove = ttEntry.BestMove;
 
@@ -581,7 +593,7 @@ public sealed partial class Engine
                                     reduction -= Configuration.EngineSettings.LMR_InCheck;
                                 }
 
-                                if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
+                                if (corrplexity >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_Corrplexity;
                                 }

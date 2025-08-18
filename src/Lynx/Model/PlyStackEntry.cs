@@ -8,6 +8,8 @@ public struct PlyStackEntry
 
     public Move Move { get; set; }
 
+    public bool CorrplexityExtension { get; set; }
+
     public PlyStackEntry()
     {
         StaticEval = int.MaxValue;
