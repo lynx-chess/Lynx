@@ -193,15 +193,17 @@ public sealed partial class Engine
                 improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
 
+            var ttCorrectedStaticEval = staticEval;
+
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            //if (ttHit && ttNodeType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
-            //{
-            //    staticEval = ttScore;
-            //}
+            if (ttHit && ttNodeType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            {
+                ttCorrectedStaticEval = ttScore;
+            }
 
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
@@ -218,10 +220,10 @@ public sealed partial class Engine
 
                 var rfpThreshold = rfpMargin + improvingFactor;
 
-                if (staticEval - rfpThreshold >= beta)
-                {
+                    if (ttCorrectedStaticEval - rfpThreshold >= beta)
+                    {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                    return (staticEval + beta) / 2;
+                        return (ttCorrectedStaticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
                 }
 
