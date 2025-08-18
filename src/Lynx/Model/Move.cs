@@ -393,7 +393,7 @@ public static class MoveExtensions
         return span[..^1].ToString();
     }
 
-    private static readonly Dictionary<int, string> _uCIStringCache = new(4096);
+    public static readonly Dictionary<int, string> UCIStringCache = new(4096);
 
     /// <summary>
     /// NOT thread-safe
@@ -402,13 +402,13 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIStringMemoized(this Move move)
     {
-        if (_uCIStringCache.TryGetValue(move, out var uciString))
+        if (UCIStringCache.TryGetValue(move, out var uciString))
         {
             return uciString;
         }
 
         var str = move.UCIString();
-        _uCIStringCache[move] = str;
+        UCIStringCache[move] = str;
 
         return str;
     }

@@ -518,6 +518,8 @@ public sealed class Searcher
         }
         _firstRun = false;
 
+        MoveExtensions.UCIStringCache.Clear();
+
         sw.Stop();
         _logger.Info("ucinewgame duration: {Time}ms", sw.ElapsedMilliseconds);
 
