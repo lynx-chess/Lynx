@@ -211,7 +211,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("3k4/4p1pp/8/8/8/8/4PPP1/3K4 b - - 0 1")]
+    [TestCase("3k4/3p2pp/8/8/8/8/4PPP1/3K4 b - - 0 1")]
     public void StaticEvaluation_IsolatedPawnPenalty(string fen)
     {
         Position position = new Position(fen);
@@ -223,7 +223,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        var expectedEval = UnpackMG(IsolatedPawnPenalty) - UnpackMG(PawnPhalanxBonus[1]);
+        var expectedEval = UnpackMG(IsolatedPawnPenalty[Constants.File[(int)BoardSquare.d3]]) - UnpackMG(PawnPhalanxBonus[1]);
 
         Assert.AreEqual(expectedEval, evaluation);
     }
@@ -306,7 +306,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/4p1pp/8/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e7)]
+    [TestCase("1k6/3p2pp/8/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d7)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -323,7 +323,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/4p3/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e6)]
+    [TestCase("1k6/6pp/3p4/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d6)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -340,7 +340,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/4p3/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e5)]
+    [TestCase("1k6/6pp/8/3p4/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d5)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -357,7 +357,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/4p3/7P/6PP/1K6 b - - 0 1", BoardSquare.e4)]
+    [TestCase("1k6/6pp/8/8/3p4/7P/6PP/1K6 b - - 0 1", BoardSquare.d4)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -374,7 +374,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/8/4p2P/6PP/1K6 b - - 0 1", BoardSquare.e3)]
+    [TestCase("1k6/6pp/8/8/8/3p3P/6PP/1K6 b - - 0 1", BoardSquare.d3)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -391,7 +391,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/8/7P/4p1PP/1K6 b - - 0 1", BoardSquare.e2)]
+    [TestCase("1k6/6pp/8/8/8/7P/3p2PP/1K6 b - - 0 1", BoardSquare.d2)]
     public void StaticEvaluation_PassedPawnBonus(string fen, BoardSquare square)
     {
         var position = new Position(fen);
@@ -429,7 +429,7 @@ public class PositionTest
         Assert.AreEqual(
             expectedEval
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            + UnpackMG(IsolatedPawnPenalty)
+            + UnpackMG(IsolatedPawnPenalty[Constants.File[(int)square]])
             + UnpackMG(PassedPawnBonus[0][rank])
             + UnpackMG(PassedPawnEnemyBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])

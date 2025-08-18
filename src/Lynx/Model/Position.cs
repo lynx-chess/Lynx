@@ -1415,7 +1415,7 @@ public class Position : IDisposable
         // Isolated pawn
         if ((_pieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
-            packedBonus += IsolatedPawnPenalty;
+            packedBonus += IsolatedPawnPenalty[Constants.File[squareIndex]];
         }
         // Backwards pawn
         else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
