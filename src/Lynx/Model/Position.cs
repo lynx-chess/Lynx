@@ -1600,12 +1600,12 @@ public class Position : IDisposable
             // King on open file
             if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & file) == 0)
             {
-                packedBonus += OpenFileKingPenalty;
+                packedBonus += OpenFileKingPenalty[Constants.File[squareIndex]];
             }
             // King on semi-open file
             else if ((_pieceBitBoards[(int)Piece.P + kingSideOffset] & file) == 0)
             {
-                packedBonus += SemiOpenFileKingPenalty;
+                packedBonus += SemiOpenFileKingPenalty[Constants.File[squareIndex]];
             }
         }
 
