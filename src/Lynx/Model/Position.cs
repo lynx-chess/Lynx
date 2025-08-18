@@ -1419,9 +1419,10 @@ public class Position : IDisposable
         }
         // Backwards pawn
         else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
-            && oppositeSidePawns.GetBit(pushSquare))
+            && (oppositeSidePawns.GetBit(pushSquare)                                            // Blocked
+                || evaluationContext.Attacks[(int)Piece.p - pieceIndex].GetBit(pushSquare)))    // Push square attacked by opponent pawns
         {
-            packedBonus += BackwardsPawnBonus[rank];
+            packedBonus += BackwardsPawnPenalty[rank];
         }
 
         // Passed pawn
