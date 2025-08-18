@@ -6167,6 +6167,18 @@ public static class EvaluationParams
 		Pack(45, 50)
 	];
 
+	public static readonly TaperedEvaluationTermByRank BackwardsPawnBonus =
+	[
+		Pack(0, 0),
+		Pack(-27, -13),
+		Pack(-10, -6),
+		Pack(8, 7),
+		Pack(18, 20),
+		Pack(30, 35),
+		Pack(34, 53),
+		Pack(45, 50)
+	];
+
 	public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus =
 	[
 		Pack(-14, -21),
