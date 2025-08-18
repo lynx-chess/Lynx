@@ -1417,6 +1417,12 @@ public class Position : IDisposable
         {
             packedBonus += IsolatedPawnPenalty;
         }
+        // Backwards pawn
+        else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
+            && oppositeSidePawns.GetBit(pushSquare))
+        {
+            packedBonus += BackwardsPawnBonus[rank];
+        }
 
         // Passed pawn
         if ((oppositeSidePawns & passedPawnsMask) == default)
@@ -1438,13 +1444,6 @@ public class Position : IDisposable
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
-        }
-
-        // Backwards pawn
-        if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
-            && oppositeSidePawns.GetBit(pushSquare))
-        {
-            packedBonus += BackwardsPawnBonus[rank];
         }
 
         // Pawn phalanx
