@@ -245,7 +245,7 @@ public struct TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv, int ply)
+    public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv, int ply)
     {
         // Reuse RecordHash replacement logic, despite not being super-efficient
         RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: -1, ply, EvaluationConstants.NoScore, NodeType.None, wasPv, null);
