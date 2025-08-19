@@ -126,7 +126,7 @@ public sealed partial class Engine
             ttWasPv = false;
         }
 
-            var ttPv = pvNode || ttWasPv;
+        var ttPv = pvNode || ttWasPv;
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
@@ -220,10 +220,10 @@ public sealed partial class Engine
 
                 var rfpThreshold = rfpMargin + improvingFactor;
 
-                    if (ttCorrectedStaticEval - rfpThreshold >= beta)
-                    {
+                if (ttCorrectedStaticEval - rfpThreshold >= beta)
+                {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
+                    return (ttCorrectedStaticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
                 }
 
@@ -412,6 +412,13 @@ public sealed partial class Engine
                 }
             }
 
+            var moveResets50mr = isCapture
+                || piece == (int)Piece.P
+                || piece == (int)Piece.p;
+
+            var moveResetsHigh50mr = moveResets50mr
+                && Game.HalfMovesWithoutCaptureOrPawnMove >= Configuration.EngineSettings.LMR_50mrReset_MinCounter;
+
             var gameState = position.MakeMove(move);
 
             if (!position.WasProduceByAValidMove())
@@ -512,7 +519,7 @@ public sealed partial class Engine
             }
             else
             {
-                var nextHalfMovesCounter = (isCapture || piece == (int)Piece.P || piece == (int)Piece.p)
+                var nextHalfMovesCounter = moveResets50mr
                     ? 0
                     : Game.HalfMovesWithoutCaptureOrPawnMove + 1;
 
@@ -585,6 +592,11 @@ public sealed partial class Engine
                                 if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_Corrplexity;
+                                }
+
+                                if (moveResetsHigh50mr)
+                                {
+                                    reduction -= Configuration.EngineSettings.LMR_50mrReset;
                                 }
 
                                 reduction /= EvaluationConstants.LMRScaleFactor;
