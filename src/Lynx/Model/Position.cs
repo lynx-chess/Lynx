@@ -1467,12 +1467,12 @@ public class Position : IDisposable
         // Rook on open file
         if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & file) == default)
         {
-            packedBonus += OpenFileRookBonus;
+            packedBonus += OpenFileRookBonus[Constants.File[squareIndex]];
         }
         // Rook on semi-open file
         else if ((_pieceBitBoards[pieceIndex - pawnToRookOffset] & file) == default)
         {
-            packedBonus += SemiOpenFileRookBonus;
+            packedBonus += SemiOpenFileRookBonus[Constants.File[squareIndex]];
         }
 
         // Connected rooks
