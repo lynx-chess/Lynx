@@ -48,7 +48,7 @@ public struct TranspositionTableElement
     /// Binary move bits    Hexadecimal
     /// 0000 0001              0x1           Was PV (0-1)
     /// 0000 1110              0xE           NodeType (0-4)
-    /// 1111 0000              0xE           NodeType (0-4)
+    /// 1111 0000                            Age (0-15)
     /// </summary>
     private byte _age_type_WasPv;
 
@@ -57,11 +57,8 @@ public struct TranspositionTableElement
 
     private const int AgeOffset = 4;
 
-    /// <summary>
-    /// Max age, 15
-    /// </summary>
-    public const int MaxAge = 0b1111;
-    public const int AgeMask = MaxAge - 1 ;
+    public const int MaxAge = 16;
+    public const int AgeMask = MaxAge - 1;
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
@@ -144,7 +141,7 @@ public struct TranspositionTableElement
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move, int age)
     {
-        Debug.Assert(age <= MaxAge);
+        Debug.Assert(age < MaxAge);
         Debug.Assert(nodeType != NodeType.Unknown);
 
         _key = (ushort)key;
