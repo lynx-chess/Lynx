@@ -126,7 +126,7 @@ public sealed partial class Engine
             ttWasPv = false;
         }
 
-            var ttPv = pvNode || ttWasPv;
+        var ttPv = pvNode || ttWasPv;
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
@@ -206,54 +206,55 @@ public sealed partial class Engine
             }
 
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+
+            // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+            // Return formula by Ciekce, instead of just returning static eval
+            // Improving impl. based on Potential's
+            var rfpMargin = improving
+                ? Configuration.EngineSettings.RFP_Linear_Improving * (depth - 1)
+                : Configuration.EngineSettings.RFP_Linear_NotImproving * depth;
+
+            rfpMargin += Configuration.EngineSettings.RFP_Constant
+                + (depth * depth * Configuration.EngineSettings.RFP_Quadratic);
+
+            // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
+            var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
+
+            var rfpThreshold = rfpMargin + improvingFactor;
+
+            if (ttCorrectedStaticEval - rfpThreshold >= beta)
             {
-                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-                // Return formula by Ciekce, instead of just returning static eval
-                // Improving impl. based on Potential's
-                var rfpMargin = improving
-                    ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
-                    : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
-
-                // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
-                var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
-
-                var rfpThreshold = rfpMargin + improvingFactor;
-
-                    if (ttCorrectedStaticEval - rfpThreshold >= beta)
-                    {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
+                return (ttCorrectedStaticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
-                }
+            }
 
-                // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+            // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+            if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+            {
+                var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                if (score < beta)               // Static evaluation + bonus indicates fail-low node
                 {
-                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
-
-                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                    if (depth == 1)
                     {
-                        if (depth == 1)
-                        {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                        var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
 
+                        return qSearchScore > score
+                            ? qSearchScore
+                            : score;
+                    }
+
+                    score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                    if (score < beta)               // Static evaluation indicates fail-low node
+                    {
+                        var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                        if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                        {
                             return qSearchScore > score
                                 ? qSearchScore
                                 : score;
-                        }
-
-                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                        if (score < beta)               // Static evaluation indicates fail-low node
-                        {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
-                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
-                            {
-                                return qSearchScore > score
-                                    ? qSearchScore
-                                    : score;
-                            }
                         }
                     }
                 }
