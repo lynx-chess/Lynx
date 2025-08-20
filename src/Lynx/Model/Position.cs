@@ -1155,8 +1155,8 @@ public class Position : IDisposable
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(ref evaluationContext, whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(ref evaluationContext, blackKing, (int)Side.Black, whitePawnAttacks);
+            KingAdditionalEvaluation(ref evaluationContext, whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(ref evaluationContext, blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
         AssertAttackPopulation(ref evaluationContext);
 
@@ -1590,7 +1590,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int pieceSide, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KingAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
@@ -1600,7 +1600,7 @@ public class Position : IDisposable
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, _occupancyBitBoards[(int)Side.Both])
             & ~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks)).CountBits();
-        int packedBonus = VirtualKingMobilityBonus[attacksCount];
+        int packedBonus = VirtualKingMobilityBonus[bucket][attacksCount];
 
         var kingSideOffset = Utils.PieceOffset(pieceSide);
 
