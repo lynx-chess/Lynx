@@ -967,6 +967,9 @@ public class Position : IDisposable
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
+                // Central pawn control
+                pawnScore += CentralPawnControl(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks);
+
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
@@ -1094,6 +1097,9 @@ public class Position : IDisposable
 
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
+
+                // Central pawn control
+                pawnScore += CentralPawnControl(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1676,6 +1682,15 @@ public class Position : IDisposable
 
             return islandCount;
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CentralPawnControl(BitBoard whitePawns, BitBoard blackPawns, BitBoard whitePawnsAttacks, BitBoard blackPawnsAttacks)
+    {
+        var whiteCentralPawnCount = ((whitePawns | whitePawnsAttacks) & Constants.CentralSquaresControl_WhitePawns) % 9;
+        var blackCentralPawnCount = ((blackPawns | blackPawnsAttacks) & Constants.CentralSquaresControl_BlackPawns) % 9;
+
+        return CentralPawnControlBonus[whiteCentralPawnCount] - CentralPawnControlBonus[blackCentralPawnCount];
     }
 
     private static readonly int[][] _defendedThreatsBonus =

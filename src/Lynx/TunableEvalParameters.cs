@@ -6052,6 +6052,19 @@ public static class EvaluationParams
 		Pack(-9, 23)
 	];
 
+	public static readonly TaperedEvaluationTermByRank CentralPawnControlBonus =
+	[
+		Pack(1, -24),
+		Pack(-4, -25),
+		Pack(-9, -28),
+		Pack(-3, -38),
+		Pack(-9, -37),
+		Pack(-4, -25),
+		Pack(-4, -21),
+		Pack(-4, -26),
+		Pack(5, 6)
+	];
+
 	public static readonly TaperedEvaluationTermByRank IsolatedPawnPenalty =
 	[
 		Pack(1, -24),

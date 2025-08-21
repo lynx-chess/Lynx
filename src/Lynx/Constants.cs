@@ -487,6 +487,32 @@ public static class Constants
 
     /// <summary>
     /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 1 1 1 1 0 0
+    /// 5   0 0 1 1 1 1 0 0
+    /// 4   0 0 1 1 1 1 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard CentralSquaresControl_WhitePawns = 0x3c3c3c0000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 1 1 1 1 0 0
+    /// 4   0 0 1 1 1 1 0 0
+    /// 3   0 0 1 1 1 1 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard CentralSquaresControl_BlackPawns = 0x3c3c3c000000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
     /// 7   0 1 1 1 1 1 1 0
     /// 6   0 1 1 1 1 1 1 0
     /// 5   0 1 1 1 1 1 1 0
