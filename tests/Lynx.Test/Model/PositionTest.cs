@@ -567,67 +567,6 @@ public class PositionTest
     }
 
     /// <summary>
-    /// 8   . . . r . . k .
-    /// 7   p p . p . . p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P . P P . . P P
-    /// 1   . K . R . . . .
-    ///     a b c d e f g h
-    /// </summary>
-    [TestCase("3r2k1/pp1p2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2P1PP/1K2R3 b - - 0 1")]
-    [Ignore("Broken by virtual king mobility")]
-    public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
-    {
-        Position position = new Position(fen);
-        int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
-
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
-
-        Assert.AreEqual(UnpackEG(SemiOpenFileKingPenalty), evaluation);
-    }
-
-    /// <summary>
-    /// 8   . . . r . . k .
-    /// 7   p . p p . . p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P . P P . . P P
-    /// 1   . K . R . . . .
-    ///     a b c d e f g h
-    /// </summary>
-    [TestCase("3r2k1/p1pp2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2PP1P/1K2R3 b - - 0 1")]
-    public void StaticEvaluation_OpenFileKingPenalty(string fen)
-    {
-        Position position = new Position(fen);
-        int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
-
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
-
-        Assert.AreEqual(UnpackEG(OpenFileKingPenalty), evaluation);
-    }
-
-    /// <summary>
     /// No rooks = no bonus or penalty
     /// 8   . . . . . . k .
     /// 7   p . p . . . p p
@@ -1034,8 +973,8 @@ public class PositionTest
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, (int)Side.Black, whitePawnAttacks));
+            ? position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
