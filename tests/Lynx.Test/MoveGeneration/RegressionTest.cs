@@ -15,19 +15,23 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.IsLongCastle()));
         Assert.True(moves.Exists(m => m.IsEnPassant()));
         Assert.True(moves.Exists(m => m.PromotedPiece() != default));
-        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.IsCapture()));
-        Assert.True(moves.Exists(m => m.PromotedPiece() != default && !m.IsCapture()));
+        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() != (int)Piece.None));
+        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() == (int)Piece.None));
         Assert.True(moves.Exists(m => m.IsDoublePawnPush()));
 
-        Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var captures = MoveGenerator.GenerateAllCaptures(position, moveSpan).ToArray().ToList();
+        Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        var captures = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moveSpan).ToArray().ToList();
 
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));
         Assert.True(captures.Exists(m => m.IsEnPassant()));
         Assert.True(captures.Exists(m => m.PromotedPiece() != default));
-        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.IsCapture()));
-        Assert.True(captures.Exists(m => m.PromotedPiece() != default && !m.IsCapture()));
+        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() != (int)Piece.None));
+        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() == (int)Piece.None));
         Assert.False(captures.Exists(m => m.IsDoublePawnPush()));
     }
 }

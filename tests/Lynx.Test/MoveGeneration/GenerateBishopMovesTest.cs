@@ -7,19 +7,27 @@ public class GenerateBishopMovesTest
 {
     private static IEnumerable<Move> GenerateBishopMoves(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     private static IEnumerable<Move> GenerateBishopCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
-    [TestCase("k7/8/8/8/8/8/P1P2P1P/RNBQKBNR w KQkq - 0 1", 14)]
-    [TestCase("rnbqkbnr/p1p2p1p/8/8/8/8/8/K7 b KQkq - 0 1", 14)]
+    [TestCase("k7/8/8/8/8/8/P1P2P1P/RNBQKBNR w KQ - 0 1", 14)]
+    [TestCase("rnbqkbnr/p1p2p1p/8/8/8/8/8/K7 b kq - 0 1", 14)]
     [TestCase("1K1k4/8/8/3B4/8/8/8/8 w - - 0 1", 13)]
     [TestCase("1K1k4/8/8/3b4/8/8/8/8 b - - 0 1", 13)]
     [TestCase("1K1k4/2N1N3/1N1P1N2/2PBP3/1N1P1N2/2N1N3/3N4/8 w - - 0 1", 13)]
@@ -182,7 +190,7 @@ public class GenerateBishopMovesTest
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopCaptures(position);
 
-        Assert.AreEqual(1, moves.Count(m => m.Piece() == piece && m.IsCapture()));
+        Assert.AreEqual(1, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.e2
@@ -211,7 +219,7 @@ public class GenerateBishopMovesTest
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopCaptures(position);
 
-        Assert.AreEqual(1, moves.Count(m => m.Piece() == piece && m.IsCapture()));
+        Assert.AreEqual(1, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a6

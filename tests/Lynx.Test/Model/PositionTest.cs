@@ -88,6 +88,8 @@ public class PositionTest
         Assert.Throws<LynxException>(() => new Position(fen));
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(Constants.InitialPositionFEN, true)]
     [TestCase("r1k5/1K6/8/8/8/8/8/8 w - - 0 1", false)]
     [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
@@ -100,6 +102,8 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).IsValid());
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(Constants.EmptyBoardFEN, false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
@@ -115,6 +119,8 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).WasProduceByAValidMove());
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR b KQkq - 1 2", true)]
     [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR w KQkq - 1 2", false)]
     [TestCase("rnbqk1nr/pppp1ppp/4p3/8/1b6/3P1N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3", true)]
@@ -163,14 +169,14 @@ public class PositionTest
         }
     }
 
-    [TestCase("k7/8/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
+    [TestCase("8/k7/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
+    [TestCase("8/k7/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K w - - 0 1", Description = "N+N")]
     [TestCase("k7/8/8/2nn4/8/8/8/7K w - - 0 1", Description = "n+n")]
-    [TestCase("k7/8/8/3B4/8/8/8/7K b - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K b - - 0 1", Description = "b")]
+    [TestCase("k7/8/8/3B4/8/8/8/6K1 b - - 0 1", Description = "B")]
+    [TestCase("k7/8/8/3b4/8/8/8/6K1 b - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K b - - 0 1", Description = "N+N")]
@@ -205,7 +211,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("3k4/4p1pp/8/8/8/8/4PPP1/3K4 b - - 0 1")]
+    [TestCase("3k4/3p2pp/8/8/8/8/4PPP1/3K4 b - - 0 1")]
     public void StaticEvaluation_IsolatedPawnPenalty(string fen)
     {
         Position position = new Position(fen);
@@ -217,7 +223,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        var expectedEval = UnpackMG(IsolatedPawnPenalty) - UnpackMG(PawnPhalanxBonus[1]);
+        var expectedEval = UnpackMG(IsolatedPawnPenalty[Constants.File[(int)BoardSquare.d3]]) - UnpackMG(PawnPhalanxBonus[1]);
 
         Assert.AreEqual(expectedEval, evaluation);
     }
@@ -300,7 +306,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/4p1pp/8/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e7)]
+    [TestCase("1k6/3p2pp/8/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d7)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -317,7 +323,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/4p3/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e6)]
+    [TestCase("1k6/6pp/3p4/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d6)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -334,7 +340,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/4p3/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e5)]
+    [TestCase("1k6/6pp/8/3p4/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d5)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -351,7 +357,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/4p3/7P/6PP/1K6 b - - 0 1", BoardSquare.e4)]
+    [TestCase("1k6/6pp/8/8/3p4/7P/6PP/1K6 b - - 0 1", BoardSquare.d4)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -368,7 +374,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/8/4p2P/6PP/1K6 b - - 0 1", BoardSquare.e3)]
+    [TestCase("1k6/6pp/8/8/8/3p3P/6PP/1K6 b - - 0 1", BoardSquare.d3)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -385,7 +391,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/8/7P/4p1PP/1K6 b - - 0 1", BoardSquare.e2)]
+    [TestCase("1k6/6pp/8/8/8/7P/3p2PP/1K6 b - - 0 1", BoardSquare.d2)]
     public void StaticEvaluation_PassedPawnBonus(string fen, BoardSquare square)
     {
         var position = new Position(fen);
@@ -423,7 +429,7 @@ public class PositionTest
         Assert.AreEqual(
             expectedEval
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            + UnpackMG(IsolatedPawnPenalty)
+            + UnpackMG(IsolatedPawnPenalty[Constants.File[(int)square]])
             + UnpackMG(PassedPawnBonus[0][rank])
             + UnpackMG(PassedPawnEnemyBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
@@ -443,12 +449,12 @@ public class PositionTest
     /// 1   R . . . K . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1", 9, 2)]
+    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1", 9, 2, 0)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 9, 2)]
-    public void StaticEvaluation_SemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 9, 2, 7)]
+    public void StaticEvaluation_SemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int semiopenFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -459,7 +465,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(SemiOpenFileRookBonus)
+        Assert.AreEqual(UnpackMG(SemiOpenFileRookBonus[semiopenFile])
                 + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
@@ -475,12 +481,12 @@ public class PositionTest
     /// 1   . R . . K . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("7r/2p1k2p/8/8/8/8/2P1K2P/1R6 w - - 0 1", 13, 7)]
+    [TestCase("7r/2p1k2p/8/8/8/8/2P1K2P/1R6 w - - 0 1", 13, 7, 1)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("6r1/p2k1p2/8/8/8/8/P2K1P2/R7 b - - 0 1", 13, 7)]
-    public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("6r1/p2k1p2/8/8/8/8/P2K1P2/R7 b - - 0 1", 13, 7, 6)]
+    public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int openFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -490,7 +496,7 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(UnpackMG(OpenFileRookBonus)
+        Assert.AreEqual(UnpackMG(OpenFileRookBonus[openFile])
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
@@ -506,12 +512,12 @@ public class PositionTest
     /// 1   R. .K. . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("4k2r/p6r/7p/8/8/8/R2P3P/R2K4 w - - 0 1", 7, 6)]
+    [TestCase("4k2r/p6r/7p/8/8/8/R2P3P/R2K4 w - - 0 1", 7, 6, 0)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("4k2r/p3p2r/8/8/8/P7/R6P/R2K4 b - - 0 1", 7, 6)]
-    public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("4k2r/p3p2r/8/8/8/P7/R6P/R2K4 b - - 0 1", 7, 6, 7)]
+    public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int semiopenFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -522,7 +528,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((2 * UnpackMG(SemiOpenFileRookBonus))
+        Assert.AreEqual((2 * UnpackMG(SemiOpenFileRookBonus[semiopenFile]))
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
         evaluation);
     }
@@ -538,12 +544,12 @@ public class PositionTest
     /// 1   R . . . K . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("1r5k/1r5p/2p5/8/8/2P5/2R4P/2R4K w - - 0 1", 6, 11)]
+    [TestCase("1r5k/1r5p/2p5/8/8/2P5/2R4P/2R4K w - - 0 1", 6, 11, 1)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("k4r2/p4r2/5p2/8/8/5P2/P5R1/K5R1 b - - 0 1", 6, 11)]
-    public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("k4r2/p4r2/5p2/8/8/5P2/P5R1/K5R1 b - - 0 1", 6, 11, 6)]
+    public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int openFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -554,71 +560,10 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * UnpackMG(OpenFileRookBonus))
+        Assert.AreEqual((-2 * UnpackMG(OpenFileRookBonus[openFile]))
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove])
             - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
-    }
-
-    /// <summary>
-    /// 8   . . . r . . k .
-    /// 7   p p . p . . p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P . P P . . P P
-    /// 1   . K . R . . . .
-    ///     a b c d e f g h
-    /// </summary>
-    [TestCase("3r2k1/pp1p2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2P1PP/1K2R3 b - - 0 1")]
-    [Ignore("Broken by virtual king mobility")]
-    public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
-    {
-        Position position = new Position(fen);
-        int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
-
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
-
-        Assert.AreEqual(UnpackEG(SemiOpenFileKingPenalty), evaluation);
-    }
-
-    /// <summary>
-    /// 8   . . . r . . k .
-    /// 7   p . p p . . p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P . P P . . P P
-    /// 1   . K . R . . . .
-    ///     a b c d e f g h
-    /// </summary>
-    [TestCase("3r2k1/p1pp2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2PP1P/1K2R3 b - - 0 1")]
-    public void StaticEvaluation_OpenFileKingPenalty(string fen)
-    {
-        Position position = new Position(fen);
-        int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
-
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
-
-        Assert.AreEqual(UnpackEG(OpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -908,9 +853,9 @@ public class PositionTest
     [TestCase("1k6/1b6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "b")]
     [TestCase("1k6/8/8/8/8/8/1N6/1K6 w - - 0 1", true, 1, "N")]
     [TestCase("1k6/1n6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "n")]
-    [TestCase("1k6/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
+    [TestCase("2k5/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
     [TestCase("rk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 2, "r")]
-    [TestCase("1k6/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
+    [TestCase("2k5/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
     [TestCase("qk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 4, "q")]
     public void StaticEvaluation_PawnlessEndgames_SinglePiece(string fen, bool isDrawExpected, int expectedPhase, string _)
     {
@@ -990,11 +935,16 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         while (!bitBoard.Empty())
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(ref evaluationContext ,0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
@@ -1017,9 +967,14 @@ public class PositionTest
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(bitBoard, (int)Side.Black, whitePawnAttacks));
+            ? position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)

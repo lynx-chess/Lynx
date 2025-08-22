@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <!--<DefineConstants>MULTITHREAD_DEBUG</DefineConstants>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +22,7 @@
   </ItemGroup >
 
   <PropertyGroup>
-    <Version>1.9.0</Version>
+    <Version>1.10.0</Version>
     <Authors>Eduardo Cáceres</Authors>
     <ApplicationIcon>$(MSBuildThisFileDirectory)resources\icon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/lynx-chess/Lynx</RepositoryUrl>
@@ -31,6 +32,10 @@
   <PropertyGroup Condition="'$(DeterministicBuild)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(ReleaseBuild)' == 'true'">
+    <DefineConstants>LYNX_RELEASE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

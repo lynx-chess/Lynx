@@ -119,7 +119,7 @@ namespace Lynx.UCI.Commands.Engine;
 /// </summary>
 #pragma warning restore RCS1243 // Duplicate word in a comment.
 
-public sealed class OptionCommand : IEngineBaseCommand
+public sealed class OptionCommand
 {
     public const string Id = "option";
 
@@ -128,10 +128,11 @@ public sealed class OptionCommand : IEngineBaseCommand
             "option name UCI_Opponent type string",
             $"option name UCI_EngineAbout type string default {IdCommand.EngineName} by {IdCommand.EngineAuthor}, see https://github.com/lynx-chess/Lynx",
             $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
-            $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
-            $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
             $"option name Threads type spin default {Configuration.EngineSettings.Threads} min 1 max {Constants.MaxThreadCount}",
+            $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
             $"option name Ponder type check default {Configuration.EngineSettings.IsPonder}",
+            $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
+            $"option name MoveOverhead type spin default {Configuration.EngineSettings.MoveOverhead} min 1 max {Constants.MaxMoveOverhead}",
             .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : []
         ];
 

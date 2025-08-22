@@ -62,7 +62,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -89,7 +89,7 @@ jobs:
         (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
 
     - name: Publish ${{ matrix.runtime-identifier }} version
-      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true -o artifacts/${{ matrix.runtime-identifier }}
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:ReleaseBuild=true -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version != ''
@@ -113,11 +113,11 @@ jobs:
 
     - name: Deterministic build
       if: matrix.runtime-identifier == 'linux-x64'
-      run: dotnet clean -c Release && dotnet build -c Release /p:DeterministicBuild=true
+      run: dotnet clean -c Release && dotnet build -c Release /p:DeterministicBuild=true /p:ReleaseBuild=true
 
     - name: Pack NuGet package
       if: matrix.runtime-identifier == 'linux-x64'
-      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
+      run: dotnet pack --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version != ''
@@ -155,7 +155,7 @@ jobs:
     - name: Install NuGet
       uses: nuget/setup-nuget@v2
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         token: ${{ secrets.GH_RELEASE }}
 
@@ -190,7 +190,7 @@ jobs:
         git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
         git push --tags
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         path: artifacts/
 
