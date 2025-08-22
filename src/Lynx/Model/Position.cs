@@ -943,7 +943,7 @@ public class Position : IDisposable
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
+                    pawnScore += PawnAdditionalEvaluation(ref evaluationContext, whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
                 // Black pawns
@@ -960,7 +960,7 @@ public class Position : IDisposable
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
+                    pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
                 // Pawn islands
@@ -1068,7 +1068,7 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
                                                 + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
 
-                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
+                    pawnScore += PawnAdditionalEvaluation(ref evaluationContext, whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
                 // Black pawns
@@ -1088,7 +1088,7 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
                                                 + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
-                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
+                    pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
                 // Pawn islands
@@ -1154,8 +1154,8 @@ public class Position : IDisposable
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(ref  evaluationContext, whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(ref evaluationContext, blackKing, (int)Side.Black, whitePawnAttacks);
+            KingAdditionalEvaluation(ref evaluationContext, whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(ref evaluationContext, blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
         AssertAttackPopulation(ref evaluationContext);
 
@@ -1376,7 +1376,7 @@ public class Position : IDisposable
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(ref evaluationContext, bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
 
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
@@ -1387,33 +1387,45 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int bucket, int oppositeSideBucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
+    private int PawnAdditionalEvaluation(ref EvaluationContext evaluationContext, int bucket, int oppositeSideBucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
     {
         int packedBonus = 0;
 
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
+        int pushSquare;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
+            pushSquare = squareIndex + 8;
         }
         else
         {
             passedPawnsMask = Masks.WhitePassedPawnMasks[squareIndex];
+            pushSquare = squareIndex - 8;
         }
+
+        var oppositeSidePawns = _pieceBitBoards[(int)Piece.p - pieceIndex];
 
         // Isolated pawn
         if ((_pieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
-            packedBonus += IsolatedPawnPenalty;
+            packedBonus += IsolatedPawnPenalty[Constants.File[squareIndex]];
+        }
+        // Backwards pawn
+        else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
+            && (oppositeSidePawns.GetBit(pushSquare)                                            // Blocked
+                || evaluationContext.Attacks[(int)Piece.p - pieceIndex].GetBit(pushSquare)))    // Push square attacked by opponent pawns
+        {
+            packedBonus += BackwardsPawnPenalty[rank];
         }
 
         // Passed pawn
-        if ((_pieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
+        if ((oppositeSidePawns & passedPawnsMask) == default)
         {
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & _occupancyBitBoards[oppositeSide]) == 0)
@@ -1466,12 +1478,12 @@ public class Position : IDisposable
         // Rook on open file
         if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & file) == default)
         {
-            packedBonus += OpenFileRookBonus;
+            packedBonus += OpenFileRookBonus[Constants.File[squareIndex]];
         }
         // Rook on semi-open file
         else if ((_pieceBitBoards[pieceIndex - pawnToRookOffset] & file) == default)
         {
-            packedBonus += SemiOpenFileRookBonus;
+            packedBonus += SemiOpenFileRookBonus[Constants.File[squareIndex]];
         }
 
         // Connected rooks
@@ -1577,7 +1589,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int pieceSide, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KingAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
@@ -1599,12 +1611,12 @@ public class Position : IDisposable
             // King on open file
             if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & file) == 0)
             {
-                packedBonus += OpenFileKingPenalty;
+                packedBonus += OpenFileKingPenalty[bucket][Constants.File[squareIndex]];
             }
             // King on semi-open file
             else if ((_pieceBitBoards[(int)Piece.P + kingSideOffset] & file) == 0)
             {
-                packedBonus += SemiOpenFileKingPenalty;
+                packedBonus += SemiOpenFileKingPenalty[bucket][Constants.File[squareIndex]];
             }
         }
 
