@@ -86,16 +86,15 @@ public class Position : IDisposable
     {
     }
 
-    public Position((BitBoard[] _pieceBitBoards, BitBoard[] _occupancyBitBoards, int[] _board, Side Side, byte _castle, BoardSquare _enPassant,
-        int _/*, int FullMoveCounter*/) parsedFEN)
+    public Position(ParseFENResult parsedFEN)
     {
-        _pieceBitBoards = parsedFEN._pieceBitBoards;
-        _occupancyBitBoards = parsedFEN._occupancyBitBoards;
-        _board = parsedFEN._board;
+        _pieceBitBoards = parsedFEN.PieceBitBoards;
+        _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        _board = parsedFEN.Board;
 
         _side = parsedFEN.Side;
-        _castle = parsedFEN._castle;
-        _enPassant = parsedFEN._enPassant;
+        _castle = parsedFEN.Castle;
+        _enPassant = parsedFEN.EnPassant;
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
         _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);

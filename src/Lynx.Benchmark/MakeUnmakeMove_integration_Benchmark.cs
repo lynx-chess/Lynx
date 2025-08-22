@@ -313,12 +313,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
         }
 
-        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] board, Side Side, byte Castle, BoardSquare EnPassant,
-            int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
+        public MakeMovePosition(ParseFENResult parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
             OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Board = parsedFEN.board;
+            Board = parsedFEN.Board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
