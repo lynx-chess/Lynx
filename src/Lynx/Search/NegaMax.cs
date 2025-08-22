@@ -572,6 +572,11 @@ public sealed partial class Engine
                                     reduction += Configuration.EngineSettings.LMR_TTCapture;
                                 }
 
+                                if(moveScore > EvaluationConstants.FirstKillerMoveValue || moveScore < EvaluationConstants.CounterMoveValue)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_KillerOrCounterMove;
+                                }
+
                                 if (pvNode)
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_PVNode;
@@ -585,11 +590,6 @@ public sealed partial class Engine
                                 if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_Corrplexity;
-                                }
-
-                                if(moveScore <= EvaluationConstants.FirstKillerMoveValue && moveScore >= EvaluationConstants.CounterMoveValue)
-                                {
-                                    reduction -= Configuration.EngineSettings.LMR_KillerOrCounterMove;
                                 }
 
                                 reduction /= EvaluationConstants.LMRScaleFactor;
