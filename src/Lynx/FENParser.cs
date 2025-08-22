@@ -4,9 +4,6 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
-            int HalfMoveClock/*, int FullMoveCounter*/);
-
 namespace Lynx;
 
 public static class FENParser
@@ -14,10 +11,11 @@ public static class FENParser
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
+    public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
 
+        // Arrays will be be returned as part of Position cleanaup
         var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         var board = ArrayPool<int>.Shared.Rent(64);
@@ -74,7 +72,7 @@ public static class FENParser
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            ? new(pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
             : throw new LynxException($"Error parsing {fen.ToString()}");
     }
 
