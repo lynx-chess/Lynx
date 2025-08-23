@@ -1154,8 +1154,8 @@ public class Position : IDisposable
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(ref evaluationContext, whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(ref evaluationContext, blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
+            KingAdditionalEvaluation(ref evaluationContext, whiteKing, whiteBucket, blackBucket, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(ref evaluationContext, blackKing, blackBucket, whiteBucket, (int)Side.Black, whitePawnAttacks);
 
         AssertAttackPopulation(ref evaluationContext);
 
@@ -1589,7 +1589,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int pieceSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int enemyBucket, int pieceSide, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KingAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
@@ -1606,17 +1606,23 @@ public class Position : IDisposable
         // Opposite side rooks or queens on the board
         if (_pieceBitBoards[(int)Piece.r - kingSideOffset] + _pieceBitBoards[(int)Piece.q - kingSideOffset] != 0)
         {
-            var file = Masks.FileMask(squareIndex);
+            var fileMask = Masks.FileMask(squareIndex);
 
             // King on open file
-            if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & file) == 0)
+            if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & fileMask) == 0)
             {
-                packedBonus += OpenFileKingPenalty[bucket][Constants.File[squareIndex]];
+                var file = Constants.File[squareIndex];
+
+                packedBonus += OpenFileKingPenalty[bucket][file];
+                packedBonus += OpenFileEnemyKingPenalty[enemyBucket][file];
             }
             // King on semi-open file
-            else if ((_pieceBitBoards[(int)Piece.P + kingSideOffset] & file) == 0)
+            else if ((_pieceBitBoards[(int)Piece.P + kingSideOffset] & fileMask) == 0)
             {
-                packedBonus += SemiOpenFileKingPenalty[bucket][Constants.File[squareIndex]];
+                var file = Constants.File[squareIndex];
+
+                packedBonus += SemiOpenFileKingPenalty[bucket][file];
+                packedBonus += SemiOpenFileEnemyKingPenalty[enemyBucket][file];
             }
         }
 
