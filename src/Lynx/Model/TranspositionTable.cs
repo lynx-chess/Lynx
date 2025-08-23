@@ -143,7 +143,7 @@ public readonly struct TranspositionTable
             || newKey != entry.Key                              // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
-                //+ Configuration.EngineSettings.TTReplacement_DepthOffset
+                + Configuration.EngineSettings.TTReplacement_DepthOffset
                 + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
                 ;
         // || entry.Type == NodeType.None not needed, since depth condition is always true for those cases
