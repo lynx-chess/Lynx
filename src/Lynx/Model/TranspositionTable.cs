@@ -100,7 +100,9 @@ public readonly struct TranspositionTable
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex];
 
-        if ((ushort)position.UniqueIdentifier != entry.Key)
+        var key = GenerateTTKey(position.UniqueIdentifier);
+
+        if (key != entry.Key)
         {
             result = default;
             return false;
@@ -132,11 +134,13 @@ public readonly struct TranspositionTable
         //    _logger.Warn("TT collision");
         //}
 
+        var newKey = GenerateTTKey(position.UniqueIdentifier);
+
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
             entry.Key == 0                                      // No actual entry
-            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
+            || newKey != entry.Key                              // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
@@ -153,7 +157,7 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -163,8 +167,14 @@ public readonly struct TranspositionTable
         ref var entry = ref _tt[ttIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
+        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
     }
+
+    /// <summary>
+    /// Use lowest 16 bits of the position unique identifier as the key
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
 
     /// <summary>
     /// Exact TT occupancy per mill
