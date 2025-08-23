@@ -19,12 +19,7 @@ public enum NodeType : byte
     /// <summary>
     /// LowerBound
     /// </summary>
-    Beta,
-
-    /// <summary>
-    /// i.e. when storing only static evaluation
-    /// </summary>
-    None
+    Beta
 }
 
 /// <summary>
@@ -46,7 +41,7 @@ public struct TranspositionTableElement
     /// 1 byte
     /// Binary move bits    Hexadecimal
     /// 0000 0001              0x1           Was PV (0-1)
-    /// 0000 1110              0xE           NodeType (0-3)
+    /// 0000 0110              0x6           NodeType (0-3)
     /// </summary>
     private byte _type_WasPv;
 

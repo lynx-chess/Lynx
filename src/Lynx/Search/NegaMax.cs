@@ -62,6 +62,7 @@ public sealed partial class Engine
         TTProbeResult ttEntry;
         bool ttWasPv;
 
+        bool realttHit = false;
         bool ttHit = false;
         bool ttEntryHasBestMove = false;
         bool ttMoveIsCapture = false;
@@ -70,7 +71,10 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out ttEntry);
+            realttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out ttEntry);
+            var ttNodeType = ttEntry.NodeType;
+
+            ttHit = realttHit && ttNodeType != NodeType.Unknown;
 
             ttWasPv = ttEntry.WasPv;
             ttEntryHasBestMove = ttHit && ttEntry.BestMove != default;
@@ -78,7 +82,6 @@ public sealed partial class Engine
             // TT cutoffs
             if (!isVerifyingSE && ttHit && ttEntry.Depth >= depth)
             {
-                var ttNodeType = ttEntry.NodeType;
                 var ttScore = ttEntry.Score;
 
                 if (ttNodeType == NodeType.Exact
@@ -126,7 +129,7 @@ public sealed partial class Engine
             ttWasPv = false;
         }
 
-            var ttPv = pvNode || ttWasPv;
+        var ttPv = pvNode || ttWasPv;
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
@@ -168,8 +171,7 @@ public sealed partial class Engine
             var ttNodeType = ttEntry.NodeType;
             var ttScore = ttEntry.Score;
 
-            if (ttHit || ttNodeType == NodeType.None)
-            //if (ttHit && ttEntry.StaticEval != EvaluationConstants.NoScore)
+            if (realttHit && ttEntry.StaticEval != EvaluationConstants.NoScore)
             {
                 Debug.Assert(ttEntry.StaticEval != EvaluationConstants.NoScore);
 
@@ -220,10 +222,10 @@ public sealed partial class Engine
 
                 var rfpThreshold = rfpMargin + improvingFactor;
 
-                    if (ttCorrectedStaticEval - rfpThreshold >= beta)
-                    {
+                if (ttCorrectedStaticEval - rfpThreshold >= beta)
+                {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
+                    return (ttCorrectedStaticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
                 }
 
