@@ -135,7 +135,7 @@ public readonly struct TranspositionTable
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            entry.Key == 0                                      // No actual entry
+            nodeType == NodeType.Unknown                        // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
@@ -163,7 +163,7 @@ public readonly struct TranspositionTable
         ref var entry = ref _tt[ttIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.Unknown, wasPv ? 1 : 0, null);
+        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, null);
     }
 
     /// <summary>
