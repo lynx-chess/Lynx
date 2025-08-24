@@ -163,7 +163,7 @@ public readonly struct TranspositionTable
         ref var entry = ref _tt[ttIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
+        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.None, wasPv ? 1 : 0, null);
     }
 
     /// <summary>
