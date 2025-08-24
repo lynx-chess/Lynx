@@ -174,8 +174,8 @@ public struct TranspositionTable
 
                 // Bucket policy to discard very old entries
 
-                // Always take an empty entry, or one with just static eval
-                if (candidateEntry.Key == 0 || candidateEntry.Type == NodeType.None)
+                // Always take an empty entry, or one from the same position
+                if (candidateEntry.Key == (short)position.UniqueIdentifier || candidateEntry.Type == NodeType.None)
                 {
                     entry = ref candidateEntry;
 
