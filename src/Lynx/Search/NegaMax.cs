@@ -180,7 +180,7 @@ public sealed partial class Engine
             else
             {
                 (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext);
-                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, ttPv);
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
 
@@ -298,7 +298,7 @@ public sealed partial class Engine
 
             if (!ttHit)
             {
-                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, ttPv);
             }
         }
 
@@ -842,7 +842,7 @@ public sealed partial class Engine
         {
             if (!ttHit)
             {
-                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, ttPv);
             }
 
             // Standing pat beta-cutoff (updating alpha after this check)
