@@ -164,7 +164,7 @@ public struct TranspositionTable
         int bucketIndex = 0;
 #endif
         var newKey = (short)position.UniqueIdentifier;
-        if (entry.Key != 0 && entry.Key != newKey && entry.Type != NodeType.None && entry.Type != NodeType.Unknown)
+        if (entry.Key != newKey && entry.Type != NodeType.None && entry.Type != NodeType.Unknown)
         {
             int minValue = CalculateBucketWeight(entry, _age);
 
