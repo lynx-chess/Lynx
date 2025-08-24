@@ -5,17 +5,19 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Model;
-public readonly struct TranspositionTable
+public struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly TranspositionTableElement[] _tt = [];
+    private readonly TranspositionTableBucket[] _tt = [];
+
+    private int _age = 0;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
     public readonly int Size;
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
-    public int Length => _tt.Length;
+    public readonly int Length => _tt.Length;
 
     public TranspositionTable()
     {
@@ -25,9 +27,16 @@ public readonly struct TranspositionTable
         Size = Configuration.EngineSettings.TranspositionTableSize;
 
         var ttLength = CalculateLength(Size);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+        _tt = GC.AllocateArray<TranspositionTableBucket>(ttLength, pinned: true);
 
         _logger.Info("TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Age()
+    {
+        // Circular buffer
+        _age = (_age + 1) & TranspositionTableElement.AgeMask;
     }
 
     /// <summary>
@@ -54,13 +63,17 @@ public readonly struct TranspositionTable
                 : sizePerThread;
 
             Array.Clear(tt, start, length);
+
+            // Clusters are 'magically' taken care of
         });
+
+        _age = 0;
 
         _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    public readonly void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         if (Sse.IsSupported)
         {
@@ -71,7 +84,7 @@ public readonly struct TranspositionTable
                 // Since _tt is a pinned array
                 // This is no-op pinning as it does not influence the GC compaction
                 // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _tt)
+                fixed (TranspositionTableBucket* ttPtr = _tt)
                 {
                     Sse.Prefetch0(ttPtr + index);
                 }
@@ -95,24 +108,30 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result) // [MaybeNullWhen(false)]
+    public readonly bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result) // [MaybeNullWhen(false)]
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        var entry = _tt[ttIndex];
+        var bucket = _tt[ttIndex];
 
-        if ((ushort)position.UniqueIdentifier != entry.Key)
+        // We simply take the first entry
+        for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
         {
-            result = default;
-            return false;
+            ref var entry = ref bucket[i];
+
+            if ((ushort)position.UniqueIdentifier == entry.Key)
+            {
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+
+                result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+
+                return entry.Type != NodeType.Unknown && entry.Type != NodeType.None;
+            }
         }
 
-        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
-
-        result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
-
-        return entry.Type != NodeType.Unknown && entry.Type != NodeType.None;
+        result = default;
+        return false;
     }
 
     /// <summary>
@@ -120,12 +139,68 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
+    public readonly void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
         Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overriden");
 
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        ref var entry = ref _tt[ttIndex];
+        ref var bucket = ref _tt[ttIndex];
+
+        ref TranspositionTableElement entry = ref bucket[0];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CalculateBucketWeight(TranspositionTableElement entry, int ttAge)
+        {
+            // Another way of doing:
+            // var ageDiff = age - entry.Age
+            // if (ageDiff <0) ageDiff += maxAge
+            var relativeAge = (ttAge - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
+
+            var value = entry.Depth - (2 * relativeAge);
+            return value;
+        }
+
+#if DEBUG
+        int bucketIndex = 0;
+#endif
+        var newKey = (short)position.UniqueIdentifier;
+        if (entry.Key != 0 && entry.Key != newKey && entry.Type != NodeType.None && entry.Type != NodeType.Unknown)
+        {
+            int minValue = CalculateBucketWeight(entry, _age);
+
+            for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
+            {
+                ref var candidateEntry = ref bucket[i];
+
+                // Bucket policy to discard very old entries
+
+                // Always take an empty entry, or one from the same position
+                if (candidateEntry.Key == newKey || candidateEntry.Type == NodeType.None || candidateEntry.Type == NodeType.Unknown)
+                {
+                    entry = ref candidateEntry;
+
+#if DEBUG
+                    bucketIndex = i;
+#endif
+
+                    break;
+                }
+
+                // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
+                // Current formula from Stormphrax
+                var value = CalculateBucketWeight(candidateEntry, _age);
+
+                if (value < minValue)
+                {
+                    minValue = value;
+                    entry = ref candidateEntry;
+
+#if DEBUG
+                    bucketIndex = i;
+#endif
+                }
+            }
+        }
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
@@ -134,9 +209,11 @@ public readonly struct TranspositionTable
 
         var wasPvInt = wasPv ? 1 : 0;
 
+        // Replacement policy
         bool shouldReplace =
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
+            || entry.Age != _age                                // Different age
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
@@ -153,17 +230,32 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, _age);
+
+#if DEBUG
+        Debug.Assert(bucket[bucketIndex].Score == recalculatedScore);
+        Debug.Assert(bucket[bucketIndex].Type == nodeType);
+        Debug.Assert(bucket[bucketIndex].Age == _age);
+        Debug.Assert(_tt[ttIndex][bucketIndex].Score == recalculatedScore);
+        Debug.Assert(_tt[ttIndex][bucketIndex].Type == nodeType);
+        Debug.Assert(bucket[bucketIndex].Age == _age);
+
+        if (_tt[ttIndex][bucketIndex].Score != recalculatedScore)
+        {
+            throw new LynxException();
+        }
+#endif
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
+    public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        ref var entry = ref _tt[ttIndex];
+        ref var bucket = ref _tt[ttIndex];
 
+        ref var firstEntry = ref bucket[0];
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
+        firstEntry.Update(position.UniqueIdentifier, EvaluationConstants.NoScore, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null, _age);
     }
 
     /// <summary>
@@ -171,7 +263,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int HashfullPermill() => _tt.Length > 0
+    public readonly int HashfullPermill() => _tt.Length > 0
         ? (int)(1000L * PopulatedItemsCount() / _tt.LongLength)
         : 0;
 
@@ -188,23 +280,28 @@ public readonly struct TranspositionTable
         {
             for (int i = 0; i < 1_000; ++i)
             {
-                if (_tt[i].Key != default)
+                var bucket = _tt[i];
+                for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
                 {
-                    ++items;
+                    if (bucket[j].Key != default)
+                    {
+                        ++items;
+                    }
                 }
             }
         }
 
         //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
-        return items;
+        return items / Constants.TranspositionTableElementsPerBucket;
     }
 
     internal static int CalculateLength(int size)
     {
         var ttEntrySize = TranspositionTableElement.Size;
+        var ttBucketSize = TranspositionTableBucket.Size;
 
         ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
-        ulong ttLength = sizeBytes / ttEntrySize;
+        ulong ttLength = sizeBytes / ttBucketSize;
         var ttLengthMb = (double)ttLength / 1024 / 1024;
 
         if (ttLength > (ulong)Array.MaxLength)
@@ -215,6 +312,7 @@ public readonly struct TranspositionTable
         _logger.Info("Hash value:\t{0} MB", size);
         _logger.Info("TT memory:\t{0} MB", (ttLengthMb * ttEntrySize).ToString("F"));
         _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT bucket:\t{0} bytes", ttBucketSize);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return (int)ttLength;
@@ -246,9 +344,13 @@ public readonly struct TranspositionTable
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = _tt[i];
+            for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
             {
-                ++items;
+                if (bucket[j].Key != default)
+                {
+                    ++items;
+                }
             }
         }
 
@@ -256,35 +358,25 @@ public readonly struct TranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal ref TranspositionTableElement Get(int index) => ref _tt[index];
+    internal readonly ref TranspositionTableBucket Get(int index) => ref _tt[index];
 
     [Conditional("DEBUG")]
-    private void Stats()
+    private readonly void Stats()
     {
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = _tt[i];
+            for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
             {
-                ++items;
+                if (bucket[j].Key != default)
+                {
+                    ++items;
+                }
             }
         }
         _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
             100 * PopulatedItemsCount() / _tt.Length,
-            _tt.Length * Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
-    }
-
-    [Conditional("DEBUG")]
-    private readonly void Print()
-    {
-        Console.WriteLine("Transposition table content:");
-        for (int i = 0; i < _tt.Length; ++i)
-        {
-            if (_tt[i].Key != default)
-            {
-                Console.WriteLine($"{i}: Key = {_tt[i].Key}, Depth: {_tt[i].Depth}, Score: {_tt[i].Score}, Move: {(_tt[i].Move != 0 ? ((Move)_tt[i].Move).UCIString() : "-")} {_tt[i].Type}");
-            }
-        }
-        Console.WriteLine("");
+            _tt.Length * Marshal.SizeOf<TranspositionTableBucket>() / 1024 / 1024);
     }
 }
