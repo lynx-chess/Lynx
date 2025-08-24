@@ -211,7 +211,7 @@ public struct TranspositionTable
 
         // Replacement policy
         bool shouldReplace =
-            entry.Key == 0                                      // No actual entry
+            nodeType == NodeType.Unknown                        // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
             || entry.Age != _age                                // Different age
             || nodeType == NodeType.Exact                       // Entering PV data
@@ -250,7 +250,7 @@ public struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, bool wasPv)
     {
-        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: -1, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
+        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: 0, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
     }
 
     /// <summary>
