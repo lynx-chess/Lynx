@@ -572,6 +572,11 @@ public sealed partial class Engine
                                     reduction += Configuration.EngineSettings.LMR_TTCapture;
                                 }
 
+                                if(moveScore > EvaluationConstants.FirstKillerMoveValue || moveScore < EvaluationConstants.CounterMoveValue)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_KillerOrCounterMove;
+                                }
+
                                 if (pvNode)
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_PVNode;
