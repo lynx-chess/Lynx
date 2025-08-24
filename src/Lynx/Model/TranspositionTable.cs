@@ -85,6 +85,7 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier, int halfMovesWithoutCaptureOrPawnMove)
     {
+        // mult trick: msb
         var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
 
         return (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
@@ -100,7 +101,7 @@ public readonly struct TranspositionTable
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex];
 
-        if ((ushort)position.UniqueIdentifier != entry.Key)
+        if ((ushort)position.UniqueIdentifier != entry.Key)     // lsb
         {
             result = default;
             return false;
@@ -136,7 +137,7 @@ public readonly struct TranspositionTable
 
         bool shouldReplace =
             nodeType == NodeType.Unknown                        // No actual entry
-            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
+            || (ushort)position.UniqueIdentifier != entry.Key   // Different key: collision - changing to lsb
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
