@@ -275,7 +275,7 @@ public static class SPSAAttributeHelpers
             }
 
             var genericSpsa = spsaArray[0];
-            if (genericSpsa is SPSAAttribute<int> intSpsa)
+            if (genericSpsa is SPSAAttribute<int>)
             {
                 if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                 {
@@ -284,7 +284,7 @@ public static class SPSAAttributeHelpers
                     return true;
                 }
             }
-            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
+            else if (genericSpsa is SPSAAttribute<double>)
             {
                 if (length > 4 && double.TryParse(command[commandItems[4]], out var value))
                 {

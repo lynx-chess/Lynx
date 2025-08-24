@@ -36,7 +36,7 @@ public class TranspositionTableTests
 
         transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, false, move: recordNodeType != NodeType.Alpha ? 1234 : null);
 
-        var ttEntry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
+        Assert.True(transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3, out var ttEntry));
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
         Assert.AreEqual(staticEval, ttEntry.StaticEval);
     }
@@ -51,7 +51,7 @@ public class TranspositionTableTests
 
         transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, recordedEval, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, false, move: 1234);
 
-        var ttEntry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: sharedDepth);
+        Assert.True(transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: sharedDepth, out var ttEntry));
         Assert.AreEqual(recordedEval, ttEntry.Score);
         Assert.AreEqual(recordedEval, ttEntry.StaticEval);
     }
@@ -67,7 +67,7 @@ public class TranspositionTableTests
 
         transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, recordedEval, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, false, move: 1234);
 
-        var ttEntry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: probeDepth);
+        Assert.True(transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: probeDepth, out var ttEntry));
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
         Assert.AreEqual(recordedEval, ttEntry.StaticEval);
     }
