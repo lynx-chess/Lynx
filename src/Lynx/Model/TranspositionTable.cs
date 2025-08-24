@@ -163,8 +163,8 @@ public struct TranspositionTable
 #if DEBUG
         int bucketIndex = 0;
 #endif
-
-        if (entry.Key != 0 && entry.Type != NodeType.None)
+        var newKey = (short)position.UniqueIdentifier;
+        if (entry.Key != 0 && entry.Key != newKey && entry.Type != NodeType.None && entry.Type != NodeType.Unknown)
         {
             int minValue = CalculateBucketWeight(entry, _age);
 
@@ -175,7 +175,7 @@ public struct TranspositionTable
                 // Bucket policy to discard very old entries
 
                 // Always take an empty entry, or one from the same position
-                if (candidateEntry.Key == (short)position.UniqueIdentifier || candidateEntry.Type == NodeType.None)
+                if (candidateEntry.Key == newKey || candidateEntry.Type == NodeType.None || candidateEntry.Type == NodeType.Unknown)
                 {
                     entry = ref candidateEntry;
 
