@@ -132,10 +132,10 @@ public readonly struct TranspositionTable
         bool shouldReplace =
             (position.UniqueIdentifier >> 48) != entry.Key      // Different key: collision or no actual entry
             || nodeType == NodeType.Exact                       // Entering PV data
-            || depth
-                //+ Configuration.EngineSettings.TTReplacement_DepthOffset
-                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
-                ;
+            || depth                                            // Higher depth
+                    + Configuration.EngineSettings.TTReplacement_DepthOffset
+                    + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
+                >= entry.Depth;
 
         if (!shouldReplace)
         {
