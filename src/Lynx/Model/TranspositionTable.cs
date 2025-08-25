@@ -130,7 +130,7 @@ public readonly struct TranspositionTable
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            (position.UniqueIdentifier >> 48) != entry.Key      // Different key: collision or no actual entry
+            entry.Key != (ushort)position.UniqueIdentifier      // Different key: collision or no actual entry
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth                                            // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
