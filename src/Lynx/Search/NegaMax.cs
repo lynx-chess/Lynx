@@ -171,13 +171,11 @@ public sealed partial class Engine
             var ttNodeType = ttEntry.NodeType;
             var ttScore = ttEntry.Score;
 
-            if (realttHit
-                && ttEntry.StaticEval != EvaluationConstants.NoScore
-                // This is the only way I found to differentiate
-                // uninitalized entries from static eval ones that actually have 0 as static eval
-                // I'm really sorry about positions with key 0, they won't ever reuse static eval.
-                && TranspositionTable.GenerateTTKey(position.UniqueIdentifier) != 0)
+            if (realttHit)
             {
+                Debug.Assert(ttEntry.StaticEval != EvaluationConstants.NoScore);
+                Debug.Assert(ttEntry.Score != EvaluationConstants.NoScore || ttEntry.NodeType == NodeType.Unknown);
+
                 rawStaticEval = ttEntry.StaticEval;
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
