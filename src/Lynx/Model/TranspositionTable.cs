@@ -1,5 +1,4 @@
 ﻿using NLog;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -246,10 +245,13 @@ public struct TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv, int ply)
+    public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
-        // Reuse RecordHash replacement logic, despite not being super-efficient
-        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: 0, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
+        ref var bucket = ref _tt[ttIndex];
+
+        // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
+        bucket[0].Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.None, wasPv ? 1 : 0, null, _age);
     }
 
     /// <summary>
