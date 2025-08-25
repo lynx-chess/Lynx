@@ -125,9 +125,9 @@ public struct TranspositionTableElement
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move)
+    public void Update(ushort key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move)
     {
-        _key = (ushort)key;
+        _key = key;
         _score = (short)score;
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
