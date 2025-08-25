@@ -113,12 +113,14 @@ public struct TranspositionTable
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var bucket = _tt[ttIndex];
 
+        var key = GenerateTTKey(position.UniqueIdentifier);
+
         // We simply take the first entry
         for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
         {
             ref var entry = ref bucket[i];
 
-            if ((ushort)position.UniqueIdentifier == entry.Key)
+            if (key == entry.Key)
             {
                 // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
                 // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
@@ -202,17 +204,19 @@ public struct TranspositionTable
             }
         }
 
+        var newKey = GenerateTTKey(position.UniqueIdentifier);
+
         var wasPvInt = wasPv ? 1 : 0;
 
         // Replacement policy
         bool shouldReplace =
-            (position.UniqueIdentifier >> 48) != entry.Key      // Different key: collision or no actual entry
-            || nodeType == NodeType.Exact                       // Entering PV data
-            || entry.Age != _age
-            || depth
-                //+ Configuration.EngineSettings.TTReplacement_DepthOffset
-                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
-                ;
+            entry.Key != newKey                 // Different key: collision or no actual entry
+            || nodeType == NodeType.Exact       // Entering PV data
+            || entry.Age != _age                // Different age/generation
+            || depth                            // Higher depth
+                    + Configuration.EngineSettings.TTReplacement_DepthOffset
+                    + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
+                >= entry.Depth;
 
         if (!shouldReplace)
         {
@@ -223,7 +227,7 @@ public struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, _age);
+        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, _age);
 
 #if DEBUG
         Debug.Assert(bucket[bucketIndex].Score == recalculatedScore);
@@ -246,6 +250,12 @@ public struct TranspositionTable
         // Reuse RecordHash replacement logic, despite not being super-efficient
         RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: 0, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
     }
+
+    /// <summary>
+    /// Use lowest 16 bits of the position unique identifier as the key
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
 
     /// <summary>
     /// Exact TT occupancy per mill
