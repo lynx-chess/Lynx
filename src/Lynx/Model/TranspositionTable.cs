@@ -202,24 +202,17 @@ public struct TranspositionTable
             }
         }
 
-        //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
-        //{
-        //    _logger.Warn("TT collision");
-        //}
-
         var wasPvInt = wasPv ? 1 : 0;
 
         // Replacement policy
         bool shouldReplace =
-            entry.Key == 0                                      // No actual entry
-            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
-            || entry.Age != _age                                // Different age
+            (position.UniqueIdentifier >> 48) != entry.Key      // Different key: collision or no actual entry
             || nodeType == NodeType.Exact                       // Entering PV data
+            || entry.Age != _age
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
                 + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
                 ;
-        // || entry.Type == NodeType.None not needed, since depth condition is always true for those cases
 
         if (!shouldReplace)
         {
@@ -251,7 +244,7 @@ public struct TranspositionTable
     public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv, int ply)
     {
         // Reuse RecordHash replacement logic, despite not being super-efficient
-        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: -1, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
+        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: 0, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
     }
 
     /// <summary>
