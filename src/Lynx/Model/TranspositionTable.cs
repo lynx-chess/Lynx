@@ -127,22 +127,15 @@ public readonly struct TranspositionTable
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         ref var entry = ref _tt[ttIndex];
 
-        //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
-        //{
-        //    _logger.Warn("TT collision");
-        //}
-
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            entry.Type == NodeType.Unknown                      // No actual entry
-            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
+            (position.UniqueIdentifier >> 48) != entry.Key      // Different key: collision or no actual entry
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
                 + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
                 ;
-        // || entry.Type == NodeType.None not needed, since depth condition is always true for those cases
 
         if (!shouldReplace)
         {
