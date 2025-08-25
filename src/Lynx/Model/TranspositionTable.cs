@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -166,7 +167,9 @@ public struct TranspositionTable
         int bucketIndex = 0;
 #endif
 
-        if (entry.Key != 0 && entry.Type != NodeType.None)
+        var newKey = GenerateTTKey(position.UniqueIdentifier);
+
+        if (entry.Key != newKey && entry.Type != NodeType.None)
         {
             int minValue = CalculateBucketWeight(entry, _age);
 
@@ -177,7 +180,7 @@ public struct TranspositionTable
                 // Bucket policy to discard very old entries
 
                 // Always take an empty entry, or one with just static eval
-                if (candidateEntry.Key == 0 || candidateEntry.Type == NodeType.None)
+                if (candidateEntry.Type == NodeType.None || candidateEntry.Key == newKey)
                 {
                     entry = ref candidateEntry;
 
@@ -203,8 +206,6 @@ public struct TranspositionTable
                 }
             }
         }
-
-        var newKey = GenerateTTKey(position.UniqueIdentifier);
 
         var wasPvInt = wasPv ? 1 : 0;
 
