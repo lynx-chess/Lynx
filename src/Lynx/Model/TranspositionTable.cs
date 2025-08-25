@@ -167,7 +167,7 @@ public readonly struct TranspositionTable
     /// Use lowest 16 bits of the position unique identifier as the key
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
+    internal static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
 
     /// <summary>
     /// Exact TT occupancy per mill
