@@ -235,7 +235,7 @@ public readonly struct TranspositionTable
         {
             return score - ply;
         }
-        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit && score != EvaluationConstants.NoScore)
         {
             return score + ply;
         }
