@@ -137,7 +137,7 @@ public struct TranspositionTableElement
     public void Update(ushort key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move, int age)
     {
         Debug.Assert(age < MaxAge);
-        Debug.Assert(nodeType != NodeType.Unknown);
+        Debug.Assert(nodeType != NodeType.Unknown || score == EvaluationConstants.NoScore);
 
         _key = key;
         _score = (short)score;

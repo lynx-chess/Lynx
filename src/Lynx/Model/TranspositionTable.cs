@@ -1,5 +1,4 @@
 ﻿using NLog;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -331,7 +330,7 @@ public struct TranspositionTable
         {
             return score - ply;
         }
-        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit && score != EvaluationConstants.NoScore)
         {
             return score + ply;
         }
