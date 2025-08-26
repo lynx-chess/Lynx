@@ -50,9 +50,9 @@ public struct TranspositionTableElement
     private const int NodeTypeOffset = 1;
     private const int NodeTypeMask = 0x6;
 
-    private const int AgeOffset = 4;
+    private const int AgeOffset = 5;
 
-    public const int MaxAge = 16;
+    public const int MaxAge = 32;
     public const int AgeMask = MaxAge - 1;
 
     /// <summary>
