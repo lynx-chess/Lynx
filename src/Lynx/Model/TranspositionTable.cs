@@ -129,7 +129,7 @@ public struct TranspositionTable
 
                 result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
 
-                return entry.Type != NodeType.Unknown && entry.Type != NodeType.None;
+                return true;
             }
         }
 
@@ -249,14 +249,15 @@ public struct TranspositionTable
     public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv, int ply)
     {
         // Reuse RecordHash replacement logic, despite not being super-efficient
-        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: 0, ply, EvaluationConstants.NoScore, NodeType.None, wasPv);
+        // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
+        RecordHash(position, halfMovesWithoutCaptureOrPawnMove, staticEval, depth: 0, ply, EvaluationConstants.NoScore, NodeType.Unknown, wasPv);
     }
 
     /// <summary>
     /// Use lowest 16 bits of the position unique identifier as the key
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
+    internal static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
 
     /// <summary>
     /// Exact TT occupancy per mill
