@@ -62,6 +62,7 @@ public sealed partial class Engine
         TTProbeResult ttEntry;
         bool ttWasPv;
 
+        bool realttHit = false;
         bool ttHit = false;
         bool ttEntryHasBestMove = false;
         bool ttMoveIsCapture = false;
@@ -70,7 +71,10 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out ttEntry);
+            realttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out ttEntry);
+            var ttNodeType = ttEntry.NodeType;
+
+            ttHit = realttHit && ttNodeType != NodeType.Unknown;
 
             ttWasPv = ttEntry.WasPv;
             ttEntryHasBestMove = ttHit && ttEntry.BestMove != default;
@@ -78,7 +82,6 @@ public sealed partial class Engine
             // TT cutoffs
             if (!isVerifyingSE && ttHit && ttEntry.Depth >= depth)
             {
-                var ttNodeType = ttEntry.NodeType;
                 var ttScore = ttEntry.Score;
 
                 if (ttNodeType == NodeType.Exact
@@ -168,10 +171,10 @@ public sealed partial class Engine
             var ttNodeType = ttEntry.NodeType;
             var ttScore = ttEntry.Score;
 
-            if (ttHit || ttNodeType == NodeType.None)
-            //if (ttHit && ttEntry.StaticEval != EvaluationConstants.NoScore)
+            if (realttHit)
             {
                 Debug.Assert(ttEntry.StaticEval != EvaluationConstants.NoScore);
+                Debug.Assert(ttEntry.Score != EvaluationConstants.NoScore || ttEntry.NodeType == NodeType.Unknown);
 
                 rawStaticEval = ttEntry.StaticEval;
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
