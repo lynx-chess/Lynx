@@ -43,17 +43,17 @@ public struct TranspositionTableElement
     /// Binary move bits    Hexadecimal
     /// 0000 0001              0x1           Was PV (0-1)
     /// 0000 0110              0x6           NodeType (0-3)
-    /// 1111 0000                            Age (0-15)
+    /// 1111 1000                            Age (0-32)
     /// </summary>
     private byte _age_type_WasPv;
 
     private const int NodeTypeOffset = 1;
     private const int NodeTypeMask = 0x6;
 
-    private const int AgeOffset = 5;
-
-    public const int MaxAge = 32;
+    public const int AgeBits = 5;
+    public const int MaxAge = 1 << AgeBits;
     public const int AgeMask = MaxAge - 1;
+    private const int AgeOffset = 8 - AgeBits;
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
