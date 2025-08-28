@@ -465,7 +465,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(SemiOpenFileRookBonus[semiopenFile])
+        Assert.AreEqual(
+            UnpackMG(SemiOpenFileRookBonus[0][semiopenFile])
+                + UnpackMG(SemiOpenFileRookEnemyBonus[0][semiopenFile])
                 + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
@@ -496,7 +498,10 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(UnpackMG(OpenFileRookBonus[openFile])
+
+        Assert.AreEqual(
+            UnpackMG(OpenFileRookBonus[0][openFile])
+            + UnpackMG(OpenFileRookEnemyBonus[0][openFile])
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
@@ -528,7 +533,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((2 * UnpackMG(SemiOpenFileRookBonus[semiopenFile]))
+        Assert.AreEqual(
+            (2 * UnpackMG(SemiOpenFileRookBonus[0][semiopenFile]))
+            + (2 * UnpackMG(SemiOpenFileRookEnemyBonus[0][semiopenFile]))
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
         evaluation);
     }
@@ -560,7 +567,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * UnpackMG(OpenFileRookBonus[openFile]))
+        Assert.AreEqual(
+            (-2 * UnpackMG(OpenFileRookBonus[0][openFile]))
+            + (-2 * UnpackMG(OpenFileRookEnemyBonus[0][openFile]))
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove])
             - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
@@ -944,7 +953,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(ref evaluationContext ,0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(ref evaluationContext, 0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;

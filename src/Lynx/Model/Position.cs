@@ -1473,19 +1473,21 @@ public class Position : IDisposable
 
         var packedBonus = RookMobilityBonus[attacksCount];
 
-        var file = Masks.FileMask(squareIndex);
+        var fileMask = Masks.FileMask(squareIndex);
 
         // Rook on open file
-        if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & file) == default)
+        if (((_pieceBitBoards[(int)Piece.P] | _pieceBitBoards[(int)Piece.p]) & fileMask) == default)
         {
-            packedBonus += OpenFileRookBonus[bucket][Constants.File[squareIndex]];
-            packedBonus += OpenFileRookEnemyBonus[oppositeSideBucket][Constants.File[squareIndex]];
+            var file = Constants.File[squareIndex];
+            packedBonus += OpenFileRookBonus[bucket][file];
+            packedBonus += OpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
         // Rook on semi-open file
-        else if ((_pieceBitBoards[pieceIndex - pawnToRookOffset] & file) == default)
+        else if ((_pieceBitBoards[pieceIndex - pawnToRookOffset] & fileMask) == default)
         {
-            packedBonus += SemiOpenFileRookBonus[bucket][Constants.File[squareIndex]];
-            packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][Constants.File[squareIndex]];
+            var file = Constants.File[squareIndex];
+            packedBonus += SemiOpenFileRookBonus[bucket][file];
+            packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
 
         // Connected rooks
