@@ -49,7 +49,7 @@ public sealed partial class Engine
     /// [12][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref int QuietHistoryEntry(Position position, Move move)
+    private ref int QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
     {
         const int pieceOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
@@ -59,8 +59,10 @@ public sealed partial class Engine
         var targetSquare = move.TargetSquare();
         var oppositeSide = Utils.OppositeSide(position.Side);
 
-        var isStartSquareAttacked = position.AttacksBySide[oppositeSide].GetBit(sourceSquare) ? 1 : 0;
-        var isTargetSquareAttacked = position.AttacksBySide[oppositeSide].GetBit(targetSquare) ? 1 : 0;
+        var oppsiteSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
+
+        var isStartSquareAttacked = oppsiteSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppsiteSideAttacks.GetBit(targetSquare) ? 1 : 0;
 
         var index = (move.Piece() * pieceOffset)
             + (targetSquare * targetSquareOffset)

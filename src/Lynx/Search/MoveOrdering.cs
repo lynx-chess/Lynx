@@ -12,7 +12,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int ply, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, ref EvaluationContext evaluationContext, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -50,13 +50,13 @@ public sealed partial class Engine
 
                 // Counter move history
                 return BaseMoveScore
-                    + QuietHistoryEntry(position, move)
+                    + QuietHistoryEntry(position, move, ref evaluationContext)
                     + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
             }
 
             // History move or 0 if not found
             return BaseMoveScore
-                + QuietHistoryEntry(position, move);
+                + QuietHistoryEntry(position, move, ref evaluationContext);
         }
 
         // Queen promotion
@@ -157,7 +157,7 @@ public sealed partial class Engine
     /// Quiet history, contination history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
     {
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
@@ -170,7 +170,7 @@ public sealed partial class Engine
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
-        ref var quietHistoryEntry = ref QuietHistoryEntry(position, move);
+        ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
         quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
@@ -193,7 +193,7 @@ public sealed partial class Engine
 
                 // 🔍 Quiet history penalty / malus
                 // When a quiet move fails high, penalize previous visited quiet moves
-                quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove);
+                quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
                 quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)
