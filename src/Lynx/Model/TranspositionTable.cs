@@ -172,7 +172,7 @@ public struct TranspositionTable
                     // if (ageDiff <0) ageDiff += maxAge
                     var relativeAge = (ttAge - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
 
-                    var value = entry.Depth - (2 * relativeAge);
+                    var value = entry.Depth - relativeAge;
                     return value;
                 }
 
