@@ -180,7 +180,7 @@ public class ImmutableArrayBenchmark : BaseBenchmark
             }
         }
 
-        ImmutableArray = RegularArray.Select(arr1 => arr1.Select(arr2 => arr2.Select(arr3 => arr3.ToImmutableArray()).ToImmutableArray()).ToImmutableArray()).ToImmutableArray();
+        ImmutableArray = [.. RegularArray.Select(arr1 => arr1.Select(arr2 => arr2.Select(arr3 => arr3.ToImmutableArray()).ToImmutableArray()).ToImmutableArray())];
     }
 
     [Benchmark(Baseline = true)]

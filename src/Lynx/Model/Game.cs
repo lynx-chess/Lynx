@@ -57,6 +57,10 @@ public sealed class Game : IDisposable
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
 #endif
 
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
             if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -64,7 +68,7 @@ public sealed class Game : IDisposable
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -93,8 +97,9 @@ public sealed class Game : IDisposable
     /// </remarks>
     /// <returns>true if threefol/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Update50movesRule(Move moveToPlay, bool isCapture)
+    public bool Update50movesRule(Move moveToPlay)
     {
+        var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
         if (isCapture)
         {
             if (HalfMovesWithoutCaptureOrPawnMove < 100)
@@ -150,14 +155,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition()
+    public bool Is50MovesRepetition(ref readonly EvaluationContext evaluationContext)
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, in evaluationContext);
     }
 
     /// <summary>
@@ -198,7 +203,7 @@ public sealed class Game : IDisposable
             MoveHistory.Add(moveToPlay);
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
-            Update50movesRule(moveToPlay, moveToPlay.IsCapture());
+            Update50movesRule(moveToPlay);
         }
         else
         {

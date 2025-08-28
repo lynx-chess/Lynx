@@ -410,7 +410,7 @@ static void _23_Castling_Moves()
     position.Print();
 
     int index = 0;
-    var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+    var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
     MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
@@ -469,7 +469,7 @@ static void PrintMoveList(IEnumerable<Move> moves)
         sb.AppendFormat("{0,-3}", i + 1)
           .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece()])
           .AppendFormat("{0,-4}", Constants.Coordinates[move.SourceSquare()])
-          .AppendFormat("{0,-2}", isCapture(move.IsCapture()))
+          .AppendFormat("{0,-2}", isCapture(move.CapturedPiece() != (int)Piece.None))
           .AppendFormat("{0,-4}", Constants.Coordinates[move.TargetSquare()])
           .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush()))
           .AppendFormat("{0,-3}", bts(move.IsEnPassant()))
@@ -1084,20 +1084,7 @@ static void TranspositionTableMethod()
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
     transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, false, move: 1234);
-    var entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 20
-
-    transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, false, move: 1234);
-    entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 12_345_678
-
-    transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, false, move: 1234);
-    entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 12_345_678
-
-    transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, false, move: 1234);
-    entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 30
+    transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3, out var entry);
 }
 
 static void UnmakeMove()

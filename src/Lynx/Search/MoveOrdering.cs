@@ -21,7 +21,8 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
         var isPromotion = promotedPiece != default;
-        var isCapture = move.IsCapture();
+        var capturedPiece = move.CapturedPiece();
+        var isCapture = capturedPiece != (int)Piece.None;
 
         if (!isCapture && !isPromotion)
         {
@@ -63,7 +64,7 @@ public sealed partial class Engine
         {
             if (isCapture)
             {
-                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+                return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
             return PromotionMoveScoreValue
@@ -75,8 +76,6 @@ public sealed partial class Engine
         if (isCapture)
         {
             var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
-
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
@@ -113,14 +112,15 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
         var isPromotion = promotedPiece != default;
-        var isCapture = move.IsCapture();
+        var capturedPiece = move.CapturedPiece();
+        var isCapture = capturedPiece != (int)Piece.None;
 
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
             if (isCapture)
             {
-                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+                return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
             return PromotionMoveScoreValue
@@ -136,8 +136,6 @@ public sealed partial class Engine
                 : BadCaptureMoveBaseScoreValue;
 
             var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
-
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
@@ -164,41 +162,46 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
-        // 🔍 Quiet history moves
-        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
-        int rawHistoryBonus = HistoryBonus[depth];
-        int rawHistoryMalus = HistoryMalus[depth];
+        // Idea by Alayan in Ethereal: don't update history on low depths
+        if (depth >= Configuration.EngineSettings.History_MinDepth || visitedMovesCounter >= Configuration.EngineSettings.History_MinVisitedMoves)
+        {
+            // 🔍 Quiet history moves
+            // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
+            int rawHistoryBonus = HistoryBonus[depth];
+            int rawHistoryMalus = HistoryMalus[depth];
 
         ref var quietHistoryEntry = ref QuietHistoryEntry(position, move);
         quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
-        if (!isRoot)
-        {
-            // 🔍 Continuation history
-            // - Counter move history (continuation history, ply - 1)
-            ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-            continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
-        }
-
-        for (int i = 0; i < visitedMovesCounter; ++i)
-        {
-            var visitedMove = visitedMoves[i];
-
-            if (!visitedMove.IsCapture())
+            if (!isRoot)
             {
-                var visitedMovePiece = visitedMove.Piece();
-                var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                // 🔍 Continuation history
+                // - Counter move history (continuation history, ply - 1)
+                ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
+                continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
+            }
+
+            for (int i = 0; i < visitedMovesCounter; ++i)
+            {
+                var visitedMove = visitedMoves[i];
+                var capturedPiece = visitedMove.CapturedPiece();
+
+                if (capturedPiece == (int)Piece.None)
+                {
+                    var visitedMovePiece = visitedMove.Piece();
+                    var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
                 // 🔍 Quiet history penalty / malus
                 // When a quiet move fails high, penalize previous visited quiet moves
                 quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove);
                 quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
-                if (!isRoot)
-                {
-                    // 🔍 Continuation history penalty / malus
-                    ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                    continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                    if (!isRoot)
+                    {
+                        // 🔍 Continuation history penalty / malus
+                        ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
+                        continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                    }
                 }
             }
         }
@@ -242,8 +245,9 @@ public sealed partial class Engine
         for (int i = 0; i < visitedMovesCounter; ++i)
         {
             var visitedMove = visitedMoves[i];
+            var capturedPiece = visitedMove.CapturedPiece();
 
-            if (visitedMove.IsCapture())
+            if (capturedPiece != (int)Piece.None)
             {
                 ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
                 captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);

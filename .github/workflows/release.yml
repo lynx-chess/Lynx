@@ -62,7 +62,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -155,7 +155,7 @@ jobs:
     - name: Install NuGet
       uses: nuget/setup-nuget@v2
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         token: ${{ secrets.GH_RELEASE }}
 
@@ -190,7 +190,7 @@ jobs:
         git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
         git push --tags
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         path: artifacts/
 

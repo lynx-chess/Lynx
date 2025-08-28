@@ -313,12 +313,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
         }
 
-        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] board, Side Side, byte Castle, BoardSquare EnPassant,
-            int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
+        public MakeMovePosition(ParseFENResult parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
             OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Board = parsedFEN.board;
+            Board = parsedFEN.Board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
@@ -406,7 +405,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 ^ ZobristTable.EnPassantHash((int)position.EnPassant)
                 ^ ZobristTable.CastleHash(position.Castle);
 
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -523,7 +522,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -644,7 +643,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -765,7 +764,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -884,7 +883,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                  // We clear the existing castling rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -985,7 +984,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                  // We clear the existing castling rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1086,7 +1085,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 ^ ZobristTable.CastleHash(Castle);                  // We clear the existing castling rights
 
             EnPassant = BoardSquare.noSquare;
-            if (move.IsCapture())
+            if (move.CapturedPiece() != (int)Piece.None)
             {
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1383,6 +1382,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// </summary>
         private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
         [
+#pragma warning disable IDE0350 // Use implicitly typed lambda
             (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White][origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             MakeMoveAttacks.BishopAttacks,
@@ -1396,6 +1396,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             MakeMoveAttacks.RookAttacks,
             MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
+#pragma warning restore IDE0350 // Use implicitly typed lambda
         ];
 
         /// <summary>
@@ -1412,7 +1413,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
 #endif
 
-            movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            movePool ??= new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             int localIndex = 0;
 
             var offset = Utils.PieceOffset(position.Side);

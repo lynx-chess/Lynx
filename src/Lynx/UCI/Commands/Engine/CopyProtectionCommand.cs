@@ -16,7 +16,7 @@
 ///     else
 ///	        TellGUI("copyprotection error\n");
 /// </summary>
-public sealed class CopyProtectionCommand : IEngineBaseCommand
+public sealed class CopyProtectionCommand
 {
     public const string Id = "copyprotection";
 }

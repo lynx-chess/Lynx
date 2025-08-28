@@ -15,7 +15,7 @@ public class EvaluationConstantsTest
     private readonly int _sensibleEvaluation =
         (2 * (Math.Max(MiddleGameBishopTable[0].Max(), EndGameBishopTable[0].Max()) + UnpackMG(BishopMobilityBonus[13]))) +
         (2 * (Math.Max(MiddleGameKnightTable[0].Max(), EndGameKnightTable[0].Max()))) +
-        (2 * (Math.Max(MiddleGameRookTable[0].Max(), EndGameRookTable[0].Max()) + UnpackMG(OpenFileRookBonus) + UnpackMG(SemiOpenFileRookBonus))) +
+        (2 * (Math.Max(MiddleGameRookTable[0].Max(), EndGameRookTable[0].Max()) + UnpackMG(OpenFileRookBonus[0][0]) + UnpackMG(SemiOpenFileRookBonus[0][0]))) +
         (9 * (Math.Max(MiddleGameQueenTable[0].Max(), EndGameQueenTable[0].Max()) + (UnpackMG(QueenMobilityBonus[27]) * 9))) +
         (1 * (Math.Max(MiddleGameKingTable[0].Max(), EndGameKingTable[0].Max()) + (UnpackMG(KingShieldBonus) * 8))) +
         MiddleGameQueenTable[0].Max(); // just in case
@@ -270,23 +270,23 @@ public class EvaluationConstantsTest
     [Test]
     public void PackedEvaluation()
     {
-        short[][] middleGamePawnTableBlack = MiddleGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
-        short[][] endGamePawnTableBlack = EndGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
+        short[][] middleGamePawnTableBlack = [.. MiddleGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
+        short[][] endGamePawnTableBlack = [.. EndGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
 
-        short[][] middleGameKnightTableBlack = MiddleGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
-        short[][] endGameKnightTableBlack = EndGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
+        short[][] middleGameKnightTableBlack = [.. MiddleGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
+        short[][] endGameKnightTableBlack = [.. EndGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
 
-        short[][] middleGameBishopTableBlack = MiddleGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
-        short[][] endGameBishopTableBlack = EndGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
+        short[][] middleGameBishopTableBlack = [.. MiddleGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
+        short[][] endGameBishopTableBlack = [.. EndGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
 
-        short[][] middleGameRookTableBlack = MiddleGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
-        short[][] endGameRookTableBlack = EndGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
+        short[][] middleGameRookTableBlack = [.. MiddleGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
+        short[][] endGameRookTableBlack = [.. EndGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
 
-        short[][] middleGameQueenTableBlack = MiddleGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
-        short[][] EndGameQueenTableBlack = EndGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
+        short[][] middleGameQueenTableBlack = [.. MiddleGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
+        short[][] EndGameQueenTableBlack = [.. EndGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
 
-        short[][] middleGameKingTableBlack = MiddleGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
-        short[][] endGameKingTableBlack = EndGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray()).ToArray();
+        short[][] middleGameKingTableBlack = [.. MiddleGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
+        short[][] endGameKingTableBlack = [.. EndGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
 
         short[][][] mgPositionalTables =
         [

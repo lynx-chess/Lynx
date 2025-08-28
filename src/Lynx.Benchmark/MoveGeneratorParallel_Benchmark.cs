@@ -177,6 +177,7 @@ file static class CustomMoveGenerator
 
     private static readonly Func<int, BitBoard, ulong>[] _pieceLocalAttacks =
     [
+#pragma warning disable IDE0350 // Use implicitly typed lambda
         (int origin, BitBoard _) => LocalAttacks.PawnAttacks[(int)Side.White][origin],
         (int origin, BitBoard _) => LocalAttacks.KnightLocalAttacks[origin],
         LocalAttacks.BishopLocalAttacks,
@@ -190,6 +191,7 @@ file static class CustomMoveGenerator
         LocalAttacks.RookLocalAttacks,
         LocalAttacks.QueenLocalAttacks,
         (int origin, BitBoard _) => LocalAttacks.KingLocalAttacks[origin],
+#pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
