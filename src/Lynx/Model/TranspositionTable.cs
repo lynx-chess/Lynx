@@ -111,24 +111,32 @@ public struct TranspositionTable
     public readonly bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result) // [MaybeNullWhen(false)]
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        var bucket = _tt[ttIndex];
 
-        var key = GenerateTTKey(position.UniqueIdentifier);
-
-        // We simply take the first entry
-        for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
+        unsafe
         {
-            ref var entry = ref bucket[i];
-
-            if (key == entry.Key)
+            fixed (TranspositionTableBucket* ttPtr = _tt)
             {
-                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-                var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+                var bucketPtr = ttPtr + ttIndex;
+                var bucket = (TranspositionTableElement*)bucketPtr;
 
-                result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+                var key = GenerateTTKey(position.UniqueIdentifier);
 
-                return true;
+                // We simply take the first entry
+                for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
+                {
+                    ref var entry = ref bucket[i];
+
+                    if (key == entry.Key)
+                    {
+                        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+
+                        result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+
+                        return true;
+                    }
+                }
             }
         }
 
@@ -146,102 +154,96 @@ public struct TranspositionTable
         Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overriden");
 
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        ref var bucket = ref _tt[ttIndex];
 
-        ref TranspositionTableElement entry = ref bucket[0];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CalculateBucketWeight(TranspositionTableElement entry, int ttAge)
+        unsafe
         {
-            // Another way of doing:
-            // var ageDiff = age - entry.Age
-            // if (ageDiff <0) ageDiff += maxAge
-            var relativeAge = (ttAge - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
-
-            var value = entry.Depth - (2 * relativeAge);
-            return value;
-        }
-
-#if DEBUG
-        int bucketIndex = 0;
-#endif
-
-        var newKey = GenerateTTKey(position.UniqueIdentifier);
-
-        if (entry.Key != newKey && entry.Type != NodeType.Unknown)
-        {
-            int minValue = CalculateBucketWeight(entry, _age);
-
-            for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
+            fixed (TranspositionTableBucket* ttPtr = _tt)
             {
-                ref var candidateEntry = ref bucket[i];
+                var bucketPtr = ttPtr + ttIndex;
+                var bucket = (TranspositionTableElement*)bucketPtr;
 
-                // Bucket policy to discard very old entries
+                ref TranspositionTableElement entry = ref bucket[0];
 
-                // Always take an empty entry, or one that corresponds to the same position
-                if (candidateEntry.Type == NodeType.Unknown || candidateEntry.Key == newKey)
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                static int CalculateBucketWeight(TranspositionTableElement entry, int ttAge)
                 {
-                    entry = ref candidateEntry;
+                    // Another way of doing:
+                    // var ageDiff = age - entry.Age
+                    // if (ageDiff <0) ageDiff += maxAge
+                    var relativeAge = (ttAge - entry.Age + TranspositionTableElement.MaxAge) & TranspositionTableElement.AgeMask;
 
-#if DEBUG
-                    bucketIndex = i;
-#endif
-
-                    break;
+                    var value = entry.Depth - (2 * relativeAge);
+                    return value;
                 }
 
-                // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
-                // Current formula from Stormphrax
-                var value = CalculateBucketWeight(candidateEntry, _age);
+#if DEBUG
+                int bucketIndex = 0;
+#endif
 
-                if (value < minValue)
+                var newKey = GenerateTTKey(position.UniqueIdentifier);
+
+                if (entry.Key != newKey && entry.Type != NodeType.Unknown)
                 {
-                    minValue = value;
-                    entry = ref candidateEntry;
+                    int minValue = CalculateBucketWeight(entry, _age);
+
+                    for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
+                    {
+                        ref var candidateEntry = ref bucket[i];
+
+                        // Bucket policy to discard very old entries
+
+                        // Always take an empty entry, or one that corresponds to the same position
+                        if (candidateEntry.Type == NodeType.Unknown || candidateEntry.Key == newKey)
+                        {
+                            entry = ref candidateEntry;
 
 #if DEBUG
-                    bucketIndex = i;
+                            bucketIndex = i;
 #endif
+
+                            break;
+                        }
+
+                        // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
+                        // Current formula from Stormphrax
+                        var value = CalculateBucketWeight(candidateEntry, _age);
+
+                        if (value < minValue)
+                        {
+                            minValue = value;
+                            entry = ref candidateEntry;
+
+#if DEBUG
+                            bucketIndex = i;
+#endif
+                        }
+                    }
                 }
+
+                var wasPvInt = wasPv ? 1 : 0;
+
+                // Replacement policy
+                bool shouldReplace =
+                    entry.Key != newKey                 // Different key: collision or no actual entry
+                    || nodeType == NodeType.Exact       // Entering PV data
+                    || entry.Age != _age                // Different age/generation
+                    || depth                            // Higher depth
+                            + Configuration.EngineSettings.TTReplacement_DepthOffset
+                            + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
+                        >= entry.Depth;
+
+                if (!shouldReplace)
+                {
+                    return;
+                }
+
+                // We want to store the distance to the checkmate position relative to the current node, independently from the root
+                // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
+                var recalculatedScore = RecalculateMateScores(score, -ply);
+
+                entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, _age);
             }
         }
-
-        var wasPvInt = wasPv ? 1 : 0;
-
-        // Replacement policy
-        bool shouldReplace =
-            entry.Key != newKey                 // Different key: collision or no actual entry
-            || nodeType == NodeType.Exact       // Entering PV data
-            || entry.Age != _age                // Different age/generation
-            || depth                            // Higher depth
-                    + Configuration.EngineSettings.TTReplacement_DepthOffset
-                    + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
-                >= entry.Depth;
-
-        if (!shouldReplace)
-        {
-            return;
-        }
-
-        // We want to store the distance to the checkmate position relative to the current node, independently from the root
-        // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var recalculatedScore = RecalculateMateScores(score, -ply);
-
-        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, _age);
-
-#if DEBUG
-        Debug.Assert(bucket[bucketIndex].Score == recalculatedScore);
-        Debug.Assert(bucket[bucketIndex].Type == nodeType);
-        Debug.Assert(bucket[bucketIndex].Age == _age);
-        Debug.Assert(_tt[ttIndex][bucketIndex].Score == recalculatedScore);
-        Debug.Assert(_tt[ttIndex][bucketIndex].Type == nodeType);
-        Debug.Assert(bucket[bucketIndex].Age == _age);
-
-        if (_tt[ttIndex][bucketIndex].Score != recalculatedScore)
-        {
-            throw new LynxException();
-        }
-#endif
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -280,12 +282,21 @@ public struct TranspositionTable
         {
             for (int i = 0; i < 1_000; ++i)
             {
-                var bucket = _tt[i];
-                for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                unsafe
                 {
-                    if (bucket[j].Key != default)
+                    fixed (TranspositionTableBucket* ttPtr = _tt)
                     {
-                        ++items;
+                        var bucketPtr = ttPtr + i;
+                        var bucket = (TranspositionTableElement*)bucketPtr;
+
+                        for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                        {
+                            TranspositionTableElement entry = bucket[0];
+                            if (entry.Key != default)
+                            {
+                                ++items;
+                            }
+                        }
                     }
                 }
             }
@@ -344,12 +355,21 @@ public struct TranspositionTable
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            var bucket = _tt[i];
-            for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+            unsafe
             {
-                if (bucket[j].Key != default)
+                fixed (TranspositionTableBucket* ttPtr = _tt)
                 {
-                    ++items;
+                    var bucketPtr = ttPtr + i;
+                    var bucket = (TranspositionTableElement*)bucketPtr;
+
+                    for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                    {
+                        TranspositionTableElement entry = bucket[0];
+                        if (entry.Key != default)
+                        {
+                            ++items;
+                        }
+                    }
                 }
             }
         }
@@ -366,12 +386,21 @@ public struct TranspositionTable
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            var bucket = _tt[i];
-            for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+            unsafe
             {
-                if (bucket[j].Key != default)
+                fixed (TranspositionTableBucket* ttPtr = _tt)
                 {
-                    ++items;
+                    var bucketPtr = ttPtr + i;
+                    var bucket = (TranspositionTableElement*)bucketPtr;
+
+                    for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                    {
+                        TranspositionTableElement entry = bucket[0];
+                        if (entry.Key != default)
+                        {
+                            ++items;
+                        }
+                    }
                 }
             }
         }
