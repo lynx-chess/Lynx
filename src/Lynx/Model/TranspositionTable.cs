@@ -291,7 +291,7 @@ public struct TranspositionTable
 
                         for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
                         {
-                            TranspositionTableElement entry = bucket[0];
+                            TranspositionTableElement entry = bucket[j];
                             if (entry.Key != default)
                             {
                                 ++items;
@@ -364,7 +364,7 @@ public struct TranspositionTable
 
                     for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
                     {
-                        TranspositionTableElement entry = bucket[0];
+                        TranspositionTableElement entry = bucket[j];
                         if (entry.Key != default)
                         {
                             ++items;
@@ -395,7 +395,7 @@ public struct TranspositionTable
 
                     for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
                     {
-                        TranspositionTableElement entry = bucket[0];
+                        TranspositionTableElement entry = bucket[j];
                         if (entry.Key != default)
                         {
                             ++items;
