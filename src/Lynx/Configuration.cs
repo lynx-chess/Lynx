@@ -479,7 +479,7 @@ public sealed class EngineSettings
     public int SE_LowDepthExtension { get; set; } = 9;
 
     [SPSA<int>(50, 150, 10)]
-    public int Corrplexity_Extension_Delta { get; set; } = 125;
+    public int Corrplexity_Extension_Delta { get; set; } = 75;
 
     #endregion
 }
