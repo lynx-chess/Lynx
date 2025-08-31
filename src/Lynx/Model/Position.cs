@@ -1701,6 +1701,39 @@ public class Position : IDisposable
         KingThreatsBonus
     ];
 
+    private void CalculateThreats(ref EvaluationContext evaluationContext)
+    {
+        var occupancy = OccupancyBitBoards[(int)Side.Both];
+
+        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
+        {
+            var board = PieceBitBoards[pieceIndex];
+            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
+
+            while (board != 0)
+            {
+                board = board.WithoutLS1B(out var square);
+                evaluationContext.Attacks[pieceIndex] |= attacks(square, occupancy);
+            }
+
+            evaluationContext.AttacksBySide[(int)Side.White] |= evaluationContext.Attacks[pieceIndex];
+        }
+
+        for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
+        {
+            var board = PieceBitBoards[pieceIndex];
+            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
+
+            while (board != 0)
+            {
+                board = board.WithoutLS1B(out var square);
+                evaluationContext.Attacks[pieceIndex] |= attacks(square, occupancy);
+            }
+
+            evaluationContext.AttacksBySide[(int)Side.Black] |= evaluationContext.Attacks[pieceIndex];
+        }
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Threats(EvaluationContext evaluationContext, int oppositeSide)
     {
