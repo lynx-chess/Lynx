@@ -25,7 +25,9 @@ public class MoveScoreTest : BaseTest
 
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move =>
         {
-            EvaluationContext evaluationContext = default;
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
             return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
         }).ToList();
 
@@ -38,7 +40,9 @@ public class MoveScoreTest : BaseTest
         Assert.AreEqual("e5g6", allMoves[6].UCIString());     // NxP
         Assert.AreEqual("f3h3", allMoves[7].UCIString());     // QxP
 
-        EvaluationContext evaluationContext = default;
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         foreach (var move in allMoves.Where(move => move.CapturedPiece() == (int)Piece.None && !move.IsCastle()))
         {
@@ -66,12 +70,16 @@ public class MoveScoreTest : BaseTest
 
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move =>
         {
-            EvaluationContext evaluationContext = default;
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
             return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
         }).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        EvaluationContext evaluationContext = default;
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
         Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0][6], engine.ScoreMove(engine.Game.CurrentPosition, allMoves[0], default, ref evaluationContext));
     }
 }
