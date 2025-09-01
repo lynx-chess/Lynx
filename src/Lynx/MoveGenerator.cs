@@ -21,7 +21,7 @@ public static class MoveGenerator
     /// Indexed by <see cref="Piece"/>.
     /// Checks are not considered
     /// </summary>
-    private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
+    public static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
     [
 #pragma warning disable IDE0350 // Use implicitly typed lambda
         (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
