@@ -120,7 +120,12 @@ public sealed partial class Engine
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
                 && !ttEntryHasBestMove)
             {
-                depthExtension -= 2;
+                --depthExtension;
+
+                if (pvNode)
+                {
+                    --depthExtension;
+                }
             }
         }
         else
