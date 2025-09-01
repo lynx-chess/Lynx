@@ -120,7 +120,7 @@ public sealed partial class Engine
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
                 && !ttEntryHasBestMove)
             {
-                --depthExtension;
+                depthExtension -= 2;
             }
         }
         else
