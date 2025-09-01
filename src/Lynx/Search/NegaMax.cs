@@ -179,6 +179,7 @@ public sealed partial class Engine
                 rawStaticEval = ttEntry.StaticEval;
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
+                position.CalculateThreats(ref evaluationContext);
             }
             else
             {

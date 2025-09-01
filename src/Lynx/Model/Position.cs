@@ -1701,7 +1701,7 @@ public class Position : IDisposable
         KingThreatsBonus
     ];
 
-    private void CalculateThreats(ref EvaluationContext evaluationContext)
+    public void CalculateThreats(ref EvaluationContext evaluationContext)
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
 
