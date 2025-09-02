@@ -179,6 +179,7 @@ public sealed partial class Engine
                 rawStaticEval = ttEntry.StaticEval;
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
+                position.CalculateThreats(ref evaluationContext);
             }
             else
             {
@@ -319,7 +320,7 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
+            moveScores[i] = ScoreMove(position, pseudoLegalMoves[i], ply, ref evaluationContext, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -354,11 +355,7 @@ public sealed partial class Engine
             var piece = move.Piece();
             var isCapture = move.CapturedPiece() != (int)Piece.None;
 
-            int? quietHistory = null;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            int QuietHistory() => quietHistory ??=
-                _quietHistory[piece][move.TargetSquare()]
+            int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
@@ -384,7 +381,7 @@ public sealed partial class Engine
                 // once we find one with a history score too low
                 if (!isCapture
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && quietHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -597,7 +594,7 @@ public sealed partial class Engine
 
                                 // -= history/(maxHistory/2)
 
-                                reduction -= QuietHistory() / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+                                reduction -= quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
                             }
                         }
 
@@ -720,7 +717,7 @@ public sealed partial class Engine
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(position, historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode, ref evaluationContext);
                     }
 
                     nodeType = NodeType.Beta;

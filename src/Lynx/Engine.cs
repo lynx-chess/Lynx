@@ -44,11 +44,9 @@ public sealed partial class Engine : IDisposable
         Game = new Game(Constants.InitialPositionFEN);
 
         // Update ResetEngine() after any changes here
-        _quietHistory = new int[12][];
         _moveNodeCount = new ulong[12][];
-        for (int i = 0; i < _quietHistory.Length; ++i)
+        for (int i = 0; i < _moveNodeCount.Length; ++i)
         {
-            _quietHistory[i] = new int[64];
             _moveNodeCount[i] = new ulong[64];
         }
 
@@ -72,10 +70,10 @@ public sealed partial class Engine : IDisposable
         // Clear histories
         for (int i = 0; i < 12; ++i)
         {
-            Array.Clear(_quietHistory[i]);
             Array.Clear(_moveNodeCount[i]);
         }
 
+        Array.Clear(_quietHistory);
         Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
