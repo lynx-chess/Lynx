@@ -24,10 +24,10 @@ public sealed partial class Engine
     private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     /// <summary>
-    /// 12 x 64
-    /// piece x target square
+    /// 12 x 64 x 2 x 2
+    /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly int[][] _quietHistory;
+    private readonly int[] _quietHistory = GC.AllocateArray<int>(12 * 64 * 2 * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
@@ -430,7 +430,12 @@ public sealed partial class Engine
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
@@ -562,9 +567,9 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
 
         using var position = new Position(Game.PositionBeforeLastSearch);
-        var ttEntry = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply: 0);
+        var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply: 0, out var ttEntry);
 
-        if (ttEntry.NodeType != NodeType.Unknown)
+        if (ttHit)
         {
             ttBestMove = ttEntry.BestMove;
             score = ttEntry.Score;
@@ -575,13 +580,17 @@ public sealed partial class Engine
             }
         }
 
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves);
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, ttBestMove);
+            moveScores[i] = ScoreMove(position, pseudoLegalMoves[i], 0, ref evaluationContext, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)

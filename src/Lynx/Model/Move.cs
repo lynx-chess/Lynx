@@ -423,7 +423,12 @@ public static class MoveExtensions
         var targetSquare = move.TargetSquare();
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, moves).ToArray();
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        var pseudoLegalMoves = MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
 
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)

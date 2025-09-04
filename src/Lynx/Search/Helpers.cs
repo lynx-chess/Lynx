@@ -46,6 +46,33 @@ public sealed partial class Engine
     }
 
     /// <summary>
+    /// [12][64][2][2]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ref int QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    {
+        const int pieceOffset = 64 * 2 * 2;
+        const int targetSquareOffset = 2 * 2;
+        const int startSquareAttackedOffset = 2;
+
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var oppositeSide = Utils.OppositeSide(position.Side);
+
+        var oppsiteSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
+
+        var isStartSquareAttacked = oppsiteSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppsiteSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        var index = (move.Piece() * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + (isStartSquareAttacked * startSquareAttackedOffset)
+            + isTargetSquareAttacked;
+
+        return ref _quietHistory[index];
+    }
+
+    /// <summary>
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -299,9 +326,13 @@ public sealed partial class Engine
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, movePool),
+               MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
@@ -418,28 +449,6 @@ $" {427,-3}                                                  {_pVTable[427].ToEP
 $" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
 #pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Conditional("DEBUG")]
-    internal void PrintHistoryMoves()
-    {
-        int max = EvaluationConstants.MinEval;
-
-        for (int i = 0; i < 12; ++i)
-        {
-            var tmp = _quietHistory[i];
-            for (int j = 0; j < 64; ++j)
-            {
-                var item = tmp[j];
-
-                if (item > max)
-                {
-                    max = item;
-                }
-            }
-        }
-
-        _logger.ConditionalDebug($"Max history: {max}");
     }
 
 #pragma warning restore S125 // Sections of code should not be commented out

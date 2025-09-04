@@ -402,10 +402,8 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
     [SPSA<int>(enabled: false)]
-    public int TTReplacement_DepthOffset { get; set; } = 0;
-#pragma warning restore CA1805 // Do not initialize unnecessarily
+    public int TTReplacement_DepthOffset { get; set; } = 4;
 
     [SPSA<int>(enabled: false)]
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;

@@ -4,9 +4,6 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
-            int HalfMoveClock/*, int FullMoveCounter*/);
-
 namespace Lynx;
 
 public static class FENParser
@@ -14,10 +11,11 @@ public static class FENParser
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
+    public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
 
+        // Arrays will be be returned as part of Position cleanaup
         var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         var board = ArrayPool<int>.Shared.Rent(64);
@@ -74,7 +72,7 @@ public static class FENParser
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            ? new(pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
             : throw new LynxException($"Error parsing {fen.ToString()}");
     }
 
@@ -89,7 +87,6 @@ public static class FENParser
             var match = fen[..end];
 
             ParseBoardSection(pieceBitBoards, board, rankIndex, match);
-            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
             fen = fen[(end + 1)..];
             end = fen.IndexOf('/');
@@ -97,8 +94,17 @@ public static class FENParser
         }
 
         ParseBoardSection(pieceBitBoards, board, rankIndex, fen[..fen.IndexOf(' ')]);
-        PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
+        // Populate occupancies
+        for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
+        {
+            occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
+            occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
+        }
+
+        occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void ParseBoardSection(BitBoard[] pieceBitBoards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
         {
             int fileIndex = 0;
@@ -137,17 +143,6 @@ public static class FENParser
                     Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
                 }
             }
-        }
-
-        static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
-        {
-            for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
-            {
-                occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
-            }
-
-            occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
         }
     }
 

@@ -480,6 +480,9 @@ public static class Constants
     /// </summary>
     public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
 
+    /// <summary>
+    /// e4, d4, e5, d5
+    /// </summary>
     public const BitBoard CentralSquares = 0x1818000000;
 
     /// <summary>
