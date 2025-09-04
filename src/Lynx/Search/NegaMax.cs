@@ -121,6 +121,11 @@ public sealed partial class Engine
                 && !ttEntryHasBestMove)
             {
                 --depthExtension;
+
+                if (pvNode)
+                {
+                    --depthExtension;
+                }
             }
         }
         else
