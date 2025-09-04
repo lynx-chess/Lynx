@@ -120,6 +120,8 @@ public sealed class Searcher
             await MultiThreadedSearch(goCommand);
         }
 
+        _ttWrapper.Age();
+
         _isProcessingGoCommand = false;
     }
 
