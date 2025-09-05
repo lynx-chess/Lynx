@@ -27,7 +27,7 @@ public class Position : IDisposable
     private readonly ulong[] _occupancyBitBoards;
     private readonly int[] _board;
 
-    private CastlingData _castle;
+    private CastlingRights _castle;
     private BoardSquare _enPassant;
     private Side _side;
 
@@ -65,7 +65,7 @@ public class Position : IDisposable
     /// <summary>
     /// See <see cref="<CastlingRights"/>
     /// </summary>
-    public CastlingData Castle { get => _castle; private set => _castle = value; }
+    public CastlingRights Castle { get => _castle; private set => _castle = value; }
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
@@ -196,7 +196,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ fullPieceMovementHash
             ^ ZobristTable.EnPassantHash((int)_enPassant)            // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(_castle.CastlingRights);                      // We clear the existing castle rights
+            ^ ZobristTable.CastleHash(_castle);                      // We clear the existing castle rights
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
@@ -470,9 +470,10 @@ public class Position : IDisposable
         _occupancyBitBoards[2] = _occupancyBitBoards[1] | _occupancyBitBoards[0];
 
         // Updating castling rights
-        _castle.UpdateCastlingRights(sourceSquare, targetSquare);
+        _castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        _castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
-        _uniqueIdentifier ^= ZobristTable.CastleHash(_castle.CastlingRights);
+        _uniqueIdentifier ^= ZobristTable.CastleHash(_castle);
 
         Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
@@ -521,6 +522,7 @@ public class Position : IDisposable
 
                     if (capturedPiece != (int)Piece.None)
                     {
+
                         _pieceBitBoards[capturedPiece].SetBit(targetSquare);
                         _occupancyBitBoards[oppositeSide].SetBit(targetSquare);
                         _board[targetSquare] = capturedPiece;
@@ -796,30 +798,30 @@ public class Position : IDisposable
         Debug.Assert(whiteKings.CountBits() == 1, failureMessage, "More than one white king");
         Debug.Assert(blackKings.CountBits() == 1, failureMessage, "More than one black king");
 
-        var castlingRights = _castle.CastlingRights;
-
-        if (castlingRights != 0)
+        if (_castle != 0)
         {
             // Castling rights and king/rook positions
-            if ((castlingRights & CastlingRights.WK) != 0)
+            if ((_castle & CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
+
             }
 
-            if ((castlingRights & CastlingRights.WQ) != 0)
+            if ((_castle & CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), failureMessage, "No white rook on a1 when long castling rights");
             }
 
-            if ((castlingRights & CastlingRights.BK) != 0)
+            if ((_castle & CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
+
             }
 
-            if ((castlingRights & CastlingRights.BQ) != 0)
+            if ((_castle & CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.a8), failureMessage, "No black rook on a8 when long castling rights");
@@ -2063,20 +2065,19 @@ public class Position : IDisposable
         var length = sb.Length;
 
         // TODO X-FEN support
-        var castlingRights = _castle.CastlingRights;
-        if ((castlingRights & CastlingRights.WK) != default)
+        if ((_castle & CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((castlingRights & CastlingRights.WQ) != default)
+        if ((_castle & CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((castlingRights & CastlingRights.BK) != default)
+        if ((_castle & CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((castlingRights & CastlingRights.BQ) != default)
+        if ((_castle & CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -2144,12 +2145,11 @@ public class Position : IDisposable
         Console.WriteLine($"    Side:\t{_side}");
         Console.WriteLine($"    Enpassant:\t{(_enPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_enPassant])}");
         // TODO X-FEN
-        var castlingRights = _castle.CastlingRights;
         Console.WriteLine($"    Castling:\t" +
-            $"{((castlingRights & CastlingRights.WK) != default ? 'K' : '-')}" +
-            $"{((castlingRights & CastlingRights.WQ) != default ? 'Q' : '-')} | " +
-            $"{((castlingRights & CastlingRights.BK) != default ? 'k' : '-')}" +
-            $"{((castlingRights & CastlingRights.BQ) != default ? 'q' : '-')}"
+            $"{((_castle & CastlingRights.WK) != default ? 'K' : '-')}" +
+            $"{((_castle & CastlingRights.WQ) != default ? 'Q' : '-')} | " +
+            $"{((_castle & CastlingRights.BK) != default ? 'k' : '-')}" +
+            $"{((_castle & CastlingRights.BQ) != default ? 'q' : '-')}"
             );
         Console.WriteLine($"    FEN:\t{FEN()}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.

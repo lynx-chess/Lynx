@@ -144,7 +144,7 @@ public static class ZobristTable
 
         positionHash ^= EnPassantHash((int)position.EnPassant)
             ^ SideHash((ulong)position.Side)
-            ^ CastleHash(position.Castle.CastlingRights);
+            ^ CastleHash(position.Castle);
 
         return positionHash;
     }
@@ -159,7 +159,7 @@ public static class ZobristTable
             ^ PieceHash(position.BlackKingSquare, (int)Piece.k)
             ^ EnPassantHash((int)position.EnPassant)
             ^ SideHash((ulong)position.Side)
-            ^ CastleHash(position.Castle.CastlingRights);
+            ^ CastleHash(position.Castle);
     }
 
     /// <summary>
