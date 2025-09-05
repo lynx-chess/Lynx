@@ -27,7 +27,7 @@ public class Position : IDisposable
     private readonly ulong[] _occupancyBitBoards;
     private readonly int[] _board;
 
-    private byte _castle;
+    private CastlingRights _castle;
     private BoardSquare _enPassant;
     private Side _side;
 
@@ -65,7 +65,7 @@ public class Position : IDisposable
     /// <summary>
     /// See <see cref="<CastlingRights"/>
     /// </summary>
-    public byte Castle { get => _castle; private set => _castle = value; }
+    public CastlingRights Castle { get => _castle; private set => _castle = value; }
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
@@ -801,27 +801,27 @@ public class Position : IDisposable
         if (_castle != 0)
         {
             // Castling rights and king/rook positions
-            if ((_castle & (int)CastlingRights.WK) != 0)
+            if ((_castle & CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
 
             }
 
-            if ((_castle & (int)CastlingRights.WQ) != 0)
+            if ((_castle & CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), failureMessage, "No white rook on a1 when long castling rights");
             }
 
-            if ((_castle & (int)CastlingRights.BK) != 0)
+            if ((_castle & CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
 
             }
 
-            if ((_castle & (int)CastlingRights.BQ) != 0)
+            if ((_castle & CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.a8), failureMessage, "No black rook on a8 when long castling rights");
@@ -2064,19 +2064,19 @@ public class Position : IDisposable
         sb.Append(' ');
         var length = sb.Length;
 
-        if ((_castle & (int)CastlingRights.WK) != default)
+        if ((_castle & CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((_castle & (int)CastlingRights.WQ) != default)
+        if ((_castle & CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((_castle & (int)CastlingRights.BK) != default)
+        if ((_castle & CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((_castle & (int)CastlingRights.BQ) != default)
+        if ((_castle & CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -2144,10 +2144,10 @@ public class Position : IDisposable
         Console.WriteLine($"    Side:\t{_side}");
         Console.WriteLine($"    Enpassant:\t{(_enPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_enPassant])}");
         Console.WriteLine($"    Castling:\t" +
-            $"{((_castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
-            $"{((_castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +
-            $"{((_castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
-            $"{((_castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
+            $"{((_castle & CastlingRights.WK) != default ? 'K' : '-')}" +
+            $"{((_castle & CastlingRights.WQ) != default ? 'Q' : '-')} | " +
+            $"{((_castle & CastlingRights.BK) != default ? 'k' : '-')}" +
+            $"{((_castle & CastlingRights.BQ) != default ? 'q' : '-')}"
             );
         Console.WriteLine($"    FEN:\t{FEN()}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
