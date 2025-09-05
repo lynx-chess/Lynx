@@ -22,7 +22,7 @@ public readonly struct GameState
 
     public readonly BoardSquare EnPassant;
 
-    public readonly byte Castle;
+    public readonly CastlingRights Castle;
 
     public readonly bool IsIncrementalEval;
 
