@@ -349,20 +349,19 @@ public static class Constants
     ///  Black kingside Rook moved or captured      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved or captured     1111 & 0111  =  0111    7
     /// </summary>
-    public static readonly CastlingRights[] CastlingRightsUpdateConstants =
-    [..
-        new byte[64]
-        {
-                7, 15, 15, 15,  3, 15, 15, 11,
-            15, 15, 15, 15, 15, 15, 15, 15,
-            15, 15, 15, 15, 15, 15, 15, 15,
-            15, 15, 15, 15, 15, 15, 15, 15,
-            15, 15, 15, 15, 15, 15, 15, 15,
-            15, 15, 15, 15, 15, 15, 15, 15,
-            15, 15, 15, 15, 15, 15, 15, 15,
-            13, 15, 15, 15, 12, 15, 15, 14
-        }.Select(b => (CastlingRights)b)
+#pragma warning disable RCS1257 // Use enum field explicitly
+    public static ReadOnlySpan<CastlingRights> CastlingRightsUpdateConstants =>
+    [
+        (CastlingRights) 7, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,  (CastlingRights)3, (CastlingRights)15, (CastlingRights)15, (CastlingRights)11,
+        (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,
+        (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,
+        (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,
+        (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,
+        (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,
+        (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,
+        (CastlingRights)13, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15, (CastlingRights)12, (CastlingRights)15, (CastlingRights)15, (CastlingRights)14
     ];
+#pragma warning restore RCS1257 // Use enum field explicitly
 
     public static int AbsoluteMaxTTSize => (int)((ulong)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024));
 
