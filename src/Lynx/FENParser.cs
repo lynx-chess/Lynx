@@ -23,7 +23,7 @@ public static class FENParser
 
         bool success;
         Side side;
-        CastlingRights castle = 0;
+        CastlingData castle;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
 
@@ -158,25 +158,25 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static CastlingRights ParseCastlingRights(ReadOnlySpan<char> castling)
+    private static CastlingData ParseCastlingRights(ReadOnlySpan<char> castling)
     {
         // TODO add FRC X-FEN support;
-        CastlingRights castle = 0;
+        CastlingRights castlingRights = 0;
 
         for (int i = 0; i < castling.Length; ++i)
         {
-            castle |= castling[i] switch
+            castlingRights |= castling[i] switch
             {
                 'K' => CastlingRights.WK,
                 'Q' => CastlingRights.WQ,
                 'k' => CastlingRights.BK,
                 'q' => CastlingRights.BQ,
-                '-' => castle,
+                '-' => castlingRights,
                 _ => throw new LynxException($"Unrecognized castling char: {castling[i]}")
             };
         }
 
-        return castle;
+        return new CastlingData(castlingRights);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

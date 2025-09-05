@@ -298,7 +298,7 @@ public interface IMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
-        var castlingRights = position.Castle;
+        var castlingRights = position.Castle.CastlingRights;
 
         if (castlingRights != default)
         {
@@ -607,7 +607,7 @@ public interface IMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected bool IsAnyCastlingMoveValid(Position position)
     {
-        var castlingRights = position.Castle;
+        var castlingRights = position.Castle.CastlingRights;
 
         if (castlingRights != default)
         {
