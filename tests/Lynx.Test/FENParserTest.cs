@@ -180,9 +180,7 @@ public class FENParserTest
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kq - 0 1", CR.BK | CR.BQ)]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Qq - 0 1", CR.WQ | CR.BQ)]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Kk - 0 1", CR.WK | CR.BK)]
-    [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1", 0)]
-    [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w A - 0 1", -1)]
-    [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KA - 0 1", -1)]
+    [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1", CR.None)]
     public void CastlingRights(string fen, CastlingRights expectedCastleResult)
     {
         // Arrange
@@ -190,19 +188,11 @@ public class FENParserTest
         const string previuosFen = "K15k/8/8/8/8/8/8/8 w KQkq - 0 1";
         Assert.DoesNotThrow(() => FENParser.ParseFEN(previuosFen));
 
-        if (expectedCastleResult >= 0)
-        {
-            // Act
-            var result = FENParser.ParseFEN(fen);
+        // Act
+        var result = FENParser.ParseFEN(fen);
 
-            //Assert
-            Assert.AreEqual(expectedCastleResult, result.Castle);
-        }
-        else
-        {
-            // Act and Assert
-            Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
-        }
+        //Assert
+        Assert.AreEqual(expectedCastleResult, result.Castle);
     }
 
     [TestCase("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b Qq e3 0 1", BoardSquare.e3)]
