@@ -338,6 +338,15 @@ public static class Constants
         (int)BoardSquare.h3 - 8     //47 = h3
     ];
 
+#pragma warning disable RCS1257 // Use enum field explicitly
+    public const CastlingRights NoUpdateCastlingRight = (CastlingRights)15;
+    public const CastlingRights WhiteKingCastlingRight = (CastlingRights)12;
+    public const CastlingRights WhiteKingSideRookCastlingRight = (CastlingRights)14;
+    public const CastlingRights WhiteQueenSideRookCastlingRight = (CastlingRights)13;
+    public const CastlingRights BlackKingCastlingRight = (CastlingRights)3;
+    public const CastlingRights BlackKingSideRookCastlingRight = (CastlingRights)11;
+    public const CastlingRights BlackQueenSideRookCastlingRight = (CastlingRights)7;
+
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474
     ///                                             CastlingRights  Binary  Decimal
@@ -349,7 +358,6 @@ public static class Constants
     ///  Black kingside Rook moved or captured      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved or captured     1111 & 0111  =  0111    7
     /// </summary>
-#pragma warning disable RCS1257 // Use enum field explicitly
     public static ReadOnlySpan<CastlingRights> CastlingRightsUpdateConstants =>
     [
         (CastlingRights) 7, (CastlingRights)15, (CastlingRights)15, (CastlingRights)15,  (CastlingRights)3, (CastlingRights)15, (CastlingRights)15, (CastlingRights)11,

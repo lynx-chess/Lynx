@@ -306,7 +306,9 @@ public interface IMoveGenerator
 
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
+                var whiteKingSourceSquare = position.InitialKingSquares[(int)Side.White];
+
+                bool ise1Attacked = position.IsSquareAttacked(whiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
                     && (castlingRights & CastlingRights.WK) != default
@@ -316,8 +318,8 @@ public interface IMoveGenerator
                 {
                     movePool[localIndex++] = WhiteShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
-                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
                 }
 
                 if (!ise1Attacked
@@ -334,7 +336,9 @@ public interface IMoveGenerator
             }
             else
             {
-                bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
+                var blackKingSourceSquare = position.InitialKingSquares[(int)Side.Black];
+
+                bool ise8Attacked = position.IsSquareAttacked(blackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
                     && (castlingRights & CastlingRights.BK) != default
@@ -344,8 +348,8 @@ public interface IMoveGenerator
                 {
                     movePool[localIndex++] = BlackShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
-                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
                 }
 
                 if (!ise8Attacked
@@ -615,7 +619,8 @@ public interface IMoveGenerator
 
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
+                var whiteKingSourceSquare = position.InitialKingSquares[(int)Side.White];
+                bool ise1Attacked = position.IsSquareAttacked(whiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
                     && (castlingRights & CastlingRights.WK) != default
@@ -639,7 +644,9 @@ public interface IMoveGenerator
             }
             else
             {
-                bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
+                var blackKingSourceSquare = position.InitialKingSquares[(int)Side.Black];
+
+                bool ise8Attacked = position.IsSquareAttacked(blackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
                     && (castlingRights & CastlingRights.BK) != default
@@ -667,7 +674,7 @@ public interface IMoveGenerator
     }
 
     /// <summary>
-    /// Also valid for Kings, but less performant thatn <see cref="IsAnyKingMoveValid(int, Position)"/>
+    /// Also valid for Kings, but less performant than <see cref="IsAnyKingMoveValid(int, Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyPieceMoveValid(int piece, Position position)
