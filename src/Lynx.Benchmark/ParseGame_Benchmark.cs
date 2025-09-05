@@ -143,6 +143,8 @@ using NLog;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
+using static Lynx.MoveGeneratorWrapper;
+
 namespace Lynx.Benchmark;
 
 #pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both

@@ -133,26 +133,26 @@ public class ZobristTableTest
         Assert.AreEqual(originalHash, currentHash);
     }
 
-    private static ulong CalculateCastleHash(byte castle, ulong[][] zobristTable)
+    private static ulong CalculateCastleHash(CastlingRights castle, ulong[][] zobristTable)
     {
         ulong combinedHash = 0;
 
-        if ((castle & (int)CastlingRights.WK) != default)
+        if ((castle & CastlingRights.WK) != default)
         {
             combinedHash ^= zobristTable[(int)BoardSquare.a8][(int)Piece.p];        // a8
         }
 
-        if ((castle & (int)CastlingRights.WQ) != default)
+        if ((castle & CastlingRights.WQ) != default)
         {
             combinedHash ^= zobristTable[(int)BoardSquare.b8][(int)Piece.p];        // b8
         }
 
-        if ((castle & (int)CastlingRights.BK) != default)
+        if ((castle & CastlingRights.BK) != default)
         {
             combinedHash ^= zobristTable[(int)BoardSquare.c8][(int)Piece.p];        // c8
         }
 
-        if ((castle & (int)CastlingRights.BQ) != default)
+        if ((castle & CastlingRights.BQ) != default)
         {
             combinedHash ^= zobristTable[(int)BoardSquare.d8][(int)Piece.p];        // d8
         }

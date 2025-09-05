@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+
 namespace Lynx.Test;
 public class IncrementalEvalTest
 {
@@ -10,9 +11,9 @@ public class IncrementalEvalTest
     [Test]
     public void CastlingMovesAreKingMoves()
     {
-        Assert.AreEqual((int)Piece.K, MoveGenerator.WhiteShortCastle.Piece());
-        Assert.AreEqual((int)Piece.K, MoveGenerator.WhiteLongCastle.Piece());
-        Assert.AreEqual((int)Piece.k, MoveGenerator.BlackShortCastle.Piece());
-        Assert.AreEqual((int)Piece.k, MoveGenerator.BlackLongCastle.Piece());
+        Assert.AreEqual((int)Piece.K, IMoveGenerator.WhiteShortCastle.Piece());
+        Assert.AreEqual((int)Piece.K, IMoveGenerator.WhiteLongCastle.Piece());
+        Assert.AreEqual((int)Piece.k, IMoveGenerator.BlackShortCastle.Piece());
+        Assert.AreEqual((int)Piece.k, IMoveGenerator.BlackLongCastle.Piece());
     }
 }

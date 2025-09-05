@@ -147,7 +147,7 @@ public class PositionTest
     {
         // Arrange
         var position = new Position(fen);
-        Assert.IsEmpty(MoveGenerator.GenerateAllMoves(position).Where(move =>
+        Assert.IsEmpty(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position).Where(move =>
         {
             var newPosition = new Position(position);
             newPosition.MakeMove(move);

@@ -62,10 +62,10 @@ public class PositionIdGeneration_Benchmark : BaseBenchmark
     public static IEnumerable<Position> Data =>
     [
         //Constants.EmptyBoardFEN,
-        Positions[0].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[0])[0]),
-        Positions[1].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[1])[0]),
-        Positions[2].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[2])[0]),
-        Positions[3].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[3])[0])
+        Positions[0].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[0])[0]),
+        Positions[1].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[1])[0]),
+        Positions[2].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[2])[0]),
+        Positions[3].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[3])[0])
     ];
 }
 
@@ -96,19 +96,19 @@ internal static class PositionExtensions
 
         sb.Append((int)position.Side);
 
-        if ((position.Castle & (int)CastlingRights.WK) != default)
+        if ((position.Castle & CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((position.Castle & (int)CastlingRights.WQ) != default)
+        if ((position.Castle & CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((position.Castle & (int)CastlingRights.BK) != default)
+        if ((position.Castle & CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((position.Castle & (int)CastlingRights.BQ) != default)
+        if ((position.Castle & CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }

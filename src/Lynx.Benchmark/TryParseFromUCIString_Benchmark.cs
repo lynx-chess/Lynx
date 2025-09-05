@@ -216,7 +216,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
                 }
                 var moveString = rawMoves[rangeSpan[i]];
 
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+                var moveList = MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {

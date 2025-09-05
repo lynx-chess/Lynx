@@ -1,6 +1,8 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 
+using static Lynx.MoveGeneratorWrapper;
+
 namespace Lynx.Test.MoveGeneration;
 
 public class GenerateCastlingMovesTest
