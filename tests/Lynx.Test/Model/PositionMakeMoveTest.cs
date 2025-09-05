@@ -506,10 +506,10 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var shortCastling = moves.Single(m => m.IsShortCastle());
@@ -538,10 +538,10 @@ public class PositionMakeMoveTest
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -558,10 +558,10 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var shortCastling = moves.Single(m => m.IsLongCastle());
@@ -590,10 +590,10 @@ public class PositionMakeMoveTest
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -610,10 +610,10 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var shortCastling = moves.Single(m => m.IsShortCastle());
@@ -642,10 +642,10 @@ public class PositionMakeMoveTest
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
     }
 
     [Test]
@@ -662,10 +662,10 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var shortCastling = moves.Single(m => m.IsLongCastle());
@@ -694,10 +694,10 @@ public class PositionMakeMoveTest
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
     }
 
     [Test]
@@ -705,10 +705,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
@@ -718,10 +718,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(quietKingMove);
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -729,10 +729,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
@@ -742,10 +742,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(quietKingMove);
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
     }
 
     [Test]
@@ -753,10 +753,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
@@ -769,10 +769,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -780,10 +780,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
@@ -796,10 +796,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -807,10 +807,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
@@ -823,10 +823,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -834,10 +834,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
@@ -850,10 +850,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -861,10 +861,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/3B4/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
@@ -879,10 +879,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -890,10 +890,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/4B3/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
@@ -908,10 +908,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -919,10 +919,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/4b3/8/8/8/R3K2R b KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
@@ -937,10 +937,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     [Test]
@@ -948,10 +948,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/3b4/8/8/8/R3K2R b KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
@@ -966,10 +966,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
-        Assert.AreEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     /// <summary>
@@ -991,10 +991,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/1r6/8/3B4/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
@@ -1007,10 +1007,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     /// <summary>
@@ -1032,10 +1032,10 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/3b4/8/8/6R1/R3K2R b KQkq - 0 1");
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), position.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, position.Castle & CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
@@ -1048,10 +1048,10 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.WQ);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BK);
-        Assert.AreNotEqual(default(int), newPosition.Castle & CastlingRights.BQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.WQ);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BK);
+        Assert.AreNotEqual(CastlingRights.None, newPosition.Castle & CastlingRights.BQ);
     }
 
     #endregion

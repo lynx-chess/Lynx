@@ -132,6 +132,8 @@ public class Position : IDisposable
         const int blackKingSideRook = (int)BoardSquare.h8;
         const int blackQueenSideRook = (int)BoardSquare.a8;
 
+        // TODO as well calculate WhiteShortCastleFreeSquares, WhiteLongCastleFreeSquares, BlackShortCastleFreeSquares, BlackLongCastleFreeSquares
+
         _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
         _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
 
@@ -855,30 +857,33 @@ public class Position : IDisposable
 
         if (_castle != 0)
         {
+            var whiteKingSourceSquare = InitialKingSquares[(int)Side.White];
+
             // Castling rights and king/rook positions
             if ((_castle & CastlingRights.WK) != 0)
             {
-                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
+                Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
-
             }
 
             if ((_castle & CastlingRights.WQ) != 0)
             {
-                Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
+                Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), failureMessage, "No white rook on a1 when long castling rights");
             }
 
+            var blackKingSourceSquare = InitialKingSquares[(int)Side.Black];
+
             if ((_castle & CastlingRights.BK) != 0)
             {
-                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
+                Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
 
             }
 
             if ((_castle & CastlingRights.BQ) != 0)
             {
-                Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
+                Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.a8), failureMessage, "No black rook on a8 when long castling rights");
             }
         }

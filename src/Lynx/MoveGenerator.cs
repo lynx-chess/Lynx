@@ -10,6 +10,7 @@ public interface IMoveGenerator
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
 
+    // TODO on the fly using position.InitialKingSquares[Side]
     public static readonly int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
     public static readonly int WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
     public static readonly int BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
@@ -330,8 +331,8 @@ public interface IMoveGenerator
                 {
                     movePool[localIndex++] = WhiteLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
-                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
                 }
             }
             else
@@ -360,8 +361,8 @@ public interface IMoveGenerator
                 {
                     movePool[localIndex++] = BlackLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
-                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
                 }
             }
         }
