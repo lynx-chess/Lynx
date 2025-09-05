@@ -349,16 +349,19 @@ public static class Constants
     ///  Black kingside Rook moved or captured      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved or captured     1111 & 0111  =  0111    7
     /// </summary>
-    public static ReadOnlySpan<byte> CastlingRightsUpdateConstants =>
-    [
-         7, 15, 15, 15,  3, 15, 15, 11,
-        15, 15, 15, 15, 15, 15, 15, 15,
-        15, 15, 15, 15, 15, 15, 15, 15,
-        15, 15, 15, 15, 15, 15, 15, 15,
-        15, 15, 15, 15, 15, 15, 15, 15,
-        15, 15, 15, 15, 15, 15, 15, 15,
-        15, 15, 15, 15, 15, 15, 15, 15,
-        13, 15, 15, 15, 12, 15, 15, 14
+    public static readonly CastlingRights[] CastlingRightsUpdateConstants =
+    [..
+        new byte[64]
+        {
+                7, 15, 15, 15,  3, 15, 15, 11,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            15, 15, 15, 15, 15, 15, 15, 15,
+            13, 15, 15, 15, 12, 15, 15, 14
+        }.Select(b => (CastlingRights)b)
     ];
 
     public static int AbsoluteMaxTTSize => (int)((ulong)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024));

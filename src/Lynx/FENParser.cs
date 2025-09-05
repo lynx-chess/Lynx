@@ -23,7 +23,7 @@ public static class FENParser
 
         bool success;
         Side side;
-        byte castle = 0;
+        CastlingRights castle = 0;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
 
@@ -158,18 +158,18 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static byte ParseCastlingRights(ReadOnlySpan<char> castling)
+    private static CastlingRights ParseCastlingRights(ReadOnlySpan<char> castling)
     {
-        byte castle = 0;
+        CastlingRights castle = 0;
 
         for (int i = 0; i < castling.Length; ++i)
         {
             castle |= castling[i] switch
             {
-                'K' => (byte)CastlingRights.WK,
-                'Q' => (byte)CastlingRights.WQ,
-                'k' => (byte)CastlingRights.BK,
-                'q' => (byte)CastlingRights.BQ,
+                'K' => CastlingRights.WK,
+                'Q' => CastlingRights.WQ,
+                'k' => CastlingRights.BK,
+                'q' => CastlingRights.BQ,
                 '-' => castle,
                 _ => throw new LynxException($"Unrecognized castling char: {castling[i]}")
             };
