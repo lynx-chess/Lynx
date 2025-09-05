@@ -2,8 +2,6 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
 
-using static Lynx.MoveGeneratorWrapper;
-
 namespace Lynx.Model;
 
 public sealed class Game : IDisposable

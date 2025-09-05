@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading.Channels;
 using static Lynx.EvaluationConstants;
 using static Lynx.TunableEvalParameters;
-using static Lynx.MoveGeneratorWrapper;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();

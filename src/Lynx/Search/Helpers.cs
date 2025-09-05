@@ -332,7 +332,7 @@ public sealed partial class Engine
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
+               MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";

@@ -9,7 +9,7 @@ public class MoveGeneratorRegressionTest : BaseTest
     {
         var position = new Position("r3k2r/pP1pqpb1/bn2pnp1/2pPN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq c6 0 1");
 
-        var moves = MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position).ToList();
+        var moves = MoveGenerator.GenerateAllMoves(position).ToList();
 
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));
@@ -24,7 +24,7 @@ public class MoveGeneratorRegressionTest : BaseTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        var captures = MoveGeneratorWrapper.MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moveSpan).ToArray().ToList();
+        var captures = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moveSpan).ToArray().ToList();
 
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));

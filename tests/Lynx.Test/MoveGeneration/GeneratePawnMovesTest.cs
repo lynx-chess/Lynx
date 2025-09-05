@@ -1,8 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 
-using static Lynx.MoveGeneratorWrapper;
-
 namespace Lynx.Test.MoveGeneration;
 
 #pragma warning disable RCS1098 // Constant values should be placed on right side of comparisons.

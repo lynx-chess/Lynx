@@ -62,10 +62,10 @@ public class PositionIdGeneration_Benchmark : BaseBenchmark
     public static IEnumerable<Position> Data =>
     [
         //Constants.EmptyBoardFEN,
-        Positions[0].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[0])[0]),
-        Positions[1].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[1])[0]),
-        Positions[2].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[2])[0]),
-        Positions[3].ClonePositionAndMakeMove(MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(Positions[3])[0])
+        Positions[0].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[0])[0]),
+        Positions[1].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[1])[0]),
+        Positions[2].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[2])[0]),
+        Positions[3].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[3])[0])
     ];
 }
 

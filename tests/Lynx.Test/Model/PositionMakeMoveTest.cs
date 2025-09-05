@@ -1,8 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 
-using static Lynx.MoveGeneratorWrapper;
-
 namespace Lynx.Test.Model;
 
 #pragma warning disable CS0618 // Type or member is obsolete

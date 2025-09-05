@@ -98,7 +98,7 @@ public class MoveToEPDStringTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        var pseudoLegalMoves = MoveGeneratorWrapper.MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
 
         var ambiguousMoves = pseudoLegalMoves
             .Where(m => m.Piece() == (int)piece && m.TargetSquare() == (int)targetSquare)

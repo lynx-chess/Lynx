@@ -203,8 +203,6 @@ using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Text;
 
-using static Lynx.MoveGeneratorWrapper;
-
 namespace Lynx.Benchmark;
 
 public class FENGeneration_Benchmark : BaseBenchmark

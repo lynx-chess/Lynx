@@ -7,7 +7,6 @@ using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 
 using static Lynx.EvaluationConstants;
-using static Lynx.MoveGeneratorWrapper;
 
 namespace Lynx.Test;
 
