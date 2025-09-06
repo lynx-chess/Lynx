@@ -137,10 +137,25 @@ public class Position : IDisposable
             _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
             _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
 
-            _castlingRightsUpdateConstants[parsedFEN.WhiteKingSideRook] = Constants.WhiteKingSideRookCastlingRight;
-            _castlingRightsUpdateConstants[parsedFEN.WhiteQueenSideRook] = Constants.WhiteQueenSideRookCastlingRight;
-            _castlingRightsUpdateConstants[parsedFEN.BlackKingSideRook] = Constants.BlackKingSideRookCastlingRight;
-            _castlingRightsUpdateConstants[parsedFEN.BlackQueenSideRook] = Constants.BlackQueenSideRookCastlingRight;
+            if (parsedFEN.WhiteKingSideRook != -1)
+            {
+                _castlingRightsUpdateConstants[parsedFEN.WhiteKingSideRook] = Constants.WhiteKingSideRookCastlingRight;
+            }
+
+            if (parsedFEN.WhiteQueenSideRook != -1)
+            {
+                _castlingRightsUpdateConstants[parsedFEN.WhiteQueenSideRook] = Constants.WhiteQueenSideRookCastlingRight;
+            }
+
+            if (parsedFEN.BlackKingSideRook != -1)
+            {
+                _castlingRightsUpdateConstants[parsedFEN.BlackKingSideRook] = Constants.BlackKingSideRookCastlingRight;
+            }
+
+            if (parsedFEN.BlackQueenSideRook != -1)
+            {
+                _castlingRightsUpdateConstants[parsedFEN.BlackQueenSideRook] = Constants.BlackQueenSideRookCastlingRight;
+            }
 
             InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
             InitialKingSquares[(int)Side.White] = whiteKingSquare;
