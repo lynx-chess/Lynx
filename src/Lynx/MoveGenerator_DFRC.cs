@@ -1,4 +1,6 @@
-﻿namespace Lynx;
+﻿using Lynx.Model;
+
+namespace Lynx;
 
 public sealed class MoveGenerator_DFRC : IMoveGenerator
 {
@@ -20,15 +22,14 @@ public sealed class MoveGenerator_DFRC : IMoveGenerator
 
     private MoveGenerator_DFRC() { }
 
-    ///// <inheritdoc/>
-    //internal GenerateCastlingMoves(ref int localIndex, Span<int> movePool, Position position)
-    //{
-    //    base.GenerateCastlingMoves(ref localIndex, movePool, position);
-    //}
+    /// <inheritdoc/>
+    internal void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, Position position)
+    {
+    }
 
-    ///// <inheritdoc/>
-    //protected IsAnyCastlingMoveValid(Position position)
-    //{
-    //    return base.IsAnyCastlingMoveValid(position);
-    //}
+    /// <inheritdoc/>
+    protected bool IsAnyCastlingMoveValid(Position position)
+    {
+        return false;
+    }
 }

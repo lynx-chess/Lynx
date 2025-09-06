@@ -23,10 +23,10 @@ public static class FENParser
 
         bool success;
         Side side;
-        byte castle = 0;
+        byte castlingRights = 0;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
-        int whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook;
+        CastlingData parseCastlingResult;
 
         try
         {
@@ -43,7 +43,7 @@ public static class FENParser
 
             side = ParseSide(unparsedStringAsSpan[parts[0]]);
 
-            (castle, whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook) = ParseCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitBoards);
+            parseCastlingResult = ParseCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitBoards, out castlingRights);
 
             (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
 
@@ -73,8 +73,8 @@ public static class FENParser
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? new(pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant,
-                whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook,
+            ? new(pieceBitBoards, occupancyBitBoards, board, side, castlingRights, enPassant,
+                parseCastlingResult,
                 halfMoveClock/*, fullMoveCounter*/)
             : throw new LynxException($"Error parsing {fen.ToString()}");
     }
@@ -161,9 +161,9 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (byte CastlingRights, int WhiteKingSideRook, int WhiteQueenSideRook, int BlackKingSideRook, int BlackQueenSideRook) ParseCastlingRights(ReadOnlySpan<char> castling, ulong[] pieceBitboards)
+    private static CastlingData ParseCastlingRights(ReadOnlySpan<char> castling, ulong[] pieceBitboards, out byte castlingRights)
     {
-        byte castle = 0;
+        castlingRights = 0;
         int whiteKingSideRook = -1;
         int whiteQueenSideRook = -1;
         int blackKingSideRook = -1;
@@ -173,13 +173,13 @@ public static class FENParser
         {
             for (int i = 0; i < castling.Length; ++i)
             {
-                castle |= castling[i] switch
+                castlingRights |= castling[i] switch
                 {
                     'K' => (byte)CastlingRights.WK,
                     'Q' => (byte)CastlingRights.WQ,
                     'k' => (byte)CastlingRights.BK,
                     'q' => (byte)CastlingRights.BQ,
-                    '-' => castle,
+                    '-' => castlingRights,
                     _ => throw new LynxException($"Unrecognized castling char: {castling[i]}")
                 };
             }
@@ -208,7 +208,7 @@ public static class FENParser
                         {
                             Debug.Assert(whiteKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingSideRook}");
 
-                            castle |= (byte)CastlingRights.WK;
+                            castlingRights |= (byte)CastlingRights.WK;
 
                             for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > Constants.InitialWhiteKingSquare; --potentialRookSquareIndex)
                             {
@@ -230,7 +230,7 @@ public static class FENParser
                         {
                             Debug.Assert(whiteQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueenSideRook}");
 
-                            castle |= (byte)CastlingRights.WQ;
+                            castlingRights |= (byte)CastlingRights.WQ;
 
                             for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < Constants.InitialWhiteKingSquare; ++potentialRookSquareIndex)
                             {
@@ -252,7 +252,7 @@ public static class FENParser
                         {
                             Debug.Assert(blackKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingSideRook}");
 
-                            castle |= (byte)CastlingRights.BK;
+                            castlingRights |= (byte)CastlingRights.BK;
 
                             for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > Constants.InitialBlackKingSquare; --potentialRookSquareIndex)
                             {
@@ -274,7 +274,7 @@ public static class FENParser
                         {
                             Debug.Assert(blackQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueenSideRook}");
 
-                            castle |= (byte)CastlingRights.BQ;
+                            castlingRights |= (byte)CastlingRights.BQ;
 
                             for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < Constants.InitialBlackKingSquare; ++potentialRookSquareIndex)
                             {
@@ -306,13 +306,13 @@ public static class FENParser
                                 if (square < whiteKing)
                                 {
                                     Debug.Assert(whiteQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueenSideRook}");
-                                    castle |= (byte)CastlingRights.WQ;
+                                    castlingRights |= (byte)CastlingRights.WQ;
                                     whiteQueenSideRook = square;
                                 }
                                 else if (square > whiteKing)
                                 {
                                     Debug.Assert(whiteKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingSideRook}");
-                                    castle |= (byte)CastlingRights.WK;
+                                    castlingRights |= (byte)CastlingRights.WK;
                                     whiteKingSideRook = square;
                                 }
                                 else
@@ -329,13 +329,13 @@ public static class FENParser
                                 if (square < blackKing)
                                 {
                                     Debug.Assert(blackQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueenSideRook}");
-                                    castle |= (byte)CastlingRights.BQ;
+                                    castlingRights |= (byte)CastlingRights.BQ;
                                     blackQueenSideRook = square;
                                 }
                                 else if (square > blackKing)
                                 {
                                     Debug.Assert(blackKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingSideRook}");
-                                    castle |= (byte)CastlingRights.BK;
+                                    castlingRights |= (byte)CastlingRights.BK;
                                     blackKingSideRook = square;
                                 }
                                 else
@@ -353,7 +353,7 @@ public static class FENParser
             }
         }
 
-        return (castle, whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook);
+        return new CastlingData(whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
