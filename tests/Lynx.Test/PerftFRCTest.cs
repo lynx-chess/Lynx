@@ -3,10 +3,7 @@ using Lynx.Model;
 
 namespace Lynx.Test;
 
-/// <summary>
-/// https://www.chessprogramming.org/Perft_Results
-/// </summary>
-[TestFixture(Category = Categories.Perft, Explicit = true)]
+[TestFixture(Category = Categories.PerftFRC, Explicit = true)]
 public class PerftFRCTest
 {
     public PerftFRCTest()
