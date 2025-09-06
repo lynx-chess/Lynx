@@ -30,9 +30,16 @@ public class Position : IDisposable
 
     private readonly byte[] _castlingRightsUpdateConstants;
 
-    public readonly int[] InitialKingSquares;
     private readonly int[] _initialKingsideRookSquares;
     private readonly int[] _initialQueensideRookSquares;
+
+#pragma warning disable S3887, CA1051
+    public readonly int[] InitialKingSquares;
+    public readonly ulong[] KingsideCastlingFreeSquares;
+    public readonly ulong[] KingsideCastlingNonAttackedSquares;
+    public readonly ulong[] QueensideCastlingFreeSquares;
+    public readonly ulong[] QueensideCastlingNonAttackedSquares;
+#pragma warning restore S3887, CA1051
 
     private BoardSquare _enPassant;
     private Side _side;
@@ -126,37 +133,39 @@ public class Position : IDisposable
             InitialKingSquares = [];
             _initialKingsideRookSquares = [];
             _initialQueensideRookSquares = [];
+            KingsideCastlingFreeSquares = [];
+            QueensideCastlingFreeSquares = [];
+            KingsideCastlingNonAttackedSquares = [];
+            QueensideCastlingNonAttackedSquares = [];
         }
         else
         {
             var whiteKingSquare = WhiteKingSquare;
             var blackKingSquare = BlackKingSquare;
 
-            // TODO as well calculate WhiteShortCastleFreeSquares, WhiteLongCastleFreeSquares, BlackShortCastleFreeSquares, BlackLongCastleFreeSquares
-
             _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
             _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
 
             var parsedCastling = parsedFEN.CastlingData;
 
-            if (parsedCastling.WhiteKingSideRook != -1)
+            if (parsedCastling.WhiteKingsideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.WhiteKingSideRook] = Constants.WhiteKingSideRookCastlingRight;
+                _castlingRightsUpdateConstants[parsedCastling.WhiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
             }
 
-            if (parsedCastling.WhiteQueenSideRook != -1)
+            if (parsedCastling.WhiteQueensideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.WhiteQueenSideRook] = Constants.WhiteQueenSideRookCastlingRight;
+                _castlingRightsUpdateConstants[parsedCastling.WhiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
             }
 
-            if (parsedCastling.BlackKingSideRook != -1)
+            if (parsedCastling.BlackKingsideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.BlackKingSideRook] = Constants.BlackKingSideRookCastlingRight;
+                _castlingRightsUpdateConstants[parsedCastling.BlackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
             }
 
-            if (parsedCastling.BlackQueenSideRook != -1)
+            if (parsedCastling.BlackQueensideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.BlackQueenSideRook] = Constants.BlackQueenSideRookCastlingRight;
+                _castlingRightsUpdateConstants[parsedCastling.BlackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
             }
 
             InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
@@ -164,12 +173,28 @@ public class Position : IDisposable
             InitialKingSquares[(int)Side.Black] = blackKingSquare;
 
             _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingsideRookSquares[(int)Side.White] = parsedCastling.WhiteKingSideRook;
-            _initialKingsideRookSquares[(int)Side.Black] = parsedCastling.BlackKingSideRook;
+            _initialKingsideRookSquares[(int)Side.White] = parsedCastling.WhiteKingsideRook;
+            _initialKingsideRookSquares[(int)Side.Black] = parsedCastling.BlackKingsideRook;
 
             _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialQueensideRookSquares[(int)Side.White] = parsedCastling.WhiteQueenSideRook;
-            _initialQueensideRookSquares[(int)Side.Black] = parsedCastling.BlackQueenSideRook;
+            _initialQueensideRookSquares[(int)Side.White] = parsedCastling.WhiteQueensideRook;
+            _initialQueensideRookSquares[(int)Side.Black] = parsedCastling.BlackQueensideRook;
+
+            KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+            KingsideCastlingFreeSquares[(int)Side.White] = parsedCastling.WhiteKingsideFreeSquares;
+            KingsideCastlingFreeSquares[(int)Side.Black] = parsedCastling.BlackKingsideFreeSquares;
+
+            KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+            KingsideCastlingNonAttackedSquares[(int)Side.White] = parsedCastling.WhiteKingsideNonAttackedSquares;
+            KingsideCastlingNonAttackedSquares[(int)Side.Black] = parsedCastling.BlackKingsideNonAttackedSquares;
+
+            QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+            QueensideCastlingFreeSquares[(int)Side.White] = parsedCastling.WhiteQueensideFreeSquares;
+            QueensideCastlingFreeSquares[(int)Side.Black] = parsedCastling.BlackQueensideFreeSquares;
+
+            QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+            QueensideCastlingNonAttackedSquares[(int)Side.White] = parsedCastling.WhiteQueensideNonAttackedSquares;
+            QueensideCastlingNonAttackedSquares[(int)Side.Black] = parsedCastling.BlackQueensideNonAttackedSquares;
         }
 
         Validate();
@@ -216,6 +241,10 @@ public class Position : IDisposable
             InitialKingSquares = [];
             _initialKingsideRookSquares = [];
             _initialQueensideRookSquares = [];
+            KingsideCastlingFreeSquares = [];
+            QueensideCastlingFreeSquares = [];
+            KingsideCastlingNonAttackedSquares = [];
+            QueensideCastlingNonAttackedSquares = [];
         }
         else
         {
@@ -230,6 +259,22 @@ public class Position : IDisposable
             _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialQueensideRookSquares[(int)Side.White] = position._initialQueensideRookSquares[(int)Side.White];
             _initialQueensideRookSquares[(int)Side.Black] = position._initialQueensideRookSquares[(int)Side.Black];
+
+            KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+            KingsideCastlingFreeSquares[(int)Side.White] = position.KingsideCastlingFreeSquares[(int)Side.White];
+            KingsideCastlingFreeSquares[(int)Side.Black] = position.KingsideCastlingFreeSquares[(int)Side.Black];
+
+            KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+            KingsideCastlingNonAttackedSquares[(int)Side.White] = position.KingsideCastlingNonAttackedSquares[(int)Side.White];
+            KingsideCastlingNonAttackedSquares[(int)Side.Black] = position.KingsideCastlingNonAttackedSquares[(int)Side.Black];
+
+            QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+            QueensideCastlingFreeSquares[(int)Side.White] = position.QueensideCastlingFreeSquares[(int)Side.White];
+            QueensideCastlingFreeSquares[(int)Side.Black] = position.QueensideCastlingFreeSquares[(int)Side.Black];
+
+            QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+            QueensideCastlingNonAttackedSquares[(int)Side.White] = position.QueensideCastlingNonAttackedSquares[(int)Side.White];
+            QueensideCastlingNonAttackedSquares[(int)Side.Black] = position.QueensideCastlingNonAttackedSquares[(int)Side.Black];
         }
 
         Validate();
@@ -2370,6 +2415,10 @@ public class Position : IDisposable
         ArrayPool<int>.Shared.Return(InitialKingSquares, clearArray: true);
         ArrayPool<int>.Shared.Return(_initialKingsideRookSquares, clearArray: true);
         ArrayPool<int>.Shared.Return(_initialQueensideRookSquares, clearArray: true);
+        ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares, clearArray: true);
+        ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares, clearArray: true);
+        ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares, clearArray: true);
+        ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares, clearArray: true);
 
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments

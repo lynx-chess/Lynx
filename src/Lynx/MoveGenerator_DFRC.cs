@@ -28,7 +28,7 @@ public sealed class MoveGenerator_DFRC : IMoveGenerator
     }
 
     /// <inheritdoc/>
-    protected bool IsAnyCastlingMoveValid(Position position)
+    private bool IsAnyCastlingMoveValid(Position position)
     {
         return false;
     }

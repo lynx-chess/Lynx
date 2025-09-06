@@ -4,21 +4,51 @@
 
 public readonly ref struct CastlingData
 {
-    public readonly int WhiteKingSideRook;
-    public readonly int WhiteQueenSideRook;
-    public readonly int BlackKingSideRook;
-    public readonly int BlackQueenSideRook;
+    public readonly ulong WhiteKingsideFreeSquares;
+    public readonly ulong WhiteQueensideFreeSquares;
+    public readonly ulong BlackKingsideFreeSquares;
+    public readonly ulong BlackQueensideFreeSquares;
+
+    public readonly ulong WhiteKingsideNonAttackedSquares;
+    public readonly ulong WhiteQueensideNonAttackedSquares;
+    public readonly ulong BlackKingsideNonAttackedSquares;
+    public readonly ulong BlackQueensideNonAttackedSquares;
+
+    public readonly int WhiteKingsideRook;
+    public readonly int WhiteQueensideRook;
+    public readonly int BlackKingsideRook;
+    public readonly int BlackQueensideRook;
 
     public CastlingData(
-        int whiteKingSideRook,
-        int whiteQueenSideRook,
-        int blackKingSideRook,
-        int blackQueenSideRook)
+        int whiteKingsideRook,
+        int whiteQueensideRook,
+        int blackKingsideRook,
+        int blackQueensideRook,
+
+        ulong whiteKingsideFreeSquares,
+        ulong whiteQueensideFreeSquares,
+        ulong blackKingsideFreeSquares,
+        ulong blackQueensideFreeSquares,
+
+        ulong whiteKingsideNonAttackedSquares,
+        ulong whiteQueensideNonAttackedSquares,
+        ulong blackKingsideNonAttackedSquares,
+        ulong blackQueensideNonAttackedSquares)
     {
-        WhiteKingSideRook = whiteKingSideRook;
-        WhiteQueenSideRook = whiteQueenSideRook;
-        BlackKingSideRook = blackKingSideRook;
-        BlackQueenSideRook = blackQueenSideRook;
+        WhiteKingsideRook = whiteKingsideRook;
+        WhiteQueensideRook = whiteQueensideRook;
+        BlackKingsideRook = blackKingsideRook;
+        BlackQueensideRook = blackQueensideRook;
+
+        WhiteKingsideFreeSquares = whiteKingsideFreeSquares;
+        WhiteQueensideFreeSquares = whiteQueensideFreeSquares;
+        BlackKingsideFreeSquares = blackKingsideFreeSquares;
+        BlackQueensideFreeSquares = blackQueensideFreeSquares;
+
+        WhiteKingsideNonAttackedSquares = whiteKingsideNonAttackedSquares;
+        WhiteQueensideNonAttackedSquares = whiteQueensideNonAttackedSquares;
+        BlackKingsideNonAttackedSquares = blackKingsideNonAttackedSquares;
+        BlackQueensideNonAttackedSquares = blackQueensideNonAttackedSquares;
     }
 }
 
