@@ -25,6 +25,8 @@ if (Configuration.GeneralSettings.EnableLogging)
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
 
+UpdateCurrentInstance();
+
 await Runner.Run(args);
 
 Thread.Sleep(2_000);
