@@ -5,7 +5,6 @@
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
-
 using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test;

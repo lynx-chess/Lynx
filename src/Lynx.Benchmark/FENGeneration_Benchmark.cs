@@ -361,7 +361,7 @@ internal struct StructCustomPosition
 
     public BoardSquare EnPassant { get; }
 
-    public CastlingRights Castle { get; }
+    public int Castle { get; }
 
     public StructCustomPosition(string fen)
     {
@@ -652,19 +652,19 @@ internal struct StructCustomPosition
         sb.Append(' ');
         var length = sb.Length;
 
-        if ((Castle & CastlingRights.WK) != default)
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((Castle & CastlingRights.WQ) != default)
+        if ((Castle & (int)CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((Castle & CastlingRights.BK) != default)
+        if ((Castle & (int)CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((Castle & CastlingRights.BQ) != default)
+        if ((Castle & (int)CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -702,7 +702,7 @@ internal readonly struct ReadonlyStructCustomPosition
 
     public BoardSquare EnPassant { get; }
 
-    public CastlingRights Castle { get; }
+    public int Castle { get; }
 
     public ReadonlyStructCustomPosition(string fen)
     {
@@ -993,19 +993,19 @@ internal readonly struct ReadonlyStructCustomPosition
         sb.Append(' ');
         var length = sb.Length;
 
-        if ((Castle & CastlingRights.WK) != default)
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((Castle & CastlingRights.WQ) != default)
+        if ((Castle & (int)CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((Castle & CastlingRights.BK) != default)
+        if ((Castle & (int)CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((Castle & CastlingRights.BQ) != default)
+        if ((Castle & (int)CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -1049,7 +1049,7 @@ internal class ClassCustomPosition
 
     public BoardSquare EnPassant { get; }
 
-    public CastlingRights Castle { get; }
+    public int Castle { get; }
 
     public ClassCustomPosition(string fen)
     {
@@ -1339,19 +1339,19 @@ internal class ClassCustomPosition
         sb.Append(' ');
         var length = sb.Length;
 
-        if ((Castle & CastlingRights.WK) != default)
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((Castle & CastlingRights.WQ) != default)
+        if ((Castle & (int)CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((Castle & CastlingRights.BK) != default)
+        if ((Castle & (int)CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((Castle & CastlingRights.BQ) != default)
+        if ((Castle & (int)CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -1395,7 +1395,7 @@ internal record class RecordClassCustomPosition
 
     public BoardSquare EnPassant { get; }
 
-    public CastlingRights Castle { get; }
+    public int Castle { get; }
 
     public RecordClassCustomPosition(string fen)
     {
@@ -1685,19 +1685,19 @@ internal record class RecordClassCustomPosition
         sb.Append(' ');
         var length = sb.Length;
 
-        if ((Castle & CastlingRights.WK) != default)
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((Castle & CastlingRights.WQ) != default)
+        if ((Castle & (int)CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((Castle & CastlingRights.BK) != default)
+        if ((Castle & (int)CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((Castle & CastlingRights.BQ) != default)
+        if ((Castle & (int)CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -1741,7 +1741,7 @@ internal record struct RecordStructCustomPosition
 
     public BoardSquare EnPassant { get; }
 
-    public CastlingRights Castle { get; }
+    public int Castle { get; }
 
     public RecordStructCustomPosition(string fen)
     {
@@ -2031,19 +2031,19 @@ internal record struct RecordStructCustomPosition
         sb.Append(' ');
         var length = sb.Length;
 
-        if ((Castle & CastlingRights.WK) != default)
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((Castle & CastlingRights.WQ) != default)
+        if ((Castle & (int)CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((Castle & CastlingRights.BK) != default)
+        if ((Castle & (int)CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((Castle & CastlingRights.BQ) != default)
+        if ((Castle & (int)CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -2567,7 +2567,7 @@ internal static class FENHelpers
     /// <param name="side">Update <see cref="Position.Side"/></param>
     /// <param name="castle">Updated <see cref="Position.Castle"/></param>
     /// <param name="enPassant">Updated <see cref="Position.EnPassant"/></param>
-    public static string UpdateSecondPartOfFEN(StringBuilder fenSb, Side side, CastlingRights castle, BoardSquare enPassant)
+    public static string UpdateSecondPartOfFEN(StringBuilder fenSb, Side side, int castle, BoardSquare enPassant)
     {
         fenSb.Append(' ');
         fenSb.Append(side == Side.White ? 'w' : 'b');
@@ -2575,19 +2575,19 @@ internal static class FENHelpers
         fenSb.Append(' ');
         var length = fenSb.Length;
 
-        if ((castle & CastlingRights.WK) != default)
+        if ((castle & (int)CastlingRights.WK) != default)
         {
             fenSb.Append('K');
         }
-        if ((castle & CastlingRights.WQ) != default)
+        if ((castle & (int)CastlingRights.WQ) != default)
         {
             fenSb.Append('Q');
         }
-        if ((castle & CastlingRights.BK) != default)
+        if ((castle & (int)CastlingRights.BK) != default)
         {
             fenSb.Append('k');
         }
-        if ((castle & CastlingRights.BQ) != default)
+        if ((castle & (int)CastlingRights.BQ) != default)
         {
             fenSb.Append('q');
         }

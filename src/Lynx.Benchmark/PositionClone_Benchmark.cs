@@ -53,7 +53,7 @@ file readonly struct Position
 
     public BoardSquare EnPassant { get; }
 
-    public CastlingRights Castle { get; }
+    public int Castle { get; }
 
     public Position(string fen)
     {

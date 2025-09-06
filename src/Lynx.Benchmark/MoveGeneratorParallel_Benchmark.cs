@@ -292,7 +292,7 @@ file static class CustomMoveGenerator
         {
             if (position.Side == Side.White)
             {
-                if (((position.Castle & CastlingRights.WK) != default)
+                if (((position.Castle & (int)CastlingRights.WK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
@@ -302,7 +302,7 @@ file static class CustomMoveGenerator
                     yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteShortCastleKingSquare, piece);
                 }
 
-                if (((position.Castle & CastlingRights.WQ) != default)
+                if (((position.Castle & (int)CastlingRights.WQ) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
@@ -315,7 +315,7 @@ file static class CustomMoveGenerator
             }
             else
             {
-                if (((position.Castle & CastlingRights.BK) != default)
+                if (((position.Castle & (int)CastlingRights.BK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
@@ -325,7 +325,7 @@ file static class CustomMoveGenerator
                     yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackShortCastleKingSquare, piece);
                 }
 
-                if (((position.Castle & CastlingRights.BQ) != default)
+                if (((position.Castle & (int)CastlingRights.BQ) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)

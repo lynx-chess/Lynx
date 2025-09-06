@@ -96,19 +96,19 @@ internal static class PositionExtensions
 
         sb.Append((int)position.Side);
 
-        if ((position.Castle & CastlingRights.WK) != default)
+        if ((position.Castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((position.Castle & CastlingRights.WQ) != default)
+        if ((position.Castle & (int)CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((position.Castle & CastlingRights.BK) != default)
+        if ((position.Castle & (int)CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((position.Castle & CastlingRights.BQ) != default)
+        if ((position.Castle & (int)CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }

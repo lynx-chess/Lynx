@@ -277,51 +277,51 @@ file static class LocalZobristTable
 
     private static readonly long WK_Hash_XOR_WQ_Hash_XOR_BK_Hash_XOR_BQ_Hash = WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash;
 
-    private static readonly Dictionary<CastlingRights, long> _castleHashDictionary = new()
+    private static readonly Dictionary<byte, long> _castleHashDictionary = new()
     {
         [0] = 0,                                // -    | -
-        [CastlingRights.WK] = WK_Hash,    // K    | -
-        [CastlingRights.WQ] = WQ_Hash,    // Q    | -
-        [CastlingRights.BK] = BK_Hash,    // -    | k
-        [CastlingRights.BQ] = BQ_Hash,    // -    | q
+        [(byte)CastlingRights.WK] = WK_Hash,    // K    | -
+        [(byte)CastlingRights.WQ] = WQ_Hash,    // Q    | -
+        [(byte)CastlingRights.BK] = BK_Hash,    // -    | k
+        [(byte)CastlingRights.BQ] = BQ_Hash,    // -    | q
 
-        [CastlingRights.WK | CastlingRights.WQ] = WK_Hash ^ WQ_Hash,    // KQ   | -
-        [CastlingRights.WK | CastlingRights.BK] = WK_Hash ^ BK_Hash,    // K    | k
-        [CastlingRights.WK | CastlingRights.BQ] = WK_Hash ^ BQ_Hash,    // K    | q
-        [CastlingRights.WQ | CastlingRights.BK] = WQ_Hash ^ BK_Hash,    // Q    | k
-        [CastlingRights.WQ | CastlingRights.BQ] = WQ_Hash ^ BQ_Hash,    // Q    | q
-        [CastlingRights.BK | CastlingRights.BQ] = BK_Hash ^ BQ_Hash,    // -    | kq
+        [(byte)CastlingRights.WK | (byte)CastlingRights.WQ] = WK_Hash ^ WQ_Hash,    // KQ   | -
+        [(byte)CastlingRights.WK | (byte)CastlingRights.BK] = WK_Hash ^ BK_Hash,    // K    | k
+        [(byte)CastlingRights.WK | (byte)CastlingRights.BQ] = WK_Hash ^ BQ_Hash,    // K    | q
+        [(byte)CastlingRights.WQ | (byte)CastlingRights.BK] = WQ_Hash ^ BK_Hash,    // Q    | k
+        [(byte)CastlingRights.WQ | (byte)CastlingRights.BQ] = WQ_Hash ^ BQ_Hash,    // Q    | q
+        [(byte)CastlingRights.BK | (byte)CastlingRights.BQ] = BK_Hash ^ BQ_Hash,    // -    | kq
 
-        [CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK] = WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
-        [CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ] = WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
-        [CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ] = WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
-        [CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ] = WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
+        [(byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK] = WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
+        [(byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ] = WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
+        [(byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ] = WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
+        [(byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ] = WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
 
-        [CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ] =       // KQ   | kq
+        [(byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ] =       // KQ   | kq
             WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateMethod(CastlingRights castle)
+    public static long CalculateMethod(byte castle)
     {
         long combinedHash = 0;
 
-        if ((castle & CastlingRights.WK) != default)
+        if ((castle & (int)CastlingRights.WK) != default)
         {
             combinedHash ^= _table[(int)BoardSquare.a8, (int)Piece.p];        // a8
         }
 
-        if ((castle & CastlingRights.WQ) != default)
+        if ((castle & (int)CastlingRights.WQ) != default)
         {
             combinedHash ^= _table[(int)BoardSquare.b8, (int)Piece.p];        // b8
         }
 
-        if ((castle & CastlingRights.BK) != default)
+        if ((castle & (int)CastlingRights.BK) != default)
         {
             combinedHash ^= _table[(int)BoardSquare.c8, (int)Piece.p];        // c8
         }
 
-        if ((castle & CastlingRights.BQ) != default)
+        if ((castle & (int)CastlingRights.BQ) != default)
         {
             combinedHash ^= _table[(int)BoardSquare.d8, (int)Piece.p];        // d8
         }
@@ -330,33 +330,33 @@ file static class LocalZobristTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long DictionaryMethod(CastlingRights castle) => _castleHashDictionary[castle];
+    public static long DictionaryMethod(byte castle) => _castleHashDictionary[castle];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long SwitchMethod(CastlingRights castle)
+    public static long SwitchMethod(byte castle)
     {
         return castle switch
         {
             0 => 0,                                // -    | -
 
-            CastlingRights.WK => WK_Hash,    // K    | -
-            CastlingRights.WQ => WQ_Hash,    // Q    | -
-            CastlingRights.BK => BK_Hash,    // -    | k
-            CastlingRights.BQ => BQ_Hash,    // -    | q
+            (byte)CastlingRights.WK => WK_Hash,    // K    | -
+            (byte)CastlingRights.WQ => WQ_Hash,    // Q    | -
+            (byte)CastlingRights.BK => BK_Hash,    // -    | k
+            (byte)CastlingRights.BQ => BQ_Hash,    // -    | q
 
-            CastlingRights.WK | CastlingRights.WQ => WK_Hash ^ WQ_Hash,    // KQ   | -
-            CastlingRights.WK | CastlingRights.BK => WK_Hash ^ BK_Hash,    // K    | k
-            CastlingRights.WK | CastlingRights.BQ => WK_Hash ^ BQ_Hash,    // K    | q
-            CastlingRights.WQ | CastlingRights.BK => WQ_Hash ^ BK_Hash,    // Q    | k
-            CastlingRights.WQ | CastlingRights.BQ => WQ_Hash ^ BQ_Hash,    // Q    | q
-            CastlingRights.BK | CastlingRights.BQ => BK_Hash ^ BQ_Hash,    // -    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => WK_Hash ^ WQ_Hash,    // KQ   | -
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK => WK_Hash ^ BK_Hash,    // K    | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => WK_Hash ^ BQ_Hash,    // K    | q
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WQ_Hash ^ BK_Hash,    // Q    | k
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WQ_Hash ^ BQ_Hash,    // Q    | q
+            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => BK_Hash ^ BQ_Hash,    // -    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK => WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
-            CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ => WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
-            CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ =>       // KQ   | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
                 WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash,
 
             _ => new()
@@ -364,7 +364,7 @@ file static class LocalZobristTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long SwitchMethodNoStaticCalculations(CastlingRights castle)
+    public static long SwitchMethodNoStaticCalculations(byte castle)
     {
 #pragma warning disable S1117 // Local variables should not shadow class fields or properties
         var WQ_Hash = _table[(int)BoardSquare.b8, (int)Piece.p];
@@ -377,24 +377,24 @@ file static class LocalZobristTable
         {
             0 => 0,                                // -    | -
 
-            CastlingRights.WK => WK_Hash,    // K    | -
-            CastlingRights.WQ => WQ_Hash,    // Q    | -
-            CastlingRights.BK => BK_Hash,    // -    | k
-            CastlingRights.BQ => BQ_Hash,    // -    | q
+            (byte)CastlingRights.WK => WK_Hash,    // K    | -
+            (byte)CastlingRights.WQ => WQ_Hash,    // Q    | -
+            (byte)CastlingRights.BK => BK_Hash,    // -    | k
+            (byte)CastlingRights.BQ => BQ_Hash,    // -    | q
 
-            CastlingRights.WK | CastlingRights.WQ => WK_Hash ^ WQ_Hash,    // KQ   | -
-            CastlingRights.WK | CastlingRights.BK => WK_Hash ^ BK_Hash,    // K    | k
-            CastlingRights.WK | CastlingRights.BQ => WK_Hash ^ BQ_Hash,    // K    | q
-            CastlingRights.WQ | CastlingRights.BK => WQ_Hash ^ BK_Hash,    // Q    | k
-            CastlingRights.WQ | CastlingRights.BQ => WQ_Hash ^ BQ_Hash,    // Q    | q
-            CastlingRights.BK | CastlingRights.BQ => BK_Hash ^ BQ_Hash,    // -    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => WK_Hash ^ WQ_Hash,    // KQ   | -
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK => WK_Hash ^ BK_Hash,    // K    | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => WK_Hash ^ BQ_Hash,    // K    | q
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WQ_Hash ^ BK_Hash,    // Q    | k
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WQ_Hash ^ BQ_Hash,    // Q    | q
+            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => BK_Hash ^ BQ_Hash,    // -    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK => WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
-            CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ => WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
-            CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ =>       // KQ   | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
                 WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash,
 
             _ => new()
@@ -402,60 +402,60 @@ file static class LocalZobristTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long SwitchMethodOrdered(CastlingRights castle)
+    public static long SwitchMethodOrdered(byte castle)
     {
         return castle switch
         {
             0 => 0,                                // -    | -
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ =>       // KQ   | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
                 WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash,
-            CastlingRights.WK | CastlingRights.WQ => WK_Hash ^ WQ_Hash,    // KQ   | -
-            CastlingRights.BK | CastlingRights.BQ => BK_Hash ^ BQ_Hash,    // -    | kq
-            CastlingRights.WK | CastlingRights.BK => WK_Hash ^ BK_Hash,    // K    | k
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK => WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
-            CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ => WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
-            CastlingRights.WK => WK_Hash,    // K    | -
-            CastlingRights.BK => BK_Hash,    // -    | k
-            CastlingRights.WQ => WQ_Hash,    // Q    | -
-            CastlingRights.BQ => BQ_Hash,    // -    | q
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => WK_Hash ^ WQ_Hash,    // KQ   | -
+            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => BK_Hash ^ BQ_Hash,    // -    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK => WK_Hash ^ BK_Hash,    // K    | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
+            (byte)CastlingRights.WK => WK_Hash,    // K    | -
+            (byte)CastlingRights.BK => BK_Hash,    // -    | k
+            (byte)CastlingRights.WQ => WQ_Hash,    // Q    | -
+            (byte)CastlingRights.BQ => BQ_Hash,    // -    | q
 
-            CastlingRights.WK | CastlingRights.BQ => WK_Hash ^ BQ_Hash,    // K    | q
-            CastlingRights.WQ | CastlingRights.BK => WQ_Hash ^ BK_Hash,    // Q    | k
-            CastlingRights.WQ | CastlingRights.BQ => WQ_Hash ^ BQ_Hash,    // Q    | q
+            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => WK_Hash ^ BQ_Hash,    // K    | q
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WQ_Hash ^ BK_Hash,    // Q    | k
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WQ_Hash ^ BQ_Hash,    // Q    | q
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
-            CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
 
             _ => new()
         };
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long SwitchMethodPrecalculated(CastlingRights castle)
+    public static long SwitchMethodPrecalculated(byte castle)
     {
         return castle switch
         {
             0 => 0,                                                                                                             // -    | -
 
-            CastlingRights.WK => WK_Hash,                                                                                 // K    | -
-            CastlingRights.WQ => WQ_Hash,                                                                                 // Q    | -
-            CastlingRights.BK => BK_Hash,                                                                                 // -    | k
-            CastlingRights.BQ => BQ_Hash,                                                                                 // -    | q
+            (byte)CastlingRights.WK => WK_Hash,                                                                                 // K    | -
+            (byte)CastlingRights.WQ => WQ_Hash,                                                                                 // Q    | -
+            (byte)CastlingRights.BK => BK_Hash,                                                                                 // -    | k
+            (byte)CastlingRights.BQ => BQ_Hash,                                                                                 // -    | q
 
-            CastlingRights.WK | CastlingRights.WQ => WK_Hash_XOR_WQ_Hash,                                           // KQ   | -
-            CastlingRights.WK | CastlingRights.BK => WK_Hash_XOR_BK_Hash,                                           // K    | k
-            CastlingRights.WK | CastlingRights.BQ => WK_Hash_XOR_BQ_Hash,                                           // K    | q
-            CastlingRights.WQ | CastlingRights.BK => WQ_Hash_XOR_BK_Hash,                                           // Q    | k
-            CastlingRights.WQ | CastlingRights.BQ => WQ_Hash_XOR_BQ_Hash,                                           // Q    | q
-            CastlingRights.BK | CastlingRights.BQ => BK_Hash_XOR_BQ_Hash,                                           // -    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => WK_Hash_XOR_WQ_Hash,                                           // KQ   | -
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK => WK_Hash_XOR_BK_Hash,                                           // K    | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => WK_Hash_XOR_BQ_Hash,                                           // K    | q
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WQ_Hash_XOR_BK_Hash,                                           // Q    | k
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WQ_Hash_XOR_BQ_Hash,                                           // Q    | q
+            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => BK_Hash_XOR_BQ_Hash,                                           // -    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK => WK_Hash_XOR_WQ_Hash_XOR_BK_Hash,     // KQ   | k
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ => WK_Hash_XOR_WQ_Hash_XOR_BQ_Hash,     // KQ   | q
-            CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ => WK_Hash_XOR_BK_Hash_XOR_BQ_Hash,     // K    | kq
-            CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ => WQ_Hash_XOR_BK_Hash_XOR_BQ_Hash,     // Q    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WK_Hash_XOR_WQ_Hash_XOR_BK_Hash,     // KQ   | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WK_Hash_XOR_WQ_Hash_XOR_BQ_Hash,     // KQ   | q
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WK_Hash_XOR_BK_Hash_XOR_BQ_Hash,     // K    | kq
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WQ_Hash_XOR_BK_Hash_XOR_BQ_Hash,     // Q    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ =>            // KQ   | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>            // KQ   | kq
                 WK_Hash_XOR_WQ_Hash_XOR_BK_Hash_XOR_BQ_Hash,
 
 #pragma warning disable S112 // General or reserved exceptions should never be thrown

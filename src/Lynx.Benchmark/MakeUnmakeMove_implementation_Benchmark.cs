@@ -304,7 +304,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
         public BoardSquare EnPassant { get; private set; }
 
-        public CastlingRights Castle { get; private set; }
+        public byte Castle { get; private set; }
 
         public MakeMovePosition(string fen) : this(FENParser.ParseFEN(fen))
         {
@@ -831,7 +831,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         public MakeMoveGameStateWithZobristKey MakeMove_WithZobristKey_PreSwitchSpecialMove(Move move)
         {
             int capturedPiece = -1;
-            var castleCopy = Castle;
+            byte castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
             var uniqueIdentifierCopy = UniqueIdentifier;
 
@@ -943,7 +943,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         {
             int capturedPiece = -1;
 
-            var castleCopy = Castle;
+            byte castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
             var uniqueIdentifierCopy = UniqueIdentifier;
 
@@ -1374,11 +1374,11 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
     {
         public readonly int CapturedPiece;
 
-        public readonly CastlingRights Castle;
+        public readonly byte Castle;
 
         public readonly BoardSquare EnPassant;
 
-        public MakeMoveGameState(int capturedPiece, CastlingRights castle, BoardSquare enpassant)
+        public MakeMoveGameState(int capturedPiece, byte castle, BoardSquare enpassant)
         {
             CapturedPiece = capturedPiece;
             Castle = castle;
@@ -1394,9 +1394,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
         public readonly BoardSquare EnPassant;
 
-        public readonly CastlingRights Castle;
+        public readonly byte Castle;
 
-        public MakeMoveGameStateWithZobristKey(int capturedPiece, CastlingRights castle, BoardSquare enpassant, ulong zobristKey)
+        public MakeMoveGameStateWithZobristKey(int capturedPiece, byte castle, BoardSquare enpassant, ulong zobristKey)
         {
             CapturedPiece = capturedPiece;
             Castle = castle;
@@ -1445,26 +1445,26 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <see cref="BoardSquare.c8"/> for <see cref="CastlingRights.BK"/>, <see cref="BoardSquare.d8"/> for <see cref="CastlingRights.BQ"/>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong CastleHash(CastlingRights castle)
+        public static ulong CastleHash(byte castle)
         {
             ulong combinedHash = 0;
 
-            if ((castle & CastlingRights.WK) != default)
+            if ((castle & (int)CastlingRights.WK) != default)
             {
                 combinedHash ^= _table[(int)BoardSquare.a8, (int)Piece.p];        // a8
             }
 
-            if ((castle & CastlingRights.WQ) != default)
+            if ((castle & (int)CastlingRights.WQ) != default)
             {
                 combinedHash ^= _table[(int)BoardSquare.b8, (int)Piece.p];        // b8
             }
 
-            if ((castle & CastlingRights.BK) != default)
+            if ((castle & (int)CastlingRights.BK) != default)
             {
                 combinedHash ^= _table[(int)BoardSquare.c8, (int)Piece.p];        // c8
             }
 
-            if ((castle & CastlingRights.BQ) != default)
+            if ((castle & (int)CastlingRights.BQ) != default)
             {
                 combinedHash ^= _table[(int)BoardSquare.d8, (int)Piece.p];        // d8
             }
@@ -1665,7 +1665,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 if (position.Side == Side.White)
                 {
                     bool ise1Attacked = MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
-                    if (((position.Castle & CastlingRights.WK) != default)
+                    if (((position.Castle & (int)CastlingRights.WK) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
                         && !ise1Attacked
@@ -1675,7 +1675,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         movePool[localIndex++] = MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteShortCastleKingSquare, piece);
                     }
 
-                    if (((position.Castle & CastlingRights.WQ) != default)
+                    if (((position.Castle & (int)CastlingRights.WQ) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
@@ -1689,7 +1689,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 else
                 {
                     bool ise8Attacked = MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide);
-                    if (((position.Castle & CastlingRights.BK) != default)
+                    if (((position.Castle & (int)CastlingRights.BK) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
                         && !ise8Attacked
@@ -1699,7 +1699,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         movePool[localIndex++] = MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackShortCastleKingSquare, piece);
                     }
 
-                    if (((position.Castle & CastlingRights.BQ) != default)
+                    if (((position.Castle & (int)CastlingRights.BQ) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
