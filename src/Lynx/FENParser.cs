@@ -26,6 +26,7 @@ public static class FENParser
         byte castle = 0;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
+        int whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook;
 
         try
         {
@@ -42,7 +43,7 @@ public static class FENParser
 
             side = ParseSide(unparsedStringAsSpan[parts[0]]);
 
-            castle = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
+            (castle, whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook) = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
 
             (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
 
@@ -72,7 +73,9 @@ public static class FENParser
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? new(pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            ? new(pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant,
+                whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook,
+                halfMoveClock/*, fullMoveCounter*/)
             : throw new LynxException($"Error parsing {fen.ToString()}");
     }
 
@@ -158,25 +161,41 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static byte ParseCastlingRights(ReadOnlySpan<char> castling)
+    private static (byte CastlingRights, int WhiteKingSideRook, int WhiteQueenSideRook, int BlackKingSideRook, int BlackQueenSideRook) ParseCastlingRights(ReadOnlySpan<char> castling)
     {
-        // TODO add FRC X-FEN support
         byte castle = 0;
+        int whiteKingSideRook = -1;
+        int whiteQueenSideRook = -1;
+        int blackKingSideRook = -1;
+        int blackQueenSideRook = -1;
 
-        for (int i = 0; i < castling.Length; ++i)
+        if (!Configuration.EngineSettings.IsChess960)
         {
-            castle |= castling[i] switch
+            for (int i = 0; i < castling.Length; ++i)
             {
-                'K' => (byte)CastlingRights.WK,
-                'Q' => (byte)CastlingRights.WQ,
-                'k' => (byte)CastlingRights.BK,
-                'q' => (byte)CastlingRights.BQ,
-                '-' => castle,
-                _ => throw new LynxException($"Unrecognized castling char: {castling[i]}")
-            };
+                castle |= castling[i] switch
+                {
+                    'K' => (byte)CastlingRights.WK,
+                    'Q' => (byte)CastlingRights.WQ,
+                    'k' => (byte)CastlingRights.BK,
+                    'q' => (byte)CastlingRights.BQ,
+                    '-' => castle,
+                    _ => throw new LynxException($"Unrecognized castling char: {castling[i]}")
+                };
+            }
+
+            whiteKingSideRook = (int)BoardSquare.h1;
+            whiteQueenSideRook = (int)BoardSquare.a1;
+            blackKingSideRook = (int)BoardSquare.h8;
+            blackQueenSideRook = (int)BoardSquare.a8;
+        }
+        else
+        {
+            // TODO
+            ;
         }
 
-        return castle;
+        return (castle, whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
