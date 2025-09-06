@@ -118,18 +118,17 @@ public class Position : IDisposable
 
         _isIncrementalEval = false;
 
+        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
+        Array.Fill(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
+
         if (_castle == (int)CastlingRights.None)
         {
-            _castlingRightsUpdateConstants = [];
             InitialKingSquares = [];
             _initialKingSideRookSquares = [];
             _initialQueenSideRookSquares = [];
         }
         else
         {
-            _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
-            Array.Fill<byte>(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
-
             var whiteKingSquare = WhiteKingSquare;
             var blackKingSquare = BlackKingSquare;
 
@@ -191,10 +190,12 @@ public class Position : IDisposable
         _incrementalEvalAccumulator = position._incrementalEvalAccumulator;
         _incrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
 
+        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
+        Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
+
         // Avoid allocating arrays when the position to clone never had castling rights
-        if (position._castlingRightsUpdateConstants.Length == 0)
+        if (position.InitialKingSquares.Length == 0)
         {
-            _castlingRightsUpdateConstants = [];
             InitialKingSquares = [];
             _initialKingSideRookSquares = [];
             _initialQueenSideRookSquares = [];
@@ -212,9 +213,6 @@ public class Position : IDisposable
             _initialQueenSideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialQueenSideRookSquares[(int)Side.White] = position._initialQueenSideRookSquares[(int)Side.White];
             _initialQueenSideRookSquares[(int)Side.Black] = position._initialQueenSideRookSquares[(int)Side.Black];
-
-            _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
-            Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
         }
 
         Validate();
