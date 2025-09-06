@@ -4,6 +4,8 @@ public static class Categories
 {
     public const string Perft = "Perft";
 
+    public const string PerftFRC = "PerftFRC";
+
     public const string LongRunning = "LongRunning";
 
     /// <summary>

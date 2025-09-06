@@ -2,7 +2,6 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
-
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
 using static Lynx.EvaluationPSQTs;
@@ -119,33 +118,43 @@ public class Position : IDisposable
 
         _isIncrementalEval = false;
 
-        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
-        Array.Fill<byte>(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
+        if (_castle == (int)CastlingRights.None)
+        {
+            _castlingRightsUpdateConstants = [];
+            InitialKingSquares = [];
+            _initialKingSideRookSquares = [];
+            _initialQueenSideRookSquares = [];
+        }
+        else
+        {
+            _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
+            Array.Fill<byte>(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
 
-        var whiteKingSquare = WhiteKingSquare;
-        var blackKingSquare = BlackKingSquare;
+            var whiteKingSquare = WhiteKingSquare;
+            var blackKingSquare = BlackKingSquare;
 
-        // TODO as well calculate WhiteShortCastleFreeSquares, WhiteLongCastleFreeSquares, BlackShortCastleFreeSquares, BlackLongCastleFreeSquares
+            // TODO as well calculate WhiteShortCastleFreeSquares, WhiteLongCastleFreeSquares, BlackShortCastleFreeSquares, BlackLongCastleFreeSquares
 
-        _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
-        _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
+            _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
+            _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
 
-        _castlingRightsUpdateConstants[parsedFEN.WhiteKingSideRook] = Constants.WhiteKingSideRookCastlingRight;
-        _castlingRightsUpdateConstants[parsedFEN.WhiteQueenSideRook] = Constants.WhiteQueenSideRookCastlingRight;
-        _castlingRightsUpdateConstants[parsedFEN.BlackKingSideRook] = Constants.BlackKingSideRookCastlingRight;
-        _castlingRightsUpdateConstants[parsedFEN.BlackQueenSideRook] = Constants.BlackQueenSideRookCastlingRight;
+            _castlingRightsUpdateConstants[parsedFEN.WhiteKingSideRook] = Constants.WhiteKingSideRookCastlingRight;
+            _castlingRightsUpdateConstants[parsedFEN.WhiteQueenSideRook] = Constants.WhiteQueenSideRookCastlingRight;
+            _castlingRightsUpdateConstants[parsedFEN.BlackKingSideRook] = Constants.BlackKingSideRookCastlingRight;
+            _castlingRightsUpdateConstants[parsedFEN.BlackQueenSideRook] = Constants.BlackQueenSideRookCastlingRight;
 
-        InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
-        InitialKingSquares[(int)Side.White] = whiteKingSquare;
-        InitialKingSquares[(int)Side.Black] = blackKingSquare;
+            InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
+            InitialKingSquares[(int)Side.White] = whiteKingSquare;
+            InitialKingSquares[(int)Side.Black] = blackKingSquare;
 
-        _initialKingSideRookSquares = ArrayPool<int>.Shared.Rent(2);
-        _initialKingSideRookSquares[(int)Side.White] = parsedFEN.WhiteKingSideRook;
-        _initialKingSideRookSquares[(int)Side.Black] = parsedFEN.BlackKingSideRook;
+            _initialKingSideRookSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialKingSideRookSquares[(int)Side.White] = parsedFEN.WhiteKingSideRook;
+            _initialKingSideRookSquares[(int)Side.Black] = parsedFEN.BlackKingSideRook;
 
-        _initialQueenSideRookSquares = ArrayPool<int>.Shared.Rent(2);
-        _initialQueenSideRookSquares[(int)Side.White] = parsedFEN.WhiteQueenSideRook;
-        _initialQueenSideRookSquares[(int)Side.Black] = parsedFEN.BlackQueenSideRook;
+            _initialQueenSideRookSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialQueenSideRookSquares[(int)Side.White] = parsedFEN.WhiteQueenSideRook;
+            _initialQueenSideRookSquares[(int)Side.Black] = parsedFEN.BlackQueenSideRook;
+        }
 
         Validate();
     }
@@ -182,20 +191,31 @@ public class Position : IDisposable
         _incrementalEvalAccumulator = position._incrementalEvalAccumulator;
         _incrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
 
-        InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
-        InitialKingSquares[(int)Side.White] = position.InitialKingSquares[(int)Side.White];
-        InitialKingSquares[(int)Side.Black] = position.InitialKingSquares[(int)Side.Black];
+        // Avoid allocating arrays when the position to clone never had castling rights
+        if (position._castlingRightsUpdateConstants.Length == 0)
+        {
+            _castlingRightsUpdateConstants = [];
+            InitialKingSquares = [];
+            _initialKingSideRookSquares = [];
+            _initialQueenSideRookSquares = [];
+        }
+        else
+        {
+            InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
+            InitialKingSquares[(int)Side.White] = position.InitialKingSquares[(int)Side.White];
+            InitialKingSquares[(int)Side.Black] = position.InitialKingSquares[(int)Side.Black];
 
-        _initialKingSideRookSquares = ArrayPool<int>.Shared.Rent(2);
-        _initialKingSideRookSquares[(int)Side.White] = position._initialKingSideRookSquares[(int)Side.White];
-        _initialKingSideRookSquares[(int)Side.Black] = position._initialKingSideRookSquares[(int)Side.Black];
+            _initialKingSideRookSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialKingSideRookSquares[(int)Side.White] = position._initialKingSideRookSquares[(int)Side.White];
+            _initialKingSideRookSquares[(int)Side.Black] = position._initialKingSideRookSquares[(int)Side.Black];
 
-        _initialQueenSideRookSquares = ArrayPool<int>.Shared.Rent(2);
-        _initialQueenSideRookSquares[(int)Side.White] = position._initialQueenSideRookSquares[(int)Side.White];
-        _initialQueenSideRookSquares[(int)Side.Black] = position._initialQueenSideRookSquares[(int)Side.Black];
+            _initialQueenSideRookSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialQueenSideRookSquares[(int)Side.White] = position._initialQueenSideRookSquares[(int)Side.White];
+            _initialQueenSideRookSquares[(int)Side.Black] = position._initialQueenSideRookSquares[(int)Side.Black];
 
-        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
-        Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
+            _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
+            Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
+        }
 
         Validate();
     }
@@ -856,14 +876,14 @@ public class Position : IDisposable
             if ((_castle & (int)CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
-                Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
+                Debug.Assert(whiteRooks.GetBit(_initialKingSideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialKingSideRookSquares[(int)Side.White]} when short castling rights");
                 Debug.Assert(_initialKingSideRookSquares[(int)Side.White] != -1, failureMessage, "White initial kingside rook not set");
             }
 
             if ((_castle & (int)CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
-                Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), failureMessage, "No white rook on a1 when long castling rights");
+                Debug.Assert(whiteRooks.GetBit(_initialQueenSideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialQueenSideRookSquares[(int)Side.White]} when long castling rights");
                 Debug.Assert(_initialQueenSideRookSquares[(int)Side.White] != -1, failureMessage, "White initial queenside rook not set");
             }
 
@@ -872,14 +892,14 @@ public class Position : IDisposable
             if ((_castle & (int)CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
-                Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
+                Debug.Assert(blackRooks.GetBit(_initialKingSideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialKingSideRookSquares[(int)Side.Black]} when short castling rights");
                 Debug.Assert(_initialKingSideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial kingside rook not set");
             }
 
             if ((_castle & (int)CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
-                Debug.Assert(blackRooks.GetBit(BoardSquare.a8), failureMessage, "No black rook on a8 when long castling rights");
+                Debug.Assert(blackRooks.GetBit(_initialQueenSideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialQueenSideRookSquares[(int)Side.Black]} when long castling rights");
                 Debug.Assert(_initialQueenSideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial queenside rook not set");
             }
         }
@@ -2118,27 +2138,53 @@ public class Position : IDisposable
         sb.Append(_side == Side.White ? 'w' : 'b');
 
         sb.Append(' ');
-        var length = sb.Length;
+        var lengthBeforeCastlingRights = sb.Length;
 
-        // TODO X-FEN support
-        if ((_castle & (int)CastlingRights.WK) != default)
+        if (!Configuration.EngineSettings.IsChess960)
         {
-            sb.Append('K');
+            if ((_castle & (int)CastlingRights.WK) != default)
+            {
+                sb.Append('K');
+            }
+            if ((_castle & (int)CastlingRights.WQ) != default)
+            {
+                sb.Append('Q');
+            }
+            if ((_castle & (int)CastlingRights.BK) != default)
+            {
+                sb.Append('k');
+            }
+            if ((_castle & (int)CastlingRights.BQ) != default)
+            {
+                sb.Append('q');
+            }
         }
-        if ((_castle & (int)CastlingRights.WQ) != default)
+        else
         {
-            sb.Append('Q');
-        }
-        if ((_castle & (int)CastlingRights.BK) != default)
-        {
-            sb.Append('k');
-        }
-        if ((_castle & (int)CastlingRights.BQ) != default)
-        {
-            sb.Append('q');
+            // Shredder-FEN style (always showing columns), no support for X-FEN style yet (showking KQkq when not-ambiguous)
+            if ((_castle & (int)CastlingRights.WK) != default)
+            {
+                char file = (char)('A' + Constants.File[_initialKingSideRookSquares[(int)Side.White]]);
+                sb.Append(file);
+            }
+            if ((_castle & (int)CastlingRights.WQ) != default)
+            {
+                char file = (char)('A' + Constants.File[_initialQueenSideRookSquares[(int)Side.White]]);
+                sb.Append(file);
+            }
+            if ((_castle & (int)CastlingRights.BK) != default)
+            {
+                char file = (char)('a' + Constants.File[_initialKingSideRookSquares[(int)Side.Black]]);
+                sb.Append(file);
+            }
+            if ((_castle & (int)CastlingRights.BQ) != default)
+            {
+                char file = (char)('a' + Constants.File[_initialQueenSideRookSquares[(int)Side.Black]]);
+                sb.Append(file);
+            }
         }
 
-        if (sb.Length == length)
+        if (sb.Length == lengthBeforeCastlingRights)
         {
             sb.Append('-');
         }
@@ -2201,12 +2247,43 @@ public class Position : IDisposable
         Console.WriteLine($"    Side:\t{_side}");
         Console.WriteLine($"    Enpassant:\t{(_enPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_enPassant])}");
         // TODO X-FEN
-        Console.WriteLine($"    Castling:\t" +
-            $"{((_castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
-            $"{((_castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +
-            $"{((_castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
-            $"{((_castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
-            );
+
+        if (!Configuration.EngineSettings.IsChess960)
+        {
+            Console.WriteLine($"    Castling:\t" +
+                $"{((_castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
+                $"{((_castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +
+                $"{((_castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
+                $"{((_castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}");
+        }
+        else
+        {
+            char whitekingSide = '-', whiteQueenside = '-', blackKingside = '-', blackQueenside = '-';
+
+            if ((_castle & (int)CastlingRights.WK) != default)
+            {
+                whitekingSide = (char)('A' + Constants.File[_initialKingSideRookSquares[(int)Side.White]]);
+            }
+            if ((_castle & (int)CastlingRights.WQ) != default)
+            {
+                whiteQueenside = (char)('A' + Constants.File[_initialQueenSideRookSquares[(int)Side.White]]);
+            }
+            if ((_castle & (int)CastlingRights.BK) != default)
+            {
+                blackKingside = (char)('a' + Constants.File[_initialKingSideRookSquares[(int)Side.Black]]);
+            }
+            if ((_castle & (int)CastlingRights.BQ) != default)
+            {
+                blackQueenside = (char)('a' + Constants.File[_initialQueenSideRookSquares[(int)Side.Black]]);
+            }
+
+            Console.WriteLine($"    Castling:\t" +
+                whitekingSide +
+                $"{whiteQueenside} | " +
+                blackKingside +
+                $"{blackQueenside}");
+        }
+
         Console.WriteLine($"    FEN:\t{FEN()}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
 
@@ -2273,6 +2350,7 @@ public class Position : IDisposable
         ArrayPool<BitBoard>.Shared.Return(_pieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards, clearArray: true);
         ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
+
         ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
         ArrayPool<int>.Shared.Return(InitialKingSquares, clearArray: true);
         ArrayPool<int>.Shared.Return(_initialKingSideRookSquares, clearArray: true);

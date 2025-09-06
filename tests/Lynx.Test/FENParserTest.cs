@@ -75,8 +75,8 @@ public class FENParserTest
         Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.g6));
         Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.h3));
 
-        Assert.True(pieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
-        Assert.True(pieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
+        Assert.True(pieceBitBoards[(int)Piece.r].GetBit(Constants.InitialBlackQueensideRookSquare));
+        Assert.True(pieceBitBoards[(int)Piece.r].GetBit(Constants.InitialBlackKingsideRookSquare));
 
         Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquare.b6));
         Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquare.f6));
@@ -96,8 +96,8 @@ public class FENParserTest
         Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.g2));
         Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.h2));
 
-        Assert.True(pieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
-        Assert.True(pieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
+        Assert.True(pieceBitBoards[(int)Piece.R].GetBit(Constants.InitialWhiteQueensideRookSquare));
+        Assert.True(pieceBitBoards[(int)Piece.R].GetBit(Constants.InitialWhiteKingsideRookSquare));
 
         Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquare.c3));
         Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquare.e5));

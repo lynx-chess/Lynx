@@ -43,7 +43,7 @@ public static class FENParser
 
             side = ParseSide(unparsedStringAsSpan[parts[0]]);
 
-            (castle, whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook) = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
+            (castle, whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook) = ParseCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitBoards);
 
             (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
 
@@ -161,7 +161,7 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (byte CastlingRights, int WhiteKingSideRook, int WhiteQueenSideRook, int BlackKingSideRook, int BlackQueenSideRook) ParseCastlingRights(ReadOnlySpan<char> castling)
+    private static (byte CastlingRights, int WhiteKingSideRook, int WhiteQueenSideRook, int BlackKingSideRook, int BlackQueenSideRook) ParseCastlingRights(ReadOnlySpan<char> castling, ulong[] pieceBitboards)
     {
         byte castle = 0;
         int whiteKingSideRook = -1;
@@ -184,15 +184,173 @@ public static class FENParser
                 };
             }
 
-            whiteKingSideRook = (int)BoardSquare.h1;
-            whiteQueenSideRook = (int)BoardSquare.a1;
-            blackKingSideRook = (int)BoardSquare.h8;
-            blackQueenSideRook = (int)BoardSquare.a8;
+            whiteKingSideRook = Constants.InitialWhiteKingsideRookSquare;
+            whiteQueenSideRook = Constants.InitialWhiteQueensideRookSquare;
+            blackKingSideRook = Constants.InitialBlackKingsideRookSquare;
+            blackQueenSideRook = Constants.InitialBlackQueensideRookSquare;
         }
         else
         {
-            // TODO
-            ;
+            // X-FEN uses KQkq notation when not ambiguous, with the letters referring to "the outermost rook of the affected side"
+
+            var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
+            var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
+
+            Debug.Assert(whiteKing != 0);
+            Debug.Assert(blackKing != 0);
+
+            for (int i = 0; i < castling.Length; ++i)
+            {
+                var ch = castling[i];
+                switch (ch)
+                {
+                    case 'K':
+                        {
+                            Debug.Assert(whiteKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingSideRook}");
+
+                            castle |= (byte)CastlingRights.WK;
+
+                            for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > Constants.InitialWhiteKingSquare; --potentialRookSquareIndex)
+                            {
+                                if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                                {
+                                    whiteKingSideRook = potentialRookSquareIndex;
+                                    break;
+                                }
+                            }
+
+                            if (whiteKingSideRook == -1)
+                            {
+                                throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
+                            }
+
+                            break;
+                        }
+                    case 'Q':
+                        {
+                            Debug.Assert(whiteQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueenSideRook}");
+
+                            castle |= (byte)CastlingRights.WQ;
+
+                            for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < Constants.InitialWhiteKingSquare; ++potentialRookSquareIndex)
+                            {
+                                if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                                {
+                                    whiteQueenSideRook = potentialRookSquareIndex;
+                                    break;
+                                }
+                            }
+
+                            if (whiteQueenSideRook == -1)
+                            {
+                                throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
+                            }
+
+                            break;
+                        }
+                    case 'k':
+                        {
+                            Debug.Assert(blackKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingSideRook}");
+
+                            castle |= (byte)CastlingRights.BK;
+
+                            for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > Constants.InitialBlackKingSquare; --potentialRookSquareIndex)
+                            {
+                                if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                                {
+                                    blackKingSideRook = potentialRookSquareIndex;
+                                    break;
+                                }
+                            }
+
+                            if (blackKingSideRook == -1)
+                            {
+                                throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
+                            }
+
+                            break;
+                        }
+                    case 'q':
+                        {
+                            Debug.Assert(blackQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueenSideRook}");
+
+                            castle |= (byte)CastlingRights.BQ;
+
+                            for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < Constants.InitialBlackKingSquare; ++potentialRookSquareIndex)
+                            {
+                                if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                                {
+                                    blackQueenSideRook = potentialRookSquareIndex;
+                                    break;
+                                }
+                            }
+
+                            if (blackQueenSideRook == -1)
+                            {
+                                throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
+                            }
+
+                            break;
+                        }
+                    case '-':
+                        {
+                            //castle |= (byte)CastlingRights.None;
+                            break;
+                        }
+                    default:
+                        {
+                            if (ch >= 'A' && ch <= 'H')
+                            {
+                                var square = BitBoardExtensions.SquareIndex(rank: 7, file: ch - 'A');
+
+                                if (square < whiteKing)
+                                {
+                                    Debug.Assert(whiteQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueenSideRook}");
+                                    castle |= (byte)CastlingRights.WQ;
+                                    whiteQueenSideRook = square;
+                                }
+                                else if (square > whiteKing)
+                                {
+                                    Debug.Assert(whiteKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingSideRook}");
+                                    castle |= (byte)CastlingRights.WK;
+                                    whiteKingSideRook = square;
+                                }
+                                else
+                                {
+                                    throw new LynxException($"Invalid castle character {ch}: it matches white king square ({square})");
+                                }
+
+                                break;
+                            }
+                            else if (ch >= 'a' && ch <= 'h')
+                            {
+                                var square = BitBoardExtensions.SquareIndex(rank: 0, file: ch - 'a');
+
+                                if (square < blackKing)
+                                {
+                                    Debug.Assert(blackQueenSideRook == -1, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueenSideRook}");
+                                    castle |= (byte)CastlingRights.BQ;
+                                    blackQueenSideRook = square;
+                                }
+                                else if (square > blackKing)
+                                {
+                                    Debug.Assert(blackKingSideRook == -1, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingSideRook}");
+                                    castle |= (byte)CastlingRights.BK;
+                                    blackKingSideRook = square;
+                                }
+                                else
+                                {
+                                    throw new LynxException($"Invalid castle character {ch}: it matches black king square ({square})");
+                                }
+
+                                break;
+                            }
+
+                            throw new LynxException($"Unrecognized castle character: {ch}");
+                        }
+                }
+                ;
+            }
         }
 
         return (castle, whiteKingSideRook, whiteQueenSideRook, blackKingSideRook, blackQueenSideRook);

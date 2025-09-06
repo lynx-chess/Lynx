@@ -293,8 +293,13 @@ public static class Constants
 
     public const string CaptureTrainPositionFEN = "r2q1rk1/bppb1pp1/p2p2np/2PPp3/1P2P1n1/P3BN2/2Q1BPPP/RN3RK1 w - - 2 15";
 
-    public const int WhiteKingSourceSquare = (int)BoardSquare.e1;
-    public const int BlackKingSourceSquare = (int)BoardSquare.e8;
+    public const int InitialWhiteKingSquare = (int)BoardSquare.e1;
+    public const int InitialBlackKingSquare = (int)BoardSquare.e8;
+
+    public const int InitialWhiteKingsideRookSquare = (int)BoardSquare.h1;
+    public const int InitialWhiteQueensideRookSquare = (int)BoardSquare.a1;
+    public const int InitialBlackKingsideRookSquare = (int)BoardSquare.h8;
+    public const int InitialBlackQueensideRookSquare = (int)BoardSquare.a8;
 
     public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
     public const int BlackShortCastleKingSquare = (int)BoardSquare.g8;
