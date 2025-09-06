@@ -312,7 +312,7 @@ public interface IMoveGenerator
                 bool ise1Attacked = position.IsSquareAttacked(whiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
-                    && (castlingRights & CastlingRights.WK) != default
+                    && (castlingRights & (int)CastlingRights.WK) != default
                     && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black))
@@ -324,7 +324,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise1Attacked
-                    && (castlingRights & CastlingRights.WQ) != default
+                    && (castlingRights & (int)CastlingRights.WQ) != default
                     && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black))
@@ -342,7 +342,7 @@ public interface IMoveGenerator
                 bool ise8Attacked = position.IsSquareAttacked(blackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
-                    && (castlingRights & CastlingRights.BK) != default
+                    && (castlingRights & (int)CastlingRights.BK) != default
                     && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White))
@@ -354,7 +354,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise8Attacked
-                    && (castlingRights & CastlingRights.BQ) != default
+                    && (castlingRights & (int)CastlingRights.BQ) != default
                     && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White))
@@ -624,7 +624,7 @@ public interface IMoveGenerator
                 bool ise1Attacked = position.IsSquareAttacked(whiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
-                    && (castlingRights & CastlingRights.WK) != default
+                    && (castlingRights & (int)CastlingRights.WK) != default
                     && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black)
@@ -634,7 +634,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise1Attacked
-                    && (castlingRights & CastlingRights.WQ) != default
+                    && (castlingRights & (int)CastlingRights.WQ) != default
                     && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black)
@@ -650,7 +650,7 @@ public interface IMoveGenerator
                 bool ise8Attacked = position.IsSquareAttacked(blackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
-                    && (castlingRights & CastlingRights.BK) != default
+                    && (castlingRights & (int)CastlingRights.BK) != default
                     && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White)
@@ -660,7 +660,7 @@ public interface IMoveGenerator
                 }
 
                 if (!ise8Attacked
-                    && (castlingRights & CastlingRights.BQ) != default
+                    && (castlingRights & (int)CastlingRights.BQ) != default
                     && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White)

@@ -27,9 +27,9 @@ public class Position : IDisposable
     private readonly ulong[] _occupancyBitBoards;
     private readonly int[] _board;
 
-    private CastlingRights _castle;
+    private byte _castle;
 
-    private readonly CastlingRights[] _castlingRightsUpdateConstants;
+    private readonly byte[] _castlingRightsUpdateConstants;
 
     public readonly int[] InitialKingSquares;
     private readonly int[] _initialKingSideRookSquares;
@@ -72,7 +72,7 @@ public class Position : IDisposable
     /// <summary>
     /// See <see cref="<CastlingRights"/>
     /// </summary>
-    public CastlingRights Castle { get => _castle; private set => _castle = value; }
+    public byte Castle { get => _castle; private set => _castle = value; }
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
@@ -119,8 +119,8 @@ public class Position : IDisposable
 
         _isIncrementalEval = false;
 
-        _castlingRightsUpdateConstants = ArrayPool<CastlingRights>.Shared.Rent(64);
-        Array.Fill<CastlingRights>(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
+        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
+        Array.Fill<byte>(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
 
         var whiteKingSquare = WhiteKingSquare;
         var blackKingSquare = BlackKingSquare;
@@ -201,7 +201,7 @@ public class Position : IDisposable
         _initialQueenSideRookSquares[(int)Side.White] = position._initialQueenSideRookSquares[(int)Side.White];
         _initialQueenSideRookSquares[(int)Side.Black] = position._initialQueenSideRookSquares[(int)Side.Black];
 
-        _castlingRightsUpdateConstants = ArrayPool<CastlingRights>.Shared.Rent(64);
+        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
 
         Validate();
@@ -860,13 +860,13 @@ public class Position : IDisposable
             var whiteKingSourceSquare = InitialKingSquares[(int)Side.White];
 
             // Castling rights and king/rook positions
-            if ((_castle & CastlingRights.WK) != 0)
+            if ((_castle & (int)CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
             }
 
-            if ((_castle & CastlingRights.WQ) != 0)
+            if ((_castle & (int)CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.a1), failureMessage, "No white rook on a1 when long castling rights");
@@ -874,14 +874,14 @@ public class Position : IDisposable
 
             var blackKingSourceSquare = InitialKingSquares[(int)Side.Black];
 
-            if ((_castle & CastlingRights.BK) != 0)
+            if ((_castle & (int)CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
 
             }
 
-            if ((_castle & CastlingRights.BQ) != 0)
+            if ((_castle & (int)CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.a8), failureMessage, "No black rook on a8 when long castling rights");
@@ -2125,19 +2125,19 @@ public class Position : IDisposable
         var length = sb.Length;
 
         // TODO X-FEN support
-        if ((_castle & CastlingRights.WK) != default)
+        if ((_castle & (int)CastlingRights.WK) != default)
         {
             sb.Append('K');
         }
-        if ((_castle & CastlingRights.WQ) != default)
+        if ((_castle & (int)CastlingRights.WQ) != default)
         {
             sb.Append('Q');
         }
-        if ((_castle & CastlingRights.BK) != default)
+        if ((_castle & (int)CastlingRights.BK) != default)
         {
             sb.Append('k');
         }
-        if ((_castle & CastlingRights.BQ) != default)
+        if ((_castle & (int)CastlingRights.BQ) != default)
         {
             sb.Append('q');
         }
@@ -2206,10 +2206,10 @@ public class Position : IDisposable
         Console.WriteLine($"    Enpassant:\t{(_enPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_enPassant])}");
         // TODO X-FEN
         Console.WriteLine($"    Castling:\t" +
-            $"{((_castle & CastlingRights.WK) != default ? 'K' : '-')}" +
-            $"{((_castle & CastlingRights.WQ) != default ? 'Q' : '-')} | " +
-            $"{((_castle & CastlingRights.BK) != default ? 'k' : '-')}" +
-            $"{((_castle & CastlingRights.BQ) != default ? 'q' : '-')}"
+            $"{((_castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
+            $"{((_castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +
+            $"{((_castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
+            $"{((_castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
             );
         Console.WriteLine($"    FEN:\t{FEN()}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
@@ -2277,7 +2277,7 @@ public class Position : IDisposable
         ArrayPool<BitBoard>.Shared.Return(_pieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards, clearArray: true);
         ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
-        ArrayPool<CastlingRights>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
+        ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
         ArrayPool<int>.Shared.Return(InitialKingSquares, clearArray: true);
         ArrayPool<int>.Shared.Return(_initialKingSideRookSquares, clearArray: true);
         ArrayPool<int>.Shared.Return(_initialQueenSideRookSquares, clearArray: true);

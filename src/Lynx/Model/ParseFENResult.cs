@@ -14,14 +14,14 @@ public readonly ref struct ParseFENResult
     //public readonly int FullMoveCounter;
     public readonly BoardSquare EnPassant;
     public readonly Side Side;
-    public readonly CastlingRights Castle;
+    public readonly byte Castle;
 
     public ParseFENResult(
         BitBoard[] pieceBitBoards,
         BitBoard[] occupancyBitBoards,
         int[] board,
         Side side,
-        CastlingRights castle,
+        byte castle,
         BoardSquare enPassant,
         int halfMoveClock)
     {

@@ -92,30 +92,30 @@ public static class ZobristTable
     /// <see cref="BoardSquare.c8"/> for <see cref="CastlingRights.BK"/>, <see cref="BoardSquare.d8"/> for <see cref="CastlingRights.BQ"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong CastleHash(CastlingRights castle)
+    public static ulong CastleHash(byte castle)
     {
         return castle switch
         {
             0 => 0,                                // -    | -
 
-            CastlingRights.WK => _WK_Hash,    // K    | -
-            CastlingRights.WQ => _WQ_Hash,    // Q    | -
-            CastlingRights.BK => _BK_Hash,    // -    | k
-            CastlingRights.BQ => _BQ_Hash,    // -    | q
+            (byte)CastlingRights.WK => _WK_Hash,    // K    | -
+            (byte)CastlingRights.WQ => _WQ_Hash,    // Q    | -
+            (byte)CastlingRights.BK => _BK_Hash,    // -    | k
+            (byte)CastlingRights.BQ => _BQ_Hash,    // -    | q
 
-            CastlingRights.WK | CastlingRights.WQ => _WK_Hash ^ _WQ_Hash,    // KQ   | -
-            CastlingRights.WK | CastlingRights.BK => _WK_Hash ^ _BK_Hash,    // K    | k
-            CastlingRights.WK | CastlingRights.BQ => _WK_Hash ^ _BQ_Hash,    // K    | q
-            CastlingRights.WQ | CastlingRights.BK => _WQ_Hash ^ _BK_Hash,    // Q    | k
-            CastlingRights.WQ | CastlingRights.BQ => _WQ_Hash ^ _BQ_Hash,    // Q    | q
-            CastlingRights.BK | CastlingRights.BQ => _BK_Hash ^ _BQ_Hash,    // -    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => _WK_Hash ^ _WQ_Hash,    // KQ   | -
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK => _WK_Hash ^ _BK_Hash,    // K    | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => _WK_Hash ^ _BQ_Hash,    // K    | q
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WQ_Hash ^ _BK_Hash,    // Q    | k
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WQ_Hash ^ _BQ_Hash,    // Q    | q
+            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _BK_Hash ^ _BQ_Hash,    // -    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK => _WK_Hash ^ _WQ_Hash ^ _BK_Hash,    // KQ   | k
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ => _WK_Hash ^ _WQ_Hash ^ _BQ_Hash,    // KQ   | q
-            CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ => _WK_Hash ^ _BK_Hash ^ _BQ_Hash,    // K    | kq
-            CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ => _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,    // Q    | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WK_Hash ^ _WQ_Hash ^ _BK_Hash,    // KQ   | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WK_Hash ^ _WQ_Hash ^ _BQ_Hash,    // KQ   | q
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WK_Hash ^ _BK_Hash ^ _BQ_Hash,    // K    | kq
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,    // Q    | kq
 
-            CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ =>       // KQ   | kq
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
                 _WK_Hash ^ _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,
 
             _ => throw new LynxException($"Unexpected castle encoded number: {castle}")
