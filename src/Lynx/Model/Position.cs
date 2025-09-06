@@ -30,8 +30,8 @@ public class Position : IDisposable
 
     private readonly byte[] _castlingRightsUpdateConstants;
 
-    private readonly int[] _initialKingsideRookSquares;
-    private readonly int[] _initialQueensideRookSquares;
+    internal readonly int[] _initialKingsideRookSquares;
+    internal readonly int[] _initialQueensideRookSquares;
 
 #pragma warning disable S3887, CA1051
     public readonly int[] InitialKingSquares;
@@ -148,24 +148,28 @@ public class Position : IDisposable
 
             var parsedCastling = parsedFEN.CastlingData;
 
-            if (parsedCastling.WhiteKingsideRook != -1)
+            var whiteKingsideRook = parsedCastling.WhiteKingsideRook;
+            if (whiteKingsideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.WhiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
+                _castlingRightsUpdateConstants[whiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
             }
 
-            if (parsedCastling.WhiteQueensideRook != -1)
+            var whiteQueensideRook = parsedCastling.WhiteQueensideRook;
+            if (whiteQueensideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.WhiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
+                _castlingRightsUpdateConstants[whiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
             }
 
-            if (parsedCastling.BlackKingsideRook != -1)
+            var blackKingsideRook = parsedCastling.BlackKingsideRook;
+            if (blackKingsideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.BlackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
+                _castlingRightsUpdateConstants[blackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
             }
 
-            if (parsedCastling.BlackQueensideRook != -1)
+            var blackQueensideRook = parsedCastling.BlackQueensideRook;
+            if (blackQueensideRook != -1)
             {
-                _castlingRightsUpdateConstants[parsedCastling.BlackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
+                _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
             }
 
             InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
@@ -173,28 +177,50 @@ public class Position : IDisposable
             InitialKingSquares[(int)Side.Black] = blackKingSquare;
 
             _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingsideRookSquares[(int)Side.White] = parsedCastling.WhiteKingsideRook;
-            _initialKingsideRookSquares[(int)Side.Black] = parsedCastling.BlackKingsideRook;
+            _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
+            _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
 
             _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialQueensideRookSquares[(int)Side.White] = parsedCastling.WhiteQueensideRook;
-            _initialQueensideRookSquares[(int)Side.Black] = parsedCastling.BlackQueensideRook;
-
-            KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-            KingsideCastlingFreeSquares[(int)Side.White] = parsedCastling.WhiteKingsideFreeSquares;
-            KingsideCastlingFreeSquares[(int)Side.Black] = parsedCastling.BlackKingsideFreeSquares;
+            _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
+            _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
 
             KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            KingsideCastlingNonAttackedSquares[(int)Side.White] = parsedCastling.WhiteKingsideNonAttackedSquares;
-            KingsideCastlingNonAttackedSquares[(int)Side.Black] = parsedCastling.BlackKingsideNonAttackedSquares;
-
-            QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-            QueensideCastlingFreeSquares[(int)Side.White] = parsedCastling.WhiteQueensideFreeSquares;
-            QueensideCastlingFreeSquares[(int)Side.Black] = parsedCastling.BlackQueensideFreeSquares;
+            KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingKingsideCastlingSquare);
+            KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingKingsideCastlingSquare);
 
             QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            QueensideCastlingNonAttackedSquares[(int)Side.White] = parsedCastling.WhiteQueensideNonAttackedSquares;
-            QueensideCastlingNonAttackedSquares[(int)Side.Black] = parsedCastling.BlackQueensideNonAttackedSquares;
+            QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingQueensideCastlingSquare);
+            QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingQueensideCastlingSquare);
+
+            KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+
+            var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookKingsideCastlingSquare);
+            whiteKingsideFreeMask.PopBit(whiteKingSquare);
+            whiteKingsideFreeMask.PopBit(whiteKingsideRook);
+
+            var blackKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.Black]
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookKingsideCastlingSquare);
+            blackKingsideFreeMask.PopBit(blackKingSquare);
+            blackKingsideFreeMask.PopBit(blackKingsideRook);
+
+            KingsideCastlingFreeSquares[(int)Side.White] = whiteKingsideFreeMask;
+            KingsideCastlingFreeSquares[(int)Side.Black] = blackKingsideFreeMask;
+
+            QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+
+            var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookQueensideCastlingSquare);
+            whiteQueensideFreeMask.PopBit(whiteKingSquare);
+            whiteQueensideFreeMask.PopBit(whiteQueensideRook);
+
+            var blackQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.Black]
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookQueensideCastlingSquare);
+            blackQueensideFreeMask.PopBit(blackKingSquare);
+            blackQueensideFreeMask.PopBit(blackQueensideRook);
+
+            QueensideCastlingFreeSquares[(int)Side.White] = whiteQueensideFreeMask;
+            QueensideCastlingFreeSquares[(int)Side.Black] = blackQueensideFreeMask;
         }
 
         Validate();

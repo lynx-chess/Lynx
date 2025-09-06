@@ -299,7 +299,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteShortCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteKingKingsideCastlingSquare, piece);
                 }
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -310,7 +310,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.WhiteLongCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.WhiteKingQueensideCastlingSquare, piece);
                 }
             }
             else
@@ -322,7 +322,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackShortCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackKingKingsideCastlingSquare, piece);
                 }
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -333,7 +333,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.BlackLongCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.BlackKingQueensideCastlingSquare, piece);
                 }
             }
         }

@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using NLog;
 using System.Buffers;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -165,8 +166,6 @@ public static class FENParser
     {
         castlingRights = 0;
         int whiteKingsideRook = -1, whiteQueensideRook = -1, blackKingsideRook = -1, blackQueensideRook = -1;
-        ulong whiteKingsideFreeSquares = 0, whiteQueensideFreeSquares = 0, blackKingsideFreeSquares = 0, blackQueensideFreeSquares = 0;
-        ulong whiteKingsideNonAttackedSquares = 0, whiteQueensideNonAttackedSquares = 0, blackKingsideNonAttackedSquares = 0, blackQueensideNonAttackedSquares = 0;
 
         if (!Configuration.EngineSettings.IsChess960)
         {
@@ -209,24 +208,16 @@ public static class FENParser
 
                             castlingRights |= (byte)CastlingRights.WK;
 
-                            bool rookDetected = false;
                             for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > whiteKing; --potentialRookSquareIndex)
                             {
-                                if (rookDetected)
-                                {
-                                    whiteKingsideFreeSquares.SetBit(potentialRookSquareIndex);
-                                }
-                                else if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                                if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
                                 {
                                     whiteKingsideRook = potentialRookSquareIndex;
-                                    rookDetected = true;
+                                    break;
                                 }
                             }
 
-                            whiteKingsideNonAttackedSquares = whiteKingsideFreeSquares;
-                            whiteKingsideNonAttackedSquares.SetBit(whiteKing);
-
-                            if (!rookDetected || whiteKingsideRook == -1)
+                            if (whiteKingsideRook == -1)
                             {
                                 throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
                             }
@@ -239,24 +230,16 @@ public static class FENParser
 
                             castlingRights |= (byte)CastlingRights.WQ;
 
-                            bool rookDetected = false;
                             for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < whiteKing; ++potentialRookSquareIndex)
                             {
-                                if (rookDetected)
-                                {
-                                    whiteQueensideFreeSquares.SetBit(potentialRookSquareIndex);
-                                }
-                                else if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                                if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
                                 {
                                     whiteQueensideRook = potentialRookSquareIndex;
-                                    rookDetected = true;
+                                    break;
                                 }
                             }
 
-                            whiteQueensideNonAttackedSquares = whiteQueensideFreeSquares;
-                            whiteQueensideNonAttackedSquares.SetBit(whiteKing);
-
-                            if (!rookDetected || whiteQueensideRook == -1)
+                            if (whiteQueensideRook == -1)
                             {
                                 throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
                             }
@@ -269,24 +252,16 @@ public static class FENParser
 
                             castlingRights |= (byte)CastlingRights.BK;
 
-                            bool rookDetected = false;
                             for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > blackKing; --potentialRookSquareIndex)
                             {
-                                if (rookDetected)
-                                {
-                                    blackKingsideFreeSquares.SetBit(potentialRookSquareIndex);
-                                }
-                                else if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                                if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
                                 {
                                     blackKingsideRook = potentialRookSquareIndex;
-                                    rookDetected = true;
+                                    break;
                                 }
                             }
 
-                            blackKingsideNonAttackedSquares = blackKingsideFreeSquares;
-                            blackKingsideNonAttackedSquares.SetBit(blackKing);
-
-                            if (!rookDetected || blackKingsideRook == -1)
+                            if (blackKingsideRook == -1)
                             {
                                 throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
                             }
@@ -299,24 +274,16 @@ public static class FENParser
 
                             castlingRights |= (byte)CastlingRights.BQ;
 
-                            bool rookDetected = false;
                             for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < blackKing; ++potentialRookSquareIndex)
                             {
-                                if (rookDetected)
-                                {
-                                    blackQueensideFreeSquares.SetBit(potentialRookSquareIndex);
-                                }
-                                else if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                                if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
                                 {
                                     blackQueensideRook = potentialRookSquareIndex;
-                                    rookDetected = true;
+                                    break;
                                 }
                             }
 
-                            blackQueensideNonAttackedSquares = blackQueensideFreeSquares;
-                            blackQueensideNonAttackedSquares.SetBit(blackKing);
-
-                            if (!rookDetected || blackQueensideRook == -1)
+                            if (blackQueensideRook == -1)
                             {
                                 throw new LynxException($"Invalid castle rights: {ch} specified, but no rook found");
                             }
@@ -380,14 +347,10 @@ public static class FENParser
                             throw new LynxException($"Unrecognized castle character: {ch}");
                         }
                 }
-                ;
             }
         }
 
-        return new CastlingData(
-            whiteKingsideRook, whiteQueensideRook, blackKingsideRook, blackQueensideRook,
-            whiteKingsideFreeSquares, whiteQueensideFreeSquares, blackKingsideFreeSquares, blackQueensideFreeSquares,
-            whiteKingsideNonAttackedSquares, whiteQueensideNonAttackedSquares, blackKingsideNonAttackedSquares, blackQueensideNonAttackedSquares);
+        return new CastlingData(whiteKingsideRook, whiteQueensideRook, blackKingsideRook, blackQueensideRook);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

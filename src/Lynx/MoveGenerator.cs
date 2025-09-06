@@ -311,11 +311,11 @@ public interface IMoveGenerator
                     && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black))
                 {
-                    var whiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
+                    var whiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K);
                     movePool[localIndex++] = whiteShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
-                        $"Wrong hardcoded white short castle move, expected {whiteShortCastle}, got {MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white short castle move, expected {whiteShortCastle}, got {MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K)}");
                 }
 
                 if (!ise1Attacked
@@ -324,11 +324,11 @@ public interface IMoveGenerator
                     && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black))
                 {
-                    var whiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
+                    var whiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K);
                     movePool[localIndex++] = whiteLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
-                        $"Wrong hardcoded white long castle move, expected {whiteLongCastle}, got {MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white long castle move, expected {whiteLongCastle}, got {MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K)}");
                 }
             }
             else
@@ -343,11 +343,11 @@ public interface IMoveGenerator
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White))
                 {
-                    var blackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
+                    var blackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k);
                     movePool[localIndex++] = blackShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
-                        $"Wrong hardcoded black short castle move, expected {blackShortCastle}, got {MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black short castle move, expected {blackShortCastle}, got {MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k)}");
                 }
 
                 if (!ise8Attacked
@@ -356,11 +356,11 @@ public interface IMoveGenerator
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White))
                 {
-                    var blackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k);
+                    var blackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k);
                     movePool[localIndex++] = blackLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
-                        $"Wrong hardcoded black long castle move, expected {blackLongCastle}, got {MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black long castle move, expected {blackLongCastle}, got {MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k)}");
                 }
             }
         }
@@ -626,7 +626,7 @@ public interface IMoveGenerator
                     && (occupancy & Constants.WhiteShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.g1, Side.Black)
-                    && IsValidMove(position, MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)))
+                    && IsValidMove(position, MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K)))
                 {
                     return true;
                 }
@@ -636,7 +636,7 @@ public interface IMoveGenerator
                     && (occupancy & Constants.WhiteLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d1, Side.Black)
                     && !position.IsSquareAttacked((int)BoardSquare.c1, Side.Black)
-                    && IsValidMove(position, MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)))
+                    && IsValidMove(position, MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K)))
                 {
                     return true;
                 }
@@ -652,7 +652,7 @@ public interface IMoveGenerator
                     && (occupancy & Constants.BlackShortCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.g8, Side.White)
-                    && IsValidMove(position, MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)))
+                    && IsValidMove(position, MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k)))
                 {
                     return true;
                 }
@@ -662,7 +662,7 @@ public interface IMoveGenerator
                     && (occupancy & Constants.BlackLongCastleFreeSquares) == 0
                     && !position.IsSquareAttacked((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttacked((int)BoardSquare.c8, Side.White)
-                    && IsValidMove(position, MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)))
+                    && IsValidMove(position, MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k)))
                 {
                     return true;
                 }

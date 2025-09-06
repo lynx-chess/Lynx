@@ -5,10 +5,10 @@ namespace Lynx.Test.MoveGeneration;
 
 public class CastlingMoveTest
 {
-    private static readonly int _whiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
-    private static readonly int _whiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialWhiteKingSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
-    private static readonly int _blackShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialBlackKingSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
-    private static readonly int _blackLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k);
+    private static readonly int _whiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K);
+    private static readonly int _whiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K);
+    private static readonly int _blackShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialBlackKingSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k);
+    private static readonly int _blackLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k);
 
     [Test]
     public void WhiteShortCastling()

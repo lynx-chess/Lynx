@@ -301,15 +301,15 @@ public static class Constants
     public const int InitialBlackKingsideRookSquare = (int)BoardSquare.h8;
     public const int InitialBlackQueensideRookSquare = (int)BoardSquare.a8;
 
-    public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
-    public const int BlackShortCastleKingSquare = (int)BoardSquare.g8;
-    public const int WhiteLongCastleKingSquare = (int)BoardSquare.c1;
-    public const int BlackLongCastleKingSquare = (int)BoardSquare.c8;
+    public const int WhiteKingKingsideCastlingSquare = (int)BoardSquare.g1;
+    public const int BlackKingKingsideCastlingSquare = (int)BoardSquare.g8;
+    public const int WhiteKingQueensideCastlingSquare = (int)BoardSquare.c1;
+    public const int BlackKingQueensideCastlingSquare = (int)BoardSquare.c8;
 
-    public const int WhiteShortCastleRookSquare = (int)BoardSquare.f1;
-    public const int BlackShortCastleRookSquare = (int)BoardSquare.f8;
-    public const int WhiteLongCastleRookSquare = (int)BoardSquare.d1;
-    public const int BlackLongCastleRookSquare = (int)BoardSquare.d8;
+    public const int WhiteRookKingsideCastlingSquare = (int)BoardSquare.f1;
+    public const int BlackRookKingsideCastlingSquare = (int)BoardSquare.f8;
+    public const int WhiteRookQueensideCastlingSquare = (int)BoardSquare.d1;
+    public const int BlackRookQueensideCastlingSquare = (int)BoardSquare.d8;
 
     public const string WhiteShortCastle = "e1g1";
     public const string BlackShortCastle = "e8g8";

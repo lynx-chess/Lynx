@@ -61,7 +61,7 @@ public static class Utils
     {
         GuardAgainstSideBoth(side);
 
-        return Constants.BlackShortCastleRookSquare + (7 * 8 * side);
+        return Constants.BlackRookKingsideCastlingSquare + (7 * 8 * side);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,7 +71,7 @@ public static class Utils
     {
         GuardAgainstSideBoth(side);
 
-        return Constants.BlackLongCastleRookSquare + (7 * 8 * side);
+        return Constants.BlackRookQueensideCastlingSquare + (7 * 8 * side);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,7 +103,7 @@ public static class Utils
 
         return (
             (int)BoardSquare.h8 + (7 * 8 * side),
-            Constants.BlackShortCastleRookSquare + (7 * 8 * side));
+            Constants.BlackRookKingsideCastlingSquare + (7 * 8 * side));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,7 +115,7 @@ public static class Utils
 
         return (
             (int)BoardSquare.a8 + (7 * 8 * side),
-            Constants.BlackLongCastleRookSquare + (7 * 8 * side));
+            Constants.BlackRookQueensideCastlingSquare + (7 * 8 * side));
     }
 
     /// <summary>
