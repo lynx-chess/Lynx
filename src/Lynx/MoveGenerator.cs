@@ -4,14 +4,13 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
-public static class MoveGenerator
+public interface IMoveGenerator
 {
 #if DEBUG
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
 
-    private const int TRUE = 1;
-
+    // TODO on the fly using position.InitialKingSquares[Side]
     public static readonly int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
     public static readonly int WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
     public static readonly int BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
@@ -40,14 +39,12 @@ public static class MoveGenerator
 #pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
-    internal static int Init() => TRUE;
-
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
-    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
+    internal Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -61,11 +58,11 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
-    internal static Move[] GenerateAllMoves(Position position, ref readonly EvaluationContext evaluationContext, bool capturesOnly = false)
+    internal Move[] GenerateAllMoves(Position position, ref readonly EvaluationContext evaluationContext, bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -78,7 +75,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllMoves(Position position, ref readonly EvaluationContext evaluationContext, Span<Move> movePool)
+    public Span<Move> GenerateAllMoves(Position position, ref readonly EvaluationContext evaluationContext, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -98,10 +95,10 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>
+    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, ref readonly EvaluationContext evaluationContext, Span<Move> movePool)
+    public Span<Move> GenerateAllCaptures(Position position, ref readonly EvaluationContext evaluationContext, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -218,7 +215,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, Position position, int offset)
     {
-
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
@@ -301,7 +297,7 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
+    internal void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
         var castlingRights = position.Castle;
 
@@ -311,7 +307,9 @@ public static class MoveGenerator
 
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
+                var whiteKingSourceSquare = position.InitialKingSquares[(int)Side.White];
+
+                bool ise1Attacked = position.IsSquareAttacked(whiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
                     && (castlingRights & (int)CastlingRights.WK) != default
@@ -321,8 +319,8 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = WhiteShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
-                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
                 }
 
                 if (!ise1Attacked
@@ -333,13 +331,15 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = WhiteLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
-                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
                 }
             }
             else
             {
-                bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
+                var blackKingSourceSquare = position.InitialKingSquares[(int)Side.Black];
+
+                bool ise8Attacked = position.IsSquareAttacked(blackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
                     && (castlingRights & (int)CastlingRights.BK) != default
@@ -349,8 +349,8 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = BlackShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
-                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
                 }
 
                 if (!ise8Attacked
@@ -361,16 +361,15 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = BlackLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
-                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
                 }
             }
         }
     }
 
     /// <summary>
-    /// Generate Knight, Bishop, Rook and Queen moves.
-    /// Could also generate King moves (except castling), but <see cref="GenerateKingMoves(ref int, Span{int}, int, Position)"/> is more efficient
+    /// Generate Knight, Bishop, Rook and Queen moves
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -484,7 +483,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position, ref readonly EvaluationContext evaluationContext)
+    public bool CanGenerateAtLeastAValidMove(Position position, ref readonly EvaluationContext evaluationContext)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -514,7 +513,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyPawnMoveValid(Position position, int offset)
     {
-
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
@@ -607,8 +605,12 @@ public static class MoveGenerator
         return false;
     }
 
+    /// <summary>
+    /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
+    /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyCastlingMoveValid(Position position)
+    protected bool IsAnyCastlingMoveValid(Position position)
     {
         var castlingRights = position.Castle;
 
@@ -618,7 +620,8 @@ public static class MoveGenerator
 
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = position.IsSquareAttacked(Constants.WhiteKingSourceSquare, Side.Black);
+                var whiteKingSourceSquare = position.InitialKingSquares[(int)Side.White];
+                bool ise1Attacked = position.IsSquareAttacked(whiteKingSourceSquare, Side.Black);
 
                 if (!ise1Attacked
                     && (castlingRights & (int)CastlingRights.WK) != default
@@ -642,7 +645,9 @@ public static class MoveGenerator
             }
             else
             {
-                bool ise8Attacked = position.IsSquareAttacked(Constants.BlackKingSourceSquare, Side.White);
+                var blackKingSourceSquare = position.InitialKingSquares[(int)Side.Black];
+
+                bool ise8Attacked = position.IsSquareAttacked(blackKingSourceSquare, Side.White);
 
                 if (!ise8Attacked
                     && (castlingRights & (int)CastlingRights.BK) != default
@@ -670,7 +675,7 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Also valid for Kings, but less performant thatn <see cref="IsAnyKingMoveValid(int, Position)"/>
+    /// Also valid for Kings, but less performant than <see cref="IsAnyKingMoveValid(int, Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyPieceMoveValid(int piece, Position position)

@@ -160,6 +160,7 @@ public static class FENParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static byte ParseCastlingRights(ReadOnlySpan<char> castling)
     {
+        // TODO add FRC X-FEN support
         byte castle = 0;
 
         for (int i = 0; i < castling.Length; ++i)

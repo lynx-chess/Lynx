@@ -19,6 +19,7 @@
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByCount8" />
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByCount14" />
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByCount27" />
+    <Using Static="true" Include="Lynx.MoveGeneratorWrapper" />
   </ItemGroup >
 
   <PropertyGroup>

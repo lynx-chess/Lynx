@@ -338,6 +338,15 @@ public static class Constants
         (int)BoardSquare.h3 - 8     //47 = h3
     ];
 
+#pragma warning disable RCS1257 // Use enum field explicitly
+    public const byte NoUpdateCastlingRight = 15;
+    public const byte WhiteKingCastlingRight = 12;
+    public const byte WhiteKingSideRookCastlingRight = 14;
+    public const byte WhiteQueenSideRookCastlingRight = 13;
+    public const byte BlackKingCastlingRight = 3;
+    public const byte BlackKingSideRookCastlingRight = 11;
+    public const byte BlackQueenSideRookCastlingRight = 7;
+
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474
     ///                                             CastlingRights  Binary  Decimal
