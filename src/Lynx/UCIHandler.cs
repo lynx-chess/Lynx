@@ -108,6 +108,9 @@ public sealed class UCIHandler
                 case "fen":
                     await HandleFEN(cancellationToken);
                     break;
+                case "print":
+                    HandlePrint();
+                    break;
                 case "ob_spsa":
                     await HandleOpenBenchSPSA(cancellationToken);
                     break;
@@ -491,6 +494,11 @@ public sealed class UCIHandler
     private async Task HandleFEN(CancellationToken cancellationToken)
     {
         await _engineToUci.Writer.WriteAsync(_searcher.FEN, cancellationToken);
+    }
+
+    private void HandlePrint()
+    {
+        _searcher.PrintCurrentPosition();
     }
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
