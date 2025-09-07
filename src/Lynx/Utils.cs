@@ -95,6 +95,16 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ShortCastleKingTargetSquare(int side) => side == (int)Side.White
+        ? Constants.WhiteKingKingsideCastlingSquare
+        : Constants.BlackKingKingsideCastlingSquare;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int LongCastleKingTargetSquare(int side) => side == (int)Side.White
+        ? Constants.WhiteKingQueensideCastlingSquare
+        : Constants.BlackKingQueensideCastlingSquare;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(int side)

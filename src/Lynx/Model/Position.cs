@@ -563,8 +563,14 @@ public class Position : IDisposable
                         var rookIndex = (int)Piece.R + offset;
 
                         _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                        _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
+
+                        // In DFRC the square where the rook was could be occupied by the king after castling
+                        // TODO try to remove this by moving the main piece set/pops before the switch
+                        if (rookSourceSquare != Utils.ShortCastleKingTargetSquare(oldSide))
+                        {
+                            _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                            _board[rookSourceSquare] = (int)Piece.None;
+                        }
 
                         _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                         _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
@@ -586,8 +592,14 @@ public class Position : IDisposable
                         var rookIndex = (int)Piece.R + offset;
 
                         _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                        _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
+
+                        // In DFRC the square where the rook was could be occupied by the king after castling
+                        // TODO try to remove this by moving the main piece set/pops before the switch
+                        if (rookSourceSquare != Utils.LongCastleKingTargetSquare(oldSide))
+                        {
+                            _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                            _board[rookSourceSquare] = (int)Piece.None;
+                        }
 
                         _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                         _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
@@ -697,8 +709,14 @@ public class Position : IDisposable
                     _board[rookSourceSquare] = rookIndex;
 
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                    _board[rookTargetSquare] = (int)Piece.None;
+
+                    // In DFRC the square where the rook ended could be occupied by the king before castling
+                    // TODO try to remove this by moving the main piece set/pops before the switch
+                    if (rookTargetSquare != InitialKingSquares[side])
+                    {
+                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                        _board[rookTargetSquare] = (int)Piece.None;
+                    }
 
                     break;
                 }
@@ -713,8 +731,14 @@ public class Position : IDisposable
                     _board[rookSourceSquare] = rookIndex;
 
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                    _board[rookTargetSquare] = (int)Piece.None;
+
+                    // In DFRC the square where the rook ended could be occupied by the king before castling
+                    // TODO try to remove this by moving the main piece set/pops before the switch
+                    if (rookTargetSquare != InitialKingSquares[side])
+                    {
+                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                        _board[rookTargetSquare] = (int)Piece.None;
+                    }
 
                     break;
                 }
