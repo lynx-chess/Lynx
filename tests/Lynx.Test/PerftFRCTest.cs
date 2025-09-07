@@ -15,8 +15,8 @@ public class PerftFRCTest
     /// <summary>
     /// https://github.com/toanth/motors/blob/main/gears/src/games/chess/perft_tests.rs
     /// </summary>
-    [TestCase("2r1kr2/8/8/8/8/8/8/1R2K1R1 w GBfc - 0 1", 1, 22, 501, 11459)]
-    [TestCase("2r1kr2/8/8/8/8/8/8/1R2K1R1 w GBfc - 0 1", 2, 501, 11459)]
+    [TestCase("2r1kr2/8/8/8/8/8/8/1R2K1R1 w GBfc - 0 1", 1, 22)]
+    [TestCase("2r1kr2/8/8/8/8/8/8/1R2K1R1 w GBfc - 0 1", 2, 501)]
     [TestCase("2r1kr2/8/8/8/8/8/8/1R2K1R1 w GBfc - 0 1", 3, 11459)]
     [TestCase("rkr5/8/8/8/8/8/8/5RKR w HFca - 0 1", 1, 22)]
     [TestCase("rkr5/8/8/8/8/8/8/5RKR w HFca - 0 1", 2, 442)]

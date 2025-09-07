@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
 using System.Buffers;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 

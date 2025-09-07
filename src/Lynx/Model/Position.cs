@@ -194,6 +194,7 @@ public class Position : IDisposable
 
             KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
+            // TODO optimize, pretty sure between rooks will be enough
             var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
                 | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookKingsideCastlingSquare);
             whiteKingsideFreeMask.PopBit(whiteKingSquare);
@@ -678,7 +679,6 @@ public class Position : IDisposable
 
                     if (capturedPiece != (int)Piece.None)
                     {
-
                         _pieceBitBoards[capturedPiece].SetBit(targetSquare);
                         _occupancyBitBoards[oppositeSide].SetBit(targetSquare);
                         _board[targetSquare] = capturedPiece;
@@ -688,7 +688,7 @@ public class Position : IDisposable
                 }
             case SpecialMoveType.ShortCastle:
                 {
-                    var rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
+                    var rookSourceSquare = _initialKingsideRookSquares[side];
                     var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
 
@@ -704,7 +704,7 @@ public class Position : IDisposable
                 }
             case SpecialMoveType.LongCastle:
                 {
-                    var rookSourceSquare = Utils.LongCastleRookSourceSquare(side);
+                    var rookSourceSquare = _initialQueensideRookSquares[side];
                     var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
 
@@ -2057,6 +2057,29 @@ public class Position : IDisposable
             || IsSquareAttackedByBishops(squareIndex, offset, bothSidesOccupancy, out var bishopAttacks)
             || IsSquareAttackedByRooks(squareIndex, offset, bothSidesOccupancy, out var rookAttacks)
             || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks);
+    }
+
+    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, ref readonly EvaluationContext evaluationContext)
+    {
+        var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
+
+        if (attacks != 0)
+        {
+            return (attacks & squaresBitboard) != 0;
+        }
+
+        // Fallback: no threats
+        while (squaresBitboard != 0)
+        {
+            squaresBitboard = squaresBitboard.WithoutLS1B(out var square);
+
+            if (IsSquareAttacked(square, attackingSide))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

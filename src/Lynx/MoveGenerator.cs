@@ -78,7 +78,7 @@ public interface IMoveGenerator
         var offset = Utils.PieceOffset(position.Side);
 
         GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position);
+        GenerateCastlingMoves(ref localIndex, movePool, position, in evaluationContext);
         GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset, position, in evaluationContext);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
@@ -101,7 +101,7 @@ public interface IMoveGenerator
         var offset = Utils.PieceOffset(position.Side);
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position);
+        GenerateCastlingMoves(ref localIndex, movePool, position, in evaluationContext);
         GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, in evaluationContext);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
@@ -291,7 +291,7 @@ public interface IMoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
+    public void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position, ref readonly EvaluationContext evaluationContext)
     {
         var castlingRights = position.Castle;
 
@@ -497,7 +497,7 @@ public interface IMoveGenerator
                 || IsAnyPieceMoveValid((int)Piece.B + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.N + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-                || IsAnyCastlingMoveValid(position);
+                || IsAnyCastlingMoveValid(position, in evaluationContext);
 #if DEBUG
         }
         catch (Exception e)
@@ -608,7 +608,7 @@ public interface IMoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsAnyCastlingMoveValid(Position position)
+    public bool IsAnyCastlingMoveValid(Position position, ref readonly EvaluationContext evaluationContext)
     {
         var castlingRights = position.Castle;
 
@@ -734,7 +734,7 @@ public interface IMoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsValidMove(Position position, Move move)
+    protected static bool IsValidMove(Position position, Move move)
     {
         var gameState = position.MakeMove(move);
 

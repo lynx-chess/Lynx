@@ -412,7 +412,11 @@ static void _23_Castling_Moves()
     int index = 0;
     var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-    MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+    Span<BitBoard> attacks = stackalloc BitBoard[12];
+    Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+    var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
     foreach (var move in moves[..index])
     {
