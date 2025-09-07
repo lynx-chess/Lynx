@@ -412,7 +412,12 @@ static void _23_Castling_Moves()
     int index = 0;
     var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-    MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+    Span<BitBoard> attacks = stackalloc BitBoard[12];
+    Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+    var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+    evaluationContext.EnsureThreatsAreCalculated(position);
+
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
     foreach (var move in moves[..index])
     {
@@ -703,6 +708,7 @@ static void _54_ScoreMove()
     Span<BitBoard> attacks = stackalloc BitBoard[12];
     Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
     var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+    evaluationContext.EnsureThreatsAreCalculated(position);
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext)}");

@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+using System.Globalization;
 
 namespace Lynx.Test.MoveGeneration;
 
@@ -18,7 +19,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsShortCastle()));
@@ -38,7 +44,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsLongCastle()));
@@ -66,7 +77,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -92,7 +108,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -116,7 +137,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -144,7 +170,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -162,7 +193,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -180,7 +216,12 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
