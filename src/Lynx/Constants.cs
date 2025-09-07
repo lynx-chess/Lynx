@@ -151,6 +151,58 @@ public static class Constants
     /// </summary>
     public const BitBoard BlackLongCastleFreeSquares = 0xe;
 
+     /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 1 1 1 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard WhiteShortCastleNonAttackableSquares = 0x7000000000000000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 1 1 1 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard WhiteLongCastleNonAttackableSquares = 0x1c00000000000000;
+
+    /// <summary>
+    /// 8   0 0 0 0 1 1 1 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard BlackShortCastleNonAttackableSquares = 0x70;
+
+    /// <summary>
+    /// 8   0 0 1 1 1 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 0 0 0 0 0 0
+    /// 4   0 0 0 0 0 0 0 0
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard BlackLongCastleNonAttackableSquares = 0x1c;
+
     public static readonly string[] Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
