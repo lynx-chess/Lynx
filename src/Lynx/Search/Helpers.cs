@@ -329,6 +329,7 @@ public sealed partial class Engine
             Span<BitBoard> attacks = stackalloc BitBoard[12];
             Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
             var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            evaluationContext.EnsureThreatsAreCalculated(position);
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),

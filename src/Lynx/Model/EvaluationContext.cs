@@ -15,6 +15,14 @@ public ref struct EvaluationContext
         Attacks.Clear();
         AttacksBySide.Clear();
     }
+
+    public void EnsureThreatsAreCalculated(Position position)
+    {
+        if(AttacksBySide[(int)Side.White] == 0)
+        {
+            position.CalculateThreats(ref this);
+        }
+    }
 }
 
 #pragma warning restore CA1051 // Do not declare visible instance fields

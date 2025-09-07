@@ -818,7 +818,7 @@ public sealed partial class Engine
         ShortMove ttBestMove = ttProbeResult.BestMove;
         _maxDepthReached[ply] = ply;
 
-        var rawStaticEval = ttHit
+        int rawStaticEval = ttHit
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
 
@@ -857,6 +857,11 @@ public sealed partial class Engine
         if (standPat > alpha)
         {
             alpha = standPat;
+        }
+
+        if (ttHit)
+        {
+            evaluationContext.EnsureThreatsAreCalculated(position);
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];

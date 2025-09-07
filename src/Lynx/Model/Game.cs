@@ -60,6 +60,7 @@ public sealed class Game : IDisposable
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(CurrentPosition);
 
         for (int i = 0; i < rangeSpan.Length; ++i)
         {

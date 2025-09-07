@@ -432,6 +432,7 @@ public sealed partial class Engine
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(Game.CurrentPosition);
 
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
         {
@@ -581,6 +582,7 @@ public sealed partial class Engine
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
