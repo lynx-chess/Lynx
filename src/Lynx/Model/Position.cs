@@ -1703,6 +1703,9 @@ public class Position : IDisposable
 
     public void CalculateThreats(ref EvaluationContext evaluationContext)
     {
+        evaluationContext.AttacksBySide.Clear();
+        evaluationContext.Attacks.Clear();
+
         var occupancy = OccupancyBitBoards[(int)Side.Both];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
