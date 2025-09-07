@@ -17,6 +17,7 @@ public class GeneralMoveGeneratorTest
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(originalPosition);
 
         var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, ref evaluationContext, moves).ToArray().Single(m => m.IsEnPassant());
         var positionAfterEnPassant = new Position(originalPosition);
@@ -45,6 +46,7 @@ public class GeneralMoveGeneratorTest
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
 
         var allMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moveSpan);
 

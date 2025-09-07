@@ -23,6 +23,7 @@ public class MoveGeneratorRegressionTest : BaseTest
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
 
         var captures = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moveSpan).ToArray().ToList();
 

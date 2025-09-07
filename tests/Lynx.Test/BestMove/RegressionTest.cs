@@ -227,6 +227,7 @@ public class RegressionTest : BaseTest
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(engine.Game.CurrentPosition);
 
         Assert.False(engine.Game.Is50MovesRepetition(ref evaluationContext));
         var bestMove = engine.BestMove(new GoCommand("go depth 1"));

@@ -190,6 +190,7 @@ public class GameTest : BaseTest
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(game.CurrentPosition);
 
         Assert.False(game.Is50MovesRepetition(ref evaluationContext));
     }
@@ -222,6 +223,7 @@ public class GameTest : BaseTest
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(game.CurrentPosition);
 
         Assert.True(game.Is50MovesRepetition(ref evaluationContext));
     }
@@ -258,6 +260,7 @@ public class GameTest : BaseTest
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(game.CurrentPosition);
 
         Assert.False(game.Is50MovesRepetition(ref evaluationContext));
     }

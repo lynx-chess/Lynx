@@ -12,6 +12,8 @@ public class GenerateQueenMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
         return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
@@ -22,6 +24,8 @@ public class GenerateQueenMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        evaluationContext.EnsureThreatsAreCalculated(position);
+
         return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
