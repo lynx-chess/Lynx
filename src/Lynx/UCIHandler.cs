@@ -272,7 +272,7 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "uci_cess960":
+            case "uci_chess960":
                 {
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
