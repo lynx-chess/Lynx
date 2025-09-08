@@ -51,9 +51,9 @@ public sealed class Searcher
 
         AllocateExtraEngines();
 
-#if !DEBUG
+//#if !DEBUG
         Warmup();
-#endif
+//#endif
 
         // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
         // It might help performance though due to preventing that zeroing from happenning during search

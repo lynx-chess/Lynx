@@ -71,6 +71,7 @@ public sealed class PositionCommand
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         if (!MoveExtensions.TryParseFromUCIString(
+            game.CurrentPosition,
             moveString,
             MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evaluationContext, movePool),
             out lastMove))

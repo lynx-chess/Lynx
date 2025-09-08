@@ -331,6 +331,7 @@ public sealed partial class Engine
             var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
             if (!MoveExtensions.TryParseFromUCIString(
+                position,
                move.UCIString(),
                MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
                out _))

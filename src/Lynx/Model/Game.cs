@@ -71,7 +71,7 @@ public sealed class Game : IDisposable
             var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
             // TODO: consider creating moves on the fly
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            if (!MoveExtensions.TryParseFromUCIString(CurrentPosition, moveString, moveList, out var parsedMove))
             {
                 _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
                 break;
