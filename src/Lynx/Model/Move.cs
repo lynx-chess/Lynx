@@ -333,13 +333,35 @@ public static class MoveExtensions
 
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string UCIString(this Move move)
+    public static string UCIString(this Move move, Position position)
     {
         // TODO memoize them with dict or even array?
         Span<char> span = stackalloc char[5];
 
+        var targetSquare = move.TargetSquare();
         var source = Constants.CoordinatesCharArray[move.SourceSquare()];
-        var target = Constants.CoordinatesCharArray[move.TargetSquare()];
+        var target = Constants.CoordinatesCharArray[targetSquare];
+
+        if (Configuration.EngineSettings.IsChess960)
+        {
+            var side = (int)(move.Piece() <= (int)Model.Piece.K ? Side.White : Side.Black);
+
+            if ((move.IsShortCastle()
+                    && move == Utils.ShortCastleKingTargetSquare(side)
+                    && targetSquare == position._initialKingsideRookSquares[side]))
+            {
+                var newTargetSquare = position._initialKingsideRookSquares[side];
+                target = Constants.CoordinatesCharArray[newTargetSquare];
+            }
+
+            if (move.IsLongCastle()
+                && move == Utils.LongCastleKingTargetSquare(side)
+                && targetSquare == position._initialQueensideRookSquares[side])
+            {
+                var newTargetSquare = position._initialQueensideRookSquares[side];
+                target = Constants.CoordinatesCharArray[newTargetSquare];
+            }
+        }
 
         span[0] = source[0];
         span[1] = source[1];
@@ -364,14 +386,14 @@ public static class MoveExtensions
     /// </summary>
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string UCIStringMemoized(this Move move)
+    public static string UCIStringMemoized(this Move move, Position position)
     {
         if (_uCIStringCache.TryGetValue(move, out var uciString))
         {
             return uciString;
         }
 
-        var str = move.UCIString();
+        var str = move.UCIString(position);
         _uCIStringCache[move] = str;
 
         return str;
