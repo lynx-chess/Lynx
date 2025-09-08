@@ -325,7 +325,29 @@ public class Position : IDisposable
         var oppositeSide = Utils.OppositeSide(oldSide);
 
         int sourceSquare = move.SourceSquare();
-        int targetSquare = move.TargetSquare();
+        int targetSquare;
+
+        if (!Configuration.EngineSettings.IsChess960)
+        {
+            targetSquare = move.TargetSquare();
+        }
+        else
+        {
+            // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
+            if (move.IsShortCastle())
+            {
+                targetSquare = Utils.ShortCastleKingTargetSquare(oldSide);
+            }
+            else if (move.IsLongCastle())
+            {
+                targetSquare = Utils.LongCastleKingTargetSquare(oldSide);
+            }
+            else
+            {
+                targetSquare = move.TargetSquare();
+            }
+        }
+
         int piece = move.Piece();
         int promotedPiece = move.PromotedPiece();
 
@@ -564,31 +586,9 @@ public class Position : IDisposable
 
                         _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
 
-                        var kingTargetSquare = Utils.ShortCastleKingTargetSquare(oldSide);
-
-                        if (Configuration.EngineSettings.IsChess960)
-                        {
-                            // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                            _pieceBitBoards[newPiece].PopBit(targetSquare);
-                            _occupancyBitBoards[oldSide].PopBit(targetSquare);
-                            _board[targetSquare] = (int)Piece.None;
-                            var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
-
-                            _pieceBitBoards[newPiece].SetBit(kingTargetSquare);
-                            _occupancyBitBoards[oldSide].SetBit(kingTargetSquare);
-                            _board[kingTargetSquare] = newPiece;
-                            var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
-
-                            var hashFix = hashToRevert ^ hashToApply;
-
-                            _uniqueIdentifier ^= hashFix;
-                            _nonPawnHash[oldSide] ^= hashFix;
-                            _kingPawnUniqueIdentifier ^= hashFix;
-                        }
-
                         // In DFRC the square where the rook was could be occupied by the king after castling
                         // TODO try to remove this by moving the main piece set/pops before the switch
-                        if (rookSourceSquare != kingTargetSquare)
+                        if (rookSourceSquare != targetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
                             _board[rookSourceSquare] = (int)Piece.None;
@@ -615,30 +615,9 @@ public class Position : IDisposable
 
                         _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
 
-                        var kingTargetSquare = Utils.LongCastleKingTargetSquare(oldSide);
-                        if (Configuration.EngineSettings.IsChess960)
-                        {
-                            // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                            _pieceBitBoards[newPiece].PopBit(targetSquare);
-                            _occupancyBitBoards[oldSide].PopBit(targetSquare);
-                            _board[targetSquare] = (int)Piece.None;
-                            var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
-
-                            _pieceBitBoards[newPiece].SetBit(kingTargetSquare);
-                            _occupancyBitBoards[oldSide].SetBit(kingTargetSquare);
-                            _board[kingTargetSquare] = newPiece;
-                            var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
-
-                            var hashFix = hashToRevert ^ hashToApply;
-
-                            _uniqueIdentifier ^= hashFix;
-                            _nonPawnHash[oldSide] ^= hashFix;
-                            _kingPawnUniqueIdentifier ^= hashFix;
-                        }
-
                         // In DFRC the square where the rook was could be occupied by the king after castling
                         // TODO try to remove this by moving the main piece set/pops before the switch
-                        if (rookSourceSquare != kingTargetSquare)
+                        if (rookSourceSquare != targetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
                             _board[rookSourceSquare] = (int)Piece.None;
@@ -708,7 +687,28 @@ public class Position : IDisposable
         var offset = Utils.PieceOffset(side);
 
         int sourceSquare = move.SourceSquare();
-        int targetSquare = move.TargetSquare();
+        int targetSquare;
+        if (!Configuration.EngineSettings.IsChess960)
+        {
+            targetSquare = move.TargetSquare();
+        }
+        else
+        {
+            // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
+            if (move.IsShortCastle())
+            {
+                targetSquare = Utils.ShortCastleKingTargetSquare(side);
+            }
+            else if (move.IsLongCastle())
+            {
+                targetSquare = Utils.LongCastleKingTargetSquare(side);
+            }
+            else
+            {
+                targetSquare = move.TargetSquare();
+            }
+        }
+
         int piece = move.Piece();
         int promotedPiece = move.PromotedPiece();
 
@@ -743,20 +743,6 @@ public class Position : IDisposable
                 }
             case SpecialMoveType.ShortCastle:
                 {
-                    if (Configuration.EngineSettings.IsChess960)
-                    {
-                        // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                        // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
-                        // have already been undone by the rook ops above, or don't matter (removig the king from the target square, where it isn't anyway)
-
-                        // However, the kings needs to be removed from the real target square
-                        // We do it before the rook adjustments, to avoid wrongly emptying rook squares
-                        var kingTargetSquare = Utils.ShortCastleKingTargetSquare(side);
-                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
-                        _board[kingTargetSquare] = (int)Piece.None;
-                    }
-
                     var rookSourceSquare = _initialKingsideRookSquares[side];
                     var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
@@ -780,20 +766,6 @@ public class Position : IDisposable
                 }
             case SpecialMoveType.LongCastle:
                 {
-                    if (Configuration.EngineSettings.IsChess960)
-                    {
-                        // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                        // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
-                        // have already been undone by the rook ops above, or don't matter (removig the king from the target square, where it isn't anyway)
-
-                        // However, the kings needs to be removed from the real target square
-                        // We do it before the rook adjustments, to avoid wrongly emptying rook squares
-                        var kingTargetSquare = Utils.LongCastleKingTargetSquare(side);
-                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
-                        _board[kingTargetSquare] = (int)Piece.None;
-                    }
-
                     var rookSourceSquare = _initialQueensideRookSquares[side];
                     var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
