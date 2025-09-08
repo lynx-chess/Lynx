@@ -204,7 +204,10 @@ public static class MoveExtensions
                     }
 
                     Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
-                    Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4 || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8, "Assert fail", "There will be either 4 or 8 moves that are a promotion");
+                    Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4
+                        || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 12
+                        || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8,
+                        "Assert fail", "There will be either 4 or 8 moves that are a promotion");
                     Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
                 }
             }
