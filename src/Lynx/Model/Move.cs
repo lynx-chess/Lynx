@@ -171,66 +171,6 @@ public static class MoveExtensions
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    [Obsolete("Just intended for testing purposes")]
-    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, Move[] moveList, [NotNullWhen(true)] out Move? move)
-    {
-#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection
-
-        Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
-
-        var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
-        var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
-
-        var candidateMoves = moveList.Where(move => move.SourceSquare() == sourceSquare && move.TargetSquare() == targetSquare);
-
-        if (UCIString.Length == 4)
-        {
-            move = candidateMoves.FirstOrDefault();
-
-            if (move.Equals(default(Move)))
-            {
-                _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
-                move = null;
-                return false;
-            }
-
-            Utils.Assert(move.Value.PromotedPiece() == default);
-            return true;
-        }
-        else
-        {
-            var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
-
-            bool predicate(Move m)
-            {
-                var actualPromotedPiece = m.PromotedPiece();
-
-                return actualPromotedPiece == promotedPiece
-                    || actualPromotedPiece == promotedPiece - 6;
-            }
-
-            move = candidateMoves.FirstOrDefault(predicate);
-            if (move.Equals(default(Move)))
-            {
-                _logger.Warn("Unable to link move {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
-                move = null;
-                return false;
-            }
-
-            Debug.Assert(candidateMoves.Count() == 4);
-            Debug.Assert(candidateMoves.Count(predicate) == 1);
-
-            return true;
-
-#pragma warning restore CA1851 // Possible multiple enumerations of 'IEnumerable' collection
-        }
-    }
-
-    /// <summary>
-    /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
-    /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
-    /// <exception cref="IndexOutOfRangeException"></exception>
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, [NotNullWhen(true)] out Move? move)
     {
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
