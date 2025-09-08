@@ -30,8 +30,10 @@ public class Position : IDisposable
 
     private readonly byte[] _castlingRightsUpdateConstants;
 
+#if DEBUG
     internal readonly int[] _initialKingsideRookSquares;
     internal readonly int[] _initialQueensideRookSquares;
+#endif
 
 #pragma warning disable S3887, CA1051
     public readonly int[] InitialKingSquares;
@@ -136,8 +138,12 @@ public class Position : IDisposable
         if (_castle == (int)CastlingRights.None)
         {
             InitialKingSquares = [];
+
+#if DEBUG
             _initialKingsideRookSquares = [];
             _initialQueensideRookSquares = [];
+#endif
+
             KingsideCastlingFreeSquares = [];
             QueensideCastlingFreeSquares = [];
             KingsideCastlingNonAttackedSquares = [];
@@ -181,6 +187,7 @@ public class Position : IDisposable
             InitialKingSquares[(int)Side.White] = whiteKingSquare;
             InitialKingSquares[(int)Side.Black] = blackKingSquare;
 
+#if DEBUG
             _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
             _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
@@ -188,6 +195,7 @@ public class Position : IDisposable
             _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
             _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
+#endif
 
             KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
             KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingKingsideCastlingSquare);
@@ -290,8 +298,12 @@ public class Position : IDisposable
         if (position.InitialKingSquares.Length == 0)
         {
             InitialKingSquares = [];
+
+#if DEBUG
             _initialKingsideRookSquares = [];
             _initialQueensideRookSquares = [];
+#endif
+
             KingsideCastlingFreeSquares = [];
             QueensideCastlingFreeSquares = [];
             KingsideCastlingNonAttackedSquares = [];
@@ -303,6 +315,7 @@ public class Position : IDisposable
             InitialKingSquares[(int)Side.White] = position.InitialKingSquares[(int)Side.White];
             InitialKingSquares[(int)Side.Black] = position.InitialKingSquares[(int)Side.Black];
 
+#if DEBUG
             _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialKingsideRookSquares[(int)Side.White] = position._initialKingsideRookSquares[(int)Side.White];
             _initialKingsideRookSquares[(int)Side.Black] = position._initialKingsideRookSquares[(int)Side.Black];
@@ -310,6 +323,7 @@ public class Position : IDisposable
             _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialQueensideRookSquares[(int)Side.White] = position._initialQueensideRookSquares[(int)Side.White];
             _initialQueensideRookSquares[(int)Side.Black] = position._initialQueensideRookSquares[(int)Side.Black];
+#endif
 
             KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
             KingsideCastlingFreeSquares[(int)Side.White] = position.KingsideCastlingFreeSquares[(int)Side.White];
@@ -587,7 +601,9 @@ public class Position : IDisposable
                     }
                 case SpecialMoveType.ShortCastle:
                     {
-                        var rookSourceSquare = _initialKingsideRookSquares[oldSide];
+                        var rookSourceSquare = Configuration.EngineSettings.IsChess960
+                            ? targetSquare
+                            : Utils.ShortCastleRookSourceSquare(oldSide);
                         var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                         var rookIndex = (int)Piece.R + offset;
 
@@ -638,7 +654,9 @@ public class Position : IDisposable
                     }
                 case SpecialMoveType.LongCastle:
                     {
-                        var rookSourceSquare = _initialQueensideRookSquares[oldSide];
+                        var rookSourceSquare = Configuration.EngineSettings.IsChess960
+                            ? targetSquare
+                            : Utils.LongCastleRookSourceSquare(oldSide);
                         var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                         var rookIndex = (int)Piece.R + offset;
 
@@ -772,6 +790,7 @@ public class Position : IDisposable
                 }
             case SpecialMoveType.ShortCastle:
                 {
+                    int rookSourceSquare;
                     if (Configuration.EngineSettings.IsChess960)
                     {
                         // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
@@ -784,9 +803,14 @@ public class Position : IDisposable
                         _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
                         _occupancyBitBoards[side].PopBit(kingTargetSquare);
                         _board[kingTargetSquare] = (int)Piece.None;
+
+                        rookSourceSquare = targetSquare;
+                    }
+                    else
+                    {
+                        rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
                     }
 
-                    var rookSourceSquare = _initialKingsideRookSquares[side];
                     var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
 
@@ -809,6 +833,7 @@ public class Position : IDisposable
                 }
             case SpecialMoveType.LongCastle:
                 {
+                    int rookSourceSquare;
                     if (Configuration.EngineSettings.IsChess960)
                     {
                         // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
@@ -821,9 +846,13 @@ public class Position : IDisposable
                         _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
                         _occupancyBitBoards[side].PopBit(kingTargetSquare);
                         _board[kingTargetSquare] = (int)Piece.None;
+                        rookSourceSquare = targetSquare;
+                    }
+                    else
+                    {
+                        rookSourceSquare = Utils.LongCastleRookSourceSquare(side);
                     }
 
-                    var rookSourceSquare = _initialQueensideRookSquares[side];
                     var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
 
@@ -1088,15 +1117,21 @@ public class Position : IDisposable
             if ((_castle & (int)CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
+
+#if DEBUG
                 Debug.Assert(_initialKingsideRookSquares[(int)Side.White] != -1, failureMessage, "White initial kingside rook not set");
                 Debug.Assert(whiteRooks.GetBit(_initialKingsideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.White]} when short castling rights");
+#endif
             }
 
             if ((_castle & (int)CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
+
+#if DEBUG
                 Debug.Assert(whiteRooks.GetBit(_initialQueensideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialQueensideRookSquares[(int)Side.White]} when long castling rights");
                 Debug.Assert(_initialQueensideRookSquares[(int)Side.White] != -1, failureMessage, "White initial queenside rook not set");
+#endif
             }
 
             var blackKingSourceSquare = InitialKingSquares[(int)Side.Black];
@@ -1104,15 +1139,21 @@ public class Position : IDisposable
             if ((_castle & (int)CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
+
+#if DEBUG
                 Debug.Assert(_initialKingsideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial kingside rook not set");
                 Debug.Assert(blackRooks.GetBit(_initialKingsideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.Black]} when short castling rights");
+#endif
             }
 
             if ((_castle & (int)CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
+
+#if DEBUG
                 Debug.Assert(blackRooks.GetBit(_initialQueensideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialQueensideRookSquares[(int)Side.Black]} when long castling rights");
                 Debug.Assert(_initialQueensideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial queenside rook not set");
+#endif
             }
         }
 
@@ -2399,22 +2440,22 @@ public class Position : IDisposable
             // Shredder-FEN style (always showing columns), no support for X-FEN style yet (showking KQkq when not-ambiguous)
             if ((_castle & (int)CastlingRights.WK) != default)
             {
-                char file = (char)('A' + Constants.File[_initialKingsideRookSquares[(int)Side.White]]);
+                char file = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
                 sb.Append(file);
             }
             if ((_castle & (int)CastlingRights.WQ) != default)
             {
-                char file = (char)('A' + Constants.File[_initialQueensideRookSquares[(int)Side.White]]);
+                char file = (char)('A' + Constants.File[WhiteLongCastle.TargetSquare()]);
                 sb.Append(file);
             }
             if ((_castle & (int)CastlingRights.BK) != default)
             {
-                char file = (char)('a' + Constants.File[_initialKingsideRookSquares[(int)Side.Black]]);
+                char file = (char)('a' + Constants.File[BlackShortCastle.TargetSquare()]);
                 sb.Append(file);
             }
             if ((_castle & (int)CastlingRights.BQ) != default)
             {
-                char file = (char)('a' + Constants.File[_initialQueensideRookSquares[(int)Side.Black]]);
+                char file = (char)('a' + Constants.File[BlackLongCastle.TargetSquare()]);
                 sb.Append(file);
             }
         }
@@ -2497,19 +2538,19 @@ public class Position : IDisposable
 
             if ((_castle & (int)CastlingRights.WK) != default)
             {
-                whitekingSide = (char)('A' + Constants.File[_initialKingsideRookSquares[(int)Side.White]]);
+                whitekingSide = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
             }
             if ((_castle & (int)CastlingRights.WQ) != default)
             {
-                whiteQueenside = (char)('A' + Constants.File[_initialQueensideRookSquares[(int)Side.White]]);
+                whiteQueenside = (char)('A' + Constants.File[WhiteLongCastle.TargetSquare()]);
             }
             if ((_castle & (int)CastlingRights.BK) != default)
             {
-                blackKingside = (char)('a' + Constants.File[_initialKingsideRookSquares[(int)Side.Black]]);
+                blackKingside = (char)('a' + Constants.File[BlackShortCastle.TargetSquare()]);
             }
             if ((_castle & (int)CastlingRights.BQ) != default)
             {
-                blackQueenside = (char)('a' + Constants.File[_initialQueensideRookSquares[(int)Side.Black]]);
+                blackQueenside = (char)('a' + Constants.File[BlackLongCastle.TargetSquare()]);
             }
 
             Console.WriteLine($"    Castling:\t" +
@@ -2588,12 +2629,15 @@ public class Position : IDisposable
 
         ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
         ArrayPool<int>.Shared.Return(InitialKingSquares, clearArray: true);
-        ArrayPool<int>.Shared.Return(_initialKingsideRookSquares, clearArray: true);
-        ArrayPool<int>.Shared.Return(_initialQueensideRookSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares, clearArray: true);
+
+#if DEBUG
+        ArrayPool<int>.Shared.Return(_initialKingsideRookSquares, clearArray: true);
+        ArrayPool<int>.Shared.Return(_initialQueensideRookSquares, clearArray: true);
+#endif
 
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
