@@ -797,12 +797,15 @@ public class Position : IDisposable
                         // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
                         // have already been undone by the rook ops above, or don't matter (removig the king from the target square, where it isn't anyway)
 
-                        // However, the kings needs to be removed from the real target square
+                        // However, the kings needs to be removed from the real target square, providing that's not also its soure square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
                         var kingTargetSquare = Utils.ShortCastleKingTargetSquare(side);
-                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
-                        _board[kingTargetSquare] = (int)Piece.None;
+                        if (kingTargetSquare != sourceSquare)
+                        {
+                            _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
+                            _occupancyBitBoards[side].PopBit(kingTargetSquare);
+                            _board[kingTargetSquare] = (int)Piece.None;
+                        }
 
                         rookSourceSquare = targetSquare;
                     }
@@ -843,9 +846,13 @@ public class Position : IDisposable
                         // However, the kings needs to be removed from the real target square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
                         var kingTargetSquare = Utils.LongCastleKingTargetSquare(side);
-                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
-                        _board[kingTargetSquare] = (int)Piece.None;
+                        if (kingTargetSquare != sourceSquare)
+                        {
+                            _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
+                            _occupancyBitBoards[side].PopBit(kingTargetSquare);
+                            _board[kingTargetSquare] = (int)Piece.None;
+                        }
+
                         rookSourceSquare = targetSquare;
                     }
                     else
@@ -1106,8 +1113,8 @@ public class Position : IDisposable
         Debug.Assert((whiteKings & blackKings) == 0, failureMessage, pieceOverlapMessage);
 
         // 1 king per side
-        Debug.Assert(whiteKings.CountBits() == 1, failureMessage, "More than one white king");
-        Debug.Assert(blackKings.CountBits() == 1, failureMessage, "More than one black king");
+        Debug.Assert(whiteKings.CountBits() == 1, failureMessage, $"More than one white king, or none: {whiteKings}");
+        Debug.Assert(blackKings.CountBits() == 1, failureMessage, $"More than one black king, or none: {blackKings}");
 
         if (_castle != 0)
         {

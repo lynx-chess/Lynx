@@ -69,6 +69,12 @@ public class PerftFRCTest
         Validate(fen, depth, expectedNumberOfNodes);
     }
 
+    [TestCase("rbnnbqkr/pppppppp/8/8/8/2P5/PP1PPPPP/RBNNBQKR b KQkq - 0 1", 5, 6112904)]
+    public void LynxTests(string fen, int depth, long expectedNumberOfNodes)
+    {
+        Validate(fen, depth, expectedNumberOfNodes);
+    }
+
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
         Assert.AreEqual(expectedNumberOfNodes, Perft.PerftRecursiveImpl(new Position(fen), depth, default));
