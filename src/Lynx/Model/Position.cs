@@ -764,10 +764,6 @@ public class Position : IDisposable
                     // Popping before setting, because in DFRC they can be the same square
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
 
-                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
-                    _board[rookSourceSquare] = rookIndex;
-
                     // In DFRC the square where the rook ended could be occupied by the king before castling
                     // TODO try to remove this by moving the main piece set/pops before the switch
                     if (rookTargetSquare != InitialKingSquares[side])
@@ -775,6 +771,10 @@ public class Position : IDisposable
                         _occupancyBitBoards[side].PopBit(rookTargetSquare);
                         _board[rookTargetSquare] = (int)Piece.None;
                     }
+
+                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
+                    _board[rookSourceSquare] = rookIndex;
 
                     break;
                 }
@@ -801,14 +801,6 @@ public class Position : IDisposable
                     // Popping before setting, because in DFRC they can be the same square
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
 
-                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
-                    _board[rookSourceSquare] = rookIndex;
-
-                    // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                    // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
-                    // have already been undone by the rook ops above, or don't matter (removig the king from the target square, where it isn't anyway)
-
                     // In DFRC the square where the rook ended could be occupied by the king before castling
                     // TODO try to remove this by moving the main piece set/pops before the switch
                     if (rookTargetSquare != InitialKingSquares[side])
@@ -816,6 +808,10 @@ public class Position : IDisposable
                         _occupancyBitBoards[side].PopBit(rookTargetSquare);
                         _board[rookTargetSquare] = (int)Piece.None;
                     }
+
+                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
+                    _board[rookSourceSquare] = rookIndex;
 
                     break;
                 }
