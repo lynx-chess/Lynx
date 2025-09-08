@@ -39,8 +39,7 @@ public sealed class MoveGenerator_DFRC : IMoveGenerator
                     && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext))
                 {
-                    var whiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K);
-                    movePool[localIndex++] = whiteShortCastle;
+                    movePool[localIndex++] = MoveExtensions.EncodeShortCastle(whiteKingSourceSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K);
                 }
 
                 if ((castlingRights & (int)CastlingRights.WQ) != default
@@ -48,8 +47,7 @@ public sealed class MoveGenerator_DFRC : IMoveGenerator
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext))
 
                 {
-                    var whiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K);
-                    movePool[localIndex++] = whiteLongCastle;
+                    movePool[localIndex++] = MoveExtensions.EncodeLongCastle(whiteKingSourceSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K);
                 }
             }
             else
@@ -60,16 +58,14 @@ public sealed class MoveGenerator_DFRC : IMoveGenerator
                     && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext))
                 {
-                    var blackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k);
-                    movePool[localIndex++] = blackShortCastle;
+                    movePool[localIndex++] = MoveExtensions.EncodeShortCastle(blackKingSourceSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k);
                 }
 
                 if ((castlingRights & (int)CastlingRights.BQ) != default
                     && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext))
                 {
-                    var blackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k);
-                    movePool[localIndex++] = blackLongCastle;
+                    movePool[localIndex++] = MoveExtensions.EncodeLongCastle(blackKingSourceSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k);
                 }
             }
         }
