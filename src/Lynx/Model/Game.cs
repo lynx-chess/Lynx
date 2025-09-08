@@ -155,14 +155,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition(ref readonly EvaluationContext evaluationContext)
+    public bool Is50MovesRepetition(ref EvaluationContext evaluationContext)
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, in evaluationContext);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
     }
 
     /// <summary>
