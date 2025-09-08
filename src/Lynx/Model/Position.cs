@@ -704,10 +704,7 @@ public class Position : IDisposable
                     var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
 
-                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
-                    _board[rookSourceSquare] = rookIndex;
-
+                    // Popping before setting, because in DFRC they can be the same square
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
@@ -717,6 +714,10 @@ public class Position : IDisposable
                         _occupancyBitBoards[side].PopBit(rookTargetSquare);
                         _board[rookTargetSquare] = (int)Piece.None;
                     }
+
+                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
+                    _board[rookSourceSquare] = rookIndex;
 
                     break;
                 }
@@ -726,10 +727,7 @@ public class Position : IDisposable
                     var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
 
-                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
-                    _board[rookSourceSquare] = rookIndex;
-
+                    // Popping before setting, because in DFRC they can be the same square
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
@@ -739,6 +737,10 @@ public class Position : IDisposable
                         _occupancyBitBoards[side].PopBit(rookTargetSquare);
                         _board[rookTargetSquare] = (int)Piece.None;
                     }
+
+                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
+                    _board[rookSourceSquare] = rookIndex;
 
                     break;
                 }

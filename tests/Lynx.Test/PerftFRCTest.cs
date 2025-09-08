@@ -58,13 +58,13 @@ public class PerftFRCTest
     [TestCase("r1q1k1rn/1p1ppp1p/1npb2b1/p1N3p1/8/1BP4P/PP1PPPP1/1RQ1KRBN w BFag - 0 9", 3, 34210)]
     [TestCase("r1q1k1rn/1p1ppp1p/1npb2b1/p1N3p1/8/1BP4P/PP1PPPP1/1RQ1KRBN w BFag - 0 9", 4, 1187103)]
     [TestCase("r1q1k1rn/1p1ppp1p/1npb2b1/p1N3p1/8/1BP4P/PP1PPPP1/1RQ1KRBN w BFag - 0 9", 5, 37188628)]
-    [TestCase("r1q1k1rn/1p1ppp1p/1npb2b1/p1N3p1/8/1BP4P/PP1PPPP1/1RQ1KRBN w BFag - 0 9", 6, 1308319545)]
+    [TestCase("r1q1k1rn/1p1ppp1p/1npb2b1/p1N3p1/8/1BP4P/PP1PPPP1/1RQ1KRBN w BFag - 0 9", 6, 1308319545, Category = Categories.PerftFRCExhaustive, Explicit = true)]
     [TestCase("rk3r2/8/8/5r2/6R1/8/8/R3K1R1 w AGaf - 0 1", 1, 31)]
     [TestCase("rk3r2/8/8/5r2/6R1/8/8/R3K1R1 w AGaf - 0 1", 2, 841)]
     [TestCase("rk3r2/8/8/5r2/6R1/8/8/R3K1R1 w AGaf - 0 1", 3, 23877)]
     [TestCase("rk3r2/8/8/5r2/6R1/8/8/R3K1R1 w AGaf - 0 1", 4, 711547)]
     [TestCase("rk3r2/8/8/5r2/6R1/8/8/R3K1R1 w AGaf - 0 1", 5, 20894205)]
-    [TestCase("rk3r2/8/8/5r2/6R1/8/8/R3K1R1 w AGaf - 0 1", 6, 644033568)]
+    [TestCase("rk3r2/8/8/5r2/6R1/8/8/R3K1R1 w AGaf - 0 1", 6, 644033568, Category = Categories.PerftFRCExhaustive, Explicit = true)]
     public void MotorsDFRC(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
