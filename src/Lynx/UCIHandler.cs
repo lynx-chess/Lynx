@@ -277,7 +277,6 @@ public sealed class UCIHandler
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.IsChess960 = value;
-                        UpdateCurrentInstance();
                     }
                     break;
                 }

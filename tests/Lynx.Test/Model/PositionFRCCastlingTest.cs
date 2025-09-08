@@ -11,7 +11,6 @@ public class PositionFRCCastlingTest
     public PositionFRCCastlingTest()
     {
         Configuration.EngineSettings.IsChess960 = true;
-        UpdateCurrentInstance();
     }
 
     /// <summary>

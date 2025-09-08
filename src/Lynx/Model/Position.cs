@@ -39,6 +39,11 @@ public class Position : IDisposable
     public readonly ulong[] KingsideCastlingNonAttackedSquares;
     public readonly ulong[] QueensideCastlingFreeSquares;
     public readonly ulong[] QueensideCastlingNonAttackedSquares;
+
+    internal readonly int WhiteShortCastle;
+    internal readonly int WhiteLongCastle;
+    internal readonly int BlackShortCastle;
+    internal readonly int BlackLongCastle;
 #pragma warning restore S3887, CA1051
 
     private BoardSquare _enPassant;
@@ -222,6 +227,25 @@ public class Position : IDisposable
 
             QueensideCastlingFreeSquares[(int)Side.White] = whiteQueensideFreeMask;
             QueensideCastlingFreeSquares[(int)Side.Black] = blackQueensideFreeMask;
+
+            // KxR encoding for DFRC
+            if (Configuration.EngineSettings.IsChess960)
+            {
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
+
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+            }
+            // Usual encoding for standard chess, King to target square
+            else
+            {
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K);
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K);
+
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k);
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k);
+            }
         }
 
         Validate();
@@ -302,6 +326,11 @@ public class Position : IDisposable
             QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
             QueensideCastlingNonAttackedSquares[(int)Side.White] = position.QueensideCastlingNonAttackedSquares[(int)Side.White];
             QueensideCastlingNonAttackedSquares[(int)Side.Black] = position.QueensideCastlingNonAttackedSquares[(int)Side.Black];
+
+            WhiteShortCastle = position.WhiteShortCastle;
+            WhiteLongCastle = position.WhiteLongCastle;
+            BlackShortCastle = position.BlackShortCastle;
+            BlackLongCastle = position.BlackLongCastle;
         }
 
         Validate();
@@ -1967,7 +1996,7 @@ public class Position : IDisposable
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = PieceBitBoards[pieceIndex];
-            var attacks = IMoveGenerator._pieceAttacks[pieceIndex];
+            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
             {
@@ -1981,7 +2010,7 @@ public class Position : IDisposable
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = PieceBitBoards[pieceIndex];
-            var attacks = IMoveGenerator._pieceAttacks[pieceIndex];
+            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
             {

@@ -9,7 +9,6 @@ public class PerftFRCTest
     public PerftFRCTest()
     {
         Configuration.EngineSettings.IsChess960 = true;
-        UpdateCurrentInstance();
     }
 
     /// <summary>

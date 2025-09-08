@@ -12,7 +12,6 @@ public class PerftFRCTestSuite
     public PerftFRCTestSuite()
     {
         Configuration.EngineSettings.IsChess960 = true;
-        UpdateCurrentInstance();
     }
 
     [TestCase("bqnb1rkr/pp3ppp/3ppn2/2p5/5P2/P2P4/NPP1P1PP/BQ1BNRKR w HFhf - 2 9", 1, 21)]
