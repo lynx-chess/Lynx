@@ -64,10 +64,6 @@ public static class OnlineTablebaseProber
 
         int[]? allPossibleMoves = null;
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-
         switch (tablebaseEval.Category)
         {
             case TablebaseEvaluationCategory.Unknown:
@@ -122,7 +118,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -183,7 +179,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -246,7 +242,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -306,7 +302,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -350,7 +346,7 @@ public static class OnlineTablebaseProber
 
         Move? parsedMove = 0;
 #pragma warning disable CS0618 // Type or member is obsolete
-        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position, ref evaluationContext), out parsedMove))
+        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
         {
             throw new LynxException($"{bestMove.Uci} should be parsable from position {fen}");
         }

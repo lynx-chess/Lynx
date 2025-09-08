@@ -986,8 +986,8 @@ public class Position : IDisposable
             if ((_castle & (int)CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
-                Debug.Assert(whiteRooks.GetBit(_initialKingsideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.White]} when short castling rights");
                 Debug.Assert(_initialKingsideRookSquares[(int)Side.White] != -1, failureMessage, "White initial kingside rook not set");
+                Debug.Assert(whiteRooks.GetBit(_initialKingsideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.White]} when short castling rights");
             }
 
             if ((_castle & (int)CastlingRights.WQ) != 0)
@@ -1002,8 +1002,8 @@ public class Position : IDisposable
             if ((_castle & (int)CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
-                Debug.Assert(blackRooks.GetBit(_initialKingsideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.Black]} when short castling rights");
                 Debug.Assert(_initialKingsideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial kingside rook not set");
+                Debug.Assert(blackRooks.GetBit(_initialKingsideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.Black]} when short castling rights");
             }
 
             if ((_castle & (int)CastlingRights.BQ) != 0)
@@ -2083,7 +2083,7 @@ public class Position : IDisposable
             || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks);
     }
 
-    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, ref readonly EvaluationContext evaluationContext)
+    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, ref EvaluationContext evaluationContext)
     {
         var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
 
@@ -2457,7 +2457,7 @@ public class Position : IDisposable
 #pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
 
     [Conditional("DEBUG")]
-    private void AssertAttackPopulation(ref readonly EvaluationContext evaluationContext)
+    private void AssertAttackPopulation(ref EvaluationContext evaluationContext)
     {
         var attacks = evaluationContext.Attacks;
 
