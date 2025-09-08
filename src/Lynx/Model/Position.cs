@@ -522,7 +522,6 @@ public class Position : IDisposable
 
                     if (capturedPiece != (int)Piece.None)
                     {
-
                         _pieceBitBoards[capturedPiece].SetBit(targetSquare);
                         _occupancyBitBoards[oppositeSide].SetBit(targetSquare);
                         _board[targetSquare] = capturedPiece;
@@ -805,7 +804,6 @@ public class Position : IDisposable
             {
                 Debug.Assert(whiteKings.GetBit(Constants.WhiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
                 Debug.Assert(whiteRooks.GetBit(BoardSquare.h1), failureMessage, "No white rook on h1 when short castling rights");
-
             }
 
             if ((_castle & (int)CastlingRights.WQ) != 0)
@@ -818,7 +816,6 @@ public class Position : IDisposable
             {
                 Debug.Assert(blackKings.GetBit(Constants.BlackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
                 Debug.Assert(blackRooks.GetBit(BoardSquare.h8), failureMessage, "No black rook on h8 when short castling rights");
-
             }
 
             if ((_castle & (int)CastlingRights.BQ) != 0)
@@ -2189,7 +2186,7 @@ public class Position : IDisposable
 #pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
 
     [Conditional("DEBUG")]
-    private void AssertAttackPopulation(ref readonly EvaluationContext evaluationContext)
+    private void AssertAttackPopulation(ref EvaluationContext evaluationContext)
     {
         var attacks = evaluationContext.Attacks;
 
