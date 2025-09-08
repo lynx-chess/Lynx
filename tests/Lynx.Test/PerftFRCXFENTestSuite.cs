@@ -8,7 +8,7 @@ namespace Lynx.Test;
 /// This aims to test X-FEN parsing.
 /// Shredder-FEN -> X-FEN transformation courtesy of Jonathan Hallström.
 /// </summary>
-[TestFixture(Category = Categories.Perft, Explicit = true)]
+[TestFixture(Category = Categories.PerftFRC, Explicit = true)]
 public class PerftFRCXFENTestSuite
 {
     public PerftFRCXFENTestSuite()
