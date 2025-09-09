@@ -619,7 +619,7 @@ public class Position : IDisposable
                             // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
                             // We need to revert the incorect changes + apply the right ones
                             // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
-                            // But that hurts performanc, see https://github.com/lynx-chess/Lynx/pull/2043
+                            // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
                             _pieceBitBoards[newPiece].PopBit(targetSquare);
                             _occupancyBitBoards[oldSide].PopBit(targetSquare);
                             _board[targetSquare] = (int)Piece.None;
@@ -675,7 +675,8 @@ public class Position : IDisposable
                             // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
                             // We need to revert the incorect changes + apply the right ones
                             // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
-                            // But that hurts performanc, see https://github.com/lynx-chess/Lynx/pull/2043                            _pieceBitBoards[newPiece].PopBit(targetSquare);
+                            // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
+                            _pieceBitBoards[newPiece].PopBit(targetSquare);
                             _occupancyBitBoards[oldSide].PopBit(targetSquare);
                             _board[targetSquare] = (int)Piece.None;
                             var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
