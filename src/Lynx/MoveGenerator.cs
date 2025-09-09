@@ -37,7 +37,7 @@ public partial class Position
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
-    internal Move[] GenerateAllMoves( bool capturesOnly = false)
+    internal Move[] GenerateAllMoves(bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -62,9 +62,9 @@ public partial class Position
 
         var offset = Utils.PieceOffset(Side);
 
-        GenerateAllPawnMoves(ref localIndex, movePool,offset);
-        GenerateCastlingMoves(ref localIndex, movePool,ref evaluationContext);
-        GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset,ref evaluationContext);
+        GenerateAllPawnMoves(ref localIndex, movePool, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, ref evaluationContext);
+        GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset, ref evaluationContext);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset);
         GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset);
@@ -85,9 +85,9 @@ public partial class Position
 
         var offset = Utils.PieceOffset(Side);
 
-        GeneratePawnCapturesAndPromotions(ref localIndex, movePool,offset);
-        GenerateCastlingMoves(ref localIndex, movePool,ref evaluationContext);
-        GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset,ref evaluationContext);
+        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, ref evaluationContext);
+        GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, ref evaluationContext);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset);
@@ -97,7 +97,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void GenerateAllPawnMoves(ref int localIndex, Span<Move> movePool, int offset)
+    private void GenerateAllPawnMoves(ref int localIndex, Span<Move> movePool, int offset)
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
@@ -192,7 +192,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, int offset)
+    private void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, int offset)
     {
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)Side * 16);          // Side == Side.White ? -8 : +8
@@ -276,7 +276,7 @@ public partial class Position
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, ref EvaluationContext evaluationContext)
+    internal void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, ref EvaluationContext evaluationContext)
     {
         var castlingRights = Castle;
 
@@ -325,7 +325,7 @@ public partial class Position
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece)
+    private void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece)
     {
         var bitboard = _pieceBitBoards[piece];
 
@@ -357,7 +357,7 @@ public partial class Position
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, ref EvaluationContext evaluationContext)
+    private void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, ref EvaluationContext evaluationContext)
     {
         var sourceSquare = _pieceBitBoards[piece].GetLS1BIndex();
         var occupancy = _occupancyBitBoards[(int)Side.Both];
@@ -382,7 +382,7 @@ public partial class Position
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece)
+    private void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece)
     {
         var bitboard = _pieceBitBoards[piece];
         var oppositeSide = Utils.OppositeSide(Side);
@@ -413,7 +413,7 @@ public partial class Position
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, ref EvaluationContext evaluationContext)
+    private void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, ref EvaluationContext evaluationContext)
     {
         var sourceSquare = _pieceBitBoards[piece].GetLS1BIndex();
         var oppositeSide = Utils.OppositeSide(Side);
@@ -446,7 +446,7 @@ public partial class Position
         {
 #endif
             return IsAnyPawnMoveValid(offset)
-                || IsAnyKingMoveValid((int)Piece.K + offset,ref evaluationContext)    // in?
+                || IsAnyKingMoveValid((int)Piece.K + offset, ref evaluationContext)    // in?
                 || IsAnyPieceMoveValid((int)Piece.Q + offset)
                 || IsAnyPieceMoveValid((int)Piece.B + offset)
                 || IsAnyPieceMoveValid((int)Piece.N + offset)
@@ -673,7 +673,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsValidMove(Move move)
+    private bool IsValidMove(Move move)
     {
         var gameState = MakeMove(move);
 
