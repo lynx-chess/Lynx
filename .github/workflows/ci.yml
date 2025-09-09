@@ -259,9 +259,7 @@ jobs:
         category: [PerftFRC]
       fail-fast: false
 
-    if: >
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-      || ${{ matrix.configuration }} == 'Release'
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || matrix.configuration == 'Release' }}
 
     steps:
     - uses: actions/checkout@v5
