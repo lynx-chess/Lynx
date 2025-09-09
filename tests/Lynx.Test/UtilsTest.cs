@@ -21,16 +21,16 @@ public class UtilsTest
         Assert.AreEqual(expectedSide, Utils.OppositeSide(sideToMove));
     }
 
-    [TestCase(Side.White, Constants.WhiteRookKingsideCastlingSquare)]
-    [TestCase(Side.Black, Constants.BlackRookKingsideCastlingSquare)]
+    [TestCase(Side.White, Constants.WhiteRookShortCastleSquare)]
+    [TestCase(Side.Black, Constants.BlackRookShortCastleSquare)]
     public void ShortCastleRookTargetSquare(Side sideToMove, int expectedRookSquare)
     {
         Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookTargetSquare(sideToMove));
         Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookTargetSquare((int)sideToMove));
     }
 
-    [TestCase(Side.White, Constants.WhiteRookQueensideCastlingSquare)]
-    [TestCase(Side.Black, Constants.BlackRookQueensideCastlingSquare)]
+    [TestCase(Side.White, Constants.WhiteRookLongCastleSquare)]
+    [TestCase(Side.Black, Constants.BlackRookLongCastleSquare)]
     public void LongCastleRookTargetSquare(Side sideToMove, int expectedRookSquare)
     {
         Assert.AreEqual(expectedRookSquare, Utils.LongCastleRookTargetSquare(sideToMove));

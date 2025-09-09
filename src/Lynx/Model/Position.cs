@@ -197,22 +197,22 @@ public class Position : IDisposable
 #endif
 
             KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingKingsideCastlingSquare);
-            KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingKingsideCastlingSquare);
+            KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingShortCastleSquare);
+            KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingShortCastleSquare);
 
             QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingQueensideCastlingSquare);
-            QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingQueensideCastlingSquare);
+            QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
+            QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
 
             KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
             var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookKingsideCastlingSquare);
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookShortCastleSquare);
             whiteKingsideFreeMask.PopBit(whiteKingSquare);
             whiteKingsideFreeMask.PopBit(whiteKingsideRook);
 
             var blackKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.Black]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookKingsideCastlingSquare);
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookShortCastleSquare);
             blackKingsideFreeMask.PopBit(blackKingSquare);
             blackKingsideFreeMask.PopBit(blackKingsideRook);
 
@@ -222,12 +222,12 @@ public class Position : IDisposable
             QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
             var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookQueensideCastlingSquare);
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookLongCastleSquare);
             whiteQueensideFreeMask.PopBit(whiteKingSquare);
             whiteQueensideFreeMask.PopBit(whiteQueensideRook);
 
             var blackQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.Black]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookQueensideCastlingSquare);
+                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookLongCastleSquare);
             blackQueensideFreeMask.PopBit(blackKingSquare);
             blackQueensideFreeMask.PopBit(blackQueensideRook);
 
@@ -246,11 +246,11 @@ public class Position : IDisposable
             // Usual encoding for standard chess, King to target square
             else
             {
-                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, Constants.WhiteKingKingsideCastlingSquare, (int)Piece.K);
-                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, Constants.WhiteKingQueensideCastlingSquare, (int)Piece.K);
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
 
-                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, Constants.BlackKingKingsideCastlingSquare, (int)Piece.k);
-                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, Constants.BlackKingQueensideCastlingSquare, (int)Piece.k);
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
             }
         }
 
@@ -610,7 +610,7 @@ public class Position : IDisposable
 
                         _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
 
-                        var kingTargetSquare = Utils.ShortCastleKingTargetSquare(oldSide);
+                        var kingTargetSquare = Utils.KingShortCastleSquare(oldSide);
 
                         if (Configuration.EngineSettings.IsChess960)
                         {
@@ -663,7 +663,7 @@ public class Position : IDisposable
 
                         _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
 
-                        var kingTargetSquare = Utils.LongCastleKingTargetSquare(oldSide);
+                        var kingTargetSquare = Utils.KingLongCastleSquare(oldSide);
                         if (Configuration.EngineSettings.IsChess960)
                         {
                             // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
@@ -796,7 +796,7 @@ public class Position : IDisposable
 
                         // However, the kings needs to be removed from the real target square, providing that's not also its soure square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
-                        var kingTargetSquare = Utils.ShortCastleKingTargetSquare(side);
+                        var kingTargetSquare = Utils.KingShortCastleSquare(side);
                         // Since we set the king squares after the switch, we don't need the guard here
                         // if (kingTargetSquare != sourceSquare)
                         //{
@@ -843,7 +843,7 @@ public class Position : IDisposable
 
                         // However, the kings needs to be removed from the real target square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
-                        var kingTargetSquare = Utils.LongCastleKingTargetSquare(side);
+                        var kingTargetSquare = Utils.KingLongCastleSquare(side);
                         // Since we set the king squares after the switch, we don't need the guard here
                         //if (kingTargetSquare != sourceSquare)
                         //{

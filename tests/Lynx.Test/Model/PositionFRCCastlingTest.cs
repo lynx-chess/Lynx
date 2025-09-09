@@ -36,16 +36,16 @@ public class PositionFRCCastlingTest
             var whiteKing = position.InitialKingSquare((int)Side.White);
             var blackKing = position.InitialKingSquare((int)Side.Black);
 
-            ulong blackNonAttackedKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingKingsideCastlingSquare);
+            ulong blackNonAttackedKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingShortCastleSquare);
             Assert.AreEqual(blackNonAttackedKingsideMask, position.KingsideCastlingNonAttackedSquares[(int)Side.Black]);
 
-            ulong blackNonAttackedQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingQueensideCastlingSquare);
+            ulong blackNonAttackedQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingLongCastleSquare);
             Assert.AreEqual(blackNonAttackedQueensideMask, position.QueensideCastlingNonAttackedSquares[(int)Side.Black]);
 
-            ulong whiteNonAttackedKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingKingsideCastlingSquare);
+            ulong whiteNonAttackedKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingShortCastleSquare);
             Assert.AreEqual(whiteNonAttackedKingsideMask, position.KingsideCastlingNonAttackedSquares[(int)Side.White]);
 
-            ulong whiteNonAttackedQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingQueensideCastlingSquare);
+            ulong whiteNonAttackedQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingLongCastleSquare);
             Assert.AreEqual(whiteNonAttackedQueensideMask, position.QueensideCastlingNonAttackedSquares[(int)Side.White]);
         }
     }
@@ -73,29 +73,29 @@ public class PositionFRCCastlingTest
             var blackKing = position.InitialKingSquare((int)Side.Black);
 
             var castlingRook = position.BlackShortCastle.TargetSquare();
-            ulong blackFreeKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingKingsideCastlingSquare)
-                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.BlackRookKingsideCastlingSquare);
+            ulong blackFreeKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingShortCastleSquare)
+                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.BlackRookShortCastleSquare);
             blackFreeKingsideMask.PopBit(blackKing);
             blackFreeKingsideMask.PopBit(castlingRook);
             Assert.AreEqual(blackFreeKingsideMask, position.KingsideCastlingFreeSquares[(int)Side.Black]);
 
             castlingRook = position.BlackLongCastle.TargetSquare();
-            ulong blackFreeQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingQueensideCastlingSquare)
-                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.BlackRookQueensideCastlingSquare);
+            ulong blackFreeQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingLongCastleSquare)
+                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.BlackRookLongCastleSquare);
             blackFreeQueensideMask.PopBit(blackKing);
             blackFreeQueensideMask.PopBit(castlingRook);
             Assert.AreEqual(blackFreeQueensideMask, position.QueensideCastlingFreeSquares[(int)Side.Black]);
 
             castlingRook = position.WhiteShortCastle.TargetSquare();
-            ulong whiteFreeKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingKingsideCastlingSquare)
-                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.WhiteRookKingsideCastlingSquare);
+            ulong whiteFreeKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingShortCastleSquare)
+                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.WhiteRookShortCastleSquare);
             whiteFreeKingsideMask.PopBit(whiteKing);
             whiteFreeKingsideMask.PopBit(castlingRook);
             Assert.AreEqual(whiteFreeKingsideMask, position.KingsideCastlingFreeSquares[(int)Side.White]);
 
             castlingRook = position.WhiteLongCastle.TargetSquare();
-            ulong whiteFreeQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingQueensideCastlingSquare)
-                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.WhiteRookQueensideCastlingSquare);
+            ulong whiteFreeQueensideMask = MaskBetweenTwoSquaresSameRankInclusive(whiteKing, Constants.WhiteKingLongCastleSquare)
+                | MaskBetweenTwoSquaresSameRankInclusive(castlingRook, Constants.WhiteRookLongCastleSquare);
             whiteFreeQueensideMask.PopBit(whiteKing);
             whiteFreeQueensideMask.PopBit(castlingRook);
             Assert.AreEqual(whiteFreeQueensideMask, position.QueensideCastlingFreeSquares[(int)Side.White]);

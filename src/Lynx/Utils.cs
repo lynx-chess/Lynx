@@ -61,7 +61,7 @@ public static class Utils
     {
         GuardAgainstSideBoth(side);
 
-        return Constants.BlackRookKingsideCastlingSquare + (7 * 8 * side);
+        return Constants.BlackRookShortCastleSquare + (7 * 8 * side);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,7 +71,7 @@ public static class Utils
     {
         GuardAgainstSideBoth(side);
 
-        return Constants.BlackRookQueensideCastlingSquare + (7 * 8 * side);
+        return Constants.BlackRookLongCastleSquare + (7 * 8 * side);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,14 +95,14 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int ShortCastleKingTargetSquare(int side) => side == (int)Side.White
-        ? Constants.WhiteKingKingsideCastlingSquare
-        : Constants.BlackKingKingsideCastlingSquare;
+    public static int KingShortCastleSquare(int side) => side == (int)Side.White
+        ? Constants.WhiteKingShortCastleSquare
+        : Constants.BlackKingShortCastleSquare;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int LongCastleKingTargetSquare(int side) => side == (int)Side.White
-        ? Constants.WhiteKingQueensideCastlingSquare
-        : Constants.BlackKingQueensideCastlingSquare;
+    public static int KingLongCastleSquare(int side) => side == (int)Side.White
+        ? Constants.WhiteKingLongCastleSquare
+        : Constants.BlackKingLongCastleSquare;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
@@ -113,7 +113,7 @@ public static class Utils
 
         return (
             (int)BoardSquare.h8 + (7 * 8 * side),
-            Constants.BlackRookKingsideCastlingSquare + (7 * 8 * side));
+            Constants.BlackRookShortCastleSquare + (7 * 8 * side));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -125,7 +125,7 @@ public static class Utils
 
         return (
             (int)BoardSquare.a8 + (7 * 8 * side),
-            Constants.BlackRookQueensideCastlingSquare + (7 * 8 * side));
+            Constants.BlackRookLongCastleSquare + (7 * 8 * side));
     }
 
     /// <summary>

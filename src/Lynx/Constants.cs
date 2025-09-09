@@ -301,15 +301,15 @@ public static class Constants
     public const int InitialBlackKingsideRookSquare = (int)BoardSquare.h8;
     public const int InitialBlackQueensideRookSquare = (int)BoardSquare.a8;
 
-    public const int WhiteKingKingsideCastlingSquare = (int)BoardSquare.g1;
-    public const int BlackKingKingsideCastlingSquare = (int)BoardSquare.g8;
-    public const int WhiteKingQueensideCastlingSquare = (int)BoardSquare.c1;
-    public const int BlackKingQueensideCastlingSquare = (int)BoardSquare.c8;
+    public const int WhiteKingShortCastleSquare = (int)BoardSquare.g1;
+    public const int BlackKingShortCastleSquare = (int)BoardSquare.g8;
+    public const int WhiteKingLongCastleSquare = (int)BoardSquare.c1;
+    public const int BlackKingLongCastleSquare = (int)BoardSquare.c8;
 
-    public const int WhiteRookKingsideCastlingSquare = (int)BoardSquare.f1;
-    public const int BlackRookKingsideCastlingSquare = (int)BoardSquare.f8;
-    public const int WhiteRookQueensideCastlingSquare = (int)BoardSquare.d1;
-    public const int BlackRookQueensideCastlingSquare = (int)BoardSquare.d8;
+    public const int WhiteRookShortCastleSquare = (int)BoardSquare.f1;
+    public const int BlackRookShortCastleSquare = (int)BoardSquare.f8;
+    public const int WhiteRookLongCastleSquare = (int)BoardSquare.d1;
+    public const int BlackRookLongCastleSquare = (int)BoardSquare.d8;
 
     public const string WhiteShortCastle = "e1g1";
     public const string BlackShortCastle = "e8g8";
@@ -363,6 +363,7 @@ public static class Constants
     ///  Black kingside Rook moved or captured      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved or captured     1111 & 0111  =  0111    7
     /// </summary>
+    [Obsolete("Test only")]
     public static ReadOnlySpan<byte> CastlingRightsUpdateConstants =>
     [
          7, 15, 15, 15,  3, 15, 15, 11,
