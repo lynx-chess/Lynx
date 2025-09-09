@@ -510,7 +510,7 @@ public class RegressionTest : BaseTest
     }
 
     /// <summary>
-    /// They won't get understood as FRC, rater as empty castling rights
+    /// They won't get understood as FRC, rather as empty castling rights
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="depth"></param>
