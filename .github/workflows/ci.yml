@@ -254,12 +254,9 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [Debug, Release]
         os: [ubuntu-latest, windows-latest, macOS-latest]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
         category: [PerftFRC]
       fail-fast: false
-
-    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || matrix.configuration == 'Release' }}
 
     steps:
     - uses: actions/checkout@v5
@@ -279,21 +276,52 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: dotnet build -c ${{ matrix.configuration }}
+      run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests in Release mode
-      run: dotnet test -c ${{ matrix.configuration }} --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
         # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
+
+  perft-frc-tests-debug:
+    runs-on: ${{ matrix.os }}
+    # if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        os: [windows-latest]
+        category: [PerftFRC]
+      fail-fast: true
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v4
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Debug
+
+    - name: Run ${{ matrix.category }} tests in Release mode
+      run: dotnet test -c Debug --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
 
   perft-frc-tests-exhaustive:
     runs-on: ${{ matrix.os }}
     # if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
-        # os: [ubuntu-latest, windows-latest, macOS-latest]
         os: [ubuntu-latest]
         category: [PerftFRCExhaustive]
-      fail-fast: false
+      fail-fast: true
 
     steps:
     - uses: actions/checkout@v5
