@@ -944,7 +944,6 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
-
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
@@ -975,7 +974,6 @@ public class PositionTest
         BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
-
 
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
