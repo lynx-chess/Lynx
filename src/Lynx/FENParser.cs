@@ -10,6 +10,13 @@ public static class FENParser
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+#pragma warning disable IDE1006 // Naming Styles
+    private static readonly SearchValues<char> _DFRCCastlingRightsChars =
+#pragma warning restore IDE1006 // Naming Styles
+        SearchValues.Create(
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen)
     {
@@ -163,11 +170,27 @@ public static class FENParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static CastlingData ParseCastlingRights(ReadOnlySpan<char> castling, ulong[] pieceBitboards, out byte castlingRights)
     {
-        castlingRights = 0;
-        int whiteKingsideRook = -1, whiteQueensideRook = -1, blackKingsideRook = -1, blackQueensideRook = -1;
-
         if (!Configuration.EngineSettings.IsChess960)
         {
+            return ParseStandardChessCastlingRights(castling, pieceBitboards, out castlingRights);
+        }
+        else
+        {
+            return ParseDFRCCastlingRights(castling, pieceBitboards, out castlingRights);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static CastlingData ParseStandardChessCastlingRights(ReadOnlySpan<char> castling, ulong[] pieceBitboards, out byte castlingRights)
+        {
+            if (castling.ContainsAny(_DFRCCastlingRightsChars))
+            {
+                _logger.Warn("DFRC position detected without UCI_Chess960 set. Enabling it as a fallback");
+                Configuration.EngineSettings.IsChess960 = true;
+
+                return ParseDFRCCastlingRights(castling, pieceBitboards, out castlingRights);
+            }
+
+            castlingRights = 0;
             for (int i = 0; i < castling.Length; ++i)
             {
                 castlingRights |= castling[i] switch
@@ -181,20 +204,25 @@ public static class FENParser
                 };
             }
 
-            whiteKingsideRook = Constants.InitialWhiteKingsideRookSquare;
-            whiteQueensideRook = Constants.InitialWhiteQueensideRookSquare;
-            blackKingsideRook = Constants.InitialBlackKingsideRookSquare;
-            blackQueensideRook = Constants.InitialBlackQueensideRookSquare;
+            return new CastlingData(
+                Constants.InitialWhiteKingsideRookSquare, Constants.InitialWhiteQueensideRookSquare,
+                Constants.InitialBlackKingsideRookSquare, Constants.InitialBlackQueensideRookSquare);
         }
-        else
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static CastlingData ParseDFRCCastlingRights(ReadOnlySpan<char> castling, ulong[] pieceBitboards, out byte castlingRights)
         {
             // X-FEN uses KQkq notation when not ambiguous, with the letters referring to "the outermost rook of the affected side"
+
+            int whiteKingsideRook = -1, whiteQueensideRook = -1, blackKingsideRook = -1, blackQueensideRook = -1;
 
             var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
             var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
 
             Debug.Assert(whiteKing != 0);
             Debug.Assert(blackKing != 0);
+
+            castlingRights = 0;
 
             for (int i = 0; i < castling.Length; ++i)
             {
@@ -347,9 +375,9 @@ public static class FENParser
                         }
                 }
             }
-        }
 
-        return new CastlingData(whiteKingsideRook, whiteQueensideRook, blackKingsideRook, blackQueensideRook);
+            return new CastlingData(whiteKingsideRook, whiteQueensideRook, blackKingsideRook, blackQueensideRook);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
