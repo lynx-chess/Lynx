@@ -261,7 +261,7 @@ jobs:
 
     if: >
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-      || matrix.configuration == 'Release'
+      || ${{ matrix.configuration }} == 'Release'
 
     steps:
     - uses: actions/checkout@v5
