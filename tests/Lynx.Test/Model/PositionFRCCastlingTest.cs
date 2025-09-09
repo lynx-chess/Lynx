@@ -33,8 +33,8 @@ public class PositionFRCCastlingTest
 
         static void Validate(Position position)
         {
-            var whiteKing = position.InitialKingSquares[(int)Side.White];
-            var blackKing = position.InitialKingSquares[(int)Side.Black];
+            var whiteKing = position.InitialKingSquare((int)Side.White);
+            var blackKing = position.InitialKingSquare((int)Side.Black);
 
             ulong blackNonAttackedKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingKingsideCastlingSquare);
             Assert.AreEqual(blackNonAttackedKingsideMask, position.KingsideCastlingNonAttackedSquares[(int)Side.Black]);
@@ -69,8 +69,8 @@ public class PositionFRCCastlingTest
 
         static void Validate(Position position)
         {
-            var whiteKing = position.InitialKingSquares[(int)Side.White];
-            var blackKing = position.InitialKingSquares[(int)Side.Black];
+            var whiteKing = position.InitialKingSquare((int)Side.White);
+            var blackKing = position.InitialKingSquare((int)Side.Black);
 
             var castlingRook = position.BlackShortCastle.TargetSquare();
             ulong blackFreeKingsideMask = MaskBetweenTwoSquaresSameRankInclusive(blackKing, Constants.BlackKingKingsideCastlingSquare)

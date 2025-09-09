@@ -33,10 +33,10 @@ public class Position : IDisposable
 #if DEBUG
     internal readonly int[] _initialKingsideRookSquares;
     internal readonly int[] _initialQueensideRookSquares;
+    internal readonly int[] _initialKingSquares;
 #endif
 
 #pragma warning disable S3887, CA1051
-    public readonly int[] InitialKingSquares;
     public readonly ulong[] KingsideCastlingFreeSquares;
     public readonly ulong[] KingsideCastlingNonAttackedSquares;
     public readonly ulong[] QueensideCastlingFreeSquares;
@@ -137,9 +137,8 @@ public class Position : IDisposable
 
         if (_castle == (int)CastlingRights.None)
         {
-            InitialKingSquares = [];
-
 #if DEBUG
+            _initialKingSquares = [];
             _initialKingsideRookSquares = [];
             _initialQueensideRookSquares = [];
 #endif
@@ -183,11 +182,11 @@ public class Position : IDisposable
                 _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
             }
 
-            InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
-            InitialKingSquares[(int)Side.White] = whiteKingSquare;
-            InitialKingSquares[(int)Side.Black] = blackKingSquare;
-
 #if DEBUG
+            _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialKingSquares[(int)Side.White] = whiteKingSquare;
+            _initialKingSquares[(int)Side.Black] = blackKingSquare;
+
             _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
             _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
@@ -294,11 +293,10 @@ public class Position : IDisposable
         Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
 
         // Avoid allocating arrays when the position to clone never had castling rights
-        if (position.InitialKingSquares.Length == 0)
+        if (position.KingsideCastlingNonAttackedSquares.Length == 0)
         {
-            InitialKingSquares = [];
-
 #if DEBUG
+            _initialKingSquares = [];
             _initialKingsideRookSquares = [];
             _initialQueensideRookSquares = [];
 #endif
@@ -310,11 +308,11 @@ public class Position : IDisposable
         }
         else
         {
-            InitialKingSquares = ArrayPool<int>.Shared.Rent(2);
-            InitialKingSquares[(int)Side.White] = position.InitialKingSquares[(int)Side.White];
-            InitialKingSquares[(int)Side.Black] = position.InitialKingSquares[(int)Side.Black];
-
 #if DEBUG
+            _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialKingSquares[(int)Side.White] = position._initialKingSquares[(int)Side.White];
+            _initialKingSquares[(int)Side.Black] = position._initialKingSquares[(int)Side.Black];
+
             _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
             _initialKingsideRookSquares[(int)Side.White] = position._initialKingsideRookSquares[(int)Side.White];
             _initialKingsideRookSquares[(int)Side.Black] = position._initialKingsideRookSquares[(int)Side.Black];
@@ -348,6 +346,10 @@ public class Position : IDisposable
 
         Validate();
     }
+
+    public int InitialKingSquare(int side) => side == (int)Side.White
+        ? WhiteShortCastle.SourceSquare()
+        : BlackShortCastle.SourceSquare();
 
     #region Move making
 
@@ -1118,53 +1120,47 @@ public class Position : IDisposable
         Debug.Assert(whiteKings.CountBits() == 1, failureMessage, $"More than one white king, or none: {whiteKings}");
         Debug.Assert(blackKings.CountBits() == 1, failureMessage, $"More than one black king, or none: {blackKings}");
 
+#if DEBUG
         if (_castle != 0)
         {
-            var whiteKingSourceSquare = InitialKingSquares[(int)Side.White];
+            var whiteKingSourceSquare = _initialKingSquares[(int)Side.White];
 
             // Castling rights and king/rook positions
             if ((_castle & (int)CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
 
-#if DEBUG
                 Debug.Assert(_initialKingsideRookSquares[(int)Side.White] != -1, failureMessage, "White initial kingside rook not set");
                 Debug.Assert(whiteRooks.GetBit(_initialKingsideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.White]} when short castling rights");
-#endif
             }
 
             if ((_castle & (int)CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
 
-#if DEBUG
                 Debug.Assert(whiteRooks.GetBit(_initialQueensideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialQueensideRookSquares[(int)Side.White]} when long castling rights");
                 Debug.Assert(_initialQueensideRookSquares[(int)Side.White] != -1, failureMessage, "White initial queenside rook not set");
-#endif
             }
 
-            var blackKingSourceSquare = InitialKingSquares[(int)Side.Black];
+            var blackKingSourceSquare = _initialKingSquares[(int)Side.Black];
 
             if ((_castle & (int)CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
 
-#if DEBUG
                 Debug.Assert(_initialKingsideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial kingside rook not set");
                 Debug.Assert(blackRooks.GetBit(_initialKingsideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.Black]} when short castling rights");
-#endif
             }
 
             if ((_castle & (int)CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
 
-#if DEBUG
                 Debug.Assert(blackRooks.GetBit(_initialQueensideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialQueensideRookSquares[(int)Side.Black]} when long castling rights");
                 Debug.Assert(_initialQueensideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial queenside rook not set");
-#endif
             }
         }
+#endif
 
         // En-passant and pawn to be captured position
         if (_enPassant != BoardSquare.noSquare)
@@ -2637,13 +2633,13 @@ public class Position : IDisposable
         ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
 
         ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
-        ArrayPool<int>.Shared.Return(InitialKingSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares, clearArray: true);
         ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares, clearArray: true);
 
 #if DEBUG
+        ArrayPool<int>.Shared.Return(_initialKingSquares, clearArray: true);
         ArrayPool<int>.Shared.Return(_initialKingsideRookSquares, clearArray: true);
         ArrayPool<int>.Shared.Return(_initialQueensideRookSquares, clearArray: true);
 #endif
