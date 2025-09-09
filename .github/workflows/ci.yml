@@ -311,7 +311,7 @@ jobs:
     - name: Build
       run: dotnet build -c Debug
 
-    - name: Run ${{ matrix.category }} tests in Release mode
+    - name: Run ${{ matrix.category }} tests in Debug mode
       run: dotnet test -c Debug --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
 
   perft-frc-tests-exhaustive:
