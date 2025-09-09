@@ -631,6 +631,7 @@ public class Position : IDisposable
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
+                        // TODO remove guard if we ever move the sets after the switch
                         if (rookSourceSquare != kingTargetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
@@ -682,6 +683,7 @@ public class Position : IDisposable
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
+                        // TODO remove guard if we ever move the sets after the switch
                         if (rookSourceSquare != kingTargetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
