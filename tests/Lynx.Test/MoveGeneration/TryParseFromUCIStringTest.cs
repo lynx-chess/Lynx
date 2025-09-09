@@ -34,7 +34,8 @@ public class TryParseFromUCIStringTest
     {
         // Arrange
         const string fen = "r1b1k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/P1PB1PpP/R3KB1R w KQkq - 0 1";
-        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
+        var position = new Position(fen);
+        var moves = position.GenerateAllMoves();
 
         // Act
         Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var move));
@@ -74,7 +75,8 @@ public class TryParseFromUCIStringTest
     {
         // Arrange
         const string fen = "r1b1k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/P1PB1PpP/R3KB1R b KQkq - 0 1";
-        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
+        var position = new Position(fen);
+        var moves = position.GenerateAllMoves();
 
         // Act
         Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var move));
@@ -91,7 +93,8 @@ public class TryParseFromUCIStringTest
     {
         // Arrange
         const string fen = Constants.InitialPositionFEN;
-        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
+        var position = new Position(fen);
+        var moves = position.GenerateAllMoves();
 
         // Act & Assert
         Assert.False(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var result));

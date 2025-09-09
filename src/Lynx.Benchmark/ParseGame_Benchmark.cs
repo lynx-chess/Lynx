@@ -509,7 +509,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         {
             foreach (var moveString in movesUCIString)
             {
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+                var moveList = CurrentPosition.GenerateAllMoves();
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
@@ -590,7 +590,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[range];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+                var moveList = CurrentPosition.GenerateAllMoves();
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
@@ -675,7 +675,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                 }
                 var moveString = rawMoves[rangeSpan[i]];
 
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+                var moveList = CurrentPosition.GenerateAllMoves(ref evaluationContext, movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {

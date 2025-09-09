@@ -371,7 +371,7 @@ public static class MoveExtensions
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
+        var pseudoLegalMoves = position.GenerateAllMoves(ref evaluationContext, moves).ToArray();
 
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)

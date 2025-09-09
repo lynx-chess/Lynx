@@ -384,7 +384,7 @@ static void _22_Generate_Moves()
     position.Print();
 
     //position.OccupancyBitBoards[2] |= 0b11100111UL << 8 * 4;
-    var moves = MoveGenerator.GenerateAllMoves(position);
+    var moves = position.GenerateAllMoves();
 
     foreach (var move in moves)
     {
@@ -395,7 +395,7 @@ static void _22_Generate_Moves()
     position.PieceBitBoards[0].Print();
     position.PieceBitBoards[6].Print();
     position.Print();
-    moves = MoveGenerator.GenerateAllMoves(position);
+    moves = position.GenerateAllMoves();
 
     foreach (var move in moves)
     {
@@ -415,7 +415,7 @@ static void _23_Castling_Moves()
     Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
     var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-    MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
+    position.GenerateCastlingMoves(ref index, moves, ref evaluationContext);
 
     foreach (var move in moves[..index])
     {
@@ -428,10 +428,10 @@ static void _26_Piece_Moves()
     var position = new Position(TrickyPosition);
     position.Print();
 
-    var moves = MoveGenerator.GenerateAllMoves(position).Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n).ToList();
+    var moves = position.GenerateAllMoves().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
-    moves = [.. MoveGenerator.GenerateAllMoves(position)];
+    moves = [.. position.GenerateAllMoves()];
     Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {
@@ -487,16 +487,16 @@ static void PrintMoveList(IEnumerable<Move> moves)
 static void _29_Move_List()
 {
     var position = new Position(TrickyPosition);
-    var moves = MoveGenerator.GenerateAllMoves(position);
+    var moves = position.GenerateAllMoves();
     PrintMoveList(moves);
 
     position = new Position(TrickyPositionReversed);
-    moves = MoveGenerator.GenerateAllMoves(position);
+    moves = position.GenerateAllMoves();
     PrintMoveList(moves);
 
     position = new Position(KillerPosition);
     position.Print();
-    moves = MoveGenerator.GenerateAllMoves(position);
+    moves = position.GenerateAllMoves();
     PrintMoveList(moves);
 }
 
@@ -516,13 +516,13 @@ static void _32_Make_Move()
     //CastlingRightsTest(game);
     //CastlingRightsTest(reversedGame);
 
-    PrintMoveList(MoveGenerator.GenerateAllMoves(gameWithPromotion.CurrentPosition));
+    PrintMoveList(gameWithPromotion.CurrentPosition.GenerateAllMoves());
 
     GeneralMoveTest(gameWithPromotion);
 
     static void GeneralMoveTest(Game game)
     {
-        foreach (var move in MoveGenerator.GenerateAllMoves(game.CurrentPosition))
+        foreach (var move in game.CurrentPosition.GenerateAllMoves())
         {
             game.CurrentPosition.Print();
 
@@ -542,7 +542,7 @@ static void _32_Make_Move()
 
     static void CastlingRightsTest(Game game)
     {
-        foreach (var move in MoveGenerator.GenerateAllMoves(game.CurrentPosition))
+        foreach (var move in game.CurrentPosition.GenerateAllMoves())
         {
             if (move.Piece() == (int)Piece.R || (move.Piece() == (int)Piece.r)
              || move.Piece() == (int)Piece.K || (move.Piece() == (int)Piece.k))
@@ -586,7 +586,7 @@ static void _49_Rudimetary_Evaluation()
 {
     //var position = new Position(Constants.InitialPositionFEN);
 
-    //foreach (var move in MoveGenerator.GenerateAllMoves(position))
+    //foreach (var move in position.GenerateAllMoves())
     //{
     //    var newBlackPosition = new Position(position, move);
     //    if (newBlackPosition.IsValid())
@@ -706,7 +706,7 @@ static void _54_ScoreMove()
     Span<BitBoard> attacks = stackalloc BitBoard[12];
     Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
     var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
+    foreach (var move in position.GenerateAllMoves(capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext)}");
     }
@@ -715,7 +715,7 @@ static void _54_ScoreMove()
     position.Print();
 
     engine.SetGame(new(position.FEN()));
-    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
+    foreach (var move in position.GenerateAllMoves(capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext)}");
     }
@@ -726,7 +726,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos)[0]);
+    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.GenerateAllMoves()[0]);
 
     Console.WriteLine(updatedHash);
 }
@@ -1109,7 +1109,7 @@ static void UnmakeMove()
         var position = new Position(fen);
         Console.WriteLine($"**Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}**");
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position);
+        var allMoves = position.GenerateAllMoves();
 
         var oldZobristKey = position.UniqueIdentifier;
         foreach (var move in allMoves)

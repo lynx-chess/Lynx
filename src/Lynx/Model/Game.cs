@@ -68,7 +68,7 @@ public sealed class Game : IDisposable
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+            var moveList = CurrentPosition.GenerateAllMoves(ref evaluationContext, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -162,7 +162,7 @@ public sealed class Game : IDisposable
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
+        return !CurrentPosition.IsInCheck() || CurrentPosition.CanGenerateAtLeastAValidMove(ref evaluationContext);
     }
 
     /// <summary>

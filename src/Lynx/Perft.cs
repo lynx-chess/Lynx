@@ -44,7 +44,7 @@ public static class Perft
             Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
             var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
+            foreach (var move in position.GenerateAllMoves(ref evaluationContext, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -72,7 +72,7 @@ public static class Perft
             Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
             var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
+            foreach (var move in position.GenerateAllMoves(ref evaluationContext, moves))
             {
                 var state = position.MakeMove(move);
 

@@ -1,18 +1,13 @@
-﻿using Lynx.Model;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Lynx;
+namespace Lynx.Model;
 
-public static class MoveGenerator
+public partial class Position
 {
 #if DEBUG
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
-
-    private const int TRUE = 1;
-
-    internal static int Init() => TRUE;
 
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
@@ -42,7 +37,7 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
-    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
+    internal Move[] GenerateAllMoves(bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -51,29 +46,29 @@ public static class MoveGenerator
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         return (capturesOnly
-            ? GenerateAllCaptures(position, ref evaluationContext, moves)
-            : GenerateAllMoves(position, ref evaluationContext, moves)).ToArray();
+            ? GenerateAllCaptures(ref evaluationContext, moves)
+            : GenerateAllMoves(ref evaluationContext, moves)).ToArray();
     }
 
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllMoves(Position position, ref EvaluationContext evaluationContext, Span<Move> movePool)
+    public Span<Move> GenerateAllMoves(ref EvaluationContext evaluationContext, Span<Move> movePool)
     {
-        Debug.Assert(position.Side != Side.Both);
+        Debug.Assert(Side != Side.Both);
 
         int localIndex = 0;
 
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset(Side);
 
-        GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position, ref evaluationContext);
-        GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset, position, ref evaluationContext);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position);
+        GenerateAllPawnMoves(ref localIndex, movePool, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, ref evaluationContext);
+        GenerateKingMoves(ref localIndex, movePool, (int)Piece.K + offset, ref evaluationContext);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset);
 
         return movePool[..localIndex];
     }
@@ -82,35 +77,35 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, ref EvaluationContext evaluationContext, Span<Move> movePool)
+    public Span<Move> GenerateAllCaptures(ref EvaluationContext evaluationContext, Span<Move> movePool)
     {
-        Debug.Assert(position.Side != Side.Both);
+        Debug.Assert(Side != Side.Both);
 
         int localIndex = 0;
 
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset(Side);
 
-        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position, ref evaluationContext);
-        GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, ref evaluationContext);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
+        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, ref evaluationContext);
+        GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, ref evaluationContext);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset);
 
         return movePool[..localIndex];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateAllPawnMoves(ref int localIndex, Span<Move> movePool, Position position, int offset)
+    private void GenerateAllPawnMoves(ref int localIndex, Span<Move> movePool, int offset)
     {
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
-        var bitboard = position.PieceBitBoards[piece];
+        var pawnPush = +8 - ((int)Side * 16);          // Side == Side.White ? -8 : +8
+        int oppositeSide = Utils.OppositeSide(Side);   // Side == Side.White ? (int)Side.Black : (int)Side.White
+        var bitboard = _pieceBitBoards[piece];
 
-        var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
+        var pawnAttacks = Attacks.PawnAttacks[(int)Side];
 
         while (bitboard != default)
         {
@@ -118,7 +113,7 @@ public static class MoveGenerator
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
-            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -145,8 +140,8 @@ public static class MoveGenerator
 
                     // Double pawn push
                     // Inside of the single pawn push if because singlePush square cannot be occupied either
-                    if ((sourceRank == 2)        // position.Side == Side.Black is always true, otherwise targetRank would be 1
-                        || (sourceRank == 7))    // position.Side == Side.White is always true, otherwise targetRank would be 8
+                    if ((sourceRank == 2)        // Side == Side.Black is always true, otherwise targetRank would be 1
+                        || (sourceRank == 7))    // Side == Side.White is always true, otherwise targetRank would be 8
                     {
                         var doublePushSquare = singlePushSquare + pawnPush;
 
@@ -161,18 +156,18 @@ public static class MoveGenerator
             var attacks = pawnAttacks[sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
-            // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
+            if (EnPassant != BoardSquare.noSquare && attacks.GetBit(EnPassant))
+            // We assume that _occupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
+                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
-            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+            var attackedSquares = attacks & _occupancyBitBoards[oppositeSide];
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
+                var capturedPiece = Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
@@ -197,17 +192,17 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, Position position, int offset)
+    private void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, int offset)
     {
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
-        var bitboard = position.PieceBitBoards[piece];
+        var pawnPush = +8 - ((int)Side * 16);          // Side == Side.White ? -8 : +8
+        int oppositeSide = Utils.OppositeSide(Side);   // Side == Side.White ? (int)Side.Black : (int)Side.White
+        var bitboard = _pieceBitBoards[piece];
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
-        var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
 
-        var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
+        var pawnAttacks = Attacks.PawnAttacks[(int)Side];
 
         while (bitboard != default)
         {
@@ -215,7 +210,7 @@ public static class MoveGenerator
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
-            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -241,10 +236,10 @@ public static class MoveGenerator
             var attacks = pawnAttacks[sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
-            // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
+            if (EnPassant != BoardSquare.noSquare && attacks.GetBit(EnPassant))
+            // We assume that _occupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
+                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
@@ -252,7 +247,7 @@ public static class MoveGenerator
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
+                var capturedPiece = Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
@@ -281,46 +276,45 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, Position position, ref EvaluationContext evaluationContext)
+    internal void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, ref EvaluationContext evaluationContext)
     {
-        // TODO: move to position?
-        var castlingRights = position.Castle;
+        var castlingRights = Castle;
 
         if (castlingRights != default)
         {
-            var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+            var occupancy = _occupancyBitBoards[(int)Side.Both];
 
-            if (position.Side == Side.White)
+            if (Side == Side.White)
             {
                 if ((castlingRights & (int)CastlingRights.WK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
-                    && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext))
+                    && (occupancy & KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                    && !AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext))
                 {
-                    movePool[localIndex++] = position.WhiteShortCastle;
+                    movePool[localIndex++] = WhiteShortCastle;
                 }
 
                 if ((castlingRights & (int)CastlingRights.WQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
-                    && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext))
+                    && (occupancy & QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                    && !AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext))
 
                 {
-                    movePool[localIndex++] = position.WhiteLongCastle;
+                    movePool[localIndex++] = WhiteLongCastle;
                 }
             }
             else
             {
                 if ((castlingRights & (int)CastlingRights.BK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
-                    && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext))
+                    && (occupancy & KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && !AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext))
                 {
-                    movePool[localIndex++] = position.BlackShortCastle;
+                    movePool[localIndex++] = BlackShortCastle;
                 }
 
                 if ((castlingRights & (int)CastlingRights.BQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
-                    && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext))
+                    && (occupancy & QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && !AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext))
                 {
-                    movePool[localIndex++] = position.BlackLongCastle;
+                    movePool[localIndex++] = BlackLongCastle;
                 }
             }
         }
@@ -331,12 +325,12 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
+    private void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece)
     {
-        var bitboard = position.PieceBitBoards[piece];
+        var bitboard = _pieceBitBoards[piece];
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
-        ulong squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        ulong squaresNotOccupiedByUs = ~_occupancyBitBoards[(int)Side];
 
         var pieceAttacks = _pieceAttacks[piece];
 
@@ -351,9 +345,9 @@ public static class MoveGenerator
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
 
-                Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+                Debug.Assert(occupancy.GetBit(targetSquare) == (Board[targetSquare] != (int)Piece.None));
 
-                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
+                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: Board[targetSquare]);
             }
         }
     }
@@ -363,38 +357,38 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, Position position, ref EvaluationContext evaluationContext)
+    private void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, ref EvaluationContext evaluationContext)
     {
-        var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        var sourceSquare = _pieceBitBoards[piece].GetLS1BIndex();
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
 
         var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
-            & ~position.OccupancyBitBoards[(int)position.Side]
-            & ~evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
+            & ~_occupancyBitBoards[(int)Side]
+            & ~evaluationContext.AttacksBySide[Utils.OppositeSide(Side)];
 
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
-            Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+            Debug.Assert(occupancy.GetBit(targetSquare) == (Board[targetSquare] != (int)Piece.None));
 
-            movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
+            movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: Board[targetSquare]);
         }
     }
 
     /// <summary>
     /// Generate Knight, Bishop, Rook and Queen capture moves.
-    /// Could also generate King captures, but <see cref="GenerateKingCaptures(ref int, Span{int}, int, Position)"/> is more efficient.
+    /// Could also generate King captures, but <see cref="GenerateKingCaptures(ref int, Span{int}, int)"/> is more efficient.
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
+    private void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece)
     {
-        var bitboard = position.PieceBitBoards[piece];
-        var oppositeSide = Utils.OppositeSide(position.Side);
+        var bitboard = _pieceBitBoards[piece];
+        var oppositeSide = Utils.OppositeSide(Side);
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
-        var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
 
         var pieceAttacks = _pieceAttacks[piece];
 
@@ -408,7 +402,7 @@ public static class MoveGenerator
             while (attacks != default)
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
+                var capturedPiece = Board[targetSquare];
                 movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
             }
         }
@@ -419,20 +413,20 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, ref EvaluationContext evaluationContext)
+    private void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, ref EvaluationContext evaluationContext)
     {
-        var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
-        var oppositeSide = Utils.OppositeSide(position.Side);
+        var sourceSquare = _pieceBitBoards[piece].GetLS1BIndex();
+        var oppositeSide = Utils.OppositeSide(Side);
 
-        var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
-            & position.OccupancyBitBoards[oppositeSide]
+        var attacks = _pieceAttacks[piece](sourceSquare, _occupancyBitBoards[(int)Side.Both])
+            & _occupancyBitBoards[oppositeSide]
             & ~evaluationContext.AttacksBySide[oppositeSide];
 
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
-            var capturedPiece = position.Board[targetSquare];
+            var capturedPiece = Board[targetSquare];
             movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
         }
     }
@@ -441,23 +435,23 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position, ref EvaluationContext evaluationContext)
+    public bool CanGenerateAtLeastAValidMove(ref EvaluationContext evaluationContext)
     {
-        Debug.Assert(position.Side != Side.Both);
+        Debug.Assert(Side != Side.Both);
 
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset(Side);
 
 #if DEBUG
         try
         {
 #endif
-            return IsAnyPawnMoveValid(position, offset)
-                || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
-                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-                || IsAnyCastlingMoveValid(position, ref evaluationContext);
+            return IsAnyPawnMoveValid(offset)
+                || IsAnyKingMoveValid((int)Piece.K + offset, ref evaluationContext)    // in?
+                || IsAnyPieceMoveValid((int)Piece.Q + offset)
+                || IsAnyPieceMoveValid((int)Piece.B + offset)
+                || IsAnyPieceMoveValid((int)Piece.N + offset)
+                || IsAnyPieceMoveValid((int)Piece.R + offset)
+                || IsAnyCastlingMoveValid(ref evaluationContext);
 #if DEBUG
         }
         catch (Exception e)
@@ -469,15 +463,15 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyPawnMoveValid(Position position, int offset)
+    private bool IsAnyPawnMoveValid(int offset)
     {
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
-        var bitboard = position.PieceBitBoards[piece];
+        var pawnPush = +8 - ((int)Side * 16);          // Side == Side.White ? -8 : +8
+        int oppositeSide = Utils.OppositeSide(Side);   // Side == Side.White ? (int)Side.Black : (int)Side.White
+        var bitboard = _pieceBitBoards[piece];
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
-        var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
 
         while (bitboard != default)
         {
@@ -485,7 +479,7 @@ public static class MoveGenerator
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
-            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -499,14 +493,14 @@ public static class MoveGenerator
                 {
                     // If any of the promotions isn't valid, it means that the pawn move unveils a discovered check, or that the promoted piece doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions will be valid either
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset)))
+                    if (IsValidMove(MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset)))
                     {
                         return true;
                     }
                 }
                 else
                 {
-                    if (IsValidMove(position, singlePawnPush))
+                    if (IsValidMove(singlePawnPush))
                     {
                         return true;
                     }
@@ -515,21 +509,21 @@ public static class MoveGenerator
                     // Inside of the if because singlePush square cannot be occupied either
                     var doublePushSquare = singlePushSquare + pawnPush;
                     if (!occupancy.GetBit(doublePushSquare)
-                        && (sourceRank == 2         // position.Side == Side.Black is always true, otherwise targetRank would be 1
-                            || sourceRank == 7)     // position.Side == Side.White is always true, otherwise targetRank would be 8
-                        && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
+                        && (sourceRank == 2         // Side == Side.Black is always true, otherwise targetRank would be 1
+                            || sourceRank == 7)     // Side == Side.White is always true, otherwise targetRank would be 8
+                        && IsValidMove(MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
                     {
                         return true;
                     }
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+            var attacks = Attacks.PawnAttacks[(int)Side][sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
-                // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
+            if (EnPassant != BoardSquare.noSquare && attacks.GetBit(EnPassant)
+                // We assume that _occupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
+                && IsValidMove(MoveExtensions.EncodeEnPassant(sourceSquare, (int)EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
             {
                 return true;
             }
@@ -539,7 +533,7 @@ public static class MoveGenerator
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
+                var capturedPiece = Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
@@ -548,12 +542,12 @@ public static class MoveGenerator
                 {
                     // If any of the promotions that capture the same piece isn't valid, it means that the pawn move unveils a discovered check, or that the capture doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions capturing the same piece will be valid either
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset)))
+                    if (IsValidMove(MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset)))
                     {
                         return true;
                     }
                 }
-                else if (IsValidMove(position, pawnCapture))
+                else if (IsValidMove(pawnCapture))
                 {
                     return true;
                 }
@@ -568,30 +562,28 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsAnyCastlingMoveValid(Position position, ref EvaluationContext evaluationContext)
+    public bool IsAnyCastlingMoveValid(ref EvaluationContext evaluationContext)
     {
-        // TODO: move to position?
-
-        var castlingRights = position.Castle;
+        var castlingRights = Castle;
 
         if (castlingRights != default)
         {
-            var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+            var occupancy = _occupancyBitBoards[(int)Side.Both];
 
-            if (position.Side == Side.White)
+            if (Side == Side.White)
             {
                 if ((castlingRights & (int)CastlingRights.WK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
-                    && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext)
-                    && IsValidMove(position, position.WhiteShortCastle))
+                    && (occupancy & KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                    && !AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext)
+                    && IsValidMove(WhiteShortCastle))
                 {
                     return true;
                 }
 
                 if ((castlingRights & (int)CastlingRights.WQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
-                    && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext)
-                    && IsValidMove(position, position.WhiteLongCastle))
+                    && (occupancy & QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                    && !AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext)
+                    && IsValidMove(WhiteLongCastle))
                 {
                     return true;
                 }
@@ -599,17 +591,17 @@ public static class MoveGenerator
             else
             {
                 if ((castlingRights & (int)CastlingRights.BK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
-                    && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext)
-                    && IsValidMove(position, position.BlackShortCastle))
+                    && (occupancy & KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && !AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext)
+                    && IsValidMove(BlackShortCastle))
                 {
                     return true;
                 }
 
                 if ((castlingRights & (int)CastlingRights.BQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
-                    && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext)
-                    && IsValidMove(position, position.BlackLongCastle))
+                    && (occupancy & QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && !AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext)
+                    && IsValidMove(BlackLongCastle))
                 {
                     return true;
                 }
@@ -620,15 +612,15 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Also valid for Kings, but less performant than <see cref="IsAnyKingMoveValid(int, Position)"/>
+    /// Also valid for Kings, but less performant than <see cref="IsAnyKingMoveValid(int)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyPieceMoveValid(int piece, Position position)
+    private bool IsAnyPieceMoveValid(int piece)
     {
-        var bitboard = position.PieceBitBoards[piece];
+        var bitboard = _pieceBitBoards[piece];
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
-        var squaresNotOccupiedByUs = ~position.OccupancyBitBoards[(int)position.Side];
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var squaresNotOccupiedByUs = ~_occupancyBitBoards[(int)Side];
 
         var pieceAttacks = _pieceAttacks[piece];
 
@@ -643,9 +635,9 @@ public static class MoveGenerator
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
 
-                Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+                Debug.Assert(occupancy.GetBit(targetSquare) == (Board[targetSquare] != (int)Piece.None));
 
-                if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
+                if (IsValidMove(MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: Board[targetSquare])))
                 {
                     return true;
                 }
@@ -656,22 +648,22 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyKingMoveValid(int piece, Position position, ref EvaluationContext evaluationContext)
+    private bool IsAnyKingMoveValid(int piece, ref EvaluationContext evaluationContext)
     {
-        var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both];
+        var sourceSquare = _pieceBitBoards[piece].GetLS1BIndex();
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
 
         var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
-            & ~position.OccupancyBitBoards[(int)position.Side]
-            & ~evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
+            & ~_occupancyBitBoards[(int)Side]
+            & ~evaluationContext.AttacksBySide[Utils.OppositeSide(Side)];
 
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
-            Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
+            Debug.Assert(occupancy.GetBit(targetSquare) == (Board[targetSquare] != (int)Piece.None));
 
-            if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
+            if (IsValidMove(MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: Board[targetSquare])))
             {
                 return true;
             }
@@ -681,12 +673,12 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsValidMove(Position position, Move move)
+    private bool IsValidMove(Move move)
     {
-        var gameState = position.MakeMove(move);
+        var gameState = MakeMove(move);
 
-        bool result = position.WasProduceByAValidMove();
-        position.UnmakeMove(move, gameState);
+        bool result = WasProduceByAValidMove();
+        UnmakeMove(move, gameState);
 
         return result;
     }

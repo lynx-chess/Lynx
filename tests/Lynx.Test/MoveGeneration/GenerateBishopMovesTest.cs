@@ -12,7 +12,7 @@ public class GenerateBishopMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        return position.GenerateAllMoves(ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     private static IEnumerable<Move> GenerateBishopCaptures(Position position)
@@ -22,7 +22,7 @@ public class GenerateBishopMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        return position.GenerateAllCaptures(ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
