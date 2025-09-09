@@ -207,7 +207,6 @@ public class Position : IDisposable
 
             KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
-            // TODO optimize, pretty sure between rooks will be enough
             var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
                 | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookKingsideCastlingSquare);
             whiteKingsideFreeMask.PopBit(whiteKingSquare);
@@ -632,7 +631,6 @@ public class Position : IDisposable
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
-                        // TODO try to remove this by moving the main piece set/pops before the switch
                         if (rookSourceSquare != kingTargetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
@@ -684,7 +682,6 @@ public class Position : IDisposable
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
-                        // TODO try to remove this by moving the main piece set/pops before the switch
                         if (rookSourceSquare != kingTargetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
@@ -769,10 +766,6 @@ public class Position : IDisposable
         _occupancyBitBoards[side].PopBit(targetSquare);
         _board[targetSquare] = (int)Piece.None;
 
-        _pieceBitBoards[piece].SetBit(sourceSquare);
-        _occupancyBitBoards[side].SetBit(sourceSquare);
-        _board[sourceSquare] = piece;
-
         switch (move.SpecialMoveFlag())
         {
             case SpecialMoveType.None:
@@ -800,12 +793,13 @@ public class Position : IDisposable
                         // However, the kings needs to be removed from the real target square, providing that's not also its soure square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
                         var kingTargetSquare = Utils.ShortCastleKingTargetSquare(side);
-                        if (kingTargetSquare != sourceSquare)
-                        {
-                            _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                            _occupancyBitBoards[side].PopBit(kingTargetSquare);
-                            _board[kingTargetSquare] = (int)Piece.None;
-                        }
+                        // Since we set the king squares after the switch, we don't need the guard here
+                        // if (kingTargetSquare != sourceSquare)
+                        //{
+                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
+                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
+                        _board[kingTargetSquare] = (int)Piece.None;
+                        //}
 
                         rookSourceSquare = targetSquare;
                     }
@@ -821,12 +815,12 @@ public class Position : IDisposable
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
-                    // TODO try to remove this by moving the main piece set/pops before the switch
-                    if (rookTargetSquare != InitialKingSquares[side])
-                    {
-                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                        _board[rookTargetSquare] = (int)Piece.None;
-                    }
+                    // Since we set the king squares after the switch, we don't need the guard here
+                    //if (rookTargetSquare != InitialKingSquares[side])
+                    //{
+                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                    _board[rookTargetSquare] = (int)Piece.None;
+                    //}
 
                     _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
                     _occupancyBitBoards[side].SetBit(rookSourceSquare);
@@ -846,12 +840,14 @@ public class Position : IDisposable
                         // However, the kings needs to be removed from the real target square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
                         var kingTargetSquare = Utils.LongCastleKingTargetSquare(side);
-                        if (kingTargetSquare != sourceSquare)
-                        {
-                            _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                            _occupancyBitBoards[side].PopBit(kingTargetSquare);
-                            _board[kingTargetSquare] = (int)Piece.None;
-                        }
+                        // Since we set the king squares after the switch, we don't need the guard here
+                        //if (kingTargetSquare != sourceSquare)
+                        //{
+
+                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
+                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
+                        _board[kingTargetSquare] = (int)Piece.None;
+                        //}
 
                         rookSourceSquare = targetSquare;
                     }
@@ -867,12 +863,12 @@ public class Position : IDisposable
                     _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
-                    // TODO try to remove this by moving the main piece set/pops before the switch
-                    if (rookTargetSquare != InitialKingSquares[side])
-                    {
-                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                        _board[rookTargetSquare] = (int)Piece.None;
-                    }
+                    // Since we set the king squares after the switch, we don't need the guard here
+                    //if (rookTargetSquare != InitialKingSquares[side])
+                    //{
+                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                    _board[rookTargetSquare] = (int)Piece.None;
+                    //}
 
                     _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
                     _occupancyBitBoards[side].SetBit(rookSourceSquare);
@@ -897,6 +893,10 @@ public class Position : IDisposable
                     break;
                 }
         }
+
+        _pieceBitBoards[piece].SetBit(sourceSquare);
+        _occupancyBitBoards[side].SetBit(sourceSquare);
+        _board[sourceSquare] = piece;
 
         _occupancyBitBoards[2] = _occupancyBitBoards[1] | _occupancyBitBoards[0];
 
