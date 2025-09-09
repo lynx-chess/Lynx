@@ -8,7 +8,7 @@ using static Lynx.EvaluationPSQTs;
 
 namespace Lynx.Model;
 
-public class Position : IDisposable
+public partial class Position : IDisposable
 {
     private bool _disposedValue;
 
@@ -2053,7 +2053,7 @@ public class Position : IDisposable
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = PieceBitBoards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
+            var attacks = _pieceAttacks[pieceIndex];
 
             while (board != 0)
             {
@@ -2067,7 +2067,7 @@ public class Position : IDisposable
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = PieceBitBoards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
+            var attacks = _pieceAttacks[pieceIndex];
 
             while (board != 0)
             {

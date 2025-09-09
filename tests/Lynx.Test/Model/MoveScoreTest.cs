@@ -23,7 +23,7 @@ public class MoveScoreTest : BaseTest
     {
         var engine = GetEngine(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move =>
+        var allMoves = engine.Game.CurrentPosition.GenerateAllMoves().OrderByDescending(move =>
         {
             Span<BitBoard> attacks = stackalloc BitBoard[12];
             Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
@@ -68,7 +68,7 @@ public class MoveScoreTest : BaseTest
     {
         var engine = GetEngine(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move =>
+        var allMoves = engine.Game.CurrentPosition.GenerateAllMoves().OrderByDescending(move =>
         {
             Span<BitBoard> attacks = stackalloc BitBoard[12];
             Span<BitBoard> attacksBySide = stackalloc BitBoard[2];

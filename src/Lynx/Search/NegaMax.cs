@@ -155,7 +155,7 @@ public sealed partial class Engine
 
         if (depth + depthExtension <= 0)
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext))
+            if (Game.CurrentPosition.CanGenerateAtLeastAValidMove(ref evaluationContext))
             {
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
@@ -314,7 +314,7 @@ public sealed partial class Engine
         var ttBestMove = ttEntry.BestMove;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+        var pseudoLegalMoves = position.GenerateAllMoves(ref evaluationContext, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
 
@@ -860,7 +860,7 @@ public sealed partial class Engine
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves);
+        var pseudoLegalMoves = position.GenerateAllCaptures(ref evaluationContext, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -962,7 +962,7 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext)) // Bad captures can be pruned, so all moves need to be generated for now
+            && !position.CanGenerateAtLeastAValidMove(ref evaluationContext)) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 

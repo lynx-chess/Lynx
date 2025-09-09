@@ -12,7 +12,7 @@ public class GenerateKingMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+        return position.GenerateAllMoves(ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
     }
 
     private static IEnumerable<Move> GenerateKingCaptures(Position position)
@@ -22,7 +22,7 @@ public class GenerateKingMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+        return position.GenerateAllCaptures(ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

@@ -13,7 +13,7 @@ public class GeneratePawnMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        return position.GenerateAllMoves(ref evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     private static IEnumerable<Move> GeneratePawnCaptures(Position position)
@@ -23,7 +23,7 @@ public class GeneratePawnMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        return position.GenerateAllCaptures(ref evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     [Test]

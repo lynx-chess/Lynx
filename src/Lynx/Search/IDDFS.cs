@@ -433,7 +433,7 @@ public sealed partial class Engine
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
+        foreach (var move in Game.CurrentPosition.GenerateAllMoves(ref evaluationContext, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
@@ -583,7 +583,7 @@ public sealed partial class Engine
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
+        pseudoLegalMoves = position.GenerateAllMoves(ref evaluationContext, pseudoLegalMoves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)

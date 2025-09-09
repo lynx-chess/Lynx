@@ -22,7 +22,7 @@ public class CastlingMoveTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        position.GenerateCastlingMoves(ref index, moveSpan, ref evaluationContext);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -41,7 +41,7 @@ public class CastlingMoveTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        position.GenerateCastlingMoves(ref index, moveSpan, ref evaluationContext);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -60,7 +60,7 @@ public class CastlingMoveTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        position.GenerateCastlingMoves(ref index, moveSpan, ref evaluationContext);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -79,7 +79,7 @@ public class CastlingMoveTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        position.GenerateCastlingMoves(ref index, moveSpan, ref evaluationContext);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());

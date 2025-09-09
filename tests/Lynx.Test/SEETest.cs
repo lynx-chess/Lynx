@@ -79,7 +79,7 @@ public class SEETest
     {
         var position = new Position(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position);
+        var allMoves = position.GenerateAllMoves();
         var move = allMoves.Single(m => m.UCIString() == moveUCIString);
 
         if (move.CapturedPiece() != (int)Piece.None && move.PromotedPiece() == default && !move.IsEnPassant())
@@ -170,7 +170,7 @@ public class SEETest
     {
         var position = new Position(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position);
+        var allMoves = position.GenerateAllMoves();
         var move = allMoves.Single(m => m.UCIString() == moveUCIString);
 
         if (expectedScore >= 0)

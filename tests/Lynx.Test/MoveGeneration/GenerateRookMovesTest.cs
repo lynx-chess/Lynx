@@ -12,7 +12,7 @@ public class GenerateRookMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        return position.GenerateAllMoves(ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     private static IEnumerable<Move> GenerateRookCaptures(Position position)
@@ -22,7 +22,7 @@ public class GenerateRookMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        return position.GenerateAllCaptures(ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

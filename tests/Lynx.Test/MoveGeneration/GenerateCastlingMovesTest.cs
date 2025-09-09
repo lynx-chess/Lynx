@@ -177,7 +177,7 @@ public class GenerateCastlingMovesTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
+        position.GenerateCastlingMoves(ref index, moves, ref evaluationContext);
     }
 
 #pragma warning restore RCS1098, S4144 // Methods should not have identical implementations

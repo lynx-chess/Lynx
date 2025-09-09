@@ -18,12 +18,12 @@ public class GeneralMoveGeneratorTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, ref evaluationContext, moves).ToArray().Single(m => m.IsEnPassant());
+        var enPassantMove = originalPosition.GenerateAllMoves(ref evaluationContext, moves).ToArray().Single(m => m.IsEnPassant());
         var positionAfterEnPassant = new Position(originalPosition);
         positionAfterEnPassant.MakeMove(enPassantMove);
 
         moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, ref evaluationContext, moves))
+        foreach (var move in positionAfterEnPassant.GenerateAllMoves(ref evaluationContext, moves))
         {
             var newPosition = new Position(positionAfterEnPassant);
             newPosition.MakeMove(move);
@@ -46,7 +46,7 @@ public class GeneralMoveGeneratorTest
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moveSpan);
+        var allMoves = position.GenerateAllMoves(ref evaluationContext, moveSpan);
 
         Assert.LessOrEqual(allMoves.Length, Constants.MaxNumberOfPseudolegalMovesInAPosition);
     }
