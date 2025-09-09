@@ -28,15 +28,8 @@ public class Position : IDisposable
 
     private byte _castle;
 
-    private readonly byte[] _castlingRightsUpdateConstants;
-
-#if DEBUG
-    internal readonly int[] _initialKingsideRookSquares;
-    internal readonly int[] _initialQueensideRookSquares;
-    internal readonly int[] _initialKingSquares;
-#endif
-
 #pragma warning disable S3887, CA1051
+    private readonly byte[] _castlingRightsUpdateConstants;
     public readonly ulong[] KingsideCastlingFreeSquares;
     public readonly ulong[] KingsideCastlingNonAttackedSquares;
     public readonly ulong[] QueensideCastlingFreeSquares;
@@ -47,6 +40,12 @@ public class Position : IDisposable
     internal readonly int BlackShortCastle;
     internal readonly int BlackLongCastle;
 #pragma warning restore S3887, CA1051
+
+#if DEBUG
+    internal readonly int[] _initialKingsideRookSquares;
+    internal readonly int[] _initialQueensideRookSquares;
+    internal readonly int[] _initialKingSquares;
+#endif
 
     private BoardSquare _enPassant;
     private Side _side;
@@ -135,18 +134,19 @@ public class Position : IDisposable
         _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Fill(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
 
+        // It won't be possible to add castling rights to a position created froma FEN without them
         if (_castle == (int)CastlingRights.None)
         {
+            KingsideCastlingFreeSquares = [];
+            QueensideCastlingFreeSquares = [];
+            KingsideCastlingNonAttackedSquares = [];
+            QueensideCastlingNonAttackedSquares = [];
+
 #if DEBUG
             _initialKingSquares = [];
             _initialKingsideRookSquares = [];
             _initialQueensideRookSquares = [];
 #endif
-
-            KingsideCastlingFreeSquares = [];
-            QueensideCastlingFreeSquares = [];
-            KingsideCastlingNonAttackedSquares = [];
-            QueensideCastlingNonAttackedSquares = [];
         }
         else
         {
@@ -156,45 +156,31 @@ public class Position : IDisposable
             _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
             _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
 
-            var parsedCastling = parsedFEN.CastlingData;
+            var castlingData = parsedFEN.CastlingData;
 
-            var whiteKingsideRook = parsedCastling.WhiteKingsideRook;
-            if (whiteKingsideRook != -1)
+            var whiteKingsideRook = castlingData.WhiteKingsideRook;
+            if (whiteKingsideRook != CastlingData.DefaultValues)
             {
                 _castlingRightsUpdateConstants[whiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
             }
 
-            var whiteQueensideRook = parsedCastling.WhiteQueensideRook;
-            if (whiteQueensideRook != -1)
+            var whiteQueensideRook = castlingData.WhiteQueensideRook;
+            if (whiteQueensideRook != CastlingData.DefaultValues)
             {
                 _castlingRightsUpdateConstants[whiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
             }
 
-            var blackKingsideRook = parsedCastling.BlackKingsideRook;
-            if (blackKingsideRook != -1)
+            var blackKingsideRook = castlingData.BlackKingsideRook;
+            if (blackKingsideRook != CastlingData.DefaultValues)
             {
                 _castlingRightsUpdateConstants[blackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
             }
 
-            var blackQueensideRook = parsedCastling.BlackQueensideRook;
-            if (blackQueensideRook != -1)
+            var blackQueensideRook = castlingData.BlackQueensideRook;
+            if (blackQueensideRook != CastlingData.DefaultValues)
             {
                 _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
             }
-
-#if DEBUG
-            _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingSquares[(int)Side.White] = whiteKingSquare;
-            _initialKingSquares[(int)Side.Black] = blackKingSquare;
-
-            _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
-            _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
-
-            _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
-            _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
-#endif
 
             KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
             KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingShortCastleSquare);
@@ -204,6 +190,7 @@ public class Position : IDisposable
             QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
             QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
 
+            // This could be simplified/harcoded for standard chess, see FreeAndNonAttackedSquares
             KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
             var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
@@ -219,6 +206,7 @@ public class Position : IDisposable
             KingsideCastlingFreeSquares[(int)Side.White] = whiteKingsideFreeMask;
             KingsideCastlingFreeSquares[(int)Side.Black] = blackKingsideFreeMask;
 
+            // This could be simplified/harcoded for standard chess, see FreeAndNonAttackedSquares
             QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
             var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
@@ -234,17 +222,8 @@ public class Position : IDisposable
             QueensideCastlingFreeSquares[(int)Side.White] = whiteQueensideFreeMask;
             QueensideCastlingFreeSquares[(int)Side.Black] = blackQueensideFreeMask;
 
-            // KxR encoding for DFRC
-            if (Configuration.EngineSettings.IsChess960)
-            {
-                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
-                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
-
-                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
-                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
-            }
             // Usual encoding for standard chess, King to target square
-            else
+            if (!Configuration.EngineSettings.IsChess960)
             {
                 WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
                 WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
@@ -252,6 +231,29 @@ public class Position : IDisposable
                 BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
                 BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
             }
+            // KxR encoding for DFRC
+            else
+            {
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
+
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+            }
+
+#if DEBUG
+            _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialKingSquares[(int)Side.White] = whiteKingSquare;
+            _initialKingSquares[(int)Side.Black] = blackKingSquare;
+
+            _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
+            _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
+
+            _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
+            _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
+            _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
+#endif
         }
 
         Validate();
@@ -615,6 +617,9 @@ public class Position : IDisposable
                         if (Configuration.EngineSettings.IsChess960)
                         {
                             // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
+                            // We need to revert the incorect changes + apply the right ones
+                            // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
+                            // But that hurts performanc, see https://github.com/lynx-chess/Lynx/pull/2043
                             _pieceBitBoards[newPiece].PopBit(targetSquare);
                             _occupancyBitBoards[oldSide].PopBit(targetSquare);
                             _board[targetSquare] = (int)Piece.None;
@@ -633,7 +638,7 @@ public class Position : IDisposable
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
-                        // TODO remove guard if we ever move the sets after the switch
+                        // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                         if (rookSourceSquare != kingTargetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
@@ -664,10 +669,13 @@ public class Position : IDisposable
                         _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
 
                         var kingTargetSquare = Utils.KingLongCastleSquare(oldSide);
+
                         if (Configuration.EngineSettings.IsChess960)
                         {
                             // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                            _pieceBitBoards[newPiece].PopBit(targetSquare);
+                            // We need to revert the incorect changes + apply the right ones
+                            // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
+                            // But that hurts performanc, see https://github.com/lynx-chess/Lynx/pull/2043                            _pieceBitBoards[newPiece].PopBit(targetSquare);
                             _occupancyBitBoards[oldSide].PopBit(targetSquare);
                             _board[targetSquare] = (int)Piece.None;
                             var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
@@ -685,7 +693,7 @@ public class Position : IDisposable
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
-                        // TODO remove guard if we ever move the sets after the switch
+                        // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                         if (rookSourceSquare != kingTargetSquare)
                         {
                             _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
@@ -769,6 +777,8 @@ public class Position : IDisposable
         _pieceBitBoards[newPiece].PopBit(targetSquare);
         _occupancyBitBoards[side].PopBit(targetSquare);
         _board[targetSquare] = (int)Piece.None;
+
+        // We purposedly delay the sets here until after the switch
 
         switch (move.SpecialMoveFlag())
         {
@@ -1130,7 +1140,7 @@ public class Position : IDisposable
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
 
-                Debug.Assert(_initialKingsideRookSquares[(int)Side.White] != -1, failureMessage, "White initial kingside rook not set");
+                Debug.Assert(_initialKingsideRookSquares[(int)Side.White] != CastlingData.DefaultValues, failureMessage, "White initial kingside rook not set");
                 Debug.Assert(whiteRooks.GetBit(_initialKingsideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.White]} when short castling rights");
             }
 
@@ -1139,7 +1149,7 @@ public class Position : IDisposable
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
 
                 Debug.Assert(whiteRooks.GetBit(_initialQueensideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialQueensideRookSquares[(int)Side.White]} when long castling rights");
-                Debug.Assert(_initialQueensideRookSquares[(int)Side.White] != -1, failureMessage, "White initial queenside rook not set");
+                Debug.Assert(_initialQueensideRookSquares[(int)Side.White] != CastlingData.DefaultValues, failureMessage, "White initial queenside rook not set");
             }
 
             var blackKingSourceSquare = _initialKingSquares[(int)Side.Black];
@@ -1148,7 +1158,7 @@ public class Position : IDisposable
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
 
-                Debug.Assert(_initialKingsideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial kingside rook not set");
+                Debug.Assert(_initialKingsideRookSquares[(int)Side.Black] != CastlingData.DefaultValues, failureMessage, "Black initial kingside rook not set");
                 Debug.Assert(blackRooks.GetBit(_initialKingsideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.Black]} when short castling rights");
             }
 
@@ -1157,7 +1167,7 @@ public class Position : IDisposable
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
 
                 Debug.Assert(blackRooks.GetBit(_initialQueensideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialQueensideRookSquares[(int)Side.Black]} when long castling rights");
-                Debug.Assert(_initialQueensideRookSquares[(int)Side.Black] != -1, failureMessage, "Black initial queenside rook not set");
+                Debug.Assert(_initialQueensideRookSquares[(int)Side.Black] != CastlingData.DefaultValues, failureMessage, "Black initial queenside rook not set");
             }
         }
 #endif
@@ -2231,6 +2241,7 @@ public class Position : IDisposable
             || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, ref EvaluationContext evaluationContext)
     {
         var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
@@ -2527,7 +2538,6 @@ public class Position : IDisposable
         Console.WriteLine();
         Console.WriteLine($"    Side:\t{_side}");
         Console.WriteLine($"    Enpassant:\t{(_enPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_enPassant])}");
-        // TODO X-FEN
 
         if (!Configuration.EngineSettings.IsChess960)
         {

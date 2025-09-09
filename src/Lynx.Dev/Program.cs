@@ -55,7 +55,6 @@ using static Lynx.TunableEvalParameters;
 //NewMasks();
 //DarkLightSquares();
 //PawnIslands();
-CastlingBitBoards();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1228,12 +1227,4 @@ static void DarkLightSquares()
 static void PawnIslands()
 {
     PawnIslandsGenerator.GeneratePawnIslands();
-}
-
-static void CastlingBitBoards()
-{
-    Constants.WhiteShortCastleFreeSquares.Print();
-    Constants.WhiteLongCastleFreeSquares.Print();
-    Constants.BlackShortCastleFreeSquares.Print();
-    Constants.BlackLongCastleFreeSquares.Print();
 }

@@ -204,7 +204,7 @@ public static class FENParser
     {
         // X-FEN uses KQkq notation when not ambiguous, with the letters referring to "the outermost rook of the affected side"
 
-        int whiteKingsideRook = -1, whiteQueensideRook = -1, blackKingsideRook = -1, blackQueensideRook = -1;
+        int whiteKingsideRook = CastlingData.DefaultValues, whiteQueensideRook = CastlingData.DefaultValues, blackKingsideRook = CastlingData.DefaultValues, blackQueensideRook = CastlingData.DefaultValues;
 
         var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
         var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
@@ -221,7 +221,7 @@ public static class FENParser
             {
                 case 'K':
                     {
-                        Debug.Assert(whiteKingsideRook == -1, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
+                        Debug.Assert(whiteKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
 
                         castlingRights |= (byte)CastlingRights.WK;
 
@@ -234,7 +234,7 @@ public static class FENParser
                             }
                         }
 
-                        if (whiteKingsideRook == -1)
+                        if (whiteKingsideRook == CastlingData.DefaultValues)
                         {
                             throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
                         }
@@ -243,7 +243,7 @@ public static class FENParser
                     }
                 case 'Q':
                     {
-                        Debug.Assert(whiteQueensideRook == -1, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
+                        Debug.Assert(whiteQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
 
                         castlingRights |= (byte)CastlingRights.WQ;
 
@@ -256,7 +256,7 @@ public static class FENParser
                             }
                         }
 
-                        if (whiteQueensideRook == -1)
+                        if (whiteQueensideRook == CastlingData.DefaultValues)
                         {
                             throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
                         }
@@ -265,7 +265,7 @@ public static class FENParser
                     }
                 case 'k':
                     {
-                        Debug.Assert(blackKingsideRook == -1, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
+                        Debug.Assert(blackKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
 
                         castlingRights |= (byte)CastlingRights.BK;
 
@@ -278,7 +278,7 @@ public static class FENParser
                             }
                         }
 
-                        if (blackKingsideRook == -1)
+                        if (blackKingsideRook == CastlingData.DefaultValues)
                         {
                             throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
                         }
@@ -287,7 +287,7 @@ public static class FENParser
                     }
                 case 'q':
                     {
-                        Debug.Assert(blackQueensideRook == -1, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
+                        Debug.Assert(blackQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
 
                         castlingRights |= (byte)CastlingRights.BQ;
 
@@ -300,7 +300,7 @@ public static class FENParser
                             }
                         }
 
-                        if (blackQueensideRook == -1)
+                        if (blackQueensideRook == CastlingData.DefaultValues)
                         {
                             throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
                         }
@@ -320,13 +320,13 @@ public static class FENParser
 
                             if (square < whiteKing)
                             {
-                                Debug.Assert(whiteQueensideRook == -1, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
+                                Debug.Assert(whiteQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
                                 castlingRights |= (byte)CastlingRights.WQ;
                                 whiteQueensideRook = square;
                             }
                             else if (square > whiteKing)
                             {
-                                Debug.Assert(whiteKingsideRook == -1, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
+                                Debug.Assert(whiteKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
                                 castlingRights |= (byte)CastlingRights.WK;
                                 whiteKingsideRook = square;
                             }
@@ -343,13 +343,13 @@ public static class FENParser
 
                             if (square < blackKing)
                             {
-                                Debug.Assert(blackQueensideRook == -1, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
+                                Debug.Assert(blackQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
                                 castlingRights |= (byte)CastlingRights.BQ;
                                 blackQueensideRook = square;
                             }
                             else if (square > blackKing)
                             {
-                                Debug.Assert(blackKingsideRook == -1, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
+                                Debug.Assert(blackKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
                                 castlingRights |= (byte)CastlingRights.BK;
                                 blackKingsideRook = square;
                             }

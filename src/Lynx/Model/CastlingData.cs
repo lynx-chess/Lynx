@@ -4,6 +4,8 @@
 
 public readonly ref struct CastlingData
 {
+    public const int DefaultValues = -1;
+
     public readonly int WhiteKingsideRook;
     public readonly int WhiteQueensideRook;
     public readonly int BlackKingsideRook;
