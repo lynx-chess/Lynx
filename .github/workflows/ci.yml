@@ -254,9 +254,12 @@ jobs:
 
     strategy:
       matrix:
+        configuration: [Debug, Release]
         os: [ubuntu-latest, windows-latest, macOS-latest]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
         category: [PerftFRC]
       fail-fast: false
+
+    if: matrix.configuration == 'Release' || (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
 
     steps:
     - uses: actions/checkout@v5
@@ -276,19 +279,15 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build -c ${{ matrix.configuration }}
 
     - name: Run ${{ matrix.category }} tests in Release mode
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
-        # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
-
-    - name: Run ${{ matrix.category }} tests in Debug mode
-      run: dotnet test -c Debug --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+      run: dotnet test -c ${{ matrix.configuration }} --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
         # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
 
   perft-frc-tests-exhaustive:
     runs-on: ${{ matrix.os }}
-    # if: github.event_name == 'schedule'
+    # if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
         # os: [ubuntu-latest, windows-latest, macOS-latest]
