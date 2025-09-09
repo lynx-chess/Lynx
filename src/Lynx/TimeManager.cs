@@ -38,10 +38,8 @@ public static class TimeManager
 
         if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
         {
-            var movesDivisor = goCommand.MovesToGo <= 0
-                ? MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()))
-                // Ensuring soft limit is at least hardLimit / 10, which avoids pitfalls in mate-detected high depth searches
-                : Math.Max(10, goCommand.MovesToGo);
+            // Used to apply MovesToGo here if available, but that becomes an issue in some mate-detected high depth searches
+            var movesDivisor = MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()));
 
             millisecondsLeft -= engineGuiCommunicationTimeOverhead;
             millisecondsLeft = Math.Clamp(millisecondsLeft, Configuration.EngineSettings.MinSearchTime, int.MaxValue); // Avoiding 0/negative values
