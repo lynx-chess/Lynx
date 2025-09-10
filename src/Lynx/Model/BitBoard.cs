@@ -247,6 +247,40 @@ public static class BitBoardExtensions
         return (board & bit) == default;
     }
 
+    public static ulong MaskBetweenTwoSquaresSameRankInclusive(int start, int end)
+    {
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP
+        ulong result = 0;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
+
+        var min = Math.Min(start, end);
+        var limit = Math.Abs(start - end);
+
+        for (int sq = min; sq <= min + limit; ++sq)
+        {
+            result.SetBit(sq);
+        }
+
+        return result;
+    }
+
+    public static ulong MaskBetweenTwoSquaresSameRankExclusive(int start, int end)
+    {
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP
+        ulong result = 0;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
+
+        var min = Math.Min(start, end);
+        var limit = Math.Abs(start - end);
+
+        for (int sq = min + 1; sq < min + limit; ++sq)
+        {
+            result.SetBit(sq);
+        }
+
+        return result;
+    }
+
     #endregion
 
     #region Methods accepting BoardSquares

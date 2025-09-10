@@ -13,6 +13,9 @@ public readonly ref struct ParseFENResult
     public readonly int HalfMoveClock;
     //public readonly int FullMoveCounter;
     public readonly BoardSquare EnPassant;
+
+    public readonly CastlingData CastlingData;
+
     public readonly Side Side;
     public readonly byte Castle;
 
@@ -23,6 +26,7 @@ public readonly ref struct ParseFENResult
         Side side,
         byte castle,
         BoardSquare enPassant,
+        CastlingData castlingData,
         int halfMoveClock)
     {
         PieceBitBoards = pieceBitBoards;
@@ -31,6 +35,7 @@ public readonly ref struct ParseFENResult
         Side = side;
         Castle = castle;
         EnPassant = enPassant;
+        CastlingData = castlingData;
         HalfMoveClock = halfMoveClock;
     }
 }

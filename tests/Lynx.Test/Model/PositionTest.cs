@@ -917,6 +917,92 @@ public class PositionTest
         Assert.AreEqual((int)(0.75 * position.StaticEvaluation(0).Score), position.StaticEvaluation(50).Score);
     }
 
+    [Test]
+    public void FreeAndNonAttackedSquares()
+    {
+        /// <summary>
+        /// 8   0 0 0 0 0 0 0 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 0 0 0 0 1 1 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard WhiteShortCastleFreeSquares = 0x6000000000000000;
+
+        /// <summary>
+        /// 8   0 0 0 0 0 0 0 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 1 1 1 0 0 0 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard WhiteLongCastleFreeSquares = 0xe00000000000000;
+
+        /// <summary>
+        /// 8   0 0 0 0 0 1 1 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 0 0 0 0 0 0 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard BlackShortCastleFreeSquares = 0x60;
+
+        /// <summary>
+        /// 8   0 1 1 1 0 0 0 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 0 0 0 0 0 0 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard BlackLongCastleFreeSquares = 0xe;
+
+        var position = new Position(Constants.InitialPositionFEN);
+
+        Assert.AreEqual(WhiteShortCastleFreeSquares, position.KingsideCastlingFreeSquares[(int)Side.White]);
+        Assert.AreEqual(BlackShortCastleFreeSquares, position.KingsideCastlingFreeSquares[(int)Side.Black]);
+        Assert.AreEqual(WhiteLongCastleFreeSquares, position.QueensideCastlingFreeSquares[(int)Side.White]);
+        Assert.AreEqual(BlackLongCastleFreeSquares, position.QueensideCastlingFreeSquares[(int)Side.Black]);
+
+        var nonAttackedWhiteShortCastleSquares = position.KingsideCastlingFreeSquares[(int)Side.White];
+        nonAttackedWhiteShortCastleSquares.SetBit(Constants.InitialWhiteKingSquare);
+        nonAttackedWhiteShortCastleSquares.SetBit(Constants.WhiteKingShortCastleSquare);
+
+        var nonAttackedWhiteLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.White];
+        nonAttackedWhiteLongCastleSquares.PopBit(BoardSquare.b1);
+        nonAttackedWhiteLongCastleSquares.SetBit(Constants.InitialWhiteKingSquare);
+        nonAttackedWhiteLongCastleSquares.SetBit(Constants.WhiteKingLongCastleSquare);
+
+        var nonAttackedBlackShortCastleSquares = position.KingsideCastlingFreeSquares[(int)Side.Black];
+        nonAttackedBlackShortCastleSquares.SetBit(Constants.InitialBlackKingSquare);
+        nonAttackedBlackShortCastleSquares.SetBit(Constants.BlackKingShortCastleSquare);
+
+        var nonAttackedBlackLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.Black];
+        nonAttackedBlackLongCastleSquares.PopBit(BoardSquare.b8);
+        nonAttackedBlackLongCastleSquares.SetBit(Constants.InitialBlackKingSquare);
+        nonAttackedBlackLongCastleSquares.SetBit(Constants.BlackKingLongCastleSquare);
+
+        Assert.AreEqual(nonAttackedWhiteShortCastleSquares, position.KingsideCastlingNonAttackedSquares[(int)Side.White]);
+        Assert.AreEqual(nonAttackedWhiteLongCastleSquares, position.QueensideCastlingNonAttackedSquares[(int)Side.White]);
+        Assert.AreEqual(nonAttackedBlackShortCastleSquares, position.KingsideCastlingNonAttackedSquares[(int)Side.Black]);
+        Assert.AreEqual(nonAttackedBlackLongCastleSquares, position.QueensideCastlingNonAttackedSquares[(int)Side.Black]);
+    }
+
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
         var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
