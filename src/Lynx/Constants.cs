@@ -99,58 +99,6 @@ public static class Constants
     /// </summary>
     public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
-    /// <summary>
-    /// 8   0 0 0 0 0 0 0 0
-    /// 7   0 0 0 0 0 0 0 0
-    /// 6   0 0 0 0 0 0 0 0
-    /// 5   0 0 0 0 0 0 0 0
-    /// 4   0 0 0 0 0 0 0 0
-    /// 3   0 0 0 0 0 0 0 0
-    /// 2   0 0 0 0 0 0 0 0
-    /// 1   0 0 0 0 0 1 1 0
-    ///     a b c d e f g h
-    /// </summary>
-    public const BitBoard WhiteShortCastleFreeSquares = 0x6000000000000000;
-
-    /// <summary>
-    /// 8   0 0 0 0 0 0 0 0
-    /// 7   0 0 0 0 0 0 0 0
-    /// 6   0 0 0 0 0 0 0 0
-    /// 5   0 0 0 0 0 0 0 0
-    /// 4   0 0 0 0 0 0 0 0
-    /// 3   0 0 0 0 0 0 0 0
-    /// 2   0 0 0 0 0 0 0 0
-    /// 1   0 1 1 1 0 0 0 0
-    ///     a b c d e f g h
-    /// </summary>
-    public const BitBoard WhiteLongCastleFreeSquares = 0xe00000000000000;
-
-    /// <summary>
-    /// 8   0 0 0 0 0 1 1 0
-    /// 7   0 0 0 0 0 0 0 0
-    /// 6   0 0 0 0 0 0 0 0
-    /// 5   0 0 0 0 0 0 0 0
-    /// 4   0 0 0 0 0 0 0 0
-    /// 3   0 0 0 0 0 0 0 0
-    /// 2   0 0 0 0 0 0 0 0
-    /// 1   0 0 0 0 0 0 0 0
-    ///     a b c d e f g h
-    /// </summary>
-    public const BitBoard BlackShortCastleFreeSquares = 0x60;
-
-    /// <summary>
-    /// 8   0 1 1 1 0 0 0 0
-    /// 7   0 0 0 0 0 0 0 0
-    /// 6   0 0 0 0 0 0 0 0
-    /// 5   0 0 0 0 0 0 0 0
-    /// 4   0 0 0 0 0 0 0 0
-    /// 3   0 0 0 0 0 0 0 0
-    /// 2   0 0 0 0 0 0 0 0
-    /// 1   0 0 0 0 0 0 0 0
-    ///     a b c d e f g h
-    /// </summary>
-    public const BitBoard BlackLongCastleFreeSquares = 0xe;
-
     public static readonly string[] Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
@@ -293,18 +241,23 @@ public static class Constants
 
     public const string CaptureTrainPositionFEN = "r2q1rk1/bppb1pp1/p2p2np/2PPp3/1P2P1n1/P3BN2/2Q1BPPP/RN3RK1 w - - 2 15";
 
-    public const int WhiteKingSourceSquare = (int)BoardSquare.e1;
-    public const int BlackKingSourceSquare = (int)BoardSquare.e8;
+    public const int InitialWhiteKingSquare = (int)BoardSquare.e1;
+    public const int InitialBlackKingSquare = (int)BoardSquare.e8;
 
-    public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
-    public const int BlackShortCastleKingSquare = (int)BoardSquare.g8;
-    public const int WhiteLongCastleKingSquare = (int)BoardSquare.c1;
-    public const int BlackLongCastleKingSquare = (int)BoardSquare.c8;
+    public const int InitialWhiteKingsideRookSquare = (int)BoardSquare.h1;
+    public const int InitialWhiteQueensideRookSquare = (int)BoardSquare.a1;
+    public const int InitialBlackKingsideRookSquare = (int)BoardSquare.h8;
+    public const int InitialBlackQueensideRookSquare = (int)BoardSquare.a8;
 
-    public const int WhiteShortCastleRookSquare = (int)BoardSquare.f1;
-    public const int BlackShortCastleRookSquare = (int)BoardSquare.f8;
-    public const int WhiteLongCastleRookSquare = (int)BoardSquare.d1;
-    public const int BlackLongCastleRookSquare = (int)BoardSquare.d8;
+    public const int WhiteKingShortCastleSquare = (int)BoardSquare.g1;
+    public const int BlackKingShortCastleSquare = (int)BoardSquare.g8;
+    public const int WhiteKingLongCastleSquare = (int)BoardSquare.c1;
+    public const int BlackKingLongCastleSquare = (int)BoardSquare.c8;
+
+    public const int WhiteRookShortCastleSquare = (int)BoardSquare.f1;
+    public const int BlackRookShortCastleSquare = (int)BoardSquare.f8;
+    public const int WhiteRookLongCastleSquare = (int)BoardSquare.d1;
+    public const int BlackRookLongCastleSquare = (int)BoardSquare.d8;
 
     public const string WhiteShortCastle = "e1g1";
     public const string BlackShortCastle = "e8g8";
@@ -338,6 +291,15 @@ public static class Constants
         (int)BoardSquare.h3 - 8     //47 = h3
     ];
 
+#pragma warning disable RCS1257 // Use enum field explicitly
+    public const byte NoUpdateCastlingRight = 15;
+    public const byte WhiteKingCastlingRight = 12;
+    public const byte WhiteKingSideRookCastlingRight = 14;
+    public const byte WhiteQueenSideRookCastlingRight = 13;
+    public const byte BlackKingCastlingRight = 3;
+    public const byte BlackKingSideRookCastlingRight = 11;
+    public const byte BlackQueenSideRookCastlingRight = 7;
+
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474
     ///                                             CastlingRights  Binary  Decimal
@@ -349,6 +311,7 @@ public static class Constants
     ///  Black kingside Rook moved or captured      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved or captured     1111 & 0111  =  0111    7
     /// </summary>
+    [Obsolete("Test only")]
     public static ReadOnlySpan<byte> CastlingRightsUpdateConstants =>
     [
          7, 15, 15, 15,  3, 15, 15, 11,
@@ -537,6 +500,8 @@ public static class Constants
     /// 500 moves, https://www.chess.com/game/live/378106991
     /// </summary>
     public const string SuperLongPositionCommand = "position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves e2e4 e7e5 g1f3 g8f6 b1c3 b8c6 f1e2 f8b4 a2a3 b4c3 b2c3 f6e4 e2b5 d7d6 d1e2 e4f6 d2d4 e8g8 d4e5 d6e5 b5c6 b7c6 c1g5 h7h6 g5h4 f8e8 a1d1 d8e7 e1g1 c8g4 h2h3 g4f3 e2f3 e7e6 h4f6 e6f6 f3f6 g7f6 d1d7 a8c8 f1b1 e8d8 d7d3 e5e4 d3d4 d8d4 c3d4 c8d8 c2c3 d8d7 f2f3 e4e3 g1f1 f6f5 f3f4 d7e7 f1e2 h6h5 h3h4 g8g7 b1f1 e7e4 g2g3 g7f6 f1f3 f6e6 f3e3 e4e3 e2e3 e6d5 e3d3 c6c5 c3c4 d5c6 d4d5 c6d6 d3c3 c7c6 d5c6 d6c6 c3b3 c6b6 a3a4 a7a5 b3a3 f7f6 a3b3 b6c6 b3c3 c6d6 c3d3 d6c6 d3e3 c6d6 e3f3 d6e6 f3e3 e6d6 e3f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2e2 e6d6 e2d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6d6 a3b3 d6e6 b3c2 e6d6 c2c3 d6e6 c3b2 e6d6 b2c2 d6e6 c2c3 e6e7 c3d3 e7d6 d3d2 d6e6 d2c3 e6e7 c3c2 e7d6 c2d3 d6e6 d3e2 e6d6 e2f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2f3 e6d6 f3g2 d6e6 g2f1 e6d6 f1e2 d6e6 e2d2 e6d6 d2d3 d6e7 d3c2 e7e6 c2c3 e6d6 c3b3 d6d7 b3c2 d7e6 c2d3 e6d6 d3e2 d6e6 e2d2 e6d6 d2d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a2 e6d6 a2b2 d6e6 b2c3 e6d6 c3d2 d6e6 d2e1 e6d6 e1d1 d6e6 d1e2 e6d6 e2f1 d6e6 f1g1 e6d6 g1h1 d6e6 h1g1 e6d6 g1f1 d6e6 f1e1 e6d6 e1d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a1 e6d6 a1a2 d6e6 a2b2 e6d6 b2c2 d6e6 c2d2 e6d6 d2e2 d6e6 e2f2 e6d6 f2f3 d6e6 f3e3 e6d6 e3d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6f7 a3b2 f7g6 b2c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e3 h6g6 e3e2 g6h6 e2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f1 h6g6 f1e2 g6h6 e2e1 h6g6 e1d2 g6h6 d2c1 h6g6 c1c2 g6h6 c2d1 h6g6 d1e2 g6h6 e2f1 h6g6 f1f2 g6h6 f2f3 h6g6 f3e3 g6h6 e3d3 h6g6 d3c3 g6h6 c3b3 h6g6 b3a3 g6h6 a3b2 h6g6 b2a2 g6h6 a2a1 h6g6 a1b2 g6h6 b2c1 h6g6 c1c2 g6h6 c2c3 h6g6 c3b3 g6h6 b3b2 h6g6 b2a3 g6h6 a3b3 h6g6 b3c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1f2 g6h6 f2f1 h6g6 f1e2 g6h6 e2e3 h6g6 e3d2 g6h6 d2d3 h6g6 d3e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3d3 g6h6 d3d2 h6g6 d2c3 g6h6 c3c2 h6g6 c2d1 g6h6 d1d2 h6g6 d2e1 g6h6 e1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1g1 g6h6 g1f1 h6g6 f1e1 g6h6 e1d1 h6g6 d1c2 g6h6 c2c3 h6g6 c3d3 g6h6 d3d2 h6g6 d2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1e2 h6g6 e2f3 g6h6 f3e3 h6g6 e3f2 g6h6 f2f1 h6g6 f1g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e2 h6g6 e2e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1g2 h6g6 g2g1 g6h6 g1h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f1 g6h6 f1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2h3 h6g6 h3g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2g1 h6g6 g1h1 g6h6 h1h2 h6g6 h2h3 g6h6 h3g2 h6g6 g2f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2g1 g6h6 g1g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1g2 g6h6 g2h2 h6g6 h2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e1 h6g6 e1f2 g6h6 f2g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6h7 f2f3 h7g7 f3g2 g7g6 g2h3 g6h6 h3h2 h6h7 h2g1 h7h8 g1h1 h8g8 h1g2 g8g7 g2f2 g7g6 f2f1 g6h6 f1e2 h6h7 e2f3 h7h8 f3f2 h8g8 f2f1 g8g7 f1g2 g7g6 g2h2 g6h6 h2h3 h6h7 h3h2 h7h8 h2h1 h8g8 h1g1 g8g7 g1g2 g7g6 g2h2 g6h6 h2g1 h6h7 g1g2 h7h8 g2h1 h8g8 h1h2 g8g7 h2g2 g7g6 g2g1 g6h6 g1g2 h6h7 g2h2 h7h8 h2h3 h8g8 h3h2 g8g7 h2h1 g7g6 h1g1 g6h6 g1g2 h6h7 g2f2 h7h8 f2f3 h8g8 f3g2 g8g7 g2h3 g7g6 h3h2 g6h6 h2h1 h6h7 h1g2 h7h6 g2g1 h6g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6g7 g1g2 g7f8 g2g1 f8f7 g1g2 f7g8 g2g1 g8g7 g1g2 g7h8 g2g1 h8h7 g1g2 h7h6 g2g1 h6g7";
+
+    public const string SuperLongPositionCommand_DFRC = "position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves e2e4 e7e5 g1f3 g8f6 b1c3 b8c6 f1e2 f8b4 a2a3 b4c3 b2c3 f6e4 e2b5 d7d6 d1e2 e4f6 d2d4 e8h8 d4e5 d6e5 b5c6 b7c6 c1g5 h7h6 g5h4 f8e8 a1d1 d8e7 e1h1 c8g4 h2h3 g4f3 e2f3 e7e6 h4f6 e6f6 f3f6 g7f6 d1d7 a8c8 f1b1 e8d8 d7d3 e5e4 d3d4 d8d4 c3d4 c8d8 c2c3 d8d7 f2f3 e4e3 g1f1 f6f5 f3f4 d7e7 f1e2 h6h5 h3h4 g8g7 b1f1 e7e4 g2g3 g7f6 f1f3 f6e6 f3e3 e4e3 e2e3 e6d5 e3d3 c6c5 c3c4 d5c6 d4d5 c6d6 d3c3 c7c6 d5c6 d6c6 c3b3 c6b6 a3a4 a7a5 b3a3 f7f6 a3b3 b6c6 b3c3 c6d6 c3d3 d6c6 d3e3 c6d6 e3f3 d6e6 f3e3 e6d6 e3f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2e2 e6d6 e2d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6d6 a3b3 d6e6 b3c2 e6d6 c2c3 d6e6 c3b2 e6d6 b2c2 d6e6 c2c3 e6e7 c3d3 e7d6 d3d2 d6e6 d2c3 e6e7 c3c2 e7d6 c2d3 d6e6 d3e2 e6d6 e2f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2f3 e6d6 f3g2 d6e6 g2f1 e6d6 f1e2 d6e6 e2d2 e6d6 d2d3 d6e7 d3c2 e7e6 c2c3 e6d6 c3b3 d6d7 b3c2 d7e6 c2d3 e6d6 d3e2 d6e6 e2d2 e6d6 d2d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a2 e6d6 a2b2 d6e6 b2c3 e6d6 c3d2 d6e6 d2e1 e6d6 e1d1 d6e6 d1e2 e6d6 e2f1 d6e6 f1g1 e6d6 g1h1 d6e6 h1g1 e6d6 g1f1 d6e6 f1e1 e6d6 e1d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a1 e6d6 a1a2 d6e6 a2b2 e6d6 b2c2 d6e6 c2d2 e6d6 d2e2 d6e6 e2f2 e6d6 f2f3 d6e6 f3e3 e6d6 e3d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6f7 a3b2 f7g6 b2c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e3 h6g6 e3e2 g6h6 e2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f1 h6g6 f1e2 g6h6 e2e1 h6g6 e1d2 g6h6 d2c1 h6g6 c1c2 g6h6 c2d1 h6g6 d1e2 g6h6 e2f1 h6g6 f1f2 g6h6 f2f3 h6g6 f3e3 g6h6 e3d3 h6g6 d3c3 g6h6 c3b3 h6g6 b3a3 g6h6 a3b2 h6g6 b2a2 g6h6 a2a1 h6g6 a1b2 g6h6 b2c1 h6g6 c1c2 g6h6 c2c3 h6g6 c3b3 g6h6 b3b2 h6g6 b2a3 g6h6 a3b3 h6g6 b3c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1f2 g6h6 f2f1 h6g6 f1e2 g6h6 e2e3 h6g6 e3d2 g6h6 d2d3 h6g6 d3e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3d3 g6h6 d3d2 h6g6 d2c3 g6h6 c3c2 h6g6 c2d1 g6h6 d1d2 h6g6 d2e1 g6h6 e1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1g1 g6h6 g1f1 h6g6 f1e1 g6h6 e1d1 h6g6 d1c2 g6h6 c2c3 h6g6 c3d3 g6h6 d3d2 h6g6 d2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1e2 h6g6 e2f3 g6h6 f3e3 h6g6 e3f2 g6h6 f2f1 h6g6 f1g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e2 h6g6 e2e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1g2 h6g6 g2g1 g6h6 g1h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f1 g6h6 f1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2h3 h6g6 h3g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2g1 h6g6 g1h1 g6h6 h1h2 h6g6 h2h3 g6h6 h3g2 h6g6 g2f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2g1 g6h6 g1g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1g2 g6h6 g2h2 h6g6 h2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e1 h6g6 e1f2 g6h6 f2g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6h7 f2f3 h7g7 f3g2 g7g6 g2h3 g6h6 h3h2 h6h7 h2g1 h7h8 g1h1 h8g8 h1g2 g8g7 g2f2 g7g6 f2f1 g6h6 f1e2 h6h7 e2f3 h7h8 f3f2 h8g8 f2f1 g8g7 f1g2 g7g6 g2h2 g6h6 h2h3 h6h7 h3h2 h7h8 h2h1 h8g8 h1g1 g8g7 g1g2 g7g6 g2h2 g6h6 h2g1 h6h7 g1g2 h7h8 g2h1 h8g8 h1h2 g8g7 h2g2 g7g6 g2g1 g6h6 g1g2 h6h7 g2h2 h7h8 h2h3 h8g8 h3h2 g8g7 h2h1 g7g6 h1g1 g6h6 g1g2 h6h7 g2f2 h7h8 f2f3 h8g8 f3g2 g8g7 g2h3 g7g6 h3h2 g6h6 h2h1 h6h7 h1g2 h7h6 g2g1 h6g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6g7 g1g2 g7f8 g2g1 f8f7 g1g2 f7g8 g2g1 g8g7 g1g2 g7h8 g2g1 h8h7 g1g2 h7h6 g2g1 h6g7";
 
     /// <summary>
     /// 64 x 64
