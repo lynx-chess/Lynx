@@ -110,6 +110,8 @@ public sealed class EngineSettings
 
     public bool IsPonder { get; set; }
 
+    public bool IsChess960 { get; set; }
+
     /// <summary>
     /// Real NPS aren't calculated until the last search command.
     /// This option enables the report of an NPS estimation by the main thread
@@ -164,7 +166,7 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
-    public int SoftTimeBoundLimitOnMate { get; set; } = 1_000;
+    public int SoftTimeBoundLimitOnMate { get; set; } = 10_000;
 
     [SPSA<int>(enabled: false)]
     public int PonderHitMinTimeToContinueSearch { get; set; } = 100;

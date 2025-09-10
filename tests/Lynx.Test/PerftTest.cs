@@ -268,6 +268,18 @@ public class PerftTest
     [Test]
     public void PositionWithHighestKnownNumberOfMoves() => Validate("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNN1KB1 w - - 0 1", 1, 218);
 
+    [Test]
+    public void XFENPosition()
+    {
+        Validate("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b KQkq - 0 1", 5, 8728887);
+
+        // Effectively parsed as:
+        Validate("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b - - 0 1", 5, 8728887);
+
+        // If the Shredder-FEN equivalent was used, it'd be interpreted correctly as DFRC position
+        // rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b FDda - 0 1
+    }
+
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
         Assert.AreEqual(expectedNumberOfNodes, Perft.PerftRecursiveImpl(new Position(fen), depth, default));
