@@ -221,7 +221,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
+        os: [ubuntu-latest, windows-latest]   # disabled for macOS since that's always the CI bottleneck due to runners availability
         category: [Perft]
       fail-fast: false
 
@@ -254,7 +254,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
+        os: [ubuntu-latest, windows-latest]   # disabled for macOS since that's always the CI bottleneck due to runners availability
         category: [PerftFRC]
       fail-fast: false
 
@@ -319,7 +319,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         category: [PerftFRCExhaustive]
       fail-fast: true
 
