@@ -1918,7 +1918,8 @@ public class Position : IDisposable
             packedBonus += BishopInUnblockedLongDiagonalBonus;
         }
 
-        if (!Constants.Corners.GetBit(squareIndex))
+        if (!Configuration.EngineSettings.IsChess960        // Can't happen in standard chess
+            || !Constants.Corners.GetBit(squareIndex))      // Saves some checks if no bishop in a corner at all
         {
             return packedBonus;
         }
