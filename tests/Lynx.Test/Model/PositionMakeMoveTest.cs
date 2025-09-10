@@ -517,20 +517,20 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteShortCastleKingSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteShortCastleRookSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteKingShortCastleSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteRookShortCastleSquare));
         Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteShortCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteShortCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteRookShortCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteShortCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteShortCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteRookShortCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
@@ -569,20 +569,20 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteLongCastleKingSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteLongCastleRookSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteKingLongCastleSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteRookLongCastleSquare));
         Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteLongCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteLongCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteRookLongCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteLongCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteLongCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteRookLongCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
@@ -621,20 +621,20 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackShortCastleKingSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackShortCastleRookSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackKingShortCastleSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackRookShortCastleSquare));
         Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackShortCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackShortCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackRookShortCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackShortCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackShortCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackRookShortCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
@@ -673,20 +673,20 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackLongCastleKingSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackLongCastleRookSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackKingLongCastleSquare));
+        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackRookLongCastleSquare));
         Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
         Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackLongCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackLongCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackRookLongCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackLongCastleKingSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackLongCastleRookSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackRookLongCastleSquare));
         Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
         Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
