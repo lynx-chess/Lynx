@@ -22,7 +22,9 @@ public sealed partial class Engine : IDisposable
 
     public double AverageDepth { get; private set; }
 
+#pragma warning disable IDISP008 // Don't assign member with injected and created disposables - caused by SetGame, internal-only for tests
     public Game Game { get; private set; }
+#pragma warning restore IDISP008 // Don't assign member with injected and created disposables
 
     public bool PendingConfirmation { get; set; }
 
@@ -88,9 +90,10 @@ public sealed partial class Engine : IDisposable
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
+    [Obsolete("Test only")]
     internal void SetGame(Game game)
     {
-        Game.FreeResources();
+        Game.Dispose();
         Game = game;
     }
 
@@ -242,8 +245,5 @@ public sealed partial class Engine : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
-#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
-        GC.SuppressFinalize(this);
-#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }

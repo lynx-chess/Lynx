@@ -222,14 +222,18 @@ public sealed class Game : IDisposable
     public void ResetCurrentPositionToBeforeSearchState()
     {
         CurrentPosition.FreeResources();
+#pragma warning disable IDISP003 // Dispose previous before re-assigning
         CurrentPosition = new(PositionBeforeLastSearch);
-        //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
+#pragma warning restore IDISP003 // Dispose previous before re-assigning
+                                //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
     }
 
     public void UpdateInitialPosition()
     {
         PositionBeforeLastSearch.FreeResources();
+#pragma warning disable IDISP003 // Dispose previous before re-assigning
         PositionBeforeLastSearch = new(CurrentPosition);
+#pragma warning restore IDISP003 // Dispose previous before re-assigning
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -291,8 +295,5 @@ public sealed class Game : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
-#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
-        GC.SuppressFinalize(this);
-#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }
