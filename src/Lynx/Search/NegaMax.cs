@@ -853,6 +853,12 @@ public sealed partial class Engine
             if (standPat >= beta)
             {
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
+
+                if (!ttHit)
+                {
+                    _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, staticEval, depth: 0, ply: 0, standPat, NodeType.Beta, ttPv);
+                }
+
                 return standPat;
             }
         }
