@@ -99,6 +99,9 @@ public partial class Engine
 
         "r7/8/8/4k3/8/4B3/4K2P/7R w - - 95 1",                          // High 50mr counter in advantage position (needs to move pawn)
         "7K/r7/8/8/7P/6PR/6PR/1k6 b - - 95 1",                          // High 50mr counter in disadvantage position (needs to keep checking)
+
+        "nqbnrkrb/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight
+        "rqbbnknr/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight - only one side
     ];
 
     /// <summary>

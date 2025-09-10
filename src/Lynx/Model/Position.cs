@@ -35,16 +35,18 @@ public class Position : IDisposable
     public readonly ulong[] QueensideCastlingFreeSquares;
     public readonly ulong[] QueensideCastlingNonAttackedSquares;
 
+#pragma warning disable IDE1006 // Naming Styles
     internal readonly int WhiteShortCastle;
     internal readonly int WhiteLongCastle;
     internal readonly int BlackShortCastle;
     internal readonly int BlackLongCastle;
+#pragma warning restore IDE1006 // Naming Styles
 #pragma warning restore S3887, CA1051
 
 #if DEBUG
-    internal readonly int[] _initialKingsideRookSquares;
-    internal readonly int[] _initialQueensideRookSquares;
-    internal readonly int[] _initialKingSquares;
+    private readonly int[] _initialKingsideRookSquares;
+    private readonly int[] _initialQueensideRookSquares;
+    private readonly int[] _initialKingSquares;
 #endif
 
     private BoardSquare _enPassant;
