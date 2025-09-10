@@ -6023,6 +6023,8 @@ public static class EvaluationParams
 	/// </summary>
 	public const int BishopPairBonus = 4456476;
 
+	public const int BishopCorneredPenalty = -2031666;
+
 	/// <summary>
 	/// <see cref="Utils.Pack(19, 13)"/>
 	/// </summary>
