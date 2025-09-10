@@ -101,6 +101,7 @@ public partial class Engine
         "7K/r7/8/8/7P/6PR/6PR/1k6 b - - 95 1",                          // High 50mr counter in disadvantage position (needs to keep checking)
 
         "nqbnrkrb/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Trapped bishop and knight
+        "rqbbnknr/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Trapped bishop and knight - only one side
     ];
 
     /// <summary>
