@@ -509,5 +509,21 @@ public class RegressionTest : BaseTest
         Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
     }
 
+    /// <summary>
+    /// They won't get understood as FRC, rather as empty castling rights
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="depth"></param>
+    [TestCase("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b KQkq - 0 1", 15)]
+    [TestCase("bnqbrnkr/p1p2pp1/1p6/4p3/4N2p/3P4/PPPB1PPP/RQ1K1RNB w kq e6 1 1", 17)]
+    public void XFENParsingWhenNoFRCEnabled(string fen, int depth)
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition($"position fen {fen}");
+
+        Assert.DoesNotThrow(() => engine.BestMove(new($"go depth {depth}")));
+    }
+
 #pragma warning restore S4144 // Methods should not have identical implementations
 }
