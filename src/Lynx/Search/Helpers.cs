@@ -311,7 +311,7 @@ public sealed partial class Engine
             var move = _pVTable[i];
             TryParseMove(position, i, move);
 
-#pragma warning disable CA2000 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
+#pragma warning disable CA2000, IDISP001 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
             var newPosition = new Position(position);
 #pragma warning restore CA2000 // Dispose objects before losing scope
             newPosition.MakeMove(move);
@@ -319,7 +319,9 @@ public sealed partial class Engine
             {
                 throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
             }
+#pragma warning disable IDISP003 // Dispose previous before re-assigning - debug method
             position = newPosition;
+#pragma warning restore IDISP003 // Dispose previous before re-assigning
         }
 
         static void TryParseMove(Position position, int i, int move)

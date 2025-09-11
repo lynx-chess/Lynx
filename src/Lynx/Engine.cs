@@ -22,7 +22,9 @@ public sealed partial class Engine : IDisposable
 
     public double AverageDepth { get; private set; }
 
+#pragma warning disable IDISP008 // Don't assign member with injected and created disposables - caused by SetGame, internal-only for tests
     public Game Game { get; private set; }
+#pragma warning restore IDISP008 // Don't assign member with injected and created disposables
 
     public bool PendingConfirmation { get; set; }
 
@@ -88,16 +90,17 @@ public sealed partial class Engine : IDisposable
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
+    [Obsolete("Test only")]
     internal void SetGame(Game game)
     {
-        Game.FreeResources();
+        Game.Dispose();
         Game = game;
     }
 
     public void NewGame()
     {
         AverageDepth = 0;
-        Game.FreeResources();
+        Game.Dispose();
         Game = new Game(Constants.InitialPositionFEN);
 
         ResetEngine();
@@ -107,7 +110,7 @@ public sealed partial class Engine : IDisposable
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Game.FreeResources();
+        Game.Dispose();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
     }
 
@@ -220,19 +223,13 @@ public sealed partial class Engine : IDisposable
         }
     }
 
-    public void FreeResources()
-    {
-        Game.FreeResources();
-        _disposedValue = true;
-    }
-
     private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {
             if (disposing)
             {
-                FreeResources();
+                Game.Dispose();
             }
             _disposedValue = true;
         }
@@ -242,8 +239,9 @@ public sealed partial class Engine : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
-#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+
+        #pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
-#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
+#pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }

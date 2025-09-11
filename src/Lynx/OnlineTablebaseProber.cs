@@ -31,10 +31,12 @@ public static class OnlineTablebaseProber
         .WaitAndRetryAsync(4, retryAttempt => TimeSpan.FromMilliseconds(Math.Pow(2, 10 + retryAttempt)));    // 128, 256, 512, 1024ms
 
     private readonly static HttpClient _client = new(
+#pragma warning disable IDISP004 // Don't ignore created IDisposable
         new PolicyHttpMessageHandler(_retryPolicy)
         {
             InnerHandler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(15) }
         })
+#pragma warning restore IDISP004 // Don't ignore created IDisposable
     {
         BaseAddress = new("http://tablebase.lichess.ovh/")
     };
