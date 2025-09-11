@@ -170,8 +170,8 @@ public sealed partial class Engine
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
-        ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
-        quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
+            ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
+            quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
             {
@@ -191,10 +191,10 @@ public sealed partial class Engine
                     var visitedMovePiece = visitedMove.Piece();
                     var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
-                // 🔍 Quiet history penalty / malus
-                // When a quiet move fails high, penalize previous visited quiet moves
-                quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
-                quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
+                    // 🔍 Quiet history penalty / malus
+                    // When a quiet move fails high, penalize previous visited quiet moves
+                    quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)
                     {

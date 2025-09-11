@@ -381,6 +381,15 @@ public sealed class EngineSettings
     [SPSA<int>(0, 200, 10)]
     public int History_BestScoreBetaMargin { get; set; } = 125;
 
+    [SPSA<int>(-20, 0, 2)]
+    public int History_StaticEvalBonus_Multiplier { get; set; } = -10;
+
+    [SPSA<int>(-500, 0, 50)]
+    public int History_StaticEvalBonus_Min { get; set; } = -100;
+
+    [SPSA<int>(0, 500, 50)]
+    public int History_StaticEvalBonus_Max{ get; set; } = 200;
+
     [SPSA<int>(enabled: false)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
 

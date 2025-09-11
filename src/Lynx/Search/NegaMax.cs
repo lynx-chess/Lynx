@@ -146,6 +146,7 @@ public sealed partial class Engine
         int phase = int.MaxValue;
 
         ref var stack = ref Game.Stack(ply);
+        stack.IsInCheck = isInCheck;
         stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
         if (isInCheck && !isVerifyingSE)
@@ -207,6 +208,25 @@ public sealed partial class Engine
             if (ttHit && ttNodeType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 ttCorrectedStaticEval = ttScore;
+            }
+
+            // Add bonus for previous move that make static eval worse from current perspective - idea from Horsie
+            if (!isRoot)
+            {
+                var previousState = Game.Stack(ply - 1);
+
+                var lastMove = previousState.Move;
+                Debug.Assert(lastMove != 0);
+
+                if (!previousState.IsInCheck && !lastMove.IsCapture())
+                {
+                    // Multiplier is negative, so if after last move static eval improved, we penalize last move
+                    var historyBonus = (previousState.StaticEval + staticEval) * Configuration.EngineSettings.History_StaticEvalBonus_Multiplier;
+                    historyBonus = Math.Clamp(historyBonus, Configuration.EngineSettings.History_StaticEvalBonus_Min, Configuration.EngineSettings.History_StaticEvalBonus_Max);
+
+                    ref var quietHistory = ref QuietHistoryEntry(position, lastMove, ref evaluationContext);
+                    quietHistory += historyBonus;
+                }
             }
 
             // Fail-high pruning (moves with high scores) - prune more when improving

@@ -238,6 +238,9 @@ public static class MoveExtensions
     public static int CapturedPiece(this Move move) => (move & CapturedPieceMask) >> CapturedPieceOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsCapture(this Move move) => move.CapturedPiece() != (int)Model.Piece.None;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & SpecialMoveMask) >> SpecialMoveFlagOffset);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
