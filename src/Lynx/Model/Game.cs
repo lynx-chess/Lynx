@@ -248,6 +248,9 @@ public sealed class Game : IDisposable
     public int ReadDoubleExtensionsFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].DoubleExtensions;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool CorrplexityExtensionFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].CorrplexityExtension;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref PlyStackEntry Stack(int n) => ref _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
