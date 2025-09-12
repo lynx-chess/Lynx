@@ -189,7 +189,11 @@ public sealed class Searcher
                         _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
                     }
 
-                    searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                    // Soft limit tweak
+                    var newSoftLimit = TimeManager.PonderHitSoftLimit(searchConstraints.SoftLimitTimeBound, goCommand, searchResult, _mainEngine.Game.PositionBeforeLastSearch.Side == Side.White);
+                    var ponderHitSearchContraints = new SearchConstraints(searchConstraints.HardLimitTimeBound, newSoftLimit, searchConstraints.MaxDepth);
+
+                    searchResult = _mainEngine.Search(in ponderHitSearchContraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
                 }
                 else
                 {
@@ -263,13 +267,17 @@ public sealed class Searcher
                     || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch)
                 {
                     _logger.Debug("Ponder hit - restarting search now with time constraints");
+                  
+                    // Soft limit tweak
+                    var newSoftLimit = TimeManager.PonderHitSoftLimit(searchConstraints.SoftLimitTimeBound, goCommand, finalSearchResult, _mainEngine.Game.PositionBeforeLastSearch.Side == Side.White);
+                    var ponderHitSearchContraints = new SearchConstraints(searchConstraints.HardLimitTimeBound, newSoftLimit, searchConstraints.MaxDepth);
 
-                    if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+                    if (ponderHitSearchContraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
                     {
-                        _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
+                        _searchCancellationTokenSource.CancelAfter(ponderHitSearchContraints.HardLimitTimeBound);
                     }
 
-                    finalSearchResult = await MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints);
+                    finalSearchResult = await MultithreadedSearch(ponderHitSearchContraints, extraEnginesSearchConstraints);
                 }
                 else
                 {
