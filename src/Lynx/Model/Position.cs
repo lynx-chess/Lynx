@@ -1544,7 +1544,7 @@ public class Position : IDisposable
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
         // Few pieces endgames
-        if (gamePhase <= 5)
+        if (gamePhase <= 6)
         {
             // Pawnless endgames
             if (totalPawnsCount == 0)
