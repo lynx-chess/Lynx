@@ -36,16 +36,18 @@ public class Position : IDisposable
     public readonly ulong[] QueensideCastlingFreeSquares;
     public readonly ulong[] QueensideCastlingNonAttackedSquares;
 
+#pragma warning disable IDE1006 // Naming Styles
     internal readonly int WhiteShortCastle;
     internal readonly int WhiteLongCastle;
     internal readonly int BlackShortCastle;
     internal readonly int BlackLongCastle;
+#pragma warning restore IDE1006 // Naming Styles
 #pragma warning restore S3887, CA1051
 
 #if DEBUG
-    internal readonly int[] _initialKingsideRookSquares;
-    internal readonly int[] _initialQueensideRookSquares;
-    internal readonly int[] _initialKingSquares;
+    private readonly int[] _initialKingsideRookSquares;
+    private readonly int[] _initialQueensideRookSquares;
+    private readonly int[] _initialKingSquares;
 #endif
 
     private BoardSquare _enPassant;
@@ -2517,7 +2519,7 @@ public class Position : IDisposable
     /// Combines <see cref="_pieceBitBoards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
     /// into a human-friendly representation
     /// </summary>
-    public void Print()
+    public void Print(int halfMovesWithoutCaptureOrPawnMove = -1)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator + Environment.NewLine);
@@ -2594,6 +2596,11 @@ public class Position : IDisposable
                 $"{whiteQueenside} | " +
                 blackKingside +
                 $"{blackQueenside}");
+        }
+
+        if (halfMovesWithoutCaptureOrPawnMove != -1)
+        {
+            Console.WriteLine($"    Half-moves:\t{halfMovesWithoutCaptureOrPawnMove}");
         }
 
         Console.WriteLine($"    FEN:\t{FEN()}");
