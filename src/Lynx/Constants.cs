@@ -99,6 +99,8 @@ public static class Constants
     /// </summary>
     public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
+    public const BitBoard Corners = 0x8100000000000081;
+
     public static readonly string[] Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",

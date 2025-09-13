@@ -413,6 +413,8 @@ public sealed class UCIHandler
 
     private async ValueTask HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
     {
+        var isFRC = Configuration.EngineSettings.IsChess960;
+
         try
         {
             var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
@@ -421,6 +423,9 @@ public sealed class UCIHandler
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
                 return;
             }
+
+            // FRC-only cases, i.e. cornered bishops
+            Configuration.EngineSettings.IsChess960 = true;
 
             int lineCounter = 0;
             await foreach (var line in File.ReadLinesAsync(fullPath, cancellationToken))
@@ -481,6 +486,10 @@ public sealed class UCIHandler
 
                 return sb;
             }
+        }
+        finally
+        {
+            Configuration.EngineSettings.IsChess960 = isFRC;
         }
     }
 
