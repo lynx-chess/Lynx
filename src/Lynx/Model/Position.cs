@@ -2499,7 +2499,7 @@ public class Position : IDisposable
     /// Combines <see cref="_pieceBitBoards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
     /// into a human-friendly representation
     /// </summary>
-    public void Print()
+    public void Print(int halfMovesWithoutCaptureOrPawnMove = -1)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator + Environment.NewLine);
@@ -2576,6 +2576,11 @@ public class Position : IDisposable
                 $"{whiteQueenside} | " +
                 blackKingside +
                 $"{blackQueenside}");
+        }
+
+        if (halfMovesWithoutCaptureOrPawnMove != -1)
+        {
+            Console.WriteLine($"    Half-moves:\t{halfMovesWithoutCaptureOrPawnMove}");
         }
 
         Console.WriteLine($"    FEN:\t{FEN()}");

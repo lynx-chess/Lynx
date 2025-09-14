@@ -93,7 +93,7 @@ public sealed class Searcher : IDisposable
         }
     }
 
-    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print();
+    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove);
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
