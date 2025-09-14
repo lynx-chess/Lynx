@@ -130,6 +130,8 @@ public class PerftFRCTest : BaseTest
         Validate(fen, depth, expectedNumberOfNodes);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]
     [TestCase("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b KQkq - 0 1", 15)]
     [TestCase("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b FDda - 0 1", 15)]
     [TestCase("bnqbrnkr/p1p2pp1/1p6/4p3/4N2p/3P4/PPPB1PPP/RQ1K1RNB w kq e6 1 1", 17)]
