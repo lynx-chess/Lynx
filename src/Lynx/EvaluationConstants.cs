@@ -1,7 +1,5 @@
 ﻿#pragma warning disable IDE1006 // Naming Styles
 
-using Lynx.Model;
-
 namespace Lynx;
 
 public static class EvaluationConstants
