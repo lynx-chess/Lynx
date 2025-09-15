@@ -31,10 +31,12 @@ public static class OnlineTablebaseProber
         .WaitAndRetryAsync(4, retryAttempt => TimeSpan.FromMilliseconds(Math.Pow(2, 10 + retryAttempt)));    // 128, 256, 512, 1024ms
 
     private readonly static HttpClient _client = new(
+#pragma warning disable IDISP004 // Don't ignore created IDisposable
         new PolicyHttpMessageHandler(_retryPolicy)
         {
             InnerHandler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(15) }
         })
+#pragma warning restore IDISP004 // Don't ignore created IDisposable
     {
         BaseAddress = new("http://tablebase.lichess.ovh/")
     };
@@ -63,10 +65,6 @@ public static class OnlineTablebaseProber
         int mate = 0;
 
         int[]? allPossibleMoves = null;
-
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         switch (tablebaseEval.Category)
         {
@@ -122,7 +120,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -183,7 +181,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -246,7 +244,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -306,7 +304,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position, ref evaluationContext);
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -350,7 +348,7 @@ public static class OnlineTablebaseProber
 
         Move? parsedMove = 0;
 #pragma warning disable CS0618 // Type or member is obsolete
-        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position, ref evaluationContext), out parsedMove))
+        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
         {
             throw new LynxException($"{bestMove.Uci} should be parsable from position {fen}");
         }

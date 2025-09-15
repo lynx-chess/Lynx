@@ -110,6 +110,8 @@ public sealed class EngineSettings
 
     public bool IsPonder { get; set; }
 
+    public bool IsChess960 { get; set; }
+
     /// <summary>
     /// Real NPS aren't calculated until the last search command.
     /// This option enables the report of an NPS estimation by the main thread
@@ -164,7 +166,7 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
-    public int SoftTimeBoundLimitOnMate { get; set; } = 1_000;
+    public int SoftTimeBoundLimitOnMate { get; set; } = 10_000;
 
     [SPSA<int>(enabled: false)]
     public int PonderHitMinTimeToContinueSearch { get; set; } = 100;
@@ -341,7 +343,7 @@ public sealed class EngineSettings
     public int Razoring_NotDepth1Bonus { get; set; } = 205;
 
     [SPSA<int>(enabled: false)]
-    public int IIR_MinDepth { get; set; } = 4;
+    public int IIR_MinDepth { get; set; } = 5;
 
     [SPSA<int>(enabled: false)]
     public int LMP_BaseMovesToTry { get; set; } = 1;
@@ -403,10 +405,8 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
     [SPSA<int>(enabled: false)]
-    public int TTReplacement_DepthOffset { get; set; } = 0;
-#pragma warning restore CA1805 // Do not initialize unnecessarily
+    public int TTReplacement_DepthOffset { get; set; } = 4;
 
     [SPSA<int>(enabled: false)]
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
