@@ -1066,8 +1066,8 @@ public class PositionTest
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.Black, whitePawnAttacks));
+            ? position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, (int)piece, 0, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, (int)piece, 0, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
