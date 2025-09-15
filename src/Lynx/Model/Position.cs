@@ -1504,13 +1504,13 @@ public class Position : IDisposable
             KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
-        var whiteKingAttacks = evaluationContext.Attacks[(int)Piece.K];
+        var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
         evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
         evaluationContext.AttacksBySide[(int)Side.White] |= whiteKingAttacks;
 
-        var blackKingAttacks = evaluationContext.Attacks[(int)Piece.k];
+        var blackKingAttacks = Attacks.KingAttacks[blackKing];
         evaluationContext.Attacks[(int)Piece.k] |= blackKingAttacks;
-        evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;;
+        evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;
 
         // Kings mobility
         var whiteKingAttacksCount =
@@ -1523,8 +1523,8 @@ public class Position : IDisposable
                 & (~(blackPawns | evaluationContext.AttacksBySide[(int)Side.White])))
             .CountBits();
 
-        //packedScore += whiteKingAttacksCount;
-            //- KingMobilityBonus[blackKingAttacksCount];
+        packedScore += KingMobilityBonus[whiteKingAttacksCount]
+        - KingMobilityBonus[blackKingAttacksCount];
 
         AssertAttackPopulation(ref evaluationContext);
 
