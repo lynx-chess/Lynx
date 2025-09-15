@@ -44,7 +44,7 @@ public class ZobristHashGenerationTest
     [Category(Categories.LongRunning)]
     [TestCase(Constants.TrickyTestPositionFEN)]
     [TestCase(Constants.KillerTestPositionFEN)]
-    public void EnPassant1234(string fen)
+    public void EnPassant(string fen)
     {
         var originalPosition = new Position(fen);
 
