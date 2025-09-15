@@ -2499,7 +2499,7 @@ public class Position : IDisposable
     /// Combines <see cref="_pieceBitBoards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
     /// into a human-friendly representation
     /// </summary>
-    public void Print()
+    public void Print(int halfMovesWithoutCaptureOrPawnMove = -1)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator + Environment.NewLine);
@@ -2578,6 +2578,11 @@ public class Position : IDisposable
                 $"{blackQueenside}");
         }
 
+        if (halfMovesWithoutCaptureOrPawnMove != -1)
+        {
+            Console.WriteLine($"    Half-moves:\t{halfMovesWithoutCaptureOrPawnMove}");
+        }
+
         Console.WriteLine($"    FEN:\t{FEN()}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
 
@@ -2639,11 +2644,15 @@ public class Position : IDisposable
         Debug.Assert(evaluationContext.AttacksBySide[(int)Side.Black] != 0);
     }
 
-    public void FreeResources()
+    protected virtual void Dispose(bool disposing)
     {
-        ArrayPool<BitBoard>.Shared.Return(_pieceBitBoards, clearArray: true);
-        ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                ArrayPool<BitBoard>.Shared.Return(_pieceBitBoards, clearArray: true);
+                ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
 
         ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
         ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares, clearArray: true);
@@ -2659,19 +2668,8 @@ public class Position : IDisposable
 
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
-        ArrayPool<int>.Shared.Return(_board, clearArray: false);
+                ArrayPool<int>.Shared.Return(_board, clearArray: false);
 #pragma warning restore S3254 // Default parameter values should not be passed as arguments
-
-        _disposedValue = true;
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                FreeResources();
             }
             _disposedValue = true;
         }

@@ -221,14 +221,14 @@ public sealed class Game : IDisposable
     /// </summary>
     public void ResetCurrentPositionToBeforeSearchState()
     {
-        CurrentPosition.FreeResources();
+        CurrentPosition.Dispose();
         CurrentPosition = new(PositionBeforeLastSearch);
         //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
     }
 
     public void UpdateInitialPosition()
     {
-        PositionBeforeLastSearch.FreeResources();
+        PositionBeforeLastSearch.Dispose();
         PositionBeforeLastSearch = new(CurrentPosition);
     }
 
@@ -264,24 +264,17 @@ public sealed class Game : IDisposable
 
     internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
 
-    public void FreeResources()
-    {
-        ArrayPool<PlyStackEntry>.Shared.Return(_stack, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(_positionHashHistory);
-
-        CurrentPosition.FreeResources();
-        PositionBeforeLastSearch.FreeResources();
-
-        _disposedValue = true;
-    }
-
     private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {
             if (disposing)
             {
-                FreeResources();
+                ArrayPool<PlyStackEntry>.Shared.Return(_stack, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(_positionHashHistory);
+
+                CurrentPosition.Dispose();
+                PositionBeforeLastSearch.Dispose();
             }
             _disposedValue = true;
         }
@@ -291,8 +284,9 @@ public sealed class Game : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
-#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+
+#pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
-#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
+#pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }
