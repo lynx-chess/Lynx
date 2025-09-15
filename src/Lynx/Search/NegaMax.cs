@@ -594,9 +594,9 @@ public sealed partial class Engine
                                     reduction -= Configuration.EngineSettings.LMR_Corrplexity;
                                 }
 
-                                if (moveScore <= EvaluationConstants.FirstKillerMoveValue && moveScore >= EvaluationConstants.SecondKillerMoveValue)
+                                if (moveScore == EvaluationConstants.FirstKillerMoveValue)
                                 {
-                                    reduction -= Configuration.EngineSettings.LMR_KillerOrCounterMove;
+                                    reduction -= Configuration.EngineSettings.LMR_FirstKiller;
                                 }
 
                                 reduction /= EvaluationConstants.LMRScaleFactor;
