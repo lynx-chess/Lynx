@@ -1821,7 +1821,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += RookKingRingAttacksBonus[kingRingAttacksCount];
+        packedBonus += RookKingRingAttacksBonus * kingRingAttacksCount;
 
         var fileMask = Masks.FileMask(squareIndex);
 
@@ -1874,7 +1874,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += KnightKingRingAttacksBonus[kingRingAttacksCount];
+        packedBonus += KnightKingRingAttacksBonus * kingRingAttacksCount;
 
         return packedBonus;
     }
@@ -1900,7 +1900,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += BishopKingRingAttacksBonus[kingRingAttacksCount];
+        packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
 
         // Bad bishop
         var sameColorPawns = sameSidePawns &
@@ -1952,7 +1952,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += QueenKingRingAttacksBonus[kingRingAttacksCount];
+        packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
 
         return packedBonus;
     }
