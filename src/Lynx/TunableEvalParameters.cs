@@ -6281,6 +6281,39 @@ public static class EvaluationParams
 		Pack(-12, 496)
 	];
 
+	public static readonly int[] KnightKingRingAttacksBonus =
+	[
+		Pack(0, 0),
+		Pack(15, 44),
+		Pack(26, 62),
+	];
+
+	public static readonly int[] BishopKingRingAttacksBonus =
+	[
+		Pack(0, 0),
+		Pack(16, 31),
+		Pack(23, 51),
+	];
+
+	public static readonly int[] RookKingRingAttacksBonus =
+	[
+		Pack(0, 0),
+		Pack(15, 26),
+		Pack(19, 43),
+		Pack(27, 48),
+		Pack(32, 55),
+	];
+
+	public static readonly int[] QueenKingRingAttacksBonus =
+	[
+		Pack(0, 0),
+		Pack(13, 191),
+		Pack(25, 323),
+		Pack(24, 411),
+		Pack(27, 451),
+		Pack(31, 481),
+	];
+
 	public static readonly int[] KnightThreatsBonus =
 	[
 		Pack(-13, 11),

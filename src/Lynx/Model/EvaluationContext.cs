@@ -7,6 +7,8 @@ public ref struct EvaluationContext
     public Span<BitBoard> Attacks;
     public Span<BitBoard> AttacksBySide;
 
+    public int KingAttacks;
+
     public EvaluationContext(Span<BitBoard> attacks, Span<BitBoard> attacksBySide)
     {
         Attacks = attacks;
@@ -14,6 +16,8 @@ public ref struct EvaluationContext
 
         Attacks.Clear();
         AttacksBySide.Clear();
+
+        KingAttacks = 0;
     }
 }
 
