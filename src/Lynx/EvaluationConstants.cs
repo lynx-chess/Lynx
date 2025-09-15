@@ -76,7 +76,7 @@ public static class EvaluationConstants
 
         for (int square = 0; square < 64; ++square)
         {
-            KingRing[square] = Attacks.KingAttacks[square].SetBit(square);
+            KingRing[square] = Attacks.KingAttacks[square];
         }
     }
 
