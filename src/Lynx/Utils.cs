@@ -244,6 +244,14 @@ public static class Utils
         return ((1 << piece) & MajorPieceMask) != 0;
     }
 
+    /// <summary>
+    /// Recommended in https://learn.microsoft.com/en-us/dotnet/api/system.boolean.tostring
+    /// </summary>
+    public static string ToLowerString(this bool b)
+    {
+        return b.ToString().ToLowerInvariant();
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {

@@ -150,7 +150,7 @@ public sealed class UCIHandler
 
     private async Task HandleStop() => await _searcher.StopSearching();
 
-    private async Task HandleUCI(CancellationToken cancellationToken)
+    internal async Task HandleUCI(CancellationToken cancellationToken)
     {
         await SendCommand(IdCommand.NameString, cancellationToken);
         await SendCommand(IdCommand.AuthorString, cancellationToken);
