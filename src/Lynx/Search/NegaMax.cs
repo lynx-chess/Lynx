@@ -976,6 +976,16 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
+        // QS fail medium
+        if (!pvNode
+            && bestScore >= beta
+            && bestScore < EvaluationConstants.PositiveCheckmateDetectionLimit
+            && beta < EvaluationConstants.PositiveCheckmateDetectionLimit
+            && beta > EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            bestScore = (bestScore + beta) / 2;
+        }
+
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
