@@ -206,11 +206,11 @@ public static class FENParser
 
         int whiteKingsideRook = CastlingData.DefaultValues, whiteQueensideRook = CastlingData.DefaultValues, blackKingsideRook = CastlingData.DefaultValues, blackQueensideRook = CastlingData.DefaultValues;
 
+        Debug.Assert(pieceBitboards[(int)Piece.K] != 0);
+        Debug.Assert(pieceBitboards[(int)Piece.k] != 0);
+
         var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
         var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
-
-        Debug.Assert(whiteKing != 0);
-        Debug.Assert(blackKing != 0);
 
         castlingRights = 0;
 
