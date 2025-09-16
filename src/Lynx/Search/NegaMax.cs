@@ -745,7 +745,8 @@ public sealed partial class Engine
 
         if (bestScore >= beta
             && bestScore < EvaluationConstants.PositiveCheckmateDetectionLimit
-            && beta < EvaluationConstants.PositiveCheckmateDetectionLimit)
+            && beta < EvaluationConstants.PositiveCheckmateDetectionLimit
+            && beta > EvaluationConstants.NegativeCheckmateDetectionLimit)
         {
             bestScore = ((bestScore * depth) + beta) / (depth + 1);
         }
