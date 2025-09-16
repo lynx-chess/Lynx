@@ -743,6 +743,13 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
+        if (bestScore >= beta
+            && bestScore < EvaluationConstants.PositiveCheckmateDetectionLimit
+            && beta < EvaluationConstants.PositiveCheckmateDetectionLimit)
+        {
+            bestScore = ((bestScore * depth) + beta) / (depth + 1);
+        }
+
         if (!isVerifyingSE)
         {
             if (!(isInCheck
