@@ -17,6 +17,37 @@ public static class FENParser
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
 
+    private static readonly BitBoard[] _queensideSquares = GC.AllocateArray<BitBoard>(64, pinned: true);
+    private static readonly BitBoard[] _kingsideSquares = GC.AllocateArray<BitBoard>(64, pinned: true);
+
+    static FENParser()
+    {
+        for (int square = (int)BoardSquare.a1; square <= (int)BoardSquare.h1; ++square)
+        {
+            PopulateSquares(square);
+        }
+
+        for (int square = (int)BoardSquare.a8; square <= (int)BoardSquare.a8; ++square)
+        {
+            PopulateSquares(square);
+        }
+
+        static void PopulateSquares(int square)
+        {
+            var file = Constants.File[square];
+
+            for (int f = file + 1; f < 8; ++f)
+            {
+                _queensideSquares[square].SetBit(square);
+            }
+
+            for (int f = file - 1; f >= 0; --f)
+            {
+                _kingsideSquares[square].SetBit(square);
+            }
+        }
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen)
     {
@@ -212,6 +243,9 @@ public static class FENParser
         var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
         var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
 
+        var whiteRooks = pieceBitboards[(int)Piece.R];
+        var blackRooks = pieceBitboards[(int)Piece.r];
+
         castlingRights = 0;
 
         for (int i = 0; i < castlingChars.Length; ++i)
@@ -225,14 +259,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WK;
 
-                        for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > whiteKing; --potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
-                            {
-                                whiteKingsideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        whiteKingsideRook = FindNearestQueensideRook(whiteRooks, whiteKing);
 
                         if (whiteKingsideRook == CastlingData.DefaultValues)
                         {
@@ -247,14 +274,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WQ;
 
-                        for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < whiteKing; ++potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
-                            {
-                                whiteQueensideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        whiteQueensideRook = FindNearestKingsideRook(whiteRooks, whiteKing);
 
                         if (whiteQueensideRook == CastlingData.DefaultValues)
                         {
@@ -269,14 +289,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BK;
 
-                        for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > blackKing; --potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
-                            {
-                                blackKingsideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        blackKingsideRook = FindNearestQueensideRook(blackRooks, blackKing);
 
                         if (blackKingsideRook == CastlingData.DefaultValues)
                         {
@@ -291,14 +304,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BQ;
 
-                        for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < blackKing; ++potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
-                            {
-                                blackQueensideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        blackQueensideRook = FindNearestKingsideRook(blackRooks, blackKing);
 
                         if (blackQueensideRook == CastlingData.DefaultValues)
                         {
@@ -370,6 +376,41 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FindNearestQueensideRook(BitBoard rooks, int kingSquare)
+    {
+        var east = rooks & _queensideSquares[kingSquare];
+
+        return east == 0
+            ? CastlingData.DefaultValues
+            : east.GetLS1BIndex();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FindNearestKingsideRook(BitBoard rooks, int kingSquare)
+    {
+        var west = rooks & _kingsideSquares[kingSquare];
+
+        if (west == 0)
+        {
+            return CastlingData.DefaultValues;
+        }
+
+        // Find the closest rook to the king (highest index among west squares)
+        int rookSquare = CastlingData.DefaultValues;
+        while (west != 0)
+        {
+            west.WithoutLS1B(out var sq);
+
+            if (sq > rookSquare)
+            {
+                rookSquare = sq;
+            }
+        }
+
+        return rookSquare;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, BitBoard[] PieceBitBoards, Side side)
     {
         bool success = true;
@@ -407,7 +448,6 @@ public static class FENParser
         /// <summary>
         /// Fast alternative to Enum.TryParse
         /// </summary>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool TryParseEnPassantSquare(ReadOnlySpan<char> enPassantSpan, out BoardSquare square)
         {
