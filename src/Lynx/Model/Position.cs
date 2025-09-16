@@ -1922,6 +1922,25 @@ public class Position : IDisposable
             packedBonus += BishopInUnblockedLongDiagonalBonus;
         }
 
+        if (!Configuration.EngineSettings.IsChess960        // Can't happen in standard chess
+            || !Constants.Corners.GetBit(squareIndex))      // Saves some checks if no bishop in a corner at all
+        {
+            return packedBonus;
+        }
+
+        // Cornered/trapped bishop
+        if (pieceIndex == (int)Piece.B
+            && ((squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
+                || (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)))
+        {
+            packedBonus += BishopCorneredPenalty;
+        }
+        else if ((squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
+                || (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p))
+        {
+            packedBonus += BishopCorneredPenalty;
+        }
+
         return packedBonus;
     }
 
