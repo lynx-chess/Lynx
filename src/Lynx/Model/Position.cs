@@ -1512,15 +1512,15 @@ public class Position : IDisposable
         evaluationContext.Attacks[(int)Piece.k] |= blackKingAttacks;
         evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;
 
-        // Kings mobility
+        // King mobility
         var whiteKingAttacksCount =
             (whiteKingAttacks
-                & (~(whitePawns | evaluationContext.AttacksBySide[(int)Side.Black])))
+                & (~(whitePawns | blackPawnAttacks)))
             .CountBits();
 
         var blackKingAttacksCount =
             (blackKingAttacks
-                & (~(blackPawns | evaluationContext.AttacksBySide[(int)Side.White])))
+                & (~(blackPawns | whitePawnAttacks)))
             .CountBits();
 
         packedScore += KingMobilityBonus[whiteKingAttacksCount]
