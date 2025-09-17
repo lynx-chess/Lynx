@@ -1508,8 +1508,8 @@ public class Position : IDisposable
 
         // Total king rings ttacks
         packedScore +=
-            TotalKingRingAttacksBonus[Math.Clamp(evaluationContext.WhiteKingRingAttacks, 5, 13)]
-            - TotalKingRingAttacksBonus[Math.Clamp(evaluationContext.BlackKingRingAttacks, 5, 13)];
+            TotalKingRingAttacksBonus[Math.Clamp(evaluationContext.WhiteKingRingAttacks, 4, 13)]
+            - TotalKingRingAttacksBonus[Math.Clamp(evaluationContext.BlackKingRingAttacks, 4, 13)];
 
         // Bishop pair bonus
         if (_pieceBitBoards[(int)Piece.B].CountBits() >= 2)
