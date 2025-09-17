@@ -30,6 +30,8 @@ public static class EvaluationConstants
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
+    public static readonly BitBoard[] KingRing = new BitBoard[64];
+
     public const int LMRScaleFactor = 100;
 
     public const int CorrectionHistoryScale = 256;
@@ -68,6 +70,11 @@ public static class EvaluationConstants
                 Configuration.EngineSettings.History_Malus_Constant
                 + (Configuration.EngineSettings.History_Malus_Linear * searchDepth)
                 + (Configuration.EngineSettings.History_Malus_Quadratic * searchDepth * searchDepth));
+        }
+
+        for (int square = 0; square < 64; ++square)
+        {
+            KingRing[square] = Attacks.KingAttacks[square];
         }
     }
 
