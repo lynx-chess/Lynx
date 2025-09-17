@@ -1826,9 +1826,12 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += RookKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        if (kingRingAttacksCount > 0)
+        {
+            packedBonus += RookKingRingAttacksBonus;
+            evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        }
 
         var fileMask = Masks.FileMask(squareIndex);
 
@@ -1881,9 +1884,12 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += KnightKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        if (kingRingAttacksCount > 0)
+        {
+            packedBonus += KnightKingRingAttacksBonus;
+            evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        }
 
         return packedBonus;
     }
@@ -1909,9 +1915,12 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        if (kingRingAttacksCount > 0)
+        {
+            packedBonus += BishopKingRingAttacksBonus;
+            evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        }
 
         // Bad bishop
         var sameColorPawns = sameSidePawns &
@@ -1982,9 +1991,12 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        if (kingRingAttacksCount > 0)
+        {
+            packedBonus += QueenKingRingAttacksBonus;
+            evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        }
 
         return packedBonus;
     }
