@@ -379,11 +379,10 @@ public static class FENParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int FindNearestKingsideRook(BitBoard rooks, int kingSquare)
     {
-        var queensideMask = rooks & _queensideSquares[kingSquare];
-
-        return queensideMask == 0
+        var kingsideMask = rooks & _kingsideSquares[kingSquare];
+        return kingsideMask == 0
             ? CastlingData.DefaultValues
-            : queensideMask.GetLS1BIndex();
+            : kingsideMask.GetLS1BIndex();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
