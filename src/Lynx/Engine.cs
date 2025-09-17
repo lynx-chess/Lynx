@@ -89,11 +89,11 @@ public sealed partial class Engine : IDisposable
         int attacksBySideSize = _poolsPerPly * maxDepth * 2;
         int movesSize = _poolsPerPly * maxDepth * Constants.MaxNumberOfPseudolegalMovesInAPosition;
 
-        _attacksPool = new BitBoard[attacksSize];
-        _attacksBySidePool = new BitBoard[attacksBySideSize];
-        _movesPool = new Move[movesSize];
-        _moveScoresPool = new int[movesSize];
-        _visitedMovesPool = new Move[movesSize];
+        _attacksPool = GC.AllocateArray<BitBoard>(attacksSize, pinned: true);
+        _attacksBySidePool = GC.AllocateArray<BitBoard>(attacksBySideSize, pinned: true);
+        _movesPool = GC.AllocateArray<int>(movesSize, pinned: true);
+        _moveScoresPool = GC.AllocateArray<int>(movesSize, pinned: true);
+        _visitedMovesPool = GC.AllocateArray<int>(movesSize, pinned: true);
 
         _logger.Info("Engine {0} initialized", _id);
     }
