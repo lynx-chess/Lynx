@@ -1506,6 +1506,11 @@ public class Position : IDisposable
 
         AssertAttackPopulation(ref evaluationContext);
 
+        // Total king rings ttacks
+        packedScore +=
+            TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
+            - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
+
         // Bishop pair bonus
         if (_pieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
@@ -1823,6 +1828,8 @@ public class Position : IDisposable
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += RookKingRingAttacksBonus * kingRingAttacksCount;
 
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+
         var fileMask = Masks.FileMask(squareIndex);
 
         // Rook on open file
@@ -1876,6 +1883,8 @@ public class Position : IDisposable
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += KnightKingRingAttacksBonus * kingRingAttacksCount;
 
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+
         return packedBonus;
     }
 
@@ -1901,6 +1910,8 @@ public class Position : IDisposable
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
+
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
         // Bad bishop
         var sameColorPawns = sameSidePawns &
@@ -1972,6 +1983,8 @@ public class Position : IDisposable
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
+
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
         return packedBonus;
     }
