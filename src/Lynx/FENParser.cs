@@ -260,7 +260,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WK;
 
-                        whiteKingsideRook = FindNearestKingsideRook(whiteRooks, whiteKing);
+                        whiteKingsideRook = FindFurthestKingsideRook(whiteRooks, whiteKing);
 
                         if (whiteKingsideRook == CastlingData.DefaultValues)
                         {
@@ -275,7 +275,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WQ;
 
-                        whiteQueensideRook = FindNearestQueensideRook(whiteRooks, whiteKing);
+                        whiteQueensideRook = FindFurthestQueensideRook(whiteRooks, whiteKing);
 
                         if (whiteQueensideRook == CastlingData.DefaultValues)
                         {
@@ -290,7 +290,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BK;
 
-                        blackKingsideRook = FindNearestKingsideRook(blackRooks, blackKing);
+                        blackKingsideRook = FindFurthestKingsideRook(blackRooks, blackKing);
 
                         if (blackKingsideRook == CastlingData.DefaultValues)
                         {
@@ -305,7 +305,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BQ;
 
-                        blackQueensideRook = FindNearestQueensideRook(blackRooks, blackKing);
+                        blackQueensideRook = FindFurthestQueensideRook(blackRooks, blackKing);
 
                         if (blackQueensideRook == CastlingData.DefaultValues)
                         {
@@ -377,33 +377,32 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindNearestKingsideRook(BitBoard rooks, int kingSquare)
+    private static int FindFurthestKingsideRook(BitBoard rooks, int kingSquare)
     {
-        var kingsideMask = rooks & _kingsideSquares[kingSquare];
-        return kingsideMask == 0
-            ? CastlingData.DefaultValues
-            : kingsideMask.GetLS1BIndex();
-    }
+        // Kingside: outermost rook to the east of the king (highest file / largest square index on that rank)
+        var eastMask = rooks & _kingsideSquares[kingSquare];
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindNearestQueensideRook(BitBoard rooks, int kingSquare)
-    {
-        var rookSquare = CastlingData.DefaultValues;
-
-        var kingsideMask = rooks & _queensideSquares[kingSquare];
-
-
-        while (kingsideMask != 0)
+        int rookSquare = CastlingData.DefaultValues;
+        while (eastMask != 0)
         {
-            kingsideMask.WithoutLS1B(out var sq);
-
-            if (sq > rookSquare)
+            eastMask.WithoutLS1B(out var square);
+            if (square > rookSquare)
             {
-                rookSquare = sq;
+                rookSquare = square;
             }
         }
 
         return rookSquare;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FindFurthestQueensideRook(BitBoard rooks, int kingSquare)
+    {
+        var queensideMask = rooks & _queensideSquares[kingSquare];
+
+        return queensideMask == 0
+            ? CastlingData.DefaultValues
+            : queensideMask.GetLS1BIndex();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
