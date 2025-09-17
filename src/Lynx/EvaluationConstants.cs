@@ -1,5 +1,7 @@
 ﻿#pragma warning disable IDE1006 // Naming Styles
 
+using Lynx.Model;
+
 namespace Lynx;
 
 public static class EvaluationConstants
@@ -75,6 +77,17 @@ public static class EvaluationConstants
         for (int square = 0; square < 64; ++square)
         {
             KingRing[square] = Attacks.KingAttacks[square];
+
+            var rank = Constants.Rank[square];
+
+            if (rank == 0)
+            {
+                KingRing[square] |= KingRing[square].ShiftUp();
+            }
+            else if (rank == 7)
+            {
+                KingRing[square] |= KingRing[square].ShiftDown();
+            }
         }
     }
 
