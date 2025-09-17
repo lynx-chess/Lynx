@@ -10,9 +10,9 @@ public readonly struct SearchConstraints
     /// </summary>
     private const int DefaultTimeBound = 10_000_000;
 
-    public const int DefaultHardLimitTimeBound  = DefaultTimeBound;
+    public const int DefaultHardLimitTimeBound = DefaultTimeBound;
 
-    public const int DefaultSoftLimitTimeBound  = DefaultTimeBound;
+    public const int DefaultSoftLimitTimeBound = DefaultTimeBound;
 
     public readonly int HardLimitTimeBound;
 

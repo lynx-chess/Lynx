@@ -9,21 +9,17 @@ public class GeneratePawnMovesTest
     private static IEnumerable<Move> GeneratePawnMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        using var evaluationContext = new EvaluationContext();
+        return MoveGenerator.GenerateAllMoves(position, evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     private static IEnumerable<Move> GeneratePawnCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        using var evaluationContext = new EvaluationContext();
+        return MoveGenerator.GenerateAllCaptures(position, evaluationContext, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     [Test]

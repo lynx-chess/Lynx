@@ -32,7 +32,7 @@ using Lynx.Model;
 
 namespace Lynx.Benchmark;
 
-public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchmark
+public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark : BaseBenchmark
 {
     private struct BitBoardOps
     {

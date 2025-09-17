@@ -94,11 +94,9 @@ public class MoveToEPDStringTest
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        using var evaluationContext = new EvaluationContext();
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, evaluationContext, moves).ToArray();
 
         var ambiguousMoves = pseudoLegalMoves
             .Where(m => m.Piece() == (int)piece && m.TargetSquare() == (int)targetSquare)

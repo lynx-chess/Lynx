@@ -45,7 +45,7 @@ public class EvaluationConstantsTest
     [Test]
     public void CheckmateDepthFactorTest()
     {
-        const int maxCheckmateValue = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth ;
+        const int maxCheckmateValue = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth;
         Assert.Less(maxCheckmateValue, MaxEval);
         Assert.Greater(maxCheckmateValue, MinEval);
 

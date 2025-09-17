@@ -688,7 +688,7 @@ public sealed class Searcher : IDisposable
             {
                 _mainEngine.Dispose();
 
-                foreach(var engine in _extraEngines)
+                foreach (var engine in _extraEngines)
                 {
                     engine.Dispose();
                 }

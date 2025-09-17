@@ -149,569 +149,567 @@ namespace Lynx.Benchmark;
 
 public partial class ParseGame_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data =>
-    [
-        "position startpos",    // No moves
+	public static IEnumerable<string> Data =>
+	[
+		"position startpos",    // No moves
         "position startpos moves d2d4 d7d5 b1c3 g8f6 f2f3 c7c5 e2e3 b8c6 a2a3 e7e6 f1e2 c8d7 d4c5 f8c5 h2h3 f6h5 h1h2 d8h4 e1d2 h4f2 c3d5 e6d5 d2c3 c5e3 c1d2 c6a5 a3a4 e3d4 c3b4 d4c5 b4a5 a7a6 a1a2 b7b6",    // 17 moves
         "position startpos moves d2d4 d7d5 g1f3 g8f6 e2e3 b8c6 f1e2 c8f5 b1c3 f6e4 e1g1 e4c3 b2c3 e7e6 a1b1 a8b8 c1b2 b7b5 f3e5 c6e5 d4e5 f8c5 e2f3 e8g8 f1e1 d8h4 g2g4 f5g6 b1c1 f7f6 e5f6 h4f6 g1g2 g6e4 f3e4 f6f2 g2h1 d5e4 d1e2 f2f3 e2f3 e4f3 e3e4 f3f2 e1f1 f8f4 c1d1 f4e4 g4g5 e4g4 b2c1 b8f8 a2a3 e6e5 h2h3 g4g3 c1b2 f8f3 d1d8 g8f7 d8d7 f7e6 d7c7 g3h3 h1g2 f3g3",    // 36 moves
         "position startpos moves g1f3 e7e6 e2e4 b7b6 d2d4 g8f6 e4e5 f6d5 c2c4 f8b4 b1d2 d5e7 a2a3 b4d2 c1d2 d7d6 d2c3 d6e5 f3e5 c8b7 f1e2 e8g8 e2f3 b7f3 d1f3 b8d7 a1d1 f7f6 e5c6 e7c6 f3c6 f8e8 e1g1 d7f8 f1e1 d8d7 c6f3 f8g6 f3b7 a7a5 c4c5 a8b8 b7e4 d7b5 d4d5 e6e5 d5d6 b5c5 d6d7 e8d8 e1e3 g6f4 g2g3 f4h3 g1g2 h3g5 e4a4 g5f7 e3d3 f7d6 d3d5 c5c4 a4c4 d6c4 b2b4 a5a4 d1c1 c4d6 c3e5 d8d7 e5d6 d7d6 d5d6 c7d6 c1c6 d6d5 c6d6 b8c8 d6d5 c8c3 b4b5 c3b3 d5d4 b3a3 d4d6 a3a1 d6b6 a4a3 b6b8 g8f7 b5b6 a1b1 b8a8 b1b6 a8a3 b6b8 a3a7 f7g8 h2h4 b8e8 g3g4 e8d8 g2f3 d8d3 f3e4 d3d8 e4f4 d8d4 f4g3 d4d8 h4h5 d8f8 g3f4 f8b8 f4f3 b8b3 f3g2 b3b8 a7c7 b8a8 g2f3 a8a3 f3f4 a3a4 f4g3 a4a8 c7b7 a8f8 g3f4 f8c8 f4e4 c8c4 e4f3 c4c3 f3g2 c3c8 f2f4 c8c2 g2f3 c2c3 f3e4 c3c4 e4f5 c4c5 f5e6 c5c6 e6d5 c6c8 h5h6 g7h6 d5e6 c8c4 e6f5 c4c6 b7a7 c6d6 a7c7 d6d4 c7b7 d4a4 b7e7 a4a6 e7e6 a6e6 f5e6 g8g7 f4f5 h6h5 g4h5 h7h6 e6e7 g7g8 e7f6 g8f8 f6e6 f8g7 e6e7 g7h8 f5f6 h8g8 f6f7 g8h8 f7f8Q h8h7 f8f4 h7g8 f4g4 g8h8 e7f8 h8h7 g4g8",  // 96 movws
         Constants.LongPositionCommand, // 296 moves
     ];
 
-    [Benchmark(Baseline = true)]
-    [ArgumentsSource(nameof(Data))]
-    public OriginalGame ParseGame_Original(string positionCommand) => ParseGame_OriginalClass.ParseGame(positionCommand);
-
-    [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public OriginalGame ParseGame_Improved1(string positionCommand) => ParseGame_ImprovedClass1.ParseGame(positionCommand);
-
-    [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public ImprovedGame ParseGame_Improved2(string positionCommand) => ParseGame_ImprovedClass2.ParseGame(positionCommand);
-
-    [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public ImprovedGame ParseGame_Improved3(string positionCommand) => ParseGame_ImprovedClass3.ParseGame(positionCommand);
-
-    [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public ImprovedGame2 ParseGame_Improved4(string positionCommand) => ParseGame_ImprovedClass4.ParseGame(positionCommand);
-
-    [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public ImprovedGame2 ParseGame_Improved5(string positionCommand) => ParseGame_ImprovedClass5.ParseGame(positionCommand);
-
-    public static partial class ParseGame_OriginalClass
-    {
-        public const string StartPositionString = "startpos";
-        public const string MovesString = "moves";
-
-        [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex FenRegex();
-
-        [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex MovesRegex();
-
-        private static readonly Regex _fenRegex = FenRegex();
-        private static readonly Regex _movesRegex = MovesRegex();
-
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static OriginalGame ParseGame(string positionCommand)
-        {
-            try
-            {
-                var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
-
-                var initialPosition = isInitialPosition
-                        ? Constants.InitialPositionFEN
-                        : _fenRegex.Match(positionCommand).Value.Trim();
-
-                if (string.IsNullOrEmpty(initialPosition))
-                {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
-                }
-
-                var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                return new OriginalGame(initialPosition, moves);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                throw;
-            }
-        }
-    }
-
-    public static partial class ParseGame_ImprovedClass1
-    {
-        public const string StartPositionString = "startpos";
-        public const string MovesString = "moves";
-
-        [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex FenRegex();
-
-        [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex MovesRegex();
-
-        private static readonly Regex _fenRegex = FenRegex();
-        private static readonly Regex _movesRegex = MovesRegex();
-
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static OriginalGame ParseGame(string positionCommand)
-        {
-            try
-            {
-                var positionCommandSpan = positionCommand.AsSpan();
-                Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
-                positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
-                bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
-
-                var initialPosition = isInitialPosition
-                        ? Constants.InitialPositionFEN
-                        : _fenRegex.Match(positionCommand).Value.Trim();
-
-                if (string.IsNullOrEmpty(initialPosition))
-                {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
-                }
-
-                var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                return new OriginalGame(initialPosition, moves);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                throw;
-            }
-        }
-    }
-
-    public static partial class ParseGame_ImprovedClass2
-    {
-        public const string StartPositionString = "startpos";
-        public const string MovesString = "moves";
-
-        [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex FenRegex();
-
-        [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex MovesRegex();
-
-        private static readonly Regex _fenRegex = FenRegex();
-        private static readonly Regex _movesRegex = MovesRegex();
-
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static ImprovedGame ParseGame(string positionCommand)
-        {
-            try
-            {
-                var positionCommandSpan = positionCommand.AsSpan();
-                Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
-                positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
-                bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
-
-                var initialPosition = isInitialPosition
-                        ? Constants.InitialPositionFEN
-                        : _fenRegex.Match(positionCommand).Value.Trim();
-
-                if (string.IsNullOrEmpty(initialPosition))
-                {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
-                }
-
-                var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
-                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
-                movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
-
-                return new ImprovedGame(initialPosition, movesRegexResultAsSpan, moves);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                throw;
-            }
-        }
-    }
-
-    public static partial class ParseGame_ImprovedClass3
-    {
-        public const string StartPositionString = "startpos";
-        public const string MovesString = "moves";
-
-        [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex FenRegex();
-
-        [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex MovesRegex();
-
-        private static readonly Regex _fenRegex = FenRegex();
-        private static readonly Regex _movesRegex = MovesRegex();
-
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static ImprovedGame ParseGame(string positionCommand)
-        {
-            try
-            {
-                var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
-
-                var initialPosition = isInitialPosition
-                        ? Constants.InitialPositionFEN
-                        : _fenRegex.Match(positionCommand).Value.Trim();
-
-                if (string.IsNullOrEmpty(initialPosition))
-                {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
-                }
-
-                var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
-                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
-                movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
-
-                return new ImprovedGame(initialPosition, movesRegexResultAsSpan, moves);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                throw;
-            }
-        }
-    }
-
-    public static class ParseGame_ImprovedClass4
-    {
-        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-
-        public const string Id = "position";
-
-        public const string StartPositionString = "startpos";
-        public const string MovesString = "moves";
-
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static ImprovedGame2 ParseGame(string positionCommand)
-        {
-            try
-            {
-                var positionCommandSpan = positionCommand.AsSpan();
-
-                // We divide the position command in these two sections:
-                // "position startpos                       ||"
-                // "position startpos                       || moves e2e4 e7e5"
-                // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
-                // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
-                Span<Range> items = stackalloc Range[2];
-                positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                var initialPositionSection = positionCommandSpan[items[0]];
-
-                // We divide in these two parts
-                // "position startpos ||"       <-- If "fen" doesn't exist in the section
-                // "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
-                Span<Range> initialPositionParts = stackalloc Range[2];
-                initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == Id.Length   // "position" o "position startpos"
-                    ? initialPositionSection[initialPositionParts[1]]
-                    : Constants.InitialPositionFEN.AsSpan();
-
-                var movesSection = positionCommandSpan[items[1]];
-
-                Span<Range> moves = stackalloc Range[2048]; // Number of potential half-moves provided in the string
-                movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                return new ImprovedGame2(fen, movesSection, moves, _movePool);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                throw;
-            }
-        }
-    }
-
-    public static class ParseGame_ImprovedClass5
-    {
-        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-
-        public const string Id = "position";
-
-        public const string StartPositionString = "startpos";
-        public const string MovesString = "moves";
-
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public static ImprovedGame2 ParseGame(string positionCommand)
-        {
-            try
-            {
-                var positionCommandSpan = positionCommand.AsSpan();
-
-                // We divide the position command in these two sections:
-                // "position startpos                       ||"
-                // "position startpos                       || moves e2e4 e7e5"
-                // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
-                // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
-                Span<Range> items = stackalloc Range[2];
-                positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                var initialPositionSection = positionCommandSpan[items[0]];
-
-                // We divide in these two parts
-                // "position startpos ||"       <-- If "fen" doesn't exist in the section
-                // "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
-                Span<Range> initialPositionParts = stackalloc Range[2];
-                initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == Id.Length   // "position" o "position startpos"
-                    ? initialPositionSection[initialPositionParts[1]]
-                    : Constants.InitialPositionFEN.AsSpan();
-
-                var movesSection = positionCommandSpan[items[1]];
-
-                Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
-                movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                return new ImprovedGame2(fen, movesSection, moves, _movePool);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                throw;
-            }
-        }
-    }
+	[Benchmark(Baseline = true)]
+	[ArgumentsSource(nameof(Data))]
+	public OriginalGame ParseGame_Original(string positionCommand) => ParseGame_OriginalClass.ParseGame(positionCommand);
+
+	[Benchmark]
+	[ArgumentsSource(nameof(Data))]
+	public OriginalGame ParseGame_Improved1(string positionCommand) => ParseGame_ImprovedClass1.ParseGame(positionCommand);
+
+	[Benchmark]
+	[ArgumentsSource(nameof(Data))]
+	public ImprovedGame ParseGame_Improved2(string positionCommand) => ParseGame_ImprovedClass2.ParseGame(positionCommand);
+
+	[Benchmark]
+	[ArgumentsSource(nameof(Data))]
+	public ImprovedGame ParseGame_Improved3(string positionCommand) => ParseGame_ImprovedClass3.ParseGame(positionCommand);
+
+	[Benchmark]
+	[ArgumentsSource(nameof(Data))]
+	public ImprovedGame2 ParseGame_Improved4(string positionCommand) => ParseGame_ImprovedClass4.ParseGame(positionCommand);
+
+	[Benchmark]
+	[ArgumentsSource(nameof(Data))]
+	public ImprovedGame2 ParseGame_Improved5(string positionCommand) => ParseGame_ImprovedClass5.ParseGame(positionCommand);
+
+	public static partial class ParseGame_OriginalClass
+	{
+		public const string StartPositionString = "startpos";
+		public const string MovesString = "moves";
+
+		[GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex FenRegex();
+
+		[GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex MovesRegex();
+
+		private static readonly Regex _fenRegex = FenRegex();
+		private static readonly Regex _movesRegex = MovesRegex();
+
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+		public static OriginalGame ParseGame(string positionCommand)
+		{
+			try
+			{
+				var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+				bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+				var initialPosition = isInitialPosition
+						? Constants.InitialPositionFEN
+						: _fenRegex.Match(positionCommand).Value.Trim();
+
+				if (string.IsNullOrEmpty(initialPosition))
+				{
+					_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+				}
+
+				var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+				return new OriginalGame(initialPosition, moves);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+				throw;
+			}
+		}
+	}
+
+	public static partial class ParseGame_ImprovedClass1
+	{
+		public const string StartPositionString = "startpos";
+		public const string MovesString = "moves";
+
+		[GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex FenRegex();
+
+		[GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex MovesRegex();
+
+		private static readonly Regex _fenRegex = FenRegex();
+		private static readonly Regex _movesRegex = MovesRegex();
+
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+		public static OriginalGame ParseGame(string positionCommand)
+		{
+			try
+			{
+				var positionCommandSpan = positionCommand.AsSpan();
+				Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
+				positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
+				bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+				var initialPosition = isInitialPosition
+						? Constants.InitialPositionFEN
+						: _fenRegex.Match(positionCommand).Value.Trim();
+
+				if (string.IsNullOrEmpty(initialPosition))
+				{
+					_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+				}
+
+				var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+				return new OriginalGame(initialPosition, moves);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+				throw;
+			}
+		}
+	}
+
+	public static partial class ParseGame_ImprovedClass2
+	{
+		public const string StartPositionString = "startpos";
+		public const string MovesString = "moves";
+
+		[GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex FenRegex();
+
+		[GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex MovesRegex();
+
+		private static readonly Regex _fenRegex = FenRegex();
+		private static readonly Regex _movesRegex = MovesRegex();
+
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+		public static ImprovedGame ParseGame(string positionCommand)
+		{
+			try
+			{
+				var positionCommandSpan = positionCommand.AsSpan();
+				Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
+				positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
+				bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+				var initialPosition = isInitialPosition
+						? Constants.InitialPositionFEN
+						: _fenRegex.Match(positionCommand).Value.Trim();
+
+				if (string.IsNullOrEmpty(initialPosition))
+				{
+					_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+				}
+
+				var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
+				Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
+				movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+				return new ImprovedGame(initialPosition, movesRegexResultAsSpan, moves);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+				throw;
+			}
+		}
+	}
+
+	public static partial class ParseGame_ImprovedClass3
+	{
+		public const string StartPositionString = "startpos";
+		public const string MovesString = "moves";
+
+		[GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex FenRegex();
+
+		[GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+		private static partial Regex MovesRegex();
+
+		private static readonly Regex _fenRegex = FenRegex();
+		private static readonly Regex _movesRegex = MovesRegex();
+
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+		public static ImprovedGame ParseGame(string positionCommand)
+		{
+			try
+			{
+				var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+				bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+				var initialPosition = isInitialPosition
+						? Constants.InitialPositionFEN
+						: _fenRegex.Match(positionCommand).Value.Trim();
+
+				if (string.IsNullOrEmpty(initialPosition))
+				{
+					_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+				}
+
+				var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
+				Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
+				movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+				return new ImprovedGame(initialPosition, movesRegexResultAsSpan, moves);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+				throw;
+			}
+		}
+	}
+
+	public static class ParseGame_ImprovedClass4
+	{
+		private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+		public const string Id = "position";
+
+		public const string StartPositionString = "startpos";
+		public const string MovesString = "moves";
+
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+		public static ImprovedGame2 ParseGame(string positionCommand)
+		{
+			try
+			{
+				var positionCommandSpan = positionCommand.AsSpan();
+
+				// We divide the position command in these two sections:
+				// "position startpos                       ||"
+				// "position startpos                       || moves e2e4 e7e5"
+				// "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
+				// "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
+				Span<Range> items = stackalloc Range[2];
+				positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+				var initialPositionSection = positionCommandSpan[items[0]];
+
+				// We divide in these two parts
+				// "position startpos ||"       <-- If "fen" doesn't exist in the section
+				// "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
+				Span<Range> initialPositionParts = stackalloc Range[2];
+				initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+				ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == Id.Length   // "position" o "position startpos"
+					? initialPositionSection[initialPositionParts[1]]
+					: Constants.InitialPositionFEN.AsSpan();
+
+				var movesSection = positionCommandSpan[items[1]];
+
+				Span<Range> moves = stackalloc Range[2048]; // Number of potential half-moves provided in the string
+				movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+				return new ImprovedGame2(fen, movesSection, moves, _movePool);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+				throw;
+			}
+		}
+	}
+
+	public static class ParseGame_ImprovedClass5
+	{
+		private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+		public const string Id = "position";
+
+		public const string StartPositionString = "startpos";
+		public const string MovesString = "moves";
+
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+		public static ImprovedGame2 ParseGame(string positionCommand)
+		{
+			try
+			{
+				var positionCommandSpan = positionCommand.AsSpan();
+
+				// We divide the position command in these two sections:
+				// "position startpos                       ||"
+				// "position startpos                       || moves e2e4 e7e5"
+				// "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
+				// "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
+				Span<Range> items = stackalloc Range[2];
+				positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+				var initialPositionSection = positionCommandSpan[items[0]];
+
+				// We divide in these two parts
+				// "position startpos ||"       <-- If "fen" doesn't exist in the section
+				// "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
+				Span<Range> initialPositionParts = stackalloc Range[2];
+				initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+				ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == Id.Length   // "position" o "position startpos"
+					? initialPositionSection[initialPositionParts[1]]
+					: Constants.InitialPositionFEN.AsSpan();
+
+				var movesSection = positionCommandSpan[items[1]];
+
+				Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
+				movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+				return new ImprovedGame2(fen, movesSection, moves, _movePool);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+				throw;
+			}
+		}
+	}
 
 #pragma warning disable RCS1169, S2933, S4487, IDE0044, IDE0052, RCS1170 // Readonly, not used
 
-    public sealed class OriginalGame
-    {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+	public sealed class OriginalGame
+	{
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
-        public List<Move> MoveHistory { get; }
+		public List<Move> MoveHistory { get; }
 #endif
 
-        public HashSet<ulong> PositionHashHistory { get; }
+		public HashSet<ulong> PositionHashHistory { get; }
 
-        public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
+		public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
-        public Position CurrentPosition { get; private set; }
+		public Position CurrentPosition { get; private set; }
 
-        private Position _gameInitialPosition;
+		private Position _gameInitialPosition;
 
-        public OriginalGame(ReadOnlySpan<char> fen)
-        {
-            var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition = new Position(parsedFen);
-            if (!CurrentPosition.IsValid())
-            {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
-            }
+		public OriginalGame(ReadOnlySpan<char> fen)
+		{
+			var parsedFen = FENParser.ParseFEN(fen);
+			CurrentPosition = new Position(parsedFen);
+			if (!CurrentPosition.IsValid())
+			{
+				_logger.Warn($"Invalid position detected: {fen.ToString()}");
+			}
 
-            PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
-            HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-            _gameInitialPosition = new Position(CurrentPosition);
+			PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
+			HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+			_gameInitialPosition = new Position(CurrentPosition);
 #if DEBUG
-            MoveHistory = new(1024);
+			MoveHistory = new(1024);
 #endif
-        }
+		}
 
-        internal OriginalGame(string fen, string[] movesUCIString) : this(fen)
-        {
-            foreach (var moveString in movesUCIString)
-            {
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+		internal OriginalGame(string fen, string[] movesUCIString) : this(fen)
+		{
+			foreach (var moveString in movesUCIString)
+			{
+				var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
 
-                if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
-                {
-                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
-                    break;
-                }
+				if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+				{
+					_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
+					break;
+				}
 
-                MakeMove(parsedMove.Value);
-            }
+				MakeMove(parsedMove.Value);
+			}
 
-            _gameInitialPosition = new Position(CurrentPosition);
-        }
+			_gameInitialPosition = new Position(CurrentPosition);
+		}
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
-        {
-            var gameState = CurrentPosition.MakeMove(moveToPlay);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public GameState MakeMove(Move moveToPlay)
+		{
+			var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-            if (CurrentPosition.WasProduceByAValidMove())
-            {
+			if (CurrentPosition.WasProduceByAValidMove())
+			{
 #if DEBUG
-                MoveHistory.Add(moveToPlay);
+				MoveHistory.Add(moveToPlay);
 #endif
-            }
-            else
-            {
-                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
-            }
+			}
+			else
+			{
+				_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+				CurrentPosition.UnmakeMove(moveToPlay, gameState);
+			}
 
-            PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-            HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+			PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+			HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 
-            return gameState;
-        }
-    }
+			return gameState;
+		}
+	}
 
-    public sealed class ImprovedGame
-    {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-#if DEBUG
-        public List<Move> MoveHistory { get; }
-#endif
-
-        public HashSet<ulong> PositionHashHistory { get; }
-
-        public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
-
-        public Position CurrentPosition { get; private set; }
-
-        private Position _gameInitialPosition;
-
-        public ImprovedGame(ReadOnlySpan<char> fen)
-        {
-            var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition = new Position(parsedFen);
-            if (!CurrentPosition.IsValid())
-            {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
-            }
-
-            PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
-            HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-            _gameInitialPosition = new Position(CurrentPosition);
-#if DEBUG
-            MoveHistory = new(1024);
-#endif
-        }
-
-        internal ImprovedGame(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
-        {
-            for (int i = 0; i < rangeSpan.Length; ++i)
-            {
-                var range = rangeSpan[i];
-                if (range.Start.Equals(range.End))
-                {
-                    break;
-                }
-                var moveString = rawMoves[range];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
-
-                if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
-                {
-                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
-                    break;
-                }
-
-                MakeMove(parsedMove.Value);
-            }
-
-            _gameInitialPosition = new Position(CurrentPosition);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
-        {
-            var gameState = CurrentPosition.MakeMove(moveToPlay);
-
-            if (CurrentPosition.WasProduceByAValidMove())
-            {
-#if DEBUG
-                MoveHistory.Add(moveToPlay);
-#endif
-            }
-            else
-            {
-                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
-            }
-
-            PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-            HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
-
-            return gameState;
-        }
-    }
-
-    public sealed class ImprovedGame2
-    {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+	public sealed class ImprovedGame
+	{
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
-        public List<Move> MoveHistory { get; }
+		public List<Move> MoveHistory { get; }
 #endif
 
-        public HashSet<ulong> PositionHashHistory { get; }
+		public HashSet<ulong> PositionHashHistory { get; }
 
-        public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
+		public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
-        public Position CurrentPosition { get; private set; }
+		public Position CurrentPosition { get; private set; }
 
-        private Position _gameInitialPosition;
+		private Position _gameInitialPosition;
 
-        public ImprovedGame2(ReadOnlySpan<char> fen)
-        {
-            var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition = new Position(parsedFen);
-            if (!CurrentPosition.IsValid())
-            {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
-            }
+		public ImprovedGame(ReadOnlySpan<char> fen)
+		{
+			var parsedFen = FENParser.ParseFEN(fen);
+			CurrentPosition = new Position(parsedFen);
+			if (!CurrentPosition.IsValid())
+			{
+				_logger.Warn($"Invalid position detected: {fen.ToString()}");
+			}
 
-            PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
-            HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-            _gameInitialPosition = new Position(CurrentPosition);
+			PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
+			HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+			_gameInitialPosition = new Position(CurrentPosition);
 #if DEBUG
-            MoveHistory = new(1024);
+			MoveHistory = new(1024);
 #endif
-        }
+		}
 
-        public ImprovedGame2(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
-        {
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+		internal ImprovedGame(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
+		{
+			for (int i = 0; i < rangeSpan.Length; ++i)
+			{
+				var range = rangeSpan[i];
+				if (range.Start.Equals(range.End))
+				{
+					break;
+				}
+				var moveString = rawMoves[range];
+				var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
 
-            for (int i = 0; i < rangeSpan.Length; ++i)
-            {
-                if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
-                {
-                    break;
-                }
-                var moveString = rawMoves[rangeSpan[i]];
+				if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+				{
+					_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
+					break;
+				}
 
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+				MakeMove(parsedMove.Value);
+			}
 
-                if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
-                {
-                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
-                    break;
-                }
+			_gameInitialPosition = new Position(CurrentPosition);
+		}
 
-                MakeMove(parsedMove.Value);
-            }
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public GameState MakeMove(Move moveToPlay)
+		{
+			var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-            _gameInitialPosition = new Position(CurrentPosition);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
-        {
-            var gameState = CurrentPosition.MakeMove(moveToPlay);
-
-            if (CurrentPosition.WasProduceByAValidMove())
-            {
+			if (CurrentPosition.WasProduceByAValidMove())
+			{
 #if DEBUG
-                MoveHistory.Add(moveToPlay);
+				MoveHistory.Add(moveToPlay);
 #endif
-            }
-            else
-            {
-                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
-            }
+			}
+			else
+			{
+				_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+				CurrentPosition.UnmakeMove(moveToPlay, gameState);
+			}
 
-            PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-            HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+			PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+			HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 
-            return gameState;
-        }
-    }
+			return gameState;
+		}
+	}
+
+	public sealed class ImprovedGame2
+	{
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+#if DEBUG
+		public List<Move> MoveHistory { get; }
+#endif
+
+		public HashSet<ulong> PositionHashHistory { get; }
+
+		public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
+
+		public Position CurrentPosition { get; private set; }
+
+		private Position _gameInitialPosition;
+
+		public ImprovedGame2(ReadOnlySpan<char> fen)
+		{
+			var parsedFen = FENParser.ParseFEN(fen);
+			CurrentPosition = new Position(parsedFen);
+			if (!CurrentPosition.IsValid())
+			{
+				_logger.Warn($"Invalid position detected: {fen.ToString()}");
+			}
+
+			PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
+			HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+			_gameInitialPosition = new Position(CurrentPosition);
+#if DEBUG
+			MoveHistory = new(1024);
+#endif
+		}
+
+		public ImprovedGame2(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
+		{
+			using var evaluationContext = new EvaluationContext();
+
+			for (int i = 0; i < rangeSpan.Length; ++i)
+			{
+				if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
+				{
+					break;
+				}
+				var moveString = rawMoves[rangeSpan[i]];
+
+				var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, evaluationContext, movePool);
+
+				if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+				{
+					_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
+					break;
+				}
+
+				MakeMove(parsedMove.Value);
+			}
+
+			_gameInitialPosition = new Position(CurrentPosition);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public GameState MakeMove(Move moveToPlay)
+		{
+			var gameState = CurrentPosition.MakeMove(moveToPlay);
+
+			if (CurrentPosition.WasProduceByAValidMove())
+			{
+#if DEBUG
+				MoveHistory.Add(moveToPlay);
+#endif
+			}
+			else
+			{
+				_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+				CurrentPosition.UnmakeMove(moveToPlay, gameState);
+			}
+
+			PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+			HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+
+			return gameState;
+		}
+	}
 
 #pragma warning restore RCS1169, S2933, S4487, IDE0044, IDE0052, RCS1170,  // Readonly, not used
 }

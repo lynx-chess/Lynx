@@ -24,7 +24,7 @@ public sealed class DebugCommand
     public static bool Parse(ReadOnlySpan<char> command)
     {
         const string on = "on";
-        const string off= "off";
+        const string off = "off";
 
         Span<Range> items = stackalloc Range[2];
         command.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
