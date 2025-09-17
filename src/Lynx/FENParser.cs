@@ -379,30 +379,34 @@ public static class FENParser
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int FindFurthestKingsideRook(BitBoard rooks, int kingSquare)
     {
-        // Kingside: outermost rook to the east of the king (highest file / largest square index on that rank)
+        // Optimized: use precomputed kingside ray (squares strictly east)
         var eastMask = rooks & _kingsideSquares[kingSquare];
-
-        int rookSquare = CastlingData.DefaultValues;
+        if (eastMask == 0)
+        {
+            return CastlingData.DefaultValues;
+        }
+        // Need OUTERMOST (farthest) rook to the east => highest file index (largest square index on rank)
+        // Iterate LS1B until exhausted; the last extracted index will be the max
+        int furthest = CastlingData.DefaultValues;
         while (eastMask != 0)
         {
-            eastMask.WithoutLS1B(out var square);
-            if (square > rookSquare)
-            {
-                rookSquare = square;
-            }
+            eastMask.WithoutLS1B(out var sq);
+            furthest = sq; // monotonically increasing because LS1B gives lowest remaining bit
         }
-
-        return rookSquare;
+        return furthest;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int FindFurthestQueensideRook(BitBoard rooks, int kingSquare)
     {
-        var queensideMask = rooks & _queensideSquares[kingSquare];
-
-        return queensideMask == 0
-            ? CastlingData.DefaultValues
-            : queensideMask.GetLS1BIndex();
+        // Optimized: use precomputed queenside ray (squares strictly west)
+        var westMask = rooks & _queensideSquares[kingSquare];
+        if (westMask == 0)
+        {
+            return CastlingData.DefaultValues;
+        }
+        // OUTERMOST (farthest) rook to the west => lowest file index (smallest square index on rank) = LS1B
+        return westMask.GetLS1BIndex();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
