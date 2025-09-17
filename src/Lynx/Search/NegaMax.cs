@@ -25,8 +25,8 @@ public sealed partial class Engine
 
         Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
-        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12); attacks.Clear();
-        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2); attacksBySide.Clear();
+        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12);
+        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2);
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
@@ -778,8 +778,8 @@ public sealed partial class Engine
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12); attacks.Clear();
-        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2); attacksBySide.Clear();
+        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12);
+        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2);
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         if (ply >= Configuration.EngineSettings.MaxDepth)

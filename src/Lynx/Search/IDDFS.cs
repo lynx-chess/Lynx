@@ -107,6 +107,13 @@ public sealed partial class Engine
             Array.Clear(_moveNodeCount[i]);
         }
 
+        // Not really needed
+        Array.Clear(_attacksPool);
+        Array.Clear(_attacksBySidePool);
+        Array.Clear(_movesPool);
+        Array.Clear(_moveScoresPool);
+        Array.Clear(_visitedMovesPool);
+
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
         int beta = EvaluationConstants.MaxEval;
