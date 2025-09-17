@@ -27,7 +27,7 @@ public static class FENParser
             PopulateSquares(square);
         }
 
-        for (int square = (int)BoardSquare.a8; square <= (int)BoardSquare.a8; ++square)
+        for (int square = (int)BoardSquare.a8; square <= (int)BoardSquare.h8; ++square)
         {
             PopulateSquares(square);
         }
@@ -35,15 +35,16 @@ public static class FENParser
         static void PopulateSquares(int square)
         {
             var file = Constants.File[square];
+            int rank = Constants.Rank[square];
 
             for (int f = file + 1; f < 8; ++f)
             {
-                _queensideSquares[square].SetBit(square);
+                _kingsideSquares[square].SetBit(BitBoardExtensions.SquareIndex(rank, f));
             }
 
             for (int f = file - 1; f >= 0; --f)
             {
-                _kingsideSquares[square].SetBit(square);
+                _queensideSquares[square].SetBit(BitBoardExtensions.SquareIndex(rank, f));
             }
         }
     }
@@ -259,7 +260,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WK;
 
-                        whiteKingsideRook = FindNearestQueensideRook(whiteRooks, whiteKing);
+                        whiteKingsideRook = FindNearestKingsideRook(whiteRooks, whiteKing);
 
                         if (whiteKingsideRook == CastlingData.DefaultValues)
                         {
@@ -274,7 +275,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WQ;
 
-                        whiteQueensideRook = FindNearestKingsideRook(whiteRooks, whiteKing);
+                        whiteQueensideRook = FindNearestQueensideRook(whiteRooks, whiteKing);
 
                         if (whiteQueensideRook == CastlingData.DefaultValues)
                         {
@@ -289,7 +290,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BK;
 
-                        blackKingsideRook = FindNearestQueensideRook(blackRooks, blackKing);
+                        blackKingsideRook = FindNearestKingsideRook(blackRooks, blackKing);
 
                         if (blackKingsideRook == CastlingData.DefaultValues)
                         {
@@ -304,7 +305,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BQ;
 
-                        blackQueensideRook = FindNearestKingsideRook(blackRooks, blackKing);
+                        blackQueensideRook = FindNearestQueensideRook(blackRooks, blackKing);
 
                         if (blackQueensideRook == CastlingData.DefaultValues)
                         {
@@ -376,30 +377,26 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindNearestQueensideRook(BitBoard rooks, int kingSquare)
+    private static int FindNearestKingsideRook(BitBoard rooks, int kingSquare)
     {
-        var east = rooks & _queensideSquares[kingSquare];
+        var queensideMask = rooks & _queensideSquares[kingSquare];
 
-        return east == 0
+        return queensideMask == 0
             ? CastlingData.DefaultValues
-            : east.GetLS1BIndex();
+            : queensideMask.GetLS1BIndex();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindNearestKingsideRook(BitBoard rooks, int kingSquare)
+    private static int FindNearestQueensideRook(BitBoard rooks, int kingSquare)
     {
-        var west = rooks & _kingsideSquares[kingSquare];
+        var rookSquare = CastlingData.DefaultValues;
 
-        if (west == 0)
-        {
-            return CastlingData.DefaultValues;
-        }
+        var kingsideMask = rooks & _queensideSquares[kingSquare];
 
-        // Find the closest rook to the king (highest index among west squares)
-        int rookSquare = CastlingData.DefaultValues;
-        while (west != 0)
+
+        while (kingsideMask != 0)
         {
-            west.WithoutLS1B(out var sq);
+            kingsideMask.WithoutLS1B(out var sq);
 
             if (sq > rookSquare)
             {
