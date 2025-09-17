@@ -20,6 +20,31 @@ public sealed partial class Engine : IDisposable
 
     private bool _isSearching;
 
+    /// <summary>
+    /// 12 x <see cref="Configuration.EngineSettings.MaxDepth"/> x 12
+    /// </summary>
+    private readonly BitBoard[] _attacksPool;
+
+    /// <summary>
+    /// 2 x <see cref="Configuration.EngineSettings.MaxDepth"/> x 2
+    /// </summary>
+    private readonly BitBoard[] _attacksBySidePool;
+
+    /// <summary>
+    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
+    /// </summary>
+    private readonly Move[] _movesPool;
+
+    /// <summary>
+    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
+    /// </summary>
+    private readonly int[] _moveScoresPool;
+
+    /// <summary>
+    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
+    /// </summary>
+    private readonly Move[] _visitedMovesPool;
+
     public double AverageDepth { get; private set; }
 
 #pragma warning disable IDISP008 // Don't assign member with injected and created disposables - caused by SetGame, internal-only for tests
@@ -51,6 +76,18 @@ public sealed partial class Engine : IDisposable
         {
             _moveNodeCount[i] = new ulong[64];
         }
+
+        var maxDepth = Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin;
+
+        int attacksSize = maxDepth * 12;
+        int attacksBySideSize = maxDepth * 2;
+        int movesSize = maxDepth * Constants.MaxNumberOfPseudolegalMovesInAPosition;
+
+        _attacksPool = new BitBoard[attacksSize];
+        _attacksBySidePool = new BitBoard[attacksBySideSize];
+        _movesPool = new Move[movesSize];
+        _moveScoresPool = new int[movesSize];
+        _visitedMovesPool = new Move[movesSize];
 
         _logger.Info("Engine {0} initialized", _id);
     }
@@ -240,7 +277,7 @@ public sealed partial class Engine : IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
 
-        #pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+#pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
 #pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }

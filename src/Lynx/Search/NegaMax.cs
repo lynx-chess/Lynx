@@ -25,8 +25,8 @@ public sealed partial class Engine
 
         Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12); attacks.Clear();
+        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2); attacksBySide.Clear();
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
@@ -317,10 +317,10 @@ public sealed partial class Engine
 
         var ttBestMove = ttEntry.BestMove;
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Move> moves = _movesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, Constants.MaxNumberOfPseudolegalMovesInAPosition);
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
 
-        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
+        Span<int> moveScores = _moveScoresPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
@@ -332,7 +332,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedMoves = _visitedMovesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -778,8 +778,8 @@ public sealed partial class Engine
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12); attacks.Clear();
+        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2); attacksBySide.Clear();
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
@@ -863,7 +863,7 @@ public sealed partial class Engine
             alpha = standPat;
         }
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Move> moves = _movesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, Constants.MaxNumberOfPseudolegalMovesInAPosition);
         var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves);
         if (pseudoLegalMoves.Length == 0)
         {
@@ -877,13 +877,13 @@ public sealed partial class Engine
 
         bool isAnyCaptureValid = false;
 
-        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
+        Span<int> moveScores = _moveScoresPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
         }
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedMoves = _visitedMovesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
