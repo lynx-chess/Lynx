@@ -19,14 +19,16 @@ public sealed partial class Engine
     /// </param>
     [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
-        bool parentWasNullMove = false, bool isVerifyingSE = false)
+        bool parentWasNullMove = false, int isVerifyingSEInt = 0)
     {
+        bool isVerifyingSE = isVerifyingSEInt != 0;
         var position = Game.CurrentPosition;
 
         Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
-        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12);
-        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2);
+        var poolOffset = (ply * _poolsPerPly) + isVerifyingSEInt;
+        Span<BitBoard> attacks = _attacksPool.AsSpan(poolOffset * 12, 12);
+        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(poolOffset * 2, 2);
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
@@ -157,7 +159,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext))
             {
-                return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                return QuiescenceSearch(ply, alpha, beta, pvNode, isVerifyingSEInt, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -246,7 +248,7 @@ public sealed partial class Engine
                                 // that corrected eval is at least as good as QSearch result would be
                                 var qSearchScore = ttCorrectedStaticEval != staticEval
                                     ? ttCorrectedStaticEval
-                                    : QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                    : QuiescenceSearch(ply, alpha, beta, pvNode, isVerifyingSEInt, cancellationToken);
 
                                 return qSearchScore > score
                                     ? qSearchScore
@@ -257,7 +259,7 @@ public sealed partial class Engine
 
                             if (score < beta)               // Static evaluation indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, isVerifyingSEInt, cancellationToken);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
                                     return qSearchScore > score
@@ -317,10 +319,12 @@ public sealed partial class Engine
 
         var ttBestMove = ttEntry.BestMove;
 
-        Span<Move> moves = _movesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, Constants.MaxNumberOfPseudolegalMovesInAPosition);
+        var movePoolIndex = poolOffset * Constants.MaxNumberOfPseudolegalMovesInAPosition;
+
+        Span<Move> moves = _movesPool.AsSpan(movePoolIndex, Constants.MaxNumberOfPseudolegalMovesInAPosition);
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
 
-        Span<int> moveScores = _moveScoresPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
+        Span<int> moveScores = _moveScoresPool.AsSpan(movePoolIndex, pseudoLegalMoves.Length);
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
@@ -332,7 +336,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = _visitedMovesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
+        Span<Move> visitedMoves = _visitedMovesPool.AsSpan(movePoolIndex, pseudoLegalMoves.Length);
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -448,7 +452,7 @@ public sealed partial class Engine
                 var singularBeta = ttEntry.Score - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
-                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
+                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSEInt: 1);
 
                 // Singular extension
                 if (singularScore < singularBeta)
@@ -772,14 +776,15 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
+    public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, int isVerifyingSEInt, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Span<BitBoard> attacks = _attacksPool.AsSpan(ply * 12, 12);
-        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(ply * 2, 2);
+        var poolOffset = (ply * _poolsPerPly) + 2 + isVerifyingSEInt;
+        Span<BitBoard> attacks = _attacksPool.AsSpan(poolOffset * 12, 12);
+        Span<BitBoard> attacksBySide = _attacksBySidePool.AsSpan(poolOffset * 2, 2);
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
@@ -863,7 +868,9 @@ public sealed partial class Engine
             alpha = standPat;
         }
 
-        Span<Move> moves = _movesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, Constants.MaxNumberOfPseudolegalMovesInAPosition);
+        var movePoolIndex = poolOffset * Constants.MaxNumberOfPseudolegalMovesInAPosition;
+
+        Span<Move> moves = _movesPool.AsSpan(movePoolIndex, Constants.MaxNumberOfPseudolegalMovesInAPosition);
         var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves);
         if (pseudoLegalMoves.Length == 0)
         {
@@ -877,13 +884,13 @@ public sealed partial class Engine
 
         bool isAnyCaptureValid = false;
 
-        Span<int> moveScores = _moveScoresPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
+        Span<int> moveScores = _moveScoresPool.AsSpan(movePoolIndex, pseudoLegalMoves.Length);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
         }
 
-        Span<Move> visitedMoves = _visitedMovesPool.AsSpan(ply * Constants.MaxNumberOfPseudolegalMovesInAPosition, pseudoLegalMoves.Length);
+        Span<Move> visitedMoves = _visitedMovesPool.AsSpan(movePoolIndex, pseudoLegalMoves.Length);
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -925,7 +932,7 @@ public sealed partial class Engine
             stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
+            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, isVerifyingSEInt, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 

@@ -21,27 +21,33 @@ public sealed partial class Engine : IDisposable
     private bool _isSearching;
 
     /// <summary>
-    /// 12 x <see cref="Configuration.EngineSettings.MaxDepth"/> x 12
+    /// Number of ways a search method might be invoked with the same ply:
+    /// Regular NegaMax, SE verification NegaMax, regular QSearch, SE verification QSearch
+    /// </summary>
+    const int _poolsPerPly = 4;
+
+    /// <summary>
+    /// 12 x <see cref="_poolsPerPly"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
     private readonly BitBoard[] _attacksPool;
 
     /// <summary>
-    /// 2 x <see cref="Configuration.EngineSettings.MaxDepth"/> x 2
+    /// 2 x <see cref="_poolsPerPly"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
     private readonly BitBoard[] _attacksBySidePool;
 
     /// <summary>
-    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
+    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x <see cref="_poolsPerPly"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
     private readonly Move[] _movesPool;
 
     /// <summary>
-    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
+    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x <see cref="_poolsPerPly"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
     private readonly int[] _moveScoresPool;
 
     /// <summary>
-    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
+    /// <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/> x <see cref="_poolsPerPly"/> x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
     private readonly Move[] _visitedMovesPool;
 
@@ -79,9 +85,9 @@ public sealed partial class Engine : IDisposable
 
         var maxDepth = Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin;
 
-        int attacksSize = maxDepth * 12;
-        int attacksBySideSize = maxDepth * 2;
-        int movesSize = maxDepth * Constants.MaxNumberOfPseudolegalMovesInAPosition;
+        int attacksSize = _poolsPerPly * maxDepth * 12;
+        int attacksBySideSize = _poolsPerPly * maxDepth * 2;
+        int movesSize = _poolsPerPly * maxDepth * Constants.MaxNumberOfPseudolegalMovesInAPosition;
 
         _attacksPool = new BitBoard[attacksSize];
         _attacksBySidePool = new BitBoard[attacksBySideSize];
