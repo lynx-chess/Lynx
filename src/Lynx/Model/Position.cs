@@ -1948,16 +1948,57 @@ public class Position : IDisposable
         }
 
         // Cornered/trapped bishop
-        if (pieceIndex == (int)Piece.B
-            && ((squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
-                || (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)))
+        if (pieceIndex == (int)Piece.B)
         {
-            packedBonus += BishopCorneredPenalty;
+            if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
+            {
+                if (_board[(int)BoardSquare.b3] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+
+            }
+            else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
+            {
+                if (_board[(int)BoardSquare.g3] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+            }
         }
-        else if ((squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
-                || (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p))
+        else
         {
-            packedBonus += BishopCorneredPenalty;
+
+            if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
+            {
+                if (_board[(int)BoardSquare.b6] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+            }
+            else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
+            {
+                if (_board[(int)BoardSquare.g6] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+            }
         }
 
         return packedBonus;
