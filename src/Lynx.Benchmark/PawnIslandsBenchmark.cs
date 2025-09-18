@@ -51,7 +51,9 @@ namespace Lynx.Benchmark;
 
 public class PawnIslandsBenchmark : BaseBenchmark
 {
+#pragma warning disable IDE1006 // Naming Styles
     private static readonly string[] Data = Engine._benchmarkFens;
+#pragma warning restore IDE1006 // Naming Styles
 
     [Benchmark(Baseline = true)]
     public int Original()

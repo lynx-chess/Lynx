@@ -12,7 +12,7 @@ namespace Lynx.UCI.Commands.GUI;
 ///	Note: no "new" command is needed. However, if this position is from a different game than
 ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
 /// </summary>
-public sealed class PositionCommand : IGUIBaseCommand
+public sealed class PositionCommand
 {
     public const string Id = "position";
 
@@ -64,11 +64,15 @@ public sealed class PositionCommand : IGUIBaseCommand
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
+            MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evaluationContext, movePool),
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

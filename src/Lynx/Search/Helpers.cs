@@ -46,6 +46,33 @@ public sealed partial class Engine
     }
 
     /// <summary>
+    /// [12][64][2][2]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ref int QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    {
+        const int pieceOffset = 64 * 2 * 2;
+        const int targetSquareOffset = 2 * 2;
+        const int startSquareAttackedOffset = 2;
+
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var oppositeSide = Utils.OppositeSide(position.Side);
+
+        var oppsiteSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
+
+        var isStartSquareAttacked = oppsiteSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppsiteSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        var index = (move.Piece() * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + (isStartSquareAttacked * startSquareAttackedOffset)
+            + isTargetSquareAttacked;
+
+        return ref _quietHistory[index];
+    }
+
+    /// <summary>
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,6 +188,15 @@ public sealed partial class Engine
         ref var minorCorrHistEntry = ref _minorCorrHistory[minorCorrHistIndex];
         minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, scaledBonus, weight);
 
+        // Major correction history
+        var majorHash = position.MajorHash ^ kingsHash;     // Add kings hash
+        var majorIndex = majorHash & Constants.MajorCorrHistoryHashMask;
+        var majorCorrHistIndex = (2 * majorIndex) + side;
+        Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
+
+        ref var majorCorrHistEntry = ref _majorCorrHistory[majorCorrHistIndex];
+        majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
@@ -227,11 +263,20 @@ public sealed partial class Engine
 
         var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
 
+        // Major correction history - Sirius author original idea
+        var majorHash = position.MajorHash ^ kingsHash;     // Add kings hash
+        var majorIndex = majorHash & Constants.MajorCorrHistoryHashMask;
+        var majorCorrHistIndex = (2 * majorIndex) + side;
+        Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
+
+        var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
             + (nonPawnNoSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM)
-            + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor);
+            + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
+            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major);
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
@@ -266,7 +311,7 @@ public sealed partial class Engine
             var move = _pVTable[i];
             TryParseMove(position, i, move);
 
-#pragma warning disable CA2000 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
+#pragma warning disable CA2000, IDISP001 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
             var newPosition = new Position(position);
 #pragma warning restore CA2000 // Dispose objects before losing scope
             newPosition.MakeMove(move);
@@ -274,16 +319,22 @@ public sealed partial class Engine
             {
                 throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
             }
+#pragma warning disable IDISP003 // Dispose previous before re-assigning - debug method
             position = newPosition;
+#pragma warning restore IDISP003 // Dispose previous before re-assigning
         }
 
         static void TryParseMove(Position position, int i, int move)
         {
-            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, movePool),
+               MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
@@ -400,28 +451,6 @@ $" {427,-3}                                                  {_pVTable[427].ToEP
 $" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
 #pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Conditional("DEBUG")]
-    internal void PrintHistoryMoves()
-    {
-        int max = EvaluationConstants.MinEval;
-
-        for (int i = 0; i < 12; ++i)
-        {
-            var tmp = _quietHistory[i];
-            for (int j = 0; j < 64; ++j)
-            {
-                var item = tmp[j];
-
-                if (item > max)
-                {
-                    max = item;
-                }
-            }
-        }
-
-        _logger.ConditionalDebug($"Max history: {max}");
     }
 
 #pragma warning restore S125 // Sections of code should not be commented out

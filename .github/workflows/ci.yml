@@ -18,17 +18,17 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macOS-latest, macOS-13, windows-latest, windows-11-arm]
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -62,13 +62,13 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -136,13 +136,13 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -194,10 +194,10 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -214,22 +214,122 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" --settings tests/runsettings.xml --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+        # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
 
   perft-tests:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
+        os: [ubuntu-latest, windows-latest]   # disabled for macOS since that's always the CI bottleneck due to runners availability
         category: [Perft]
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v4
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+        # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
+
+  perft-frc-tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]   # disabled for macOS since that's always the CI bottleneck due to runners availability
+        category: [PerftFRC]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v4
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests in Release mode
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+        # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
+
+  perft-frc-tests-debug:
+    runs-on: ${{ matrix.os }}
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        os: [windows-latest]
+        category: [PerftFRC]
+      fail-fast: true
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v4
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Debug
+
+    - name: Run ${{ matrix.category }} tests in Debug mode
+      run: dotnet test -c Debug --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+        # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
+
+  perft-frc-tests-exhaustive:
+    runs-on: ${{ matrix.os }}
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        category: [PerftFRCExhaustive]
+      fail-fast: true
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -259,10 +359,10 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -291,10 +391,10 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -377,10 +477,10 @@ jobs:
   #    PROJECT_NAME: Lynx
 
   #  steps:
-  #  - uses: actions/checkout@v4
+  #  - uses: actions/checkout@v5
 
   #  - name: Setup .NET
-  #    uses: actions/setup-dotnet@v4
+  #    uses: actions/setup-dotnet@v5
   #    with:
   #      dotnet-version: ${{ env.DOTNET_VERSION }}
 

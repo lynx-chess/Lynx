@@ -73,10 +73,10 @@ public class BitBoardExtensionsTest
     [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.g2, false)]
     [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.h2, false)]
 
-    [TestCase(Constants.InitialPositionFEN, Piece.R, BoardSquare.a1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.R, BoardSquare.h1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.r, BoardSquare.a8, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.r, BoardSquare.h8, true)]
+    [TestCase(Constants.InitialPositionFEN, Piece.R, (BoardSquare)Constants.InitialWhiteQueensideRookSquare, true)]
+    [TestCase(Constants.InitialPositionFEN, Piece.R, (BoardSquare)Constants.InitialWhiteKingsideRookSquare, true)]
+    [TestCase(Constants.InitialPositionFEN, Piece.r, (BoardSquare)Constants.InitialBlackQueensideRookSquare, true)]
+    [TestCase(Constants.InitialPositionFEN, Piece.r, (BoardSquare)Constants.InitialBlackKingsideRookSquare, true)]
 
     [TestCase(Constants.InitialPositionFEN, Piece.N, BoardSquare.b1, true)]
     [TestCase(Constants.InitialPositionFEN, Piece.N, BoardSquare.g1, true)]
@@ -89,13 +89,13 @@ public class BitBoardExtensionsTest
     [TestCase(Constants.InitialPositionFEN, Piece.b, BoardSquare.f8, true)]
 
     [TestCase(Constants.InitialPositionFEN, Piece.Q, BoardSquare.d1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.Q, BoardSquare.e1, false)]
+    [TestCase(Constants.InitialPositionFEN, Piece.Q, (BoardSquare)Constants.InitialWhiteKingSquare, false)]
     [TestCase(Constants.InitialPositionFEN, Piece.q, BoardSquare.d8, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.q, BoardSquare.e8, false)]
+    [TestCase(Constants.InitialPositionFEN, Piece.q, (BoardSquare)Constants.InitialBlackKingSquare, false)]
 
-    [TestCase(Constants.InitialPositionFEN, Piece.K, BoardSquare.e1, true)]
+    [TestCase(Constants.InitialPositionFEN, Piece.K, (BoardSquare)Constants.InitialWhiteKingSquare, true)]
     [TestCase(Constants.InitialPositionFEN, Piece.K, BoardSquare.d1, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.k, BoardSquare.e8, true)]
+    [TestCase(Constants.InitialPositionFEN, Piece.k, (BoardSquare)Constants.InitialBlackKingSquare, true)]
     [TestCase(Constants.InitialPositionFEN, Piece.k, BoardSquare.d8, false)]
     public void Contains_DoesNotContain(string fen, Piece piece, BoardSquare square, bool shouldContain)
     {

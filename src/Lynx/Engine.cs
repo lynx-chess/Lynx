@@ -22,13 +22,17 @@ public sealed partial class Engine : IDisposable
 
     public double AverageDepth { get; private set; }
 
+#pragma warning disable IDISP008 // Don't assign member with injected and created disposables - caused by SetGame, internal-only for tests
     public Game Game { get; private set; }
+#pragma warning restore IDISP008 // Don't assign member with injected and created disposables
 
     public bool PendingConfirmation { get; set; }
 
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
+#pragma warning disable EPS09 // Pass an argument for an 'in' parameter explicitly
     public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
+#pragma warning restore EPS09 // Pass an argument for an 'in' parameter explicitly
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
     public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
@@ -42,11 +46,9 @@ public sealed partial class Engine : IDisposable
         Game = new Game(Constants.InitialPositionFEN);
 
         // Update ResetEngine() after any changes here
-        _quietHistory = new int[12][];
         _moveNodeCount = new ulong[12][];
-        for (int i = 0; i < _quietHistory.Length; ++i)
+        for (int i = 0; i < _moveNodeCount.Length; ++i)
         {
-            _quietHistory[i] = new int[64];
             _moveNodeCount[i] = new ulong[64];
         }
 
@@ -55,7 +57,7 @@ public sealed partial class Engine : IDisposable
 
     public void Warmup()
     {
-        AdjustPosition(Constants.SuperLongPositionCommand);
+        AdjustPosition(Configuration.EngineSettings.IsChess960 ? Constants.SuperLongPositionCommand_DFRC : Constants.SuperLongPositionCommand);
 
         const string goWarmupCommand = "go depth 10";   // ~300 ms
         var command = new GoCommand(goWarmupCommand);
@@ -70,10 +72,10 @@ public sealed partial class Engine : IDisposable
         // Clear histories
         for (int i = 0; i < 12; ++i)
         {
-            Array.Clear(_quietHistory[i]);
             Array.Clear(_moveNodeCount[i]);
         }
 
+        Array.Clear(_quietHistory);
         Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
@@ -81,20 +83,22 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_pawnCorrHistory);
         Array.Clear(_nonPawnCorrHistory);
         Array.Clear(_minorCorrHistory);
+        Array.Clear(_majorCorrHistory);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
+    [Obsolete("Test only")]
     internal void SetGame(Game game)
     {
-        Game.FreeResources();
+        Game.Dispose();
         Game = game;
     }
 
     public void NewGame()
     {
         AverageDepth = 0;
-        Game.FreeResources();
+        Game.Dispose();
         Game = new Game(Constants.InitialPositionFEN);
 
         ResetEngine();
@@ -103,8 +107,8 @@ public sealed partial class Engine : IDisposable
     [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        Game.FreeResources();
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Game.Dispose();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
     }
 
@@ -217,19 +221,13 @@ public sealed partial class Engine : IDisposable
         }
     }
 
-    public void FreeResources()
-    {
-        Game.FreeResources();
-        _disposedValue = true;
-    }
-
     private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {
             if (disposing)
             {
-                FreeResources();
+                Game.Dispose();
             }
             _disposedValue = true;
         }
@@ -239,8 +237,9 @@ public sealed partial class Engine : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
-#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+
+        #pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
-#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
+#pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }

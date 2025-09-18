@@ -91,25 +91,30 @@ public readonly struct TranspositionTable
     }
 
     /// <summary>
-    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
+    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoScore"/> is returned otherwise
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply)
+    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result) // [MaybeNullWhen(false)]
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex];
 
-        if ((ushort)position.UniqueIdentifier != entry.Key)
+        var key = GenerateTTKey(position.UniqueIdentifier);
+
+        if (key != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, EvaluationConstants.NoHashEntry, default, default);
+            result = default;
+            return false;
         }
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
         var recalculatedScore = RecalculateMateScores(entry.Score, ply);
 
-        return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+        result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+
+        return true;
     }
 
     /// <summary>
@@ -124,22 +129,17 @@ public readonly struct TranspositionTable
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         ref var entry = ref _tt[ttIndex];
 
-        //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
-        //{
-        //    _logger.Warn("TT collision");
-        //}
+        var newKey = GenerateTTKey(position.UniqueIdentifier);
 
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            entry.Key == 0                                      // No actual entry
-            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
-            || nodeType == NodeType.Exact                       // Entering PV data
-            || depth
-                //+ Configuration.EngineSettings.TTReplacement_DepthOffset
-                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
-                ;
-        // || entry.Type == NodeType.None not needed, since depth condition is always true for those cases
+            entry.Key != newKey                 // Different key: collision or no actual entry
+            || nodeType == NodeType.Exact       // Entering PV data
+            || depth                            // Higher depth
+                    + Configuration.EngineSettings.TTReplacement_DepthOffset
+                    + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
+                >= entry.Depth;
 
         if (!shouldReplace)
         {
@@ -150,7 +150,7 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -160,8 +160,14 @@ public readonly struct TranspositionTable
         ref var entry = ref _tt[ttIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoHashEntry, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
+        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, null);
     }
+
+    /// <summary>
+    /// Use lowest 16 bits of the position unique identifier as the key
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
 
     /// <summary>
     /// Exact TT occupancy per mill
@@ -229,7 +235,7 @@ public readonly struct TranspositionTable
         {
             return score - ply;
         }
-        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit && score != EvaluationConstants.NoScore)
         {
             return score + ply;
         }

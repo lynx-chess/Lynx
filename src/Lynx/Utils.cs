@@ -61,7 +61,7 @@ public static class Utils
     {
         GuardAgainstSideBoth(side);
 
-        return Constants.BlackShortCastleRookSquare + (7 * 8 * side);
+        return Constants.BlackRookShortCastleSquare + (7 * 8 * side);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,7 +71,7 @@ public static class Utils
     {
         GuardAgainstSideBoth(side);
 
-        return Constants.BlackLongCastleRookSquare + (7 * 8 * side);
+        return Constants.BlackRookLongCastleSquare + (7 * 8 * side);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,6 +95,16 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int KingShortCastleSquare(int side) => side == (int)Side.White
+        ? Constants.WhiteKingShortCastleSquare
+        : Constants.BlackKingShortCastleSquare;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int KingLongCastleSquare(int side) => side == (int)Side.White
+        ? Constants.WhiteKingLongCastleSquare
+        : Constants.BlackKingLongCastleSquare;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(int side)
@@ -103,7 +113,7 @@ public static class Utils
 
         return (
             (int)BoardSquare.h8 + (7 * 8 * side),
-            Constants.BlackShortCastleRookSquare + (7 * 8 * side));
+            Constants.BlackRookShortCastleSquare + (7 * 8 * side));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,7 +125,7 @@ public static class Utils
 
         return (
             (int)BoardSquare.a8 + (7 * 8 * side),
-            Constants.BlackLongCastleRookSquare + (7 * 8 * side));
+            Constants.BlackRookLongCastleSquare + (7 * 8 * side));
     }
 
     /// <summary>
@@ -132,7 +142,7 @@ public static class Utils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Update50movesRule(Move moveToPlay, int halfMovesWithoutCaptureOrPawnMove)
     {
-        if (moveToPlay.IsCapture())
+        if (moveToPlay.CapturedPiece() != (int)Piece.None)
         {
             return halfMovesWithoutCaptureOrPawnMove >= 100
                 ? halfMovesWithoutCaptureOrPawnMove
@@ -216,6 +226,30 @@ public static class Utils
     public static short UnpackEG(int packed)
     {
         return (short)((packed + 0x8000) >> 16);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsMinorPiece(int piece)
+    {
+        const int MinorPieceMask = (1 << (int)Piece.N) | (1 << (int)Piece.n) | (1 << (int)Piece.B) | (1 << (int)Piece.b);
+
+        return ((1 << piece) & MinorPieceMask) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsMajorPiece(int piece)
+    {
+        const int MajorPieceMask = (1 << (int)Piece.R) | (1 << (int)Piece.r) | (1 << (int)Piece.Q) | (1 << (int)Piece.q);
+
+        return ((1 << piece) & MajorPieceMask) != 0;
+    }
+
+    /// <summary>
+    /// Recommended in https://learn.microsoft.com/en-us/dotnet/api/system.boolean.tostring
+    /// </summary>
+    public static string ToLowerString(this bool b)
+    {
+        return b.ToString().ToLowerInvariant();
     }
 
     [Conditional("DEBUG")]

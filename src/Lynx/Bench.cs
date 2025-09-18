@@ -96,6 +96,12 @@ public partial class Engine
         "rnbqk2r/ppp2ppp/3p4/8/1b2B3/3n4/PPPP1PPP/RNBQR1K1 w kq - 2 5", // Double check R and B
         "r3k2r/ppp2ppp/n7/1N1p4/Bb6/8/PPPP1PPP/RNBQ1RK1 w kq - 2 1",    // Double check B and N, castling rights
         "r3k2r/ppp2ppp/n7/1N1p4/Bb6/8/PPPP1PPP/RNBQ1RK1 w - - 2 1",     // Double check B and N, no castling rights
+
+        "r7/8/8/4k3/8/4B3/4K2P/7R w - - 95 1",                          // High 50mr counter in advantage position (needs to move pawn)
+        "7K/r7/8/8/7P/6PR/6PR/1k6 b - - 95 1",                          // High 50mr counter in disadvantage position (needs to keep checking)
+
+        "nqbnrkrb/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight
+        "rqbbnknr/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight - only one side
     ];
 
     /// <summary>
