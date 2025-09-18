@@ -842,7 +842,7 @@ public class PositionTest
 		var blackKingRingAttacksCount = (blackQueenAttacks & blackKingRing).CountBits();
 
 		var expectedEvaluation = QueenMobilityBonus[whiteMobility] - QueenMobilityBonus[blackMobility]
-			+ QueenKingRingAttacksBonus * (whiteKingRingAttacksCount - blackKingRingAttacksCount);
+			+ (QueenKingRingAttacksBonus * (whiteKingRingAttacksCount - blackKingRingAttacksCount));
 
 		Assert.AreEqual(UnpackMG(expectedEvaluation), evaluation);
 	}
