@@ -7,6 +7,9 @@ public ref struct EvaluationContext
     public Span<BitBoard> Attacks;
     public Span<BitBoard> AttacksBySide;
 
+    public int WhiteKingRingAttacks;
+    public int BlackKingRingAttacks;
+
     public EvaluationContext(Span<BitBoard> attacks, Span<BitBoard> attacksBySide)
     {
         Attacks = attacks;
@@ -14,6 +17,18 @@ public ref struct EvaluationContext
 
         Attacks.Clear();
         AttacksBySide.Clear();
+    }
+
+    public void IncreaseKingRingAttacks(int side, int count)
+    {
+        if (side == (int)Side.White)
+        {
+            WhiteKingRingAttacks += count;
+        }
+        else
+        {
+            BlackKingRingAttacks += count;
+        }
     }
 }
 

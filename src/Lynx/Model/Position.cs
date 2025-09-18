@@ -1329,7 +1329,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
                 }
             }
 
@@ -1346,7 +1346,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
                 }
             }
         }
@@ -1462,7 +1462,7 @@ public class Position : IDisposable
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
                 }
             }
 
@@ -1484,7 +1484,7 @@ public class Position : IDisposable
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
                 }
             }
 
@@ -1505,6 +1505,11 @@ public class Position : IDisposable
             - KingAdditionalEvaluation(ref evaluationContext, blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
         AssertAttackPopulation(ref evaluationContext);
+
+        // Total king rings ttacks
+        packedScore +=
+            TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
+            - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
 
         // Bishop pair bonus
         if (_pieceBitBoards[(int)Piece.B].CountBits() >= 2)
@@ -1703,14 +1708,14 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int AdditionalPieceEvaluation(ref EvaluationContext evaluationContext, int pieceSquareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    private int AdditionalPieceEvaluation(ref EvaluationContext evaluationContext, int pieceSquareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
     {
         return pieceIndex switch
         {
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, enemyPawnAttacks),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
             _ => 0
         };
     }
@@ -1725,10 +1730,10 @@ public class Position : IDisposable
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(ref evaluationContext, bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
 
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceSide, enemyPawnAttacks),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
             _ => 0
         };
     }
@@ -1803,9 +1808,10 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    private int RookAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
+        var sameSidePawns = _pieceBitBoards[pieceIndex - pawnToRookOffset];
 
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
@@ -1813,12 +1819,16 @@ public class Position : IDisposable
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
-        var attacksCount =
-            (attacks
-                & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks)))
-            .CountBits();
+        var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
+        var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
+        var packedBonus = RookMobilityBonus[mobility];
 
-        var packedBonus = RookMobilityBonus[attacksCount];
+        // King ring attacks
+        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRingAttacksCount = (attacks & kingRing).CountBits();
+        packedBonus += RookKingRingAttacksBonus * kingRingAttacksCount;
+
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
         var fileMask = Masks.FileMask(squareIndex);
 
@@ -1830,7 +1840,7 @@ public class Position : IDisposable
             packedBonus += OpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
         // Rook on semi-open file
-        else if ((_pieceBitBoards[pieceIndex - pawnToRookOffset] & fileMask) == default)
+        else if ((sameSidePawns & fileMask) == default)
         {
             var file = Constants.File[squareIndex];
             packedBonus += SemiOpenFileRookBonus[bucket][file];
@@ -1854,25 +1864,35 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    private int KnightAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
     {
+        const int pawnToKnightOffset = (int)Piece.N - (int)Piece.P;
+        var sameSidePawns = _pieceBitBoards[pieceIndex - pawnToKnightOffset];
+
         var attacks = Attacks.KnightAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
-        var attacksCount =
-            (attacks
-                & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks)))
-            .CountBits();
+        var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
+        var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
+        var packedBonus = KnightMobilityBonus[mobility];
 
-        return KnightMobilityBonus[attacksCount];
+        // King ring attacks
+        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRingAttacksCount = (attacks & kingRing).CountBits();
+        packedBonus += KnightKingRingAttacksBonus * kingRingAttacksCount;
+
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+
+        return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    private int BishopAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
+        var sameSidePawns = _pieceBitBoards[pieceIndex - pawnToBishopOffset];
 
         var offset = Utils.PieceOffset(pieceSide);
 
@@ -1882,16 +1902,18 @@ public class Position : IDisposable
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
-        var attacksCount =
-            (attacks
-                & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks))
-            ).CountBits();
+        var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
+        var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
+        var packedBonus = BishopMobilityBonus[mobility];
 
-        var packedBonus = BishopMobilityBonus[attacksCount];
+        // King ring attacks
+        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRingAttacksCount = (attacks & kingRing).CountBits();
+        packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
+
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
         // Bad bishop
-        var sameSidePawns = _pieceBitBoards[pieceIndex - pawnToBishopOffset];
-
         var sameColorPawns = sameSidePawns &
             (Constants.DarkSquares[squareIndex] == 1
                 ? Constants.DarkSquaresBitBoard
@@ -1919,24 +1941,93 @@ public class Position : IDisposable
             packedBonus += BishopInUnblockedLongDiagonalBonus;
         }
 
+        if (!Configuration.EngineSettings.IsChess960        // Can't happen in standard chess
+            || !Constants.Corners.GetBit(squareIndex))      // Saves some checks if no bishop in a corner at all
+        {
+            return packedBonus;
+        }
+
+        // Cornered/trapped bishop
+        if (pieceIndex == (int)Piece.B)
+        {
+            if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
+            {
+                if (_board[(int)BoardSquare.b3] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+
+            }
+            else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
+            {
+                if (_board[(int)BoardSquare.g3] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+            }
+        }
+        else
+        {
+
+            if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
+            {
+                if (_board[(int)BoardSquare.b6] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+            }
+            else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
+            {
+                if (_board[(int)BoardSquare.g6] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+            }
+        }
+
         return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    private int QueenAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
     {
+        const int pawnToQueenOffset = (int)Piece.Q - (int)Piece.P;
+        var sameSidePawns = _pieceBitBoards[pieceIndex - pawnToQueenOffset];
+
         var occupancy = _occupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
         evaluationContext.Attacks[(int)Piece.Q + Utils.PieceOffset(pieceSide)] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
-        var attacksCount =
-            (attacks
-                & (~(_occupancyBitBoards[pieceSide] | enemyPawnAttacks)))
-            .CountBits();
+        var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
+        var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
+        var packedBonus = QueenMobilityBonus[mobility];
 
-        return QueenMobilityBonus[attacksCount];
+        // King ring attacks
+        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRingAttacksCount = (attacks & kingRing).CountBits();
+        packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
+
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+
+        return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2654,19 +2745,19 @@ public class Position : IDisposable
                 ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards, clearArray: true);
                 ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
 
-        ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares, clearArray: true);
+                ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares, clearArray: true);
 
 #if DEBUG
-        ArrayPool<int>.Shared.Return(_initialKingSquares, clearArray: true);
-        ArrayPool<int>.Shared.Return(_initialKingsideRookSquares, clearArray: true);
-        ArrayPool<int>.Shared.Return(_initialQueensideRookSquares, clearArray: true);
+                ArrayPool<int>.Shared.Return(_initialKingSquares, clearArray: true);
+                ArrayPool<int>.Shared.Return(_initialKingsideRookSquares, clearArray: true);
+                ArrayPool<int>.Shared.Return(_initialQueensideRookSquares, clearArray: true);
 #endif
 
-        // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
+                // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
                 ArrayPool<int>.Shared.Return(_board, clearArray: false);
 #pragma warning restore S3254 // Default parameter values should not be passed as arguments
