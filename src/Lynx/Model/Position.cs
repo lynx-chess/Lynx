@@ -1952,25 +1952,43 @@ public class Position : IDisposable
         {
             if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
             {
-                if (_board[(int)BoardSquare.b3] == (int)Piece.None)
+                const int squareInFrontOfPawn = (int)BoardSquare.b3;
+
+                if (_board[squareInFrontOfPawn] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
                 else
                 {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
+                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
+                    {
+                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
+                    }
                 }
 
             }
             else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
             {
-                if (_board[(int)BoardSquare.g3] == (int)Piece.None)
+                const int squareInFrontOfPawn = (int)BoardSquare.g3;
+
+                if (_board[squareInFrontOfPawn] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
                 else
                 {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
+                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
+                    {
+                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
+                    }
                 }
             }
         }
@@ -1979,24 +1997,42 @@ public class Position : IDisposable
 
             if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
             {
-                if (_board[(int)BoardSquare.b6] == (int)Piece.None)
+                const int squareInFrontOfPawn = (int)BoardSquare.b6;
+
+                if (_board[squareInFrontOfPawn] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
                 else
                 {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
+                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
+                    {
+                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
+                    }
                 }
             }
             else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
             {
-                if (_board[(int)BoardSquare.g6] == (int)Piece.None)
+                const int squareInFrontOfPawn = (int)BoardSquare.g6;
+
+                if (_board[squareInFrontOfPawn] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
                 else
                 {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
+                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
+                    {
+                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
+                    }
                 }
             }
         }
