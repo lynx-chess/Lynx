@@ -79,14 +79,33 @@ public static class EvaluationConstants
             KingRing[square] = Attacks.KingAttacks[square];
 
             var rank = Constants.Rank[square];
+            var file = Constants.File[square];
 
             if (rank == 0)
             {
                 KingRing[square] |= KingRing[square].ShiftUp();
+
+                if (file == 0)
+                {
+                    KingRing[square] |= KingRing[square].ShiftRight();
+                }
+                else if (file == 7)
+                {
+                    KingRing[square] |= KingRing[square].ShiftLeft();
+                }
             }
             else if (rank == 7)
             {
                 KingRing[square] |= KingRing[square].ShiftDown();
+
+                if (file == 0)
+                {
+                    KingRing[square] |= KingRing[square].ShiftRight();
+                }
+                else if (file == 7)
+                {
+                    KingRing[square] |= KingRing[square].ShiftLeft();
+                }
             }
         }
     }
