@@ -822,17 +822,27 @@ public class PositionTest
 		BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
 		BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
 
+		var whiteQueenAttacks = Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.Q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both]);
+		var blackQueenAttacks = Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both]);
+
 		var whiteMobility =
-			(Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.Q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both])
+			(whiteQueenAttacks
 				& (~(position.PieceBitBoards[(int)Piece.P] | blackPawnAttacks)))
 			.CountBits();
 
 		var blackMobility =
-			(Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both])
+			(blackQueenAttacks
 				& (~(position.PieceBitBoards[(int)Piece.p] | whitePawnAttacks)))
 			.CountBits();
 
-		var expectedEvaluation = QueenMobilityBonus[whiteMobility] - QueenMobilityBonus[blackMobility];
+		var whiteKingRing = KingRing[position.BlackKingSquare];
+		var blackKingRing = KingRing[position.WhiteKingSquare];
+
+		var whiteKingRingAttacksCount = (whiteQueenAttacks & whiteKingRing).CountBits();
+		var blackKingRingAttacksCount = (blackQueenAttacks & blackKingRing).CountBits();
+
+		var expectedEvaluation = QueenMobilityBonus[whiteMobility] - QueenMobilityBonus[blackMobility]
+			+ QueenKingRingAttacksBonus * (whiteKingRingAttacksCount - blackKingRingAttacksCount);
 
 		Assert.AreEqual(UnpackMG(expectedEvaluation), evaluation);
 	}
