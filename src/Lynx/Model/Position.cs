@@ -1826,7 +1826,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += RookKingRingAttacksBonus * kingRingAttacksCount;
+        packedBonus += RookKingRingAttacksBonus[kingRingAttacksCount];
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
@@ -1881,7 +1881,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += KnightKingRingAttacksBonus * kingRingAttacksCount;
+        packedBonus += KnightKingRingAttacksBonus[kingRingAttacksCount];
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
@@ -1909,7 +1909,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
+        packedBonus += BishopKingRingAttacksBonus[kingRingAttacksCount];
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
@@ -1982,7 +1982,7 @@ public class Position : IDisposable
         // King ring attacks
         var kingRing = KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
-        packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
+        packedBonus += QueenKingRingAttacksBonus[kingRingAttacksCount];
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
