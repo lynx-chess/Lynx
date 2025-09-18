@@ -1953,43 +1953,26 @@ public class Position : IDisposable
             if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
             {
                 const int squareInFrontOfPawn = (int)BoardSquare.b3;
+                var blockingPiece = _board[squareInFrontOfPawn];
 
-                if (_board[squareInFrontOfPawn] == (int)Piece.None)
+                packedBonus += blockingPiece switch
                 {
-                    packedBonus += BishopCorneredPenalty;
-                }
-                else
-                {
-                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
-                    {
-                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
-                    }
-                }
-
+                    (int)Piece.None => BishopCorneredPenalty,
+                    <= (int)Piece.K => BishopCorneredAndBlockedByFriendlyPiecePenalty,
+                    _ => BishopCorneredAndBlockedByEnemyPiecePenalty
+                };
             }
             else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
             {
                 const int squareInFrontOfPawn = (int)BoardSquare.g3;
+                var blockingPiece = _board[squareInFrontOfPawn];
 
-                if (_board[squareInFrontOfPawn] == (int)Piece.None)
+                packedBonus += blockingPiece switch
                 {
-                    packedBonus += BishopCorneredPenalty;
-                }
-                else
-                {
-                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
-                    {
-                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
-                    }
-                }
+                    (int)Piece.None => BishopCorneredPenalty,
+                    <= (int)Piece.K => BishopCorneredAndBlockedByFriendlyPiecePenalty,
+                    _ => BishopCorneredAndBlockedByEnemyPiecePenalty
+                };
             }
         }
         else
@@ -1998,42 +1981,26 @@ public class Position : IDisposable
             if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
             {
                 const int squareInFrontOfPawn = (int)BoardSquare.b6;
+                var blockingPiece = _board[squareInFrontOfPawn];
 
-                if (_board[squareInFrontOfPawn] == (int)Piece.None)
+                packedBonus += blockingPiece switch
                 {
-                    packedBonus += BishopCorneredPenalty;
-                }
-                else
-                {
-                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
-                    {
-                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
-                    }
-                }
+                    (int)Piece.None => BishopCorneredPenalty,
+                    <= (int)Piece.K => BishopCorneredAndBlockedByEnemyPiecePenalty,
+                    _ => BishopCorneredAndBlockedByFriendlyPiecePenalty
+                };
             }
             else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
             {
                 const int squareInFrontOfPawn = (int)BoardSquare.g6;
+                var blockingPiece = _board[squareInFrontOfPawn];
 
-                if (_board[squareInFrontOfPawn] == (int)Piece.None)
+                packedBonus += blockingPiece switch
                 {
-                    packedBonus += BishopCorneredPenalty;
-                }
-                else
-                {
-                    if (_occupancyBitBoards[pieceSide].GetBit(squareInFrontOfPawn))
-                    {
-                        packedBonus += BishopCorneredAndBlockedByFriendlyPiecePenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedByEnemyPiecePenalty;
-                    }
-                }
+                    (int)Piece.None => BishopCorneredPenalty,
+                    <= (int)Piece.K => BishopCorneredAndBlockedByEnemyPiecePenalty,
+                    _ => BishopCorneredAndBlockedByFriendlyPiecePenalty
+                };
             }
         }
 
