@@ -125,6 +125,8 @@ public sealed class Searcher : IDisposable
             await MultiThreadedSearch(goCommand);
         }
 
+        _ttWrapper.Age();
+
         _isProcessingGoCommand = false;
     }
 
