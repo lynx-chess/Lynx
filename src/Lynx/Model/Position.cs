@@ -1317,7 +1317,7 @@ public class Position : IDisposable
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 // King pawn shelter
-                pawnScore += KingPawnShelter(whiteKingBitboard, blackKingBitboard, whitePawns, blackPawns);
+                pawnScore += KingPawnShelter(whiteKingBitboard, blackKingBitboard, whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1448,7 +1448,7 @@ public class Position : IDisposable
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 // King pawn shelter
-                pawnScore += KingPawnShelter(whiteKingBitboard, blackKingBitboard, whitePawns, blackPawns);
+                pawnScore += KingPawnShelter(whiteKingBitboard, blackKingBitboard, whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -2129,7 +2129,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int KingPawnShelter(BitBoard whiteKing, BitBoard blackKing, BitBoard whitePawns, BitBoard blackPawns)
+    public static int KingPawnShelter(BitBoard whiteKing, BitBoard blackKing, BitBoard whitePawns, BitBoard blackPawns, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
     {
         var whiteShelterPawns = whiteKing.ShiftUp();
         whiteShelterPawns |= whiteShelterPawns.ShiftLeft() | whiteShelterPawns.ShiftRight();
@@ -2137,8 +2137,8 @@ public class Position : IDisposable
         var blackShelterPawns = blackKing.ShiftDown();
         blackShelterPawns |= blackShelterPawns.ShiftLeft() | blackShelterPawns.ShiftRight();
 
-        var whiteShelter = (whiteShelterPawns & whitePawns).CountBits();
-        var blackShelter = (blackShelterPawns & blackPawns).CountBits();
+        var whiteShelter = (whiteShelterPawns & whitePawns & (~blackPawnAttacks)).CountBits();
+        var blackShelter = (blackShelterPawns & blackPawns & (~whitePawnAttacks)).CountBits();
 
         return (whiteShelter - blackShelter) * KingPawnShelterBonus;
     }
