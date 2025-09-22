@@ -1283,7 +1283,6 @@ public class Position : IDisposable
 
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
-                pawnScore += PieceAttackedByPawnPenalty[(int)Piece.P] * (blackPawnAttacks & whitePawns).CountBits();
 
                 // Bitboard copy that we 'empty'
                 var whitePawnsCopy = whitePawns;
@@ -1301,7 +1300,6 @@ public class Position : IDisposable
 
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
-                pawnScore -= PieceAttackedByPawnPenalty[(int)Piece.P] * (whitePawnAttacks & blackPawns).CountBits();
 
                 // Bitboard copy that we 'empty'
                 var blackPawnsCopy = blackPawns;
@@ -1409,7 +1407,6 @@ public class Position : IDisposable
 
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
-                pawnScore += PieceAttackedByPawnPenalty[(int)Piece.P] * (blackPawnAttacks & whitePawns).CountBits();
 
                 // Bitboard copy that we 'empty'
                 var whitePawnsCopy = _pieceBitBoards[(int)Piece.P];
@@ -1430,7 +1427,6 @@ public class Position : IDisposable
 
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
-                pawnScore -= PieceAttackedByPawnPenalty[(int)Piece.P] * (whitePawnAttacks & blackPawns).CountBits();
 
                 // Bitboard copy that we 'empty'
                 var blackPawnsCopy = _pieceBitBoards[(int)Piece.p];
