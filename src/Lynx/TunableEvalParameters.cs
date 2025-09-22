@@ -6039,11 +6039,6 @@ public static class EvaluationParams
 	public const int BishopInUnblockedLongDiagonalBonus = 720913;
 
 	/// <summary>
-	/// <see cref="Utils.Pack(-48, -32)"/>
-	/// </summary>
-	public const int PieceAttackedByPawnPenalty = -2097200;
-
-	/// <summary>
 	/// <see cref="Utils.Pack(34, -8)"/>
 	/// </summary>
 	public const int KnightKingRingAttacksBonus = -524254;
@@ -6088,6 +6083,16 @@ public static class EvaluationParams
 		Pack(10, 19),
 		Pack(9, 11),
 		Pack(-6, 25)
+	];
+
+	public static readonly int[] PieceAttackedByPawnPenalty =
+	[
+		Pack(1, 2),
+		Pack(3, 4),
+		Pack(5, 6),
+		Pack(7, 8),
+		Pack(9, 10),
+		Pack(11, 12)
 	];
 
 	public static readonly TaperedEvaluationTermByRank IsolatedPawnPenalty =
