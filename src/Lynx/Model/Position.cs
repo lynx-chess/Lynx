@@ -1279,7 +1279,7 @@ public class Position : IDisposable
                 // White pawns
 
                 // King pawn shield bonus
-                pawnScore += KingPawnShield(whiteKing, whitePawns);
+                pawnScore += KingPawnShield(whiteKing, whitePawns, blackPawnAttacks);
 
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
@@ -1296,7 +1296,7 @@ public class Position : IDisposable
                 // Black pawns
 
                 // King pawn shield bonus
-                pawnScore -= KingPawnShield(blackKing, blackPawns);
+                pawnScore -= KingPawnShield(blackKing, blackPawns, whitePawnAttacks);
 
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
@@ -1401,7 +1401,7 @@ public class Position : IDisposable
                 // White pawns
 
                 // King pawn shield bonus
-                pawnScore += KingPawnShield(whiteKing, whitePawns);
+                pawnScore += KingPawnShield(whiteKing, whitePawns, blackPawnAttacks);
 
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
@@ -1421,7 +1421,7 @@ public class Position : IDisposable
                 // Black pawns
 
                 // King pawn shield bonus
-                pawnScore -= KingPawnShield(blackKing, blackPawns);
+                pawnScore -= KingPawnShield(blackKing, blackPawns, whitePawnAttacks);
 
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
@@ -2068,11 +2068,15 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int KingPawnShield(int squareIndex, BitBoard sameSidePawns)
+    private static int KingPawnShield(int squareIndex, BitBoard sameSidePawns, BitBoard oppositSidePawnAttacks)
     {
-        var ownPawnsAroundKingCount = (Attacks.KingAttacks[squareIndex] & sameSidePawns).CountBits();
+        var kingShield = Attacks.KingAttacks[squareIndex] & sameSidePawns;
+        var kingShieldCount = kingShield.CountBits();
 
-        return ownPawnsAroundKingCount * KingShieldBonus;
+        var nonAttackedShieldCount = (kingShield & (~oppositSidePawnAttacks)).CountBits();
+
+        return (KingShieldBonus * (kingShieldCount - nonAttackedShieldCount))
+            + (KingShieldNonAttackedBonus * nonAttackedShieldCount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
