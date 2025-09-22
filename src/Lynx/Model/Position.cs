@@ -2131,8 +2131,11 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int KingPawnShelter(BitBoard whiteKing, BitBoard blackKing, BitBoard whitePawns, BitBoard blackPawns)
     {
-        var whiteShelterPawns = whiteKing.ShiftUpLeft() | whiteKing.ShiftUp() | whiteKing.ShiftUpRight();
-        var blackShelterPawns = blackKing.ShiftDownLeft() | blackKing.ShiftDown() | blackKing.ShiftDownRight();
+        var whiteShelterPawns = whiteKing.ShiftUp();
+        whiteShelterPawns |= whiteShelterPawns.ShiftLeft() | whiteShelterPawns.ShiftRight();
+
+        var blackShelterPawns = blackKing.ShiftDown();
+        blackShelterPawns |= blackShelterPawns.ShiftLeft() | blackShelterPawns.ShiftRight();
 
         var whiteShelter = (whiteShelterPawns & whitePawns).CountBits();
         var blackShelter = (blackShelterPawns & blackPawns).CountBits();
