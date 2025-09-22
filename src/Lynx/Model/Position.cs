@@ -2075,7 +2075,7 @@ public class Position : IDisposable
 
         var nonAttackedShieldCount = (kingShield & (~oppositSidePawnAttacks)).CountBits();
 
-        return (KingShieldBonus * (kingShieldCount - nonAttackedShieldCount))
+        return (KingShieldBonus * kingShieldCount)
             + (KingShieldNonAttackedBonus * nonAttackedShieldCount);
     }
 
