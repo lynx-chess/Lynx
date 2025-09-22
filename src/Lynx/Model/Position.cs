@@ -2137,7 +2137,7 @@ public class Position : IDisposable
         var whiteShelter = (whiteShelterPawns & whitePawns).CountBits();
         var blackShelter = (blackShelterPawns & blackPawns).CountBits();
 
-        return (whiteShelter - blackShelter) * KingShelterBonus;
+        return (whiteShelter - blackShelter) * KingPawnShelterBonus;
     }
 
     private static readonly int[][] _defendedThreatsBonus =
