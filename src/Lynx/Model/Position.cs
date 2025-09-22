@@ -1530,6 +1530,11 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
+        // Pieces attacked by pawns bonus
+        packedScore += TotalPiecesAttackedByPawnPenalty
+            * ((blackPawnAttacks & _occupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
+                - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
+
         // Threats
         packedScore += Threats(evaluationContext, oppositeSide: (int)Side.Black)
             - Threats(evaluationContext, oppositeSide: (int)Side.White);
