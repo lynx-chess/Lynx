@@ -6039,6 +6039,11 @@ public static class EvaluationParams
 	public const int BishopInUnblockedLongDiagonalBonus = 720913;
 
 	/// <summary>
+	/// <see cref="Utils.Pack(17, 11)"/>
+	/// </summary>
+	public const int KingShelterBonus = 720913;
+
+	/// <summary>
 	/// <see cref="Utils.Pack(-48, -32)"/>
 	/// </summary>
 	public const int PieceAttackedByPawnPenalty = -2097200;
