@@ -6,8 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.14.0" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.3" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.3" />
+    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36421.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,7 +17,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <NoWarn>>$(NoWarn),CA1822,CA1806,CS0618</NoWarn>
+    <NoWarn>$(NoWarn),CA1822,CA1806,CS0618</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
