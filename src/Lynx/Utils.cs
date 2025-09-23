@@ -13,6 +13,7 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(Side side) => PieceOffset((int)side);
 
@@ -39,6 +40,7 @@ public static class Utils
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
     /// </summary>
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int OppositeSide(Side side) => OppositeSide((int)side);
 
@@ -54,8 +56,10 @@ public static class Utils
         return side ^ 1;     // or  (int)Side.White - side
     }
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ShortCastleRookTargetSquare(Side side) => ShortCastleRookTargetSquare((int)side);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ShortCastleRookTargetSquare(int side)
     {
@@ -64,8 +68,10 @@ public static class Utils
         return Constants.BlackRookShortCastleSquare + (7 * 8 * side);
     }
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LongCastleRookTargetSquare(Side side) => LongCastleRookTargetSquare((int)side);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LongCastleRookTargetSquare(int side)
     {
@@ -74,7 +80,9 @@ public static class Utils
         return Constants.BlackRookLongCastleSquare + (7 * 8 * side);
     }
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static int ShortCastleRookSourceSquare(Side side) => ShortCastleRookSourceSquare((int)side);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ShortCastleRookSourceSquare(int side)
@@ -84,8 +92,10 @@ public static class Utils
         return (int)BoardSquare.h8 + (7 * 8 * side);
     }
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LongCastleRookSourceSquare(Side side) => LongCastleRookSourceSquare((int)side);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LongCastleRookSourceSquare(int side)
     {
@@ -104,8 +114,10 @@ public static class Utils
         ? Constants.WhiteKingLongCastleSquare
         : Constants.BlackKingLongCastleSquare;
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(int side)
     {
@@ -116,8 +128,10 @@ public static class Utils
             Constants.BlackRookShortCastleSquare + (7 * 8 * side));
     }
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(Side side) => LongCastleRookSourceAndTargetSquare((int)side);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(int side)
     {

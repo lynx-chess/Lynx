@@ -66,7 +66,7 @@ public static class MoveGenerator
 
         int localIndex = 0;
 
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position, ref evaluationContext);
@@ -89,7 +89,7 @@ public static class MoveGenerator
 
         int localIndex = 0;
 
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position, ref evaluationContext);
@@ -108,7 +108,7 @@ public static class MoveGenerator
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        int oppositeSide = Utils.OppositeSide((int)position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
         var bitboard = position.PieceBitBoards[piece];
 
         var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
@@ -165,7 +165,7 @@ public static class MoveGenerator
             var attacks = pawnAttacks[sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
@@ -206,7 +206,7 @@ public static class MoveGenerator
     {
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        int oppositeSide = Utils.OppositeSide((int)position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
         var bitboard = position.PieceBitBoards[piece];
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
@@ -249,7 +249,7 @@ public static class MoveGenerator
             var attacks = pawnAttacks[sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
@@ -381,7 +381,7 @@ public static class MoveGenerator
 
         var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
             & ~position.OccupancyBitBoards[(int)position.Side]
-            & ~evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
+            & ~evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
@@ -404,7 +404,7 @@ public static class MoveGenerator
     internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
-        var oppositeSide = Utils.OppositeSide(position.Side);
+        var oppositeSide = Utils.OppositeSide((int)position.Side);
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
         var oppositeSidePieces = position.OccupancyBitBoards[oppositeSide];
@@ -437,7 +437,7 @@ public static class MoveGenerator
     internal static void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, ref EvaluationContext evaluationContext)
     {
         var sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex();
-        var oppositeSide = Utils.OppositeSide(position.Side);
+        var oppositeSide = Utils.OppositeSide((int)position.Side);
 
         var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
             & position.OccupancyBitBoards[oppositeSide]
@@ -461,7 +461,7 @@ public static class MoveGenerator
     {
         Debug.Assert(position.Side != Side.Both);
 
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
 #if DEBUG
         try
@@ -489,7 +489,7 @@ public static class MoveGenerator
     {
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        int oppositeSide = Utils.OppositeSide((int)position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
         var bitboard = position.PieceBitBoards[piece];
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both];
@@ -543,7 +543,7 @@ public static class MoveGenerator
             var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
+            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
             {
@@ -679,7 +679,7 @@ public static class MoveGenerator
 
         var attacks = _pieceAttacks[piece](sourceSquare, occupancy)
             & ~position.OccupancyBitBoards[(int)position.Side]
-            & ~evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
+            & ~evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         while (attacks != default)
         {
