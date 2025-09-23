@@ -1,3 +1,88 @@
+/*
+ *  BenchmarkDotNet v0.15.3, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *
+ *  | Method   | data | Mean         | Error      | StdDev     | Median       | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |--------- |----- |-------------:|-----------:|-----------:|-------------:|------:|--------:|----------:|------------:|
+ *  | Original | 1    |     18.19 us |   0.096 us |   0.085 us |     18.21 us |  1.00 |    0.01 |         - |          NA |
+ *  | Improved | 1    |     19.36 us |   0.381 us |   0.439 us |     19.24 us |  1.06 |    0.02 |         - |          NA |
+ *  |          |      |              |            |            |              |       |         |           |             |
+ *  | Original | 10   |    189.15 us |   1.858 us |   1.647 us |    188.77 us |  1.00 |    0.01 |         - |          NA |
+ *  | Improved | 10   |    191.29 us |   3.793 us |   6.935 us |    186.69 us |  1.01 |    0.04 |         - |          NA |
+ *  |          |      |              |            |            |              |       |         |           |             |
+ *  | Original | 100  |  1,823.25 us |  16.198 us |  14.359 us |  1,820.78 us |  1.00 |    0.01 |         - |          NA |
+ *  | Improved | 100  |  1,878.62 us |  31.291 us |  29.270 us |  1,889.58 us |  1.03 |    0.02 |         - |          NA |
+ *  |          |      |              |            |            |              |       |         |           |             |
+ *  | Original | 1000 | 18,679.44 us | 327.838 us | 306.660 us | 18,529.66 us |  1.00 |    0.02 |         - |          NA |
+ *  | Improved | 1000 | 18,124.94 us |  59.831 us |  46.712 us | 18,108.83 us |  0.97 |    0.02 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.15.3, Windows 11 (10.0.26100.4946/24H2/2024Update/HudsonValley) (Hyper-V)
+ *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *
+ *  | Method   | data | Mean         | Error      | StdDev     | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |--------- |----- |-------------:|-----------:|-----------:|------:|--------:|----------:|------------:|
+ *  | Original | 1    |     18.35 us |   0.358 us |   0.490 us |  1.00 |    0.04 |         - |          NA |
+ *  | Improved | 1    |     18.32 us |   0.360 us |   0.354 us |  1.00 |    0.03 |         - |          NA |
+ *  |          |      |              |            |            |       |         |           |             |
+ *  | Original | 10   |    177.41 us |   2.695 us |   2.521 us |  1.00 |    0.02 |         - |          NA |
+ *  | Improved | 10   |    182.41 us |   3.543 us |   3.791 us |  1.03 |    0.03 |         - |          NA |
+ *  |          |      |              |            |            |       |         |           |             |
+ *  | Original | 100  |  1,747.34 us |  34.781 us |  34.160 us |  1.00 |    0.03 |         - |          NA |
+ *  | Improved | 100  |  1,829.62 us |  30.650 us |  27.170 us |  1.05 |    0.02 |         - |          NA |
+ *  |          |      |              |            |            |       |         |           |             |
+ *  | Original | 1000 | 17,755.53 us | 268.955 us | 251.580 us |  1.00 |    0.02 |         - |          NA |
+ *  | Improved | 1000 | 18,233.59 us | 343.455 us | 337.319 us |  1.03 |    0.02 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.15.3, macOS Sequoia 15.6.1 (24G90) [Darwin 24.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
+ *
+ *  | Method   | data | Mean         | Error      | StdDev       | Median       | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |--------- |----- |-------------:|-----------:|-------------:|-------------:|------:|--------:|----------:|------------:|
+ *  | Original | 1    |     20.64 us |   0.626 us |     1.807 us |     20.30 us |  1.01 |    0.12 |         - |          NA |
+ *  | Improved | 1    |     20.81 us |   0.665 us |     1.960 us |     20.59 us |  1.02 |    0.13 |         - |          NA |
+ *  |          |      |              |            |              |              |       |         |           |             |
+ *  | Original | 10   |    210.44 us |   6.212 us |    18.023 us |    208.62 us |  1.01 |    0.12 |         - |          NA |
+ *  | Improved | 10   |    202.67 us |   6.840 us |    19.735 us |    201.32 us |  0.97 |    0.13 |         - |          NA |
+ *  |          |      |              |            |              |              |       |         |           |             |
+ *  | Original | 100  |  1,948.95 us | 100.561 us |   291.746 us |  1,920.38 us |  1.02 |    0.22 |         - |          NA |
+ *  | Improved | 100  |  1,753.19 us |  69.693 us |   204.398 us |  1,751.63 us |  0.92 |    0.18 |         - |          NA |
+ *  |          |      |              |            |              |              |       |         |           |             |
+ *  | Original | 1000 | 16,728.10 us | 648.577 us | 1,912.345 us | 16,037.98 us |  1.01 |    0.16 |         - |          NA |
+ *  | Improved | 1000 | 16,709.66 us | 655.515 us | 1,932.800 us | 16,868.56 us |  1.01 |    0.16 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.15.3, macOS Ventura 13.7.6 (22H625) [Darwin 22.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *
+ *  | Method   | data | Mean         | Error      | StdDev       | Median       | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |--------- |----- |-------------:|-----------:|-------------:|-------------:|------:|--------:|----------:|------------:|
+ *  | Original | 1    |     38.55 us |   0.756 us |     1.595 us |     38.11 us |  1.00 |    0.06 |         - |          NA |
+ *  | Improved | 1    |     37.54 us |   0.751 us |     1.482 us |     37.00 us |  0.98 |    0.05 |         - |          NA |
+ *  |          |      |              |            |              |              |       |         |           |             |
+ *  | Original | 10   |    385.61 us |   7.475 us |    15.100 us |    379.05 us |  1.00 |    0.05 |         - |          NA |
+ *  | Improved | 10   |    368.82 us |   6.458 us |     8.840 us |    368.16 us |  0.96 |    0.04 |         - |          NA |
+ *  |          |      |              |            |              |              |       |         |           |             |
+ *  | Original | 100  |  3,886.17 us |  75.556 us |    87.010 us |  3,872.52 us |  1.00 |    0.03 |         - |          NA |
+ *  | Improved | 100  |  3,721.59 us |  73.274 us |   132.129 us |  3,685.33 us |  0.96 |    0.04 |         - |          NA |
+ *  |          |      |              |            |              |              |       |         |           |             |
+ *  | Original | 1000 | 38,360.79 us | 745.886 us |   697.702 us | 38,151.45 us |  1.00 |    0.02 |         - |          NA |
+ *  | Improved | 1000 | 37,152.60 us | 732.014 us | 1,182.067 us | 37,176.18 us |  0.97 |    0.03 |         - |          NA |
+ */
+
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Buffers;
