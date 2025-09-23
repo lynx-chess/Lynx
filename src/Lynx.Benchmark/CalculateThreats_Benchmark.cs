@@ -49,6 +49,8 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Benchmark;
 
@@ -88,6 +90,22 @@ public class CalculateThreats_Benchmark : BaseBenchmark
             var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
             position.CalculateThreats_Reference(ref evaluationContext);
+        }
+
+        return attacks[0].CountBits() + attacksBySide[0].CountBits();
+    }
+
+    [Benchmark]
+    public int UnsafeAdd()
+    {
+        Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+
+        foreach (var position in _positions)
+        {
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+            position.CalculateThreats_UnsafeAdd(ref evaluationContext);
         }
 
         return attacks[0].CountBits() + attacksBySide[0].CountBits();
@@ -199,5 +217,44 @@ class Position_CalculateThreats_Benchmark
         }
 
         return evaluationContext;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void CalculateThreats_UnsafeAdd(ref EvaluationContext evaluationContext)
+    {
+        var occupancy = _occupancyBitBoards[(int)Side.Both];
+
+        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
+        ref var attacksBySideRef = ref MemoryMarshal.GetReference(evaluationContext.AttacksBySide);
+
+        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
+        {
+            var board = _pieceBitBoards[pieceIndex];
+            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
+
+            ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
+            while (board != 0)
+            {
+                board = board.WithoutLS1B(out var square);
+                existingAttacks |= attacks(square, occupancy);
+            }
+
+            Unsafe.Add(ref attacksBySideRef, (int)Side.White) |= existingAttacks;
+        }
+
+        for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
+        {
+            var board = _pieceBitBoards[pieceIndex];
+            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
+
+            ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
+            while (board != 0)
+            {
+                board = board.WithoutLS1B(out var square);
+                existingAttacks |= attacks(square, occupancy);
+            }
+
+            Unsafe.Add(ref attacksBySideRef, (int)Side.Black) |= existingAttacks;
+        }
     }
 }
