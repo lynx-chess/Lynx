@@ -144,23 +144,38 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int MinSearchTime { get; set; } = 50;
 
-    [SPSA<double>(0.25, 0.75, 0.025)]
+    [SPSA<double>(0.25, 0.75, 0.013)]
     public double HardTimeBoundMultiplier { get; set; } = 0.51;
 
-    [SPSA<double>(1.0, 2.0, 0.05)]
+    [SPSA<double>(1.0, 2.0, 0.025)]
     public double MoveDivisor { get; set; } = 1.40;
 
     [SPSA<double>(enabled: false)]
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    [SPSA<double>(0.5, 1, 0.025)]
+    [SPSA<double>(0.5, 1, 0.013)]
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.81;
 
-    [SPSA<double>(1.5, 3.5, 0.1)]
+    [SPSA<double>(1.5, 3.5, 0.05)]
     public double NodeTmBase { get; set; } = 2.74;
 
-    [SPSA<double>(0.5, 2.5, 0.1)]
+    [SPSA<double>(0.5, 2.5, 0.05)]
     public double NodeTmScale { get; set; } = 1.80;
+
+    [SPSA<double>(2, 3.5, 0.038)]
+    public double BM_Stability_0 { get; set; } = 2.69;
+
+    [SPSA<double>(1, 2, 0.025)]
+    public double BM_Stability_1 { get; set; } = 1.19;
+
+    [SPSA<double>(0.5, 1.5, 0.025)]
+    public double BM_Stability_2 { get; set; } = 1.03;
+
+    [SPSA<double>(0.25, 1.25, 0.025)]
+    public double BM_Stability_3 { get; set; } = 0.68;
+
+    [SPSA<double>(0, 1, 0.025)]
+    public double BM_Stability_4 { get; set; } = 0.83;
 
     [SPSA<int>(enabled: false)]
     public int ScoreStabiity_MinDepth { get; set; } = 7;

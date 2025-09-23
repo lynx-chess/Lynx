@@ -20,7 +20,7 @@ internal sealed class SPSAAttribute<T> : Attribute
 #pragma warning restore RCS1158 // Static member in generic type should use a type parameter
 #pragma warning restore S2743 // Static fields should not be used in generic types
 
-    private static readonly T _hundred;
+    private static readonly T _thousand;
 
     public T MinValue { get; }
     public T MaxValue { get; }
@@ -31,10 +31,10 @@ internal sealed class SPSAAttribute<T> : Attribute
     static SPSAAttribute()
 #pragma warning restore S3963, CA1810 // "static" fields should be initialized inline
     {
-        _hundred = T.Zero;
-        for (int i = 0; i < 100; i++)
+        _thousand = T.Zero;
+        for (int i = 0; i < 1000; i++)
         {
-            _hundred += T.One;
+            _thousand += T.One;
         }
     }
 
@@ -47,9 +47,9 @@ internal sealed class SPSAAttribute<T> : Attribute
     {
         if (typeof(T) == typeof(double))
         {
-            minValue *= _hundred;
-            maxValue *= _hundred;
-            step *= 100;
+            minValue *= _thousand;
+            maxValue *= _thousand;
+            step *= 1_000;
         }
 
         MinValue = minValue;
@@ -71,7 +71,7 @@ internal sealed class SPSAAttribute<T> : Attribute
 
         if (typeof(T) == typeof(double))
         {
-            val *= _hundred;
+            val *= _thousand;
         }
 
         return val;
