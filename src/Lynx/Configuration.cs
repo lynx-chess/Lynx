@@ -244,7 +244,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
-    [SPSA<int>(25, 300, 30)]
+    [SPSA<int>(10, 100, 9)]
     public int LMR_AlphaRaiseCounter { get; set; } = 25;
 
     /// <summary>
