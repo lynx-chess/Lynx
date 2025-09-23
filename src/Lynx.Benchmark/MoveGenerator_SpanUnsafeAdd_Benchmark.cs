@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
+using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -59,12 +60,14 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
             {
                 attacks.Clear();
                 attacksBySide.Clear();
-
                 position.CalculateThreats(ref evaluationContext);
-                Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition / 4];
+
+                var movePool = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberOfPseudolegalMovesInAPosition);
                 var moves = MoveGenerator_SpanUnsafeAdd_Improved.GenerateAllMoves(position, ref evaluationContext, movePool);
 
                 total += moves.Length;
+
+                ArrayPool<Move>.Shared.Return(movePool);
             }
         }
 
