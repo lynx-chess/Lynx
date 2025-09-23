@@ -38,7 +38,7 @@ public class Threats_Benchmark : BaseBenchmark
     }
 
     [Benchmark]
-    public int Reference()
+    public int Optimized()
     {
         Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
