@@ -74,7 +74,7 @@ internal sealed class SPSAAttribute<T> : Attribute
 
         if (typeof(T) == typeof(double))
         {
-            val *= DoubleScale;
+            val *= _doubleScale;
         }
 
         return val;
