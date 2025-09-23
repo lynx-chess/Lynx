@@ -807,7 +807,7 @@ public class Position : IDisposable
                         // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
                         // have already been undone by the rook ops above, or don't matter (removig the king from the target square, where it isn't anyway)
 
-                        // However, the kings needs to be removed from the real target square, providing that's not also its soure square
+                        // However, the kings needs to be removed from the real target square, providing that's not also its source square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
                         var kingTargetSquare = Utils.KingShortCastleSquare(side);
                         // Since we set the king squares after the switch, we don't need the guard here
@@ -2619,6 +2619,7 @@ public class Position : IDisposable
                     if (_pieceBitBoards[bbIndex].GetBit(squareIndex))
                     {
                         piece = bbIndex;
+                        break;
                     }
                 }
 
