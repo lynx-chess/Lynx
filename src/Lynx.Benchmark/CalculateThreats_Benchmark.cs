@@ -62,7 +62,7 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     }
 
     [Benchmark(Baseline = true)]
-    public void Original()
+    public int Original()
     {
         Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
@@ -73,10 +73,12 @@ public class CalculateThreats_Benchmark : BaseBenchmark
 
             position.CalculateThreats_Original(ref evaluationContext);
         }
+
+        return attacks[0].CountBits() + attacksBySide[0].CountBits();
     }
 
     [Benchmark]
-    public void Reference()
+    public int Reference()
     {
         Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
@@ -87,6 +89,8 @@ public class CalculateThreats_Benchmark : BaseBenchmark
 
             position.CalculateThreats_Reference(ref evaluationContext);
         }
+
+        return attacks[0].CountBits() + attacksBySide[0].CountBits();
     }
 }
 
@@ -95,7 +99,7 @@ class Position_CalculateThreats_Benchmark
     private readonly ulong[] _pieceBitBoards;
     private readonly ulong[] _occupancyBitBoards;
 
-    #pragma warning disable RCS1085 // Use auto-implemented property
+#pragma warning disable RCS1085 // Use auto-implemented property
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
