@@ -34,7 +34,7 @@ public static class MoveGenerator
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
-        (int origin, BitBoard _) => Attacks.KingAttacks[origin]
+        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 #pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
@@ -129,21 +129,24 @@ public static class MoveGenerator
             {
                 // Single pawn push
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
-                var targetRank = (singlePushSquare >> 3) + 1;
 
+                var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)
                 {
                     // Promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
+
                     Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;         // Q
                     Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;     // R
                     Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;         // N
                     Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;     // B
+
                     localIndex += 4;
                 }
                 else
                 {
                     Unsafe.Add(ref movePoolRef, localIndex++) = singlePawnPush;
+
                     // Double pawn push
                     // Inside of the single pawn push if because singlePush square cannot be occupied either
                     if ((sourceRank == 2)        // position.Side == Side.Black is always true, otherwise targetRank would be 1
@@ -163,6 +166,7 @@ public static class MoveGenerator
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+            // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
@@ -173,7 +177,9 @@ public static class MoveGenerator
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
+
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
+
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)
                 {
@@ -264,10 +270,10 @@ public static class MoveGenerator
                     // Capture with promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
 
-                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;
-                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;
-                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;
-                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;
+                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;         // Q
+                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;     // R
+                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;         // N
+                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;     // B
 
                     localIndex += 4;
                 }
