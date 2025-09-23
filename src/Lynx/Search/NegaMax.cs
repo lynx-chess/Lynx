@@ -3,6 +3,7 @@
 using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx;
 
@@ -878,12 +879,16 @@ public sealed partial class Engine
         bool isAnyCaptureValid = false;
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
+
+        ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
+        ref var movesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
+            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(Unsafe.Add(ref movesRef, i), ttBestMove);
         }
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -893,14 +898,14 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (moveScores[j] > moveScores[moveIndex])
+                if (Unsafe.Add(ref moveScoresRef, j) > Unsafe.Add(ref moveScoresRef, moveIndex))
                 {
-                    (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
+                    (Unsafe.Add(ref moveScoresRef, moveIndex), Unsafe.Add(ref moveScoresRef, j), Unsafe.Add(ref movesRef, moveIndex), Unsafe.Add(ref movesRef, j)) = (Unsafe.Add(ref moveScoresRef, j), Unsafe.Add(ref moveScoresRef, moveIndex), Unsafe.Add(ref movesRef, j), Unsafe.Add(ref movesRef, moveIndex));
                 }
             }
 
-            var move = pseudoLegalMoves[moveIndex];
-            var moveScore = moveScores[moveIndex];
+            var move = Unsafe.Add(ref movesRef, moveIndex);
+            var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
 
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
@@ -916,7 +921,7 @@ public sealed partial class Engine
             }
 
             ++_nodes;
-            visitedMoves[visitedMovesCounter] = move;
+            Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
             isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
