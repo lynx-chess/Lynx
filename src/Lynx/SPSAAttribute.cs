@@ -20,7 +20,10 @@ internal sealed class SPSAAttribute<T> : Attribute
 #pragma warning restore RCS1158 // Static member in generic type should use a type parameter
 #pragma warning restore S2743 // Static fields should not be used in generic types
 
-    private static readonly T _thousand;
+    private static readonly T _doubleScale;
+
+    public const double DoubleScale = 1000;
+    public const double DoubleScaleInverted = 0.001;
 
     public T MinValue { get; }
     public T MaxValue { get; }
@@ -31,10 +34,10 @@ internal sealed class SPSAAttribute<T> : Attribute
     static SPSAAttribute()
 #pragma warning restore S3963, CA1810 // "static" fields should be initialized inline
     {
-        _thousand = T.Zero;
-        for (int i = 0; i < 1000; i++)
+        _doubleScale = T.Zero;
+        for (int i = 0; i < DoubleScale; i++)
         {
-            _thousand += T.One;
+            _doubleScale += T.One;
         }
     }
 
@@ -47,9 +50,9 @@ internal sealed class SPSAAttribute<T> : Attribute
     {
         if (typeof(T) == typeof(double))
         {
-            minValue *= _thousand;
-            maxValue *= _thousand;
-            step *= 1_000;
+            minValue *= _doubleScale;
+            maxValue *= _doubleScale;
+            step *= DoubleScale;
         }
 
         MinValue = minValue;
@@ -71,7 +74,7 @@ internal sealed class SPSAAttribute<T> : Attribute
 
         if (typeof(T) == typeof(double))
         {
-            val *= _thousand;
+            val *= DoubleScale;
         }
 
         return val;
@@ -80,7 +83,7 @@ internal sealed class SPSAAttribute<T> : Attribute
     public string ToOBPrettyString(PropertyInfo property)
     {
         T val = GetPropertyValue(property);
-        var percentage = 100 * (Step / double.Parse((MaxValue - MinValue).ToString()!));
+        var percentage = DoubleScale * (Step / double.Parse((MaxValue - MinValue).ToString()!));
 
         return $"{property.Name,-35} {"int",-5} {val,-5} {MinValue,-5} {MaxValue,-5} {Step,-5} {$"{percentage:F2}%",-8}{Configuration.EngineSettings.SPSA_OB_R_end,-5}";
     }
@@ -288,7 +291,7 @@ public static class SPSAAttributeHelpers
             {
                 if (length > 4 && double.TryParse(command[commandItems[4]], out var value))
                 {
-                    property.SetValue(Configuration.EngineSettings, 0.01 * value);
+                    property.SetValue(Configuration.EngineSettings, SPSAAttribute<double>.DoubleScaleInverted * value);
 
                     return true;
                 }
