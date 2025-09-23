@@ -1,4 +1,52 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿/*
+ *  BenchmarkDotNet v0.14.0, Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *
+ *  | Method    | Mean      | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |---------- |----------:|----------:|----------:|------:|----------:|------------:|
+ *  | Original  |  9.741 us | 0.0314 us | 0.0294 us |  1.00 |      80 B |        1.00 |
+ *  | Optimized | 10.074 us | 0.0362 us | 0.0321 us |  1.03 |      80 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, Windows 11 (10.0.26100.4946) (Hyper-V)
+ *  Unknown processor
+ *  .NET SDK 9.0.305
+ *
+ *    [Host]     : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *  | Method    | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |---------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
+ *  | Original  | 8.737 us | 0.1108 us | 0.0925 us |  1.00 |    0.01 |      80 B |        1.00 |
+ *  | Optimized | 9.147 us | 0.1755 us | 0.2219 us |  1.05 |    0.03 |      80 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, macOS Sequoia 15.6.1 (24G90) [Darwin 24.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.925.41916), Arm64 RyuJIT AdvSIMD
+ *    DefaultJob : .NET 9.0.9 (9.0.925.41916), Arm64 RyuJIT AdvSIMD
+ *  | Method    | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |---------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
+ *  | Original  | 8.735 us | 0.2465 us | 0.7190 us |  1.01 |    0.12 |      80 B |        1.00 |
+ *  | Optimized | 9.125 us | 0.2991 us | 0.8631 us |  1.05 |    0.13 |      80 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, macOS Ventura 13.7.6 (22H625) [Darwin 22.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *
+ *  | Method    | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |---------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
+ *  | Original  | 17.90 us | 0.434 us | 1.230 us |  1.00 |    0.10 |      80 B |        1.00 |
+ *  | Optimized | 18.65 us | 0.571 us | 1.600 us |  1.05 |    0.11 |      80 B |        1.00 |
+ */
+
+using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Runtime.CompilerServices;
 
