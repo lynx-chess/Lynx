@@ -2196,21 +2196,25 @@ public class Position : IDisposable
             var threats = attacks[6 + i - oppositeSideOffset] & oppositeSidePieces;
 
             var defended = threats & defendedSquares;
+            var undefended = threats & ~defendedSquares;
+
+            var thisDefendedThreatsBonus = defendedThreatsBonus[i];
+            var thisUndefendedThreatsBonus = undefendedThreatsBonus[i];
+
             while (defended != 0)
             {
                 defended = defended.WithoutLS1B(out var square);
                 var attackedPiece = board[square];
 
-                packedBonus += defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += thisDefendedThreatsBonus[attackedPiece - oppositeSideOffset];
             }
 
-            var undefended = threats & ~defendedSquares;
             while (undefended != 0)
             {
                 undefended = undefended.WithoutLS1B(out var square);
                 var attackedPiece = board[square];
 
-                packedBonus += undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += thisUndefendedThreatsBonus[attackedPiece - oppositeSideOffset];
             }
         }
 
