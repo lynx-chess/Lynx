@@ -61,7 +61,7 @@ public static class SEE
 
         var attackers = position.AllAttackersTo(targetSquare, occupancy, rooks, bishops);
 
-        var us = Utils.OppositeSide(sideToMove);
+        var us = Utils.OppositeSide((int)sideToMove);
 
         while (true)
         {
@@ -113,7 +113,7 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool HasPositiveScore(Position position, Move move, int threshold = 0)
     {
-        var sideToMove = position.Side;
+        var sideToMove = (int)position.Side;
 
         var score = Gain(move) - threshold;
 
@@ -190,7 +190,7 @@ public static class SEE
             }
         }
 
-        return (int)sideToMove != us;
+        return sideToMove != us;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
