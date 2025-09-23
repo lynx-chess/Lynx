@@ -345,9 +345,14 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (Unsafe.Add(ref moveScoresRef, j) > Unsafe.Add(ref moveScoresRef, moveIndex))
+                ref var moveI = ref Unsafe.Add(ref pseudoLegalMovesRef, moveIndex);
+                ref var moveJ = ref Unsafe.Add(ref pseudoLegalMovesRef, j);
+                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
+                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
+
+                if (scoreJ > scoreI)
                 {
-                    (Unsafe.Add(ref moveScoresRef, moveIndex), Unsafe.Add(ref moveScoresRef, j), Unsafe.Add(ref pseudoLegalMovesRef, moveIndex), Unsafe.Add(ref pseudoLegalMovesRef, j)) = (Unsafe.Add(ref moveScoresRef, j), Unsafe.Add(ref moveScoresRef, moveIndex), Unsafe.Add(ref pseudoLegalMovesRef, j), Unsafe.Add(ref pseudoLegalMovesRef, moveIndex));
+                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
                 }
             }
 
@@ -902,9 +907,14 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (Unsafe.Add(ref moveScoresRef, j) > Unsafe.Add(ref moveScoresRef, moveIndex))
+                ref var moveI = ref Unsafe.Add(ref movesRef, moveIndex);
+                ref var moveJ = ref Unsafe.Add(ref movesRef, j);
+                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
+                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
+
+                if (scoreJ > scoreI)
                 {
-                    (Unsafe.Add(ref moveScoresRef, moveIndex), Unsafe.Add(ref moveScoresRef, j), Unsafe.Add(ref movesRef, moveIndex), Unsafe.Add(ref movesRef, j)) = (Unsafe.Add(ref moveScoresRef, j), Unsafe.Add(ref moveScoresRef, moveIndex), Unsafe.Add(ref movesRef, j), Unsafe.Add(ref movesRef, moveIndex));
+                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
                 }
             }
 
