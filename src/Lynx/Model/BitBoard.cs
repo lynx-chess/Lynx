@@ -21,7 +21,7 @@ public static class BitBoardExtensions
 
         foreach (var square in occupiedSquares)
         {
-            board.SetBit(square);
+            board.SetBit((int)square);
         }
 
         return board;
@@ -285,12 +285,15 @@ public static class BitBoardExtensions
 
     #region Methods accepting BoardSquares
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool GetBit(this BitBoard board, BoardSquare square) => board.GetBit((int)square);
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard SetBit(this ref BitBoard board, BoardSquare square) => board.SetBit((int)square);
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard PopBit(this ref BitBoard board, BoardSquare square) => board.PopBit((int)square);
 

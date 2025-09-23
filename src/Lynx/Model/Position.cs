@@ -944,7 +944,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)_enPassant);
 
-        _side = (Side)Utils.OppositeSide(_side);
+        _side = (Side)Utils.OppositeSide((int)_side);
         _enPassant = BoardSquare.noSquare;
 
         Validate();
@@ -955,7 +955,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnMakeNullMove(NullMoveGameState gameState)
     {
-        _side = (Side)Utils.OppositeSide(_side);
+        _side = (Side)Utils.OppositeSide((int)_side);
         _enPassant = gameState.EnPassant;
         _uniqueIdentifier = gameState.ZobristKey;
 
@@ -968,7 +968,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsValid()
     {
-        var offset = Utils.PieceOffset(_side);
+        var offset = Utils.PieceOffset((int)_side);
 
         var kingBitBoard = _pieceBitBoards[(int)Piece.K + offset];
         var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
@@ -989,8 +989,9 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
-        Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].CountBits() == 1);
-        var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset(_side)].GetLS1BIndex();
+        Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
+
+        var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
 
 #if DEBUG
         var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
@@ -1178,7 +1179,7 @@ public class Position : IDisposable
         // En-passant and pawn to be captured position
         if (_enPassant != BoardSquare.noSquare)
         {
-            Debug.Assert(!OccupancyBitBoards[(int)Side.Both].GetBit(_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
+            Debug.Assert(!OccupancyBitBoards[(int)Side.Both].GetBit((int)_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
 
             var rank = Constants.Rank[(int)_enPassant];
             Debug.Assert(rank == 2 || rank == 5, failureMessage, $"Wrong en-passant rank for {_enPassant}");
@@ -1196,7 +1197,7 @@ public class Position : IDisposable
         }
 
         // Can't capture opponent's king
-        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
+        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
     }
 
     #endregion
@@ -1246,8 +1247,8 @@ public class Position : IDisposable
         var whitePawns = _pieceBitBoards[(int)Piece.P];
         var blackPawns = _pieceBitBoards[(int)Piece.p];
 
-        BitBoard whitePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
-        BitBoard blackPawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
+        BitBoard whitePawnAttacks = whitePawns.ShiftUpRightAndLeft();
+        BitBoard blackPawnAttacks = blackPawns.ShiftDownRightAndLeft();
 
         evaluationContext.AttacksBySide[(int)Side.White] = evaluationContext.Attacks[(int)Piece.P] = whitePawnAttacks;
         evaluationContext.AttacksBySide[(int)Side.Black] = evaluationContext.Attacks[(int)Piece.p] = blackPawnAttacks;
@@ -2362,7 +2363,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsInCheck()
     {
-        var oppositeSideInt = Utils.OppositeSide(_side);
+        var oppositeSideInt = Utils.OppositeSide((int)_side);
         var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
 
         var kingSquare = _pieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
@@ -2447,7 +2448,7 @@ public class Position : IDisposable
             return (int)Piece.None;
         }
 
-        var offset = Utils.PieceOffset(color);
+        var offset = Utils.PieceOffset((int)color);
 
         for (int pieceIndex = offset; pieceIndex < 6 + offset; ++pieceIndex)
         {
