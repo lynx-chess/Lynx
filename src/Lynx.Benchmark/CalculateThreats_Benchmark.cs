@@ -1,28 +1,28 @@
 ﻿/*
- *  BenchmarkDotNet v0.15.3, Windows 11 (10.0.26100.4946/24H2/2024Update/HudsonValley) (Hyper-V)
- *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
- *  .NET SDK 9.0.305
- *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
- *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
- *
- *  | Method    | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
- *  |---------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
- *  | Original  | 7.147 us | 0.0225 us | 0.0176 us |  1.00 |    0.00 |      80 B |        1.00 |
- *  | Reference | 7.836 us | 0.1542 us | 0.2741 us |  1.10 |    0.04 |      80 B |        1.00 |
- *  | UnsafeAdd | 7.926 us | 0.0928 us | 0.0775 us |  1.11 |    0.01 |      80 B |        1.00 |
- *
- *
  *  BenchmarkDotNet v0.15.3, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
  *  AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
  *  .NET SDK 9.0.305
  *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
  *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
  *
+ *  | Method    | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |---------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
+ *  | Original  | 8.683 us | 0.1707 us | 0.2032 us |  1.00 |    0.03 |      80 B |        1.00 |
+ *  | Reference | 8.049 us | 0.0385 us | 0.0360 us |  0.93 |    0.02 |      80 B |        1.00 |
+ *  | UnsafeAdd | 8.266 us | 0.0413 us | 0.0366 us |  0.95 |    0.02 |      80 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.15.3, Windows 11 (10.0.26100.4946/24H2/2024Update/HudsonValley) (Hyper-V)
+ *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *
  *  | Method    | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |---------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | Original  | 9.364 us | 0.0378 us | 0.0315 us |  1.00 |      80 B |        1.00 |
- *  | Reference | 9.209 us | 0.0570 us | 0.0534 us |  0.98 |      80 B |        1.00 |
- *  | UnsafeAdd | 8.297 us | 0.0474 us | 0.0420 us |  0.89 |      80 B |        1.00 |
+ *  | Original  | 8.636 us | 0.0974 us | 0.0911 us |  1.00 |      80 B |        1.00 |
+ *  | Reference | 8.077 us | 0.0825 us | 0.0772 us |  0.94 |      80 B |        1.00 |
+ *  | UnsafeAdd | 7.993 us | 0.0886 us | 0.0785 us |  0.93 |      80 B |        1.00 |
  *
  *
  *  BenchmarkDotNet v0.15.3, macOS Sequoia 15.6.1 (24G90) [Darwin 24.6.0]
@@ -33,9 +33,9 @@
  *
  *  | Method    | Mean     | Error     | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
  *  |---------- |---------:|----------:|----------:|------:|--------:|-------:|----------:|------------:|
- *  | Original  | 7.970 us | 0.3532 us | 1.0414 us |  1.02 |    0.18 | 0.0076 |      80 B |        1.00 |
- *  | Reference | 8.546 us | 0.3173 us | 0.9154 us |  1.09 |    0.18 |      - |      80 B |        1.00 |
- *  | UnsafeAdd | 8.658 us | 0.2544 us | 0.7298 us |  1.10 |    0.17 |      - |      80 B |        1.00 |
+ *  | Original  | 6.047 us | 0.1202 us | 0.2613 us |  1.00 |    0.06 | 0.0076 |      80 B |        1.00 |
+ *  | Reference | 5.721 us | 0.1087 us | 0.0908 us |  0.95 |    0.04 | 0.0076 |      80 B |        1.00 |
+ *  | UnsafeAdd | 6.167 us | 0.1234 us | 0.3293 us |  1.02 |    0.07 | 0.0076 |      80 B |        1.00 |
  *
  *
  *  BenchmarkDotNet v0.15.3, macOS Ventura 13.7.6 (22H625) [Darwin 22.6.0]
@@ -46,9 +46,9 @@
  *
  *  | Method    | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |---------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
- *  | Original  | 19.18 us | 0.647 us | 1.896 us |  1.01 |    0.14 |      80 B |        1.00 |
- *  | Reference | 17.19 us | 0.559 us | 1.631 us |  0.90 |    0.12 |      80 B |        1.00 |
- *  | UnsafeAdd | 26.23 us | 0.776 us | 2.240 us |  1.38 |    0.18 |      80 B |        1.00 |
+ *  | Original  | 17.61 us | 0.342 us | 0.407 us |  1.00 |    0.03 |      80 B |        1.00 |
+ *  | Reference | 17.40 us | 0.317 us | 0.297 us |  0.99 |    0.03 |      80 B |        1.00 |
+ *  | UnsafeAdd | 17.04 us | 0.333 us | 0.397 us |  0.97 |    0.03 |      80 B |        1.00 |
  */
 
 using BenchmarkDotNet.Attributes;
