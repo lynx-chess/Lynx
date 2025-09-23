@@ -1,50 +1,54 @@
 ﻿/*
- *  BenchmarkDotNet v0.14.0, Ubuntu 24.04.3 LTS (Noble Numbat)
- *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  BenchmarkDotNet v0.15.3, Windows 11 (10.0.26100.4946/24H2/2024Update/HudsonValley) (Hyper-V)
+ *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
  *  .NET SDK 9.0.305
- *    [Host]     : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
- *    DefaultJob : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
- *
- *  | Method    | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- *  |---------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | Original  | 8.832 us | 0.0445 us | 0.0416 us |  1.00 |      80 B |        1.00 |
- *  | Reference | 8.034 us | 0.0358 us | 0.0317 us |  0.91 |      80 B |        1.00 |
- *
- *
- *  BenchmarkDotNet v0.14.0, macOS Sequoia 15.6.1 (24G90) [Darwin 24.6.0]
- *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
- *  .NET SDK 9.0.305
- *    [Host]     : .NET 9.0.9 (9.0.925.41916), Arm64 RyuJIT AdvSIMD
- *    DefaultJob : .NET 9.0.9 (9.0.925.41916), Arm64 RyuJIT AdvSIMD
- *
- *  | Method    | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
- *  |---------- |---------:|----------:|----------:|---------:|------:|--------:|-------:|----------:|------------:|
- *  | Original  | 7.661 us | 0.3157 us | 0.9058 us | 7.303 us |  1.01 |    0.16 |      - |      80 B |        1.00 |
- *  | Reference | 7.457 us | 0.3365 us | 0.9817 us | 7.208 us |  0.99 |    0.17 | 0.0076 |      80 B |        1.00 |
- *
- *
- *  BenchmarkDotNet v0.14.0, Windows 11 (10.0.26100.4946) (Hyper-V)
- *  Unknown processor
- *  .NET SDK 9.0.305
- *    [Host]     : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
- *    DefaultJob : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
  *
  *  | Method    | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |---------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
- *  | Original  | 7.227 us | 0.0269 us | 0.0239 us |  1.00 |    0.00 |      80 B |        1.00 |
- *  | Reference | 6.887 us | 0.1372 us | 0.2292 us |  0.95 |    0.03 |      80 B |        1.00 |
+ *  | Original  | 7.147 us | 0.0225 us | 0.0176 us |  1.00 |    0.00 |      80 B |        1.00 |
+ *  | Reference | 7.836 us | 0.1542 us | 0.2741 us |  1.10 |    0.04 |      80 B |        1.00 |
+ *  | UnsafeAdd | 7.926 us | 0.0928 us | 0.0775 us |  1.11 |    0.01 |      80 B |        1.00 |
  *
  *
- *  BenchmarkDotNet v0.14.0, macOS Ventura 13.7.6 (22H625) [Darwin 22.6.0]
+ *  BenchmarkDotNet v0.15.3, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *
+ *  | Method    | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |---------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | Original  | 9.364 us | 0.0378 us | 0.0315 us |  1.00 |      80 B |        1.00 |
+ *  | Reference | 9.209 us | 0.0570 us | 0.0534 us |  0.98 |      80 B |        1.00 |
+ *  | UnsafeAdd | 8.297 us | 0.0474 us | 0.0420 us |  0.89 |      80 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.15.3, macOS Sequoia 15.6.1 (24G90) [Darwin 24.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
+ *
+ *  | Method    | Mean     | Error     | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |---------- |---------:|----------:|----------:|------:|--------:|-------:|----------:|------------:|
+ *  | Original  | 7.970 us | 0.3532 us | 1.0414 us |  1.02 |    0.18 | 0.0076 |      80 B |        1.00 |
+ *  | Reference | 8.546 us | 0.3173 us | 0.9154 us |  1.09 |    0.18 |      - |      80 B |        1.00 |
+ *  | UnsafeAdd | 8.658 us | 0.2544 us | 0.7298 us |  1.10 |    0.17 |      - |      80 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.15.3, macOS Ventura 13.7.6 (22H625) [Darwin 22.6.0]
  *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
  *  .NET SDK 9.0.305
- *    [Host]     : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
- *    DefaultJob : .NET 9.0.9 (9.0.925.41916), X64 RyuJIT AVX2
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
  *
- *  | Method    | Mean     | Error    | StdDev   | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
- *  |---------- |---------:|---------:|---------:|---------:|------:|--------:|----------:|------------:|
- *  | Original  | 19.30 us | 0.878 us | 2.520 us | 18.50 us |  1.02 |    0.18 |      80 B |        1.00 |
- *  | Reference | 20.60 us | 0.946 us | 2.668 us | 20.72 us |  1.08 |    0.19 |      80 B |        1.00 |
+ *  | Method    | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |---------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
+ *  | Original  | 19.18 us | 0.647 us | 1.896 us |  1.01 |    0.14 |      80 B |        1.00 |
+ *  | Reference | 17.19 us | 0.559 us | 1.631 us |  0.90 |    0.12 |      80 B |        1.00 |
+ *  | UnsafeAdd | 26.23 us | 0.776 us | 2.240 us |  1.38 |    0.18 |      80 B |        1.00 |
  */
 
 using BenchmarkDotNet.Attributes;
@@ -68,11 +72,10 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     {
         Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         foreach (var position in _positions)
         {
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-
             position.CalculateThreats_Original(ref evaluationContext);
         }
 
@@ -84,10 +87,10 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     {
         Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         foreach (var position in _positions)
         {
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
             position.CalculateThreats_Reference(ref evaluationContext);
         }
@@ -100,11 +103,10 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     {
         Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
         foreach (var position in _positions)
         {
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-
             position.CalculateThreats_UnsafeAdd(ref evaluationContext);
         }
 
@@ -145,6 +147,7 @@ class Position_CalculateThreats_Benchmark
         _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EvaluationContext CalculateThreats_Original(ref EvaluationContext evaluationContext)
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
@@ -180,6 +183,7 @@ class Position_CalculateThreats_Benchmark
         return evaluationContext;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EvaluationContext CalculateThreats_Reference(ref EvaluationContext evaluationContext)
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
