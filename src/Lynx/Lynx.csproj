@@ -81,6 +81,7 @@
 
   <ItemGroup>
     <!-- Exclude the output of source generators from the compilation -->
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.9" />
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
   </ItemGroup>
 

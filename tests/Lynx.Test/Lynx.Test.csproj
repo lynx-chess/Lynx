@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.9" />
     <ProjectReference Include="..\..\src\Lynx.Cli\Lynx.Cli.csproj" />
     <ProjectReference Include="..\..\src\Lynx.ConstantsGenerator\Lynx.ConstantsGenerator.csproj" />
   </ItemGroup>
