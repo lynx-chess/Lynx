@@ -49,15 +49,19 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
     {
         var total = 0;
 
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         for (int i = 0; i < data; ++i)
         {
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-
             foreach (var position in _positions)
             {
-                Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+                attacks.Clear();
+                attacksBySide.Clear();
+
+                position.CalculateThreats(ref evaluationContext);
+                Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition / 4];
                 var moves = MoveGenerator_SpanUnsafeAdd_Improved.GenerateAllMoves(position, ref evaluationContext, movePool);
 
                 total += moves.Length;
