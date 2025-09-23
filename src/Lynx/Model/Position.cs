@@ -2144,19 +2144,22 @@ public class Position : IDisposable
     public void CalculateThreats(ref EvaluationContext evaluationContext)
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
+        ref var attacksByWhite = ref evaluationContext.AttacksBySide[(int)Side.White];
+        ref var attacksByBlack = ref evaluationContext.AttacksBySide[(int)Side.Black];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitBoards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
+            ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                evaluationContext.Attacks[pieceIndex] |= attacks(square, occupancy);
+                existingAttacks |= attacks(square, occupancy);
             }
 
-            evaluationContext.AttacksBySide[(int)Side.White] |= evaluationContext.Attacks[pieceIndex];
+            attacksByWhite |= existingAttacks;
         }
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
@@ -2164,13 +2167,14 @@ public class Position : IDisposable
             var board = _pieceBitBoards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
+            ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                evaluationContext.Attacks[pieceIndex] |= attacks(square, occupancy);
+                existingAttacks |= attacks(square, occupancy);
             }
 
-            evaluationContext.AttacksBySide[(int)Side.Black] |= evaluationContext.Attacks[pieceIndex];
+            attacksByBlack |= existingAttacks;
         }
     }
 
