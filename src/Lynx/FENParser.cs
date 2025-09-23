@@ -386,7 +386,7 @@ public static class FENParser
                 var pawnOffset = ((int)side << 4) - 8; // side == Side.White ? +8 : -8
                 var pawnSquare = (int)enPassant + pawnOffset;
 
-                var pawnBitBoard = PieceBitBoards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide(side))];
+                var pawnBitBoard = PieceBitBoards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide((int)side))];
 
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
