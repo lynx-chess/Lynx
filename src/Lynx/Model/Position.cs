@@ -1,8 +1,8 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
@@ -2241,9 +2241,11 @@ public class Position : IDisposable
         checkThreats[(int)Piece.R] = rookAttacks;
         checkThreats[(int)Piece.Q] = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
 
+        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
+
         for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
         {
-            var checks = evaluationContext.Attacks[piece + offset] & checkThreats[piece];
+            var checks = Unsafe.Add(ref attacksRef, piece + offset) & checkThreats[piece];
             var checksCount = checks.CountBits();
 
             var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
