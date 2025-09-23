@@ -90,8 +90,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#pragma warning disable CA2014 // Do not use stackalloc in loops
-
 namespace Lynx.Benchmark;
 
 public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
@@ -1511,5 +1509,3 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
     }
 
 }
-
-#pragma warning restore CA2014 // Do not use stackalloc in loops
