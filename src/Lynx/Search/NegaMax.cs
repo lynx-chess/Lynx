@@ -356,8 +356,8 @@ public sealed partial class Engine
                 }
             }
 
-            ref var moveRef = ref Unsafe.Add(ref pseudoLegalMovesRef, moveIndex);
-            var move = moveRef; // Value copy for use in closures
+            // Value copy
+            var move = Unsafe.Add(ref pseudoLegalMovesRef, moveIndex); // Value copy for use in closures
 
             var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
@@ -918,6 +918,7 @@ public sealed partial class Engine
                 }
             }
 
+            // Value copies
             var move = Unsafe.Add(ref movesRef, moveIndex);
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
 
