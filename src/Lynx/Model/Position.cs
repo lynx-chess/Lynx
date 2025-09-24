@@ -1773,7 +1773,7 @@ public class Position : IDisposable
 
         // Isolated pawn
         if ((_pieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == 0
-            && (thisPawnAttacks & oppositeSidePieces) == 0)
+            && (thisPawnAttacks & oppositeSidePawns) == 0)
         {
             packedBonus += IsolatedPawnPenalty[Constants.File[squareIndex]];
         }
