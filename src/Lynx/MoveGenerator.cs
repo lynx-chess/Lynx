@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx;
 
@@ -112,6 +113,8 @@ public static class MoveGenerator
 
         var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
 
+        ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
+
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
@@ -128,20 +131,21 @@ public static class MoveGenerator
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
 
                 var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                if (targetRank == 1 || targetRank == 8)
                 {
+                    // Promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
 
-                    movePool[localIndex] = knightPromo + 3;         // Q
-                    movePool[localIndex + 1] = knightPromo + 2;     // R
-                    movePool[localIndex + 2] = knightPromo;         // N
-                    movePool[localIndex + 3] = knightPromo + 1;     // B
+                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;         // Q
+                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;     // R
+                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;         // N
+                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;     // B
 
                     localIndex += 4;
                 }
                 else
                 {
-                    movePool[localIndex++] = singlePawnPush;
+                    Unsafe.Add(ref movePoolRef, localIndex++) = singlePawnPush;
 
                     // Double pawn push
                     // Inside of the single pawn push if because singlePush square cannot be occupied either
@@ -152,7 +156,7 @@ public static class MoveGenerator
 
                         if (!occupancy.GetBit(doublePushSquare))
                         {
-                            movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
+                            Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                         }
                     }
                 }
@@ -164,7 +168,7 @@ public static class MoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
+                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
@@ -177,20 +181,21 @@ public static class MoveGenerator
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
                 var targetRank = (targetSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Capture with promotion
+                if (targetRank == 1 || targetRank == 8)
                 {
+                    // Capture with promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
 
-                    movePool[localIndex] = knightPromo + 3;         // Q
-                    movePool[localIndex + 1] = knightPromo + 2;     // R
-                    movePool[localIndex + 2] = knightPromo;         // N
-                    movePool[localIndex + 3] = knightPromo + 1;     // B;
+                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;
+                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;
+                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;
+                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;
 
                     localIndex += 4;
                 }
                 else
                 {
-                    movePool[localIndex++] = pawnCapture;
+                    Unsafe.Add(ref movePoolRef, localIndex++) = pawnCapture;
                 }
             }
         }
@@ -209,6 +214,8 @@ public static class MoveGenerator
 
         var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
 
+        ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
+
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
@@ -225,14 +232,15 @@ public static class MoveGenerator
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
 
                 var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                if (targetRank == 1 || targetRank == 8)
                 {
+                    // Promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
 
-                    movePool[localIndex] = knightPromo + 3;         // Q
-                    movePool[localIndex + 1] = knightPromo + 2;     // R
-                    movePool[localIndex + 2] = knightPromo;         // N
-                    movePool[localIndex + 3] = knightPromo + 1;     // B
+                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;         // Q
+                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;     // R
+                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;         // N
+                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;     // B
 
                     localIndex += 4;
                 }
@@ -244,7 +252,7 @@ public static class MoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
+                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
@@ -257,20 +265,21 @@ public static class MoveGenerator
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
                 var targetRank = (targetSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Capture with promotion
+                if (targetRank == 1 || targetRank == 8)
                 {
+                    // Capture with promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
 
-                    movePool[localIndex] = knightPromo + 3;         // Q
-                    movePool[localIndex + 1] = knightPromo + 2;     // R
-                    movePool[localIndex + 2] = knightPromo;         // N
-                    movePool[localIndex + 3] = knightPromo + 1;     // B
+                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;         // Q
+                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;     // R
+                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;         // N
+                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;     // B
 
                     localIndex += 4;
                 }
                 else
                 {
-                    movePool[localIndex++] = pawnCapture;
+                    Unsafe.Add(ref movePoolRef, localIndex++) = pawnCapture;
                 }
             }
         }
@@ -340,6 +349,8 @@ public static class MoveGenerator
 
         var pieceAttacks = _pieceAttacks[piece];
 
+        ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
+
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
@@ -353,7 +364,7 @@ public static class MoveGenerator
 
                 Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
 
-                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
+                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
             }
         }
     }
@@ -372,13 +383,15 @@ public static class MoveGenerator
             & ~position.OccupancyBitBoards[(int)position.Side]
             & ~evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
+        ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
+
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
             Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
 
-            movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
+            Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]);
         }
     }
 
@@ -398,6 +411,8 @@ public static class MoveGenerator
 
         var pieceAttacks = _pieceAttacks[piece];
 
+        ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
+
         while (bitboard != default)
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
@@ -409,7 +424,7 @@ public static class MoveGenerator
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
-                movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
+                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
             }
         }
     }
@@ -427,13 +442,14 @@ public static class MoveGenerator
         var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
             & position.OccupancyBitBoards[oppositeSide]
             & ~evaluationContext.AttacksBySide[oppositeSide];
+        ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
             var capturedPiece = position.Board[targetSquare];
-            movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
+            Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
         }
     }
 
@@ -451,13 +467,13 @@ public static class MoveGenerator
         try
         {
 #endif
-            return IsAnyPawnMoveValid(position, offset)
-                || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
-                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-                || IsAnyCastlingMoveValid(position, ref evaluationContext);
+        return IsAnyPawnMoveValid(position, offset)
+            || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
+            || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+            || IsAnyCastlingMoveValid(position, ref evaluationContext);
 #if DEBUG
         }
         catch (Exception e)
