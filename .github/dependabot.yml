@@ -3,12 +3,12 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     assignees :
       - "eduherminio"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     assignees :
       - "eduherminio"
