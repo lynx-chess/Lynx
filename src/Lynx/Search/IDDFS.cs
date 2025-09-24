@@ -375,7 +375,7 @@ public sealed partial class Engine
             _logger.Log(logLevel, "[#{EngineId}] Search continues, hoping to find a faster mate", _id);
         }
 
-        if (depth >= Configuration.EngineSettings.MaxDepth)
+        if (depth + 1 >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Log(logLevel,
                 "[#{EngineId}] Max depth reached: {MaxDepth}",
@@ -387,7 +387,7 @@ public sealed partial class Engine
         var maxDepth = _searchConstraints.MaxDepth;
         if (maxDepth > 0)
         {
-            var shouldContinue = depth <= maxDepth;
+            var shouldContinue = depth + 1 <= maxDepth;
 
             if (!shouldContinue)
             {
