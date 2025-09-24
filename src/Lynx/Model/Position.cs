@@ -1745,6 +1745,7 @@ public class Position : IDisposable
         int packedBonus = 0;
 
         var rank = Constants.Rank[squareIndex];
+        var side = (int)Side.White;
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
         int pushSquare;
@@ -1752,7 +1753,7 @@ public class Position : IDisposable
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
-            oppositeSide = (int)Side.White;
+            (side, oppositeSide) = (oppositeSide, side);
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
             pushSquare = squareIndex + 8;
         }
@@ -1762,17 +1763,24 @@ public class Position : IDisposable
             pushSquare = squareIndex - 8;
         }
 
-        var oppositeSidePawns = _pieceBitBoards[(int)Piece.p - pieceIndex];
+        var oppositeSidePawnsIndex = (int)Piece.p - pieceIndex;
+        var oppositeSidePawns = _pieceBitBoards[oppositeSidePawnsIndex];
+        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
+
+        var thisPawnAttacks = Attacks.PawnAttacks[side][squareIndex];
+        var thisSidePawnAttacks = evaluationContext.Attacks[pieceIndex];
+        var oppositeSidePawnAttacks = evaluationContext.Attacks[oppositeSidePawnsIndex];
 
         // Isolated pawn
-        if ((_pieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
+        if ((_pieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == 0
+            && (thisPawnAttacks & oppositeSidePieces) == 0)
         {
             packedBonus += IsolatedPawnPenalty[Constants.File[squareIndex]];
         }
         // Backwards pawn
-        else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
+        else if (!thisSidePawnAttacks.GetBit(squareIndex)
             && (oppositeSidePawns.GetBit(pushSquare)                                            // Blocked
-                || evaluationContext.Attacks[(int)Piece.p - pieceIndex].GetBit(pushSquare)))    // Push square attacked by opponent pawns
+                || oppositeSidePawnAttacks.GetBit(pushSquare)))    // Push square attacked by opponent pawns
         {
             packedBonus += BackwardsPawnPenalty[rank];
         }
@@ -1781,7 +1789,7 @@ public class Position : IDisposable
         if ((oppositeSidePawns & passedPawnsMask) == default)
         {
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
-            if ((passedPawnsMask & _occupancyBitBoards[oppositeSide]) == 0)
+            if ((passedPawnsMask & oppositeSidePieces) == 0)
             {
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
                 packedBonus += PassedPawnBonusNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
