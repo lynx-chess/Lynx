@@ -163,19 +163,19 @@ public sealed class EngineSettings
     public double NodeTmScale { get; set; } = 1.80;
 
     [SPSA<double>(2, 3.5, 0.038)]
-    public double BM_Stability_0 { get; set; } = 2.69;
+    public double BM_Stability_0 { get; set; } = 2.50;
 
     [SPSA<double>(1, 2, 0.025)]
-    public double BM_Stability_1 { get; set; } = 1.19;
+    public double BM_Stability_1 { get; set; } = 1.20;
 
     [SPSA<double>(0.5, 1.5, 0.025)]
-    public double BM_Stability_2 { get; set; } = 1.03;
+    public double BM_Stability_2 { get; set; } = 0.90;
 
     [SPSA<double>(0.25, 1.25, 0.025)]
-    public double BM_Stability_3 { get; set; } = 0.68;
+    public double BM_Stability_3 { get; set; } = 0.80;
 
     [SPSA<double>(0, 1, 0.025)]
-    public double BM_Stability_4 { get; set; } = 0.83;
+    public double BM_Stability_4 { get; set; } = 0.75;
 
     [SPSA<int>(enabled: false)]
     public int ScoreStabiity_MinDepth { get; set; } = 7;
