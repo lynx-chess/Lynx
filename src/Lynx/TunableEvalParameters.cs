@@ -6024,14 +6024,14 @@ public static class EvaluationParams
 	public const int BishopPairBonus = 4456480;
 
 	/// <summary>
-	/// <see cref="Utils.Pack(0, 0)"/>
+	/// <see cref="Utils.Pack(-35, -45)"/>
 	/// </summary>
-	public const int BishopCorneredPenalty = 0;
+	public const int BishopCorneredPenalty = -2949155;
 
 	/// <summary>
-	/// <see cref="Utils.Pack(0, 0)"/>
+	/// <see cref="Utils.Pack(-112, -150)"/>
 	/// </summary>
-	public const int BishopCorneredAndBlockedPenalty = 0;
+	public const int BishopCorneredAndBlockedPenalty = -9830512;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(17, 10)"/>
