@@ -1,7 +1,9 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
+
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
 using static Lynx.EvaluationPSQTs;
@@ -2144,22 +2146,23 @@ public class Position : IDisposable
     public void CalculateThreats(ref EvaluationContext evaluationContext)
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
-        ref var attacksByWhite = ref evaluationContext.AttacksBySide[(int)Side.White];
-        ref var attacksByBlack = ref evaluationContext.AttacksBySide[(int)Side.Black];
+
+        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
+        ref var attacksBySideRef = ref MemoryMarshal.GetReference(evaluationContext.AttacksBySide);
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitBoards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
-            ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
+            ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
                 existingAttacks |= attacks(square, occupancy);
             }
 
-            attacksByWhite |= existingAttacks;
+            Unsafe.Add(ref attacksBySideRef, (int)Side.White) |= existingAttacks;
         }
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
@@ -2167,14 +2170,14 @@ public class Position : IDisposable
             var board = _pieceBitBoards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
-            ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
+            ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
                 existingAttacks |= attacks(square, occupancy);
             }
 
-            attacksByBlack |= existingAttacks;
+            Unsafe.Add(ref attacksBySideRef, (int)Side.Black) |= existingAttacks;
         }
     }
 
@@ -2216,7 +2219,7 @@ public class Position : IDisposable
         }
 
         return packedBonus;
-    }
+        }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Checks(EvaluationContext evaluationContext, int side, int oppositeSide)
@@ -2239,9 +2242,11 @@ public class Position : IDisposable
         checkThreats[(int)Piece.R] = rookAttacks;
         checkThreats[(int)Piece.Q] = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
 
+        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
+
         for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
         {
-            var checks = evaluationContext.Attacks[piece + offset] & checkThreats[piece];
+            var checks = Unsafe.Add(ref attacksRef, piece + offset) & checkThreats[piece];
             var checksCount = checks.CountBits();
 
             var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
