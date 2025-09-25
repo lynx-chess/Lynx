@@ -1327,6 +1327,7 @@ public class Position : IDisposable
                 var bitboard = _pieceBitBoards[pieceIndex];
 
                 packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+                packedScore += PieceAttackedByPawnPenalty[pieceIndex] * (blackPawnAttacks & bitboard).CountBits();
 
                 while (bitboard != default)
                 {
@@ -1344,6 +1345,7 @@ public class Position : IDisposable
 
                 // Pieces protected by pawns bonus
                 packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+                packedScore -= PieceAttackedByPawnPenalty[pieceIndex - 6] * (whitePawnAttacks & bitboard).CountBits();
 
                 while (bitboard != default)
                 {
@@ -1455,6 +1457,7 @@ public class Position : IDisposable
                 var bitboard = _pieceBitBoards[pieceIndex];
 
                 packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+                packedScore += PieceAttackedByPawnPenalty[pieceIndex] * (blackPawnAttacks & bitboard).CountBits();
 
                 while (bitboard != default)
                 {
@@ -1477,6 +1480,7 @@ public class Position : IDisposable
 
                 // Pieces protected by pawns bonus
                 packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+                packedScore -= PieceAttackedByPawnPenalty[pieceIndex - 6] * (whitePawnAttacks & bitboard).CountBits();
 
                 while (bitboard != default)
                 {
@@ -1507,6 +1511,10 @@ public class Position : IDisposable
             KingAdditionalEvaluation(ref evaluationContext, whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(ref evaluationContext, blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
+        // King attacked by pawn penalty
+        //packedScore += (PieceAttackedByPawnPenalty[(int)Piece.K] * (blackPawnAttacks.GetBit(whiteKing) ? 1 : 0))
+        //    - (PieceAttackedByPawnPenalty[(int)Piece.K] * (whitePawnAttacks.GetBit(blackKing) ? 1 : 0));
+
         AssertAttackPopulation(ref evaluationContext);
 
         // Total king rings ttacks
@@ -1526,7 +1534,7 @@ public class Position : IDisposable
         }
 
         // Pieces attacked by pawns bonus
-        packedScore += PieceAttackedByPawnPenalty
+        packedScore += TotalPiecesAttackedByPawnPenalty
             * ((blackPawnAttacks & _occupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
