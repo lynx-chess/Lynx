@@ -48,12 +48,13 @@ public static class TimeManager
             // Used to apply MovesToGo here if available, but that becomes an issue in some mate-detected high depth searches
             var movesDivisor = MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()));
 
+            millisecondsLeft -= millisecondsIncrement;
             millisecondsLeft -= engineGuiCommunicationTimeOverhead;
             millisecondsLeft = Math.Clamp(millisecondsLeft, Configuration.EngineSettings.MinSearchTime, int.MaxValue); // Avoiding 0/negative values
 
             hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
 
-            var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
+            var softLimitBase = (millisecondsLeft / movesDivisor) + millisecondsIncrement;
             softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
             _logger.Info("[TM] Soft time bound: {0}ms", softLimitTimeBound);
@@ -184,8 +185,6 @@ public static class TimeManager
     /// Moves 459-469: 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40
     /// Moves 479-489: 40 40 40 40 40 40 40 40 40 40 40 40 40 42 42 42 42 42 42 42
     /// </summary>
-    /// <param name="expectedMovesLeft"></param>
-    /// <returns></returns>
     private static int MovesDivisor(int expectedMovesLeft)
     {
         return (int)(expectedMovesLeft * Configuration.EngineSettings.MoveDivisor);

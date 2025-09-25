@@ -153,9 +153,6 @@ public sealed class EngineSettings
     [SPSA<double>(enabled: false)]
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    [SPSA<double>(0.5, 1, 0.013)]
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.81;
-
     [SPSA<double>(1.5, 3.5, 0.05)]
     public double NodeTmBase { get; set; } = 2.74;
 
