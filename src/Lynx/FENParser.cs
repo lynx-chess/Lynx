@@ -206,11 +206,11 @@ public static class FENParser
 
         int whiteKingsideRook = CastlingData.DefaultValues, whiteQueensideRook = CastlingData.DefaultValues, blackKingsideRook = CastlingData.DefaultValues, blackQueensideRook = CastlingData.DefaultValues;
 
+        Debug.Assert(pieceBitboards[(int)Piece.K] != 0);
+        Debug.Assert(pieceBitboards[(int)Piece.k] != 0);
+
         var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
         var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
-
-        Debug.Assert(whiteKing != 0);
-        Debug.Assert(blackKing != 0);
 
         castlingRights = 0;
 
@@ -375,40 +375,72 @@ public static class FENParser
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;
 
-        if (Enum.TryParse(enPassantSpan, ignoreCase: true, out BoardSquare result))
+        // Enum.TryParse is too slow
+        if (TryParseEnPassantSquare(enPassantSpan, out var parsedSquare))
         {
-            enPassant = result;
+            enPassant = parsedSquare;
 
-            var rank = 1 + ((int)enPassant >> 3);
-            if (rank != 3 && rank != 6)
+            if (enPassant != BoardSquare.noSquare)
             {
-                success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
-            }
+                // Check that there's an actual pawn to be captured
+                var pawnOffset = ((int)side << 4) - 8; // side == Side.White ? +8 : -8
+                var pawnSquare = (int)enPassant + pawnOffset;
 
-            // Check that there's an actual pawn to be captured
-            var pawnOffset = side == Side.White
-                ? +8
-                : -8;
+                var pawnBitBoard = PieceBitBoards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide((int)side))];
 
-            var pawnSquare = (int)enPassant + pawnOffset;
-
-            var pawnBitBoard = side == Side.White
-                ? PieceBitBoards[(int)Piece.p]
-                : PieceBitBoards[(int)Piece.P];
-
-            if (!pawnBitBoard.GetBit(pawnSquare))
-            {
-                success = false;
-                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                if (!pawnBitBoard.GetBit(pawnSquare))
+                {
+                    success = false;
+                    enPassant = BoardSquare.noSquare;
+                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                }
             }
         }
-        else if (enPassantSpan[0] != '-')
+        else if (enPassantSpan.Length != 1 || enPassantSpan[0] != '-')
         {
             success = false;
             _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
         }
 
         return (enPassant, success);
+
+        /// <summary>
+        /// Fast alternative to Enum.TryParse
+        /// </summary>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool TryParseEnPassantSquare(ReadOnlySpan<char> enPassantSpan, out BoardSquare square)
+        {
+            if (enPassantSpan.Length == 1 && enPassantSpan[0] == '-')
+            {
+                square = BoardSquare.noSquare;
+                return true;
+            }
+
+            if (enPassantSpan.Length != 2)
+            {
+                square = BoardSquare.noSquare;
+                return false;
+            }
+
+            // Normalize to lowercase without branching
+            // https://blog.cloudflare.com/the-oldest-trick-in-the-ascii-book/
+            // Lowercase ASCII is uppercase ASCII + 0x20
+            var fileChar = (char)(enPassantSpan[0] | 0x20);
+            int file = fileChar - 'a'; // 0-7
+            int rank = enPassantSpan[1] - '0';  // 1-8
+
+            // Only ranks 3 and 6 are legal en passant target squares.
+            if ((uint)file >= 8 || (rank != 3 && rank != 6))
+            {
+                square = BoardSquare.noSquare;
+                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+
+                return false;
+            }
+
+            square = (BoardSquare)BitBoardExtensions.SquareIndex(8 - rank, file);
+            return true;
+        }
     }
 }
