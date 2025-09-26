@@ -2459,16 +2459,16 @@ public class Position : IDisposable
         const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
         promotionCornerSquare += (winningSideOffset >> 2) * whiteBlackDiff;
 
-        var defendingKingSquare = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
-
-        // Not in the corner or adjacent squares
-        if (Constants.ChebyshevDistance[defendingKingSquare][promotionCornerSquare] > 1)
+        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+        if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
         {
             return false;
         }
 
-        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
-        return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
+        var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][_pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex()];
+        var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][_pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex()];
+
+        return defendingKingCornerDistance < attackingKingCornerDistance;
     }
 
     #endregion
