@@ -1060,19 +1060,27 @@ public class PositionTest
     [TestCase("3k4/8/1K6/8/8/2B5/P7/8 w - - 0 48", false)]
     [TestCase("3k4/8/K7/8/8/2B5/P7/8 w - - 0 48", false)]
 
-    [TestCase("2K5/8/2k5/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king")]
-    [TestCase("2K5/8/1k6/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king")]
-    [TestCase("2K5/8/k7/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king")]
-    [TestCase("3K4/8/8/k7/8/8/PB6/8 w - - 0 48", false, Description = "Attacking king behind defending king")]
+    [TestCase("2K5/8/2k5/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+    [TestCase("2K5/8/1k6/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+    [TestCase("2K5/8/k7/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+    [TestCase("3K4/8/8/k7/8/8/PB6/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+
+    [TestCase("2K5/8/2k5/8/8/2B5/P7/8 b - - 0 48", true, Description = "Attacking king behind defending king, same distance, defending to move")]
+    [TestCase("2K5/8/1k6/8/8/2B5/P7/8 b - - 0 48", true, Description = "Attacking king behind defending king, same distance, defending to move")]
+    [TestCase("2K5/8/k7/8/8/2B5/P7/8 b - - 0 48", true, Description = "Attacking king behind defending king, same distance, defending to move")]
+    [TestCase("3K4/8/8/k7/8/8/PB6/8 b - - 0 48", true, Description = "Attacking king behind defending king, same distance, defending to move")]
+
+    [TestCase("3K4/8/2k5/8/8/2B5/P7/8 b - - 0 48", true, Description = "Def distance < attacking distance, defenidng in diagonal, defending to move")]
+    [TestCase("4K3/8/8/3k4/8/2B5/P7/8 b - - 0 48", true, Description = "Def distance < attacking distance, defenidng in diagonal, defending to move")]
 
     // Tricky ones
-    [TestCase("3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance")]
-    [TestCase("4K3/8/8/3k4/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance")]
+    [TestCase("3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, attacking to move")]
+    [TestCase("4K3/8/8/3k4/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, attacking to move")]
     public void IsBishopPawnDraw_Distance(string fen, bool isDraw)
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(position.Side);
+        var winnigSideOffset = Utils.PieceOffset(Side.White);
         Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
     }
 
