@@ -1075,10 +1075,10 @@ public class PositionTest
 		Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
 		var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-		return UnpackEG(piece == Piece.K
-			? position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.White, blackPawnAttacks)
-			: position.KingAdditionalEvaluation(ref evaluationContext, bitBoard, 0, (int)Side.Black, whitePawnAttacks));
-	}
+        return UnpackEG(piece == Piece.K
+            ? position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.Black, whitePawnAttacks));
+    }
 
 	private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
 	{
