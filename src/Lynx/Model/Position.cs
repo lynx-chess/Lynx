@@ -1621,12 +1621,16 @@ public class Position : IDisposable
 
                 if (gamePhase == 1)
                 {
-                    // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
-                    // TODO implement that
-                    // For now, we reduce all endgames that only have one bishop and A/H pawns
                     if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
                         && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
                     {
+                        if (IsBishopPawnDraw(winningSideOffset))
+                        {
+                            return (0, gamePhase);
+                        }
+
+                        // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
+                        // This also reduces won positions, but it shouldn't matter
                         eval >>= 1; // /2
                     }
                 }
@@ -2219,7 +2223,7 @@ public class Position : IDisposable
         }
 
         return packedBonus;
-        }
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Checks(EvaluationContext evaluationContext, int side, int oppositeSide)
@@ -2428,6 +2432,43 @@ public class Position : IDisposable
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
         return (queenAttacks & _pieceBitBoards[(int)Piece.Q + offset]) != default;
+    }
+
+    /// <summary>
+    /// If the pawn is in A or H files, the king reaches the corner/queening square and
+    /// the bisop is of the opposite color of the queening square, it's a draw
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsBishopPawnDraw(int winningSideOffset)
+    {
+        var pawns = _pieceBitBoards[(int)Piece.P + winningSideOffset];
+
+        bool hasAFilePawn = (pawns & Constants.AFile) != 0;
+        bool hasHFilePawn = (pawns & Constants.HFile) != 0;
+
+        // We filtered by Constants.NotAorH == 0 earlier, now we check that only one of those files has pawns
+        if (hasAFilePawn == hasHFilePawn)
+        {
+            return false;
+        }
+
+        var promotionCornerSquare = hasAFilePawn
+            ? (int)BoardSquare.a8
+            : (int)BoardSquare.h8;
+
+        const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
+        promotionCornerSquare += (winningSideOffset >> 2) * whiteBlackDiff;
+
+        var defendingKingSquare = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+
+        // Not in the corner or adjacent squares
+        if (Constants.ChebyshevDistance[defendingKingSquare][promotionCornerSquare] > 1)
+        {
+            return false;
+        }
+
+        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+        return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
     }
 
     #endregion

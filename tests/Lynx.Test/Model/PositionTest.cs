@@ -1013,6 +1013,44 @@ public class PositionTest
 		Assert.AreEqual(nonAttackedBlackLongCastleSquares, position.QueensideCastlingNonAttackedSquares[(int)Side.Black]);
 	}
 
+	[TestCase("8/8/8/3b4/8/8/p2k4/K7 b - - 0 1", true)]
+	[TestCase("8/p7/8/3b4/8/8/3k4/K7 b - - 0 11", true)]
+	[TestCase("8/p7/8/3b4/8/8/p2k4/K7 b - - 0 1", true)]
+	[TestCase("8/p7/8/8/8/8/1K1kb3/8 b - - 0 1", true)]
+	[TestCase("8/p7/8/8/8/8/K2kb3/8 b - - 0 1", true)]
+	[TestCase("8/p7/8/8/8/8/3kb3/1K6 b - - 0 1", true)]
+	[TestCase("8/p7/p7/p7/p7/p2b4/p2k4/K7 b - - 0 1", true)]
+	[TestCase("8/p7/8/8/8/4b3/3k4/K7 b - - 0 1", false)]
+
+	[TestCase("8/7p/8/8/8/2b5/3k4/7K b - - 0 1", true)]
+	[TestCase("8/7p/8/8/8/2b5/3k4/6K1 b - - 0 1", true)]
+	[TestCase("8/7p/8/8/8/2b5/3k2K1/8 b - - 0 1", true)]
+	[TestCase("8/7p/7p/7p/7p/2b4p/3k3p/7K b - - 0 1", true)]
+	[TestCase("8/7p/8/8/8/3b4/3k4/7K b - - 0 1", false)]
+
+	[TestCase("k7/8/PK6/2B5/8/8/8/8 w - - 0 1", true)]
+	[TestCase("8/k7/8/3K4/7B/8/P7/8 w - - 0 1", true)]
+	[TestCase("8/1k6/8/3K4/7B/8/P7/8 w - - 0 1", true)]
+	[TestCase("1k6/8/8/3K4/7B/8/P7/8 w - - 0 1", true)]
+	[TestCase("k7/8/PK6/P1B5/P7/P7/P7/8 w - - 0 1", true)]
+	[TestCase("k7/8/1K6/8/2B5/8/P7/8 w - - 0 1", false)]
+
+	[TestCase("7k/8/6KP/8/4B3/8/8/8 w - - 0 1", true)]
+	[TestCase("8/7k/8/5K2/4B3/8/7P/8 w - - 0 1", true)]
+	[TestCase("8/6k1/8/5K2/4B3/8/7P/8 w - - 0 1", true)]
+	[TestCase("6k1/8/8/5K2/4B3/8/7P/8 w - - 0 1", true)]
+	[TestCase("7k/7P/8/5K1P/7P/7P/4B2P/8 w - - 0 1", true)]
+	[TestCase("7k/8/8/5K2/8/4B3/7P/8 w - - 0 1", false)]
+
+	public void IsBishopPawnDraw(string fen, bool isDraw)
+	{
+		var position = new Position(fen);
+
+		var winnigSideOffset = Utils.PieceOffset(position.Side);
+		Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
+    }
+
+
 	private static int AdditionalPieceEvaluation(Position position, Piece piece)
 	{
 		var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
