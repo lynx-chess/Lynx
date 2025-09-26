@@ -42,6 +42,22 @@ public sealed partial class Engine
                 return SecondKillerMoveValue;
             }
 
+            var extraMoveScore = 0;
+
+            // 'Passed pawns must be pushed'
+            var piece = move.Piece();
+            if (piece == (int)Piece.P || piece == (int)Piece.p)
+            {
+                // Using target square we cover both already passed pawns and becoming passed ones
+                var passedPawnMask = Masks.PassedPawnMasks[(int)position.Side][move.TargetSquare()];
+                var oppositeSidePawns = position.PieceBitBoards[(int)Piece.p - piece];
+
+                if ((passedPawnMask & oppositeSidePawns) == 0)
+                {
+                    extraMoveScore += PassedPawnPushBonus;
+                }
+            }
+
             if (ply >= 1)
             {
                 // Countermove
@@ -51,13 +67,15 @@ public sealed partial class Engine
                 }
 
                 // Counter move history
-                return BaseMoveScore
+                return extraMoveScore
+                    + BaseMoveScore
                     + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
             }
 
             // History move or 0 if not found
-            return BaseMoveScore
+            return extraMoveScore
+                + BaseMoveScore
                 + QuietHistoryEntry(position, move, ref evaluationContext);
         }
 
