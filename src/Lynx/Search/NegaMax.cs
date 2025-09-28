@@ -201,11 +201,14 @@ public sealed partial class Engine
             var ttCorrectedStaticEval = staticEval;
 
             // From smol.cs
-            // ttEvaluation can be used as a better positional evaluation:
+            // ttScore can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttHit && ttNodeType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit
+                && ttScore > EvaluationConstants.NegativeCheckmateDetectionLimit
+                && ttScore < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ttNodeType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 ttCorrectedStaticEval = ttScore;
             }
