@@ -1255,8 +1255,11 @@ public class Position : IDisposable
         evaluationContext.AttacksBySide[(int)Side.White] = evaluationContext.Attacks[(int)Piece.P] = whitePawnAttacks;
         evaluationContext.AttacksBySide[(int)Side.Black] = evaluationContext.Attacks[(int)Piece.p] = blackPawnAttacks;
 
-        var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        var whiteKingBitboard = _pieceBitBoards[(int)Piece.K];
+        var blackKingBitboard = _pieceBitBoards[(int)Piece.k];
+
+        var whiteKing = whiteKingBitboard.GetLS1BIndex();
+        var blackKing = blackKingBitboard.GetLS1BIndex();
 
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
@@ -1315,6 +1318,9 @@ public class Position : IDisposable
 
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
+
+                // King pawn shelter
+                pawnScore += KingPawnShelter(whiteKingBitboard, blackKingBitboard, whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1443,6 +1449,9 @@ public class Position : IDisposable
 
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
+
+                // King pawn shelter
+                pawnScore += KingPawnShelter(whiteKingBitboard, blackKingBitboard, whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -2138,6 +2147,21 @@ public class Position : IDisposable
 
             return islandCount;
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int KingPawnShelter(BitBoard whiteKing, BitBoard blackKing, BitBoard whitePawns, BitBoard blackPawns, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
+    {
+        var whiteShelterPawns = whiteKing.ShiftUp();
+        whiteShelterPawns |= whiteShelterPawns.ShiftLeft() | whiteShelterPawns.ShiftRight();
+
+        var blackShelterPawns = blackKing.ShiftDown();
+        blackShelterPawns |= blackShelterPawns.ShiftLeft() | blackShelterPawns.ShiftRight();
+
+        var whiteShelter = (whiteShelterPawns & whitePawns & (~blackPawnAttacks)).CountBits();
+        var blackShelter = (blackShelterPawns & blackPawns & (~whitePawnAttacks)).CountBits();
+
+        return (whiteShelter - blackShelter) * KingPawnShelterBonus;
     }
 
     private static readonly int[][] _defendedThreatsBonus =
