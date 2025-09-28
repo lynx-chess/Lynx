@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -2107,36 +2108,22 @@ public class Position : IDisposable
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int CountPawnIslands(BitBoard pawns)
         {
-            const int n = 1;
-            Span<int> files = stackalloc int[8];
+            byte pawnFileBitBoard = 0;
 
-            while (pawns != default)
+            while (pawns != 0)
             {
                 pawns = pawns.WithoutLS1B(out var squareIndex);
 
-                files[Constants.File[squareIndex]] = n;
+                // BitBoard.SetBit equivalent but for byte instead of ulong
+                pawnFileBitBoard |= (byte)(1 << (squareIndex % 8));
             }
 
-            var islandCount = 0;
-            var isIsland = false;
+            int shifted = pawnFileBitBoard << 1;
 
-            for (int file = 0; file < files.Length; ++file)
-            {
-                if (files[file] == n)
-                {
-                    if (!isIsland)
-                    {
-                        isIsland = true;
-                        ++islandCount;
-                    }
-                }
-                else
-                {
-                    isIsland = false;
-                }
-            }
+            // Treat shifted’s MSB as 0 implicitly
+            int starts = pawnFileBitBoard & (~shifted);
 
-            return islandCount;
+            return BitOperations.PopCount((uint)starts);
         }
     }
 
@@ -2237,7 +2224,7 @@ public class Position : IDisposable
         }
 
         return packedBonus;
-        }
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Checks(EvaluationContext evaluationContext, int side, int oppositeSide)
@@ -2283,7 +2270,7 @@ public class Position : IDisposable
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
-    eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
+        eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
 
     #endregion
 
