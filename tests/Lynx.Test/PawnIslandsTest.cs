@@ -94,7 +94,9 @@ public class PawnIslandsTest
         }
 
         int shifted = pawnFileBitBoard << 1;
-        int starts = pawnFileBitBoard & (~shifted);   // treat shifted’s MSB as 0 implicitly
+
+        // Treat shifted’s MSB as 0 implicitly
+        int starts = pawnFileBitBoard & (~shifted);
 
         return BitOperations.PopCount((uint)starts);
     }
