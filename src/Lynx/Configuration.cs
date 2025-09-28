@@ -178,7 +178,10 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
-    public int SoftTimeBoundLimitOnMate { get; set; } = 10_000;
+    public int StopSearchOnMate_MaxSoftTimeBoundLimit { get; set; } = 10_000;
+
+    [SPSA<int>(enabled: false)]
+    public int StopSearchOnMate_MinDepth { get; set; } = 20;
 
     [SPSA<int>(enabled: false)]
     public int PonderHitMinTimeToContinueSearch { get; set; } = 100;
