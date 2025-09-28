@@ -45,7 +45,7 @@ public class EvaluationConstantsTest
     [Test]
     public void CheckmateDepthFactorTest()
     {
-        const int maxCheckmateValue = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth ;
+        const int maxCheckmateValue = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth;
         Assert.Less(maxCheckmateValue, MaxEval);
         Assert.Greater(maxCheckmateValue, MinEval);
 
@@ -322,17 +322,25 @@ public class EvaluationConstantsTest
             endGameKingTableBlack
         ];
 
-        for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
+        for (int friendBucket = 0; friendBucket < PSQTBucketCount; ++friendBucket)
         {
-            for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
+            for (int enemyBucket = 0; enemyBucket < PSQTBucketCount; ++enemyBucket)
             {
-                for (int sq = 0; sq < 64; ++sq)
+                for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
                 {
-                    var mg = (short)(MiddleGamePieceValues[0][bucket][piece] + mgPositionalTables[piece][bucket][sq]);
-                    var eg = (short)(EndGamePieceValues[0][bucket][piece] + egPositionalTables[piece][bucket][sq]);
+                    for (int sq = 0; sq < 64; ++sq)
+                    {
+                        var mg = (short)(MiddleGamePieceValues[0][friendBucket][piece] + mgPositionalTables[piece][friendBucket][sq]
+                            + MiddleGamePieceValues[1][enemyBucket][piece] + mgPositionalTables[piece][enemyBucket][sq]);
 
-                    Assert.AreEqual(Utils.UnpackEG(PSQT(0, bucket, piece, sq)), eg);
-                    Assert.AreEqual(Utils.UnpackMG(PSQT(0, bucket, piece, sq)), mg);
+                        var eg = (short)(EndGamePieceValues[0][friendBucket][piece] + egPositionalTables[piece][friendBucket][sq]
+                            + EndGamePieceValues[1][enemyBucket][piece] + egPositionalTables[piece][enemyBucket][sq]);
+
+                        var psqt = PSQT(friendBucket, enemyBucket, piece, sq);
+
+                        Assert.AreEqual(Utils.UnpackEG(psqt), eg);
+                        Assert.AreEqual(Utils.UnpackMG(psqt), mg);
+                    }
                 }
             }
         }
