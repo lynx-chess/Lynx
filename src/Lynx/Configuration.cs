@@ -145,31 +145,31 @@ public sealed class EngineSettings
     public int MinSearchTime { get; set; } = 50;
 
     [SPSA<double>(0.25, 0.75, 0.013)]
-    public double HardTimeBoundMultiplier { get; set; } = 0.51;
+    public double HardTimeBoundMultiplier { get; set; } = 0.50;
 
     [SPSA<double>(1.0, 2.0, 0.025)]
-    public double MoveDivisor { get; set; } = 1.40;
+    public double MoveDivisor { get; set; } = 1.43;
 
     [SPSA<double>(enabled: false)]
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
     [SPSA<double>(1.5, 3.5, 0.05)]
-    public double NodeTmBase { get; set; } = 2.74;
+    public double NodeTmBase { get; set; } = 2.86;
 
     [SPSA<double>(0.5, 2.5, 0.05)]
-    public double NodeTmScale { get; set; } = 1.80;
+    public double NodeTmScale { get; set; } = 1.90;
 
     [SPSA<double>(2, 3.5, 0.038)]
     public double BM_Stability_0 { get; set; } = 2.50;
 
     [SPSA<double>(1, 2, 0.025)]
-    public double BM_Stability_1 { get; set; } = 1.20;
+    public double BM_Stability_1 { get; set; } = 1.17;
 
     [SPSA<double>(0.5, 1.5, 0.025)]
-    public double BM_Stability_2 { get; set; } = 0.90;
+    public double BM_Stability_2 { get; set; } = 0.87;
 
     [SPSA<double>(0.25, 1.25, 0.025)]
-    public double BM_Stability_3 { get; set; } = 0.80;
+    public double BM_Stability_3 { get; set; } = 0.81;
 
     [SPSA<double>(0, 1, 0.025)]
     public double BM_Stability_4 { get; set; } = 0.75;
