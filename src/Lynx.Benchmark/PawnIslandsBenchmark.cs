@@ -45,6 +45,7 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.ConstantsGenerator;
 using Lynx.Model;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
@@ -115,6 +116,23 @@ public class PawnIslandsBenchmark : BaseBenchmark
         return sum;
     }
 
+    [Benchmark]
+    public int BitBoard_NoPawnCountArray()
+    {
+
+        var sum = 0;
+
+        foreach (var fen in Data)
+        {
+            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
+            BitBoard whitePawns = pieces[(int)Piece.P];
+            sum += BitBoard_NoFileOrPawnCountArray(whitePawns);
+        }
+
+        return sum;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int Original(BitBoard pawns)
     {
         const int n = 1;
@@ -152,6 +170,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
     }
 
     [SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int Original_SkipLocalsInit(BitBoard pawns)
     {
         const int n = 1;
@@ -161,8 +180,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         while (pawns != default)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
             files[Constants.File[squareIndex]] = n;
         }
@@ -189,14 +207,14 @@ public class PawnIslandsBenchmark : BaseBenchmark
         return islandCount;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int BitBoard(BitBoard pawns)
     {
         int pawnFileBitBoard = 0;
 
         while (pawns != default)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
             // BitBoard.SetBit equivalent but for byte instead of ulong
             pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
@@ -205,19 +223,38 @@ public class PawnIslandsBenchmark : BaseBenchmark
         return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int BitBoard_NoFileArray(BitBoard pawns)
     {
         int pawnFileBitBoard = 0;
 
-        while (pawns != default)
+        while (pawns != 0)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
             // BitBoard.SetBit equivalent but for byte instead of ulong
             pawnFileBitBoard |= (1 << (squareIndex % 8));
         }
 
         return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int BitBoard_NoFileOrPawnCountArray(BitBoard pawns)
+    {
+        byte pawnFileBitBoard = 0;
+
+        while (pawns != 0)
+        {
+            pawns = pawns.WithoutLS1B(out var squareIndex);
+
+            // BitBoard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitBoard |= (byte)(1 << (squareIndex % 8));
+        }
+
+        int shifted = pawnFileBitBoard << 1;
+        int starts = pawnFileBitBoard & (~shifted);   // treat shifted’s MSB as 0 implicitly
+
+        return BitOperations.PopCount((uint)starts);
     }
 }

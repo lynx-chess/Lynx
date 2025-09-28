@@ -1,6 +1,7 @@
 ﻿using Lynx.ConstantsGenerator;
 using Lynx.Model;
 using NUnit.Framework;
+using System.Numerics;
 
 namespace Lynx.Test;
 
@@ -49,13 +50,17 @@ public class PawnIslandsTest
         var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
         BitBoard whitePawns = pieces[(int)Piece.P];
 
-        // Original methodtest
+        // Original method test
         var pawnIslands = PawnIslandsGenerator.IdentifyIslands(whitePawns);
         Assert.AreEqual(expectedPawnIslands, pawnIslands, "Error in the original method");
 
         // Generator test
         pawnIslands = CountPawnIslands(whitePawns);
         Assert.AreEqual(expectedPawnIslands, pawnIslands, "Error in the generator");
+
+        // Generator test
+        pawnIslands = CountPawnIslandsImproved(whitePawns);
+        Assert.AreEqual(expectedPawnIslands, pawnIslands, "Error in the improved method");
 
         var pawnIslandsBonus = Position.PawnIslands(whitePawns, pieces[(int)Piece.p]);
         Assert.AreEqual(EvaluationParams.PawnIslandsBonus[expectedPawnIslands] - EvaluationParams.PawnIslandsBonus[0], pawnIslandsBonus, "Error in the Position implementation");
@@ -65,15 +70,32 @@ public class PawnIslandsTest
     {
         int pawnFileBitBoard = 0;
 
-        while (pawns != default)
+        while (pawns != 0)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
             // BitBoard.SetBit equivalent but for byte instead of ulong
             pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
         }
 
         return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
+    }
+
+    private static int CountPawnIslandsImproved(BitBoard pawns)
+    {
+        byte pawnFileBitBoard = 0;
+
+        while (pawns != 0)
+        {
+            pawns = pawns.WithoutLS1B(out var squareIndex);
+
+            // BitBoard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitBoard |= (byte)(1 << (squareIndex % 8));
+        }
+
+        int shifted = pawnFileBitBoard << 1;
+        int starts = pawnFileBitBoard & (~shifted);   // treat shifted’s MSB as 0 implicitly
+
+        return BitOperations.PopCount((uint)starts);
     }
 }
