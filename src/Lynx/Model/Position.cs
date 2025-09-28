@@ -1504,8 +1504,30 @@ public class Position : IDisposable
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(ref evaluationContext, whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(ref evaluationContext, blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
+            KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
+
+        var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
+        evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
+        evaluationContext.AttacksBySide[(int)Side.White] |= whiteKingAttacks;
+
+        var blackKingAttacks = Attacks.KingAttacks[blackKing];
+        evaluationContext.Attacks[(int)Piece.k] |= blackKingAttacks;
+        evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;
+
+        // King mobility
+        var whiteKingAttacksCount =
+            (whiteKingAttacks
+                & (~(whitePawns | blackPawnAttacks)))
+            .CountBits();
+
+        var blackKingAttacksCount =
+            (blackKingAttacks
+                & (~(blackPawns | whitePawnAttacks)))
+            .CountBits();
+
+        packedScore += KingMobilityBonus[whiteKingAttacksCount]
+        - KingMobilityBonus[blackKingAttacksCount];
 
         AssertAttackPopulation(ref evaluationContext);
 
@@ -2038,12 +2060,8 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int pieceSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(int squareIndex, int bucket, int pieceSide, BitBoard enemyPawnAttacks)
     {
-        var attacks = Attacks.KingAttacks[squareIndex];
-        evaluationContext.Attacks[(int)Piece.K + Utils.PieceOffset(pieceSide)] |= attacks;
-        evaluationContext.AttacksBySide[pieceSide] |= attacks;
-
         // Virtual mobility (as if Queen)
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, _occupancyBitBoards[(int)Side.Both])
