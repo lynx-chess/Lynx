@@ -835,8 +835,8 @@ public class Position : IDisposable
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                        _board[rookTargetSquare] = (int)Piece.None;
+                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                    _board[rookTargetSquare] = (int)Piece.None;
                     //}
 
                     _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
@@ -883,8 +883,8 @@ public class Position : IDisposable
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                        _board[rookTargetSquare] = (int)Piece.None;
+                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                    _board[rookTargetSquare] = (int)Piece.None;
                     //}
 
                     _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
@@ -1963,58 +1963,58 @@ public class Position : IDisposable
         }
 
         // Cornered/trapped bishop
-            if (pieceIndex == (int)Piece.B)
+        if (pieceIndex == (int)Piece.B)
+        {
+            if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
             {
-                if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
+                if (_board[(int)BoardSquare.b3] == (int)Piece.None)
                 {
-                    if (_board[(int)BoardSquare.b3] == (int)Piece.None)
-                    {
-                        packedBonus += BishopCorneredPenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedPenalty;
-                    }
-
+                    packedBonus += BishopCorneredPenalty;
                 }
-                else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
+                else
                 {
-                    if (_board[(int)BoardSquare.g3] == (int)Piece.None)
-                    {
-                        packedBonus += BishopCorneredPenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedPenalty;
-                    }
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+
+            }
+            else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
+            {
+                if (_board[(int)BoardSquare.g3] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
                 }
             }
-            else
-            {
+        }
+        else
+        {
 
-                if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
+            if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
+            {
+                if (_board[(int)BoardSquare.b6] == (int)Piece.None)
                 {
-                    if (_board[(int)BoardSquare.b6] == (int)Piece.None)
-                    {
-                        packedBonus += BishopCorneredPenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedPenalty;
-                    }
+                    packedBonus += BishopCorneredPenalty;
                 }
-                else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
+                else
                 {
-                    if (_board[(int)BoardSquare.g6] == (int)Piece.None)
-                    {
-                        packedBonus += BishopCorneredPenalty;
-                    }
-                    else
-                    {
-                        packedBonus += BishopCorneredAndBlockedPenalty;
-                    }
+                    packedBonus += BishopCorneredAndBlockedPenalty;
                 }
             }
+            else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
+            {
+                if (_board[(int)BoardSquare.g6] == (int)Piece.None)
+                {
+                    packedBonus += BishopCorneredPenalty;
+                }
+                else
+                {
+                    packedBonus += BishopCorneredAndBlockedPenalty;
+                }
+            }
+        }
 
         return packedBonus;
     }
@@ -2227,7 +2227,7 @@ public class Position : IDisposable
         }
 
         return packedBonus;
-        }
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Checks(EvaluationContext evaluationContext, int side, int oppositeSide)
