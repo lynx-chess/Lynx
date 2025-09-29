@@ -1086,6 +1086,11 @@ public class PositionTest
     [TestCase("4K3/8/8/3k4/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, attacking to move")]
     [TestCase("8/pb6/8/8/8/2K5/8/2k5 w - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
     [TestCase("8/pb6/8/8/8/2K5/8/2k5 b - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
+
+    [TestCase("8/P7/K1k5/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/K7/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/1K6/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/2K5/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
     public void IsBishopPawnDraw_Distance(string fen, bool isDraw)
     {
         var position = new Position(fen);
@@ -1125,6 +1130,37 @@ public class PositionTest
     [TestCase("8/7p/7p/7p/7p/6kp/8/7K b - - 0 1", true)]
     [TestCase("8/7p/7p/7p/7p/6kp/8/7K w - - 0 1", true)]
     public void IsRookPawnDraw(string fen, bool isDraw)
+    {
+        var position = new Position(fen);
+
+        var winningSideOffset = position.PieceBitBoards[(int)Piece.P] != 0
+            ? Utils.PieceOffset(Side.White)
+            : Utils.PieceOffset(Side.Black);
+
+        Assert.AreEqual(isDraw, position.IsRookPawnDraw(winningSideOffset));
+    }
+
+    [TestCase("2k5/8/K7/P7/8/8/8/8 w - - 0 1", true)]
+    [TestCase("2k5/8/K7/8/8/8/P7/8 w - - 0 1", true)]
+    [TestCase("3k4/8/K7/8/8/8/P7/8 b - - 0 1", true)]
+    [TestCase("3k4/8/K7/8/8/8/P7/8 b - - 0 1", true)]
+    [TestCase("3k4/8/K7/P7/8/8/8/8 b - - 0 1", true)]
+
+    [TestCase("2k5/K7/P7/8/8/8/8/8 w - - 0 1", true)]
+    [TestCase("2k5/K7/P7/8/8/8/8/8 b - - 0 1", true)]
+
+    [TestCase("2K5/8/2k5/8/8/8/P7/8 w - - 0 1", true)]
+    [TestCase("3K4/Pk6/8/8/8/8/8/8 w - - 0 1", true)]
+
+    // Tricky positions
+    [TestCase("3K4/P7/2k5/8/8/8/8/8 b - - 0 1", true, Description = "Pawn promotes but king captures")]
+    [TestCase("3K4/P7/2k5/8/8/8/8/8 w - - 0 1", false, Description = "Pawn promotes and king is too far, even if closer than attacking king")]
+    [TestCase("8/P7/2k5/8/8/8/8/7K w - - 0 1", false, Description = "Pawn promotes and king is too far, even if closer than attacking king")]
+    [TestCase("8/P7/K1k5/8/8/8/8/8 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/K7/8/8/8/8/8 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/1K6/8/8/8/8/8 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/2K5/8/8/8/8/8 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    public void IsRookPawnDraw_Distance(string fen, bool isDraw)
     {
         var position = new Position(fen);
 

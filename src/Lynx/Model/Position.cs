@@ -1636,6 +1636,12 @@ public class Position : IDisposable
                             {
                                 return (0, gamePhase);
                             }
+
+                            // Even if we didn't recognize the position as a draw, we reduce the eval
+                            //if ((_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
+                            //{
+                            //    eval >>= 1; // /2
+                            //}
                             break;
                         }
 
@@ -1649,7 +1655,7 @@ public class Position : IDisposable
                                     return (0, gamePhase);
                                 }
 
-                                // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
+                                // We can reduce the eval rest of positions, i.e. if the king hasn't reached the corner
                                 // This also reduces won positions, but it shouldn't matter
                                 eval >>= 1; // /2
                             }
@@ -2541,9 +2547,15 @@ public class Position : IDisposable
                 : (int)BoardSquare.h8)
             + (inverseWinningSide * whiteBlackDiff);
 
+        var attackingKing = _pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
         var defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
 
-        return Constants.ChebyshevDistance[defendingKing][promotionCornerSquare] <= 1;
+        int oneIfDefendingSideTomove = (int)_side ^ inverseWinningSide ^ 1;
+
+        var defendingKingCornerDistance = Constants.ChebyshevDistance[defendingKing][promotionCornerSquare];
+
+        return defendingKingCornerDistance <= 1
+            || defendingKingCornerDistance < Constants.ChebyshevDistance[attackingKing][promotionCornerSquare]; // Using <= would force us to take into account the pawn position
     }
 
     #endregion
