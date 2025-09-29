@@ -49,7 +49,6 @@ public static class EvaluationPSQTs
                 MiddleGameEnemyQueenTable,
                 MiddleGameEnemyKingTable
             ]
-
         ];
 
         short[][][][] egPositionalTables =

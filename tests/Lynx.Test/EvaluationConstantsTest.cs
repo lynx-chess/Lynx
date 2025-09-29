@@ -270,56 +270,44 @@ public class EvaluationConstantsTest
     [Test]
     public void PackedEvaluation()
     {
-        short[][] middleGamePawnTableBlack = [.. MiddleGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGamePawnTableBlack = [.. EndGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameKnightTableBlack = [.. MiddleGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameKnightTableBlack = [.. EndGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameBishopTableBlack = [.. MiddleGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameBishopTableBlack = [.. EndGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameRookTableBlack = [.. MiddleGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameRookTableBlack = [.. EndGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameQueenTableBlack = [.. MiddleGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] EndGameQueenTableBlack = [.. EndGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameKingTableBlack = [.. MiddleGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameKingTableBlack = [.. EndGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][][] mgPositionalTables =
+        short[][][] mgFriend =
         [
             MiddleGamePawnTable,
             MiddleGameKnightTable,
             MiddleGameBishopTable,
             MiddleGameRookTable,
             MiddleGameQueenTable,
-            MiddleGameKingTable,
-
-            middleGamePawnTableBlack,
-            middleGameKnightTableBlack,
-            middleGameBishopTableBlack,
-            middleGameRookTableBlack,
-            middleGameQueenTableBlack,
-            middleGameKingTableBlack
+            MiddleGameKingTable
         ];
 
-        short[][][] egPositionalTables =
+        short[][][] egFriend =
         [
             EndGamePawnTable,
             EndGameKnightTable,
             EndGameBishopTable,
             EndGameRookTable,
             EndGameQueenTable,
-            EndGameKingTable,
+            EndGameKingTable
+        ];
 
-            endGamePawnTableBlack,
-            endGameKnightTableBlack,
-            endGameBishopTableBlack,
-            endGameRookTableBlack,
-            EndGameQueenTableBlack,
-            endGameKingTableBlack
+        short[][][] mgEnemy =
+        [
+            MiddleGameEnemyPawnTable,
+            MiddleGameEnemyKnightTable,
+            MiddleGameEnemyBishopTable,
+            MiddleGameEnemyRookTable,
+            MiddleGameEnemyQueenTable,
+            MiddleGameEnemyKingTable
+        ];
+
+        short[][][] egEnemy =
+        [
+            EndGameEnemyPawnTable,
+            EndGameEnemyKnightTable,
+            EndGameEnemyBishopTable,
+            EndGameEnemyRookTable,
+            EndGameEnemyQueenTable,
+            EndGameEnemyKingTable
         ];
 
         for (int friendBucket = 0; friendBucket < PSQTBucketCount; ++friendBucket)
@@ -330,16 +318,36 @@ public class EvaluationConstantsTest
                 {
                     for (int sq = 0; sq < 64; ++sq)
                     {
-                        var mg = (short)(MiddleGamePieceValues[0][friendBucket][piece] + mgPositionalTables[piece][friendBucket][sq]
-                            + MiddleGamePieceValues[1][enemyBucket][piece] + mgPositionalTables[piece][enemyBucket][sq]);
+                        int mg, eg;
 
-                        var eg = (short)(EndGamePieceValues[0][friendBucket][piece] + egPositionalTables[piece][friendBucket][sq]
-                            + EndGamePieceValues[1][enemyBucket][piece] + egPositionalTables[piece][enemyBucket][sq]);
+                        if (piece < (int)Piece.p) // white piece
+                        {
+                            mg =
+                                MiddleGamePieceValues[0][friendBucket][piece] + mgFriend[piece][friendBucket][sq]
+                                + MiddleGamePieceValues[1][enemyBucket][piece] + mgEnemy[piece][enemyBucket][sq];
 
-                        var psqt = PSQT(friendBucket, enemyBucket, piece, sq);
+                            eg =
+                                EndGamePieceValues[0][friendBucket][piece] + egFriend[piece][friendBucket][sq]
+                                + EndGamePieceValues[1][enemyBucket][piece] + egEnemy[piece][enemyBucket][sq];
+                        }
+                        else // black piece
+                        {
+                            int basePiece = piece - 6;
+                            // Mirror square and subtract (equivalent to adding the pre-negated table)
+                            var mirror = sq ^ 56;
 
-                        Assert.AreEqual(Utils.UnpackEG(psqt), eg);
-                        Assert.AreEqual(Utils.UnpackMG(psqt), mg);
+                            mg =
+                                MiddleGamePieceValues[0][friendBucket][piece] - mgFriend[basePiece][friendBucket][mirror]
+                                + MiddleGamePieceValues[1][enemyBucket][piece] - mgEnemy[basePiece][enemyBucket][mirror];
+
+                            eg =
+                                EndGamePieceValues[0][friendBucket][piece] - egFriend[basePiece][friendBucket][mirror]
+                                + EndGamePieceValues[1][enemyBucket][piece] - egEnemy[basePiece][enemyBucket][mirror];
+                        }
+
+                        var packed = PSQT(friendBucket, enemyBucket, piece, sq);
+                        Assert.AreEqual(mg, Utils.UnpackMG(packed), $"MG mismatch piece {piece} sq {sq} fb {friendBucket} eb {enemyBucket}");
+                        Assert.AreEqual(eg, Utils.UnpackEG(packed), $"EG mismatch piece {piece} sq {sq} fb {friendBucket} eb {enemyBucket}");
                     }
                 }
             }
