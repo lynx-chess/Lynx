@@ -468,11 +468,8 @@ public class Position : IDisposable
                 (sameSideBucket, opposideSideBucket) = (opposideSideBucket, sameSideBucket);
             }
 
-            _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, piece, sourceSquare);
-            _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, piece, sourceSquare);
-
-            _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
-            _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
+            _incrementalEvalAccumulator -= PSQT(sameSideBucket, opposideSideBucket, piece, sourceSquare);
+            _incrementalEvalAccumulator += PSQT(sameSideBucket, opposideSideBucket, newPiece, targetSquare);
 
             _incrementalPhaseAccumulator += extraPhaseIfIncremental;
 
@@ -511,8 +508,7 @@ public class Position : IDisposable
                                 }
                             }
 
-                            _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                            _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                            _incrementalEvalAccumulator -= PSQT(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                             _incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         }
@@ -546,8 +542,7 @@ public class Position : IDisposable
                         _uniqueIdentifier ^= capturedPawnHash;
                         _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
-                        _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                        _incrementalEvalAccumulator -= PSQT(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;
@@ -1375,8 +1370,7 @@ public class Position : IDisposable
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
                 }
@@ -1390,8 +1384,7 @@ public class Position : IDisposable
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
                 }
@@ -1415,8 +1408,7 @@ public class Position : IDisposable
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     pawnScore += PawnAdditionalEvaluation(ref evaluationContext, whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
@@ -1435,8 +1427,7 @@ public class Position : IDisposable
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
@@ -1460,8 +1451,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
@@ -1482,8 +1472,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
@@ -1498,10 +1487,8 @@ public class Position : IDisposable
 
         // Kings - they can't be incremental due to the king buckets
         packedScore +=
-            PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
+            PSQT(whiteBucket, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(blackBucket, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
             KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
@@ -1643,12 +1630,16 @@ public class Position : IDisposable
 
                 if (gamePhase == 1)
                 {
-                    // Bishop vs A/H pawns: if the defending king reaches the corner, and the corner is the opposite color of the bishop, it's a draw
-                    // TODO implement that
-                    // For now, we reduce all endgames that only have one bishop and A/H pawns
                     if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
                         && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
                     {
+                        if (IsBishopPawnDraw(winningSideOffset))
+                        {
+                            return (0, gamePhase);
+                        }
+
+                        // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
+                        // This also reduces won positions, but it shouldn't matter
                         eval >>= 1; // /2
                     }
                 }
@@ -2237,7 +2228,7 @@ public class Position : IDisposable
         }
 
         return packedBonus;
-        }
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Checks(EvaluationContext evaluationContext, int side, int oppositeSide)
@@ -2446,6 +2437,59 @@ public class Position : IDisposable
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
         return (queenAttacks & _pieceBitBoards[(int)Piece.Q + offset]) != default;
+    }
+
+    /// <summary>
+    /// If the pawn is in A or H files, the defending king reaches the corner/queening square or adjacent squares
+    /// and the bisop is of the opposite color of the queening square, it's a draw.
+    /// This method also takes into account the relative distance to the corner of both kings:
+    /// if the defending one is closer enough, it's also a draw.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsBishopPawnDraw(int winningSideOffset)
+    {
+        var pawns = _pieceBitBoards[(int)Piece.P + winningSideOffset];
+
+        bool hasAFilePawn = (pawns & Constants.AFile) != 0;
+        bool hasHFilePawn = (pawns & Constants.HFile) != 0;
+
+        // We filtered by Constants.NotAorH == 0 earlier, now we check that only one of those files has pawns
+        if (hasAFilePawn == hasHFilePawn)
+        {
+            return false;
+        }
+
+        // 1 if black is winning
+        var inverseWinningSide = winningSideOffset >> 2;
+
+        const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
+
+        var promotionCornerSquare =
+            (hasAFilePawn
+                ? (int)BoardSquare.a8
+                : (int)BoardSquare.h8)
+            + (inverseWinningSide * whiteBlackDiff);
+
+        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+        if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
+        {
+            return false;
+        }
+
+        var attackingKing = _pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
+        var defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+
+        var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
+
+        int oneIfDefendingSideTomove = (int)_side ^ inverseWinningSide ^ 1;
+
+        var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing]
+        // The only case when the defending king can't reduce the distance to the corner is if the attacking one is in the middle,
+        // and therefore their difference is at least 2 distance squares
+            - oneIfDefendingSideTomove;
+
+        return defendingKingCornerDistance < attackingKingCornerDistance
+            && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];
     }
 
     #endregion
