@@ -399,7 +399,8 @@ public class Position : IDisposable
         var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
         var fullPieceMovementHash = sourcePieceHash ^ targetPieceHash;
 
-        _uniqueIdentifier ^=
+        // Aggregate all Zobrist hash XOR changes in hashDelta and apply once at the end
+        var uniqueIdentifierDelta =
             ZobristTable.SideHash()
             ^ fullPieceMovementHash
             ^ ZobristTable.EnPassantHash((int)_enPassant)            // We clear the existing enpassant square, if any
@@ -487,7 +488,7 @@ public class Position : IDisposable
                             _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
 
                             var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                            _uniqueIdentifier ^= capturedPieceHash;
+                            uniqueIdentifierDelta ^= capturedPieceHash;
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
@@ -522,7 +523,7 @@ public class Position : IDisposable
                         Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
                         _enPassant = (BoardSquare)enPassantSquare;
-                        _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+                        uniqueIdentifierDelta ^= ZobristTable.EnPassantHash(enPassantSquare);
 
                         break;
                     }
@@ -539,7 +540,7 @@ public class Position : IDisposable
                         _board[capturedSquare] = (int)Piece.None;
 
                         var capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        _uniqueIdentifier ^= capturedPawnHash;
+                        uniqueIdentifierDelta ^= capturedPawnHash;
                         _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
                         _incrementalEvalAccumulator -= PSQT(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
@@ -566,7 +567,7 @@ public class Position : IDisposable
                             _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
 
                             ulong capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                            _uniqueIdentifier ^= capturedPieceHash;
+                            uniqueIdentifierDelta ^= capturedPieceHash;
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
@@ -597,7 +598,7 @@ public class Position : IDisposable
                         Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
                         _enPassant = (BoardSquare)enPassantSquare;
-                        _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+                        uniqueIdentifierDelta ^= ZobristTable.EnPassantHash(enPassantSquare);
 
                         break;
                     }
@@ -631,7 +632,7 @@ public class Position : IDisposable
 
                             var hashFix = hashToRevert ^ hashToApply;
 
-                            _uniqueIdentifier ^= hashFix;
+                            uniqueIdentifierDelta ^= hashFix;
                             _nonPawnHash[oldSide] ^= hashFix;
                             _kingPawnUniqueIdentifier ^= hashFix;
                         }
@@ -651,7 +652,7 @@ public class Position : IDisposable
                         var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _uniqueIdentifier ^= hashChange;
+                        uniqueIdentifierDelta ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
                         _majorHash ^= hashChange;
 
@@ -687,7 +688,7 @@ public class Position : IDisposable
 
                             var hashFix = hashToRevert ^ hashToApply;
 
-                            _uniqueIdentifier ^= hashFix;
+                            uniqueIdentifierDelta ^= hashFix;
                             _nonPawnHash[oldSide] ^= hashFix;
                             _kingPawnUniqueIdentifier ^= hashFix;
                         }
@@ -707,7 +708,7 @@ public class Position : IDisposable
                         var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _uniqueIdentifier ^= hashChange;
+                        uniqueIdentifierDelta ^= hashChange;
                         _nonPawnHash[oldSide] ^= hashChange;
                         _majorHash ^= hashChange;
 
@@ -726,7 +727,7 @@ public class Position : IDisposable
                         _board[capturedSquare] = (int)Piece.None;
 
                         ulong capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        _uniqueIdentifier ^= capturedPawnHash;
+                        uniqueIdentifierDelta ^= capturedPawnHash;
                         _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
                         break;
@@ -741,7 +742,9 @@ public class Position : IDisposable
         _castle &= _castlingRightsUpdateConstants[sourceSquare];
         _castle &= _castlingRightsUpdateConstants[targetSquare];
 
-        _uniqueIdentifier ^= ZobristTable.CastleHash(_castle);
+        uniqueIdentifierDelta ^= ZobristTable.CastleHash(_castle);
+
+        _uniqueIdentifier ^= uniqueIdentifierDelta;
 
         Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
@@ -832,8 +835,8 @@ public class Position : IDisposable
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                    _board[rookTargetSquare] = (int)Piece.None;
+                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                        _board[rookTargetSquare] = (int)Piece.None;
                     //}
 
                     _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
@@ -880,8 +883,8 @@ public class Position : IDisposable
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
-                    _board[rookTargetSquare] = (int)Piece.None;
+                        _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                        _board[rookTargetSquare] = (int)Piece.None;
                     //}
 
                     _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
@@ -1960,58 +1963,58 @@ public class Position : IDisposable
         }
 
         // Cornered/trapped bishop
-        if (pieceIndex == (int)Piece.B)
-        {
-            if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
+            if (pieceIndex == (int)Piece.B)
             {
-                if (_board[(int)BoardSquare.b3] == (int)Piece.None)
+                if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
                 {
-                    packedBonus += BishopCorneredPenalty;
-                }
-                else
-                {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
-                }
+                    if (_board[(int)BoardSquare.b3] == (int)Piece.None)
+                    {
+                        packedBonus += BishopCorneredPenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedPenalty;
+                    }
 
+                }
+                else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
+                {
+                    if (_board[(int)BoardSquare.g3] == (int)Piece.None)
+                    {
+                        packedBonus += BishopCorneredPenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedPenalty;
+                    }
+                }
             }
-            else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
+            else
             {
-                if (_board[(int)BoardSquare.g3] == (int)Piece.None)
-                {
-                    packedBonus += BishopCorneredPenalty;
-                }
-                else
-                {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
-                }
-            }
-        }
-        else
-        {
 
-            if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
-            {
-                if (_board[(int)BoardSquare.b6] == (int)Piece.None)
+                if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
                 {
-                    packedBonus += BishopCorneredPenalty;
+                    if (_board[(int)BoardSquare.b6] == (int)Piece.None)
+                    {
+                        packedBonus += BishopCorneredPenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedPenalty;
+                    }
                 }
-                else
+                else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
                 {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
+                    if (_board[(int)BoardSquare.g6] == (int)Piece.None)
+                    {
+                        packedBonus += BishopCorneredPenalty;
+                    }
+                    else
+                    {
+                        packedBonus += BishopCorneredAndBlockedPenalty;
+                    }
                 }
             }
-            else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
-            {
-                if (_board[(int)BoardSquare.g6] == (int)Piece.None)
-                {
-                    packedBonus += BishopCorneredPenalty;
-                }
-                else
-                {
-                    packedBonus += BishopCorneredAndBlockedPenalty;
-                }
-            }
-        }
 
         return packedBonus;
     }
