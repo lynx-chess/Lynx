@@ -1628,34 +1628,51 @@ public class Position : IDisposable
             {
                 var winningSideOffset = Utils.PieceOffset(eval >= 0);
 
-                if (gamePhase == 1)
+                switch (gamePhase)
                 {
-                    if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
-                        && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
-                    {
-                        if (IsBishopPawnDraw(winningSideOffset))
+                    case 0:
                         {
-                            return (0, gamePhase);
+                            if (IsRookPawnDraw(winningSideOffset))
+                            {
+                                return (0, gamePhase);
+                            }
+                            break;
                         }
 
-                        // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
-                        // This also reduces won positions, but it shouldn't matter
-                        eval >>= 1; // /2
-                    }
-                }
-                else if (gamePhase == 2)
-                {
-                    var whiteBishops = _pieceBitBoards[(int)Piece.B];
-                    var blackBishops = _pieceBitBoards[(int)Piece.b];
+                    case 1:
+                        {
+                            if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
+                                && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
+                            {
+                                if (IsBishopPawnDraw(winningSideOffset))
+                                {
+                                    return (0, gamePhase);
+                                }
 
-                    // Opposite color bishop endgame with pawns are drawish
-                    if (whiteBishops > 0
-                        && blackBishops > 0
-                        && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
-                            Constants.DarkSquares[blackBishops.GetLS1BIndex()])
-                    {
-                        eval >>= 1; // /2
-                    }
+                                // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
+                                // This also reduces won positions, but it shouldn't matter
+                                eval >>= 1; // /2
+                            }
+
+                            break;
+                        }
+
+                    case 2:
+                        {
+                            var whiteBishops = _pieceBitBoards[(int)Piece.B];
+                            var blackBishops = _pieceBitBoards[(int)Piece.b];
+
+                            // Opposite color bishop endgame with pawns are drawish
+                            if (whiteBishops > 0
+                                && blackBishops > 0
+                                && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
+                                    Constants.DarkSquares[blackBishops.GetLS1BIndex()])
+                            {
+                                eval >>= 1; // /2
+                            }
+
+                            break;
+                        }
                 }
             }
         }
@@ -2490,6 +2507,43 @@ public class Position : IDisposable
 
         return defendingKingCornerDistance < attackingKingCornerDistance
             && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];
+    }
+
+    /// <summary>
+    /// If the pawn is in A or H files and the defending king reaches the corner/queening square or adjacent squares, it's a draw
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsRookPawnDraw(int winningSideOffset)
+    {
+        var pawns = _pieceBitBoards[(int)Piece.P + winningSideOffset];
+
+        if ((pawns & Constants.NotAorH) != 0)
+        {
+            return false;
+        }
+
+        bool hasAFilePawn = (pawns & Constants.AFile) != 0;
+        bool hasHFilePawn = (pawns & Constants.HFile) != 0;
+
+        if (hasAFilePawn == hasHFilePawn)
+        {
+            return false;
+        }
+
+        // 1 if black is winning
+        var inverseWinningSide = winningSideOffset >> 2;
+
+        const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
+
+        var promotionCornerSquare =
+            (hasAFilePawn
+                ? (int)BoardSquare.a8
+                : (int)BoardSquare.h8)
+            + (inverseWinningSide * whiteBlackDiff);
+
+        var defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+
+        return Constants.ChebyshevDistance[defendingKing][promotionCornerSquare] <= 1;
     }
 
     #endregion

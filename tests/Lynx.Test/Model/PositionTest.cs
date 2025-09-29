@@ -1046,9 +1046,14 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(position.Side);
-        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
+        var winningSideOffset = position.PieceBitBoards[(int)Piece.P] != 0
+            ? Utils.PieceOffset(Side.White)
+            : Utils.PieceOffset(Side.Black);
+
+        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winningSideOffset));
     }
+
+#pragma warning disable S4144 // Methods should not have identical implementations
 
     [TestCase("1k6/8/K7/8/8/2B5/P7/8 w - - 0 48", true)]
     [TestCase("1k6/8/1K6/8/8/2B5/P7/8 w - - 0 48", true)]
@@ -1072,34 +1077,65 @@ public class PositionTest
     [TestCase("4K3/8/5k2/8/8/8/6BP/8 b - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
 
     [TestCase("4K3/8/8/3k4/8/2B5/P7/8 b - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move", IgnoreReason = "False negative, so acceptable")]
+    [TestCase("4K3/8/5k2/8/8/8/6BP/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
+    [TestCase("8/pb6/8/8/8/2K5/8/3k4 w - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
 
     // Tricky ones
     [TestCase("2K5/8/1k6/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
     [TestCase("3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, attacking to move")]
     [TestCase("4K3/8/8/3k4/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, attacking to move")]
+    [TestCase("8/pb6/8/8/8/2K5/8/2k5 w - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
+    [TestCase("8/pb6/8/8/8/2K5/8/2k5 b - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
     public void IsBishopPawnDraw_Distance(string fen, bool isDraw)
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(Side.White);
-        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
+        var winningSideOffset = position.PieceBitBoards[(int)Piece.P] != 0
+            ? Utils.PieceOffset(Side.White)
+            : Utils.PieceOffset(Side.Black);
+
+        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winningSideOffset));
     }
 
-    [TestCase("4K3/8/5k2/8/8/8/6BP/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
-    [TestCase("8/pb6/8/8/8/2K5/8/3k4 w - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
+    [TestCase("k7/8/PK6/8/8/8/8/8 w - - 0 1", true)]
+    [TestCase("k7/8/PK6/8/8/8/8/8 b - - 0 1", true)]
+    [TestCase("k7/8/1K6/8/8/8/P7/8 w - - 0 1", true)]
+    [TestCase("k7/8/1K6/8/8/8/P7/8 b - - 0 1", true)]
+    [TestCase("k7/8/PK6/P7/P7/P7/P7/8 w - - 0 1", true)]
+    [TestCase("k7/8/PK6/P7/P7/P7/P7/8 b - - 0 1", true)]
 
-    // Tricky ones
-    [TestCase("8/pb6/8/8/8/2K5/8/2k5 w - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
-    [TestCase("8/pb6/8/8/8/2K5/8/2k5 b - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
+    [TestCase("7k/8/6KP/8/8/8/8/8 w - - 0 1", true)]
+    [TestCase("7k/8/6KP/8/8/8/8/8 b - - 0 1", true)]
+    [TestCase("7k/8/6K1/8/8/8/7P/8 w - - 0 1", true)]
+    [TestCase("7k/8/6K1/8/8/8/7P/8 b - - 0 1", true)]
+    [TestCase("7k/8/6KP/7P/7P/7P/7P/8 w - - 0 1", true)]
+    [TestCase("7k/8/6KP/7P/7P/7P/7P/8 b - - 0 1", true)]
 
-    public void IsBishopPawnDraw_Distance_BlackWinning(string fen, bool isDraw)
+    [TestCase("8/8/8/8/8/pk6/8/K7 b - - 0 1", true)]
+    [TestCase("8/8/8/8/8/pk6/8/K7 w - - 0 1", true)]
+    [TestCase("8/p7/8/8/8/1k6/8/K7 b - - 0 1", true)]
+    [TestCase("8/p7/8/8/8/1k6/8/K7 w - - 0 1", true)]
+    [TestCase("8/p7/p7/p7/p7/pk6/8/K7 b - - 0 1", true)]
+    [TestCase("8/p7/p7/p7/p7/pk6/8/K7 w - - 0 1", true)]
+
+    [TestCase("8/p7/8/8/8/1k6/8/K7 b - - 0 1", true)]
+    [TestCase("8/p7/8/8/8/1k6/8/K7 w - - 0 1", true)]
+    [TestCase("8/7p/8/8/8/6k1/8/7K b - - 0 1", true)]
+    [TestCase("8/7p/8/8/8/6k1/8/7K w - - 0 1", true)]
+    [TestCase("8/7p/7p/7p/7p/6kp/8/7K b - - 0 1", true)]
+    [TestCase("8/7p/7p/7p/7p/6kp/8/7K w - - 0 1", true)]
+    public void IsRookPawnDraw(string fen, bool isDraw)
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(Side.Black);
-        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
+        var winningSideOffset = position.PieceBitBoards[(int)Piece.P] != 0
+            ? Utils.PieceOffset(Side.White)
+            : Utils.PieceOffset(Side.Black);
+
+        Assert.AreEqual(isDraw, position.IsRookPawnDraw(winningSideOffset));
     }
 
+#pragma warning restore S4144 // Methods should not have identical implementations
 
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
