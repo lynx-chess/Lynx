@@ -2478,13 +2478,16 @@ public class Position : IDisposable
         int defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
 
         var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
+
+        int oneIfDefendingSideTomove = ((int)_side ^ inverseWinningSide ^ 1);
+
         var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing]
         // The only case when the defending king can't reduce the distance to the corner is if the attacking one is in the middle,
         // and therefore their difference is at least 2 distance squares
-            - ((int)_side ^ inverseWinningSide ^ 1);
+            - oneIfDefendingSideTomove;
 
         return defendingKingCornerDistance < attackingKingCornerDistance
-            && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * ((int)_side ^ inverseWinningSide ^ 1)) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];
+            && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];
     }
 
     #endregion
