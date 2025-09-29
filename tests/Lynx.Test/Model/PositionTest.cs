@@ -1071,10 +1071,6 @@ public class PositionTest
 
 		var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
-		Span<BitBoard> attacks = stackalloc BitBoard[12];
-		Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-		var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-
         return UnpackEG(piece == Piece.K
             ? position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.White, blackPawnAttacks)
             : position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.Black, whitePawnAttacks));
