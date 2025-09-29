@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using static Lynx.EvaluationConstants;
 
@@ -12,7 +13,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, ref EvaluationContext evaluationContext, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -27,15 +28,16 @@ public sealed partial class Engine
         if (!isCapture && !isPromotion)
         {
             var thisPlyKillerMovesBaseIndex = ply * 2;
+            ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
 
             // 1st killer move
-            if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
+            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) == move)
             {
                 return FirstKillerMoveValue;
             }
 
             // 2nd killer move
-            if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
+            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) == move)
             {
                 return SecondKillerMoveValue;
             }
@@ -50,13 +52,13 @@ public sealed partial class Engine
 
                 // Counter move history
                 return BaseMoveScore
-                    + _quietHistory[move.Piece()][move.TargetSquare()]
+                    + QuietHistoryEntry(position, move, ref evaluationContext)
                     + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
             }
 
             // History move or 0 if not found
             return BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()];
+                + QuietHistoryEntry(position, move, ref evaluationContext);
         }
 
         // Queen promotion
@@ -157,7 +159,7 @@ public sealed partial class Engine
     /// Quiet history, contination history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
     {
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
@@ -170,7 +172,7 @@ public sealed partial class Engine
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
-            ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
+            ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
             quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
@@ -181,9 +183,10 @@ public sealed partial class Engine
                 continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
             }
 
+            ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
             for (int i = 0; i < visitedMovesCounter; ++i)
             {
-                var visitedMove = visitedMoves[i];
+                var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
                 var capturedPiece = visitedMove.CapturedPiece();
 
                 if (capturedPiece == (int)Piece.None)
@@ -193,7 +196,7 @@ public sealed partial class Engine
 
                     // 🔍 Quiet history penalty / malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
+                    quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
                     quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)
@@ -207,17 +210,18 @@ public sealed partial class Engine
         }
 
         var thisPlyKillerMovesBaseIndex = ply * 2;
-        var firstKillerMove = _killerMoves[thisPlyKillerMovesBaseIndex];
+        ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
+        var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
 
         if (move.PromotedPiece() == default && move != firstKillerMove)
         {
             // 🔍 Killer moves
-            if (move != _killerMoves[thisPlyKillerMovesBaseIndex + 1])
+            if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
             {
-                _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
+                Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) = firstKillerMove;
             }
 
-            _killerMoves[thisPlyKillerMovesBaseIndex] = move;
+            Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) = move;
 
             if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
@@ -242,9 +246,10 @@ public sealed partial class Engine
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
+        ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
         for (int i = 0; i < visitedMovesCounter; ++i)
         {
-            var visitedMove = visitedMoves[i];
+            var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
             var capturedPiece = visitedMove.CapturedPiece();
 
             if (capturedPiece != (int)Piece.None)

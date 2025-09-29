@@ -3,6 +3,7 @@
 using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx;
 
@@ -180,6 +181,7 @@ public sealed partial class Engine
                 rawStaticEval = ttEntry.StaticEval;
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
+                position.CalculateThreats(ref evaluationContext);
             }
             else
             {
@@ -242,7 +244,11 @@ public sealed partial class Engine
                         {
                             if (depth == 1)
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                // Pawnocchio idea: no need to run QSearch when the eval is already corrected by the TT score,
+                                // that corrected eval is at least as good as QSearch result would be
+                                var qSearchScore = ttCorrectedStaticEval != staticEval
+                                    ? ttCorrectedStaticEval
+                                    : QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
 
                                 return qSearchScore > score
                                     ? qSearchScore
@@ -265,7 +271,7 @@ public sealed partial class Engine
                     }
                 }
 
-                var staticEvalBetaDiff = staticEval - beta;
+                var staticEvalBetaDiff = ttCorrectedStaticEval - beta;
 
                 // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
                 if (depth >= Configuration.EngineSettings.NMP_MinDepth
@@ -317,10 +323,11 @@ public sealed partial class Engine
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
-
+        ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
+        ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
+            Unsafe.Add(ref moveScoresRef, i) = ScoreMove(position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, ref evaluationContext, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -329,6 +336,7 @@ public sealed partial class Engine
         bool isAnyMoveValid = false;
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -338,28 +346,31 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (moveScores[j] > moveScores[moveIndex])
+                ref var moveI = ref Unsafe.Add(ref pseudoLegalMovesRef, moveIndex);
+                ref var moveJ = ref Unsafe.Add(ref pseudoLegalMovesRef, j);
+                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
+                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
+
+                if (scoreJ > scoreI)
                 {
-                    (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
+                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
                 }
             }
 
-            var move = pseudoLegalMoves[moveIndex];
+            // Value copy
+            var move = Unsafe.Add(ref pseudoLegalMovesRef, moveIndex); // Value copy for use in closures
+
             var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
             {
                 continue;
             }
 
-            var moveScore = moveScores[moveIndex];
+            var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
             var piece = move.Piece();
             var isCapture = move.CapturedPiece() != (int)Piece.None;
 
-            int? quietHistory = null;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            int QuietHistory() => quietHistory ??=
-                _quietHistory[piece][move.TargetSquare()]
+            int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
@@ -385,7 +396,7 @@ public sealed partial class Engine
                 // once we find one with a history score too low
                 if (!isCapture
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && quietHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -485,7 +496,7 @@ public sealed partial class Engine
             }
 
             var previousNodes = _nodes;
-            visitedMoves[visitedMovesCounter] = move;
+            Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
 
             ++_nodes;
             isAnyMoveValid = true;
@@ -598,7 +609,7 @@ public sealed partial class Engine
 
                                 // -= history/(maxHistory/2)
 
-                                reduction -= QuietHistory() / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+                                reduction -= quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
                             }
                         }
 
@@ -721,7 +732,7 @@ public sealed partial class Engine
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(position, historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode, ref evaluationContext);
                     }
 
                     nodeType = NodeType.Beta;
@@ -878,12 +889,16 @@ public sealed partial class Engine
         bool isAnyCaptureValid = false;
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
+
+        ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
+        ref var movesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
+            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(Unsafe.Add(ref movesRef, i), ttBestMove);
         }
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -893,14 +908,20 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (moveScores[j] > moveScores[moveIndex])
+                ref var moveI = ref Unsafe.Add(ref movesRef, moveIndex);
+                ref var moveJ = ref Unsafe.Add(ref movesRef, j);
+                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
+                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
+
+                if (scoreJ > scoreI)
                 {
-                    (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
+                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
                 }
             }
 
-            var move = pseudoLegalMoves[moveIndex];
-            var moveScore = moveScores[moveIndex];
+            // Value copies
+            var move = Unsafe.Add(ref movesRef, moveIndex);
+            var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
 
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
@@ -916,7 +937,7 @@ public sealed partial class Engine
             }
 
             ++_nodes;
-            visitedMoves[visitedMovesCounter] = move;
+            Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
             isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);

@@ -89,7 +89,17 @@ public partial class Engine
         "1b6/1R1r4/8/1n6/7k/8/8/7K w - - 0 1",                          // R vs RBN, leading to R vs BN or R vs RB or R vs RN
         "8/q5rk/8/8/8/8/Q5RK/7N w - - 0 1",                             // Endgame that can lead to QN vs Q or RN vs R positions
         "1kr5/2bp3q/Q7/1K6/6q1/6B1/8/8 w - - 0 1",                      // Endgame where triple repetition can and needs to be forced by white
-        "1kr5/2bp3q/R7/1K6/6q1/6B1/8/8 w - - 96 200",                    // Endgame where 50 moves draw can and needs to be forced by white
+        "1kr5/2bp3q/R7/1K6/6q1/6B1/8/8 w - - 96 200",                   // Endgame where 50 moves draw can and needs to be forced by white
+        "k7/8/8/K7/8/3B4/P7/8 w - - 0 48",                              // BP won endgame
+        "k7/8/8/K7/8/2B5/P7/8 w - - 0 48",                              // BP drawn endgame
+        "8/2bk4/8/3p4/P1K5/4B3/3P4/8 w - - 0 47",                       // Endgame leading to BP drawn endgame - Sirius vs Stormphrax FRD4, TCEC
+        "8/3k4/8/b1K5/P7/4B3/3P4/8 b - - 2 48",                         // Endgame leading to BP drawn endgame II - Sirius vs Stormphrax FRD4, TCEC
+        "8/2bk4/8/3p4/P1K5/8/3PB3/8 w - - 0 47",                        // Endgame leading to BP drawn endgame - but not because of the king on the corner
+        "4K3/8/8/3k4/8/2B5/P7/8 b - - 0 1",                             // Potential false negative of BP drawn endgame
+        "2K5/8/1k6/8/8/2B5/P7/8 b - - 0 1",                             // Relatively tricky BP drawn endgame
+        "3K4/8/2k5/8/8/2B5/P7/8 b - - 0 1",                             // Relatively tricky BP drawn endgame II
+        "k7/8/K7/8/8/8/P7/8 w - - 0 1",                                 // KP drawn endgame
+        "1k6/8/P1K5/P7/P7/P7/P7/8 w - - 0 1",                           // KP drawn endgame II
         "rnbqk2r/pppp1ppp/5n2/8/Bb2N3/8/PPPPQPPP/RNB1K2R w KQkq - 2 1", // Petroff defense alike position with double check Q and N
         "rnb1kb1r/pppp1ppp/5n2/8/4N3/8/PPPP1PPP/RNB1R1K1 w kq - 2 5",   // Double check R and N
         "rnbqk2r/ppp2ppp/3p4/8/1b2Bn2/8/PPPPQPPP/RNB1K2R w KQkq - 2 5", // Double check Q and B
@@ -99,6 +109,9 @@ public partial class Engine
 
         "r7/8/8/4k3/8/4B3/4K2P/7R w - - 95 1",                          // High 50mr counter in advantage position (needs to move pawn)
         "7K/r7/8/8/7P/6PR/6PR/1k6 b - - 95 1",                          // High 50mr counter in disadvantage position (needs to keep checking)
+
+        "nqbnrkrb/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight
+        "rqbbnknr/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight - only one side
     ];
 
     /// <summary>

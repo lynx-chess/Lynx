@@ -29,7 +29,7 @@ public class TryParseFromUCIStringTest
     [TestCase("b7c8n", BoardSquare.b7, BoardSquare.c8, Piece.N)]
     [TestCase("b7c8b", BoardSquare.b7, BoardSquare.c8, Piece.B)]
     [TestCase("e1d1", BoardSquare.e1, BoardSquare.d1, default(Piece))]
-    [TestCase("e1c1", BoardSquare.e1, (BoardSquare)Constants.WhiteLongCastleKingSquare, default(Piece))]
+    [TestCase("e1c1", BoardSquare.e1, (BoardSquare)Constants.WhiteKingLongCastleSquare, default(Piece))]
     public void ParseFromUCIString_White(string UCIString, BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece)
     {
         // Arrange
@@ -69,7 +69,7 @@ public class TryParseFromUCIStringTest
     [TestCase("g2f1n", BoardSquare.g2, BoardSquare.f1, Piece.n)]
     [TestCase("g2f1b", BoardSquare.g2, BoardSquare.f1, Piece.b)]
     [TestCase("e8f8", BoardSquare.e8, BoardSquare.f8, default(Piece))]
-    [TestCase("e8g8", BoardSquare.e8, (BoardSquare)Constants.BlackShortCastleKingSquare, default(Piece))]
+    [TestCase("e8g8", BoardSquare.e8, (BoardSquare)Constants.BlackKingShortCastleSquare, default(Piece))]
     public void ParseFromUCIString_Black(string UCIString, BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece)
     {
         // Arrange

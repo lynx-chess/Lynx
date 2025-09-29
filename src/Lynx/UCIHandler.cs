@@ -108,6 +108,9 @@ public sealed class UCIHandler
                 case "fen":
                     await HandleFEN(cancellationToken);
                     break;
+                case "print":
+                    HandlePrint();
+                    break;
                 case "ob_spsa":
                     await HandleOpenBenchSPSA(cancellationToken);
                     break;
@@ -147,7 +150,7 @@ public sealed class UCIHandler
 
     private async Task HandleStop() => await _searcher.StopSearching();
 
-    private async Task HandleUCI(CancellationToken cancellationToken)
+    internal async Task HandleUCI(CancellationToken cancellationToken)
     {
         await SendCommand(IdCommand.NameString, cancellationToken);
         await SendCommand(IdCommand.AuthorString, cancellationToken);
@@ -266,6 +269,14 @@ public sealed class UCIHandler
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.ShowWDL = value;
+                    }
+                    break;
+                }
+            case "uci_chess960":
+                {
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.IsChess960 = value;
                     }
                     break;
                 }
@@ -402,6 +413,8 @@ public sealed class UCIHandler
 
     private async ValueTask HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
     {
+        var isFRC = Configuration.EngineSettings.IsChess960;
+
         try
         {
             var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
@@ -410,6 +423,9 @@ public sealed class UCIHandler
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
                 return;
             }
+
+            // FRC-only cases, i.e. cornered bishops
+            Configuration.EngineSettings.IsChess960 = true;
 
             int lineCounter = 0;
             await foreach (var line in File.ReadLinesAsync(fullPath, cancellationToken))
@@ -440,9 +456,7 @@ public sealed class UCIHandler
                 ++lineCounter;
                 if (lineCounter % 100 == 0)
                 {
-#pragma warning disable CA1849 // Call async methods when in an async method - intended
-                    Thread.Sleep(50);
-#pragma warning restore CA1849 // Call async methods when in an async method
+                    await Task.Delay(50, cancellationToken);
                 }
             }
         }
@@ -471,6 +485,10 @@ public sealed class UCIHandler
                 return sb;
             }
         }
+        finally
+        {
+            Configuration.EngineSettings.IsChess960 = isFRC;
+        }
     }
 
     private async Task HandleEval(CancellationToken cancellationToken)
@@ -482,6 +500,11 @@ public sealed class UCIHandler
     private async Task HandleFEN(CancellationToken cancellationToken)
     {
         await _engineToUci.Writer.WriteAsync(_searcher.FEN, cancellationToken);
+    }
+
+    private void HandlePrint()
+    {
+        _searcher.PrintCurrentPosition();
     }
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)

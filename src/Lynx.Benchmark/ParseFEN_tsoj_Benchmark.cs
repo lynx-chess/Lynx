@@ -446,7 +446,6 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
                         pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(squareIndex);
                         board[squareIndex] = (int)piece;
                     }
-
                 }
             }
 

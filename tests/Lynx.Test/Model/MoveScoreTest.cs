@@ -23,7 +23,13 @@ public class MoveScoreTest : BaseTest
     {
         var engine = GetEngine(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
+        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move =>
+        {
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
+        }).ToList();
 
         Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
         Assert.AreEqual("d5e6", allMoves[1].UCIString());     // PxP
@@ -34,9 +40,13 @@ public class MoveScoreTest : BaseTest
         Assert.AreEqual("e5g6", allMoves[6].UCIString());     // NxP
         Assert.AreEqual("f3h3", allMoves[7].UCIString());     // QxP
 
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         foreach (var move in allMoves.Where(move => move.CapturedPiece() == (int)Piece.None && !move.IsCastle()))
         {
-            Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(move, default, default));
+            Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext));
         }
     }
 
@@ -58,9 +68,18 @@ public class MoveScoreTest : BaseTest
     {
         var engine = GetEngine(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
+        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move =>
+        {
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
+        }).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0][6], engine.ScoreMove(allMoves[0], default, default));
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0][6], engine.ScoreMove(engine.Game.CurrentPosition, allMoves[0], default, ref evaluationContext));
     }
 }
