@@ -2440,8 +2440,10 @@ public class Position : IDisposable
     }
 
     /// <summary>
-    /// If the pawn is in A or H files, the king reaches the corner/queening square and
-    /// the bisop is of the opposite color of the queening square, it's a draw
+    /// If the pawn is in A or H files, the defending king reaches the corner/queening square or adjacent squares
+    /// and the bisop is of the opposite color of the queening square, it's a draw.
+    /// This method also takes into account the relative distance to the corner of both kings:
+    /// if the defending one is closer enough, it's also a draw.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsBishopPawnDraw(int winningSideOffset)
@@ -2457,16 +2459,16 @@ public class Position : IDisposable
             return false;
         }
 
-        var promotionCornerSquare = hasAFilePawn
-            ? (int)BoardSquare.a8
-            : (int)BoardSquare.h8;
-
-        const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
-
         // 1 if black is winning
         var inverseWinningSide = winningSideOffset >> 2;
 
-        promotionCornerSquare += inverseWinningSide * whiteBlackDiff;
+        const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
+
+        var promotionCornerSquare =
+            (hasAFilePawn
+                ? (int)BoardSquare.a8
+                : (int)BoardSquare.h8)
+            + (inverseWinningSide * whiteBlackDiff);
 
         var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
         if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
@@ -2474,8 +2476,8 @@ public class Position : IDisposable
             return false;
         }
 
-        int attackingKing = _pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
-        int defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+        var attackingKing = _pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
+        var defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
 
         var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
 
