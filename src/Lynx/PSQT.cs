@@ -83,7 +83,10 @@ public static class EvaluationPSQTs
                         const int Friend = 0;
                         const int Enemy = 1;
 
-                        _packedPSQT[PSQTIndex(friendBucket, enemyBucket, piece, sq)] =
+                        ref var whitePieceEntry = ref PSQT(friendBucket, enemyBucket, piece, sq);
+                        ref var blackPieceEntry = ref PSQT(friendBucket, enemyBucket, piece + 6, sq);
+
+                        whitePieceEntry =
                             Utils.Pack(
                                 (short)(MiddleGamePieceValues[Friend][friendBucket][piece] + mgPositionalTables[Friend][piece][friendBucket][sq]),
                                 (short)(EndGamePieceValues[Friend][friendBucket][piece] + egPositionalTables[Friend][piece][friendBucket][sq]))
@@ -91,7 +94,7 @@ public static class EvaluationPSQTs
                                 (short)(MiddleGamePieceValues[Enemy][enemyBucket][piece] + mgPositionalTables[Enemy][piece][enemyBucket][sq]),
                                 (short)(EndGamePieceValues[Enemy][enemyBucket][piece] + egPositionalTables[Enemy][piece][enemyBucket][sq]));
 
-                        _packedPSQT[PSQTIndex(friendBucket, enemyBucket, piece + 6, sq)] =
+                        blackPieceEntry =
                             Utils.Pack(
                                 (short)(MiddleGamePieceValues[Friend][friendBucket][piece + 6] - mgPositionalTables[Friend][piece][friendBucket][sq ^ 56]),
                                 (short)(EndGamePieceValues[Friend][friendBucket][piece + 6] - egPositionalTables[Friend][piece][friendBucket][sq ^ 56]))
@@ -105,30 +108,22 @@ public static class EvaluationPSQTs
     }
 
     /// <summary>
-    /// [2][PSQTBucketCount][12][64]
+    /// [2][PSQTBucketCount][PSQTBucketCount][12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PSQT(int friendBucket, int enemyBucket, int piece, int square)
-    {
-        var index = PSQTIndex(friendBucket, enemyBucket, piece, square);
-        Debug.Assert(index >= 0 && index < _packedPSQT.Length);
-
-        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
-    }
-
-    /// <summary>
-    /// [PSQTBucketCount][PSQTBucketCount][12][64]
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PSQTIndex(int friendBucket, int enemyBucket, int piece, int square)
+    public static ref int PSQT(int friendBucket, int enemyBucket, int piece, int square)
     {
         const int friendBucketOffset = PSQTBucketCount * 12 * 64;
         const int enemyBucketOffset = 12 * 64;
         const int pieceOffset = 64;
 
-        return (friendBucket * friendBucketOffset)
+        var index = (friendBucket * friendBucketOffset)
             + (enemyBucket * enemyBucketOffset)
             + (piece * pieceOffset)
             + square;
+
+        Debug.Assert(index >= 0 && index < _packedPSQT.Length);
+
+        return ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
     }
 }
