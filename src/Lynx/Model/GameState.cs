@@ -20,6 +20,14 @@ public readonly struct GameState
 
     public readonly int IncrementalPhaseAccumulator;
 
+    public readonly int WhiteKing;
+
+    public readonly int BlackKing;
+
+    public readonly int WhiteKingBucket;
+
+    public readonly int BlackKingBucket;
+
     public readonly BoardSquare EnPassant;
 
     public readonly byte Castle;
@@ -40,6 +48,11 @@ public readonly struct GameState
         Castle = position.Castle;
         IncrementalEvalAccumulator = position._incrementalEvalAccumulator;
         IncrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
+
+        WhiteKing = position.WhiteKing;
+        BlackKing = position.BlackKing;
+        WhiteKingBucket = position.WhiteKingBucket;
+        BlackKingBucket = position.BlackKingBucket;
 
         // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
         IsIncrementalEval = position._isIncrementalEval;
