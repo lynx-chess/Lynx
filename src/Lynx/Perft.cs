@@ -52,7 +52,7 @@ public static class Perft
                 {
                     nodes = PerftRecursiveImpl(position, depth - 1, nodes);
                 }
-                position.UnmakeMove(move, state);
+                position.UnmakeMove(move, in state);
             }
 
             return nodes;
@@ -84,7 +84,7 @@ public static class Perft
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
 
-                position.UnmakeMove(move, state);
+                position.UnmakeMove(move, in state);
             }
 
             write(string.Empty);

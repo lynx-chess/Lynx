@@ -42,7 +42,7 @@ public class SingleLegalMoveTest : BaseTest
                 singleMove = move;
             }
 
-            pos.UnmakeMove(move, state);
+            pos.UnmakeMove(move, in state);
         }
 
         Assert.LessOrEqual(depth, Configuration.EngineSettings.MaxDepth);

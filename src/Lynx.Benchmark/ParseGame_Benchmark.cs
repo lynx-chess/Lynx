@@ -537,7 +537,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+                CurrentPosition.UnmakeMove(moveToPlay, in gameState);
             }
 
             PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
@@ -618,7 +618,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+                CurrentPosition.UnmakeMove(moveToPlay, in gameState);
             }
 
             PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
@@ -703,7 +703,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+                CurrentPosition.UnmakeMove(moveToPlay, in gameState);
             }
 
             PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);

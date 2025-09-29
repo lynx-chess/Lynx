@@ -439,7 +439,7 @@ public sealed partial class Engine
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
-            Game.CurrentPosition.UnmakeMove(move, gameState);
+            Game.CurrentPosition.UnmakeMove(move, in gameState);
 
             if (isPositionValid)
             {
@@ -609,7 +609,7 @@ public sealed partial class Engine
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
-                position.UnmakeMove(move, gameState);
+                position.UnmakeMove(move, in gameState);
                 continue;
             }
 

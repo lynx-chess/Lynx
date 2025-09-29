@@ -794,7 +794,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnmakeMove(Move move, GameState gameState)
+    public void UnmakeMove(Move move, in GameState gameState)
     {
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
