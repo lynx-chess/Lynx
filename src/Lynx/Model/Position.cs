@@ -2463,7 +2463,7 @@ public class Position : IDisposable
 
         const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
 
-        // 1 is black is winning
+        // 1 if black is winning
         var inverseWinningSide = winningSideOffset >> 2;
 
         promotionCornerSquare += inverseWinningSide * whiteBlackDiff;
@@ -2479,7 +2479,7 @@ public class Position : IDisposable
 
         var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
 
-        int oneIfDefendingSideTomove = ((int)_side ^ inverseWinningSide ^ 1);
+        int oneIfDefendingSideTomove = (int)_side ^ inverseWinningSide ^ 1;
 
         var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing]
         // The only case when the defending king can't reduce the distance to the corner is if the attacking one is in the middle,
