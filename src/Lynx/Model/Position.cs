@@ -496,11 +496,8 @@ public class Position : IDisposable
                 (sameSideBucket, opposideSideBucket) = (opposideSideBucket, sameSideBucket);
             }
 
-            _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, piece, sourceSquare);
-            _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, piece, sourceSquare);
-
-            _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
-            _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
+            _incrementalEvalAccumulator -= PSQT(sameSideBucket, opposideSideBucket, piece, sourceSquare);
+            _incrementalEvalAccumulator += PSQT(sameSideBucket, opposideSideBucket, newPiece, targetSquare);
 
             _incrementalPhaseAccumulator += extraPhaseIfIncremental;
 
@@ -539,8 +536,7 @@ public class Position : IDisposable
                                 }
                             }
 
-                            _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                            _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                            _incrementalEvalAccumulator -= PSQT(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                             _incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         }
@@ -574,8 +570,7 @@ public class Position : IDisposable
                         _uniqueIdentifier ^= capturedPawnHash;
                         _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
-                        _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                        _incrementalEvalAccumulator -= PSQT(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;
@@ -1422,8 +1417,7 @@ public class Position : IDisposable
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
                 }
@@ -1437,8 +1431,7 @@ public class Position : IDisposable
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
                 }
@@ -1462,8 +1455,7 @@ public class Position : IDisposable
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     pawnScore += PawnAdditionalEvaluation(ref evaluationContext, WhiteKingBucket, BlackKingBucket, pieceSquareIndex, (int)Piece.P, WhiteKing, BlackKing);
                 }
@@ -1482,8 +1474,7 @@ public class Position : IDisposable
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, BlackKingBucket, WhiteKingBucket, pieceSquareIndex, (int)Piece.p, BlackKing, WhiteKing);
                 }
@@ -1507,8 +1498,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
@@ -1529,8 +1519,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
@@ -1545,10 +1534,8 @@ public class Position : IDisposable
 
         // Kings - they can't be incremental due to the king buckets
         packedScore +=
-            PSQT(0, whiteBucket, (int)Piece.K, WhiteKing)
-            + PSQT(1, blackBucket, (int)Piece.K, WhiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, BlackKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, BlackKing);
+            PSQT(whiteBucket, blackBucket, (int)Piece.K, WhiteKing)
+            + PSQT(blackBucket, whiteBucket, (int)Piece.k, BlackKing);
 
         packedScore +=
             KingAdditionalEvaluation(WhiteKing, WhiteKingBucket, (int)Side.White, blackPawnAttacks)
