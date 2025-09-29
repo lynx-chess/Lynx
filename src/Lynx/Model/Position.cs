@@ -471,7 +471,6 @@ public class Position : IDisposable
 
                 _kingPawnUniqueIdentifier ^= fullPieceMovementHash;
 
-
                 BlackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
                 BlackKingBucket = PSQTBucketLayout[BlackKing ^ 56];
             }
@@ -663,6 +662,11 @@ public class Position : IDisposable
                             _board[kingTargetSquare] = newPiece;
                             var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
 
+                            WhiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
+                            BlackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
+                            WhiteKingBucket = PSQTBucketLayout[WhiteKing];
+                            BlackKingBucket = PSQTBucketLayout[BlackKing ^ 56];
+
                             var hashFix = hashToRevert ^ hashToApply;
 
                             _uniqueIdentifier ^= hashFix;
@@ -718,6 +722,11 @@ public class Position : IDisposable
                             _occupancyBitBoards[oldSide].SetBit(kingTargetSquare);
                             _board[kingTargetSquare] = newPiece;
                             var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
+
+                            WhiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
+                            BlackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
+                            WhiteKingBucket = PSQTBucketLayout[WhiteKing];
+                            BlackKingBucket = PSQTBucketLayout[BlackKing ^ 56];
 
                             var hashFix = hashToRevert ^ hashToApply;
 
