@@ -2470,26 +2470,17 @@ public class Position : IDisposable
                 : (int)BoardSquare.h8)
             + (inverseWinningSide * whiteBlackDiff);
 
-        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
-        if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
+        var defendingKingSquare = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+
+        // Not in the corner or adjacent squares
+        if (Constants.ChebyshevDistance[defendingKingSquare][promotionCornerSquare] > 1)
         {
             return false;
         }
 
-        var attackingKing = _pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
-        var defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
 
-        var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
-
-        int oneIfDefendingSideTomove = (int)_side ^ inverseWinningSide ^ 1;
-
-        var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing]
-        // The only case when the defending king can't reduce the distance to the corner is if the attacking one is in the middle,
-        // and therefore their difference is at least 2 distance squares
-            - oneIfDefendingSideTomove;
-
-        return defendingKingCornerDistance < attackingKingCornerDistance
-            && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];
+        return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
     }
 
     #endregion
