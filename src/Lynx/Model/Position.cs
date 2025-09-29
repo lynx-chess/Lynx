@@ -1418,7 +1418,7 @@ public class Position : IDisposable
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(whiteBucket, BlackKingBucket, (int)Piece.P, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
                 }
@@ -1432,7 +1432,7 @@ public class Position : IDisposable
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(BlackKingBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
                 }
@@ -1456,7 +1456,7 @@ public class Position : IDisposable
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(whiteBucket, BlackKingBucket, (int)Piece.P, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     pawnScore += PawnAdditionalEvaluation(ref evaluationContext, whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
@@ -1475,7 +1475,7 @@ public class Position : IDisposable
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(BlackKingBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
@@ -1499,7 +1499,7 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(whiteBucket, BlackKingBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
@@ -1520,11 +1520,11 @@ public class Position : IDisposable
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PSQT(BlackKingBucket, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, WhiteKingBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, WhiteKing);
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
                 }
             }
 
@@ -1535,14 +1535,14 @@ public class Position : IDisposable
 
         // Kings - they can't be incremental due to the king buckets
         packedScore +=
-            PSQT(whiteBucket, BlackKingBucket, (int)Piece.K, WhiteKing)
-            + PSQT(BlackKingBucket, whiteBucket, (int)Piece.k, blackKing);
+            PSQT(whiteBucket, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(blackBucket, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(WhiteKing, WhiteKingBucket, (int)Side.White, blackPawnAttacks)
+            KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
-        var whiteKingAttacks = Attacks.KingAttacks[WhiteKing];
+        var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
         evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
         evaluationContext.AttacksBySide[(int)Side.White] |= whiteKingAttacks;
 
