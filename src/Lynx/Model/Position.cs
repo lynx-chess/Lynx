@@ -2443,7 +2443,7 @@ public class Position : IDisposable
     {
         var pawns = _pieceBitBoards[(int)Piece.P + winningSideOffset];
 
-        if ((pawns& Constants.NotAorH) != 0)
+        if ((pawns & Constants.NotAorH) != 0)
         {
             return false;
         }
