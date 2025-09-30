@@ -1633,10 +1633,10 @@ public class Position : IDisposable
                     if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
                         && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
                     {
-                        //if (IsBishopPawnDraw(winningSideOffset))
-                        //{
-                        //    return (0, gamePhase);
-                        //}
+                        if (IsBishopPawnDraw(winningSideOffset))
+                        {
+                            return (0, gamePhase);
+                        }
 
                         // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
                         // This also reduces won positions, but it shouldn't matter
