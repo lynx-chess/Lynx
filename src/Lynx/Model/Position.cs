@@ -1631,16 +1631,9 @@ public class Position : IDisposable
                 if (gamePhase == 1)
                 {
                     if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
-                        && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
+                        && IsBishopPawnDraw(winningSideOffset, ref eval))
                     {
-                        if (IsBishopPawnDraw(winningSideOffset))
-                        {
-                            return (0, gamePhase);
-                        }
-
-                        // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
-                        // This also reduces won positions, but it shouldn't matter
-                        eval >>= 1; // /2
+                        return (0, gamePhase);
                     }
                 }
                 else if (gamePhase == 2)
@@ -2446,9 +2439,14 @@ public class Position : IDisposable
     /// if the defending one is closer enough, it's also a draw.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsBishopPawnDraw(int winningSideOffset)
+    internal bool IsBishopPawnDraw(int winningSideOffset, ref int eval)
     {
         var pawns = _pieceBitBoards[(int)Piece.P + winningSideOffset];
+
+        if ((pawns& Constants.NotAorH) != 0)
+        {
+            return false;
+        }
 
         bool hasAFilePawn = (pawns & Constants.AFile) != 0;
         bool hasHFilePawn = (pawns & Constants.HFile) != 0;
@@ -2458,6 +2456,9 @@ public class Position : IDisposable
         {
             return false;
         }
+
+        // If only A or H pawns, let's halve the score
+        eval >>= 1;
 
         // 1 if black is winning
         var inverseWinningSide = winningSideOffset >> 2;
@@ -2470,17 +2471,58 @@ public class Position : IDisposable
                 : (int)BoardSquare.h8)
             + (inverseWinningSide * whiteBlackDiff);
 
-        var defendingKingSquare = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
-
-        // Not in the corner or adjacent squares
-        if (Constants.ChebyshevDistance[defendingKingSquare][promotionCornerSquare] > 1)
+        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+        if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
         {
             return false;
         }
 
-        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+        var defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+        var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing];
 
-        return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
+        // Draw guaranteed
+        if (defendingKingCornerDistance <= 1)
+        {
+            eval = 0;
+            return true;
+        }
+
+        // We check now for a likely draw, with still some unresolved edge cases such as 4k3/8/4K3/6B1/8/8/P7/8 b - - 0 1
+        var attackingKing = _pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
+        var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
+
+        pawns = pawns.WithoutLS1B(out var pawnSquare);
+        var closerPawnCornerDistance = Math.Abs(promotionCornerSquare - pawnSquare) >> 3;  // /8
+
+        // Normally this won't be executed, since only one pawn is the typical case
+        while (pawns != 0)
+        {
+            pawns = pawns.WithoutLS1B(out var loopPawnSquare);
+
+            var promotionDistance = Math.Abs(promotionCornerSquare - loopPawnSquare) >> 3;  // /8
+            if (promotionDistance < closerPawnCornerDistance)
+            {
+                closerPawnCornerDistance = promotionDistance;
+            }
+        }
+
+        // The are two cases when the defending king can't reduce the distance to the corner:
+        // - If the attacking one is in the middle, and therefore their difference is at least 2 distance squares - not a concern
+        // - If the pawn is in 7th rank and blocks the defending king from approaching the corner - we don't use this for comparing defending and attacking conditions
+        int oneIfDefendingSideTomove = (int)_side ^ inverseWinningSide ^ 1;
+
+        var likelyADraw =
+            closerPawnCornerDistance > defendingKingCornerDistance          // Avoids bishop + king blocking, i.e. 2k5/P7/2K5/8/8/8/8/B7 b - - 0 1, 4k3/8/4K3/P7/8/8/8/B7 b - - 0 1
+            && attackingKingCornerDistance > 2                              // Avoids bishop blocking, i.e. 2k5/8/2K5/8/5B2/8/P7/8 b - - 0 1
+            && defendingKingCornerDistance - oneIfDefendingSideTomove < attackingKingCornerDistance
+            && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];     // Avoids king diagonal blocking, i.e. 3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48
+
+        if (likelyADraw)
+        {
+            eval >>= 1; // /4 total
+        }
+
+        return false;
     }
 
     #endregion

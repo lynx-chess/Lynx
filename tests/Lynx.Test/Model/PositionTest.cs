@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 
 using static Lynx.EvaluationConstants;
@@ -1046,8 +1047,10 @@ public class PositionTest
     {
         var position = new Position(fen);
 
+        int eval = 1000;
+
         var winnigSideOffset = Utils.PieceOffset(position.Side);
-        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
+        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset, ref eval));
     }
 
     [TestCase("1k6/8/K7/8/8/2B5/P7/8 w - - 0 48", true)]
@@ -1103,9 +1106,35 @@ public class PositionTest
     [TestCase("4k3/8/4K3/6B1/8/8/P7/8 b - - 0 1", false, Description = "Bishop blocks king from reaching the corner", IgnoreReason = "FP, this is where I gave up")]
     public void IsBishopPawnDraw_Distance(string fen, bool isDraw)
     {
+        const int InitialEval = 500;
+        const int ReducedEval = InitialEval / 2;
+        const int ShouldBeADrawEval = ReducedEval / 2;
+
         var position = new Position(fen);
 
         var winnigSideOffset = Utils.PieceOffset(position.PieceBitBoards[(int)Piece.P] != 0 ? Side.White : Side.Black);
+
+        var eval = InitialEval;
+        var result = position.IsBishopPawnDraw(winnigSideOffset, ref eval);
+
+        //Assert.AreEqual(isDraw, result);
+
+        if (result)
+        {
+            Assert.Zero(eval);
+        }
+        else
+        {
+            if (isDraw)
+            {
+                Assert.AreEqual(ShouldBeADrawEval, eval);
+            }
+            else
+            {
+                Assert.AreEqual(ReducedEval, eval);
+            }
+        }
+
         Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winnigSideOffset));
 
         static bool IsBishopPawnDraw(Position position, int winningSideOffset)
