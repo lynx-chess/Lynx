@@ -1043,6 +1043,8 @@ public class PositionTest
     [TestCase("7k/7P/8/5K1P/7P/7P/4B2P/8 w - - 0 1", true)]
     [TestCase("7k/8/8/5K2/8/4B3/7P/8 w - - 0 1", false)]
 
+    [TestCase("8/8/7p/pB1kp3/6K1/8/8/8 b - - 0 1", false, Description = "Bishop and pawns from opposite side")]
+
     public void IsBishopPawnDraw(string fen, bool isDraw)
     {
         var position = new Position(fen);
@@ -1112,7 +1114,7 @@ public class PositionTest
 
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(position.PieceBitBoards[(int)Piece.P] != 0 ? Side.White : Side.Black);
+        var winnigSideOffset = Utils.PieceOffset(position.PieceBitBoards[(int)Piece.B] != 0 ? Side.White : Side.Black);
 
         var eval = InitialEval;
         var result = position.IsBishopPawnDraw(winnigSideOffset, ref eval);
