@@ -2451,7 +2451,6 @@ public class Position : IDisposable
         bool hasAFilePawn = (pawns & Constants.AFile) != 0;
         bool hasHFilePawn = (pawns & Constants.HFile) != 0;
 
-        // We filtered by Constants.NotAorH == 0 earlier, now we check that only one of those files has pawns
         if (hasAFilePawn == hasHFilePawn)
         {
             return false;
