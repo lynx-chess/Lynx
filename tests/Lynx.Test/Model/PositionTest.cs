@@ -1100,7 +1100,6 @@ public class PositionTest
         Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
     }
 
-
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
         var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
@@ -1136,10 +1135,24 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(ref evaluationContext, 0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(AdditionalPieceEvaluation(position, ref evaluationContext, 0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
+
+        // Position.AdditionalPieceEvaluation but including pawns
+        static int AdditionalPieceEvaluation(Position position, ref EvaluationContext evaluationContext, int bucket, int oppositeSideBucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+        {
+            Assert.AreNotEqual(pieceIndex, (int)Piece.K);
+            Assert.AreNotEqual(pieceIndex, (int)Piece.k);
+
+            return pieceIndex switch
+            {
+                (int)Piece.P or (int)Piece.p => position.PawnAdditionalEvaluation(ref evaluationContext, bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
+                _ => position.AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare)
+            };
+        }
+
     }
 
     private static int AdditionalKingEvaluation(Position position, Piece piece)
