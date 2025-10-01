@@ -110,7 +110,7 @@ public readonly struct TranspositionTable
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+         var recalculatedScore = ScoreFromTT(entry.Score, ply);
 
         result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
 
@@ -148,7 +148,7 @@ public readonly struct TranspositionTable
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var recalculatedScore = RecalculateMateScores(score, -ply);
+        var recalculatedScore = ScoreToTT(score, ply);
 
         entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
     }
@@ -221,6 +221,66 @@ public readonly struct TranspositionTable
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return (int)ttLength;
+    }
+
+    /// <summary>
+    /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
+    /// The opposite if the playing side is getting checkmated.
+    /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int ScoreToTT(int score, int ply)
+    {
+        if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
+        {
+            if (score > EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("ScoreToTT: score > CheckMateBaseEvaluation: {0} > {1}, saving score + ply", score, EvaluationConstants.CheckMateBaseEvaluation);
+            }
+
+            return score + ply;
+        }
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            if (score < -EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("ScoreToTT: score < -CheckMateBaseEvaluation: {0} > {1}, saving score - ply", score, EvaluationConstants.CheckMateBaseEvaluation);
+            }
+
+            return score - ply;
+        }
+
+        return score;
+    }
+
+    /// <summary>
+    /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
+    /// The opposite if the playing side is getting checkmated.
+    /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int ScoreFromTT(int score, int ply)
+    {
+        if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
+        {
+            if (score - ply > EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("ScoreFromTT: score - ply > CheckMateBaseEvaluation: {0}", score - ply);
+            }
+
+            return score - ply;
+        }
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            if (score + ply < -EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("ScoreFromTT: score + ply < -CheckMateBaseEvaluation: {0}", score + ply);  // 7q/8/8/8/3k4/8/8/3K4 w - - 0 1
+            }
+
+            return score + ply;
+        }
+
+        return score;
     }
 
     /// <summary>

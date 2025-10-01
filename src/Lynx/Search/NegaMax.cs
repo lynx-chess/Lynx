@@ -24,6 +24,12 @@ public sealed partial class Engine
     {
         var position = Game.CurrentPosition;
 
+        if (position.UniqueIdentifier == 331990209780798829
+            && depth == 2 && ply == 30)
+        {
+            ;
+        }
+
         Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
         Span<BitBoard> attacks = stackalloc BitBoard[12];
