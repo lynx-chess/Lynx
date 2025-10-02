@@ -1055,7 +1055,7 @@ public partial class Position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
-    eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
+        eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
 
     /// <summary>
     /// If the pawn is in A or H files, the defending king reaches the corner/queening square or adjacent squares
