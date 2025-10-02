@@ -47,6 +47,8 @@ public static class EvaluationConstants
 
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
+            var clampedDepth = Math.Min(searchDepth, Configuration.EngineSettings.MaxDepth);
+
             quietReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -54,24 +56,24 @@ public static class EvaluationConstants
             {
                 quietReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     LMRScaleFactor *
-                    (Configuration.EngineSettings.LMR_Base_Quiet + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Quiet))));
+                    (Configuration.EngineSettings.LMR_Base_Quiet + (Math.Log(movesSearchedCount) * Math.Log(clampedDepth) / Configuration.EngineSettings.LMR_Divisor_Quiet))));
 
                 noisyReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     LMRScaleFactor *
-                    (Configuration.EngineSettings.LMR_Base_Noisy + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Noisy))));
+                    (Configuration.EngineSettings.LMR_Base_Noisy + (Math.Log(movesSearchedCount) * Math.Log(clampedDepth) / Configuration.EngineSettings.LMR_Divisor_Noisy))));
             }
 
             HistoryBonus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_Bonus_MaxIncrement,
                 Configuration.EngineSettings.History_Bonus_Constant
-                + (Configuration.EngineSettings.History_Bonus_Linear * searchDepth)
-                + (Configuration.EngineSettings.History_Bonus_Quadratic * searchDepth * searchDepth));
+                + (Configuration.EngineSettings.History_Bonus_Linear * clampedDepth)
+                + (Configuration.EngineSettings.History_Bonus_Quadratic * clampedDepth * clampedDepth));
 
             HistoryMalus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_Malus_MaxDecrement,
                 Configuration.EngineSettings.History_Malus_Constant
-                + (Configuration.EngineSettings.History_Malus_Linear * searchDepth)
-                + (Configuration.EngineSettings.History_Malus_Quadratic * searchDepth * searchDepth));
+                + (Configuration.EngineSettings.History_Malus_Linear * clampedDepth)
+                + (Configuration.EngineSettings.History_Malus_Quadratic * clampedDepth * clampedDepth));
         }
 
         for (int square = 0; square < 64; ++square)
