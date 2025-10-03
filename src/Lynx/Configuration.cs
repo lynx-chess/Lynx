@@ -251,6 +251,9 @@ public sealed class EngineSettings
     public int LMR_Corrplexity { get; set; } = 197;
 
     [SPSA<int>(25, 300, 30)]
+    public int LMR_FirstKiller { get; set; } = 100;
+
+    [SPSA<int>(25, 300, 30)]
     public int LMR_Corrplexity_Delta { get; set; } = 124;
 
     [SPSA<int>(enabled: false)]
