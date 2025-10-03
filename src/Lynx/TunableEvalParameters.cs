@@ -6023,6 +6023,8 @@ public static class EvaluationParams
 	/// </summary>
 	public const int KingShieldNonAttackedBonus = -196569;
 
+	public const int KingShieldAttackedPenalty = -3014691;
+
 	/// <summary>
 	/// <see cref="Utils.Pack(30, 71)"/>
 	/// </summary>

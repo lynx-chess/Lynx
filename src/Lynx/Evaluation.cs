@@ -901,9 +901,11 @@ public partial class Position
         var kingShieldCount = kingShield.CountBits();
 
         var nonAttackedShieldCount = (kingShield & (~oppositSidePawnAttacks)).CountBits();
+        var attackedShieldCount = kingShieldCount - nonAttackedShieldCount;
 
-        return (KingShieldBonus * (kingShieldCount - nonAttackedShieldCount))
-            + (KingShieldNonAttackedBonus * nonAttackedShieldCount);
+        return (KingShieldBonus * kingShieldCount
+            + (KingShieldNonAttackedBonus * nonAttackedShieldCount)
+            + (KingShieldAttackedPenalty * attackedShieldCount));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
