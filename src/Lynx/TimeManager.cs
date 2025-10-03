@@ -10,7 +10,14 @@ public static class TimeManager
     /// <summary>
     /// Values from Stash, every attempt to further tune them failed
     /// </summary>
-    private static ReadOnlySpan<double> BestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
+    private static readonly double[] _bestMoveStabilityValues =
+    [
+        Configuration.EngineSettings.BM_Stability_0,
+        Configuration.EngineSettings.BM_Stability_1,
+        Configuration.EngineSettings.BM_Stability_2,
+        Configuration.EngineSettings.BM_Stability_3,
+        Configuration.EngineSettings.BM_Stability_4
+    ];
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -41,12 +48,13 @@ public static class TimeManager
             // Used to apply MovesToGo here if available, but that becomes an issue in some mate-detected high depth searches
             var movesDivisor = MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()));
 
+            millisecondsLeft -= millisecondsIncrement;
             millisecondsLeft -= engineGuiCommunicationTimeOverhead;
             millisecondsLeft = Math.Clamp(millisecondsLeft, Configuration.EngineSettings.MinSearchTime, int.MaxValue); // Avoiding 0/negative values
 
             hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
 
-            var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
+            var softLimitBase = (millisecondsLeft / movesDivisor) + millisecondsIncrement;
             softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
             _logger.Info("[TM] Soft time bound: {0}ms", softLimitTimeBound);
@@ -100,9 +108,9 @@ public static class TimeManager
         scale *= nodeTmFactor;
 
         // ⌛ Best move stability: The less best move changes, the less time we spend in the search
-        Debug.Assert(BestMoveStabilityValues.Length > 0);
+        Debug.Assert(_bestMoveStabilityValues.Length > 0);
 
-        double bestMoveStabilityFactor = BestMoveStabilityValues[Math.Min(bestMoveStability, BestMoveStabilityValues.Length - 1)];
+        double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
         // ⌛ Score stability: if score improves, we spend less timespend in the search
@@ -177,8 +185,6 @@ public static class TimeManager
     /// Moves 459-469: 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40 40
     /// Moves 479-489: 40 40 40 40 40 40 40 40 40 40 40 40 40 42 42 42 42 42 42 42
     /// </summary>
-    /// <param name="expectedMovesLeft"></param>
-    /// <returns></returns>
     private static int MovesDivisor(int expectedMovesLeft)
     {
         return (int)(expectedMovesLeft * Configuration.EngineSettings.MoveDivisor);
