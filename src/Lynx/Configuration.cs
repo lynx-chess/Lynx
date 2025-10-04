@@ -397,6 +397,9 @@ public sealed class EngineSettings
     public int FP_Margin { get; set; } = 115;
 
     [SPSA<int>(enabled: false)]
+    public int FP_HistoryDivisor { get; set; } = 16;
+
+    [SPSA<int>(enabled: false)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
