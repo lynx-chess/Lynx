@@ -17,7 +17,7 @@ jobs:
         echo "RELEASE_TAG=$tag" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
     - name: 'Repository Dispatch (tag: ${{ env.RELEASE_TAG }})'
-      uses: peter-evans/repository-dispatch@v2
+      uses: peter-evans/repository-dispatch@v4
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: lynx-chess/Lynx_BOT
