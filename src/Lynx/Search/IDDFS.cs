@@ -88,7 +88,7 @@ public sealed partial class Engine
 
     private int _bestMoveStability;
     private int _scoreDelta;
-    private int _rootStaticEval;
+    private int _baseComplexityTMScore = int.MinValue;
 
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
@@ -139,8 +139,6 @@ public sealed partial class Engine
             // Not clearing _captureHistory on purpose
 
             int mate = 0;
-
-            _rootStaticEval = Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
 
             do
             {
@@ -258,6 +256,11 @@ public sealed partial class Engine
                     _scoreDelta = 0;
 
                     continue;
+                }
+
+                if (depth == 1)
+                {
+                    _baseComplexityTMScore = bestScore;
                 }
 
                 lastSearchResult = lastSearchResultCandidate;
@@ -407,7 +410,7 @@ public sealed partial class Engine
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
             var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
-            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _rootStaticEval, _scoreDelta);
+            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta, mate, _baseComplexityTMScore, bestScore);
 
             _logger.Log(logLevel,
                 "[#{EngineId}] [TM] {ElapsedMilliseconds}ms | Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}ms, scaled soft limit {ScaledSoftLimit}ms",

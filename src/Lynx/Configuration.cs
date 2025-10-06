@@ -166,10 +166,10 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
-    public int TM_Complexity_MinDepth { get; set; } = 0;
+    public int TM_Complexity_MinDepth { get; set; } = 6;
 
     [SPSA<double>(enabled: false)]
-    public double TM_Complexity_Base { get; set; } = 0.8;
+    public double TM_Complexity_Base { get; set; } = 0.6;
 
     [SPSA<double>(enabled: false)]
     public double TM_Complexity_FactorBase { get; set; } = 0.7;
@@ -178,10 +178,11 @@ public sealed class EngineSettings
     public int TM_Complexity_Max { get; set; } = 200;
 
     [SPSA<int>(enabled: false)]
-    public int TM_Complexity_Divisor { get; set; } = 400;
+    public int TM_Complexity_Divisor { get; set; } = 385;
 
     [SPSA<int>(enabled: false)]
     public int SoftTimeBoundLimitOnMate { get; set; } = 1_000;
+
     public int StopSearchOnMate_MaxSoftTimeBoundLimit { get; set; } = 10_000;
 
     [SPSA<int>(enabled: false)]

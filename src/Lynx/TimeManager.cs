@@ -3,7 +3,6 @@ using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace Lynx;
 public static class TimeManager
@@ -82,7 +81,7 @@ public static class TimeManager
         ulong bestMoveNodeCount, ulong totalNodeCount,  // Node TM
         int bestMoveStability,                          // Best move stability
         int scoreDelta,                                 // Score stability
-        int mate, int staticEval, int score)            // Complexity
+        int mate, int baseScore, int score)            // Complexity
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -131,7 +130,7 @@ public static class TimeManager
             double factorBase = Configuration.EngineSettings.TM_Complexity_FactorBase;
 
             double complexity = Math.Clamp(
-                complexityBase * Math.Log(depth) * Math.Abs(staticEval - score),
+                complexityBase * Math.Log(depth) * Math.Abs(baseScore - score),
                 0, complexityMax);
 
             double complexityFactor = Math.Max(factorBase + (complexity / complexityDivisor), 1.0);
