@@ -14,6 +14,8 @@ public readonly struct GameState
 
     public readonly ulong MinorKey;
 
+    public readonly ulong MajorKey;
+
     public readonly int IncrementalEvalAccumulator;
 
     public readonly int IncrementalPhaseAccumulator;
@@ -32,14 +34,15 @@ public readonly struct GameState
         NonPawnWhiteKey = position.NonPawnHash[(int)Side.White];
         NonPawnBlackKey = position.NonPawnHash[(int)Side.Black];
         MinorKey = position.MinorHash;
+        MajorKey = position.MajorHash;
 
         EnPassant = position.EnPassant;
         Castle = position.Castle;
-        IncrementalEvalAccumulator = position._incrementalEvalAccumulator;
-        IncrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
+        IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;
+        IncrementalPhaseAccumulator = position.IncrementalPhaseAccumulator;
 
         // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
-        IsIncrementalEval = position._isIncrementalEval;
+        IsIncrementalEval = position.IsIncrementalEval;
     }
 }
 

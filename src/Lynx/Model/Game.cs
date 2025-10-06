@@ -57,6 +57,10 @@ public sealed class Game : IDisposable
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
 #endif
 
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
             if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -64,7 +68,7 @@ public sealed class Game : IDisposable
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -93,8 +97,9 @@ public sealed class Game : IDisposable
     /// </remarks>
     /// <returns>true if threefol/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Update50movesRule(Move moveToPlay, bool isCapture)
+    public bool Update50movesRule(Move moveToPlay)
     {
+        var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
         if (isCapture)
         {
             if (HalfMovesWithoutCaptureOrPawnMove < 100)
@@ -150,14 +155,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition()
+    public bool Is50MovesRepetition(ref EvaluationContext evaluationContext)
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
     }
 
     /// <summary>
@@ -198,7 +203,7 @@ public sealed class Game : IDisposable
             MoveHistory.Add(moveToPlay);
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
-            Update50movesRule(moveToPlay, moveToPlay.IsCapture());
+            Update50movesRule(moveToPlay);
         }
         else
         {
@@ -216,14 +221,14 @@ public sealed class Game : IDisposable
     /// </summary>
     public void ResetCurrentPositionToBeforeSearchState()
     {
-        CurrentPosition.FreeResources();
+        CurrentPosition.Dispose();
         CurrentPosition = new(PositionBeforeLastSearch);
         //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
     }
 
     public void UpdateInitialPosition()
     {
-        PositionBeforeLastSearch.FreeResources();
+        PositionBeforeLastSearch.Dispose();
         PositionBeforeLastSearch = new(CurrentPosition);
     }
 
@@ -259,24 +264,17 @@ public sealed class Game : IDisposable
 
     internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
 
-    public void FreeResources()
-    {
-        ArrayPool<PlyStackEntry>.Shared.Return(_stack, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(_positionHashHistory);
-
-        CurrentPosition.FreeResources();
-        PositionBeforeLastSearch.FreeResources();
-
-        _disposedValue = true;
-    }
-
     private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {
             if (disposing)
             {
-                FreeResources();
+                ArrayPool<PlyStackEntry>.Shared.Return(_stack, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(_positionHashHistory);
+
+                CurrentPosition.Dispose();
+                PositionBeforeLastSearch.Dispose();
             }
             _disposedValue = true;
         }
@@ -286,8 +284,9 @@ public sealed class Game : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
-#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+
+#pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
-#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
+#pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }

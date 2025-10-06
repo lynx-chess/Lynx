@@ -11,7 +11,7 @@
 /// As the engine's reaction to "ucinewgame" can take some time the GUI should always send "isready"
 /// after "ucinewgame" to wait for the engine to finish its operation.
 /// </summary>
-public sealed class UCINewGameCommand : IGUIBaseCommand
+public sealed class UCINewGameCommand
 {
     public const string Id = "ucinewgame";
 }

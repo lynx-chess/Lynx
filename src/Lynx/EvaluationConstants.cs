@@ -1,18 +1,20 @@
 ﻿#pragma warning disable IDE1006 // Naming Styles
 
+using Lynx.Model;
+
 namespace Lynx;
 
 public static class EvaluationConstants
 {
     /// <summary>
     /// 20_000 games, 20+0.2, 8moves_v3.epd, no draw or win adj.
-    /// Retained (W,D,L) = (272715, 1185060, 273741) positions.
+    /// Retained (W,D,L) = (255778, 1133525, 258436) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 106;
+    public const int EvalNormalizationCoefficient = 119;
 
-    public static ReadOnlySpan<double> As => [-125.11999431, 381.50441206, -387.22057929, 237.10649364];
+    public static ReadOnlySpan<double> As => [-67.76492157, 235.07770928, -265.49800799, 216.72078173];
 
-    public static ReadOnlySpan<double> Bs => [-19.65335125, 71.35751187, -48.50235437, 46.90811211];
+    public static ReadOnlySpan<double> Bs => [9.39499192, -0.02030904, 11.00261578, 34.82067134];
 
     public static ReadOnlySpan<int> GamePhaseByPiece =>
     [
@@ -23,12 +25,14 @@ public static class EvaluationConstants
     public const int MaxPhase = 24;
 
     /// <summary>
-    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
+    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/>
     /// </summary>
     public static readonly int[][][] LMRReductions = new int[2][][];
 
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
+
+    public static readonly BitBoard[] KingRing = new BitBoard[64];
 
     public const int LMRScaleFactor = 100;
 
@@ -43,31 +47,49 @@ public static class EvaluationConstants
 
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
-            quietReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
-            noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+            var clampedDepth = Math.Min(searchDepth, Configuration.EngineSettings.MaxDepth);
 
-            for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
+            quietReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+            for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPseudolegalMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
                 quietReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     LMRScaleFactor *
-                    (Configuration.EngineSettings.LMR_Base_Quiet + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Quiet))));
+                    (Configuration.EngineSettings.LMR_Base_Quiet + (Math.Log(movesSearchedCount) * Math.Log(clampedDepth) / Configuration.EngineSettings.LMR_Divisor_Quiet))));
 
                 noisyReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     LMRScaleFactor *
-                    (Configuration.EngineSettings.LMR_Base_Noisy + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Noisy))));
+                    (Configuration.EngineSettings.LMR_Base_Noisy + (Math.Log(movesSearchedCount) * Math.Log(clampedDepth) / Configuration.EngineSettings.LMR_Divisor_Noisy))));
             }
 
             HistoryBonus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_Bonus_MaxIncrement,
                 Configuration.EngineSettings.History_Bonus_Constant
-                + (Configuration.EngineSettings.History_Bonus_Linear * searchDepth)
-                + (Configuration.EngineSettings.History_Bonus_Quadratic * searchDepth * searchDepth));
+                + (Configuration.EngineSettings.History_Bonus_Linear * clampedDepth)
+                + (Configuration.EngineSettings.History_Bonus_Quadratic * clampedDepth * clampedDepth));
 
             HistoryMalus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_Malus_MaxDecrement,
                 Configuration.EngineSettings.History_Malus_Constant
-                + (Configuration.EngineSettings.History_Malus_Linear * searchDepth)
-                + (Configuration.EngineSettings.History_Malus_Quadratic * searchDepth * searchDepth));
+                + (Configuration.EngineSettings.History_Malus_Linear * clampedDepth)
+                + (Configuration.EngineSettings.History_Malus_Quadratic * clampedDepth * clampedDepth));
+        }
+
+        for (int square = 0; square < 64; ++square)
+        {
+            KingRing[square] = Attacks.KingAttacks[square];
+
+            var rank = Constants.Rank[square];
+
+            if (rank == 0)
+            {
+                KingRing[square] |= KingRing[square].ShiftUp();
+            }
+            else if (rank == 7)
+            {
+                KingRing[square] |= KingRing[square].ShiftDown();
+            }
         }
     }
 

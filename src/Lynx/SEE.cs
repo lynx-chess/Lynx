@@ -26,7 +26,7 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
-        Debug.Assert(move.IsCapture(), "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
+        Debug.Assert(move.CapturedPiece() != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
         Debug.Assert(move.PromotedPiece() == default, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
         Debug.Assert(!move.IsEnPassant(), "Assert fail", $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
 
@@ -61,7 +61,7 @@ public static class SEE
 
         var attackers = position.AllAttackersTo(targetSquare, occupancy, rooks, bishops);
 
-        var us = Utils.OppositeSide(sideToMove);
+        var us = Utils.OppositeSide((int)sideToMove);
 
         while (true)
         {
@@ -113,7 +113,7 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool HasPositiveScore(Position position, Move move, int threshold = 0)
     {
-        var sideToMove = position.Side;
+        var sideToMove = (int)position.Side;
 
         var score = Gain(move) - threshold;
 
@@ -190,7 +190,7 @@ public static class SEE
             }
         }
 
-        return (int)sideToMove != us;
+        return sideToMove != us;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -210,7 +210,7 @@ public static class SEE
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
             ? PieceValues[move.CapturedPiece()]
-            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + (move.IsCapture() ? PieceValues[move.CapturedPiece()] : 0);
+            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + PieceValues[move.CapturedPiece()];
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 

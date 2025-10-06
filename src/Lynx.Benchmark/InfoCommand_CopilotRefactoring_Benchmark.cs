@@ -103,7 +103,9 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
         return InfoCommand_Benchmark.SearchResultInfo_Copilot(result).Length;
     }
 
-    public sealed class InfoCommand_Benchmark : IEngineBaseCommand
+#pragma warning disable S1118 // Utility classes should not have public constructors
+
+    public sealed class InfoCommand_Benchmark
     {
         public const string Id = "info";
 
@@ -175,4 +177,6 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
             return sb.ToString();
         }
     }
+
+#pragma warning restore S1118 // Utility classes should not have public constructors
 }

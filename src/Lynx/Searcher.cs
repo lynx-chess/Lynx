@@ -7,7 +7,7 @@ using System.Threading.Channels;
 
 namespace Lynx;
 
-public sealed class Searcher
+public sealed class Searcher : IDisposable
 {
     private readonly ChannelReader<string> _uciReader;
     private readonly ChannelWriter<object> _engineWriter;
@@ -30,6 +30,7 @@ public sealed class Searcher
     public string FEN => _mainEngine.Game.FEN;
 
     private bool _firstRun;
+    private bool _disposedValue;
 
     public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
@@ -92,21 +93,26 @@ public sealed class Searcher
         }
     }
 
-    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print();
+    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove);
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
+        _firstRun = false;
         _isProcessingGoCommand = true;
 
         if (!_absoluteSearchCancellationTokenSource.TryReset())
         {
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _absoluteSearchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _absoluteSearchCancellationTokenSource = new();
         }
 
         if (!_searchCancellationTokenSource.TryReset())
         {
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _searchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _searchCancellationTokenSource = new();
         }
 
@@ -174,7 +180,9 @@ public sealed class Searcher
             if (_isPonderHit)
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource = new();
 
                 if (searchResult is null
@@ -254,7 +262,9 @@ public sealed class Searcher
             if (_isPonderHit)
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource = new();
 
                 if (finalSearchResult is null
@@ -553,10 +563,12 @@ public sealed class Searcher
             // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
             _ttWrapper.Clear();
 
-            _mainEngine.FreeResources();
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
+            _mainEngine.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
 
-            // We need extra engines to know about the nwe TT
+            // We need extra engines to know about the new TT
             AllocateExtraEngines();
 
             return true;
@@ -601,8 +613,10 @@ public sealed class Searcher
 
         foreach (var engine in _extraEngines)
         {
-            engine.FreeResources();
+            engine.Dispose();
         }
+
+        Array.Clear(_extraEngines);
 
         if (_searchThreadsCount > 1)
         {
@@ -657,7 +671,7 @@ public sealed class Searcher
         Parallel.For(0, warmupCount, i =>
         {
             var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-            var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
+            using var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
 
             engine.Warmup();
         });
@@ -665,4 +679,30 @@ public sealed class Searcher
         _logger.Info("Warm-up time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 #pragma warning restore S1144, RCS1213 // Unused private types or members should be removed
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _mainEngine.Dispose();
+
+                foreach(var engine in _extraEngines)
+                {
+                    engine.Dispose();
+                }
+
+                _absoluteSearchCancellationTokenSource.Dispose();
+                _searchCancellationTokenSource.Dispose();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+    }
 }

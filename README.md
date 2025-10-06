@@ -27,7 +27,8 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 
 | Version | Date | Selfplay<br>gain<sup>1</sup><br>[40+0.4] | Estimated<br>elo<sup>2</sup><br>[40+0.4] | [CCRL<br>40/15](https://www.computerchess.org.uk/ccrl/4040/cgi/compare_engines.cgi?class=Single-CPU+engines&only_best_in_class=on&num_best_in_class=1&print=Rating+list)<br>[720+8] | [CCRL<br>Blitz](https://www.computerchess.org.uk/ccrl/404/cgi/compare_engines.cgi?class=Single-CPU+engines&only_best_in_class=on&num_best_in_class=1&print=Rating+list)<br>[120+1] | [MCERL](https://www.chessengeria.eu/mcerl)<br><br>[60+0.6] | [CEGT<br>40/20](http://www.cegt.net/40_40%20Rating%20List/40_40%20All%20Versions/rangliste.html)<br>[600+5] | [CEGT<br>40/4](http://www.cegt.net/40_4_Ratinglist/40_4_AllVersion/rangliste.html)<br>[240+2] | [CEGT<br>5+3 pb](http://www.cegt.net/5Plus3Rating/5Plus3AllVersion/rangliste.html)<br>[300+3] | [UBC](https://e4e6.com/)<br><br>[10+0.1] |
 |---|--|---|---|---|---|---|---|---|---|---|
-| [1.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.10.0) | 2025-06-29 | [+97](https://github.com/lynx-chess/Lynx/commit/1ef83b58f2a0cea27b33a9185ef7af4ab4a01143#commitcomment-161079051) | [3279](https://github.com/lynx-chess/Lynx/commit/1ef83b58f2a0cea27b33a9185ef7af4ab4a01143#commitcomment-161079077) | [3225](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.10.0%2064-bit#Lynx_1_10_0_64-bit) | [3301](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.10.0%2064-bit#Lynx_1_10_0_64-bit) |  | 3139 | 3154 |  |  |
+| [1.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.11.0) | 2025-10-02 | [+104](https://github.com/lynx-chess/Lynx/commit/2e4b458f1df480b08969f9561ec067c94b17a13b#commitcomment-166964832) | [3356](https://github.com/lynx-chess/Lynx/commit/2e4b458f1df480b08969f9561ec067c94b17a13b#commitcomment-166964983) |  |  |  |  |  |  |  |
+| [1.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.10.0) | 2025-06-29 | [+97](https://github.com/lynx-chess/Lynx/commit/1ef83b58f2a0cea27b33a9185ef7af4ab4a01143#commitcomment-161079051) | [3279](https://github.com/lynx-chess/Lynx/commit/1ef83b58f2a0cea27b33a9185ef7af4ab4a01143#commitcomment-161079077) | [3237](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.10.0%2064-bit#Lynx_1_10_0_64-bit) | [3303](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.10.0%2064-bit#Lynx_1_10_0_64-bit) |  | 3139 | 3154 | 3163 |  |
 | [1.9.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.9.1) | 2025-04-05 | - | - |  |  |  |  |  | 3077 |  |
 | [1.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.9.0) | 2025-03-11 | [+57](https://github.com/lynx-chess/Lynx/commit/f3d97c5c54cf322a38c08615fb7c4378e9a8b3e4#commitcomment-153583124) | [3203](https://github.com/lynx-chess/Lynx/commit/f3d97c5c54cf322a38c08615fb7c4378e9a8b3e4#commitcomment-153583167) |  [3160](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.9.0%2064-bit#Lynx_1_9_0_64-bit) | [3237](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.9.0%2064-bit#Lynx_1_9_0_64-bit) |  | 3068 | 3060 |  | 3193 |
 | [1.8.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.8.0) | 2024-12-20 | [+70](https://github.com/lynx-chess/Lynx/commit/41ae2c878ffeb587c02f016265bafc333207b544#commitcomment-150529143) | [3150](https://github.com/lynx-chess/Lynx/commit/41ae2c878ffeb587c02f016265bafc333207b544#commitcomment-150534767) | [3127](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.8.0%2064-bit#Lynx_1_8_0_64-bit) | [3154](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.8.0%2064-bit#Lynx_1_8_0_64-bit) | 3139 | 3019 |  | 3006 | 3144 |
@@ -134,7 +135,7 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
 
-- History heuristic: quiet history, capture history, continuation history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
+- History heuristic: quiet history with threats, capture history, continuation history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
 
 - Countermoves
 
@@ -143,6 +144,10 @@ _Beware, most of the provided links contain outdated information and don't refle
 - TT PV / wasPv
 
 - PVS SEE pruning
+
+- Singular Extensions
+
+- Correction history
 
 ### Evaluation
 
@@ -168,7 +173,7 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Connected rooks
 
-- King pawn shield, king virtual mobility, king in open and semi-open files
+- King pawn shield, king virtual mobility, king in open and semi-open files, king ring attacks
 
 - Isolated pawns
 
@@ -178,9 +183,11 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Pawn islands
 
+- Backwards pawn
+
 - Pieces protected and attacked by pawns
 
-- Pieces capable of deliverying checks
+- Pieces capable of deliverying safe/unsafe checks
 
 - Eval scaling with pawn count and 50 moves rule
 
@@ -189,6 +196,12 @@ _Beware, most of the provided links contain outdated information and don't refle
 - Incremental evaluation (partially at least)
 
 - King + pawn structure hash table
+
+- Threats
+
+- Cornered bishop (DFRC)
+
+- Pawnless endgames and endgames with few pieces
 
 ### Time management
 

@@ -55,7 +55,8 @@ using static Lynx.TunableEvalParameters;
 //NewMasks();
 //DarkLightSquares();
 //PawnIslands();
-CastlingBitBoards();
+//PrintKingRing();
+ManhattanDistance();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -410,9 +411,13 @@ static void _23_Castling_Moves()
     position.Print();
 
     int index = 0;
-    var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+    var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-    MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+    Span<BitBoard> attacks = stackalloc BitBoard[12];
+    Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+    var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
 
     foreach (var move in moves[..index])
     {
@@ -469,7 +474,7 @@ static void PrintMoveList(IEnumerable<Move> moves)
         sb.AppendFormat("{0,-3}", i + 1)
           .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece()])
           .AppendFormat("{0,-4}", Constants.Coordinates[move.SourceSquare()])
-          .AppendFormat("{0,-2}", isCapture(move.IsCapture()))
+          .AppendFormat("{0,-2}", isCapture(move.CapturedPiece() != (int)Piece.None))
           .AppendFormat("{0,-4}", Constants.Coordinates[move.TargetSquare()])
           .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush()))
           .AppendFormat("{0,-3}", bts(move.IsEnPassant()))
@@ -700,9 +705,12 @@ static void _54_ScoreMove()
 
     var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position.FEN()));
+    Span<BitBoard> attacks = stackalloc BitBoard[12];
+    Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+    var evaluationContext = new EvaluationContext(attacks, attacksBySide);
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext)}");
     }
 
     position = new Position(TrickyPosition);
@@ -711,7 +719,7 @@ static void _54_ScoreMove()
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext)}");
     }
 }
 
@@ -1084,20 +1092,7 @@ static void TranspositionTableMethod()
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
     transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, false, move: 1234);
-    var entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 20
-
-    transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, false, move: 1234);
-    entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 12_345_678
-
-    transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, false, move: 1234);
-    entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 12_345_678
-
-    transpositionTable.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, false, move: 1234);
-    entry = transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3);
-    Console.WriteLine(entry); // Expected 30
+    transpositionTable.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 3, out var entry);
 }
 
 static void UnmakeMove()
@@ -1236,10 +1231,29 @@ static void PawnIslands()
     PawnIslandsGenerator.GeneratePawnIslands();
 }
 
-static void CastlingBitBoards()
+static void PrintKingRing()
 {
-    Constants.WhiteShortCastleFreeSquares.Print();
-    Constants.WhiteLongCastleFreeSquares.Print();
-    Constants.BlackShortCastleFreeSquares.Print();
-    Constants.BlackLongCastleFreeSquares.Print();
+    Console.WriteLine(string.Join("UL,\n", KingRing));
+}
+
+static void ManhattanDistance()
+{
+    for (int sq1 = 0; sq1 < 64; ++sq1)
+    {
+        var sq1Rank = Constants.Rank[sq1];
+        var sq1File = Constants.File[sq1];
+
+        Console.Write("[");
+        for (int sq2 = 0; sq2 < 64; ++sq2)
+        {
+            var sq2Rank = Constants.Rank[sq2];
+            var sq2File = Constants.File[sq2];
+
+            var distance = Math.Abs(sq1Rank - sq2Rank) + Math.Abs(sq1File - sq2File);
+
+            Console.Write($"{distance}, ");
+        }
+
+        Console.WriteLine("],");
+    }
 }
