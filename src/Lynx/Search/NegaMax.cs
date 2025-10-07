@@ -215,24 +215,6 @@ public sealed partial class Engine
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
-                    // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-                    // Return formula by Ciekce, instead of just returning static eval
-                    // Improving impl. based on Potential's
-                    var rfpMargin = improving
-                        ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
-                        : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
-
-                    // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
-                    var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
-
-                    var rfpThreshold = rfpMargin + improvingFactor;
-
-                    if (ttCorrectedStaticEval - rfpThreshold >= beta)
-                    {
-#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
-#pragma warning restore S3949 // Calculations should not overflow
-                    }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
                     if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
@@ -267,6 +249,25 @@ public sealed partial class Engine
                                 }
                             }
                         }
+                    }
+
+                    // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                    // Return formula by Ciekce, instead of just returning static eval
+                    // Improving impl. based on Potential's
+                    var rfpMargin = improving
+                        ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
+                        : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
+
+                    // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
+                    var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
+
+                    var rfpThreshold = rfpMargin + improvingFactor;
+
+                    if (ttCorrectedStaticEval - rfpThreshold >= beta)
+                    {
+#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
+                        return (ttCorrectedStaticEval + beta) / 2;
+#pragma warning restore S3949 // Calculations should not overflow
                     }
                 }
 
