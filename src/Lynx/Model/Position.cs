@@ -1176,15 +1176,6 @@ public partial class Position : IDisposable
         return (queenAttacks & _pieceBitBoards[(int)Piece.Q + offset]) != default;
     }
 
-        var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing]
-        // The only case when the defending king can't reduce the distance to the corner is if the attacking one is in the middle,
-        // and therefore their difference is at least 2 distance squares
-            - oneIfDefendingSideTomove;
-
-        return defendingKingCornerDistance < attackingKingCornerDistance
-            && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];
-    }
-
     #endregion
 
     public int CountPieces() => _pieceBitBoards.Sum(b => b.CountBits());
