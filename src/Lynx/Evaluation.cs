@@ -468,13 +468,21 @@ public partial class Position
             else
             {
                 var winningSideOffset = Utils.PieceOffset(eval >= 0);
+                var winningSidePawns = _pieceBitBoards[(int)Piece.P + winningSideOffset];
 
+                if (gamePhase == 0)
+                {
+                    if (IsRookPawnDraw(winningSidePawns, winningSideOffset))
+                    {
+                        return (0, gamePhase);
+                    }
+                }
                 if (gamePhase == 1)
                 {
                     if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
-                        && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
+                        && (winningSidePawns & Constants.NotAorH) == 0)
                     {
-                        if (IsBishopPawnDraw(winningSideOffset))
+                        if (IsBishopPawnDraw(winningSidePawns, winningSideOffset))
                         {
                             return (0, gamePhase);
                         }
@@ -1075,17 +1083,13 @@ public partial class Position
 
     /// <summary>
     /// If the pawn is in A or H files, the defending king reaches the corner/queening square or adjacent squares
-    /// and the bisop is of the opposite color of the queening square, it's a draw.
-    /// This method also takes into account the relative distance to the corner of both kings:
-    /// if the defending one is closer enough, it's also a draw.
+    /// and the bishop is of the opposite color of the queening square, it's a draw.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsBishopPawnDraw(int winningSideOffset)
+    internal bool IsBishopPawnDraw(BitBoard winningSidePawns, int winningSideOffset)
     {
-        var pawns = _pieceBitBoards[(int)Piece.P + winningSideOffset];
-
-        bool hasAFilePawn = (pawns & Constants.AFile) != 0;
-        bool hasHFilePawn = (pawns & Constants.HFile) != 0;
+        bool hasAFilePawn = (winningSidePawns & Constants.AFile) != 0;
+        bool hasHFilePawn = (winningSidePawns & Constants.HFile) != 0;
 
         // We filtered by Constants.NotAorH == 0 earlier, now we check that only one of those files has pawns
         if (hasAFilePawn == hasHFilePawn)
@@ -1115,5 +1119,36 @@ public partial class Position
         var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
 
         return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
+    }
+
+    /// <summary>
+    /// If the pawn is in A or H files and the defending king reaches the corner/queening square, it's a draw.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsRookPawnDraw(BitBoard winningSidePawns, int winningSideOffset)
+    {
+        bool onlyAFilePawn = (winningSidePawns & Constants.AFile) == winningSidePawns;
+        bool onlyHFilePawn = (winningSidePawns & Constants.HFile) == winningSidePawns;
+
+        // Pawns not only in A or H files
+        if (!(onlyAFilePawn || onlyHFilePawn))
+        {
+            return false;
+        }
+
+        // 1 if black is winning
+        var inverseWinningSide = winningSideOffset >> 2;
+
+        const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
+
+        var promotionCornerSquare =
+            (onlyAFilePawn
+                ? (int)BoardSquare.a8
+                : (int)BoardSquare.h8)
+            + (inverseWinningSide * whiteBlackDiff);
+
+        var defendingKingSquare = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+
+        return Constants.ChebyshevDistance[defendingKingSquare][promotionCornerSquare] <= 1;
     }
 }
