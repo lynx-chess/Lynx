@@ -529,7 +529,7 @@ public sealed partial class Engine
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
             if (isPondering || !IsMainEngine)
             {
-                _logger.Info(noDepth1Message);
+                _logger.Debug(noDepth1Message);
             }
             else
             {
