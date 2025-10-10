@@ -258,7 +258,11 @@ public sealed partial class Engine
 
                             if (score < beta)               // Static evaluation indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                // Pawnocchio idea: no need to run QSearch when the eval is already corrected by the TT score,
+                                // that corrected eval is at least as good as QSearch result would be
+                                var qSearchScore = ttCorrectedStaticEval != staticEval
+                                    ? ttCorrectedStaticEval
+                                    : QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
                                     return qSearchScore > score
