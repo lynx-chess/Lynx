@@ -176,8 +176,8 @@ public sealed partial class Engine
                         Debug.Assert(depthToSearch > 0);
 
                         _logger.Log(logLevel,
-                        "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                        _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
+                            "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, time {Time}, nodes {Nodes}",
+                            _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
                         Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
