@@ -907,6 +907,13 @@ public sealed partial class Engine
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
+            // QS LMP
+            if (!isInCheck
+                && visitedMovesCounter >= Configuration.EngineSettings.LMP_MaxMovesToTry)
+            {
+                break;
+            }
+
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
