@@ -260,6 +260,7 @@ public sealed partial class Engine
 
                 if (aspWindowsCancelled)
                 {
+                    // We keep the last searched result
                     break;
                 }
 
