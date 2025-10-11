@@ -478,7 +478,10 @@ public sealed class EngineSettings
     public int SE_DepthMultiplier { get; set; } = 1;
 
     [SPSA<int>(0, 50, 5)]
-    public int SE_DoubleExtensions_Margin { get; set; } = 1;
+    public int SE_DoubleExtensions_Margin_Capture { get; set; } = 1;
+
+    [SPSA<int>(0, 100, 10)]
+    public int SE_DoubleExtensions_Margin_Quiet { get; set; } = 40;
 
     [SPSA<int>(enabled: false)]
     public int SE_DoubleExtensions_Max { get; set; } = 6;

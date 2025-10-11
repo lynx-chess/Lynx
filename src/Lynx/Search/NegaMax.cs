@@ -470,9 +470,13 @@ public sealed partial class Engine
                 {
                     ++singularDepthExtensions;
 
+                    var doubleExtensionMargin = isCapture
+                        ? Configuration.EngineSettings.SE_DoubleExtensions_Margin_Capture
+                        : Configuration.EngineSettings.SE_DoubleExtensions_Margin_Quiet;
+
                     // Double extension
                     if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
+                        && singularScore + doubleExtensionMargin < singularBeta
                         && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                     {
                         ++singularDepthExtensions;
