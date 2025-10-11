@@ -337,6 +337,7 @@ public sealed partial class Engine
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
+        int alphaRaiseCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
@@ -594,6 +595,8 @@ public sealed partial class Engine
                                     reduction += Configuration.EngineSettings.LMR_TTCapture;
                                 }
 
+                                reduction += alphaRaiseCounter * Configuration.EngineSettings.LMR_AlphaRaiseCounter;
+
                                 if (pvNode)
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_PVNode;
@@ -710,6 +713,7 @@ public sealed partial class Engine
                     }
 
                     nodeType = NodeType.Exact;
+                    ++alphaRaiseCounter;
                 }
 
                 // Beta-cutoff - refutation found, no need to keep searching this line
