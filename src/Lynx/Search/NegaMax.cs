@@ -113,21 +113,22 @@ public sealed partial class Engine
 
             ttMoveIsCapture = ttEntryHasBestMove && position.Board[((int)ttEntry.BestMove).TargetSquare()] != (int)Piece.None;
 
-            // Internal iterative reduction (IIR)
-            // If this position isn't found in TT, it has never been searched before,
-            // so the search will be potentially expensive.
-            // Therefore, we search with reduced depth for now, expecting to record a TT move
-            // which we'll be able to use later for the full depth search
-            if (depth >= Configuration.EngineSettings.IIR_MinDepth
-                && !ttEntryHasBestMove)
-            {
-                --depthExtension;
-            }
         }
         else
         {
             ttEntry = default;
             ttWasPv = false;
+        }
+
+        // Internal iterative reduction (IIR)
+        // If this position isn't found in TT, it has never been searched before,
+        // so the search will be potentially expensive.
+        // Therefore, we search with reduced depth for now, expecting to record a TT move
+        // which we'll be able to use later for the full depth search
+        if (depth >= Configuration.EngineSettings.IIR_MinDepth
+            && (!ttEntryHasBestMove))
+        {
+            --depthExtension;
         }
 
         var ttPv = pvNode || ttWasPv;
