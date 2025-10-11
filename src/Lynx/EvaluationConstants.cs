@@ -207,6 +207,8 @@ public static class EvaluationConstants
 
     public const int BadCaptureMoveBaseScoreValue = 16_384;
 
+    public const int PassedPawnPushBonus = 1024;
+
     //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 
     /// <summary>
