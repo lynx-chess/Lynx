@@ -142,6 +142,7 @@ public sealed partial class Engine
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                var aspWindowsCancelled = false;
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
@@ -228,7 +229,38 @@ public sealed partial class Engine
 
                             break;
                         }
+
+                        if (!isPondering
+                            && lastSearchResult?.BestMove is not null
+                            && depth > Configuration.EngineSettings.TM_AspWindowsSoftLimitCheck_MinDepth)
+                        {
+                            var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
+
+                            // We don't take into account best move tm heuristic
+                            var bestMoveNodeCount = _nodes;
+                            var aspWinScaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
+
+                            _logger.Log(logLevel,
+                                "[#{EngineId}] [TM] Asp-win {ElapsedMilliseconds}ms | Depth {Depth}: checking soft limit: {BaseSoftLimit}ms -> {ScaledSoftLimit}ms",
+                                _id, elapsedMilliseconds, depth, _searchConstraints.SoftLimitTimeBound, aspWinScaledSoftLimitTimeBound);
+
+                            if (elapsedMilliseconds > aspWinScaledSoftLimitTimeBound)
+                            {
+                                _logger.Log(logLevel,
+                                    "[#{EngineId}] [TM] Asp-win Stopping at depth {0} (nodes {1}): {2}ms > {3}ms",
+                                    _id, depth, _nodes, elapsedMilliseconds, aspWinScaledSoftLimitTimeBound);
+
+                                aspWindowsCancelled = true;
+
+                                break;
+                            }
+                        }
                     }
+                }
+
+                if (aspWindowsCancelled)
+                {
+                    break;
                 }
 
                 //PrintPvTable(depth: depth);

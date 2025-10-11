@@ -166,6 +166,9 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
+    public int TM_AspWindowsSoftLimitCheck_MinDepth { get; set; } = 0;
+
+    [SPSA<int>(enabled: false)]
     public int StopSearchOnMate_MaxSoftTimeBoundLimit { get; set; } = 10_000;
 
     [SPSA<int>(enabled: false)]
