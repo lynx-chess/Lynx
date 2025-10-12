@@ -203,7 +203,7 @@ public sealed partial class Engine
 
                                 // We don't take into account best move tm heuristic
                                 const ulong bestMoveNodeCount = 0;
-                                var aspWinScaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta, IsMainEngine);
+                                var aspWinScaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
 
                                 _logger.Log(logLevel,
                                     "[#{EngineId}] [TM] Asp-win {ElapsedMilliseconds}ms | Depth {Depth}: checking soft limit: {BaseSoftLimit}ms -> {ScaledSoftLimit}ms",
