@@ -195,32 +195,6 @@ public sealed partial class Engine
                         }
                         else if (beta <= bestScore)     // Fail high
                         {
-                            if (!isPondering
-                                && lastSearchResult?.BestMove is not null
-                                && depth > Configuration.EngineSettings.TM_AspWindowsSoftLimitCheck_MinDepth)
-                            {
-                                var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
-
-                                // We don't take into account best move tm heuristic
-                                const ulong bestMoveNodeCount = 0;
-                                var aspWinScaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
-
-                                _logger.Log(logLevel,
-                                    "[#{EngineId}] [TM] Asp-win {ElapsedMilliseconds}ms | Depth {Depth}: checking soft limit: {BaseSoftLimit}ms -> {ScaledSoftLimit}ms",
-                                    _id, elapsedMilliseconds, depth, _searchConstraints.SoftLimitTimeBound, aspWinScaledSoftLimitTimeBound);
-
-                                if (elapsedMilliseconds > aspWinScaledSoftLimitTimeBound)
-                                {
-                                    _logger.Log(logLevel,
-                                        "[#{EngineId}] [TM] Asp-win Stopping at depth {0} (nodes {1}): {2}ms > {3}ms",
-                                        _id, depth, _nodes, elapsedMilliseconds, aspWinScaledSoftLimitTimeBound);
-
-                                    aspWindowsCancelled = true;
-
-                                    break;
-                                }
-                            }
-
                             beta = Math.Clamp(bestScore + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
                             if (failHighReduction < 3)
                             {
@@ -255,8 +229,35 @@ public sealed partial class Engine
 
                             break;
                         }
+
+                        if (!isPondering
+                            && lastSearchResult?.BestMove is not null
+                            && depth > Configuration.EngineSettings.TM_AspWindowsSoftLimitCheck_MinDepth)
+                        {
+                            var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
+
+                            // We don't take into account best move tm heuristic
+                            const ulong bestMoveNodeCount = 0;
+                            var aspWinScaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
+
+                            _logger.Log(logLevel,
+                                "[#{EngineId}] [TM] Asp-win {ElapsedMilliseconds}ms | Depth {Depth}: checking soft limit: {BaseSoftLimit}ms -> {ScaledSoftLimit}ms",
+                                _id, elapsedMilliseconds, depth, _searchConstraints.SoftLimitTimeBound, aspWinScaledSoftLimitTimeBound);
+
+                            if (elapsedMilliseconds > aspWinScaledSoftLimitTimeBound)
+                            {
+                                _logger.Log(logLevel,
+                                    "[#{EngineId}] [TM] Asp-win Stopping at depth {0} (nodes {1}): {2}ms > {3}ms",
+                                    _id, depth, _nodes, elapsedMilliseconds, aspWinScaledSoftLimitTimeBound);
+
+                                aspWindowsCancelled = true;
+
+                                break;
+                            }
+                        }
                     }
                 }
+
 
                 if (aspWindowsCancelled)
                 {
@@ -319,8 +320,8 @@ public sealed partial class Engine
 
 #pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
             _logger.Log(higherLogLevel,
-                "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}, best move will be returned",
-                _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
+                            "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}, best move will be returned",
+                            _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
