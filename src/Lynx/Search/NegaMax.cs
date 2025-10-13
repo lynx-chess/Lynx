@@ -403,8 +403,13 @@ public sealed partial class Engine
 
                 // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                 // once it's considered that they don't have potential to raise alpha
+                var futilityValue = staticEval
+                    + Configuration.EngineSettings.FP_Margin
+                    + (Configuration.EngineSettings.FP_DepthScalingFactor * depth)
+                    + (isCapture ? 0 : quietHistory / Configuration.EngineSettings.FP_HistoryDivisor);
+
                 if (depth <= Configuration.EngineSettings.FP_MaxDepth
-                    && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                    && futilityValue <= alpha)
                 {
                     break;
                 }
