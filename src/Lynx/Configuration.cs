@@ -350,9 +350,12 @@ public sealed class EngineSettings
 
     [SPSA<int>(enabled: false)]
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
-    
+
     [SPSA<int>(enabled: false)]
-    public int LMP_MaxMovesToTry { get; set; } = 2;
+    public int LMP_QSearch_MaxMovesToTry { get; set; } = 2;
+
+    [SPSA<int>(enabled: false)]
+    public int LMP_QSearch_MaxCaptureHistory { get; set; } = -2048;
 
     [SPSA<int>(enabled: false)]
     public int History_MaxMoveValue { get; set; } = 8_192;
