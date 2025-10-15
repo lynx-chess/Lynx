@@ -355,7 +355,7 @@ public sealed class EngineSettings
     public int LMP_QSearch_MaxMovesToTry { get; set; } = 2;
 
     [SPSA<int>(enabled: false)]
-    public int LMP_QSearch_MaxCaptureHistory { get; set; } = -2048;
+    public int LMP_QSearch_MaxCaptureHistory { get; set; } = -4096;
 
     [SPSA<int>(enabled: false)]
     public int History_MaxMoveValue { get; set; } = 8_192;
