@@ -85,6 +85,12 @@ public partial class Position
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
+        int whitePawnKingRingAttacks = (whitePawnAttacks & KingRing[blackKing]).CountBits();
+        evaluationContext.IncreaseKingRingAttacks((int)Side.White, whitePawnKingRingAttacks);
+
+        int blackPawnKingRingAttacks = (blackPawnAttacks & KingRing[whiteKing]).CountBits();
+        evaluationContext.IncreaseKingRingAttacks((int)Side.Black, blackPawnKingRingAttacks);
+
         if (IsIncrementalEval)
         {
             packedScore = IncrementalEvalAccumulator;
@@ -111,6 +117,9 @@ public partial class Position
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
 
+                // King ring attacks
+                pawnScore += PawnKingRingAttacksBonus * whitePawnKingRingAttacks;
+
                 // Bitboard copy that we 'empty'
                 var whitePawnsCopy = whitePawns;
                 while (whitePawnsCopy != default)
@@ -127,6 +136,9 @@ public partial class Position
 
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
+
+                // King ring attacks;
+                pawnScore -= PawnKingRingAttacksBonus * blackPawnKingRingAttacks;
 
                 // Bitboard copy that we 'empty'
                 var blackPawnsCopy = blackPawns;
@@ -462,10 +474,10 @@ public partial class Position
                     if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
                         && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
                     {
-                        //if (IsBishopPawnDraw(winningSideOffset))
-                        //{
-                        //    return (0, gamePhase);
-                        //}
+                        if (IsBishopPawnDraw(winningSideOffset))
+                        {
+                            return (0, gamePhase);
+                        }
 
                         // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
                         // This also reduces won positions, but it shouldn't matter
@@ -1092,25 +1104,16 @@ public partial class Position
                 : (int)BoardSquare.h8)
             + (inverseWinningSide * whiteBlackDiff);
 
-        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
-        if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
+        var defendingKingSquare = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+
+        // Not in the corner or adjacent squares
+        if (Constants.ChebyshevDistance[defendingKingSquare][promotionCornerSquare] > 1)
         {
             return false;
         }
 
-        var attackingKing = _pieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
-        var defendingKing = _pieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+        var bishopSquare = _pieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
 
-        var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
-
-        int oneIfDefendingSideTomove = (int)_side ^ inverseWinningSide ^ 1;
-
-        var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing]
-        // The only case when the defending king can't reduce the distance to the corner is if the attacking one is in the middle,
-        // and therefore their difference is at least 2 distance squares
-            - oneIfDefendingSideTomove;
-
-        return defendingKingCornerDistance < attackingKingCornerDistance
-            && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing];
+        return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
     }
 }

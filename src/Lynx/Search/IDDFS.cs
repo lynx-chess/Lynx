@@ -176,8 +176,8 @@ public sealed partial class Engine
                         Debug.Assert(depthToSearch > 0);
 
                         _logger.Log(logLevel,
-                        "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                        _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
+                            "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, time {Time}, nodes {Nodes}",
+                            _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
                         Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
@@ -320,14 +320,6 @@ public sealed partial class Engine
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isPondering)
     {
-        if (bestMove is null || bestMove == 0)
-        {
-            _logger.Warn(
-                "[#{EngineId}] Depth {Depth}: search continues, due to lack of best move", _id, depth);
-
-            return true;
-        }
-
         var logLevel = IsMainEngine
             ? LogLevel.Info
 #if MULTITHREAD_DEBUG
@@ -335,6 +327,23 @@ public sealed partial class Engine
 #else
                 : LogLevel.Off;
 #endif
+
+        if (depth + 1 >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Log(logLevel,
+                "[#{EngineId}] Max depth reached: {MaxDepth}",
+                _id, Configuration.EngineSettings.MaxDepth);
+
+            return false;
+        }
+
+        if (bestMove is null || bestMove == 0)
+        {
+            _logger.Warn(
+                "[#{EngineId}] Depth {Depth}: search continues, due to lack of best move", _id, depth);
+
+            return true;
+        }
 
         if (mate != 0)
         {
@@ -373,15 +382,6 @@ public sealed partial class Engine
             }
 
             _logger.Log(logLevel, "[#{EngineId}] Search continues, hoping to find a faster mate", _id);
-        }
-
-        if (depth + 1 >= Configuration.EngineSettings.MaxDepth)
-        {
-            _logger.Log(logLevel,
-                "[#{EngineId}] Max depth reached: {MaxDepth}",
-                _id, Configuration.EngineSettings.MaxDepth);
-
-            return false;
         }
 
         var maxDepth = _searchConstraints.MaxDepth;
@@ -529,7 +529,7 @@ public sealed partial class Engine
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
             if (isPondering || !IsMainEngine)
             {
-                _logger.Info(noDepth1Message);
+                _logger.Debug(noDepth1Message);
             }
             else
             {

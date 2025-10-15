@@ -52,7 +52,7 @@ public sealed partial class Engine : IDisposable
             _moveNodeCount[i] = new ulong[64];
         }
 
-        _logger.Info("Engine {0} initialized", _id);
+        _logger.Debug("Engine {0} initialized", _id);
     }
 
     public void Warmup()
