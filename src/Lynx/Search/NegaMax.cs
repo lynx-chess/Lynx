@@ -470,13 +470,23 @@ public sealed partial class Engine
                 {
                     ++singularDepthExtensions;
 
-                    // Double extension
                     if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
                         && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                     {
-                        ++singularDepthExtensions;
-                        ++stack.DoubleExtensions;
+                        // Double extension
+                        if (singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta)
+                        {
+                            ++singularDepthExtensions;
+                            ++stack.DoubleExtensions;
+                        }
+
+                        // Triple extension
+                        if (!isCapture
+                            && singularScore + Configuration.EngineSettings.SE_TripleExtensions_Margin < singularBeta)
+                        {
+                            ++singularDepthExtensions;
+                            ++stack.DoubleExtensions;
+                        }
 
                         // Low depth extension - extending all moves
                         if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
