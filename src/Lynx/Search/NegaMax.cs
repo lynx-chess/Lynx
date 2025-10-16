@@ -478,6 +478,12 @@ public sealed partial class Engine
                     {
                         ++singularDepthExtensions;
                         ++stack.DoubleExtensions;
+
+                        // Low depth extension - extending all moves
+                        if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        {
+                            ++depth;
+                        }
                     }
 
                     // Triple extension
@@ -486,12 +492,6 @@ public sealed partial class Engine
                         && singularScore + Configuration.EngineSettings.SE_TripleExtensions_Margin < singularBeta)
                     {
                         ++singularDepthExtensions;
-                    }
-
-                    // Low depth extension - extending all moves
-                    if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
-                    {
-                        ++depth;
                     }
                 }
                 // Multicut
