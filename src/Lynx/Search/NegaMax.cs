@@ -485,6 +485,14 @@ public sealed partial class Engine
                             ++depth;
                         }
                     }
+
+                    // Triple extension
+                    if (!pvNode
+                        && !isCapture
+                        && singularScore + Configuration.EngineSettings.SE_TripleExtensions_Margin < singularBeta)
+                    {
+                        ++singularDepthExtensions;
+                    }
                 }
                 // Multicut
                 else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
