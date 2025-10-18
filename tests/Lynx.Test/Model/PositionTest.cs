@@ -422,8 +422,8 @@ public class PositionTest
         var expectedEval = 0;
         if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)
         {
-            expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadBonus[0][rank]);
-            expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadEnemyBonus[0][rank]);
+            expectedEval += UnpackMG(PassedPawnNoEnemiesAheadBonus[0][rank]);
+            expectedEval += UnpackMG(PassedPawnNoEnemiesAheadEnemyBonus[0][rank]);
         }
 
         Assert.AreEqual(

@@ -625,8 +625,8 @@ public partial class Position
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & _occupancyBitBoards[oppositeSide]) == 0)
             {
-                packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
-                packedBonus += PassedPawnBonusNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
+                packedBonus += PassedPawnNoEnemiesAheadBonus[bucket][rank];
+                packedBonus += PassedPawnNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
             }
 
             // King distance to passed pawn
