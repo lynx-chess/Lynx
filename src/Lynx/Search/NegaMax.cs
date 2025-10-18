@@ -452,52 +452,56 @@ public sealed partial class Engine
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
                 isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
-                && depth >= Configuration.EngineSettings.SE_MinDepth
-                && ttEntry.Depth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
-                && Math.Abs(ttEntry.Score) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                && ttEntry.NodeType != NodeType.Alpha
                 && ply < 3 * depth)     // Preventing search explosions
             {
-                position.UnmakeMove(move, gameState);
-
-                var verificationDepth = (depth - 1) / 2;    // TODO tune?
-                var singularBeta = ttEntry.Score - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
-                singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
-
-                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
-
-                // Singular extension
-                if (singularScore < singularBeta)
+                if (depth >= Configuration.EngineSettings.SE_MinDepth
+                    && Math.Abs(ttEntry.Score) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                    && ttEntry.Depth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
+                    && ttEntry.NodeType != NodeType.Alpha)
                 {
-                    ++singularDepthExtensions;
+                    position.UnmakeMove(move, gameState);
 
-                    // Double extension
-                    if (!pvNode
-                        && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
-                        && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
+                    var verificationDepth = (depth - 1) / 2;    // TODO tune?
+                    var singularBeta = ttEntry.Score - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
+                    singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
+
+                    var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
+
+                    // Singular extension
+                    if (singularScore < singularBeta)
                     {
                         ++singularDepthExtensions;
-                        ++stack.DoubleExtensions;
 
-                        // Low depth extension - extending all moves
-                        if (depth <= Configuration.EngineSettings.SE_LowDepthExtension)
+                        // Double extension
+                        if (!pvNode
+                            && singularScore + Configuration.EngineSettings.SE_DoubleExtensions_Margin < singularBeta
+                            && stack.DoubleExtensions <= Configuration.EngineSettings.SE_DoubleExtensions_Max)
                         {
-                            ++depth;
+                            ++singularDepthExtensions;
+                            ++stack.DoubleExtensions;
                         }
                     }
-                }
-                // Multicut
-                else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
-                {
-                    return singularScore;
-                }
-                // Negative extension
-                else if (ttEntry.Score >= beta)
-                {
-                    --singularDepthExtensions;
-                }
+                    // Multicut
+                    else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
+                    {
+                        return singularScore;
+                    }
+                    // Negative extension
+                    else if (ttEntry.Score >= beta)
+                    {
+                        --singularDepthExtensions;
+                    }
 
-                gameState = position.MakeMove(move);
+                    gameState = position.MakeMove(move);
+                }
+                else if (depth <= Configuration.EngineSettings.SE_LowDepthExtension_Depth
+                    && !isInCheck
+                    && ttEntry.NodeType == NodeType.Beta
+                    && staticEval < alpha - Configuration.EngineSettings.SE_LowDepthExtension_Margin)
+                {
+                    // Low depth extension - extending all moves
+                    ++depth;
+                }
             }
 
             var previousNodes = _nodes;
