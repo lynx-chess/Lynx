@@ -182,7 +182,7 @@ public sealed class EngineSettings
     #region Search
 
     [SPSA<int>(enabled: false)]
-    public int LMR_MinDepth { get; set; } = 3;
+    public int LMR_MinDepth { get; set; } = 2;
 
     [SPSA<int>(enabled: false)]
     public int LMR_MinFullDepthSearchedMoves_PV { get; set; } = 5;
