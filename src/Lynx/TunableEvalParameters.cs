@@ -6024,6 +6024,11 @@ public static class EvaluationParams
 	public const int KingShieldNonAttackedBonus = 14;
 
 	/// <summary>
+	/// <see cref="Utils.Pack(-35, 2)"/>
+	/// </summary>
+	public const int PassedPawnPushProtectedByPawnsBonus = 131037;
+
+	/// <summary>
 	/// <see cref="Utils.Pack(31, 71)"/>
 	/// </summary>
 	public const int BishopPairBonus = 4653087;

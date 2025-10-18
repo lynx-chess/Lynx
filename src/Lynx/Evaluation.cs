@@ -604,7 +604,11 @@ public partial class Position
             pushSquare = squareIndex - 8;
         }
 
-        var oppositeSidePawns = _pieceBitBoards[(int)Piece.p - pieceIndex];
+        var oppositeSidePawnsIndex = (int)Piece.p - pieceIndex;
+        var oppositeSidePawns = _pieceBitBoards[oppositeSidePawnsIndex];
+
+        var sameSidePawnAttacks = evaluationContext.Attacks[pieceIndex];
+        var oppositeSidePawnAttacks = evaluationContext.Attacks[oppositeSidePawnsIndex];
 
         // Isolated pawn
         if ((_pieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
@@ -612,9 +616,9 @@ public partial class Position
             packedBonus += IsolatedPawnPenalty[Constants.File[squareIndex]];
         }
         // Backwards pawn
-        else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
-            && (oppositeSidePawns.GetBit(pushSquare)                                            // Blocked
-                || evaluationContext.Attacks[(int)Piece.p - pieceIndex].GetBit(pushSquare)))    // Push square attacked by opponent pawns
+        else if (!sameSidePawnAttacks.GetBit(squareIndex)
+            && (oppositeSidePawns.GetBit(pushSquare)                // Blocked
+                || oppositeSidePawnAttacks.GetBit(pushSquare)))     // Push square attacked by opponent pawns
         {
             packedBonus += BackwardsPawnPenalty[rank];
         }
@@ -622,6 +626,16 @@ public partial class Position
         // Passed pawn
         if ((oppositeSidePawns & passedPawnsMask) == default)
         {
+            packedBonus += PassedPawnBonus[bucket][rank]
+                + PassedPawnEnemyBonus[oppositeSideBucket][rank];
+
+            // Passed pawn push square defended by pawns
+            // TODO use all attacks, but not calculated here yet
+            if (sameSidePawnAttacks.CountBits() > oppositeSidePawnAttacks.CountBits())
+            {
+                packedBonus += PassedPawnPushProtectedByPawnsBonus;
+            }
+
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & _occupancyBitBoards[oppositeSide]) == 0)
             {
@@ -635,9 +649,7 @@ public partial class Position
             // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
-            packedBonus += PassedPawnBonus[bucket][rank]
-                + PassedPawnEnemyBonus[oppositeSideBucket][rank]
-                + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
+            packedBonus += FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
 
