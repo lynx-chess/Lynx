@@ -495,6 +495,11 @@ public sealed partial class Engine
                 else if (ttEntry.Score >= beta)
                 {
                     --singularDepthExtensions;
+
+                    if (pvNode)
+                    {
+                        --singularDepthExtensions;
+                    }
                 }
 
                 gameState = position.MakeMove(move);
