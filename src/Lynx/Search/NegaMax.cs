@@ -414,6 +414,22 @@ public sealed partial class Engine
                     break;
                 }
 
+                // 🔍 Bad Noisy Futility Pruning (FP)
+                var badNoisyFPValue = staticEval + (120 * depth) + (375 * visitedMovesCounter / 128);
+
+                if(!isInCheck
+                    && depth < 6
+                    && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue // Bad noisy
+                    && badNoisyFPValue <= alpha)
+                {
+                    if(isNotGettingCheckmated && bestScore < badNoisyFPValue)
+                    {
+                        bestScore = badNoisyFPValue;
+                    }
+
+                    break;
+                }
+
                 // 🔍 PVS SEE pruning
                 if (isCapture)
                 {
