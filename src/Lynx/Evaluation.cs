@@ -633,7 +633,7 @@ public partial class Position
             // TODO use all attacks, but not calculated here yet
             if (sameSidePawnAttacks.GetBit(pushSquare))
             {
-                packedBonus += PassedPawnPushProtectedByPawnsBonus;
+                packedBonus += PassedPawnPushProtectedByPawnBonus;
             }
 
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
