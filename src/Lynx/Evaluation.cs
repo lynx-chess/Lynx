@@ -631,7 +631,7 @@ public partial class Position
 
             // Passed pawn push square defended by pawns
             // TODO use all attacks, but not calculated here yet
-            if (sameSidePawnAttacks.CountBits() > oppositeSidePawnAttacks.CountBits())
+            if (sameSidePawnAttacks.GetBit(pushSquare))
             {
                 packedBonus += PassedPawnPushProtectedByPawnsBonus;
             }
