@@ -126,6 +126,7 @@ public sealed partial class Engine
         // Therefore, we search with reduced depth for now, expecting to record a TT move
         // which we'll be able to use later for the full depth search
         if (depth >= Configuration.EngineSettings.IIR_MinDepth
+            && (pvNode || cutnode)
             && (!ttEntryHasBestMove))
         {
             --depthExtension;
