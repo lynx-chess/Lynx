@@ -81,6 +81,7 @@
 
   <ItemGroup>
     <!-- Exclude the output of source generators from the compilation -->
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
   </ItemGroup>
 
