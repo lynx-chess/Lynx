@@ -72,19 +72,27 @@ public partial class Position
 
         var whitePawns = _pieceBitBoards[(int)Piece.P];
         var blackPawns = _pieceBitBoards[(int)Piece.p];
-
-        BitBoard whitePawnAttacks = whitePawns.ShiftUpRightAndLeft();
-        BitBoard blackPawnAttacks = blackPawns.ShiftDownRightAndLeft();
-
-        evaluationContext.AttacksBySide[(int)Side.White] = evaluationContext.Attacks[(int)Piece.P] = whitePawnAttacks;
-        evaluationContext.AttacksBySide[(int)Side.Black] = evaluationContext.Attacks[(int)Piece.p] = blackPawnAttacks;
-
         var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
 
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
+        BitBoard whitePawnAttacks = whitePawns.ShiftUpRightAndLeft();
+        BitBoard blackPawnAttacks = blackPawns.ShiftDownRightAndLeft();
+        BitBoard whiteKingAttacks = Attacks.KingAttacks[whiteKing];
+        BitBoard blackKingAttacks = Attacks.KingAttacks[blackKing];
+
+        // Pawns and kings attack population
+        evaluationContext.Attacks[(int)Piece.P] = whitePawnAttacks;
+        evaluationContext.Attacks[(int)Piece.p] = blackPawnAttacks;
+        evaluationContext.Attacks[(int)Piece.K] = whiteKingAttacks;
+        evaluationContext.Attacks[(int)Piece.k] = blackKingAttacks;
+
+        evaluationContext.AttacksBySide[(int)Side.White] = whitePawnAttacks | whiteKingAttacks;
+        evaluationContext.AttacksBySide[(int)Side.Black] = blackPawnAttacks | blackKingAttacks;
+
+        // Pawn king ring attacks
         int whitePawnKingRingAttacks = (whitePawnAttacks & KingRing[blackKing]).CountBits();
         evaluationContext.IncreaseKingRingAttacks((int)Side.White, whitePawnKingRingAttacks);
 
@@ -96,6 +104,40 @@ public partial class Position
             packedScore = IncrementalEvalAccumulator;
             gamePhase = IncrementalPhaseAccumulator;
 
+            // White pieces additional eval and pawn attacks, except pawn and king
+            for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
+            {
+                // Bitboard copy that we 'empty'
+                var bitboard = _pieceBitBoards[pieceIndex];
+
+                packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+
+                while (bitboard != default)
+                {
+                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
+                }
+            }
+
+            // Black pieces additional eval and pawn attacks, except pawn and king
+            for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
+            {
+                // Bitboard copy that we 'empty'
+                var bitboard = _pieceBitBoards[pieceIndex];
+
+                // Pieces protected by pawns bonus
+                packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+
+                while (bitboard != default)
+                {
+                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
+
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
+                }
+            }
+
+            // Pawn stuff - afterwards so that all attacks are populated
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
@@ -155,8 +197,13 @@ public partial class Position
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
+        }
+        else
+        {
+            IncrementalEvalAccumulator = 0;
+            IncrementalPhaseAccumulator = 0;
 
-            // White pieces additional eval and pawn attacks, except pawn and king
+            // White pieces PSQTs and additional eval and pawn attacks, except king and pawn
             for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
@@ -168,11 +215,15 @@ public partial class Position
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
+                    IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
+
+                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
+
                     packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
                 }
             }
 
-            // Black pieces additional eval and pawn attacks, except pawn and king
+            // Black pieces PSQTs and additional eval and pawn attacks, except king and pawn
             for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
@@ -185,15 +236,15 @@ public partial class Position
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
+                    IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
+
+                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
+
                     packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
                 }
             }
-        }
-        else
-        {
-            IncrementalEvalAccumulator = 0;
-            IncrementalPhaseAccumulator = 0;
 
+            // Pawn stuff - afterwards so that all attacks are populated
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
@@ -280,51 +331,12 @@ public partial class Position
                 packedScore += pawnScore;
             }
 
-            // White pieces PSQTs and additional eval and pawn attacks, except king and pawn
-            for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
-            {
-                // Bitboard copy that we 'empty'
-                var bitboard = _pieceBitBoards[pieceIndex];
-
-                packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
-
-                while (bitboard != default)
-                {
-                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
-
-                    IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
-
-                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
-
-                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
-                }
-            }
-
-            // Black pieces PSQTs and additional eval and pawn attacks, except king and pawn
-            for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
-            {
-                // Bitboard copy that we 'empty'
-                var bitboard = _pieceBitBoards[pieceIndex];
-
-                // Pieces protected by pawns bonus
-                packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
-
-                while (bitboard != default)
-                {
-                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
-
-                    IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
-
-                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
-
-                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
-                }
-            }
-
             packedScore += IncrementalEvalAccumulator;
             gamePhase += IncrementalPhaseAccumulator;
             IsIncrementalEval = true;
         }
+
+        AssertAttackPopulation(ref evaluationContext);
 
         // Kings - they can't be incremental due to the king buckets
         packedScore +=
@@ -334,14 +346,6 @@ public partial class Position
         packedScore +=
             KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
-
-        var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
-        evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
-        evaluationContext.AttacksBySide[(int)Side.White] |= whiteKingAttacks;
-
-        var blackKingAttacks = Attacks.KingAttacks[blackKing];
-        evaluationContext.Attacks[(int)Piece.k] |= blackKingAttacks;
-        evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;
 
         // King mobility
         var whiteKingAttacksCount =
@@ -357,9 +361,7 @@ public partial class Position
         packedScore += KingMobilityBonus[whiteKingAttacksCount]
         - KingMobilityBonus[blackKingAttacksCount];
 
-        AssertAttackPopulation(ref evaluationContext);
-
-        // Total king rings ttacks
+        // Total king rings attacks
         packedScore +=
             TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
             - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
