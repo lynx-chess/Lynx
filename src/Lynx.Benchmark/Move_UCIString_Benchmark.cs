@@ -48,8 +48,8 @@ public class Move_UCIString_Benchmark : BaseBenchmark
 {
     private static readonly Move[] _moves =
     [
-        MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
-        MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
+        MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K),
+        MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k),
         MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.P),
         MoveExtensions.EncodePromotion((int)BoardSquare.e7, (int)BoardSquare.e8, (int)Piece.p, promotedPiece: (int)Piece.q),
         MoveExtensions.EncodePromotion((int)BoardSquare.a7, (int)BoardSquare.b8, (int)Piece.p, promotedPiece: (int)Piece.n, capturedPiece: (int)Piece.B),

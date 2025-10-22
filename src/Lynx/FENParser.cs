@@ -4,20 +4,25 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
-            int HalfMoveClock/*, int FullMoveCounter*/);
-
 namespace Lynx;
 
 public static class FENParser
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+#pragma warning disable IDE1006 // Naming Styles
+    private static readonly SearchValues<char> _DFRCCastlingRightsChars =
+#pragma warning restore IDE1006 // Naming Styles
+        SearchValues.Create(
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
+    public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
 
+        // Arrays will be be returned as part of Position cleanaup
         var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         var board = ArrayPool<int>.Shared.Rent(64);
@@ -25,9 +30,10 @@ public static class FENParser
 
         bool success;
         Side side;
-        byte castle = 0;
+        byte castlingRights = 0;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
+        CastlingData castlingData;
 
         try
         {
@@ -44,7 +50,9 @@ public static class FENParser
 
             side = ParseSide(unparsedStringAsSpan[parts[0]]);
 
-            castle = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
+            castlingData = !Configuration.EngineSettings.IsChess960
+                    ? ParseStandardChessCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitBoards, out castlingRights)
+                    : ParseDFRCCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitBoards, out castlingRights);
 
             (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
 
@@ -74,7 +82,9 @@ public static class FENParser
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            ? new(pieceBitBoards, occupancyBitBoards, board, side, castlingRights, enPassant,
+                castlingData,
+                halfMoveClock/*, fullMoveCounter*/)
             : throw new LynxException($"Error parsing {fen.ToString()}");
     }
 
@@ -160,24 +170,203 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static byte ParseCastlingRights(ReadOnlySpan<char> castling)
+    private static CastlingData ParseStandardChessCastlingRights(ReadOnlySpan<char> castlingChars, ReadOnlySpan<BitBoard> pieceBitboards, out byte castlingRights)
     {
-        byte castle = 0;
-
-        for (int i = 0; i < castling.Length; ++i)
+        if (castlingChars.ContainsAny(_DFRCCastlingRightsChars))
         {
-            castle |= castling[i] switch
+            _logger.Warn("DFRC position detected without UCI_Chess960 set. Enabling it as a fallback");
+            Configuration.EngineSettings.IsChess960 = true;
+
+            return ParseDFRCCastlingRights(castlingChars, pieceBitboards, out castlingRights);
+        }
+
+        castlingRights = 0;
+        for (int i = 0; i < castlingChars.Length; ++i)
+        {
+            castlingRights |= castlingChars[i] switch
             {
                 'K' => (byte)CastlingRights.WK,
                 'Q' => (byte)CastlingRights.WQ,
                 'k' => (byte)CastlingRights.BK,
                 'q' => (byte)CastlingRights.BQ,
-                '-' => castle,
-                _ => throw new LynxException($"Unrecognized castling char: {castling[i]}")
+                '-' => castlingRights,
+                _ => throw new LynxException($"Unrecognized castling char: {castlingChars[i]}")
             };
         }
 
-        return castle;
+        return new CastlingData(
+            Constants.InitialWhiteKingsideRookSquare, Constants.InitialWhiteQueensideRookSquare,
+            Constants.InitialBlackKingsideRookSquare, Constants.InitialBlackQueensideRookSquare);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static CastlingData ParseDFRCCastlingRights(ReadOnlySpan<char> castlingChars, ReadOnlySpan<BitBoard> pieceBitboards, out byte castlingRights)
+    {
+        // X-FEN uses KQkq notation when not ambiguous, with the letters referring to "the outermost rook of the affected side"
+
+        int whiteKingsideRook = CastlingData.DefaultValues, whiteQueensideRook = CastlingData.DefaultValues, blackKingsideRook = CastlingData.DefaultValues, blackQueensideRook = CastlingData.DefaultValues;
+
+        Debug.Assert(pieceBitboards[(int)Piece.K] != 0);
+        Debug.Assert(pieceBitboards[(int)Piece.k] != 0);
+
+        var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
+
+        castlingRights = 0;
+
+        for (int i = 0; i < castlingChars.Length; ++i)
+        {
+            var ch = castlingChars[i];
+            switch (ch)
+            {
+                case 'K':
+                    {
+                        Debug.Assert(whiteKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
+
+                        castlingRights |= (byte)CastlingRights.WK;
+
+                        for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > whiteKing; --potentialRookSquareIndex)
+                        {
+                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                            {
+                                whiteKingsideRook = potentialRookSquareIndex;
+                                break;
+                            }
+                        }
+
+                        if (whiteKingsideRook == CastlingData.DefaultValues)
+                        {
+                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                        }
+
+                        break;
+                    }
+                case 'Q':
+                    {
+                        Debug.Assert(whiteQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
+
+                        castlingRights |= (byte)CastlingRights.WQ;
+
+                        for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < whiteKing; ++potentialRookSquareIndex)
+                        {
+                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                            {
+                                whiteQueensideRook = potentialRookSquareIndex;
+                                break;
+                            }
+                        }
+
+                        if (whiteQueensideRook == CastlingData.DefaultValues)
+                        {
+                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                        }
+
+                        break;
+                    }
+                case 'k':
+                    {
+                        Debug.Assert(blackKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
+
+                        castlingRights |= (byte)CastlingRights.BK;
+
+                        for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > blackKing; --potentialRookSquareIndex)
+                        {
+                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                            {
+                                blackKingsideRook = potentialRookSquareIndex;
+                                break;
+                            }
+                        }
+
+                        if (blackKingsideRook == CastlingData.DefaultValues)
+                        {
+                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                        }
+
+                        break;
+                    }
+                case 'q':
+                    {
+                        Debug.Assert(blackQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
+
+                        castlingRights |= (byte)CastlingRights.BQ;
+
+                        for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < blackKing; ++potentialRookSquareIndex)
+                        {
+                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                            {
+                                blackQueensideRook = potentialRookSquareIndex;
+                                break;
+                            }
+                        }
+
+                        if (blackQueensideRook == CastlingData.DefaultValues)
+                        {
+                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                        }
+
+                        break;
+                    }
+                case '-':
+                    {
+                        //castle |= (byte)CastlingRights.None;
+                        break;
+                    }
+                default:
+                    {
+                        if (ch >= 'A' && ch <= 'H')
+                        {
+                            var square = BitBoardExtensions.SquareIndex(rank: 7, file: ch - 'A');
+
+                            if (square < whiteKing)
+                            {
+                                Debug.Assert(whiteQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
+                                castlingRights |= (byte)CastlingRights.WQ;
+                                whiteQueensideRook = square;
+                            }
+                            else if (square > whiteKing)
+                            {
+                                Debug.Assert(whiteKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
+                                castlingRights |= (byte)CastlingRights.WK;
+                                whiteKingsideRook = square;
+                            }
+                            else
+                            {
+                                throw new LynxException($"Invalid castle character {ch}: it matches white king square ({square})");
+                            }
+
+                            break;
+                        }
+                        else if (ch >= 'a' && ch <= 'h')
+                        {
+                            var square = BitBoardExtensions.SquareIndex(rank: 0, file: ch - 'a');
+
+                            if (square < blackKing)
+                            {
+                                Debug.Assert(blackQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
+                                castlingRights |= (byte)CastlingRights.BQ;
+                                blackQueensideRook = square;
+                            }
+                            else if (square > blackKing)
+                            {
+                                Debug.Assert(blackKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
+                                castlingRights |= (byte)CastlingRights.BK;
+                                blackKingsideRook = square;
+                            }
+                            else
+                            {
+                                throw new LynxException($"Invalid castle character {ch}: it matches black king square ({square})");
+                            }
+
+                            break;
+                        }
+
+                        throw new LynxException($"Unrecognized castle character: {ch}");
+                    }
+            }
+        }
+
+        return new CastlingData(whiteKingsideRook, whiteQueensideRook, blackKingsideRook, blackQueensideRook);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -186,40 +375,72 @@ public static class FENParser
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;
 
-        if (Enum.TryParse(enPassantSpan, ignoreCase: true, out BoardSquare result))
+        // Enum.TryParse is too slow
+        if (TryParseEnPassantSquare(enPassantSpan, out var parsedSquare))
         {
-            enPassant = result;
+            enPassant = parsedSquare;
 
-            var rank = 1 + ((int)enPassant >> 3);
-            if (rank != 3 && rank != 6)
+            if (enPassant != BoardSquare.noSquare)
             {
-                success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
-            }
+                // Check that there's an actual pawn to be captured
+                var pawnOffset = ((int)side << 4) - 8; // side == Side.White ? +8 : -8
+                var pawnSquare = (int)enPassant + pawnOffset;
 
-            // Check that there's an actual pawn to be captured
-            var pawnOffset = side == Side.White
-                ? +8
-                : -8;
+                var pawnBitBoard = PieceBitBoards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide((int)side))];
 
-            var pawnSquare = (int)enPassant + pawnOffset;
-
-            var pawnBitBoard = side == Side.White
-                ? PieceBitBoards[(int)Piece.p]
-                : PieceBitBoards[(int)Piece.P];
-
-            if (!pawnBitBoard.GetBit(pawnSquare))
-            {
-                success = false;
-                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                if (!pawnBitBoard.GetBit(pawnSquare))
+                {
+                    success = false;
+                    enPassant = BoardSquare.noSquare;
+                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                }
             }
         }
-        else if (enPassantSpan[0] != '-')
+        else if (enPassantSpan.Length != 1 || enPassantSpan[0] != '-')
         {
             success = false;
             _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
         }
 
         return (enPassant, success);
+
+        /// <summary>
+        /// Fast alternative to Enum.TryParse
+        /// </summary>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool TryParseEnPassantSquare(ReadOnlySpan<char> enPassantSpan, out BoardSquare square)
+        {
+            if (enPassantSpan.Length == 1 && enPassantSpan[0] == '-')
+            {
+                square = BoardSquare.noSquare;
+                return true;
+            }
+
+            if (enPassantSpan.Length != 2)
+            {
+                square = BoardSquare.noSquare;
+                return false;
+            }
+
+            // Normalize to lowercase without branching
+            // https://blog.cloudflare.com/the-oldest-trick-in-the-ascii-book/
+            // Lowercase ASCII is uppercase ASCII + 0x20
+            var fileChar = (char)(enPassantSpan[0] | 0x20);
+            int file = fileChar - 'a'; // 0-7
+            int rank = enPassantSpan[1] - '0';  // 1-8
+
+            // Only ranks 3 and 6 are legal en passant target squares.
+            if ((uint)file >= 8 || (rank != 3 && rank != 6))
+            {
+                square = BoardSquare.noSquare;
+                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+
+                return false;
+            }
+
+            square = (BoardSquare)BitBoardExtensions.SquareIndex(8 - rank, file);
+            return true;
+        }
     }
 }

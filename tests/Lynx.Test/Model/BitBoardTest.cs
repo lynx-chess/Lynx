@@ -367,4 +367,30 @@ public class BitBoardTest
         bb.SetBit(BoardSquare.h8);
         Assert.Zero(bb.ShiftDownRight());
     }
+
+    [TestCase(BoardSquare.a1, BoardSquare.h1)]
+    [TestCase(BoardSquare.h1, BoardSquare.a1)]
+    [TestCase(BoardSquare.a4, BoardSquare.a4)]
+    public void MaskBetweenTwoSquaresSameRankInclusive(BoardSquare start, BoardSquare end)
+    {
+        var result = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive((int)start, (int)end);
+
+        Assert.True(result.GetBit((int)start));
+        Assert.True(result.GetBit((int)end));
+
+        Assert.AreEqual(Math.Abs(end - start) + 1, result.CountBits());
+    }
+
+    [TestCase(BoardSquare.a1, BoardSquare.h1)]
+    [TestCase(BoardSquare.h1, BoardSquare.a1)]
+    [TestCase(BoardSquare.a4, BoardSquare.a4)]
+    public void MaskBetweenTwoSquaresSameRankExclusive(BoardSquare start, BoardSquare end)
+    {
+        var result = BitBoardExtensions.MaskBetweenTwoSquaresSameRankExclusive((int)start, (int)end);
+
+        Assert.False(result.GetBit((int)start));
+        Assert.False(result.GetBit((int)end));
+
+        Assert.AreEqual(Math.Max(0, Math.Abs(end - start) - 1), result.CountBits());
+    }
 }

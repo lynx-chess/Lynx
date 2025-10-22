@@ -13,7 +13,7 @@ public static class BitBoardExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool NotEmpty(this BitBoard board) => board != default;
 
-    public static BitBoard Initialize(params BoardSquare[] occupiedSquares)
+    public static BitBoard Initialize(params ReadOnlySpan<BoardSquare> occupiedSquares)
     {
 #pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard board = default;
@@ -21,7 +21,7 @@ public static class BitBoardExtensions
 
         foreach (var square in occupiedSquares)
         {
-            board.SetBit(square);
+            board.SetBit((int)square);
         }
 
         return board;
@@ -30,6 +30,7 @@ public static class BitBoardExtensions
     internal static void Clear(this ref BitBoard board) => board = default;
 
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
+    [Obsolete("Test only")]
     internal static void Print(this BitBoard board)
     {
         const string separator = "____________________________________________________";
@@ -152,6 +153,14 @@ public static class BitBoardExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftUpRightAndLeft(this BitBoard board)
+    {
+        var up = board.ShiftUp();
+
+        return up.ShiftRight() | up.ShiftLeft();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard ShiftDownRight(this BitBoard board)
     {
         return board.ShiftDown().ShiftRight();
@@ -161,6 +170,14 @@ public static class BitBoardExtensions
     public static BitBoard ShiftDownLeft(this BitBoard board)
     {
         return board.ShiftDown().ShiftLeft();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftDownRightAndLeft(this BitBoard board)
+    {
+        var down = board.ShiftDown();
+
+        return down.ShiftRight() | down.ShiftLeft();
     }
 
     #region Static methods
@@ -228,6 +245,7 @@ public static class BitBoardExtensions
     /// <summary>
     /// Extracts the bit that represents each square on a bitboard
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong SquareBit(int boardSquare)
     {
         return 1UL << boardSquare;
@@ -247,16 +265,53 @@ public static class BitBoardExtensions
         return (board & bit) == default;
     }
 
+    public static ulong MaskBetweenTwoSquaresSameRankInclusive(int start, int end)
+    {
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP
+        ulong result = 0;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
+
+        var min = Math.Min(start, end);
+        var limit = Math.Abs(start - end);
+
+        for (int sq = min; sq <= min + limit; ++sq)
+        {
+            result.SetBit(sq);
+        }
+
+        return result;
+    }
+
+    public static ulong MaskBetweenTwoSquaresSameRankExclusive(int start, int end)
+    {
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP
+        ulong result = 0;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
+
+        var min = Math.Min(start, end);
+        var limit = Math.Abs(start - end);
+
+        for (int sq = min + 1; sq < min + limit; ++sq)
+        {
+            result.SetBit(sq);
+        }
+
+        return result;
+    }
+
     #endregion
 
     #region Methods accepting BoardSquares
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool GetBit(this BitBoard board, BoardSquare square) => board.GetBit((int)square);
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard SetBit(this ref BitBoard board, BoardSquare square) => board.SetBit((int)square);
 
+    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard PopBit(this ref BitBoard board, BoardSquare square) => board.PopBit((int)square);
 

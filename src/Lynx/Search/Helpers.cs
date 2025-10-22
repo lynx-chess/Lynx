@@ -46,6 +46,33 @@ public sealed partial class Engine
     }
 
     /// <summary>
+    /// [12][64][2][2]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ref int QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    {
+        const int pieceOffset = 64 * 2 * 2;
+        const int targetSquareOffset = 2 * 2;
+        const int startSquareAttackedOffset = 2;
+
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var oppositeSide = Utils.OppositeSide((int)position.Side);
+
+        var oppsiteSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
+
+        var isStartSquareAttacked = oppsiteSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppsiteSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        var index = (move.Piece() * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + (isStartSquareAttacked * startSquareAttackedOffset)
+            + isTargetSquareAttacked;
+
+        return ref _quietHistory[index];
+    }
+
+    /// <summary>
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -284,7 +311,7 @@ public sealed partial class Engine
             var move = _pVTable[i];
             TryParseMove(position, i, move);
 
-#pragma warning disable CA2000 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
+#pragma warning disable CA2000, IDISP001 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
             var newPosition = new Position(position);
 #pragma warning restore CA2000 // Dispose objects before losing scope
             newPosition.MakeMove(move);
@@ -292,7 +319,9 @@ public sealed partial class Engine
             {
                 throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
             }
+#pragma warning disable IDISP003 // Dispose previous before re-assigning - debug method
             position = newPosition;
+#pragma warning restore IDISP003 // Dispose previous before re-assigning
         }
 
         static void TryParseMove(Position position, int i, int move)
@@ -422,28 +451,6 @@ $" {427,-3}                                                  {_pVTable[427].ToEP
 $" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
 #pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Conditional("DEBUG")]
-    internal void PrintHistoryMoves()
-    {
-        int max = EvaluationConstants.MinEval;
-
-        for (int i = 0; i < 12; ++i)
-        {
-            var tmp = _quietHistory[i];
-            for (int j = 0; j < 64; ++j)
-            {
-                var item = tmp[j];
-
-                if (item > max)
-                {
-                    max = item;
-                }
-            }
-        }
-
-        _logger.ConditionalDebug($"Max history: {max}");
     }
 
 #pragma warning restore S125 // Sections of code should not be commented out
