@@ -484,7 +484,10 @@ public sealed class EngineSettings
     public int SE_DoubleExtensions_Max { get; set; } = 6;
 
     [SPSA<int>(enabled: false)]
-    public int SE_LowDepthExtension { get; set; } = 9;
+    public int SE_LowDepthExtension_Depth { get; set; } = 9;
+
+    [SPSA<int>(10, 50, 4)]
+    public int SE_LowDepthExtension_Margin { get; set; } = 25;
 
     #endregion
 }
