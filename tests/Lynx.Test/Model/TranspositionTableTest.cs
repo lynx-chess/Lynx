@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+
 using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test.Model;
@@ -74,7 +75,6 @@ public class TranspositionTableTests
     [Test]
     [Explicit]
     [NonParallelizable]
-    [Category(Categories.LongRunning)]
     public void ClearTT()
     {
         Configuration.EngineSettings.TranspositionTableSize = 31;
@@ -86,23 +86,48 @@ public class TranspositionTableTests
 
         for (int index = 0; index < tt.Length; ++index)
         {
-            ref var ttEntry = ref tt.Get(index);
-            ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6);
+            ref var ttBucket = ref tt.Get(index);
+            for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
+            {
+                ref var ttEntry = ref ttBucket[i];
+                ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6, 10 + i);
+            }
+
+            Assert.AreEqual(10, ttBucket[0].Age);
+            Assert.AreEqual(11, ttBucket[1].Age);
+            Assert.AreEqual(12, ttBucket[2].Age);
+
+            //Assert.AreEqual(10, tt._tt[0][0].Age);
+            //Assert.AreEqual(11, tt._tt[0][1].Age);
+            //Assert.AreEqual(12, tt._tt[0][2].Age);
+
+            Assert.AreEqual(10, tt.Get(0)[0].Age);
+            Assert.AreEqual(11, tt.Get(0)[1].Age);
+            Assert.AreEqual(12, tt.Get(0)[2].Age);
+
+            var newBucket = tt.Get(0);
+            Assert.AreEqual(10, newBucket[0].Age);
+            Assert.AreEqual(11, newBucket[1].Age);
+            Assert.AreEqual(12, newBucket[2].Age);
         }
 
         tt.Clear();
 
         for (int index = 0; index < tt.Length; ++index)
         {
-            var ttEntry = tt.Get(index);
+            var ttBucket = tt.Get(index);
+            for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
+            {
+                var ttEntry = ttBucket[i];
 
-            Assert.AreEqual(0, ttEntry.Score);
-            Assert.AreEqual(0, ttEntry.StaticEval);
-            Assert.AreEqual(0, ttEntry.Depth);
-            Assert.AreEqual(NodeType.Unknown, ttEntry.Type);
-            Assert.AreEqual(false, ttEntry.WasPv);
-            Assert.AreEqual(0, ttEntry.Move);
-            Assert.AreEqual(0, ttEntry.Key);
+                Assert.AreEqual(0, ttEntry.Score);
+                Assert.AreEqual(0, ttEntry.StaticEval);
+                Assert.AreEqual(0, ttEntry.Depth);
+                Assert.AreEqual(NodeType.Unknown, ttEntry.Type);
+                Assert.AreEqual(false, ttEntry.WasPv);
+                Assert.AreEqual(0, ttEntry.Move);
+                Assert.AreEqual(0, ttEntry.Key);
+            }
         }
     }
 }
