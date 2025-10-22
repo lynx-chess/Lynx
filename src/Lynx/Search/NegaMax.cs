@@ -120,17 +120,6 @@ public sealed partial class Engine
             ttWasPv = false;
         }
 
-        // Internal iterative reduction (IIR)
-        // If this position isn't found in TT, it has never been searched before,
-        // so the search will be potentially expensive.
-        // Therefore, we search with reduced depth for now, expecting to record a TT move
-        // which we'll be able to use later for the full depth search
-        if (depth >= Configuration.EngineSettings.IIR_MinDepth
-            && (!ttEntryHasBestMove))
-        {
-            --depthExtension;
-        }
-
         var ttPv = pvNode || ttWasPv;
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
@@ -313,6 +302,17 @@ public sealed partial class Engine
             {
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
             }
+        }
+
+        // Internal iterative reduction (IIR)
+        // If this position isn't found in TT, it has never been searched before,
+        // so the search will be potentially expensive.
+        // Therefore, we search with reduced depth for now, expecting to record a TT move
+        // which we'll be able to use later for the full depth search
+        if (depth >= Configuration.EngineSettings.IIR_MinDepth
+            && (!ttEntryHasBestMove))
+        {
+            --depthExtension;
         }
 
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
