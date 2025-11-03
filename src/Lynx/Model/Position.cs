@@ -1662,7 +1662,7 @@ public partial class Position : IDisposable
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares);
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares);
-                
+
                 ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants);
 
 #if DEBUG
