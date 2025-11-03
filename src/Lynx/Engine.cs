@@ -95,7 +95,7 @@ public sealed partial class Engine : IDisposable
         _moveScoresPool = new int[movesSize];
         _visitedMovesPool = new Move[movesSize];
 
-        _logger.Info("Engine {0} initialized", _id);
+        _logger.Debug("Engine {0} initialized", _id);
     }
 
     public void Warmup()

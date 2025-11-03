@@ -183,8 +183,8 @@ public sealed partial class Engine
                         Debug.Assert(depthToSearch > 0);
 
                         _logger.Log(logLevel,
-                        "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                        _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
+                            "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, time {Time}, nodes {Nodes}",
+                            _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
                         Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
@@ -278,7 +278,7 @@ public sealed partial class Engine
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
-            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isPondering));
+            } while (StopSearchCondition(lastSearchResult?.BestMove, depth++, mate, bestScore, isPondering));
         }
         catch (OperationCanceledException)
         {
@@ -327,14 +327,6 @@ public sealed partial class Engine
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isPondering)
     {
-        if (bestMove is null || bestMove == 0)
-        {
-            _logger.Warn(
-                "[#{EngineId}] Depth {Depth}: search continues, due to lack of best move", _id, depth - 1);
-
-            return true;
-        }
-
         var logLevel = IsMainEngine
             ? LogLevel.Info
 #if MULTITHREAD_DEBUG
@@ -343,6 +335,23 @@ public sealed partial class Engine
                 : LogLevel.Off;
 #endif
 
+        if (depth + 1 >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Log(logLevel,
+                "[#{EngineId}] Max depth reached: {MaxDepth}",
+                _id, Configuration.EngineSettings.MaxDepth);
+
+            return false;
+        }
+
+        if (bestMove is null || bestMove == 0)
+        {
+            _logger.Warn(
+                "[#{EngineId}] Depth {Depth}: search continues, due to lack of best move", _id, depth);
+
+            return true;
+        }
+
         if (mate != 0)
         {
             if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
@@ -350,7 +359,7 @@ public sealed partial class Engine
                 //_logger.Warn( // TODO bug
                 _logger.Info(
                     "[#{EngineId}] Depth {Depth}: mate {Mate} outside of range detected, stopping search and playing best move so far: {BestMove}",
-                    _id, depth - 1, mate, bestMove.Value.UCIString());
+                    _id, depth, mate, bestMove.Value.UCIString());
 
                 return false;
             }
@@ -359,11 +368,13 @@ public sealed partial class Engine
 
             _logger.Log(logLevel,
                 "[#{EngineId}] Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
-                _id, depth - 1, mate, bestScore, winningMateThreshold);
+                _id, depth, mate, bestScore, winningMateThreshold);
 
             if (!isPondering && (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold))
             {
-                if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
+                if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.StopSearchOnMate_MaxSoftTimeBoundLimit
+                    && (depth >= Configuration.EngineSettings.StopSearchOnMate_MinDepth
+                        || depth >= mate * 2))
                 {
                     _logger.Log(logLevel,
                         "[#{EngineId}] Stopping, since mate is short enough and we're short on time: soft limit {SoftLimit}ms",
@@ -380,25 +391,16 @@ public sealed partial class Engine
             _logger.Log(logLevel, "[#{EngineId}] Search continues, hoping to find a faster mate", _id);
         }
 
-        if (depth >= Configuration.EngineSettings.MaxDepth)
-        {
-            _logger.Log(logLevel,
-                "[#{EngineId}] Max depth reached: {MaxDepth}",
-                _id, Configuration.EngineSettings.MaxDepth);
-
-            return false;
-        }
-
         var maxDepth = _searchConstraints.MaxDepth;
         if (maxDepth > 0)
         {
-            var shouldContinue = depth <= maxDepth;
+            var shouldContinue = depth + 1 <= maxDepth;
 
             if (!shouldContinue)
             {
                 _logger.Log(logLevel,
                     "[#{EngineId}] Depth {Depth}: stopping, max. depth reached",
-                    _id, depth - 1);
+                    _id, depth);
             }
 
             return shouldContinue;
@@ -409,17 +411,17 @@ public sealed partial class Engine
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
             var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
-            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
+            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
 
             _logger.Log(logLevel,
                 "[#{EngineId}] [TM] {ElapsedMilliseconds}ms | Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}ms, scaled soft limit {ScaledSoftLimit}ms",
-                _id, elapsedMilliseconds, depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+                _id, elapsedMilliseconds, depth, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
             if (elapsedMilliseconds > scaledSoftLimitTimeBound)
             {
                 _logger.Log(logLevel,
                     "[#{EngineId}] [TM] Stopping at depth {0} (nodes {1}): {2}ms > {3}ms",
-                    _id, depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
+                    _id, depth, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
 
                 return false;
             }
@@ -534,7 +536,7 @@ public sealed partial class Engine
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
             if (isPondering || !IsMainEngine)
             {
-                _logger.Info(noDepth1Message);
+                _logger.Debug(noDepth1Message);
             }
             else
             {

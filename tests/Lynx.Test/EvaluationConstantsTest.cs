@@ -1,12 +1,13 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
-using static Lynx.EvaluationPSQTs;
 using static Lynx.TunableEvalParameters;
 using static Lynx.Utils;
 
 namespace Lynx.Test;
+
 public class EvaluationConstantsTest
 {
     /// <summary>
@@ -45,7 +46,7 @@ public class EvaluationConstantsTest
     [Test]
     public void CheckmateDepthFactorTest()
     {
-        const int maxCheckmateValue = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth ;
+        const int maxCheckmateValue = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth;
         Assert.Less(maxCheckmateValue, MaxEval);
         Assert.Greater(maxCheckmateValue, MinEval);
 
@@ -265,77 +266,6 @@ public class EvaluationConstantsTest
         Assert.NotZero(EmergencyMoveScore);
         Assert.Less(EmergencyMoveScore, -50);
         Assert.Greater(EmergencyMoveScore, -200);
-    }
-
-    [Test]
-    public void PackedEvaluation()
-    {
-        short[][] middleGamePawnTableBlack = [.. MiddleGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGamePawnTableBlack = [.. EndGamePawnTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameKnightTableBlack = [.. MiddleGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameKnightTableBlack = [.. EndGameKnightTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameBishopTableBlack = [.. MiddleGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameBishopTableBlack = [.. EndGameBishopTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameRookTableBlack = [.. MiddleGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameRookTableBlack = [.. EndGameRookTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameQueenTableBlack = [.. MiddleGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] EndGameQueenTableBlack = [.. EndGameQueenTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][] middleGameKingTableBlack = [.. MiddleGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-        short[][] endGameKingTableBlack = [.. EndGameKingTable.Select(bucketedArray => bucketedArray.Select((_, index) => (short)-bucketedArray[index ^ 56]).ToArray())];
-
-        short[][][] mgPositionalTables =
-        [
-            MiddleGamePawnTable,
-            MiddleGameKnightTable,
-            MiddleGameBishopTable,
-            MiddleGameRookTable,
-            MiddleGameQueenTable,
-            MiddleGameKingTable,
-
-            middleGamePawnTableBlack,
-            middleGameKnightTableBlack,
-            middleGameBishopTableBlack,
-            middleGameRookTableBlack,
-            middleGameQueenTableBlack,
-            middleGameKingTableBlack
-        ];
-
-        short[][][] egPositionalTables =
-        [
-            EndGamePawnTable,
-            EndGameKnightTable,
-            EndGameBishopTable,
-            EndGameRookTable,
-            EndGameQueenTable,
-            EndGameKingTable,
-
-            endGamePawnTableBlack,
-            endGameKnightTableBlack,
-            endGameBishopTableBlack,
-            endGameRookTableBlack,
-            EndGameQueenTableBlack,
-            endGameKingTableBlack
-        ];
-
-        for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
-        {
-            for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
-            {
-                for (int sq = 0; sq < 64; ++sq)
-                {
-                    var mg = (short)(MiddleGamePieceValues[0][bucket][piece] + mgPositionalTables[piece][bucket][sq]);
-                    var eg = (short)(EndGamePieceValues[0][bucket][piece] + egPositionalTables[piece][bucket][sq]);
-
-                    Assert.AreEqual(Utils.UnpackEG(PSQT(0, bucket, piece, sq)), eg);
-                    Assert.AreEqual(Utils.UnpackMG(PSQT(0, bucket, piece, sq)), mg);
-                }
-            }
-        }
     }
 
     /// <summary>

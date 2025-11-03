@@ -57,7 +57,7 @@ public sealed partial class Engine
 
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
-        var oppositeSide = Utils.OppositeSide(position.Side);
+        var oppositeSide = Utils.OppositeSide((int)position.Side);
 
         var oppsiteSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
 
