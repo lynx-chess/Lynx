@@ -1658,21 +1658,20 @@ public partial class Position : IDisposable
                 ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards, clearArray: true);
                 ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
 
-                ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants, clearArray: true);
+                ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares, clearArray: true);
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares, clearArray: true);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares, clearArray: true);
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares, clearArray: true);
 
 #if DEBUG
-                ArrayPool<int>.Shared.Return(_initialKingSquares, clearArray: true);
-                ArrayPool<int>.Shared.Return(_initialKingsideRookSquares, clearArray: true);
-                ArrayPool<int>.Shared.Return(_initialQueensideRookSquares, clearArray: true);
+                ArrayPool<int>.Shared.Return(_initialKingSquares);
+                ArrayPool<int>.Shared.Return(_initialKingsideRookSquares);
+                ArrayPool<int>.Shared.Return(_initialQueensideRookSquares);
 #endif
 
-                // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
-                ArrayPool<int>.Shared.Return(_board, clearArray: false);
+                ArrayPool<int>.Shared.Return(_board);
 #pragma warning restore S3254 // Default parameter values should not be passed as arguments
             }
             _disposedValue = true;
