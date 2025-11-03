@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.4" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.4" />
-    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36525.3" />
+    <PackageReference Include="BenchmarkDotNet"/>
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows"/>
+    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers"/>
   </ItemGroup>
 
   <ItemGroup>
