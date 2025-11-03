@@ -1656,13 +1656,14 @@ public partial class Position : IDisposable
             {
                 ArrayPool<BitBoard>.Shared.Return(_pieceBitBoards);
                 ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards);
-                ArrayPool<ulong>.Shared.Return(_nonPawnHash, clearArray: true);
 
-                ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants);
+                ArrayPool<ulong>.Shared.Return(_nonPawnHash);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares);
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares);
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares);
+                
+                ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants);
 
 #if DEBUG
                 ArrayPool<int>.Shared.Return(_initialKingSquares);
