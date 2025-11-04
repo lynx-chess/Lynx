@@ -131,7 +131,7 @@ public readonly struct TranspositionTable
     {
         var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
 
-        return (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
+        return (ulong)(((UInt128)key * (UInt128)_totalTTLength) >> 64);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
