@@ -326,7 +326,7 @@ public static class Constants
         13, 15, 15, 15, 12, 15, 15, 14
     ];
 
-    public static readonly int MaxTTArrayLength = Array.MaxLength;
+    public static readonly int MaxTTArrayLength = 1_032_444;    // ~ items in 128MB / 13
 
     public const int AbsoluteMaxTTSize = 524_288; // 4TB RAM, not bad
 
