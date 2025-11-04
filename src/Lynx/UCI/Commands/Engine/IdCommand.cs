@@ -11,7 +11,7 @@ namespace Lynx.UCI.Commands.Engine;
 ///		this must be sent after receiving the "uci" command to identify the engine,
 ///		e.g. "id author Stefan MK\n"
 /// </summary>
-public sealed class IdCommand : IEngineBaseCommand
+public sealed class IdCommand
 {
     public const string IdString = "id";
 

@@ -1,19 +1,19 @@
-using Lynx.Model;
+﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx;
 
-public sealed class Searcher
+public sealed class Searcher : IDisposable
 {
     private readonly ChannelReader<string> _uciReader;
     private readonly ChannelWriter<object> _engineWriter;
     private readonly Logger _logger;
 
     internal const int MainEngineId = 1;
-
     private bool _isProcessingGoCommand;
     private bool _isPonderHit;
 
@@ -30,6 +30,7 @@ public sealed class Searcher
     public string FEN => _mainEngine.Game.FEN;
 
     private bool _firstRun;
+    private bool _disposedValue;
 
     public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
@@ -55,6 +56,9 @@ public sealed class Searcher
         Warmup();
 #endif
 
+        // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
+        // It might help performance though due to preventing that zeroing from happenning during search
+        // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
         _ttWrapper.Clear();
 
         ForceGCCollection();
@@ -89,21 +93,26 @@ public sealed class Searcher
         }
     }
 
-    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print();
+    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove);
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
+        _firstRun = false;
         _isProcessingGoCommand = true;
 
         if (!_absoluteSearchCancellationTokenSource.TryReset())
         {
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _absoluteSearchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _absoluteSearchCancellationTokenSource = new();
         }
 
         if (!_searchCancellationTokenSource.TryReset())
         {
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _searchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _searchCancellationTokenSource = new();
         }
 
@@ -171,7 +180,9 @@ public sealed class Searcher
             if (_isPonderHit)
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource = new();
 
                 if (searchResult is null
@@ -241,49 +252,7 @@ public sealed class Searcher
             // before it was reset in OnGoCommand and therefore stay undetected
             if (!_isPonderHit)
             {
-                var tasks = _extraEngines
-                    .Select(engine =>
-                        Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
-                    .ToArray();
-
-#if MULTITHREAD_DEBUG
-                _logger.Info("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-                finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
-
-#if MULTITHREAD_DEBUG
-                _logger.Info("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-                await _absoluteSearchCancellationTokenSource.CancelAsync();
-
-#if MULTITHREAD_DEBUG
-                _logger.Info("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-                if (finalSearchResult is not null)
-                {
-                    // We wait just for the node count, so there's room for improvement here with thread voting
-                    // and other strategies that take other thread results into account
-                    await foreach (var extraResult in Task.WhenEach(tasks))
-                    {
-                        finalSearchResult.Nodes += (await extraResult)?.Nodes ?? 0;
-                    }
-
-                    finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
-
-#if MULTITHREAD_DEBUG
-                    _logger.Info("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-                    // Final info command
-                    _engineWriter.TryWrite(finalSearchResult);
-
-                    // We don't print bestmove command when ponder + ponderhit though
-                }
+                finalSearchResult = await MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints, isPondering: true);
             }
 
             // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
@@ -293,7 +262,9 @@ public sealed class Searcher
             if (_isPonderHit)
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
                 _absoluteSearchCancellationTokenSource = new();
 
                 if (finalSearchResult is null
@@ -335,14 +306,14 @@ public sealed class Searcher
         }
     }
 
-    private async Task<SearchResult?> MultithreadedSearch(SearchConstraints searchConstraints, SearchConstraints extraEnginesSearchConstraints)
+    private async Task<SearchResult?> MultithreadedSearch(SearchConstraints searchConstraints, SearchConstraints extraEnginesSearchConstraints, bool isPondering = false)
     {
 #if MULTITHREAD_DEBUG
         var sw = System.Diagnostics.Stopwatch.StartNew();
         var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+        if (!isPondering && searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
         {
             _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
         }
@@ -351,57 +322,136 @@ public sealed class Searcher
 
         var tasks = _extraEngines
             .Select(engine =>
-                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
             .ToArray();
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+        finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         await _absoluteSearchCancellationTokenSource.CancelAsync();
 
 #if MULTITHREAD_DEBUG
-        _logger.Info("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        _logger.Info("[MT] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         var totalNodes = finalSearchResult?.Nodes ?? 0;
+        var finalTime = finalSearchResult?.Time ?? 0;
 
-        // We wait just for the node count, so there's room for improvement here with thread voting
-        // and other strategies that take other thread results into account
         await foreach (var task in Task.WhenEach(tasks))
         {
             var extraResult = await task;
 
-            if (extraResult != null)
+            if (extraResult is not null)
             {
                 totalNodes += extraResult.Nodes;
-                finalSearchResult ??= extraResult;
+
+                if (finalSearchResult is null)
+                {
+                    finalSearchResult = extraResult;
+                    finalTime = extraResult.Time;
+                    continue;
+                }
+
+                // Thread voting, original impl sligtly corrected based on by Heimdall's (based on Berserk's)
+                if (extraResult.BestMove != default)
+                {
+#if MULTITHREAD_DEBUG
+                    var previousEngineId = finalSearchResult.EngineId;
+                    var previousDepth = finalSearchResult.Depth;
+                    var previousScore = finalSearchResult.Score;
+                    var previousMate = finalSearchResult.Mate;
+                    var previousBestMove = finalSearchResult.BestMove;
+#endif
+
+                    finalSearchResult = finalSearchResult.Mate switch
+                    {
+                        0                                                                                   // No mate detected in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          Mate
+                                    || extraResult.Depth > finalSearchResult.Depth                          //          ||  Higher depth
+                                    || (extraResult.Depth == finalSearchResult.Depth                        //          ||  Same depth, better score
+                                        && extraResult.Score > finalSearchResult.Score)
+
+                                => extraResult,
+                        > 0                                                                                 // Mating in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          Still mating
+                                    && (extraResult.Mate < finalSearchResult.Mate                           //          &&  [But faster (shorter mate)
+                                        || (extraResult.Mate == finalSearchResult.Mate                      //              || Same mating distance, but higher depth]
+                                            && extraResult.Depth > finalSearchResult.Depth))
+
+                                => extraResult,
+
+                        < 0                                                                                 // Mated in main thread:
+                            when                                                                            //      Extra thread:
+                                extraResult.Mate > 0                                                        //          We're mating instead (which shouldn't happen, but ¯\_(ツ)_/¯ )
+                                    || (extraResult.Mate < 0                                                //              || Still mated (to avoid replacing a known mate with the result of a thread that hasn't detected the mate yet)
+                                        && extraResult.Mate >= -Configuration.EngineSettings.MaxDepth / 2   //                  && Realistic mated score
+                                        && (extraResult.Depth > finalSearchResult.Depth                     //                  && Higher depth
+                                            || (extraResult.Depth == finalSearchResult.Depth                //                      || Same depth
+                                                && extraResult.Mate < finalSearchResult.Mate                //                          && Still mated, but longer mate
+                                                && extraResult.BestMove != finalSearchResult.BestMove)))    //                          && which is only possible if the best move is not the same (otherwise the shorter mate score is more accurate)
+
+                                => extraResult,
+
+                        _ => finalSearchResult
+                    };
+
+#if MULTITHREAD_DEBUG
+                    if (previousEngineId != finalSearchResult.EngineId)
+                    {
+                        if (_logger.IsInfoEnabled)
+                        {
+                            if (previousBestMove != finalSearchResult.BestMove)
+                            {
+                                _logger.Info("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                                    previousEngineId, previousBestMove.UCIStringMemoized(), previousDepth, previousScore, previousMate.ToString(Constants.NumberWithSignFormat),
+                                    finalSearchResult.EngineId, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate.ToString(Constants.NumberWithSignFormat),
+                                    _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                            }
+                        }
+                        else if (_logger.IsDebugEnabled)
+                        {
+                            _logger.Debug("[MT] Thread voting: #{EngineId1} ({BestMove1}, Depth {Depth1}, cp {Score1}, mate {Mate1}) -> #{EngineId2} ({BestMove2}, (Depth {Depth2}, cp {Score2}, mate {Mate2}) | {FEN}",
+                                previousEngineId, previousBestMove.UCIStringMemoized(), previousDepth, previousScore, previousMate.ToString(Constants.NumberWithSignFormat),
+                                finalSearchResult.EngineId, finalSearchResult.BestMove.UCIStringMemoized(), finalSearchResult.Depth, finalSearchResult.Score, finalSearchResult.Mate.ToString(Constants.NumberWithSignFormat),
+                                _mainEngine.Game.PositionBeforeLastSearch.FEN(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove));
+                        }
+                    }
+#endif
+                }
             }
         }
 
         if (finalSearchResult is not null)
         {
             finalSearchResult.Nodes = totalNodes;
+            finalSearchResult.Time = finalTime;
+
             finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-            _logger.Info("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            _logger.Info("[MT] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
             // Final info command
             _engineWriter.TryWrite(finalSearchResult);
 
-            // bestmove command
-            _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+            if (!isPondering)
+            {
+                // bestmove command
+                _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+            }
         }
 
         return finalSearchResult;
@@ -435,57 +485,96 @@ public sealed class Searcher
 
     public void NewGame()
     {
+        var sw = Stopwatch.StartNew();
+
         var averageDepth = _mainEngine.AverageDepth;
         if (averageDepth > 0 && averageDepth < int.MaxValue)
         {
             _logger.Info("Average depth: {0}", averageDepth);
         }
 
-        // Hash update
-        if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
+        // Threads update - before hash update to take advantage of multithreaded TT initialization (clearing)
+        // if .Clear() is ever moved to TranspositionTable constructor.
+        var threadsUpdated = UpdateThreads();
+        if (threadsUpdated)
         {
-            _mainEngine.NewGame();
-
-            foreach (var engine in _extraEngines)
-            {
-                engine.NewGame();
-            }
-        }
-        else
-        {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
-
-            _ttWrapper = new TranspositionTable();
-
-            _mainEngine.FreeResources();
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
-
-            AllocateExtraEngines();
+            _logger.Warn("Unexpected threads update - should have happened on 'setoption'");
         }
 
-        // Threads update
-        if (_searchThreadsCount == Configuration.EngineSettings.Threads)
+        // Hash update - after hash update to potentially take advantage of multithreaded TT
+        // initialization (clearing/zeroing), if .Clear() is ever moved to TranspositionTable constructor.
+        var hashUpdated = UpdateHash();
+        if (hashUpdated)
         {
-            foreach (var engine in _extraEngines)
-            {
-                engine.NewGame();
-            }
-        }
-        else
-        {
-            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
-            _searchThreadsCount = Configuration.EngineSettings.Threads;
-
-            AllocateExtraEngines();
+            _logger.Warn("Unexpected hash update - should have happened on 'setoption'\");");
         }
 
-        if (!_firstRun)
+        // We don't need to reset the main engine in case of hash update
+        // because it was alredy reset there, but whetever
+        _mainEngine.NewGame();
+
+        // We don't need to reset the extra engines in case of hash or threads update
+        // because they were alredy reset there, but whetever
+        foreach (var engine in _extraEngines)
+        {
+            engine.NewGame();
+        }
+
+        // During the first run, TT is cleared at the end of the constructor
+        if (!_firstRun && !hashUpdated)
         {
             _ttWrapper.Clear();
         }
         _firstRun = false;
 
+        sw.Stop();
+        _logger.Info("ucinewgame duration: {Time}ms", sw.ElapsedMilliseconds);
+
         ForceGCCollection();
+    }
+
+    public bool UpdateThreads()
+    {
+        if (_searchThreadsCount != Configuration.EngineSettings.Threads)
+        {
+            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
+
+            // Before invoking AllocateExtraEngines
+            _searchThreadsCount = Configuration.EngineSettings.Threads;
+
+            AllocateExtraEngines();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool UpdateHash()
+    {
+        if (_ttWrapper.Size != Configuration.EngineSettings.TranspositionTableSize)
+        {
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
+
+            _ttWrapper = new TranspositionTable();
+
+            // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
+            // It might impact performance though, due to preventing that zeroing from happenning during search
+            // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
+            _ttWrapper.Clear();
+
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
+            _mainEngine.Dispose();
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
+            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+
+            // We need extra engines to know about the new TT
+            AllocateExtraEngines();
+
+            return true;
+        }
+
+        return false;
     }
 
     public void Quit()
@@ -514,6 +603,9 @@ public sealed class Searcher
         await engine.PrintBenchResults(results);
     }
 
+    /// <summary>
+    /// Removes existing <see cref="_extraEngines"/> and allocates new ones baed on <see cref="_searchThreadsCount"/>
+    /// </summary>
     private void AllocateExtraEngines()
     {
         // _searchThreadsCount includes _mainEngine
@@ -521,8 +613,10 @@ public sealed class Searcher
 
         foreach (var engine in _extraEngines)
         {
-            engine.FreeResources();
+            engine.Dispose();
         }
+
+        Array.Clear(_extraEngines);
 
         if (_searchThreadsCount > 1)
         {
@@ -532,7 +626,9 @@ public sealed class Searcher
             {
                 _extraEngines[i] = new Engine(i + 2,
 #if MULTITHREAD_DEBUG
-                    _engineWriter,
+                _logger.IsDebugEnabled
+                    ? _engineWriter
+                    : SilentChannelWriter<object>.Instance,
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
@@ -568,14 +664,14 @@ public sealed class Searcher
     private void Warmup()
     {
         _logger.Debug("Warming-up engine");
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
 
         var warmupCount = Math.Min(8, _extraEngines.Length + 1);
 
         Parallel.For(0, warmupCount, i =>
         {
             var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-            var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
+            using var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
 
             engine.Warmup();
         });
@@ -583,4 +679,30 @@ public sealed class Searcher
         _logger.Info("Warm-up time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 #pragma warning restore S1144, RCS1213 // Unused private types or members should be removed
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _mainEngine.Dispose();
+
+                foreach(var engine in _extraEngines)
+                {
+                    engine.Dispose();
+                }
+
+                _absoluteSearchCancellationTokenSource.Dispose();
+                _searchCancellationTokenSource.Dispose();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+    }
 }

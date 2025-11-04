@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Model;
+
 public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -21,6 +22,9 @@ public readonly struct TranspositionTable
 
     public TranspositionTable()
     {
+        _logger.Debug("Allocating TT");
+        var sw = Stopwatch.StartNew();
+
         Size = Configuration.EngineSettings.TranspositionTableSize;
 
         var ttLength = CalculateLength(Size);
@@ -52,6 +56,8 @@ public readonly struct TranspositionTable
         {
             _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>(itemsLeft, pinned: true);
         }
+
+        _logger.Info("TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -60,7 +66,9 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
-        _logger.Debug("Clearing TT");
+        var threadCount = Configuration.EngineSettings.Threads;
+
+        _logger.Debug("Zeroing TT using {ThreadCount} thread(s)", threadCount);
         var sw = Stopwatch.StartNew();
 
         // TODO: better division of work, it's probably better
@@ -68,7 +76,6 @@ public readonly struct TranspositionTable
         foreach (var tt in _tt)
         {
             var ttLength = tt.Length;
-            var threadCount = Configuration.EngineSettings.Threads;
             var sizePerThread = ttLength / threadCount;
 
             // Instead of just doing Array.Clear(_tt):
@@ -83,15 +90,15 @@ public readonly struct TranspositionTable
             });
         }
 
-        _logger.Info("TT clearing time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry(Position position)
+    public void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         if (Sse.IsSupported)
         {
-            (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+            (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
             Debug.Assert(ttIndex < _ttArrayCount);
             Debug.Assert(entryIndex < Array.MaxLength);
 
@@ -112,12 +119,17 @@ public readonly struct TranspositionTable
     /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_totalTTLength) >> 64);
+    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier, int halfMovesWithoutCaptureOrPawnMove)
+    {
+        var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
+
+        return (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly (int, int) CalculateTTIndexes(ulong positionUniqueIdentifier)
+    public readonly (int, int) CalculateTTIndexes(ulong positionUniqueIdentifier, int halfMovesWithoutCaptureOrPawnMove)
     {
-        var globalIndex = CalculateTTIndex(positionUniqueIdentifier);
+        var globalIndex = CalculateTTIndex(positionUniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
 
         var ttIndex = (int)(globalIndex / (ulong)Array.MaxLength);
         var itemIndex = (int)(globalIndex % (ulong)Array.MaxLength);
@@ -126,25 +138,30 @@ public readonly struct TranspositionTable
     }
 
     /// <summary>
-    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
+    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoScore"/> is returned otherwise
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int ply)
+    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result) // [MaybeNullWhen(false)]
     {
-        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         var entry = _tt[ttIndex][entryIndex];
 
-        if ((ushort)position.UniqueIdentifier != entry.Key)
+        var key = GenerateTTKey(position.UniqueIdentifier);
+
+        if (key != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, EvaluationConstants.NoHashEntry, default, default);
+            result = default;
+            return false;
         }
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
         var recalculatedScore = RecalculateMateScores(entry.Score, ply);
 
-        return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+        result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+
+        return true;
     }
 
     /// <summary>
@@ -152,27 +169,24 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
+    public void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
-        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+        Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overriden");
+
+        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         ref var entry = ref _tt[ttIndex][entryIndex];
 
-        //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
-        //{
-        //    _logger.Warn("TT collision");
-        //}
+        var newKey = GenerateTTKey(position.UniqueIdentifier);
 
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            entry.Key == 0                                      // No actual entry
-            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
-            || nodeType == NodeType.Exact                       // Entering PV data
-            || depth
-                //+ Configuration.EngineSettings.TTReplacement_DepthOffset
-                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
-                ;
-        // || entry.Type == NodeType.None not needed, since depth condition is always true for those cases
+            entry.Key != newKey                 // Different key: collision or no actual entry
+            || nodeType == NodeType.Exact       // Entering PV data
+            || depth                            // Higher depth
+                    + Configuration.EngineSettings.TTReplacement_DepthOffset
+                    + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
+                >= entry.Depth;
 
         if (!shouldReplace)
         {
@@ -183,18 +197,24 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SaveStaticEval(Position position, int staticEval, bool wasPv)
+    public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
-        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         ref var entry = ref _tt[ttIndex][entryIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoHashEntry, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
+        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, null);
     }
+
+    /// <summary>
+    /// Use lowest 16 bits of the position unique identifier as the key
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ushort GenerateTTKey(ulong positionUniqueIdentifier) => (ushort)positionUniqueIdentifier;
 
     /// <summary>
     /// Exact TT occupancy per mill
@@ -262,7 +282,7 @@ public readonly struct TranspositionTable
         {
             return score - ply;
         }
-        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit && score != EvaluationConstants.NoScore)
         {
             return score + ply;
         }

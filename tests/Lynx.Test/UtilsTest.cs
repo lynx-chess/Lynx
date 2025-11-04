@@ -21,16 +21,16 @@ public class UtilsTest
         Assert.AreEqual(expectedSide, Utils.OppositeSide(sideToMove));
     }
 
-    [TestCase(Side.White, Constants.WhiteShortCastleRookSquare)]
-    [TestCase(Side.Black, Constants.BlackShortCastleRookSquare)]
+    [TestCase(Side.White, Constants.WhiteRookShortCastleSquare)]
+    [TestCase(Side.Black, Constants.BlackRookShortCastleSquare)]
     public void ShortCastleRookTargetSquare(Side sideToMove, int expectedRookSquare)
     {
         Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookTargetSquare(sideToMove));
         Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookTargetSquare((int)sideToMove));
     }
 
-    [TestCase(Side.White, Constants.WhiteLongCastleRookSquare)]
-    [TestCase(Side.Black, Constants.BlackLongCastleRookSquare)]
+    [TestCase(Side.White, Constants.WhiteRookLongCastleSquare)]
+    [TestCase(Side.Black, Constants.BlackRookLongCastleSquare)]
     public void LongCastleRookTargetSquare(Side sideToMove, int expectedRookSquare)
     {
         Assert.AreEqual(expectedRookSquare, Utils.LongCastleRookTargetSquare(sideToMove));
@@ -129,5 +129,41 @@ public class UtilsTest
     public void CalculateNps()
     {
         Assert.AreEqual(1, Utils.CalculateNps(0, 0));
+    }
+
+    [TestCase(Piece.P, false)]
+    [TestCase(Piece.N, true)]
+    [TestCase(Piece.B, true)]
+    [TestCase(Piece.R, false)]
+    [TestCase(Piece.Q, false)]
+    [TestCase(Piece.K, false)]
+    [TestCase(Piece.p, false)]
+    [TestCase(Piece.n, true)]
+    [TestCase(Piece.b, true)]
+    [TestCase(Piece.r, false)]
+    [TestCase(Piece.q, false)]
+    [TestCase(Piece.k, false)]
+    [TestCase(Piece.None, false)]
+    public void IsMinorPiece(Piece piece, bool isMinor)
+    {
+        Assert.AreEqual(isMinor, Utils.IsMinorPiece((int)piece));
+    }
+
+    [TestCase(Piece.P, false)]
+    [TestCase(Piece.N, false)]
+    [TestCase(Piece.B, false)]
+    [TestCase(Piece.R, true)]
+    [TestCase(Piece.Q, true)]
+    [TestCase(Piece.K, false)]
+    [TestCase(Piece.p, false)]
+    [TestCase(Piece.n, false)]
+    [TestCase(Piece.b, false)]
+    [TestCase(Piece.r, true)]
+    [TestCase(Piece.q, true)]
+    [TestCase(Piece.k, false)]
+    [TestCase(Piece.None, false)]
+    public void IsMajorPiece(Piece piece, bool isMinor)
+    {
+        Assert.AreEqual(isMinor, Utils.IsMajorPiece((int)piece));
     }
 }

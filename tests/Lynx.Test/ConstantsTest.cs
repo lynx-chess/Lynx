@@ -61,18 +61,18 @@ public class ConstantsTest
         for (int square = (int)BoardSquare.a6; square <= (int)BoardSquare.h6; ++square)
         {
             Assert.AreEqual(square + 8, Constants.EnPassantCaptureSquares[square]);
-            Assert.AreEqual(EnPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
+            Assert.AreEqual(_enPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
         }
 
         Assert.AreEqual((int)BoardSquare.d4, Constants.EnPassantCaptureSquares[(int)BoardSquare.d3]);
         for (int square = (int)BoardSquare.a3; square <= (int)BoardSquare.h3; ++square)
         {
             Assert.AreEqual(square - 8, Constants.EnPassantCaptureSquares[square]);
-            Assert.AreEqual(EnPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
+            Assert.AreEqual(_enPassantCaptureSquaresDictionary[square], Constants.EnPassantCaptureSquares[square]);
         }
     }
 
-    private static readonly FrozenDictionary<int, int> EnPassantCaptureSquaresDictionary = new Dictionary<int, int>(16)
+    private static readonly FrozenDictionary<int, int> _enPassantCaptureSquaresDictionary = new Dictionary<int, int>(16)
     {
         [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
         [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,
@@ -161,5 +161,45 @@ public class ConstantsTest
     public void MaxNumberMovesInAGame()
     {
         Assert.Less(Constants.MaxNumberMovesInAGame, 1024 * 1024, "We'd need to customize ArrayPool due to desired array size requirements");
+    }
+
+    [Test]
+    public void PowerOfTwo()
+    {
+        Assert.True(int.IsPow2(KingPawnHashSize));
+        Assert.True(int.IsPow2(PawnCorrHistoryHashSize));
+        Assert.True(int.IsPow2(NonPawnCorrHistoryHashSize));
+    }
+
+    [Test]
+    public void ManhattanDistance()
+    {
+        Assert.AreEqual(0, Constants.ManhattanDistance[0][0]);
+        Assert.AreEqual(0, Constants.ManhattanDistance[63][63]);
+
+        Assert.AreEqual(7, Constants.ManhattanDistance[0][7]);
+        Assert.AreEqual(7, Constants.ManhattanDistance[7][0]);
+
+        Assert.AreEqual(14, Constants.ManhattanDistance[0][63]);
+        Assert.AreEqual(14, Constants.ManhattanDistance[63][0]);
+
+        Assert.AreEqual(1, Constants.ManhattanDistance[27][28]);
+        Assert.AreEqual(1, Constants.ManhattanDistance[28][27]);
+
+        Assert.AreEqual(1, Constants.ManhattanDistance[27][35]);
+        Assert.AreEqual(1, Constants.ManhattanDistance[35][27]);
+
+        Assert.AreEqual(2, Constants.ManhattanDistance[27][36]);
+        Assert.AreEqual(2, Constants.ManhattanDistance[36][27]);
+
+        Assert.AreEqual(4, Constants.ManhattanDistance[27][45]);
+        Assert.AreEqual(4, Constants.ManhattanDistance[45][27]);
+
+        Assert.AreEqual(6, Constants.ManhattanDistance[27][54]);
+        Assert.AreEqual(6, Constants.ManhattanDistance[54][27]);
+
+        Assert.AreEqual(2, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b7]);
+        Assert.AreEqual(4, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.c6]);
+        Assert.AreEqual(3, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b6]);
     }
 }

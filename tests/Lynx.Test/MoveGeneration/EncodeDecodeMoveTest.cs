@@ -46,7 +46,7 @@ public class EncodeDecodeMoveTest
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
         Assert.AreEqual((int)piece, move.Piece());
-        Assert.AreEqual(isCapture, move.IsCapture());
+        Assert.AreEqual(isCapture, move.CapturedPiece() != (int)Piece.None);
 
         Assert.AreEqual(default(int), move.PromotedPiece());
         Assert.False(move.IsEnPassant());
@@ -72,7 +72,7 @@ public class EncodeDecodeMoveTest
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
         Assert.AreEqual((int)promotedPiece, move.PromotedPiece());
         Assert.True(move.IsPromotion());
-        Assert.False(move.IsCapture());
+        Assert.False(move.CapturedPiece() != (int)Piece.None);
         Assert.False(move.IsEnPassant());
     }
 
@@ -92,7 +92,7 @@ public class EncodeDecodeMoveTest
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
         Assert.AreEqual((int)promotedPiece, move.PromotedPiece());
         Assert.AreEqual((int)capturedPiece, move.CapturedPiece());
-        Assert.True(move.IsCapture());
+        Assert.True(move.CapturedPiece() != (int)Piece.None);
         Assert.True(move.IsPromotion());
         Assert.False(move.IsEnPassant());
     }
@@ -135,7 +135,7 @@ public class EncodeDecodeMoveTest
         Assert.AreEqual(isLongCastle, move.IsLongCastle());
         Assert.AreEqual(isShortCastle || isLongCastle, move.IsCastle());
         Assert.False(move.IsPromotion());
-        Assert.False(move.IsCapture());
+        Assert.False(move.CapturedPiece() != (int)Piece.None);
         Assert.False(move.IsEnPassant());
     }
 
@@ -151,7 +151,7 @@ public class EncodeDecodeMoveTest
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
         Assert.True(move.IsDoublePawnPush());
         Assert.False(move.IsPromotion());
-        Assert.False(move.IsCapture());
+        Assert.False(move.CapturedPiece() != (int)Piece.None);
         Assert.False(move.IsEnPassant());
     }
 }

@@ -99,6 +99,8 @@ public static class Constants
     /// </summary>
     public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
+    public const BitBoard Corners = 0x8100000000000081;
+
     public static readonly string[] Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
@@ -241,18 +243,23 @@ public static class Constants
 
     public const string CaptureTrainPositionFEN = "r2q1rk1/bppb1pp1/p2p2np/2PPp3/1P2P1n1/P3BN2/2Q1BPPP/RN3RK1 w - - 2 15";
 
-    public const int WhiteKingSourceSquare = (int)BoardSquare.e1;
-    public const int BlackKingSourceSquare = (int)BoardSquare.e8;
+    public const int InitialWhiteKingSquare = (int)BoardSquare.e1;
+    public const int InitialBlackKingSquare = (int)BoardSquare.e8;
 
-    public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
-    public const int BlackShortCastleKingSquare = (int)BoardSquare.g8;
-    public const int WhiteLongCastleKingSquare = (int)BoardSquare.c1;
-    public const int BlackLongCastleKingSquare = (int)BoardSquare.c8;
+    public const int InitialWhiteKingsideRookSquare = (int)BoardSquare.h1;
+    public const int InitialWhiteQueensideRookSquare = (int)BoardSquare.a1;
+    public const int InitialBlackKingsideRookSquare = (int)BoardSquare.h8;
+    public const int InitialBlackQueensideRookSquare = (int)BoardSquare.a8;
 
-    public const int WhiteShortCastleRookSquare = (int)BoardSquare.f1;
-    public const int BlackShortCastleRookSquare = (int)BoardSquare.f8;
-    public const int WhiteLongCastleRookSquare = (int)BoardSquare.d1;
-    public const int BlackLongCastleRookSquare = (int)BoardSquare.d8;
+    public const int WhiteKingShortCastleSquare = (int)BoardSquare.g1;
+    public const int BlackKingShortCastleSquare = (int)BoardSquare.g8;
+    public const int WhiteKingLongCastleSquare = (int)BoardSquare.c1;
+    public const int BlackKingLongCastleSquare = (int)BoardSquare.c8;
+
+    public const int WhiteRookShortCastleSquare = (int)BoardSquare.f1;
+    public const int BlackRookShortCastleSquare = (int)BoardSquare.f8;
+    public const int WhiteRookLongCastleSquare = (int)BoardSquare.d1;
+    public const int BlackRookLongCastleSquare = (int)BoardSquare.d8;
 
     public const string WhiteShortCastle = "e1g1";
     public const string BlackShortCastle = "e8g8";
@@ -286,17 +293,27 @@ public static class Constants
         (int)BoardSquare.h3 - 8     //47 = h3
     ];
 
+#pragma warning disable RCS1257 // Use enum field explicitly
+    public const byte NoUpdateCastlingRight = 15;
+    public const byte WhiteKingCastlingRight = 12;
+    public const byte WhiteKingSideRookCastlingRight = 14;
+    public const byte WhiteQueenSideRookCastlingRight = 13;
+    public const byte BlackKingCastlingRight = 3;
+    public const byte BlackKingSideRookCastlingRight = 11;
+    public const byte BlackQueenSideRookCastlingRight = 7;
+
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474
-    ///                                 CastlingRights  Binary  Decimal
-    ///  K & R didn't move              1111 & 1111  =  1111    15
-    ///  White King moved               1111 & 1100  =  1100    12
-    ///  White kingside Rook moved      1111 & 1110  =  1110    14
-    ///  White queenside Rook moved     1111 & 1101  =  1101    13
-    ///  Black King moved               1111 & 0011  =  1011    3
-    ///  Black kingside Rook moved      1111 & 1011  =  1011    11
-    ///  Black queenside Rook moved     1111 & 0111  =  0111    7
+    ///                                             CastlingRights  Binary  Decimal
+    ///  K & R didn't move                          1111 & 1111  =  1111    15
+    ///  White King moved                           1111 & 1100  =  1100    12
+    ///  White kingside Rook moved or captured      1111 & 1110  =  1110    14
+    ///  White queenside Rook moved or captured     1111 & 1101  =  1101    13
+    ///  Black King moved                           1111 & 0011  =  1011    3
+    ///  Black kingside Rook moved or captured      1111 & 1011  =  1011    11
+    ///  Black queenside Rook moved or captured     1111 & 0111  =  0111    7
     /// </summary>
+    [Obsolete("Test only")]
     public static ReadOnlySpan<byte> CastlingRightsUpdateConstants =>
     [
          7, 15, 15, 15,  3, 15, 15, 11,
@@ -315,11 +332,15 @@ public static class Constants
 
     public static readonly int MaxThreadCount = Array.MaxLength + 1;
 
+    public static readonly int MaxMoveOverhead = 60_000;
+
     /// <summary>
-    /// 218 or 224 seems to be the known limit
+    /// 218 or 224 seems to be the known limit of legal moves
     /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
+    /// We generally need to account for a number higher than that due to pseudolegal movegen
+    /// Regardless, we want to support positions like kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1 (270 pseudolegal and legal moves)
     /// </summary>
-    public const int MaxNumberOfPossibleMovesInAPosition = 250;
+    public const int MaxNumberOfPseudolegalMovesInAPosition = 512;
 
     public const int MaxNumberMovesInAGame = 2048;
 
@@ -424,7 +445,36 @@ public static class Constants
     /// </summary>
     public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
 
+    /// <summary>
+    /// e4, d4, e5, d5
+    /// </summary>
     public const BitBoard CentralSquares = 0x1818000000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 1 1 1 1 1 1 0
+    /// 6   0 1 1 1 1 1 1 0
+    /// 5   0 1 1 1 1 1 1 0
+    /// 4   0 1 1 1 1 1 1 0
+    /// 3   0 1 1 1 1 1 1 0
+    /// 2   0 1 1 1 1 1 1 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard NotAorH = 0x7e7e7e7e7e7e00;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   1 1 1 1 1 1 1 1
+    /// 6   1 1 1 1 1 1 1 1
+    /// 5   1 1 1 1 1 1 1 1
+    /// 4   1 1 1 1 1 1 1 1
+    /// 3   1 1 1 1 1 1 1 1
+    /// 2   1 1 1 1 1 1 1 1
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard PawnSquares = 0xffffffffffff00;
 
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
@@ -452,6 +502,8 @@ public static class Constants
     /// 500 moves, https://www.chess.com/game/live/378106991
     /// </summary>
     public const string SuperLongPositionCommand = "position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves e2e4 e7e5 g1f3 g8f6 b1c3 b8c6 f1e2 f8b4 a2a3 b4c3 b2c3 f6e4 e2b5 d7d6 d1e2 e4f6 d2d4 e8g8 d4e5 d6e5 b5c6 b7c6 c1g5 h7h6 g5h4 f8e8 a1d1 d8e7 e1g1 c8g4 h2h3 g4f3 e2f3 e7e6 h4f6 e6f6 f3f6 g7f6 d1d7 a8c8 f1b1 e8d8 d7d3 e5e4 d3d4 d8d4 c3d4 c8d8 c2c3 d8d7 f2f3 e4e3 g1f1 f6f5 f3f4 d7e7 f1e2 h6h5 h3h4 g8g7 b1f1 e7e4 g2g3 g7f6 f1f3 f6e6 f3e3 e4e3 e2e3 e6d5 e3d3 c6c5 c3c4 d5c6 d4d5 c6d6 d3c3 c7c6 d5c6 d6c6 c3b3 c6b6 a3a4 a7a5 b3a3 f7f6 a3b3 b6c6 b3c3 c6d6 c3d3 d6c6 d3e3 c6d6 e3f3 d6e6 f3e3 e6d6 e3f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2e2 e6d6 e2d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6d6 a3b3 d6e6 b3c2 e6d6 c2c3 d6e6 c3b2 e6d6 b2c2 d6e6 c2c3 e6e7 c3d3 e7d6 d3d2 d6e6 d2c3 e6e7 c3c2 e7d6 c2d3 d6e6 d3e2 e6d6 e2f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2f3 e6d6 f3g2 d6e6 g2f1 e6d6 f1e2 d6e6 e2d2 e6d6 d2d3 d6e7 d3c2 e7e6 c2c3 e6d6 c3b3 d6d7 b3c2 d7e6 c2d3 e6d6 d3e2 d6e6 e2d2 e6d6 d2d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a2 e6d6 a2b2 d6e6 b2c3 e6d6 c3d2 d6e6 d2e1 e6d6 e1d1 d6e6 d1e2 e6d6 e2f1 d6e6 f1g1 e6d6 g1h1 d6e6 h1g1 e6d6 g1f1 d6e6 f1e1 e6d6 e1d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a1 e6d6 a1a2 d6e6 a2b2 e6d6 b2c2 d6e6 c2d2 e6d6 d2e2 d6e6 e2f2 e6d6 f2f3 d6e6 f3e3 e6d6 e3d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6f7 a3b2 f7g6 b2c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e3 h6g6 e3e2 g6h6 e2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f1 h6g6 f1e2 g6h6 e2e1 h6g6 e1d2 g6h6 d2c1 h6g6 c1c2 g6h6 c2d1 h6g6 d1e2 g6h6 e2f1 h6g6 f1f2 g6h6 f2f3 h6g6 f3e3 g6h6 e3d3 h6g6 d3c3 g6h6 c3b3 h6g6 b3a3 g6h6 a3b2 h6g6 b2a2 g6h6 a2a1 h6g6 a1b2 g6h6 b2c1 h6g6 c1c2 g6h6 c2c3 h6g6 c3b3 g6h6 b3b2 h6g6 b2a3 g6h6 a3b3 h6g6 b3c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1f2 g6h6 f2f1 h6g6 f1e2 g6h6 e2e3 h6g6 e3d2 g6h6 d2d3 h6g6 d3e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3d3 g6h6 d3d2 h6g6 d2c3 g6h6 c3c2 h6g6 c2d1 g6h6 d1d2 h6g6 d2e1 g6h6 e1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1g1 g6h6 g1f1 h6g6 f1e1 g6h6 e1d1 h6g6 d1c2 g6h6 c2c3 h6g6 c3d3 g6h6 d3d2 h6g6 d2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1e2 h6g6 e2f3 g6h6 f3e3 h6g6 e3f2 g6h6 f2f1 h6g6 f1g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e2 h6g6 e2e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1g2 h6g6 g2g1 g6h6 g1h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f1 g6h6 f1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2h3 h6g6 h3g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2g1 h6g6 g1h1 g6h6 h1h2 h6g6 h2h3 g6h6 h3g2 h6g6 g2f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2g1 g6h6 g1g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1g2 g6h6 g2h2 h6g6 h2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e1 h6g6 e1f2 g6h6 f2g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6h7 f2f3 h7g7 f3g2 g7g6 g2h3 g6h6 h3h2 h6h7 h2g1 h7h8 g1h1 h8g8 h1g2 g8g7 g2f2 g7g6 f2f1 g6h6 f1e2 h6h7 e2f3 h7h8 f3f2 h8g8 f2f1 g8g7 f1g2 g7g6 g2h2 g6h6 h2h3 h6h7 h3h2 h7h8 h2h1 h8g8 h1g1 g8g7 g1g2 g7g6 g2h2 g6h6 h2g1 h6h7 g1g2 h7h8 g2h1 h8g8 h1h2 g8g7 h2g2 g7g6 g2g1 g6h6 g1g2 h6h7 g2h2 h7h8 h2h3 h8g8 h3h2 g8g7 h2h1 g7g6 h1g1 g6h6 g1g2 h6h7 g2f2 h7h8 f2f3 h8g8 f3g2 g8g7 g2h3 g7g6 h3h2 g6h6 h2h1 h6h7 h1g2 h7h6 g2g1 h6g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6g7 g1g2 g7f8 g2g1 f8f7 g1g2 f7g8 g2g1 g8g7 g1g2 g7h8 g2g1 h8h7 g1g2 h7h6 g2g1 h6g7";
+
+    public const string SuperLongPositionCommand_DFRC = "position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves e2e4 e7e5 g1f3 g8f6 b1c3 b8c6 f1e2 f8b4 a2a3 b4c3 b2c3 f6e4 e2b5 d7d6 d1e2 e4f6 d2d4 e8h8 d4e5 d6e5 b5c6 b7c6 c1g5 h7h6 g5h4 f8e8 a1d1 d8e7 e1h1 c8g4 h2h3 g4f3 e2f3 e7e6 h4f6 e6f6 f3f6 g7f6 d1d7 a8c8 f1b1 e8d8 d7d3 e5e4 d3d4 d8d4 c3d4 c8d8 c2c3 d8d7 f2f3 e4e3 g1f1 f6f5 f3f4 d7e7 f1e2 h6h5 h3h4 g8g7 b1f1 e7e4 g2g3 g7f6 f1f3 f6e6 f3e3 e4e3 e2e3 e6d5 e3d3 c6c5 c3c4 d5c6 d4d5 c6d6 d3c3 c7c6 d5c6 d6c6 c3b3 c6b6 a3a4 a7a5 b3a3 f7f6 a3b3 b6c6 b3c3 c6d6 c3d3 d6c6 d3e3 c6d6 e3f3 d6e6 f3e3 e6d6 e3f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2e2 e6d6 e2d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6d6 a3b3 d6e6 b3c2 e6d6 c2c3 d6e6 c3b2 e6d6 b2c2 d6e6 c2c3 e6e7 c3d3 e7d6 d3d2 d6e6 d2c3 e6e7 c3c2 e7d6 c2d3 d6e6 d3e2 e6d6 e2f3 d6e6 f3e3 e6d6 e3f2 d6e6 f2f3 e6d6 f3g2 d6e6 g2f1 e6d6 f1e2 d6e6 e2d2 e6d6 d2d3 d6e7 d3c2 e7e6 c2c3 e6d6 c3b3 d6d7 b3c2 d7e6 c2d3 e6d6 d3e2 d6e6 e2d2 e6d6 d2d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a2 e6d6 a2b2 d6e6 b2c3 e6d6 c3d2 d6e6 d2e1 e6d6 e1d1 d6e6 d1e2 e6d6 e2f1 d6e6 f1g1 e6d6 g1h1 d6e6 h1g1 e6d6 g1f1 d6e6 f1e1 e6d6 e1d1 d6e6 d1c1 e6d6 c1b1 d6e6 b1a1 e6d6 a1a2 d6e6 a2b2 e6d6 b2c2 d6e6 c2d2 e6d6 d2e2 d6e6 e2f2 e6d6 f2f3 d6e6 f3e3 e6d6 e3d3 d6e6 d3c3 e6d6 c3b3 d6e6 b3a3 e6f7 a3b2 f7g6 b2c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e3 h6g6 e3e2 g6h6 e2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f1 h6g6 f1e2 g6h6 e2e1 h6g6 e1d2 g6h6 d2c1 h6g6 c1c2 g6h6 c2d1 h6g6 d1e2 g6h6 e2f1 h6g6 f1f2 g6h6 f2f3 h6g6 f3e3 g6h6 e3d3 h6g6 d3c3 g6h6 c3b3 h6g6 b3a3 g6h6 a3b2 h6g6 b2a2 g6h6 a2a1 h6g6 a1b2 g6h6 b2c1 h6g6 c1c2 g6h6 c2c3 h6g6 c3b3 g6h6 b3b2 h6g6 b2a3 g6h6 a3b3 h6g6 b3c3 g6h6 c3d3 h6g6 d3e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1f2 g6h6 f2f1 h6g6 f1e2 g6h6 e2e3 h6g6 e3d2 g6h6 d2d3 h6g6 d3e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2g1 h6g6 g1h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3d3 g6h6 d3d2 h6g6 d2c3 g6h6 c3c2 h6g6 c2d1 g6h6 d1d2 h6g6 d2e1 g6h6 e1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1g1 g6h6 g1f1 h6g6 f1e1 g6h6 e1d1 h6g6 d1c2 g6h6 c2c3 h6g6 c3d3 g6h6 d3d2 h6g6 d2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1e2 h6g6 e2f3 g6h6 f3e3 h6g6 e3f2 g6h6 f2f1 h6g6 f1g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e3 h6g6 e3d3 g6h6 d3c3 h6g6 c3c2 g6h6 c2c3 h6g6 c3c2 g6h6 c2d2 h6g6 d2d3 g6h6 d3e2 h6g6 e2e3 g6h6 e3e2 h6g6 e2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1g2 h6g6 g2g1 g6h6 g1h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2f1 g6h6 f1e2 h6g6 e2e3 g6h6 e3f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h2 g6h6 h2h3 h6g6 h3g2 g6h6 g2h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g1 g6h6 g1f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2f3 h6g6 f3f2 g6h6 f2g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2g1 h6g6 g1h1 g6h6 h1h2 h6g6 h2h3 g6h6 h3g2 h6g6 g2f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2g1 g6h6 g1g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2h3 h6g6 h3h2 g6h6 h2g2 h6g6 g2g1 g6h6 g1h1 h6g6 h1g2 g6h6 g2h2 h6g6 h2g1 g6h6 g1h1 h6g6 h1h2 g6h6 h2g2 h6g6 g2f2 g6h6 f2f3 h6g6 f3e2 g6h6 e2e1 h6g6 e1f2 g6h6 f2g2 h6g6 g2g1 g6h6 g1f2 h6g6 f2f3 g6h6 f3e3 h6g6 e3e2 g6h6 e2e3 h6g6 e3f3 g6h6 f3f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2h3 g6h6 h3h2 h6g6 h2h1 g6h6 h1g1 h6g6 g1g2 g6h6 g2f2 h6g6 f2f3 g6h6 f3f2 h6g6 f2f1 g6h6 f1f2 h6g6 f2f3 g6h6 f3g2 h6g6 g2h3 g6h6 h3h2 h6g6 h2g2 g6h6 g2h1 h6g6 h1h2 g6h6 h2g1 h6g6 g1g2 g6h6 g2h3 h6g6 h3h2 g6h6 h2h1 h6g6 h1g2 g6h6 g2f2 h6h7 f2f3 h7g7 f3g2 g7g6 g2h3 g6h6 h3h2 h6h7 h2g1 h7h8 g1h1 h8g8 h1g2 g8g7 g2f2 g7g6 f2f1 g6h6 f1e2 h6h7 e2f3 h7h8 f3f2 h8g8 f2f1 g8g7 f1g2 g7g6 g2h2 g6h6 h2h3 h6h7 h3h2 h7h8 h2h1 h8g8 h1g1 g8g7 g1g2 g7g6 g2h2 g6h6 h2g1 h6h7 g1g2 h7h8 g2h1 h8g8 h1h2 g8g7 h2g2 g7g6 g2g1 g6h6 g1g2 h6h7 g2h2 h7h8 h2h3 h8g8 h3h2 g8g7 h2h1 g7g6 h1g1 g6h6 g1g2 h6h7 g2f2 h7h8 f2f3 h8g8 f3g2 g8g7 g2h3 g7g6 h3h2 g6h6 h2h1 h6h7 h1g2 h7h6 g2g1 h6g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7g6 g1g2 g6h6 g2g1 h6h7 g1g2 h7g7 g2g1 g7h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6h6 g1g2 h6h7 g2g1 h7h8 g1g2 h8g8 g2g1 g8f7 g1g2 f7g6 g2g1 g6g7 g1g2 g7f8 g2g1 f8f7 g1g2 f7g8 g2g1 g8g7 g1g2 g7h8 g2g1 h8h7 g1g2 h7h6 g2g1 h6g7";
 
     /// <summary>
     /// 64 x 64
@@ -525,11 +577,95 @@ public static class Constants
     ];
 
     /// <summary>
+    /// 64 x 64
+    /// </summary>
+    public static readonly int[][] ManhattanDistance =
+    [
+        [0, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 9, 3, 4, 5, 6, 7, 8, 9, 10, 4, 5, 6, 7, 8, 9, 10, 11, 5, 6, 7, 8, 9, 10, 11, 12, 6, 7, 8, 9, 10, 11, 12, 13, 7, 8, 9, 10, 11, 12, 13, 14, ],
+        [1, 0, 1, 2, 3, 4, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 3, 2, 3, 4, 5, 6, 7, 8, 4, 3, 4, 5, 6, 7, 8, 9, 5, 4, 5, 6, 7, 8, 9, 10, 6, 5, 6, 7, 8, 9, 10, 11, 7, 6, 7, 8, 9, 10, 11, 12, 8, 7, 8, 9, 10, 11, 12, 13, ],
+        [2, 1, 0, 1, 2, 3, 4, 5, 3, 2, 1, 2, 3, 4, 5, 6, 4, 3, 2, 3, 4, 5, 6, 7, 5, 4, 3, 4, 5, 6, 7, 8, 6, 5, 4, 5, 6, 7, 8, 9, 7, 6, 5, 6, 7, 8, 9, 10, 8, 7, 6, 7, 8, 9, 10, 11, 9, 8, 7, 8, 9, 10, 11, 12, ],
+        [3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 5, 5, 4, 3, 2, 3, 4, 5, 6, 6, 5, 4, 3, 4, 5, 6, 7, 7, 6, 5, 4, 5, 6, 7, 8, 8, 7, 6, 5, 6, 7, 8, 9, 9, 8, 7, 6, 7, 8, 9, 10, 10, 9, 8, 7, 8, 9, 10, 11, ],
+        [4, 3, 2, 1, 0, 1, 2, 3, 5, 4, 3, 2, 1, 2, 3, 4, 6, 5, 4, 3, 2, 3, 4, 5, 7, 6, 5, 4, 3, 4, 5, 6, 8, 7, 6, 5, 4, 5, 6, 7, 9, 8, 7, 6, 5, 6, 7, 8, 10, 9, 8, 7, 6, 7, 8, 9, 11, 10, 9, 8, 7, 8, 9, 10, ],
+        [5, 4, 3, 2, 1, 0, 1, 2, 6, 5, 4, 3, 2, 1, 2, 3, 7, 6, 5, 4, 3, 2, 3, 4, 8, 7, 6, 5, 4, 3, 4, 5, 9, 8, 7, 6, 5, 4, 5, 6, 10, 9, 8, 7, 6, 5, 6, 7, 11, 10, 9, 8, 7, 6, 7, 8, 12, 11, 10, 9, 8, 7, 8, 9, ],
+        [6, 5, 4, 3, 2, 1, 0, 1, 7, 6, 5, 4, 3, 2, 1, 2, 8, 7, 6, 5, 4, 3, 2, 3, 9, 8, 7, 6, 5, 4, 3, 4, 10, 9, 8, 7, 6, 5, 4, 5, 11, 10, 9, 8, 7, 6, 5, 6, 12, 11, 10, 9, 8, 7, 6, 7, 13, 12, 11, 10, 9, 8, 7, 8, ],
+        [7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 10, 9, 8, 7, 6, 5, 4, 3, 11, 10, 9, 8, 7, 6, 5, 4, 12, 11, 10, 9, 8, 7, 6, 5, 13, 12, 11, 10, 9, 8, 7, 6, 14, 13, 12, 11, 10, 9, 8, 7, ],
+        [1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 9, 3, 4, 5, 6, 7, 8, 9, 10, 4, 5, 6, 7, 8, 9, 10, 11, 5, 6, 7, 8, 9, 10, 11, 12, 6, 7, 8, 9, 10, 11, 12, 13, ],
+        [2, 1, 2, 3, 4, 5, 6, 7, 1, 0, 1, 2, 3, 4, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 3, 2, 3, 4, 5, 6, 7, 8, 4, 3, 4, 5, 6, 7, 8, 9, 5, 4, 5, 6, 7, 8, 9, 10, 6, 5, 6, 7, 8, 9, 10, 11, 7, 6, 7, 8, 9, 10, 11, 12, ],
+        [3, 2, 1, 2, 3, 4, 5, 6, 2, 1, 0, 1, 2, 3, 4, 5, 3, 2, 1, 2, 3, 4, 5, 6, 4, 3, 2, 3, 4, 5, 6, 7, 5, 4, 3, 4, 5, 6, 7, 8, 6, 5, 4, 5, 6, 7, 8, 9, 7, 6, 5, 6, 7, 8, 9, 10, 8, 7, 6, 7, 8, 9, 10, 11, ],
+        [4, 3, 2, 1, 2, 3, 4, 5, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 5, 5, 4, 3, 2, 3, 4, 5, 6, 6, 5, 4, 3, 4, 5, 6, 7, 7, 6, 5, 4, 5, 6, 7, 8, 8, 7, 6, 5, 6, 7, 8, 9, 9, 8, 7, 6, 7, 8, 9, 10, ],
+        [5, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 5, 4, 3, 2, 1, 2, 3, 4, 6, 5, 4, 3, 2, 3, 4, 5, 7, 6, 5, 4, 3, 4, 5, 6, 8, 7, 6, 5, 4, 5, 6, 7, 9, 8, 7, 6, 5, 6, 7, 8, 10, 9, 8, 7, 6, 7, 8, 9, ],
+        [6, 5, 4, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 0, 1, 2, 6, 5, 4, 3, 2, 1, 2, 3, 7, 6, 5, 4, 3, 2, 3, 4, 8, 7, 6, 5, 4, 3, 4, 5, 9, 8, 7, 6, 5, 4, 5, 6, 10, 9, 8, 7, 6, 5, 6, 7, 11, 10, 9, 8, 7, 6, 7, 8, ],
+        [7, 6, 5, 4, 3, 2, 1, 2, 6, 5, 4, 3, 2, 1, 0, 1, 7, 6, 5, 4, 3, 2, 1, 2, 8, 7, 6, 5, 4, 3, 2, 3, 9, 8, 7, 6, 5, 4, 3, 4, 10, 9, 8, 7, 6, 5, 4, 5, 11, 10, 9, 8, 7, 6, 5, 6, 12, 11, 10, 9, 8, 7, 6, 7, ],
+        [8, 7, 6, 5, 4, 3, 2, 1, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 10, 9, 8, 7, 6, 5, 4, 3, 11, 10, 9, 8, 7, 6, 5, 4, 12, 11, 10, 9, 8, 7, 6, 5, 13, 12, 11, 10, 9, 8, 7, 6, ],
+        [2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 9, 3, 4, 5, 6, 7, 8, 9, 10, 4, 5, 6, 7, 8, 9, 10, 11, 5, 6, 7, 8, 9, 10, 11, 12, ],
+        [3, 2, 3, 4, 5, 6, 7, 8, 2, 1, 2, 3, 4, 5, 6, 7, 1, 0, 1, 2, 3, 4, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 3, 2, 3, 4, 5, 6, 7, 8, 4, 3, 4, 5, 6, 7, 8, 9, 5, 4, 5, 6, 7, 8, 9, 10, 6, 5, 6, 7, 8, 9, 10, 11, ],
+        [4, 3, 2, 3, 4, 5, 6, 7, 3, 2, 1, 2, 3, 4, 5, 6, 2, 1, 0, 1, 2, 3, 4, 5, 3, 2, 1, 2, 3, 4, 5, 6, 4, 3, 2, 3, 4, 5, 6, 7, 5, 4, 3, 4, 5, 6, 7, 8, 6, 5, 4, 5, 6, 7, 8, 9, 7, 6, 5, 6, 7, 8, 9, 10, ],
+        [5, 4, 3, 2, 3, 4, 5, 6, 4, 3, 2, 1, 2, 3, 4, 5, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 5, 5, 4, 3, 2, 3, 4, 5, 6, 6, 5, 4, 3, 4, 5, 6, 7, 7, 6, 5, 4, 5, 6, 7, 8, 8, 7, 6, 5, 6, 7, 8, 9, ],
+        [6, 5, 4, 3, 2, 3, 4, 5, 5, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 5, 4, 3, 2, 1, 2, 3, 4, 6, 5, 4, 3, 2, 3, 4, 5, 7, 6, 5, 4, 3, 4, 5, 6, 8, 7, 6, 5, 4, 5, 6, 7, 9, 8, 7, 6, 5, 6, 7, 8, ],
+        [7, 6, 5, 4, 3, 2, 3, 4, 6, 5, 4, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 0, 1, 2, 6, 5, 4, 3, 2, 1, 2, 3, 7, 6, 5, 4, 3, 2, 3, 4, 8, 7, 6, 5, 4, 3, 4, 5, 9, 8, 7, 6, 5, 4, 5, 6, 10, 9, 8, 7, 6, 5, 6, 7, ],
+        [8, 7, 6, 5, 4, 3, 2, 3, 7, 6, 5, 4, 3, 2, 1, 2, 6, 5, 4, 3, 2, 1, 0, 1, 7, 6, 5, 4, 3, 2, 1, 2, 8, 7, 6, 5, 4, 3, 2, 3, 9, 8, 7, 6, 5, 4, 3, 4, 10, 9, 8, 7, 6, 5, 4, 5, 11, 10, 9, 8, 7, 6, 5, 6, ],
+        [9, 8, 7, 6, 5, 4, 3, 2, 8, 7, 6, 5, 4, 3, 2, 1, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 10, 9, 8, 7, 6, 5, 4, 3, 11, 10, 9, 8, 7, 6, 5, 4, 12, 11, 10, 9, 8, 7, 6, 5, ],
+        [3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 9, 3, 4, 5, 6, 7, 8, 9, 10, 4, 5, 6, 7, 8, 9, 10, 11, ],
+        [4, 3, 4, 5, 6, 7, 8, 9, 3, 2, 3, 4, 5, 6, 7, 8, 2, 1, 2, 3, 4, 5, 6, 7, 1, 0, 1, 2, 3, 4, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 3, 2, 3, 4, 5, 6, 7, 8, 4, 3, 4, 5, 6, 7, 8, 9, 5, 4, 5, 6, 7, 8, 9, 10, ],
+        [5, 4, 3, 4, 5, 6, 7, 8, 4, 3, 2, 3, 4, 5, 6, 7, 3, 2, 1, 2, 3, 4, 5, 6, 2, 1, 0, 1, 2, 3, 4, 5, 3, 2, 1, 2, 3, 4, 5, 6, 4, 3, 2, 3, 4, 5, 6, 7, 5, 4, 3, 4, 5, 6, 7, 8, 6, 5, 4, 5, 6, 7, 8, 9, ],
+        [6, 5, 4, 3, 4, 5, 6, 7, 5, 4, 3, 2, 3, 4, 5, 6, 4, 3, 2, 1, 2, 3, 4, 5, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 5, 5, 4, 3, 2, 3, 4, 5, 6, 6, 5, 4, 3, 4, 5, 6, 7, 7, 6, 5, 4, 5, 6, 7, 8, ],
+        [7, 6, 5, 4, 3, 4, 5, 6, 6, 5, 4, 3, 2, 3, 4, 5, 5, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 5, 4, 3, 2, 1, 2, 3, 4, 6, 5, 4, 3, 2, 3, 4, 5, 7, 6, 5, 4, 3, 4, 5, 6, 8, 7, 6, 5, 4, 5, 6, 7, ],
+        [8, 7, 6, 5, 4, 3, 4, 5, 7, 6, 5, 4, 3, 2, 3, 4, 6, 5, 4, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 0, 1, 2, 6, 5, 4, 3, 2, 1, 2, 3, 7, 6, 5, 4, 3, 2, 3, 4, 8, 7, 6, 5, 4, 3, 4, 5, 9, 8, 7, 6, 5, 4, 5, 6, ],
+        [9, 8, 7, 6, 5, 4, 3, 4, 8, 7, 6, 5, 4, 3, 2, 3, 7, 6, 5, 4, 3, 2, 1, 2, 6, 5, 4, 3, 2, 1, 0, 1, 7, 6, 5, 4, 3, 2, 1, 2, 8, 7, 6, 5, 4, 3, 2, 3, 9, 8, 7, 6, 5, 4, 3, 4, 10, 9, 8, 7, 6, 5, 4, 5, ],
+        [10, 9, 8, 7, 6, 5, 4, 3, 9, 8, 7, 6, 5, 4, 3, 2, 8, 7, 6, 5, 4, 3, 2, 1, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 10, 9, 8, 7, 6, 5, 4, 3, 11, 10, 9, 8, 7, 6, 5, 4, ],
+        [4, 5, 6, 7, 8, 9, 10, 11, 3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 9, 3, 4, 5, 6, 7, 8, 9, 10, ],
+        [5, 4, 5, 6, 7, 8, 9, 10, 4, 3, 4, 5, 6, 7, 8, 9, 3, 2, 3, 4, 5, 6, 7, 8, 2, 1, 2, 3, 4, 5, 6, 7, 1, 0, 1, 2, 3, 4, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 3, 2, 3, 4, 5, 6, 7, 8, 4, 3, 4, 5, 6, 7, 8, 9, ],
+        [6, 5, 4, 5, 6, 7, 8, 9, 5, 4, 3, 4, 5, 6, 7, 8, 4, 3, 2, 3, 4, 5, 6, 7, 3, 2, 1, 2, 3, 4, 5, 6, 2, 1, 0, 1, 2, 3, 4, 5, 3, 2, 1, 2, 3, 4, 5, 6, 4, 3, 2, 3, 4, 5, 6, 7, 5, 4, 3, 4, 5, 6, 7, 8, ],
+        [7, 6, 5, 4, 5, 6, 7, 8, 6, 5, 4, 3, 4, 5, 6, 7, 5, 4, 3, 2, 3, 4, 5, 6, 4, 3, 2, 1, 2, 3, 4, 5, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 5, 5, 4, 3, 2, 3, 4, 5, 6, 6, 5, 4, 3, 4, 5, 6, 7, ],
+        [8, 7, 6, 5, 4, 5, 6, 7, 7, 6, 5, 4, 3, 4, 5, 6, 6, 5, 4, 3, 2, 3, 4, 5, 5, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 5, 4, 3, 2, 1, 2, 3, 4, 6, 5, 4, 3, 2, 3, 4, 5, 7, 6, 5, 4, 3, 4, 5, 6, ],
+        [9, 8, 7, 6, 5, 4, 5, 6, 8, 7, 6, 5, 4, 3, 4, 5, 7, 6, 5, 4, 3, 2, 3, 4, 6, 5, 4, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 0, 1, 2, 6, 5, 4, 3, 2, 1, 2, 3, 7, 6, 5, 4, 3, 2, 3, 4, 8, 7, 6, 5, 4, 3, 4, 5, ],
+        [10, 9, 8, 7, 6, 5, 4, 5, 9, 8, 7, 6, 5, 4, 3, 4, 8, 7, 6, 5, 4, 3, 2, 3, 7, 6, 5, 4, 3, 2, 1, 2, 6, 5, 4, 3, 2, 1, 0, 1, 7, 6, 5, 4, 3, 2, 1, 2, 8, 7, 6, 5, 4, 3, 2, 3, 9, 8, 7, 6, 5, 4, 3, 4, ],
+        [11, 10, 9, 8, 7, 6, 5, 4, 10, 9, 8, 7, 6, 5, 4, 3, 9, 8, 7, 6, 5, 4, 3, 2, 8, 7, 6, 5, 4, 3, 2, 1, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, 10, 9, 8, 7, 6, 5, 4, 3, ],
+        [5, 6, 7, 8, 9, 10, 11, 12, 4, 5, 6, 7, 8, 9, 10, 11, 3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 9, ],
+        [6, 5, 6, 7, 8, 9, 10, 11, 5, 4, 5, 6, 7, 8, 9, 10, 4, 3, 4, 5, 6, 7, 8, 9, 3, 2, 3, 4, 5, 6, 7, 8, 2, 1, 2, 3, 4, 5, 6, 7, 1, 0, 1, 2, 3, 4, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, 3, 2, 3, 4, 5, 6, 7, 8, ],
+        [7, 6, 5, 6, 7, 8, 9, 10, 6, 5, 4, 5, 6, 7, 8, 9, 5, 4, 3, 4, 5, 6, 7, 8, 4, 3, 2, 3, 4, 5, 6, 7, 3, 2, 1, 2, 3, 4, 5, 6, 2, 1, 0, 1, 2, 3, 4, 5, 3, 2, 1, 2, 3, 4, 5, 6, 4, 3, 2, 3, 4, 5, 6, 7, ],
+        [8, 7, 6, 5, 6, 7, 8, 9, 7, 6, 5, 4, 5, 6, 7, 8, 6, 5, 4, 3, 4, 5, 6, 7, 5, 4, 3, 2, 3, 4, 5, 6, 4, 3, 2, 1, 2, 3, 4, 5, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 5, 5, 4, 3, 2, 3, 4, 5, 6, ],
+        [9, 8, 7, 6, 5, 6, 7, 8, 8, 7, 6, 5, 4, 5, 6, 7, 7, 6, 5, 4, 3, 4, 5, 6, 6, 5, 4, 3, 2, 3, 4, 5, 5, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 5, 4, 3, 2, 1, 2, 3, 4, 6, 5, 4, 3, 2, 3, 4, 5, ],
+        [10, 9, 8, 7, 6, 5, 6, 7, 9, 8, 7, 6, 5, 4, 5, 6, 8, 7, 6, 5, 4, 3, 4, 5, 7, 6, 5, 4, 3, 2, 3, 4, 6, 5, 4, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 0, 1, 2, 6, 5, 4, 3, 2, 1, 2, 3, 7, 6, 5, 4, 3, 2, 3, 4, ],
+        [11, 10, 9, 8, 7, 6, 5, 6, 10, 9, 8, 7, 6, 5, 4, 5, 9, 8, 7, 6, 5, 4, 3, 4, 8, 7, 6, 5, 4, 3, 2, 3, 7, 6, 5, 4, 3, 2, 1, 2, 6, 5, 4, 3, 2, 1, 0, 1, 7, 6, 5, 4, 3, 2, 1, 2, 8, 7, 6, 5, 4, 3, 2, 3, ],
+        [12, 11, 10, 9, 8, 7, 6, 5, 11, 10, 9, 8, 7, 6, 5, 4, 10, 9, 8, 7, 6, 5, 4, 3, 9, 8, 7, 6, 5, 4, 3, 2, 8, 7, 6, 5, 4, 3, 2, 1, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, 9, 8, 7, 6, 5, 4, 3, 2, ],
+        [6, 7, 8, 9, 10, 11, 12, 13, 5, 6, 7, 8, 9, 10, 11, 12, 4, 5, 6, 7, 8, 9, 10, 11, 3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 8, ],
+        [7, 6, 7, 8, 9, 10, 11, 12, 6, 5, 6, 7, 8, 9, 10, 11, 5, 4, 5, 6, 7, 8, 9, 10, 4, 3, 4, 5, 6, 7, 8, 9, 3, 2, 3, 4, 5, 6, 7, 8, 2, 1, 2, 3, 4, 5, 6, 7, 1, 0, 1, 2, 3, 4, 5, 6, 2, 1, 2, 3, 4, 5, 6, 7, ],
+        [8, 7, 6, 7, 8, 9, 10, 11, 7, 6, 5, 6, 7, 8, 9, 10, 6, 5, 4, 5, 6, 7, 8, 9, 5, 4, 3, 4, 5, 6, 7, 8, 4, 3, 2, 3, 4, 5, 6, 7, 3, 2, 1, 2, 3, 4, 5, 6, 2, 1, 0, 1, 2, 3, 4, 5, 3, 2, 1, 2, 3, 4, 5, 6, ],
+        [9, 8, 7, 6, 7, 8, 9, 10, 8, 7, 6, 5, 6, 7, 8, 9, 7, 6, 5, 4, 5, 6, 7, 8, 6, 5, 4, 3, 4, 5, 6, 7, 5, 4, 3, 2, 3, 4, 5, 6, 4, 3, 2, 1, 2, 3, 4, 5, 3, 2, 1, 0, 1, 2, 3, 4, 4, 3, 2, 1, 2, 3, 4, 5, ],
+        [10, 9, 8, 7, 6, 7, 8, 9, 9, 8, 7, 6, 5, 6, 7, 8, 8, 7, 6, 5, 4, 5, 6, 7, 7, 6, 5, 4, 3, 4, 5, 6, 6, 5, 4, 3, 2, 3, 4, 5, 5, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, 5, 4, 3, 2, 1, 2, 3, 4, ],
+        [11, 10, 9, 8, 7, 6, 7, 8, 10, 9, 8, 7, 6, 5, 6, 7, 9, 8, 7, 6, 5, 4, 5, 6, 8, 7, 6, 5, 4, 3, 4, 5, 7, 6, 5, 4, 3, 2, 3, 4, 6, 5, 4, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 0, 1, 2, 6, 5, 4, 3, 2, 1, 2, 3, ],
+        [12, 11, 10, 9, 8, 7, 6, 7, 11, 10, 9, 8, 7, 6, 5, 6, 10, 9, 8, 7, 6, 5, 4, 5, 9, 8, 7, 6, 5, 4, 3, 4, 8, 7, 6, 5, 4, 3, 2, 3, 7, 6, 5, 4, 3, 2, 1, 2, 6, 5, 4, 3, 2, 1, 0, 1, 7, 6, 5, 4, 3, 2, 1, 2, ],
+        [13, 12, 11, 10, 9, 8, 7, 6, 12, 11, 10, 9, 8, 7, 6, 5, 11, 10, 9, 8, 7, 6, 5, 4, 10, 9, 8, 7, 6, 5, 4, 3, 9, 8, 7, 6, 5, 4, 3, 2, 8, 7, 6, 5, 4, 3, 2, 1, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6, 5, 4, 3, 2, 1, ],
+        [7, 8, 9, 10, 11, 12, 13, 14, 6, 7, 8, 9, 10, 11, 12, 13, 5, 6, 7, 8, 9, 10, 11, 12, 4, 5, 6, 7, 8, 9, 10, 11, 3, 4, 5, 6, 7, 8, 9, 10, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2, 3, 4, 5, 6, 7, ],
+        [8, 7, 8, 9, 10, 11, 12, 13, 7, 6, 7, 8, 9, 10, 11, 12, 6, 5, 6, 7, 8, 9, 10, 11, 5, 4, 5, 6, 7, 8, 9, 10, 4, 3, 4, 5, 6, 7, 8, 9, 3, 2, 3, 4, 5, 6, 7, 8, 2, 1, 2, 3, 4, 5, 6, 7, 1, 0, 1, 2, 3, 4, 5, 6, ],
+        [9, 8, 7, 8, 9, 10, 11, 12, 8, 7, 6, 7, 8, 9, 10, 11, 7, 6, 5, 6, 7, 8, 9, 10, 6, 5, 4, 5, 6, 7, 8, 9, 5, 4, 3, 4, 5, 6, 7, 8, 4, 3, 2, 3, 4, 5, 6, 7, 3, 2, 1, 2, 3, 4, 5, 6, 2, 1, 0, 1, 2, 3, 4, 5, ],
+        [10, 9, 8, 7, 8, 9, 10, 11, 9, 8, 7, 6, 7, 8, 9, 10, 8, 7, 6, 5, 6, 7, 8, 9, 7, 6, 5, 4, 5, 6, 7, 8, 6, 5, 4, 3, 4, 5, 6, 7, 5, 4, 3, 2, 3, 4, 5, 6, 4, 3, 2, 1, 2, 3, 4, 5, 3, 2, 1, 0, 1, 2, 3, 4, ],
+        [11, 10, 9, 8, 7, 8, 9, 10, 10, 9, 8, 7, 6, 7, 8, 9, 9, 8, 7, 6, 5, 6, 7, 8, 8, 7, 6, 5, 4, 5, 6, 7, 7, 6, 5, 4, 3, 4, 5, 6, 6, 5, 4, 3, 2, 3, 4, 5, 5, 4, 3, 2, 1, 2, 3, 4, 4, 3, 2, 1, 0, 1, 2, 3, ],
+        [12, 11, 10, 9, 8, 7, 8, 9, 11, 10, 9, 8, 7, 6, 7, 8, 10, 9, 8, 7, 6, 5, 6, 7, 9, 8, 7, 6, 5, 4, 5, 6, 8, 7, 6, 5, 4, 3, 4, 5, 7, 6, 5, 4, 3, 2, 3, 4, 6, 5, 4, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 0, 1, 2, ],
+        [13, 12, 11, 10, 9, 8, 7, 8, 12, 11, 10, 9, 8, 7, 6, 7, 11, 10, 9, 8, 7, 6, 5, 6, 10, 9, 8, 7, 6, 5, 4, 5, 9, 8, 7, 6, 5, 4, 3, 4, 8, 7, 6, 5, 4, 3, 2, 3, 7, 6, 5, 4, 3, 2, 1, 2, 6, 5, 4, 3, 2, 1, 0, 1, ],
+        [14, 13, 12, 11, 10, 9, 8, 7, 13, 12, 11, 10, 9, 8, 7, 6, 12, 11, 10, 9, 8, 7, 6, 5, 11, 10, 9, 8, 7, 6, 5, 4, 10, 9, 8, 7, 6, 5, 4, 3, 9, 8, 7, 6, 5, 4, 3, 2, 8, 7, 6, 5, 4, 3, 2, 1, 7, 6, 5, 4, 3, 2, 1, 0, ],
+    ];
+
+    /// <summary>
     /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
     /// </summary>
     public const int KingPawnHashSize = 262_144;
-
     public const int KingPawnHashMask = KingPawnHashSize - 1;
+
+    public const int PawnCorrHistoryHashSize = 16_384;
+    public const int PawnCorrHistoryHashMask = PawnCorrHistoryHashSize - 1;
+
+    public const int NonPawnCorrHistoryHashSize = 16_384;
+    public const int NonPawnCorrHistoryHashMask = NonPawnCorrHistoryHashSize - 1;
+
+    public const int MinorCorrHistoryHashSize = 16_384;
+    public const int MinorCorrHistoryHashMask = MinorCorrHistoryHashSize - 1;
+
+    public const int MajorCorrHistoryHashSize = 16_384;
+    public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
+
+    public const string NumberWithSignFormat = "+#;-#;0";
 }
 
 #pragma warning restore IDE0055

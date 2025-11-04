@@ -8,7 +8,7 @@
 ///	This mode should be switched off by default and this command can be sent
 ///	any time, also when the engine is thinking.
 /// </summary>
-public sealed class DebugCommand : IGUIBaseCommand
+public sealed class DebugCommand
 {
     public const string Id = "debug";
 
