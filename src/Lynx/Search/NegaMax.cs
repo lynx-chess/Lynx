@@ -26,10 +26,6 @@ public sealed partial class Engine
 
         Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
-
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
@@ -45,7 +41,11 @@ public sealed partial class Engine
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             }
 #endif
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
+            var localEvaluationContext = ObjectPools.EvaluationContextPool.Get();
+            var eval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref localEvaluationContext).Score;
+            ObjectPools.EvaluationContextPool.Return(localEvaluationContext);
+
+            return eval;
         }
 
         _maxDepthReached[ply] = ply;
@@ -155,16 +155,21 @@ public sealed partial class Engine
             ++depthExtension;
         }
 
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
+
         if (depth + depthExtension <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext))
             {
+                ObjectPools.EvaluationContextPool.Return(evaluationContext);
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
 
+
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
             return finalPositionEvaluation;
         }
 
@@ -230,6 +235,8 @@ public sealed partial class Engine
 
                     if (ttCorrectedStaticEval - rfpThreshold >= beta)
                     {
+                        ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                         return (ttCorrectedStaticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
@@ -250,6 +257,8 @@ public sealed partial class Engine
                                     ? ttCorrectedStaticEval
                                     : QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
 
+                                ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
                                 return qSearchScore > score
                                     ? qSearchScore
                                     : score;
@@ -262,6 +271,8 @@ public sealed partial class Engine
                                 var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
+                                    ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
                                     return qSearchScore > score
                                         ? qSearchScore
                                         : score;
@@ -297,6 +308,8 @@ public sealed partial class Engine
 
                     if (nmpScore >= beta)
                     {
+                        ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
                         return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
                             ? nmpScore
                             : beta;
@@ -489,6 +502,8 @@ public sealed partial class Engine
                 // Multicut
                 else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
                 {
+                    ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
                     return singularScore;
                 }
                 // Negative extension
@@ -773,6 +788,8 @@ public sealed partial class Engine
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
         }
 
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
         return bestScore;
     }
 
@@ -794,9 +811,7 @@ public sealed partial class Engine
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
@@ -812,6 +827,8 @@ public sealed partial class Engine
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             }
 #endif
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
         }
 
@@ -832,6 +849,8 @@ public sealed partial class Engine
                 || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
                 || (ttNodeType == NodeType.Beta && ttScore >= beta)))
         {
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
             return ttScore;
         }
 
@@ -869,6 +888,9 @@ public sealed partial class Engine
             if (standPat >= beta)
             {
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
+
+                ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
                 return standPat;
             }
         }
@@ -884,6 +906,9 @@ public sealed partial class Engine
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
+
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
             return staticEval;
         }
 
@@ -1003,6 +1028,8 @@ public sealed partial class Engine
         }
 
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
 
         return bestScore;
     }

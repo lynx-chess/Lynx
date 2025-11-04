@@ -1,22 +1,19 @@
-﻿namespace Lynx.Model;
+﻿using Microsoft.Extensions.ObjectPool;
 
-#pragma warning disable CA1051 // Do not declare visible instance fields
+namespace Lynx.Model;
 
-public ref struct EvaluationContext
+public class EvaluationContext : IResettable
 {
-    public Span<BitBoard> Attacks;
-    public Span<BitBoard> AttacksBySide;
+    public BitBoard[] Attacks { get; }
+    public BitBoard[] AttacksBySide { get; }
 
-    public int WhiteKingRingAttacks;
-    public int BlackKingRingAttacks;
+    public int WhiteKingRingAttacks { get; private set; }
+    public int BlackKingRingAttacks { get; private set; }
 
-    public EvaluationContext(Span<BitBoard> attacks, Span<BitBoard> attacksBySide)
+    public EvaluationContext()
     {
-        Attacks = attacks;
-        AttacksBySide = attacksBySide;
-
-        Attacks.Clear();
-        AttacksBySide.Clear();
+        Attacks = new BitBoard[12];
+        AttacksBySide = new BitBoard[2];
     }
 
     public void IncreaseKingRingAttacks(int side, int count)
@@ -30,6 +27,15 @@ public ref struct EvaluationContext
             BlackKingRingAttacks += count;
         }
     }
-}
 
-#pragma warning restore CA1051 // Do not declare visible instance fields
+    public bool TryReset()
+    {
+        WhiteKingRingAttacks = 0;
+        BlackKingRingAttacks = 0;
+
+        Array.Clear(Attacks);
+        Array.Clear(AttacksBySide);
+
+        return true;
+    }
+}

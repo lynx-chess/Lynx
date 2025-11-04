@@ -44,11 +44,13 @@ public partial class Position
     {
         var kingPawnTable = new PawnTableElement[Constants.KingPawnHashSize];
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
-        return StaticEvaluation(movesWithoutCaptureOrPawnMove, kingPawnTable, ref evaluationContext);
+        var eval = StaticEvaluation(movesWithoutCaptureOrPawnMove, kingPawnTable, ref evaluationContext);
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
+        return eval;
     }
 
     /// <summary>

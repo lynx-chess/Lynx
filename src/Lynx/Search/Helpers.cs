@@ -328,9 +328,7 @@ public sealed partial class Engine
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
@@ -341,6 +339,8 @@ public sealed partial class Engine
                 _logger.Error(message);
                 throw new LynxException(message);
             }
+
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
         }
     }
 

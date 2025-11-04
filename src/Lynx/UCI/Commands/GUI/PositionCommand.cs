@@ -66,9 +66,7 @@ public sealed class PositionCommand
 
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
@@ -76,8 +74,13 @@ public sealed class PositionCommand
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
+
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
             return false;
         }
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
 
         return true;
     }

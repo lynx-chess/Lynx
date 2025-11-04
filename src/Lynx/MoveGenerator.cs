@@ -47,13 +47,15 @@ public static class MoveGenerator
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
-        return (capturesOnly
+        var result = (capturesOnly
             ? GenerateAllCaptures(position, ref evaluationContext, moves)
             : GenerateAllMoves(position, ref evaluationContext, moves)).ToArray();
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
+        return result;
     }
 
     /// <summary>
@@ -467,13 +469,13 @@ public static class MoveGenerator
         try
         {
 #endif
-        return IsAnyPawnMoveValid(position, offset)
-            || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
-            || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-            || IsAnyCastlingMoveValid(position, ref evaluationContext);
+            return IsAnyPawnMoveValid(position, offset)
+                || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
+                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+                || IsAnyCastlingMoveValid(position, ref evaluationContext);
 #if DEBUG
         }
         catch (Exception e)

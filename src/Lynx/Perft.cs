@@ -40,9 +40,7 @@ public static class Perft
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
             foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
@@ -54,6 +52,8 @@ public static class Perft
                 }
                 position.UnmakeMove(move, state);
             }
+
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
 
             return nodes;
         }
@@ -67,10 +67,7 @@ public static class Perft
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
             foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
@@ -88,6 +85,8 @@ public static class Perft
             }
 
             write(string.Empty);
+
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
 
             return nodes;
         }

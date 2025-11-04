@@ -431,9 +431,7 @@ public sealed partial class Engine
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
         {
@@ -457,6 +455,8 @@ public sealed partial class Engine
                 }
             }
         }
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
 
         // Detect if there was only one legal move
         if (onlyOneLegalMove)
@@ -580,9 +580,7 @@ public sealed partial class Engine
             }
         }
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
@@ -621,6 +619,8 @@ public sealed partial class Engine
                 ? EvaluationConstants.EmergencyMoveScore        // -0.66
                 : -EvaluationConstants.EmergencyMoveScore;      // +0.66
 
+            ObjectPools.EvaluationContextPool.Return(evaluationContext);
+
             return new SearchResult(
 #if MULTITHREAD_DEBUG
                 _id,
@@ -630,6 +630,8 @@ public sealed partial class Engine
                 DepthReached = 0
             };
         }
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
 
         _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
 

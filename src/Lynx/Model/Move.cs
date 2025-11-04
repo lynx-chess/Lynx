@@ -367,11 +367,11 @@ public static class MoveExtensions
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
 
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)

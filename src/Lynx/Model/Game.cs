@@ -57,9 +57,7 @@ public sealed class Game : IDisposable
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
 #endif
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        var evaluationContext = ObjectPools.EvaluationContextPool.Get();
 
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
@@ -82,6 +80,8 @@ public sealed class Game : IDisposable
 
         PositionBeforeLastSearch = new Position(CurrentPosition);
         //_positionHashHistoryPointerBeforeLastSearch = _positionHashHistoryPointer;
+
+        ObjectPools.EvaluationContextPool.Return(evaluationContext);
     }
 
     /// <summary>
