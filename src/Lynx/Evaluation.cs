@@ -955,8 +955,8 @@ public partial class Position
     {
         var occupancy = _occupancyBitBoards[(int)Side.Both];
 
-        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
-        ref var attacksBySideRef = ref MemoryMarshal.GetReference(evaluationContext.AttacksBySide);
+        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks.AsSpan());
+        ref var attacksBySideRef = ref MemoryMarshal.GetReference(evaluationContext.AttacksBySide.AsSpan());
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
@@ -1050,7 +1050,7 @@ public partial class Position
         checkThreats[(int)Piece.R] = rookAttacks;
         checkThreats[(int)Piece.Q] = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
 
-        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
+        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks.AsSpan());
 
         for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
         {
