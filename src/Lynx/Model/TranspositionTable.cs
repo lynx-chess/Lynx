@@ -40,6 +40,11 @@ public readonly struct TranspositionTable
             ? 0UL
             : 1UL);
 
+        if(totalArrayCount >  1)
+        {
+            _logger.Info("TT arrays:\t{0}", totalArrayCount);
+        }
+
         if (totalArrayCount > maxArrayLength)
         {
             var ttLengthGB = (double)ttLength / 1024 / 1024 / 1024;
@@ -58,6 +63,7 @@ public readonly struct TranspositionTable
         {
             _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>(itemsLeft, pinned: true);
         }
+
 
         _logger.Info("TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
