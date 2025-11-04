@@ -2,6 +2,10 @@ version: 2
 updates:
   - package-ecosystem: "nuget"
     directory: "/"
+    allow:
+    - dependency-type: "all"
+    ignore:
+    - dependency-name: "Moq"
     schedule:
       interval: "weekly"
     assignees :
