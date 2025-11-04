@@ -336,8 +336,8 @@ public readonly struct TranspositionTable
             }
         }
         _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
-            100 * PopulatedItemsCount() / (ulong)_tt.Length,
-            _tt.Length * Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
+            100 * PopulatedItemsCount() / _totalTTLength,
+            (long)_totalTTLength * Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
     }
 
     [Conditional("DEBUG")]
