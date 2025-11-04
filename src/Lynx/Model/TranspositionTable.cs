@@ -30,18 +30,20 @@ public readonly struct TranspositionTable
         var ttLength = CalculateLength(Size);
         _totalTTLength = ttLength;
 
-        ulong fullArrayCount = (ttLength / (ulong)Array.MaxLength);
-        int itemsLeft = (int)(ttLength % (ulong)Array.MaxLength);
+        ulong maxArrayLength = (ulong)Constants.MaxTTArrayLength;
+
+        ulong fullArrayCount = (ttLength / maxArrayLength);
+        int itemsLeft = (int)(ttLength % maxArrayLength);
 
         var totalArrayCount = fullArrayCount
             + (itemsLeft == 0
             ? 0UL
             : 1UL);
 
-        if (totalArrayCount > (ulong)Array.MaxLength)
+        if (totalArrayCount > maxArrayLength)
         {
             var ttLengthGB = (double)ttLength / 1024 / 1024 / 1024;
-            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthGB}GB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthGB}GB, {ttLength} values (> Array.MaxLength, {maxArrayLength})");
         }
 
         _ttArrayCount = (int)totalArrayCount;
@@ -49,7 +51,7 @@ public readonly struct TranspositionTable
         _tt = GC.AllocateArray<TranspositionTableElement[]>(_ttArrayCount, pinned: true);
         for (int i = 0; i < (int)fullArrayCount; ++i)
         {
-            _tt[i] = GC.AllocateArray<TranspositionTableElement>(Array.MaxLength, pinned: true);
+            _tt[i] = GC.AllocateArray<TranspositionTableElement>(Constants.MaxTTArrayLength, pinned: true);
         }
 
         if (itemsLeft != 0)
@@ -90,7 +92,7 @@ public readonly struct TranspositionTable
             });
         }
 
-        _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Warn("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,7 +102,7 @@ public readonly struct TranspositionTable
         {
             (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
             Debug.Assert(ttIndex < _ttArrayCount);
-            Debug.Assert(entryIndex < Array.MaxLength);
+            Debug.Assert(entryIndex < Constants.MaxTTArrayLength);
 
             unsafe
             {
@@ -131,8 +133,10 @@ public readonly struct TranspositionTable
     {
         var globalIndex = CalculateTTIndex(positionUniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
 
-        var ttIndex = (int)(globalIndex / (ulong)Array.MaxLength);
-        var itemIndex = (int)(globalIndex % (ulong)Array.MaxLength);
+        ulong maxTTArrayLength = (ulong)Constants.MaxTTArrayLength;
+
+        var ttIndex = (int)(globalIndex / maxTTArrayLength);
+        var itemIndex = (int)(globalIndex % maxTTArrayLength);
 
         return (ttIndex, itemIndex);
     }
@@ -257,9 +261,9 @@ public readonly struct TranspositionTable
         ulong ttLength = sizeBytes / ttEntrySize;
         var ttLengthMB = (double)ttLength / 1024 / 1024;
 
-        if (ttLength > (ulong)Array.MaxLength)
+        if (ttLength > (ulong)Constants.MaxTTArrayLength)
         {
-            _logger.Info($"More than one TT array will be used for transpositon table (Hash) size: {ttLengthMB * ttEntrySize / 1024}GB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+            _logger.Info($"More than one TT array will be used for transpositon table (Hash) size: {ttLengthMB * ttEntrySize / 1024}GB, {ttLength} values (> Array.MaxLength, {Constants.MaxTTArrayLength})");
         }
 
         _logger.Info("Hash value:\t{0} MB", size);
