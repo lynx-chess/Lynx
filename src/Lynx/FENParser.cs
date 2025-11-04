@@ -22,9 +22,11 @@ public static class FENParser
     {
         fen = fen.Trim();
 
-        // Arrays will be be returned as part of Position cleanaup
+        // Arrays will be be returned as part of Position cleanup
         var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
+        Array.Clear(pieceBitBoards, 0, 12);
         var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
+        Array.Clear(occupancyBitBoards, 0, 3);
         var board = ArrayPool<int>.Shared.Rent(64);
         Array.Fill(board, (int)Piece.None);
 
