@@ -151,7 +151,7 @@ public partial class Position : IDisposable
         _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Fill(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
 
-        // It won't be possible to add castling rights to a position created froma FEN without them
+        // It won't be possible to add castling rights to a position created from a FEN without them
         if (_castle == (int)CastlingRights.None)
         {
             KingsideCastlingFreeSquares = [];
@@ -207,7 +207,7 @@ public partial class Position : IDisposable
             QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
             QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
 
-            // This could be simplified/harcoded for standard chess, see FreeAndNonAttackedSquares
+            // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
             KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
             var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
@@ -223,7 +223,7 @@ public partial class Position : IDisposable
             KingsideCastlingFreeSquares[(int)Side.White] = whiteKingsideFreeMask;
             KingsideCastlingFreeSquares[(int)Side.Black] = blackKingsideFreeMask;
 
-            // This could be simplified/harcoded for standard chess, see FreeAndNonAttackedSquares
+            // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
             QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
 
             var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
@@ -470,14 +470,14 @@ public partial class Position : IDisposable
             var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
             int sameSideBucket = whiteBucket;
-            int opposideSideBucket = blackBucket;
+            int oppositeSideBucket = blackBucket;
             if (_side == Side.Black)
             {
-                (sameSideBucket, opposideSideBucket) = (opposideSideBucket, sameSideBucket);
+                (sameSideBucket, oppositeSideBucket) = (oppositeSideBucket, sameSideBucket);
             }
 
-            IncrementalEvalAccumulator -= PSQT(sameSideBucket, opposideSideBucket, piece, sourceSquare);
-            IncrementalEvalAccumulator += PSQT(sameSideBucket, opposideSideBucket, newPiece, targetSquare);
+            IncrementalEvalAccumulator -= PSQT(sameSideBucket, oppositeSideBucket, piece, sourceSquare);
+            IncrementalEvalAccumulator += PSQT(sameSideBucket, oppositeSideBucket, newPiece, targetSquare);
 
             IncrementalPhaseAccumulator += extraPhaseIfIncremental;
 
@@ -516,7 +516,7 @@ public partial class Position : IDisposable
                                 }
                             }
 
-                            IncrementalEvalAccumulator -= PSQT(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                            IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                             IncrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         }
@@ -550,7 +550,7 @@ public partial class Position : IDisposable
                         _uniqueIdentifier ^= capturedPawnHash;
                         _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
-                        IncrementalEvalAccumulator -= PSQT(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                        IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;
@@ -624,7 +624,7 @@ public partial class Position : IDisposable
                         if (Configuration.EngineSettings.IsChess960)
                         {
                             // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                            // We need to revert the incorect changes + apply the right ones
+                            // We need to revert the incorrect changes + apply the right ones
                             // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                             // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
                             _pieceBitBoards[newPiece].PopBit(targetSquare);
@@ -680,7 +680,7 @@ public partial class Position : IDisposable
                         if (Configuration.EngineSettings.IsChess960)
                         {
                             // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                            // We need to revert the incorect changes + apply the right ones
+                            // We need to revert the incorrect changes + apply the right ones
                             // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                             // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
                             _pieceBitBoards[newPiece].PopBit(targetSquare);
@@ -787,7 +787,7 @@ public partial class Position : IDisposable
         _occupancyBitBoards[side].PopBit(targetSquare);
         _board[targetSquare] = (int)Piece.None;
 
-        // We purposedly delay the sets here until after the switch
+        // We purposely delay the sets here until after the switch
 
         switch (move.SpecialMoveFlag())
         {
@@ -811,7 +811,7 @@ public partial class Position : IDisposable
                     {
                         // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
                         // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
-                        // have already been undone by the rook ops above, or don't matter (removig the king from the target square, where it isn't anyway)
+                        // have already been undone by the rook ops above, or don't matter (removing the king from the target square, where it isn't anyway)
 
                         // However, the kings needs to be removed from the real target square, providing that's not also its source square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
@@ -858,7 +858,7 @@ public partial class Position : IDisposable
                     {
                         // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
                         // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
-                        // have already been undone by the rook ops above, or don't matter (removig the king from the target square, where it isn't anyway)
+                        // have already been undone by the rook ops above, or don't matter (removing the king from the target square, where it isn't anyway)
 
                         // However, the kings needs to be removed from the real target square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
@@ -1264,7 +1264,7 @@ public partial class Position : IDisposable
         }
         else
         {
-            // Shredder-FEN style (always showing columns), no support for X-FEN style yet (showking KQkq when not-ambiguous)
+            // Shredder-FEN style (always showing columns), no support for X-FEN style yet (showing KQkq when not-ambiguous)
             if ((_castle & (int)CastlingRights.WK) != default)
             {
                 char file = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
@@ -1361,11 +1361,11 @@ public partial class Position : IDisposable
         }
         else
         {
-            char whitekingSide = '-', whiteQueenside = '-', blackKingside = '-', blackQueenside = '-';
+            char whiteKingSide = '-', whiteQueenside = '-', blackKingside = '-', blackQueenside = '-';
 
             if ((_castle & (int)CastlingRights.WK) != default)
             {
-                whitekingSide = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
+                whiteKingSide = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
             }
             if ((_castle & (int)CastlingRights.WQ) != default)
             {
@@ -1381,7 +1381,7 @@ public partial class Position : IDisposable
             }
 
             Console.WriteLine($"    Castling:\t" +
-                whitekingSide +
+                whiteKingSide +
                 $"{whiteQueenside} | " +
                 blackKingside +
                 $"{blackQueenside}");
