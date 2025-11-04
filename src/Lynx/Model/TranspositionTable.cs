@@ -48,7 +48,7 @@ public readonly struct TranspositionTable
         if (totalArrayCount > maxArrayLength)
         {
             var ttLengthGB = (double)ttLength / 1024 / 1024 / 1024;
-            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthGB}GB, {ttLength} values (> Array.MaxLength, {maxArrayLength})");
+            throw new ArgumentException($"Invalid transposition table (Hash) size: {ttLengthGB}GB, {ttLength} values (> Array.MaxLength, {maxArrayLength})");
         }
 
         _ttArrayCount = (int)totalArrayCount;
@@ -98,7 +98,7 @@ public readonly struct TranspositionTable
             });
         }
 
-        _logger.Warn("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -269,7 +269,7 @@ public readonly struct TranspositionTable
 
         if (ttLength > (ulong)Constants.MaxTTArrayLength)
         {
-            _logger.Info($"More than one TT array will be used for transpositon table (Hash) size: {ttLengthMB * ttEntrySize / 1024}GB, {ttLength} values (> Array.MaxLength, {Constants.MaxTTArrayLength})");
+            _logger.Info($"More than one TT array will be used for transposition table (Hash) size: {ttLengthMB * ttEntrySize / 1024}GB, {ttLength} values (> Array.MaxLength, {Constants.MaxTTArrayLength})");
         }
 
         _logger.Info("Hash value:\t{0} MB", size);
@@ -351,7 +351,8 @@ public readonly struct TranspositionTable
                 if (_tt[i][j].Key != default)
                 {
                     var entry = _tt[i][j];
-                    Console.WriteLine($"{i}: Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {entry.Type}");
+                    Console.WriteLine($"Array {i}, item {j} (total item index: {i * Constants.MaxTTArrayLength + j}): "
+                    + $"Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {entry.Type}");
                 }
             }
         }

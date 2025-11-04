@@ -3,6 +3,7 @@ using NUnit.Framework;
 using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test.Model;
+
 public class TranspositionTableTests
 {
     [TestCase(10_000, 1, 10_000)]
@@ -84,7 +85,7 @@ public class TranspositionTableTests
 
         Assert.AreNotEqual(0, (int)tt.Length % Configuration.EngineSettings.Threads, "We want to test the edge case where the last thread clears more items than the rest");
 
-        for(int index = 0; index < (int)tt.Length; ++index)
+        for (int index = 0; index < (int)tt.Length; ++index)
         {
             ref var ttEntry = ref tt.Get(index);
             ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6);
