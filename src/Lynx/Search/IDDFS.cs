@@ -107,6 +107,8 @@ public sealed partial class Engine
             Array.Clear(_moveNodeCount[i]);
         }
 
+        // Can't age TT here, since neeeds to be done only once for all the threads
+
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
         int beta = EvaluationConstants.MaxEval;
