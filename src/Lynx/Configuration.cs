@@ -118,7 +118,7 @@ public sealed class EngineSettings
     /// </summary>
     public bool EstimateMultithreadedSearchNPS { get; set; }
 
-    public bool UseMultiArrayTT { get; set; }
+    public bool UseMultiArrayTT { get; set; } = true;
 
     public double SPSA_OB_R_end { get; set; } = 0.02;
 
