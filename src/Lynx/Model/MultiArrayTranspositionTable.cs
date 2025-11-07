@@ -13,13 +13,13 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly ulong _totalTTLength;
     private readonly int _ttArrayCount;
     private readonly TranspositionTableElement[][] _tt = [];
 
     private readonly int _size;
     public int Size => _size;
 
+    private readonly ulong _totalTTLength;
     public ulong Length => _totalTTLength;
 
     public MultiArrayTranspositionTable()
@@ -76,28 +76,31 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
     public void Clear()
     {
         var threadCount = Configuration.EngineSettings.Threads;
+        var threadsPerTTArray = threadCount / _ttArrayCount;
 
-        _logger.Debug("Zeroing Multi-Array TT using {ThreadCount} thread(s)", threadCount);
+        _logger.Debug("Zeroing Multi-Array TT using {ThreadCount} thread(s)", threadsPerTTArray * _ttArrayCount);
         var sw = Stopwatch.StartNew();
 
-        // TODO: better division of work, it's probably better
-        // not to go from sub-tt into sub-tt
-        foreach (var tt in _tt)
+        var localTTRef = _tt;
+
+        Parallel.For(0, _ttArrayCount, ttArrayIndex =>
         {
+            var tt = localTTRef[ttArrayIndex];
+
             var ttLength = tt.Length;
-            var sizePerThread = ttLength / threadCount;
+            var sizePerThread = ttLength / threadsPerTTArray;
 
             // Instead of just doing Array.Clear(_tt):
-            Parallel.For(0, threadCount, i =>
+            Parallel.For(0, threadsPerTTArray, threadIndex =>
             {
-                var start = i * sizePerThread;
-                var length = (i == threadCount - 1)
+                var start = threadIndex * sizePerThread;
+                var length = (threadIndex == threadsPerTTArray - 1)
                     ? ttLength - start
                     : sizePerThread;
 
                 Array.Clear(tt, start, length);
             });
-        }
+        });
 
         _logger.Info("Multi-Array TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
