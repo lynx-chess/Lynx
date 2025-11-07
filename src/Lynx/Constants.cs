@@ -326,7 +326,7 @@ public static class Constants
         13, 15, 15, 15, 12, 15, 15, 14
     ];
 
-    public static readonly int MaxTTArrayLength = 258_111;
+    public static readonly int MaxTTArrayLength = 13_421_772;   // 128MB
 
     public const int AbsoluteMaxTTSize = 524_288; // 4TB RAM, not bad
 
