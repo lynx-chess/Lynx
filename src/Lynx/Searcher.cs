@@ -20,7 +20,7 @@ public sealed class Searcher : IDisposable
     private int _searchThreadsCount;
     private Engine _mainEngine;
     private Engine[] _extraEngines = [];
-    private TranspositionTable _ttWrapper;
+    private ITranspositionTable _ttWrapper;
 
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
@@ -40,7 +40,7 @@ public sealed class Searcher : IDisposable
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        _ttWrapper = new TranspositionTable();
+        _ttWrapper = TranspositionTableFactory.Create();
         _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
@@ -556,7 +556,7 @@ public sealed class Searcher : IDisposable
         {
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
 
-            _ttWrapper = new TranspositionTable();
+            _ttWrapper = TranspositionTableFactory.Create();
 
             // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
             // It might impact performance though, due to preventing that zeroing from happenning during search
@@ -688,7 +688,7 @@ public sealed class Searcher : IDisposable
             {
                 _mainEngine.Dispose();
 
-                foreach(var engine in _extraEngines)
+                foreach (var engine in _extraEngines)
                 {
                     engine.Dispose();
                 }
