@@ -14,9 +14,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly TranspositionTableElement[] _tt = [];
-
-    private readonly int _size;
-    public int Size => _size;
+    public int SizeMBs { get; }
 
     public ulong Length => (ulong)_tt.Length;
 
@@ -25,9 +23,9 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         _logger.Debug("Allocating Single Array TT");
         var sw = Stopwatch.StartNew();
 
-        _size = Configuration.EngineSettings.TranspositionTableSize;
+        SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
 
-        var ttLength = CalculateLength(_size);
+        var ttLength = CalculateLength(SizeMBs);
         _tt = GC.AllocateArray<TranspositionTableElement>((int)ttLength, pinned: true);
 
         _logger.Info("Single Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
@@ -36,7 +34,6 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     /// <summary>
     /// Multithreaded clearing of the transposition table
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
         var threadCount = Configuration.EngineSettings.Threads;
@@ -104,6 +101,8 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         return (0, (int)globalIndex);
     }
 
+    #pragma warning disable S4144 // Methods should not have identical implementations
+
     /// <summary>
     /// Get a reference to a transposition table entry for the given position
     /// </summary>
@@ -124,18 +123,13 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         return ref _tt[ttIndex];
     }
 
-    /// <summary>
-
-
-
+    #pragma warning restore S4144 // Methods should not have identical implementations
 
     /// <summary>
     /// Exact transposition table occupancy per mill (0-1000)
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int HashfullPermill() => _tt.Length > 0
-        ? (int)(1000L * (PopulatedItemsCount() / (ulong)_tt.LongLength))
-        : 0;
+    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)Length));
 
     /// <summary>
     /// Approximate transposition table occupancy per mill (0-1000)
@@ -146,14 +140,11 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     {
         int items = 0;
 
-        if (_tt.Length >= 1_000)
+        for (int i = 0; i < 1_000; ++i)
         {
-            for (int i = 0; i < 1_000; ++i)
+            if (_tt[i].Key != default)
             {
-                if (_tt[i].Key != default)
-                {
-                    ++items;
-                }
+                ++items;
             }
         }
 
@@ -161,28 +152,26 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         return items;
     }
 
-    internal static ulong CalculateLength(int size)
+    internal static ulong CalculateLength(int sizeMBs)
     {
         var ttEntrySize = TranspositionTableElement.Size;
 
-        ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
+        ulong sizeBytes = (ulong)sizeMBs * 1024ul * 1024ul;
         ulong ttLength = sizeBytes / ttEntrySize;
-        var ttLengthMb = (double)ttLength / 1024 / 1024;
+        var ttLengthMB = (double)ttLength / 1024 / 1024;
 
         if (ttLength > (ulong)Array.MaxLength)
         {
-            throw new ArgumentException($"Invalid transposition table (Hash) size: {ttLengthMb}MB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+            throw new ArgumentException($"Invalid TT Hash size: {ttLengthMB} MB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
-        _logger.Info("Hash value:\t{0} MB", size);
-        _logger.Info("TT memory:\t{0} MB", (ttLengthMb * ttEntrySize).ToString("F"));
+        _logger.Info("Hash value:\t{0} MB", sizeMBs);
+        _logger.Info("TT memory:\t{0} MB", (ttLengthMB * ttEntrySize).ToString("F"));
         _logger.Info("TT length:\t{0} items", ttLength);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return ttLength;
     }
-
-
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private readonly ulong PopulatedItemsCount()

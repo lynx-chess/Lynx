@@ -12,7 +12,7 @@ public interface ITranspositionTable
     /// <summary>
     /// Size of the transposition table in MB
     /// </summary>
-    int Size { get; }
+    int SizeMBs { get; }
 
     /// <summary>
     /// Length of the transposition table (total number of entries)
@@ -117,15 +117,7 @@ public interface ITranspositionTable
     /// <summary>
     /// Prefetch transposition table entry for performance optimization
     /// </summary>
-    /// <param name="position">The position to prefetch</param>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove">Half moves without capture or pawn move counter</param>
     void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove);
-
-    /// <summary>
-    /// Exact transposition table occupancy per mill (0-1000)
-    /// </summary>
-    /// <returns>Occupancy in per mill</returns>
-    int HashfullPermill();
 
     /// <summary>
     /// Approximate transposition table occupancy per mill (0-1000)

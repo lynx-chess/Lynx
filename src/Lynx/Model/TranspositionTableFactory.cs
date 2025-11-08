@@ -8,13 +8,13 @@ public static class TranspositionTableFactory
 
     public static ITranspositionTable Create()
     {
-        if (Configuration.EngineSettings.UseMultiArrayTT)
+        if (Configuration.EngineSettings.TranspositionTableSize <= Constants.SingleTTArrayAbsoluteMaxTTSize)
         {
-            _logger.Info("Using multi TT array transposition table");
-
-            return new MultiArrayTranspositionTable();
+            return new SingleArrayTranspositionTable();
         }
 
-        return new SingleArrayTranspositionTable();
+        _logger.Info("Using multi TT array transposition table, since Hash is greater than {0} MB", Constants.SingleTTArrayAbsoluteMaxTTSize);
+
+        return new MultiArrayTranspositionTable();
     }
 }

@@ -552,9 +552,9 @@ public sealed class Searcher : IDisposable
 
     public bool UpdateHash()
     {
-        if (_ttWrapper.Size != Configuration.EngineSettings.TranspositionTableSize)
+        if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
         {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
 
             _ttWrapper = TranspositionTableFactory.Create();
 

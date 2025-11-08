@@ -106,4 +106,18 @@ public class TranspositionTableTests
             Assert.AreEqual(0, ttEntry.Key);
         }
     }
+
+    /// <summary>
+    /// Ensures <see cref="SingleArrayTranspositionTable.HashfullPermillApprox"/> works correctly
+    /// </summary>
+    [Test]
+    [Explicit]
+    [NonParallelizable]
+    public void TranspositionTableSize()
+    {
+        Configuration.EngineSettings.TranspositionTableSize = 1;
+        var tt = TranspositionTableFactory.Create();
+
+        Assert.GreaterOrEqual(tt.Length, 1000);
+    }
 }
