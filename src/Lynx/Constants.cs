@@ -326,15 +326,15 @@ public static class Constants
         13, 15, 15, 15, 12, 15, 15, 14
     ];
 
+    /// <summary>
+    /// ~20 GB
+    /// </summary>
     public static readonly int MaxTTArrayLength = Array.MaxLength;
 
-    /// <summary>
-    /// ~20 GB RAM
-    /// </summary>
-    public static int SingleTTArrayAbsoluteMaxTTSize => (int)((ulong)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024));
+    public static double TTArraySizeGBs => (double)MaxTTArrayLength * TranspositionTableElement.Size / (1024 * 1024 * 1024);
 
     /// <summary>
-    /// ~2048 TB RAM, not bad
+    /// ~2048 TB theoretical limit, max validated size is 256 GB
     /// </summary>
     public const int AbsoluteMaxTTSize = int.MaxValue;
 

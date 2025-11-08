@@ -498,7 +498,7 @@ public sealed class Searcher : IDisposable
         var threadsUpdated = UpdateThreads();
         if (threadsUpdated)
         {
-            _logger.Warn("Unexpected threads update - should have happened on 'setoption'");
+            _logger.Warn("Unexpected Threads update - should have happened on 'setoption'");
         }
 
         // Hash update - after hash update to potentially take advantage of multithreaded TT
@@ -506,7 +506,7 @@ public sealed class Searcher : IDisposable
         var hashUpdated = UpdateHash();
         if (hashUpdated)
         {
-            _logger.Warn("Unexpected hash update - should have happened on 'setoption'\");");
+            _logger.Warn("Unexpected Hash update - should have happened on 'setoption'\");");
         }
 
         // We don't need to reset the main engine in case of hash update
@@ -537,7 +537,7 @@ public sealed class Searcher : IDisposable
     {
         if (_searchThreadsCount != Configuration.EngineSettings.Threads)
         {
-            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
+            _logger.Info("Updating search thread count ({CurrentCount} thread(s) -> {NewCount} thread(s))", _searchThreadsCount, Configuration.EngineSettings.Threads);
 
             // Before invoking AllocateExtraEngines
             _searchThreadsCount = Configuration.EngineSettings.Threads;
