@@ -80,12 +80,13 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
             SequentialTTArrayZeroing();
         }
 
-        _logger.Info("Multi-Array TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Info("Multi-Array TT zeroing completed in:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     private void ParallelTTArrayZeroing(int threadsPerTTArray)
     {
-        _logger.Info("Zeroing Multi-Array TT using {TotalThreadCount} total thread(s), using {PerTTThreadCount} thread per TT array", Configuration.EngineSettings.Threads, threadsPerTTArray);
+        _logger.Info("Multi-Array TT zeroing using {ZeroingThreadCount} (out of {TotalThreadCount}) thread(s), using {PerTTThreadCount} thread per TT array",
+            _ttArrayCount * threadsPerTTArray, Configuration.EngineSettings.Threads, threadsPerTTArray);
 
         var localTTRef = _tt;
 
@@ -113,7 +114,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
     private void SequentialTTArrayZeroing()
     {
         var threadCount = Configuration.EngineSettings.Threads;
-        _logger.Info("Zeroing Multi-Array TT using {ThreadCount} thread(s), one TT array at a time", threadCount);
+        _logger.Info("Multi-Array TT zeroing using {ThreadCount} thread(s), one TT array at a time", threadCount);
 
         foreach (var tt in _tt)
         {
@@ -237,11 +238,13 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
         if (ttLength > (ulong)Constants.MaxTTArrayLength)
         {
-            _logger.Info($"More than one TT array will be used for TT Hash size: {ttLengthMB * ttEntrySize / 1024:F2} GB, {ttLength} values (> MaxTTArrayLength, {Constants.MaxTTArrayLength})");
+            _logger.Info("More than one TT array will be used for TT Hash size: {RequestedHashSize} GB, {TTLength} values (> {TTArraySizeGBs} GB, {MaxTTArrayLength} items",
+                (ttLengthMB * ttEntrySize / 1024).ToString("F2"), ttLength, Constants.TTArraySizeGBs.ToString("F2"), Constants.MaxTTArrayLength);
         }
         else
         {
-            _logger.Warn($"{nameof(MultiArrayTranspositionTable)} used, but single TT array expected for TT Hash size of {ttLengthMB * ttEntrySize / 1024:F2} GB and {ttLength} values. MaxTTArrayLength is {Constants.MaxTTArrayLength}");
+            _logger.Warn("Multi-Array TT used, but single TT array expected for TT Hash size of {RequestedHashSize} GB and {TTLength} values. Max values are {TTArraySizeGBs} GB, {MaxTTArrayLength} items",
+                (ttLengthMB * ttEntrySize / 1024).ToString("F2"),ttLength, Constants.TTArraySizeGBs.ToString("F2"), Constants.MaxTTArrayLength);
         }
 
         _logger.Info("Hash value:\t{0} MB", size);
