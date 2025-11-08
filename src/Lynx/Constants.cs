@@ -329,10 +329,10 @@ public static class Constants
     public static readonly int MaxTTArrayLength = Array.MaxLength;
 
     /// <summary>
-    /// ~2 GB RAM
+    /// ~16 MB RAM
     /// </summary>
     public static int SingleTTArrayAbsoluteMaxTTSize => (int)((ulong)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024))
-        / 10;
+        / 125;
 
     /// <summary>
     /// ~2048 TB RAM, not bad
