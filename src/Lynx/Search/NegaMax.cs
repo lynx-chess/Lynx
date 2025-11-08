@@ -112,7 +112,6 @@ public sealed partial class Engine
             }
 
             ttMoveIsCapture = ttEntryHasBestMove && position.Board[((int)ttEntry.BestMove).TargetSquare()] != (int)Piece.None;
-
         }
         else
         {
