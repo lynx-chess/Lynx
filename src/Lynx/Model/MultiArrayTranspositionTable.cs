@@ -206,15 +206,11 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
     /// <summary>
     /// Exact TT occupancy per mill
     /// </summary>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)Length));
 
     /// <summary>
-    /// Orders of magnitude faster than <see cref="HashfullPermill(TranspositionTableElement[])"/>
+    /// Orders of magnitude faster than <see cref="HashfullPermill"/>
     /// </summary>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly int HashfullPermillApprox()
     {
         int items = 0;
@@ -307,7 +303,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
                 if (_tt[i][j].Key != default)
                 {
                     var entry = _tt[i][j];
-                    Console.WriteLine($"Array {i}, item {j} (total item index: {i * Constants.MaxTTArrayLength + j}): "
+                    Console.WriteLine($"Array {i}, item {j} (total item index: {(i * Constants.MaxTTArrayLength) + j}): "
                     + $"Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {entry.Type}");
                 }
             }

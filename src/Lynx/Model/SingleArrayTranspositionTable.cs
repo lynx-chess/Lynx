@@ -90,17 +90,6 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         return (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
     }
 
-    /// <summary>
-    /// Calculate the transposition table indexes for multi-array implementations
-    /// For single array implementation, this returns (0, calculated_index)
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly (int, int) CalculateTTIndexes(ulong positionUniqueIdentifier, int halfMovesWithoutCaptureOrPawnMove)
-    {
-        var globalIndex = CalculateTTIndex(positionUniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return (0, (int)globalIndex);
-    }
-
     #pragma warning disable S4144 // Methods should not have identical implementations
 
     /// <summary>
@@ -128,14 +117,11 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     /// <summary>
     /// Exact transposition table occupancy per mill (0-1000)
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)Length));
 
     /// <summary>
-    /// Approximate transposition table occupancy per mill (0-1000)
-    /// Orders of magnitude faster than HashfullPermill()
+    /// Orders of magnitude faster than <see cref="HashfullPermill"/>
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly int HashfullPermillApprox()
     {
         int items = 0;
