@@ -13,7 +13,7 @@ public sealed partial class Engine : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly int _id;
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly TranspositionTable _tt;
+    private readonly ITranspositionTable _tt;
     private SearchConstraints _searchConstraints;
 
     private bool _disposedValue;
@@ -31,11 +31,11 @@ public sealed partial class Engine : IDisposable
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
 #pragma warning disable EPS09 // Pass an argument for an 'in' parameter explicitly
-    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
+    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, TranspositionTableFactory.Create()) { }
 #pragma warning restore EPS09 // Pass an argument for an 'in' parameter explicitly
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
+    public Engine(int id, ChannelWriter<object> engineWriter, in ITranspositionTable tt)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;

@@ -47,7 +47,7 @@ public sealed class Game : IDisposable
 
         if (!CurrentPosition.IsValid())
         {
-            _logger.Warn($"Invalid position detected: {fen.ToString()}");
+            _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
         }
 
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);

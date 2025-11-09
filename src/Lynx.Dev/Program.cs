@@ -1052,7 +1052,7 @@ static void TranspositionTableMethod()
     static void TesSize(int size)
     {
         Console.WriteLine("Hash: {0} MB", size);
-        var length = TranspositionTable.CalculateLength(size);
+        var length = (int)SingleArrayTranspositionTable.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
@@ -1073,8 +1073,8 @@ static void TranspositionTableMethod()
     TesSize(512);
     TesSize(1024);
 
-    var ttLength = TranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-    var transpositionTable = new TranspositionTable();
+    var ttLength = SingleArrayTranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var transpositionTable = TranspositionTableFactory.Create();
 
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
@@ -1082,9 +1082,6 @@ static void TranspositionTableMethod()
 
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
-
-    var hashKey2 = transpositionTable.CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove: 0);
-    Console.WriteLine(hashKey2);
 
     transpositionTable.Clear();
 

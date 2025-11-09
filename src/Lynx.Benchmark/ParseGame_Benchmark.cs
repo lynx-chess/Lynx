@@ -494,7 +494,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -569,7 +569,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -650,7 +650,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };

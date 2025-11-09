@@ -202,4 +202,13 @@ public class ConstantsTest
         Assert.AreEqual(4, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.c6]);
         Assert.AreEqual(3, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b6]);
     }
+
+    /// <summary>
+    /// Ensure <see cref="MultiArrayTranspositionTable.HashfullPermillApprox"/> works as expected
+    /// </summary>
+    [Test]
+    public void MaxTTArrayLength()
+    {
+        Assert.GreaterOrEqual(Constants.MaxTTArrayLength, 1000);
+    }
 }
