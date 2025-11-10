@@ -6,7 +6,7 @@
 
   <PropertyGroup>
     <MicrosoftExtensionsVersion>9.0.10</MicrosoftExtensionsVersion>
-    <NLogVersion>6.0.5</NLogVersion>
+    <NLogVersion>6.0.6</NLogVersion>
     <BenchmarkDotnetVersion>0.15.6</BenchmarkDotnetVersion>
   </PropertyGroup>
 
