@@ -1,32 +1,24 @@
-﻿namespace Lynx.Model;
+﻿using Microsoft.Extensions.ObjectPool;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-public readonly struct GameState
+public sealed class GameState
 {
-    public readonly ulong ZobristKey;
+    public ulong ZobristKey;
+    public ulong KingPawnKey;
+    public ulong NonPawnWhiteKey;
+    public ulong NonPawnBlackKey;
+    public ulong MinorKey;
+    public ulong MajorKey;
+    public int IncrementalEvalAccumulator;
+    public int IncrementalPhaseAccumulator;
+    public BoardSquare EnPassant;
+    public byte Castle;
+    public bool IsIncrementalEval;
 
-    public readonly ulong KingPawnKey;
-
-    public readonly ulong NonPawnWhiteKey;
-
-    public readonly ulong NonPawnBlackKey;
-
-    public readonly ulong MinorKey;
-
-    public readonly ulong MajorKey;
-
-    public readonly int IncrementalEvalAccumulator;
-
-    public readonly int IncrementalPhaseAccumulator;
-
-    public readonly BoardSquare EnPassant;
-
-    public readonly byte Castle;
-
-    public readonly bool IsIncrementalEval;
-
-    public GameState(Position position)
+    public void Populate(Position position)
     {
         ZobristKey = position.UniqueIdentifier;
 

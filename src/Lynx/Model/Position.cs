@@ -375,7 +375,8 @@ public partial class Position : IDisposable
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
-        var gameState = new GameState(this);
+        var gameState = ObjectPools.GameStatePool.Get();
+        gameState.Populate(this);
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -936,6 +937,8 @@ public partial class Position : IDisposable
         IncrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         IncrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         IsIncrementalEval = gameState.IsIncrementalEval;
+
+        ObjectPools.GameStatePool.Return(gameState);
 
         Validate();
     }
