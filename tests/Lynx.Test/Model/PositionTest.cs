@@ -1226,7 +1226,6 @@ public class PositionTest
                 _ => position.AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare)
             };
         }
-
     }
 
     private static int AdditionalKingEvaluation(Position position, Piece piece)

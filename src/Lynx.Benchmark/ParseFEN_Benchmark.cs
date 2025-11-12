@@ -1132,24 +1132,14 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
-            bool success = true;
             var rankIndex = 0;
             var end = fen.IndexOf('/');
 
-            while (
-                end != -1
-#if DEBUG
-                && success
-#endif
-                )
+            while (end != -1)
             {
                 var match = fen[..end];
 
-                ParseBoardSection(pieceBitBoards, rankIndex, match
-#if DEBUG
-                , ref success
-#endif
-                    );
+                ParseBoardSection(pieceBitBoards, rankIndex, match);
                 PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
                 fen = fen[(end + 1)..];
@@ -1157,20 +1147,12 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 ++rankIndex;
             }
 
-            ParseBoardSection(pieceBitBoards, rankIndex, fen[..fen.IndexOf(' ')]
-#if DEBUG
-                , ref success
-#endif
-                );
+            ParseBoardSection(pieceBitBoards, rankIndex, fen[..fen.IndexOf(' ')]);
             PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
-            return success;
+            return true;
 
-            static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
-#if DEBUG
-                , ref bool success
-#endif
-                )
+            static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection)
             {
                 int fileIndex = 0;
 
@@ -1203,10 +1185,6 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     else
                     {
                         fileIndex += ch - '0';
-#if DEBUG
-                        System.Diagnostics.Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
-                        success = false;
-#endif
                     }
                 }
             }
@@ -1369,24 +1347,14 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
-            bool success = true;
             var rankIndex = 0;
             var end = fen.IndexOf('/');
 
-            while (
-                end != -1
-#if DEBUG
-                && success
-#endif
-                )
+            while (end != -1)
             {
                 var match = fen[..end];
 
-                ParseBoardSection(pieceBitBoards, rankIndex, match
-#if DEBUG
-                , ref success
-#endif
-                    );
+                ParseBoardSection(pieceBitBoards, rankIndex, match);
                 PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
                 fen = fen[(end + 1)..];
@@ -1394,20 +1362,12 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 ++rankIndex;
             }
 
-            ParseBoardSection(pieceBitBoards, rankIndex, fen[..fen.IndexOf(' ')]
-#if DEBUG
-                , ref success
-#endif
-                );
+            ParseBoardSection(pieceBitBoards, rankIndex, fen[..fen.IndexOf(' ')]);
             PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
-            return success;
+            return true;
 
-            static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
-#if DEBUG
-                , ref bool success
-#endif
-                )
+            static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection)
             {
                 int fileIndex = 0;
 
@@ -1440,10 +1400,6 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     else
                     {
                         fileIndex += ch - '0';
-#if DEBUG
-                        System.Diagnostics.Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
-                        success = false;
-#endif
                     }
                 }
             }

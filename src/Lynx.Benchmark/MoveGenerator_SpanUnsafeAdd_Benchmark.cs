@@ -1507,5 +1507,4 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
             return result;
         }
     }
-
 }

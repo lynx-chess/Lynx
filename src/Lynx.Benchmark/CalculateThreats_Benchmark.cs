@@ -91,7 +91,6 @@ public class CalculateThreats_Benchmark : BaseBenchmark
 
         foreach (var position in _positions)
         {
-
             position.CalculateThreats_Reference(ref evaluationContext);
         }
 

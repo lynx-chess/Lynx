@@ -62,7 +62,6 @@ public partial class Position : IDisposable
     public ulong MinorHash => _minorHash;
     public ulong MajorHash => _majorHash;
 
-
     public BitBoard[] PieceBitBoards => _pieceBitBoards;
     public BitBoard[] OccupancyBitBoards => _occupancyBitBoards;
     public int[] Board => _board;

@@ -747,7 +747,6 @@ public partial class Position
                 {
                     packedBonus += BishopCorneredAndBlockedPenalty;
                 }
-
             }
             else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
             {
@@ -763,7 +762,6 @@ public partial class Position
         }
         else
         {
-
             if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
             {
                 if (_board[(int)BoardSquare.b6] == (int)Piece.None)

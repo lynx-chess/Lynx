@@ -136,7 +136,6 @@ public class PawnIslandsBenchmark : BaseBenchmark
     [Benchmark]
     public int BitBoard_NoPawnCountArray()
     {
-
         var sum = 0;
 
         foreach (var fen in Data)
