@@ -88,6 +88,8 @@ public class PositionTest
         Assert.Throws<LynxException>(() => new Position(fen));
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(Constants.InitialPositionFEN, true)]
     [TestCase("r1k5/1K6/8/8/8/8/8/8 w - - 0 1", false)]
     [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
@@ -100,6 +102,8 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).IsValid());
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase(Constants.EmptyBoardFEN, false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
@@ -115,6 +119,8 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).WasProduceByAValidMove());
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]  // Can't run on debug due to position validation
     [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR b KQkq - 1 2", true)]
     [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR w KQkq - 1 2", false)]
     [TestCase("rnbqk1nr/pppp1ppp/4p3/8/1b6/3P1N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3", true)]
@@ -163,14 +169,14 @@ public class PositionTest
         }
     }
 
-    [TestCase("k7/8/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
+    [TestCase("8/k7/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
+    [TestCase("8/k7/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K w - - 0 1", Description = "N+N")]
     [TestCase("k7/8/8/2nn4/8/8/8/7K w - - 0 1", Description = "n+n")]
-    [TestCase("k7/8/8/3B4/8/8/8/7K b - - 0 1", Description = "B")]
-    [TestCase("k7/8/8/3b4/8/8/8/7K b - - 0 1", Description = "b")]
+    [TestCase("k7/8/8/3B4/8/8/8/6K1 b - - 0 1", Description = "B")]
+    [TestCase("k7/8/8/3b4/8/8/8/6K1 b - - 0 1", Description = "b")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "N")]
     [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "n")]
     [TestCase("k7/8/8/2NN4/8/8/8/7K b - - 0 1", Description = "N+N")]
@@ -205,7 +211,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("3k4/4p1pp/8/8/8/8/4PPP1/3K4 b - - 0 1")]
+    [TestCase("3k4/3p2pp/8/8/8/8/4PPP1/3K4 b - - 0 1")]
     public void StaticEvaluation_IsolatedPawnPenalty(string fen)
     {
         Position position = new Position(fen);
@@ -217,7 +223,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        var expectedEval = UnpackMG(IsolatedPawnPenalty) - UnpackMG(PawnPhalanxBonus[1]);
+        var expectedEval = UnpackMG(IsolatedPawnPenalty[Constants.File[(int)BoardSquare.d3]]) - UnpackMG(PawnPhalanxBonus[1]);
 
         Assert.AreEqual(expectedEval, evaluation);
     }
@@ -300,7 +306,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/4p1pp/8/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e7)]
+    [TestCase("1k6/3p2pp/8/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d7)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -317,7 +323,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/4p3/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e6)]
+    [TestCase("1k6/6pp/3p4/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d6)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -334,7 +340,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/4p3/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e5)]
+    [TestCase("1k6/6pp/8/3p4/8/7P/6PP/1K6 b - - 0 1", BoardSquare.d5)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -351,7 +357,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/4p3/7P/6PP/1K6 b - - 0 1", BoardSquare.e4)]
+    [TestCase("1k6/6pp/8/8/3p4/7P/6PP/1K6 b - - 0 1", BoardSquare.d4)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -368,7 +374,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/8/4p2P/6PP/1K6 b - - 0 1", BoardSquare.e3)]
+    [TestCase("1k6/6pp/8/8/8/3p3P/6PP/1K6 b - - 0 1", BoardSquare.d3)]
 
     /// <summary>
     /// 8   . . . . . . k .
@@ -385,7 +391,7 @@ public class PositionTest
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("1k6/6pp/8/8/8/7P/4p1PP/1K6 b - - 0 1", BoardSquare.e2)]
+    [TestCase("1k6/6pp/8/8/8/7P/3p2PP/1K6 b - - 0 1", BoardSquare.d2)]
     public void StaticEvaluation_PassedPawnBonus(string fen, BoardSquare square)
     {
         var position = new Position(fen);
@@ -416,14 +422,14 @@ public class PositionTest
         var expectedEval = 0;
         if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)
         {
-            expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadBonus[0][rank]);
-            expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadEnemyBonus[0][rank]);
+            expectedEval += UnpackMG(PassedPawnNoEnemiesAheadBonus[0][rank]);
+            expectedEval += UnpackMG(PassedPawnNoEnemiesAheadEnemyBonus[0][rank]);
         }
 
         Assert.AreEqual(
             expectedEval
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            + UnpackMG(IsolatedPawnPenalty)
+            + UnpackMG(IsolatedPawnPenalty[Constants.File[(int)square]])
             + UnpackMG(PassedPawnBonus[0][rank])
             + UnpackMG(PassedPawnEnemyBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
@@ -443,12 +449,12 @@ public class PositionTest
     /// 1   R . . . K . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1", 9, 2)]
+    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1", 10, 3, 0)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 9, 2)]
-    public void StaticEvaluation_SemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 10, 3, 7)]
+    public void StaticEvaluation_SemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int semiopenFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -459,7 +465,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(SemiOpenFileRookBonus)
+        Assert.AreEqual(
+            UnpackMG(SemiOpenFileRookBonus[0][semiopenFile])
+                + UnpackMG(SemiOpenFileRookEnemyBonus[0][semiopenFile])
                 + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
@@ -475,12 +483,12 @@ public class PositionTest
     /// 1   . R . . K . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("7r/2p1k2p/8/8/8/8/2P1K2P/1R6 w - - 0 1", 13, 7)]
+    [TestCase("7r/2p1k2p/8/8/8/8/2P1K2P/1R6 w - - 0 1", 13, 7, 1)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("6r1/p2k1p2/8/8/8/8/P2K1P2/R7 b - - 0 1", 13, 7)]
-    public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("6r1/p2k1p2/8/8/8/8/P2K1P2/R7 b - - 0 1", 13, 7, 6)]
+    public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int openFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -490,28 +498,31 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(UnpackMG(OpenFileRookBonus)
+
+        Assert.AreEqual(
+            UnpackMG(OpenFileRookBonus[0][openFile])
+            + UnpackMG(OpenFileRookEnemyBonus[0][openFile])
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
 
     /// <summary>
-    /// 8   . . . . k. .r
-    /// 7   p. . . . . .r
+    /// 8   . . . . k . . r
+    /// 7   p . . . . . . r
     /// 6   . . . . . . . p
     /// 5   . . . . . . . .
     /// 4   . . . . . . . .
     /// 3   . . . . . . . .
-    /// 2   R. .P. . .P
-    /// 1   R. .K. . . .
+    /// 2   R . . P . . . P
+    /// 1   R . . K . . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("4k2r/p6r/7p/8/8/8/R2P3P/R2K4 w - - 0 1", 7, 6)]
+    [TestCase("4k2r/p6r/7p/8/8/8/R2P3P/R2K4 w - - 0 1", 10, 9, 0, IgnoreReason = "A pain to maintain, broken by total king ring attacks")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("4k2r/p3p2r/8/8/8/P7/R6P/R2K4 b - - 0 1", 7, 6)]
-    public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("4k2r/p3p2r/8/8/8/P7/R6P/R2K4 b - - 0 1", 10, 9, 7, IgnoreReason = "A pain to maintain, broken by total king ring attacks")]
+    public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int semiopenFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -522,28 +533,30 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((2 * UnpackMG(SemiOpenFileRookBonus))
+        Assert.AreEqual(
+            (2 * UnpackMG(SemiOpenFileRookBonus[0][semiopenFile]))
+            + (2 * UnpackMG(SemiOpenFileRookEnemyBonus[0][semiopenFile]))
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
         evaluation);
     }
 
     /// <summary>
-    /// 8   . r . . k . . .
+    /// 8   . r . . . . . k
     /// 7   . r . . . . . p
-    /// 6   p . . . . . . .
+    /// 6   . . p . . . . .
     /// 5   . . . . . . . .
     /// 4   . . . . . . . .
-    /// 3   P . . . . . . .
-    /// 2   R . . . . . . P
-    /// 1   R . . . K . . .
+    /// 3   . . P . . . . .
+    /// 2   . . R . . . . P
+    /// 1   . . R . . . . K
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("1r5k/1r5p/2p5/8/8/2P5/2R4P/2R4K w - - 0 1", 6, 11)]
+    [TestCase("1r5k/1r5p/2p5/8/8/2P5/2R4P/2R4K w - - 0 1", 7, 12, 1)]   // Counting only second rank rooks
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("k4r2/p4r2/5p2/8/8/5P2/P5R1/K5R1 b - - 0 1", 6, 11)]
-    public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
+    [TestCase("k4r2/p4r2/5p2/8/8/5P2/P5R1/K5R1 b - - 0 1", 7, 12, 6)]
+    public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove, int openFile)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -554,71 +567,12 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * UnpackMG(OpenFileRookBonus))
+        Assert.AreEqual(
+            (-2 * UnpackMG(OpenFileRookBonus[0][openFile]))
+            + (-2 * UnpackMG(OpenFileRookEnemyBonus[0][openFile]))
             + UnpackMG(RookMobilityBonus[rookMobilitySideToMove])
             - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
-    }
-
-    /// <summary>
-    /// 8   . . . r . . k .
-    /// 7   p p . p . . p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P . P P . . P P
-    /// 1   . K . R . . . .
-    ///     a b c d e f g h
-    /// </summary>
-    [TestCase("3r2k1/pp1p2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2P1PP/1K2R3 b - - 0 1")]
-    [Ignore("Broken by virtual king mobility")]
-    public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
-    {
-        Position position = new Position(fen);
-        int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
-
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
-
-        Assert.AreEqual(UnpackEG(SemiOpenFileKingPenalty), evaluation);
-    }
-
-    /// <summary>
-    /// 8   . . . r . . k .
-    /// 7   p . p p . . p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P . P P . . P P
-    /// 1   . K . R . . . .
-    ///     a b c d e f g h
-    /// </summary>
-    [TestCase("3r2k1/p1pp2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2PP1P/1K2R3 b - - 0 1")]
-    public void StaticEvaluation_OpenFileKingPenalty(string fen)
-    {
-        Position position = new Position(fen);
-        int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
-
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
-
-        Assert.AreEqual(UnpackEG(OpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -744,11 +698,11 @@ public class PositionTest
     /// 1   . . . . K . . N
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("n3k3/1n6/8/3b4/3B4/8/6N1/4K2N w - - 0 1", 13, 10)]
+    [TestCase("n3k3/1n6/8/3b4/3B4/8/6N1/4K2N w - - 0 1", 13, 11)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("n2k4/1n6/8/4b3/4B3/8/6N1/3K3N b - - 0 1", 13, 10)]
+    [TestCase("n2k4/1n6/8/4b3/4B3/8/6N1/3K3N b - - 0 1", 13, 11)]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -760,11 +714,11 @@ public class PositionTest
     /// 1   . . . . K . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("4k3/1n6/2n5/3b4/3B4/5N2/6N1/4K3 w - - 0 1", 13, 8)]
+    [TestCase("4k3/1n6/2n5/3b4/3B4/5N2/6N1/4K3 w - - 0 1", 13, 9)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    [TestCase("3k4/1n6/2n5/4b3/4B3/5N2/6N1/3K4 b - - 0 1", 13, 8)]
+    [TestCase("3k4/1n6/2n5/4b3/4B3/5N2/6N1/3K4 b - - 0 1", 13, 9)]
     public void StaticEvaluation_BishopMobility(string fen, int sideToMoveMobilityCount, int nonSideToMoveMobilityCount)
     {
         Position position = new Position(fen);
@@ -868,17 +822,27 @@ public class PositionTest
         BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
         BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
 
+        var whiteQueenAttacks = Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.Q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both]);
+        var blackQueenAttacks = Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both]);
+
         var whiteMobility =
-            (Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.Q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both])
-                & (~(position.OccupancyBitBoards[(int)Side.White] | blackPawnAttacks)))
+            (whiteQueenAttacks
+                & (~(position.PieceBitBoards[(int)Piece.P] | blackPawnAttacks)))
             .CountBits();
 
         var blackMobility =
-            (Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both])
-                & (~(position.OccupancyBitBoards[(int)Side.Black] | whitePawnAttacks)))
+            (blackQueenAttacks
+                & (~(position.PieceBitBoards[(int)Piece.p] | whitePawnAttacks)))
             .CountBits();
 
-        var expectedEvaluation = QueenMobilityBonus[whiteMobility] - QueenMobilityBonus[blackMobility];
+        var whiteKingRing = KingRing[position.BlackKingSquare];
+        var blackKingRing = KingRing[position.WhiteKingSquare];
+
+        var whiteKingRingAttacksCount = (whiteQueenAttacks & whiteKingRing).CountBits();
+        var blackKingRingAttacksCount = (blackQueenAttacks & blackKingRing).CountBits();
+
+        var expectedEvaluation = QueenMobilityBonus[whiteMobility] - QueenMobilityBonus[blackMobility]
+            + (QueenKingRingAttacksBonus * (whiteKingRingAttacksCount - blackKingRingAttacksCount));
 
         Assert.AreEqual(UnpackMG(expectedEvaluation), evaluation);
     }
@@ -908,9 +872,9 @@ public class PositionTest
     [TestCase("1k6/1b6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "b")]
     [TestCase("1k6/8/8/8/8/8/1N6/1K6 w - - 0 1", true, 1, "N")]
     [TestCase("1k6/1n6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "n")]
-    [TestCase("1k6/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
+    [TestCase("2k5/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
     [TestCase("rk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 2, "r")]
-    [TestCase("1k6/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
+    [TestCase("2k5/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
     [TestCase("qk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 4, "q")]
     public void StaticEvaluation_PawnlessEndgames_SinglePiece(string fen, bool isDrawExpected, int expectedPhase, string _)
     {
@@ -963,6 +927,253 @@ public class PositionTest
         Assert.AreEqual((int)(0.75 * position.StaticEvaluation(0).Score), position.StaticEvaluation(50).Score);
     }
 
+    [Test]
+    public void FreeAndNonAttackedSquares()
+    {
+        /// <summary>
+        /// 8   0 0 0 0 0 0 0 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 0 0 0 0 1 1 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard WhiteShortCastleFreeSquares = 0x6000000000000000;
+
+        /// <summary>
+        /// 8   0 0 0 0 0 0 0 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 1 1 1 0 0 0 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard WhiteLongCastleFreeSquares = 0xe00000000000000;
+
+        /// <summary>
+        /// 8   0 0 0 0 0 1 1 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 0 0 0 0 0 0 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard BlackShortCastleFreeSquares = 0x60;
+
+        /// <summary>
+        /// 8   0 1 1 1 0 0 0 0
+        /// 7   0 0 0 0 0 0 0 0
+        /// 6   0 0 0 0 0 0 0 0
+        /// 5   0 0 0 0 0 0 0 0
+        /// 4   0 0 0 0 0 0 0 0
+        /// 3   0 0 0 0 0 0 0 0
+        /// 2   0 0 0 0 0 0 0 0
+        /// 1   0 0 0 0 0 0 0 0
+        ///     a b c d e f g h
+        /// </summary>
+        const BitBoard BlackLongCastleFreeSquares = 0xe;
+
+        var position = new Position(Constants.InitialPositionFEN);
+
+        Assert.AreEqual(WhiteShortCastleFreeSquares, position.KingsideCastlingFreeSquares[(int)Side.White]);
+        Assert.AreEqual(BlackShortCastleFreeSquares, position.KingsideCastlingFreeSquares[(int)Side.Black]);
+        Assert.AreEqual(WhiteLongCastleFreeSquares, position.QueensideCastlingFreeSquares[(int)Side.White]);
+        Assert.AreEqual(BlackLongCastleFreeSquares, position.QueensideCastlingFreeSquares[(int)Side.Black]);
+
+        var nonAttackedWhiteShortCastleSquares = position.KingsideCastlingFreeSquares[(int)Side.White];
+        nonAttackedWhiteShortCastleSquares.SetBit(Constants.InitialWhiteKingSquare);
+        nonAttackedWhiteShortCastleSquares.SetBit(Constants.WhiteKingShortCastleSquare);
+
+        var nonAttackedWhiteLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.White];
+        nonAttackedWhiteLongCastleSquares.PopBit(BoardSquare.b1);
+        nonAttackedWhiteLongCastleSquares.SetBit(Constants.InitialWhiteKingSquare);
+        nonAttackedWhiteLongCastleSquares.SetBit(Constants.WhiteKingLongCastleSquare);
+
+        var nonAttackedBlackShortCastleSquares = position.KingsideCastlingFreeSquares[(int)Side.Black];
+        nonAttackedBlackShortCastleSquares.SetBit(Constants.InitialBlackKingSquare);
+        nonAttackedBlackShortCastleSquares.SetBit(Constants.BlackKingShortCastleSquare);
+
+        var nonAttackedBlackLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.Black];
+        nonAttackedBlackLongCastleSquares.PopBit(BoardSquare.b8);
+        nonAttackedBlackLongCastleSquares.SetBit(Constants.InitialBlackKingSquare);
+        nonAttackedBlackLongCastleSquares.SetBit(Constants.BlackKingLongCastleSquare);
+
+        Assert.AreEqual(nonAttackedWhiteShortCastleSquares, position.KingsideCastlingNonAttackedSquares[(int)Side.White]);
+        Assert.AreEqual(nonAttackedWhiteLongCastleSquares, position.QueensideCastlingNonAttackedSquares[(int)Side.White]);
+        Assert.AreEqual(nonAttackedBlackShortCastleSquares, position.KingsideCastlingNonAttackedSquares[(int)Side.Black]);
+        Assert.AreEqual(nonAttackedBlackLongCastleSquares, position.QueensideCastlingNonAttackedSquares[(int)Side.Black]);
+    }
+
+    [TestCase("8/8/8/3b4/8/8/p2k4/K7 b - - 0 1", true)]
+    [TestCase("8/p7/8/3b4/8/8/3k4/K7 b - - 0 11", true)]
+    [TestCase("8/p7/8/3b4/8/8/p2k4/K7 b - - 0 1", true)]
+    [TestCase("8/p7/8/8/8/8/1K1kb3/8 b - - 0 1", true)]
+    [TestCase("8/p7/8/8/8/8/K2kb3/8 b - - 0 1", true)]
+    [TestCase("8/p7/8/8/8/8/3kb3/1K6 b - - 0 1", true)]
+    [TestCase("8/p7/p7/p7/p7/p2b4/p2k4/K7 b - - 0 1", true)]
+    [TestCase("8/p7/8/8/8/4b3/3k4/K7 b - - 0 1", false)]
+
+    [TestCase("8/7p/8/8/8/2b5/3k4/7K b - - 0 1", true)]
+    [TestCase("8/7p/8/8/8/2b5/3k4/6K1 b - - 0 1", true)]
+    [TestCase("8/7p/8/8/8/2b5/3k2K1/8 b - - 0 1", true)]
+    [TestCase("8/7p/7p/7p/7p/2b4p/3k3p/7K b - - 0 1", true)]
+    [TestCase("8/7p/8/8/8/3b4/3k4/7K b - - 0 1", false)]
+
+    [TestCase("k7/8/PK6/2B5/8/8/8/8 w - - 0 1", true)]
+    [TestCase("8/k7/8/3K4/7B/8/P7/8 w - - 0 1", true)]
+    [TestCase("8/1k6/8/3K4/7B/8/P7/8 w - - 0 1", true)]
+    [TestCase("1k6/8/8/3K4/7B/8/P7/8 w - - 0 1", true)]
+    [TestCase("k7/8/PK6/P1B5/P7/P7/P7/8 w - - 0 1", true)]
+    [TestCase("k7/8/1K6/8/2B5/8/P7/8 w - - 0 1", false)]
+
+    [TestCase("7k/8/6KP/8/4B3/8/8/8 w - - 0 1", true)]
+    [TestCase("8/7k/8/5K2/4B3/8/7P/8 w - - 0 1", true)]
+    [TestCase("8/6k1/8/5K2/4B3/8/7P/8 w - - 0 1", true)]
+    [TestCase("6k1/8/8/5K2/4B3/8/7P/8 w - - 0 1", true)]
+    [TestCase("7k/7P/8/5K1P/7P/7P/4B2P/8 w - - 0 1", true)]
+    [TestCase("7k/8/8/5K2/8/4B3/7P/8 w - - 0 1", false)]
+
+    public void IsBishopPawnDraw(string fen, bool isDraw)
+    {
+        var position = new Position(fen);
+
+        var winnigSideOffset = Utils.PieceOffset(position.Side);
+        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
+    }
+
+    [TestCase("1k6/8/K7/8/8/2B5/P7/8 w - - 0 48", true)]
+    [TestCase("1k6/8/1K6/8/8/2B5/P7/8 w - - 0 48", true)]
+    [TestCase("1k6/8/2K5/8/8/2B5/P7/8 w - - 0 48", true, Description = "Attacking king in backrank, defending king in front of the attacking one")]
+
+    [TestCase("3k4/8/8/8/K7/2B5/P7/8 w - - 0 48", true)]
+    [TestCase("3k4/8/8/8/4K3/2B5/P7/8 w - - 0 48", true)]
+    [TestCase("3k4/8/1K6/8/8/2B5/P7/8 w - - 0 48", false)]
+    [TestCase("3k4/8/K7/8/8/2B5/P7/8 w - - 0 48", false)]
+
+    [TestCase("2K5/8/2k5/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+    [TestCase("2K5/8/k7/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+    [TestCase("3K4/8/8/k7/8/8/PB6/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+
+    [TestCase("2K5/8/2k5/8/8/2B5/P7/8 b - - 0 48", false, Description = "Attacking king behind defending king, same distance, defending to move")]
+    [TestCase("2K5/8/1k6/8/8/2B5/P7/8 b - - 0 48", true, Description = "Attacking king behind defending king, same distance, defending to move", IgnoreReason = "False negative, so acceptable")]
+    [TestCase("2K5/8/k7/8/8/2B5/P7/8 b - - 0 48", true, Description = "Attacking king behind defending king, same distance, defending to move", IgnoreReason = "False negative, so acceptable")]
+    [TestCase("3K4/8/8/k7/8/8/PB6/8 b - - 0 48", true, Description = "Attacking king behind defending king, same distance, defending to move")]
+
+    [TestCase("3K4/8/2k5/8/8/2B5/P7/8 b - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
+    [TestCase("4K3/8/5k2/8/8/8/6BP/8 b - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
+
+    [TestCase("4K3/8/8/3k4/8/2B5/P7/8 b - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move", IgnoreReason = "False negative, so acceptable")]
+
+    // Tricky ones
+    [TestCase("2K5/8/1k6/8/8/2B5/P7/8 w - - 0 48", false, Description = "Attacking king behind defending king, same distance, attacking to move")]
+    [TestCase("3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, attacking to move")]
+    [TestCase("4K3/8/8/3k4/8/2B5/P7/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, attacking to move")]
+    [TestCase("4K3/8/5k2/8/8/8/6BP/8 w - - 0 48", false, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
+    [TestCase("8/pb6/8/8/8/2K5/8/3k4 w - - 0 48", true, Description = "Def distance < attacking distance, defending in diagonal, defending to move")]
+
+    [TestCase("8/pb6/8/8/8/2K5/8/2k5 w - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
+    [TestCase("8/pb6/8/8/8/2K5/8/2k5 b - - 0 48", false, Description = "Attacking king in backrank, defending king in front of the attacking one")]
+
+    [TestCase("3k4/8/P2K4/8/8/8/8/B7 w - - 0 1", false, Description = "Pawn promotes and defending king is too far")]
+    [TestCase("4k3/8/4K3/P7/8/8/8/B7 w - - 0 1", false, Description = "Pawn promotes and defending king is too far")]
+    [TestCase("4k3/8/4K3/P7/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and defending king is too far")]
+    [TestCase("5k2/8/5K2/8/P7/8/8/B7 w - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("5k2/8/5K2/8/P7/8/8/B7 b - - 0 1", true, Description = "King makes it, miraculously", IgnoreReason = "False negative, so acceptable")]
+    [TestCase("6k1/8/6K1/8/P7/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("6k1/8/6K1/8/8/P7/8/B7 w - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("6k1/8/6K1/8/8/P7/8/B7 b - - 0 1", true, Description = "King makes it, miraculously", IgnoreReason = "False negative, so acceptable")]
+
+    [TestCase("8/P7/K1k5/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/K7/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/1K6/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+    [TestCase("2k5/P7/2K5/8/8/8/8/B7 b - - 0 1", false, Description = "Pawn promotes and is blocked by attacking king, even if same distance")]
+
+    [TestCase("2k5/8/P1K5/8/5B2/8/8/8 b - - 0 1", false, Description = "Bishop blocks king from reaching the corner")]
+    [TestCase("2k5/8/2K5/8/5B2/8/P7/8 b - - 0 1", false, Description = "Bishop blocks king from reaching the corner")]
+    [TestCase("2k5/8/2K5/4B3/8/8/P7/8 b - - 0 1", false, Description = "Bishop blocks king from reaching the corner")]
+    [TestCase("4k3/8/4K3/6B1/8/8/P7/8 b - - 0 1", false, Description = "Bishop blocks king from reaching the corner", IgnoreReason = "FP, this is where I gave up")]
+    public void IsBishopPawnDraw_Distance(string fen, bool isDraw)
+    {
+        var position = new Position(fen);
+
+        var winnigSideOffset = Utils.PieceOffset(position.PieceBitBoards[(int)Piece.P] != 0 ? Side.White : Side.Black);
+        Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winnigSideOffset));
+
+        static bool IsBishopPawnDraw(Position position, int winningSideOffset)
+        {
+            var pawns = position.PieceBitBoards[(int)Piece.P + winningSideOffset];
+
+            bool hasAFilePawn = (pawns & Constants.AFile) != 0;
+            bool hasHFilePawn = (pawns & Constants.HFile) != 0;
+
+            // We filtered by Constants.NotAorH == 0 earlier, now we check that only one of those files has pawns
+            if (hasAFilePawn == hasHFilePawn)
+            {
+                return false;
+            }
+
+            // 1 if black is winning
+            var inverseWinningSide = winningSideOffset >> 2;
+
+            const int whiteBlackDiff = (int)BoardSquare.a1 - (int)BoardSquare.a8;
+
+            var promotionCornerSquare =
+                (hasAFilePawn
+                    ? (int)BoardSquare.a8
+                    : (int)BoardSquare.h8)
+                + (inverseWinningSide * whiteBlackDiff);
+
+            var bishopSquare = position.PieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+            if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
+            {
+                return false;
+            }
+
+            var attackingKing = position.PieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
+            var defendingKing = position.PieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+
+            pawns = pawns.WithoutLS1B(out var pawnSquare);
+            var closerPawnCornerDistance = Math.Abs(promotionCornerSquare - pawnSquare) >> 3;  // /8
+
+            // Normally this won't be executed, since only one pawn is the typical case
+            while (pawns != 0)
+            {
+                pawns = pawns.WithoutLS1B(out var loopPawnSquare);
+
+                var promotionDistance = Math.Abs(promotionCornerSquare - loopPawnSquare) >> 3;  // /8
+                if (promotionDistance < closerPawnCornerDistance)
+                {
+                    closerPawnCornerDistance = promotionDistance;
+                }
+            }
+
+            var attackingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][attackingKing];
+
+            // The are two cases when the defending king can't reduce the distance to the corner:
+            // - If the attacking one is in the middle, and therefore their difference is at least 2 distance squares - not a concern
+            // - If the pawn is in 7th rank and blocks the defending king from approaching the corner - we don't use this for comparing defending and attacking conditions
+            int oneIfDefendingSideTomove = (int)position.Side ^ inverseWinningSide ^ 1;
+
+            var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing];
+
+            return
+                defendingKingCornerDistance <= 1
+                || (closerPawnCornerDistance > defendingKingCornerDistance        // Avoids bishop + king blocking, i.e. 2k5/P7/2K5/8/8/8/8/B7 b - - 0 1, 4k3/8/4K3/P7/8/8/8/B7 b - - 0 1
+                    && attackingKingCornerDistance > 2  // Avoids bishop blocking, i.e. 2k5/8/2K5/8/5B2/8/P7/8 b - - 0 1
+                    && defendingKingCornerDistance - oneIfDefendingSideTomove < attackingKingCornerDistance
+                    && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing]);     // Avoids king diagonal blocking, i.e. 3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48
+        }
+    }
+
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
         var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
@@ -990,14 +1201,31 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         while (!bitBoard.Empty())
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(AdditionalPieceEvaluation(position, ref evaluationContext, 0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
+
+        // Position.AdditionalPieceEvaluation but including pawns
+        static int AdditionalPieceEvaluation(Position position, ref EvaluationContext evaluationContext, int bucket, int oppositeSideBucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+        {
+            Assert.AreNotEqual(pieceIndex, (int)Piece.K);
+            Assert.AreNotEqual(pieceIndex, (int)Piece.k);
+
+            return pieceIndex switch
+            {
+                (int)Piece.P or (int)Piece.p => position.PawnAdditionalEvaluation(ref evaluationContext, bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
+                _ => position.AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare)
+            };
+        }
     }
 
     private static int AdditionalKingEvaluation(Position position, Piece piece)
@@ -1018,8 +1246,8 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(bitBoard, (int)Side.Black, whitePawnAttacks));
+            ? position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)

@@ -38,8 +38,13 @@ public static class Perft
     {
         if (depth != 0)
         {
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -61,8 +66,13 @@ public static class Perft
     {
         if (depth != 0)
         {
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
                 var state = position.MakeMove(move);
 

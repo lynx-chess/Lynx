@@ -8,7 +8,15 @@ public readonly struct GameState
 
     public readonly ulong KingPawnKey;
 
-    public readonly int IncremetalEvalAccumulator;
+    public readonly ulong NonPawnWhiteKey;
+
+    public readonly ulong NonPawnBlackKey;
+
+    public readonly ulong MinorKey;
+
+    public readonly ulong MajorKey;
+
+    public readonly int IncrementalEvalAccumulator;
 
     public readonly int IncrementalPhaseAccumulator;
 
@@ -18,15 +26,36 @@ public readonly struct GameState
 
     public readonly bool IsIncrementalEval;
 
-    public GameState(ulong zobristKey, ulong kingPawnKey, int incrementalEvalAccumulator, int incrementalPhaseAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
+    public GameState(Position position)
     {
-        ZobristKey = zobristKey;
-        KingPawnKey = kingPawnKey;
-        IncremetalEvalAccumulator = incrementalEvalAccumulator;
-        IncrementalPhaseAccumulator = incrementalPhaseAccumulator;
-        EnPassant = enpassant;
-        Castle = castle;
-        IsIncrementalEval = isIncrementalEval;
+        ZobristKey = position.UniqueIdentifier;
+
+        KingPawnKey = position.KingPawnUniqueIdentifier;
+        NonPawnWhiteKey = position.NonPawnHash[(int)Side.White];
+        NonPawnBlackKey = position.NonPawnHash[(int)Side.Black];
+        MinorKey = position.MinorHash;
+        MajorKey = position.MajorHash;
+
+        EnPassant = position.EnPassant;
+        Castle = position.Castle;
+        IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;
+        IncrementalPhaseAccumulator = position.IncrementalPhaseAccumulator;
+
+        // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
+        IsIncrementalEval = position.IsIncrementalEval;
+    }
+}
+
+public readonly struct NullMoveGameState
+{
+    public readonly ulong ZobristKey;
+
+    public readonly BoardSquare EnPassant;
+
+    public NullMoveGameState(Position position)
+    {
+        ZobristKey = position.UniqueIdentifier;
+        EnPassant = position.EnPassant;
     }
 }
 

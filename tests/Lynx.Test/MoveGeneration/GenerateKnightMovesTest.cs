@@ -7,19 +7,27 @@ public class GenerateKnightMovesTest
 {
     private static IEnumerable<Move> GenerateKnightMoves(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     private static IEnumerable<Move> GenerateKnightCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     [TestCase(Constants.InitialPositionFEN, 4)]
-    [TestCase("1k6/8/8/8/8/P1P2P1P/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 0)]
-    [TestCase("rnbqkbnr/pppppppp/p1p2p1p/8/8/8/8/1K6 b KQkq - 0 1", 0)]
+    [TestCase("1k6/8/8/8/8/P1P2P1P/PPPPPPPP/RNBQKBNR w KQ - 0 1", 0)]
+    [TestCase("rnbqkbnr/pppppppp/p1p2p1p/8/8/8/8/1K6 b kq - 0 1", 0)]
     [TestCase("1K1k3/8/2P1P3/1P3P2/3N4/1P3P2/2P1P3/8 w - - 0 1", 0)]
     [TestCase("1K1k3/8/2p1p3/1p3p2/3N4/1p3p2/2p1p3/8 w - - 0 1", 8)]
     [TestCase("1K1k3/8/2p1p3/1p3p2/3n4/1p3p2/2p1p3/8 b - - 0 1", 0)]
@@ -190,7 +198,7 @@ public class GenerateKnightMovesTest
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 
-        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
+        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.e5
@@ -227,7 +235,7 @@ public class GenerateKnightMovesTest
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 
-        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
+        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.b6

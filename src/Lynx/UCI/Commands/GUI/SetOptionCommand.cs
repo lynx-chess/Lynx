@@ -15,7 +15,7 @@
 ///	   "setoption name Clear Hash\n"
 ///	   "setoption name NalimovPath value c:\chess\tb\4;c:\chess\tb\5\n"
 /// </summary>
-public sealed class SetOptionCommand : IGUIBaseCommand
+public sealed class SetOptionCommand
 {
     public const string Id = "setoption";
 }

@@ -177,6 +177,7 @@ file static class CustomMoveGenerator
 
     private static readonly Func<int, BitBoard, ulong>[] _pieceLocalAttacks =
     [
+#pragma warning disable IDE0350 // Use implicitly typed lambda
         (int origin, BitBoard _) => LocalAttacks.PawnAttacks[(int)Side.White][origin],
         (int origin, BitBoard _) => LocalAttacks.KnightLocalAttacks[origin],
         LocalAttacks.BishopLocalAttacks,
@@ -190,6 +191,7 @@ file static class CustomMoveGenerator
         LocalAttacks.RookLocalAttacks,
         LocalAttacks.QueenLocalAttacks,
         (int origin, BitBoard _) => LocalAttacks.KingLocalAttacks[origin],
+#pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -297,7 +299,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteShortCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteKingShortCastleSquare, piece);
                 }
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -308,7 +310,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.WhiteLongCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.WhiteKingLongCastleSquare, piece);
                 }
             }
             else
@@ -320,7 +322,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackShortCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackKingShortCastleSquare, piece);
                 }
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -331,7 +333,7 @@ file static class CustomMoveGenerator
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
                 {
-                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.BlackLongCastleKingSquare, piece);
+                    yield return MoveExtensions.EncodeLongCastle(sourceSquare, Constants.BlackKingLongCastleSquare, piece);
                 }
             }
         }

@@ -70,17 +70,17 @@ public static class BenchmarkLegacyMoveExtensions
     public static int OldScore(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
 #pragma warning restore S2368 // Public methods should not have multidimensional array parameters
     {
-        if (move.IsCapture())
+        if (move.CapturedPiece() != (int)Piece.None)
         {
             var sourcePiece = move.Piece();
-            int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
+            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
             var targetSquare = move.TargetSquare();
             var oppositeSide = Utils.OppositeSide(position.Side);
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
-            var limit = (int)Model.Piece.K + oppositeSideOffset;
+            var limit = (int)Piece.K + oppositeSideOffset;
             for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
             {
                 if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))

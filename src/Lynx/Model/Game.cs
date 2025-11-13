@@ -1,6 +1,5 @@
 ﻿using NLog;
 using System.Buffers;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
@@ -22,7 +21,7 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Indexed by ply
     /// </summary>
-    private readonly PlyStackEntry[] _gameStack;
+    private readonly PlyStackEntry[] _stack;
 
     private bool _disposedValue;
 
@@ -40,16 +39,15 @@ public sealed class Game : IDisposable
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
-        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Assert fail", "Need to customized ArrayPool due to desired array size requirements");
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
-        _gameStack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
 
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
 
         if (!CurrentPosition.IsValid())
         {
-            _logger.Warn($"Invalid position detected: {fen.ToString()}");
+            _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
         }
 
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
@@ -59,6 +57,10 @@ public sealed class Game : IDisposable
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
 #endif
 
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
             if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -66,7 +68,7 @@ public sealed class Game : IDisposable
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -95,8 +97,9 @@ public sealed class Game : IDisposable
     /// </remarks>
     /// <returns>true if threefol/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Update50movesRule(Move moveToPlay, bool isCapture)
+    public bool Update50movesRule(Move moveToPlay)
     {
+        var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
         if (isCapture)
         {
             if (HalfMovesWithoutCaptureOrPawnMove < 100)
@@ -152,14 +155,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition()
+    public bool Is50MovesRepetition(ref EvaluationContext evaluationContext)
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
     }
 
     /// <summary>
@@ -200,7 +203,7 @@ public sealed class Game : IDisposable
             MoveHistory.Add(moveToPlay);
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
-            Update50movesRule(moveToPlay, moveToPlay.IsCapture());
+            Update50movesRule(moveToPlay);
         }
         else
         {
@@ -218,31 +221,34 @@ public sealed class Game : IDisposable
     /// </summary>
     public void ResetCurrentPositionToBeforeSearchState()
     {
-        CurrentPosition.FreeResources();
+        CurrentPosition.Dispose();
         CurrentPosition = new(PositionBeforeLastSearch);
         //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
     }
 
     public void UpdateInitialPosition()
     {
-        PositionBeforeLastSearch.FreeResources();
+        PositionBeforeLastSearch.Dispose();
         PositionBeforeLastSearch = new(CurrentPosition);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UpdateMoveinStack(int n, Move move) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
+    public void UpdateMoveinStack(int n, Move move) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Move ReadMoveFromStack(int n) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
+    public Move ReadMoveFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int ReadStaticEvalFromStack(int n) => _gameStack[n].StaticEval;
+    public int ReadStaticEvalFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n].StaticEval = value;
+    public int UpdateStaticEvalInStack(int n, int value) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref PlyStackEntry GameStack(int n) => ref _gameStack[n];
+    public int ReadDoubleExtensionsFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].DoubleExtensions;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref PlyStackEntry Stack(int n) => ref _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
@@ -258,24 +264,17 @@ public sealed class Game : IDisposable
 
     internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
 
-    public void FreeResources()
-    {
-        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack, clearArray: true);
-        ArrayPool<ulong>.Shared.Return(_positionHashHistory);
-
-        CurrentPosition.FreeResources();
-        PositionBeforeLastSearch.FreeResources();
-
-        _disposedValue = true;
-    }
-
     private void Dispose(bool disposing)
     {
         if (!_disposedValue)
         {
             if (disposing)
             {
-                FreeResources();
+                ArrayPool<PlyStackEntry>.Shared.Return(_stack, clearArray: true);
+                ArrayPool<ulong>.Shared.Return(_positionHashHistory);
+
+                CurrentPosition.Dispose();
+                PositionBeforeLastSearch.Dispose();
             }
             _disposedValue = true;
         }
@@ -285,8 +284,9 @@ public sealed class Game : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
-#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+
+#pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
-#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
+#pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }

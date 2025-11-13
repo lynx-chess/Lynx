@@ -84,16 +84,21 @@ public class MoveToEPDStringTest
     [TestCase("rnbqkbnr/1pp2p2/p3p2p/2PpP1p1/3P4/8/PP3PPP/RNBQKBNR w KQkq d6 0 6", Piece.P, BoardSquare.d6, "cxd6", "exd6")]
     // Promotion
     [TestCase("3k4/P7/8/8/8/8/p7/3K4 b - - 0 1", Piece.p, BoardSquare.a1, "a1=B", "a1=N", "a1=Q", "a1=R")]
-    [TestCase("r2k3r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", Piece.K, BoardSquare.g1, "O-O")]
-    [TestCase("r2k3r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", Piece.K, BoardSquare.c1, "O-O-O")]
+    [TestCase("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", Piece.K, BoardSquare.g1, "O-O")]
+    [TestCase("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", Piece.K, BoardSquare.c1, "O-O-O")]
     [TestCase("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1", Piece.k, BoardSquare.g8, "O-O")]
     [TestCase("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1", Piece.k, BoardSquare.c8, "O-O-O")]
     public void ToStrictEPDString(string fen, Piece piece, BoardSquare targetSquare, string m0, string? m1 = default, string? m2 = default, string? m3 = default)
     {
         var position = new Position(fen);
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
 
         var ambiguousMoves = pseudoLegalMoves
             .Where(m => m.Piece() == (int)piece && m.TargetSquare() == (int)targetSquare)

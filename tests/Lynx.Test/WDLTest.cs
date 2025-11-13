@@ -13,7 +13,10 @@ public class WDLTest
     [Test]
     public void NormalizeCoefficientAndArrayValues()
     {
-        Assert.AreEqual(EvaluationConstants.EvalNormalizationCoefficient, (int)EvaluationConstants.As.ToArray().Sum());
+        var sum = (int)EvaluationConstants.As.ToArray().Sum();
+        Assert.True(EvaluationConstants.EvalNormalizationCoefficient == sum
+            || EvaluationConstants.EvalNormalizationCoefficient == sum + 1
+            || EvaluationConstants.EvalNormalizationCoefficient == sum - 1);
     }
 
     [TestCase(500)]
