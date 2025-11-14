@@ -436,7 +436,7 @@ public sealed partial class Engine
 
             var gameState = position.MakeMove(move);
 
-            if (!position.WasProduceByAValidMove())
+            if (!position.WasProduceByAValidMove(ref evaluationContext))
             {
                 position.UnmakeMove(move, gameState);
                 continue;
@@ -934,7 +934,7 @@ public sealed partial class Engine
             }
 
             var gameState = position.MakeMove(move);
-            if (!position.WasProduceByAValidMove())
+            if (!position.WasProduceByAValidMove(ref evaluationContext))
             {
                 position.UnmakeMove(move, gameState);
                 continue;

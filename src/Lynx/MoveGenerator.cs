@@ -467,12 +467,12 @@ public static class MoveGenerator
         try
         {
 #endif
-        return IsAnyPawnMoveValid(position, offset)
+        return IsAnyPawnMoveValid(position, offset, ref evaluationContext)
             || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
-            || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+            || IsAnyPieceMoveValid((int)Piece.Q + offset, position, ref evaluationContext)
+            || IsAnyPieceMoveValid((int)Piece.B + offset, position, ref evaluationContext)
+            || IsAnyPieceMoveValid((int)Piece.N + offset, position, ref evaluationContext)
+            || IsAnyPieceMoveValid((int)Piece.R + offset, position, ref evaluationContext)
             || IsAnyCastlingMoveValid(position, ref evaluationContext);
 #if DEBUG
         }
@@ -485,7 +485,7 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyPawnMoveValid(Position position, int offset)
+    private static bool IsAnyPawnMoveValid(Position position, int offset, ref EvaluationContext evaluationContext)
     {
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
@@ -515,14 +515,14 @@ public static class MoveGenerator
                 {
                     // If any of the promotions isn't valid, it means that the pawn move unveils a discovered check, or that the promoted piece doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions will be valid either
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset)))
+                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset), ref evaluationContext))
                     {
                         return true;
                     }
                 }
                 else
                 {
-                    if (IsValidMove(position, singlePawnPush))
+                    if (IsValidMove(position, singlePawnPush, ref evaluationContext))
                     {
                         return true;
                     }
@@ -533,7 +533,7 @@ public static class MoveGenerator
                     if (!occupancy.GetBit(doublePushSquare)
                         && (sourceRank == 2         // position.Side == Side.Black is always true, otherwise targetRank would be 1
                             || sourceRank == 7)     // position.Side == Side.White is always true, otherwise targetRank would be 8
-                        && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
+                        && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece), ref evaluationContext))
                     {
                         return true;
                     }
@@ -545,7 +545,7 @@ public static class MoveGenerator
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
+                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece), ref evaluationContext)) // Could add here capturedPiece: (int)Piece.p - offset
             {
                 return true;
             }
@@ -564,12 +564,12 @@ public static class MoveGenerator
                 {
                     // If any of the promotions that capture the same piece isn't valid, it means that the pawn move unveils a discovered check, or that the capture doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions capturing the same piece will be valid either
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset)))
+                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset), ref evaluationContext))
                     {
                         return true;
                     }
                 }
-                else if (IsValidMove(position, pawnCapture))
+                else if (IsValidMove(position, pawnCapture, ref evaluationContext))
                 {
                     return true;
                 }
@@ -599,7 +599,7 @@ public static class MoveGenerator
                 if ((castlingRights & (int)CastlingRights.WK) != default
                     && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext)
-                    && IsValidMove(position, position.WhiteShortCastle))
+                    && IsValidMove(position, position.WhiteShortCastle, ref evaluationContext))
                 {
                     return true;
                 }
@@ -607,7 +607,7 @@ public static class MoveGenerator
                 if ((castlingRights & (int)CastlingRights.WQ) != default
                     && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext)
-                    && IsValidMove(position, position.WhiteLongCastle))
+                    && IsValidMove(position, position.WhiteLongCastle, ref evaluationContext))
                 {
                     return true;
                 }
@@ -617,7 +617,7 @@ public static class MoveGenerator
                 if ((castlingRights & (int)CastlingRights.BK) != default
                     && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext)
-                    && IsValidMove(position, position.BlackShortCastle))
+                    && IsValidMove(position, position.BlackShortCastle, ref evaluationContext))
                 {
                     return true;
                 }
@@ -625,7 +625,7 @@ public static class MoveGenerator
                 if ((castlingRights & (int)CastlingRights.BQ) != default
                     && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext)
-                    && IsValidMove(position, position.BlackLongCastle))
+                    && IsValidMove(position, position.BlackLongCastle, ref evaluationContext))
                 {
                     return true;
                 }
@@ -639,7 +639,7 @@ public static class MoveGenerator
     /// Also valid for Kings, but less performant than <see cref="IsAnyKingMoveValid(int, Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyPieceMoveValid(int piece, Position position)
+    private static bool IsAnyPieceMoveValid(int piece, Position position, ref EvaluationContext evaluationContext)
     {
         var bitboard = position.PieceBitBoards[piece];
 
@@ -661,7 +661,7 @@ public static class MoveGenerator
 
                 Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
 
-                if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
+                if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]), ref evaluationContext))
                 {
                     return true;
                 }
@@ -687,7 +687,7 @@ public static class MoveGenerator
 
             Debug.Assert(occupancy.GetBit(targetSquare) == (position.Board[targetSquare] != (int)Piece.None));
 
-            if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare])))
+            if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece: position.Board[targetSquare]), ref evaluationContext))
             {
                 return true;
             }
@@ -697,11 +697,11 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static bool IsValidMove(Position position, Move move)
+    internal static bool IsValidMove(Position position, Move move, ref EvaluationContext evaluationContext)
     {
         var gameState = position.MakeMove(move);
 
-        bool result = position.WasProduceByAValidMove();
+        bool result = position.WasProduceByAValidMove(ref evaluationContext);
         position.UnmakeMove(move, gameState);
 
         return result;

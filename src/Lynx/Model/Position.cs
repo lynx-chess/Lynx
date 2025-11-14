@@ -971,7 +971,7 @@ public partial class Position : IDisposable
     /// False if any of the kings has been captured, or if the opponent king is in check.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsValid()
+    internal bool IsValid(ref EvaluationContext evaluationContext)
     {
         var offset = Utils.PieceOffset((int)_side);
 
@@ -982,7 +982,25 @@ public partial class Position : IDisposable
         var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
-            && !IsSquareAttacked(oppositeKingSquare, _side);
+            && !IsSquareAttacked(oppositeKingSquare, _side, ref evaluationContext);
+    }
+
+    /// <summary>
+    /// False if any of the kings has been captured, or if the opponent king is in check.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsValidNoThreats()
+    {
+        var offset = Utils.PieceOffset((int)_side);
+
+        var kingBitBoard = _pieceBitBoards[(int)Piece.K + offset];
+        var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
+
+        var oppositeKingBitBoard = _pieceBitBoards[(int)Piece.k - offset];
+        var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
+
+        return kingSquare >= 0 && oppositeKingSquare >= 0
+            && !IsSquareAttackedNoThreats(oppositeKingSquare, (int)_side);
     }
 
     /// <summary>
@@ -992,14 +1010,14 @@ public partial class Position : IDisposable
     /// i.e. it doesn't ensure that both kings are on the board
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool WasProduceByAValidMove()
+    public bool WasProduceByAValidMove(ref EvaluationContext evaluationContext)
     {
         Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
 
         var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
 
 #if DEBUG
-        var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
+        var isValid = !IsSquareAttacked(oppositeKingSquare, _side, ref evaluationContext);
 
         if (isValid)
         {
@@ -1008,7 +1026,34 @@ public partial class Position : IDisposable
 
         return isValid;
 #else
-        return !IsSquareAttacked(oppositeKingSquare, _side);
+        return !IsSquareAttacked(oppositeKingSquare, _side, ref evaluationContext);
+#endif
+    }
+
+    /// <summary>
+    /// Lightweight version of <see cref="IsValid"/>
+    /// False if the opponent king is in check.
+    /// This method is meant to be invoked only after a pseudolegal <see cref="MakeMove(int)"/>.
+    /// i.e. it doesn't ensure that both kings are on the board
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool WasProduceByAValidMoveNoThreats()
+    {
+        Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
+
+        var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
+
+#if DEBUG
+        var isValid = !IsSquareAttackedNoThreats(oppositeKingSquare, (int)_side);
+
+        if (isValid)
+        {
+            Validate();
+        }
+
+        return isValid;
+#else
+        return !IsSquareAttackedNoThreats(oppositeKingSquare, (int)_side);
 #endif
     }
 
@@ -1073,11 +1118,26 @@ public partial class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttacked(int squareIndex, Side sideToMove)
+    public bool IsSquareAttacked(int squareIndex, Side attackingSide, ref readonly EvaluationContext evaluationContext)
     {
-        Debug.Assert(sideToMove != Side.Both);
+        Debug.Assert(attackingSide != Side.Both);
 
-        var sideToMoveInt = (int)sideToMove;
+        var sideToMoveInt = (int)attackingSide;
+
+        var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
+
+        if (attacks != 0)
+        {
+            return attacks.Contains(squareIndex);
+        }
+
+        // Fallback: no threats
+        return IsSquareAttackedNoThreats(squareIndex, sideToMoveInt);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsSquareAttackedNoThreats(int squareIndex, int sideToMoveInt)
+    {
         var offset = Utils.PieceOffset(sideToMoveInt);
         var bothSidesOccupancy = _occupancyBitBoards[(int)Side.Both];
 
@@ -1106,7 +1166,7 @@ public partial class Position : IDisposable
         {
             squaresBitboard = squaresBitboard.WithoutLS1B(out var square);
 
-            if (IsSquareAttacked(square, attackingSide))
+            if (IsSquareAttackedNoThreats(square, (int)attackingSide))
             {
                 return true;
             }
@@ -1414,7 +1474,7 @@ public partial class Position : IDisposable
 
                 var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
-                var pieceRepresentation = IsSquareAttacked(squareIndex, sideToMove)
+                var pieceRepresentation = IsSquareAttackedNoThreats(squareIndex, (int)sideToMove)
                     ? '1'
                     : '.';
 
@@ -1620,7 +1680,7 @@ public partial class Position : IDisposable
         }
 
         // Can't capture opponent's king
-        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
+        Debug.Assert(!IsSquareAttackedNoThreats(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), (int)Side), failureMessage, "Can't capture opponent's king");
 
         Debug.Assert(Math.Min(MaxPhase, PhaseFromScratch()) == Phase(), failureMessage, $"Wrong incremental phase: {Phase()} vs from scratch {Math.Min(MaxPhase, PhaseFromScratch())}");
     }

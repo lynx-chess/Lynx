@@ -45,7 +45,7 @@ public sealed class Game : IDisposable
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
 
-        if (!CurrentPosition.IsValid())
+        if (!CurrentPosition.IsValidNoThreats())
         {
             _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
         }
@@ -197,7 +197,7 @@ public sealed class Game : IDisposable
     {
         var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-        if (CurrentPosition.WasProduceByAValidMove())
+        if (CurrentPosition.WasProduceByAValidMoveNoThreats())
         {
 #if DEBUG
             MoveHistory.Add(moveToPlay);

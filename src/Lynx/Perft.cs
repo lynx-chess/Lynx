@@ -48,7 +48,7 @@ public static class Perft
             {
                 var state = position.MakeMove(move);
 
-                if (position.WasProduceByAValidMove())
+                if (position.WasProduceByAValidMove(ref evaluationContext))
                 {
                     nodes = PerftRecursiveImpl(position, depth - 1, nodes);
                 }
@@ -76,7 +76,7 @@ public static class Perft
             {
                 var state = position.MakeMove(move);
 
-                if (position.WasProduceByAValidMove())
+                if (position.WasProduceByAValidMove(ref evaluationContext))
                 {
                     var accumulatedNodes = nodes;
                     nodes = PerftRecursiveImpl(position, depth - 1, nodes);

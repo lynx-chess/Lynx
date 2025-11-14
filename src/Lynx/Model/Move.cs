@@ -379,7 +379,7 @@ public static class MoveExtensions
             {
                 // If any illegal moves exist with the same simple representation there's no need to disambiguate
                 var gameState = position.MakeMove(m);
-                var isLegal = position.WasProduceByAValidMove();
+                var isLegal = position.WasProduceByAValidMoveNoThreats();
                 position.UnmakeMove(m, gameState);
 
                 return isLegal;
