@@ -373,12 +373,13 @@ public static class MoveExtensions
 
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
 
+        var gameState = new GameState();
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
             .Where(m =>
             {
                 // If any illegal moves exist with the same simple representation there's no need to disambiguate
-                var gameState = position.MakeMove(m);
+                gameState = position.MakeMove(m, ref gameState);
                 var isLegal = position.WasProduceByAValidMove();
                 position.UnmakeMove(m, gameState);
 

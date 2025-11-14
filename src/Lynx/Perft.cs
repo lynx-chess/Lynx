@@ -10,6 +10,8 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
+    private static readonly GameState[] _gameStateBuffer = GC.AllocateArray<GameState>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+
     public static void RunPerft(Position position, int depth, Action<string> write)
     {
         var sw = new Stopwatch();
@@ -46,7 +48,8 @@ public static class Perft
 
             foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
-                var state = position.MakeMove(move);
+                var state = _gameStateBuffer[depth];
+                state = position.MakeMove(move, ref state);
 
                 if (position.WasProduceByAValidMove())
                 {
@@ -74,7 +77,8 @@ public static class Perft
 
             foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
-                var state = position.MakeMove(move);
+                var state = _gameStateBuffer[depth];
+                state = position.MakeMove(move, ref state);
 
                 if (position.WasProduceByAValidMove())
                 {

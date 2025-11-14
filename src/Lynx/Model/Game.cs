@@ -8,6 +8,8 @@ public sealed class Game : IDisposable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    private GameState _gameState;
+
 #if DEBUG
 #pragma warning disable CA1002 // Do not expose generic lists
     public List<Move> MoveHistory { get; }
@@ -195,7 +197,7 @@ public sealed class Game : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMove(moveToPlay);
+        var gameState = CurrentPosition.MakeMove(moveToPlay, ref _gameState);
 
         if (CurrentPosition.WasProduceByAValidMove())
         {

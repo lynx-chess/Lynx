@@ -434,7 +434,7 @@ public sealed partial class Engine
                 }
             }
 
-            var gameState = position.MakeMove(move);
+            var gameState = MakeMoveDuringSearch(position, move, ply);
 
             if (!position.WasProduceByAValidMove())
             {
@@ -463,6 +463,8 @@ public sealed partial class Engine
                 var singularBeta = ttEntry.Score - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
+                // Verification search
+                // ! Invoking NegaMax with same ply, but we aren't holding the game state any more
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 
                 // Singular extension
@@ -496,7 +498,7 @@ public sealed partial class Engine
                     --singularDepthExtensions;
                 }
 
-                gameState = position.MakeMove(move);
+                gameState = MakeMoveDuringSearch(position, move, ply);
             }
 
             var previousNodes = _nodes;
@@ -933,7 +935,7 @@ public sealed partial class Engine
                 continue;
             }
 
-            var gameState = position.MakeMove(move);
+            var gameState = MakeMoveDuringSearch(position, move, ply);
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);

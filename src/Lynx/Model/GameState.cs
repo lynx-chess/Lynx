@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.ObjectPool;
-
-namespace Lynx.Model;
+﻿namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
-public sealed class GameState
+public struct GameState
 {
     public ulong ZobristKey;
     public ulong KingPawnKey;

@@ -73,6 +73,8 @@ public sealed partial class Engine
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
+    private readonly GameState[] _gameStateBuffer = GC.AllocateArray<GameState>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+
     /// <summary>
     /// <see cref="Constants.KingPawnHashSize"/>
     /// </summary>
@@ -437,7 +439,7 @@ public sealed partial class Engine
 
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
         {
-            var gameState = Game.CurrentPosition.MakeMove(move);
+            var gameState = MakeMoveDuringSearch(Game.CurrentPosition, move, _gameStateBuffer.Length - 1);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
             Game.CurrentPosition.UnmakeMove(move, gameState);
 
@@ -606,7 +608,7 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
-            var gameState = position.MakeMove(move);
+            var gameState = MakeMoveInIsolation(position, move);
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);

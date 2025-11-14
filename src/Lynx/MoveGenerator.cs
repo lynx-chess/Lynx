@@ -7,6 +7,8 @@ namespace Lynx;
 
 public static class MoveGenerator
 {
+    private static GameState _gameState;
+
 #if DEBUG
     private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
@@ -699,7 +701,7 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsValidMove(Position position, Move move)
     {
-        var gameState = position.MakeMove(move);
+        var gameState = position.MakeMove(move, ref _gameState);
 
         bool result = position.WasProduceByAValidMove();
         position.UnmakeMove(move, gameState);

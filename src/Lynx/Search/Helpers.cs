@@ -288,6 +288,22 @@ public sealed partial class Engine
         _moveNodeCount[move.Piece()][move.TargetSquare()] += nodesToAdd;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private GameState MakeMoveDuringSearch(Position position, Move move, int ply)
+    {
+        var gameState = _gameStateBuffer[ply];
+
+        return position.MakeMove(move, ref gameState);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private GameState MakeMoveInIsolation(Position position, Move move)
+    {
+        var gameState = _gameStateBuffer[^1];
+
+        return position.MakeMove(move, ref gameState);
+    }
+
     #region Debugging
 
 #pragma warning disable S125 // Sections of code should not be commented out
@@ -314,7 +330,7 @@ public sealed partial class Engine
 #pragma warning disable CA2000, IDISP001 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
             var newPosition = new Position(position);
 #pragma warning restore CA2000 // Dispose objects before losing scope
-            newPosition.MakeMove(move);
+            MakeMoveInIsolation(newPosition, move);
             if (!newPosition.WasProduceByAValidMove())
             {
                 throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");

@@ -22,6 +22,8 @@ public static class OnlineTablebaseProber
 {
     public const int NoResult = 6666;
 
+    private static GameState _gameState;
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly static AsyncRetryPolicy<HttpResponseMessage> _retryPolicy = HttpPolicyExtensions
@@ -131,7 +133,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, ref _gameState);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -192,7 +194,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, ref _gameState);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -255,7 +257,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, ref _gameState);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -315,7 +317,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, ref _gameState);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);

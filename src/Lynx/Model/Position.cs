@@ -366,8 +366,16 @@ public partial class Position : IDisposable
 
     #region Move making
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Test only")]
     public GameState MakeMove(Move move)
+    {
+        var gameState = new GameState();
+
+        return MakeMove(move, ref gameState);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeMove(Move move, ref GameState gameState)
     {
         Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
@@ -375,7 +383,6 @@ public partial class Position : IDisposable
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
-        var gameState = ObjectPools.GameStatePool.Get();
         gameState.Populate(this);
 
         var oldSide = (int)_side;
@@ -937,8 +944,6 @@ public partial class Position : IDisposable
         IncrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         IncrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         IsIncrementalEval = gameState.IsIncrementalEval;
-
-        ObjectPools.GameStatePool.Return(gameState);
 
         Validate();
     }
