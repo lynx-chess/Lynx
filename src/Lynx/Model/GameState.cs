@@ -1,4 +1,6 @@
-﻿namespace Lynx.Model;
+﻿using System.Runtime.CompilerServices;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
@@ -16,6 +18,7 @@ public struct GameState
     public byte Castle;
     public bool IsIncrementalEval;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Populate(Position position)
     {
         ZobristKey = position.UniqueIdentifier;
