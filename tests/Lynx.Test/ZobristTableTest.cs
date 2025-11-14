@@ -9,13 +9,14 @@ public class ZobristTableTest
     public void XorBehavior()
     {
         var random = new LynxRandom(int.MaxValue);
-        var zobristTable = ZobristTable.InitializeZobristTable(random);
+        var zobristTable = new ulong[64 * 12];
+        ZobristTable.InitializeZobristTable(random, zobristTable);
 
         for (int i = 0; i < 64; ++i)
         {
             for (int j = 0; j < 1; ++j)
             {
-                var hash = zobristTable[i][j];
+                var hash = zobristTable[ZobristTable.PieceTableIndex(i, j)];
 
                 var n = random.NextUInt64();
 
@@ -32,16 +33,18 @@ public class ZobristTableTest
     public void ReproducibleZobristTable()
     {
         var random = new LynxRandom(int.MaxValue);
-        var zobristTable = ZobristTable.InitializeZobristTable(random);
+        var zobristTable = new ulong[64 * 12];
+        ZobristTable.InitializeZobristTable(random, zobristTable);
 
         var anotherRandom = new LynxRandom(int.MaxValue);
-        var anotherZobristTable = ZobristTable.InitializeZobristTable(anotherRandom);
+        var anotherZobristTable = new ulong[64 * 12];
+        ZobristTable.InitializeZobristTable(anotherRandom, anotherZobristTable);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                Assert.AreEqual(zobristTable[squareIndex][pieceIndex], anotherZobristTable[squareIndex][pieceIndex]);
+                Assert.AreEqual(zobristTable[ZobristTable.PieceTableIndex(squareIndex, pieceIndex)], anotherZobristTable[ZobristTable.PieceTableIndex(squareIndex,pieceIndex)]);
             }
         }
     }
@@ -50,13 +53,14 @@ public class ZobristTableTest
     public void PieceHash()
     {
         var random = new LynxRandom(int.MaxValue);
-        var zobristTable = ZobristTable.InitializeZobristTable(random);
+        var zobristTable = new ulong[64 * 12];
+        ZobristTable.InitializeZobristTable(random, zobristTable);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                Assert.AreEqual(zobristTable[squareIndex][pieceIndex], ZobristTable.PieceHash(squareIndex, pieceIndex));
+                Assert.AreEqual(zobristTable[ZobristTable.PieceTableIndex(squareIndex, pieceIndex)], ZobristTable.PieceHash(squareIndex, pieceIndex));
             }
         }
     }
@@ -65,14 +69,15 @@ public class ZobristTableTest
     public void EnPassantHash()
     {
         var random = new LynxRandom(int.MaxValue);
-        var zobristTable = ZobristTable.InitializeZobristTable(random);
+        var zobristTable = new ulong[64 * 12];
+        ZobristTable.InitializeZobristTable(random, zobristTable);
 
         var enPassantSquares = Constants.EnPassantCaptureSquares.ToArray().Select((item, index) => (item, index)).Where(pair => pair.item != 0).Select(pair => pair.index);
 
         foreach (var enPassantSquare in enPassantSquares)
         {
             var file = enPassantSquare % 8;
-            Assert.AreEqual(zobristTable[file][(int)Piece.P], ZobristTable.EnPassantHash(enPassantSquare));
+            Assert.AreEqual(zobristTable[ZobristTable.PieceTableIndex(file, (int)Piece.P)], ZobristTable.EnPassantHash(enPassantSquare));
         }
 
         Assert.AreEqual(16, enPassantSquares.Count());
@@ -82,9 +87,10 @@ public class ZobristTableTest
     public void SideHash()
     {
         var random = new LynxRandom(int.MaxValue);
-        var zobristTable = ZobristTable.InitializeZobristTable(random);
+        var zobristTable = new ulong[64 * 12];
+        ZobristTable.InitializeZobristTable(random, zobristTable);
 
-        Assert.AreEqual(zobristTable[(int)BoardSquare.h8][(int)Piece.p], ZobristTable.SideHash());
+        Assert.AreEqual(zobristTable[ZobristTable.PieceTableIndex((int)BoardSquare.h8, (int)Piece.p)], ZobristTable.SideHash());
     }
 
     [TestCase(Constants.TrickyTestPositionReversedFEN)]
@@ -101,7 +107,8 @@ public class ZobristTableTest
     public void CastleHash(string fen)
     {
         var random = new LynxRandom(int.MaxValue);
-        var zobristTable = ZobristTable.InitializeZobristTable(random);
+        var zobristTable = new ulong[64 * 12];
+        ZobristTable.InitializeZobristTable(random, zobristTable);
 
         var positionWithoutCastlingRights = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b - - 0 1");
         var positionWithoutCastlingRightsHash = ZobristTable.PositionHash(positionWithoutCastlingRights);
@@ -133,28 +140,28 @@ public class ZobristTableTest
         Assert.AreEqual(originalHash, currentHash);
     }
 
-    private static ulong CalculateCastleHash(byte castle, ulong[][] zobristTable)
+    private static ulong CalculateCastleHash(byte castle, ulong[] zobristTable)
     {
         ulong combinedHash = 0;
 
         if ((castle & (int)CastlingRights.WK) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.a8][(int)Piece.p];        // a8
+            combinedHash ^= zobristTable[ZobristTable.PieceTableIndex((int)BoardSquare.a8, (int)Piece.p)];        // a8
         }
 
         if ((castle & (int)CastlingRights.WQ) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.b8][(int)Piece.p];        // b8
+            combinedHash ^= zobristTable[ZobristTable.PieceTableIndex((int)BoardSquare.b8, (int)Piece.p)];        // b8
         }
 
         if ((castle & (int)CastlingRights.BK) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.c8][(int)Piece.p];        // c8
+            combinedHash ^= zobristTable[ZobristTable.PieceTableIndex((int)BoardSquare.c8, (int)Piece.p)];        // c8
         }
 
         if ((castle & (int)CastlingRights.BQ) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.d8][(int)Piece.p];        // d8
+            combinedHash ^= zobristTable[ZobristTable.PieceTableIndex((int)BoardSquare.d8, (int)Piece.p)];        // d8
         }
 
         return combinedHash;
