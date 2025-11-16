@@ -183,18 +183,21 @@ public sealed partial class Engine
                 // 🔍 Continuation history
                 // - Countermove history (continuation history, ply - 1)
                 ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(piece, targetSquare, ply);
-                counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
 
                 // - Follow-up history (continuation history, ply - 2)
                 ref var followUpHistoryEntry = ref FollowUpHistoryEntry(piece, targetSquare, ply);
-                followUpHistoryEntry = ScoreHistoryMove(followUpHistoryEntry, rawHistoryBonus);
+
+                var totalContHistScore = counterMoveHistoryEntry + followUpHistoryEntry;
+
+                counterMoveHistoryEntry = ScoreContHistoryMove(totalContHistScore, counterMoveHistoryEntry, rawHistoryBonus);
+                followUpHistoryEntry = ScoreContHistoryMove(totalContHistScore, followUpHistoryEntry, rawHistoryBonus);
             }
             else if (!isRoot)
             {
                 // 🔍 Continuation history
                 // - Counter move history (continuation history, ply - 1)
                 ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(piece, targetSquare, ply);
-                counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
+                counterMoveHistoryEntry = ScoreContHistoryMove(counterMoveHistoryEntry, counterMoveHistoryEntry, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -290,5 +293,15 @@ public sealed partial class Engine
     private static int ScoreHistoryMove(int score, int rawHistoryBonus)
     {
         return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
+    }
+
+    /// <summary>
+    /// Soft caps history score
+    /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ScoreContHistoryMove(int totalContHistScore, int existingEntryScore, int rawHistoryBonus)
+    {
+        return existingEntryScore + rawHistoryBonus - (totalContHistScore * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
     }
 }
