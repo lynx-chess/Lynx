@@ -538,6 +538,7 @@ public sealed class Searcher : IDisposable
         if (_searchThreadsCount != Configuration.EngineSettings.Threads)
         {
             _logger.Info("Updating search thread count ({CurrentCount} thread(s) -> {NewCount} thread(s))", _searchThreadsCount, Configuration.EngineSettings.Threads);
+            _engineWriter.TryWrite($"info string Updating search thread count ({_searchThreadsCount} thread(s) -> {Configuration.EngineSettings.Threads} thread(s))");
 
             // Before invoking AllocateExtraEngines
             _searchThreadsCount = Configuration.EngineSettings.Threads;
@@ -555,6 +556,7 @@ public sealed class Searcher : IDisposable
         if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
         {
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
+            _engineWriter.TryWrite($"info string Resizing TT ({_ttWrapper.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
             _ttWrapper = TranspositionTableFactory.Create();
 
