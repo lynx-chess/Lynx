@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/dev_test/">
+    <Project Path="src/Lynx.Benchmark/Lynx.Benchmark.csproj" />
+    <Project Path="src/Lynx.ConstantsGenerator/Lynx.ConstantsGenerator.csproj" />
+    <Project Path="src/Lynx.Dev/Lynx.Dev.csproj" />
+    <Project Path="tests/Lynx.Test/Lynx.Test.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/bench.yml" />
+    <File Path=".github/workflows/benchmarks.yml" />
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/on-demand-tests.yml" />
+    <File Path=".github/workflows/on_release.yml" />
+    <File Path=".github/workflows/perft.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="Makefile" />
+  </Folder>
+  <Project Path="src/Lynx.Cli/Lynx.Cli.csproj" />
+  <Project Path="src/Lynx/Lynx.csproj" />
+</Solution>
