@@ -89,7 +89,7 @@ public sealed partial class Engine
                 : BadCaptureMoveBaseScoreValue;
 
             return baseCaptureScore
-                + MostValueableVictimLeastValuableAttacker[move.Piece()][capturedPiece]
+                + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(move);
         }
@@ -185,7 +185,7 @@ public sealed partial class Engine
                 ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(piece, targetSquare, ply);
                 counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
 
-                // - Follow-up history (continuation history, ply - 1)
+                // - Follow-up history (continuation history, ply - 2)
                 ref var followUpHistoryEntry = ref FollowUpHistoryEntry(piece, targetSquare, ply);
                 followUpHistoryEntry = ScoreHistoryMove(followUpHistoryEntry, rawHistoryBonus);
             }
@@ -229,27 +229,27 @@ public sealed partial class Engine
                     }
                 }
             }
+        }
 
-            var thisPlyKillerMovesBaseIndex = ply * 2;
-            ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
-            var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
+        var thisPlyKillerMovesBaseIndex = ply * 2;
+        ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
+        var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
 
-            if (move.PromotedPiece() == default && move != firstKillerMove)
+        if (move.PromotedPiece() == default && move != firstKillerMove)
+        {
+            // 🔍 Killer moves
+            if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
             {
-                // 🔍 Killer moves
-                if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
-                {
-                    Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) = firstKillerMove;
-                }
+                Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) = firstKillerMove;
+            }
 
-                Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) = move;
+            Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) = move;
 
-                if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
-                {
-                    // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
-                    ref var counterMove = ref CounterMove(ply - 1);
-                    counterMove = move;
-                }
+            if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
+            {
+                // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
+                ref var counterMove = ref CounterMove(ply - 1);
+                counterMove = move;
             }
         }
     }
