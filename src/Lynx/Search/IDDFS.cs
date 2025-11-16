@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using NLog;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -21,10 +22,10 @@ public sealed partial class Engine
     private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     /// <summary>
-    /// 12 x 64
-    /// piece x target square
+    /// 12 x 64 x 2 x 2
+    /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly int[][] _quietHistory;
+    private readonly int[] _quietHistory = GC.AllocateArray<int>(12 * 64 * 2 * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
@@ -33,12 +34,36 @@ public sealed partial class Engine
     private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
 
     /// <summary>
-    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
+    /// 12 x 64 x 12 x 64 x <see cref="EvaluationConstants.ContinuationHistoryPlyCount"/>
     /// piece x target square x last piece x last target square x plies back
     /// ply 0 -> Continuation move history
     /// ply 1 -> Follow-up move history
     /// </summary>
     private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
+    /// Pawn hash x side to move
+    /// </summary>
+    private readonly int[] _pawnCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.NonPawnCorrHistoryHashMask"/> x 2 x 2
+    /// Non-pawn side hash x side to move x piece hash side
+    /// </summary>
+    private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.MinorCorrHistoryHashSize"/> x 2
+    /// Minor hash x side to move
+    /// </summary>
+    private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.MajorCorrHistoryHashSize"/> x 2
+    /// Major hash x side to move
+    /// </summary>
+    private readonly int[] _majorCorrHistory = GC.AllocateArray<int>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -91,6 +116,14 @@ public sealed partial class Engine
 
         _stopWatch.Restart();
 
+        var logLevel = IsMainEngine
+            ? LogLevel.Debug
+#if MULTITHREAD_DEBUG
+            : LogLevel.Trace;
+#else
+            : LogLevel.Off;
+#endif
+
         try
         {
             if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
@@ -128,9 +161,10 @@ public sealed partial class Engine
                     alpha = Math.Clamp(lastSearchResult.Score - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
                     beta = Math.Clamp(lastSearchResult.Score + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
 
-                    _logger.Debug(
-                        "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                    _logger.Log(logLevel,
+                        "[#{EngineId}] Depth {Depth}: asp-win [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
+
                     Debug.Assert(
                         lastSearchResult.Mate == 0
                             ? lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit
@@ -141,15 +175,15 @@ public sealed partial class Engine
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
-                        _logger.Debug(
-                            "[#{EngineId}] Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                            _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
+                        _logger.Log(logLevel,
+                            "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, time {Time}, nodes {Nodes}",
+                            _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
                         Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
-                        window = Math.Min(EvaluationConstants.MaxEval, window + (window >> 1));   // window / 2
+                        window = Math.Min(EvaluationConstants.MaxEval, (int)(window * Configuration.EngineSettings.AspirationWindow_Multiplier));
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestScore)     // Fail low
@@ -184,7 +218,9 @@ public sealed partial class Engine
 
                         if (bestScore < -EvaluationConstants.CheckMateBaseEvaluation)
                         {
+                            // TODO bug
                             _logger.Warn(
+                            //_logger.Info(
                                 "[#{EngineId}] Depth {Depth}: potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
                                 _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
 
@@ -235,14 +271,23 @@ public sealed partial class Engine
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
-            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isPondering));
+            } while (StopSearchCondition(lastSearchResult?.BestMove, depth++, mate, bestScore, isPondering));
         }
         catch (OperationCanceledException)
         {
+            // One degree higher than log level, but can't add 1 to Off
+            var higherLogLevel = IsMainEngine
+                ? LogLevel.Info
+#if MULTITHREAD_DEBUG
+                : LogLevel.Debug;
+#else
+                : LogLevel.Off;
+#endif
+
 #pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
-            _logger.Info(
-                "[#{EngineId}] Depth {Depth}: search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned",
-                _id, depth, _stopWatch.ElapsedMilliseconds, _nodes);
+            _logger.Log(higherLogLevel,
+                "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}, best move will be returned",
+                _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
@@ -275,10 +320,27 @@ public sealed partial class Engine
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isPondering)
     {
+        var logLevel = IsMainEngine
+            ? LogLevel.Info
+#if MULTITHREAD_DEBUG
+            : LogLevel.Debug;
+#else
+                : LogLevel.Off;
+#endif
+
+        if (depth + 1 >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Log(logLevel,
+                "[#{EngineId}] Max depth reached: {MaxDepth}",
+                _id, Configuration.EngineSettings.MaxDepth);
+
+            return false;
+        }
+
         if (bestMove is null || bestMove == 0)
         {
             _logger.Warn(
-                "[#{EngineId}] Depth {Depth}: search continues, due to lack of best move", _id, depth - 1);
+                "[#{EngineId}] Depth {Depth}: search continues, due to lack of best move", _id, depth);
 
             return true;
         }
@@ -287,51 +349,51 @@ public sealed partial class Engine
         {
             if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
             {
-                _logger.Warn(
-                    "[#{EngineId}] Depth {Depth}: mate outside of range detected, stopping search and playing best move {BestMove}",
-                    _id, depth - 1, bestMove.Value.UCIString());
+                //_logger.Warn( // TODO bug
+                _logger.Info(
+                    "[#{EngineId}] Depth {Depth}: mate {Mate} outside of range detected, stopping search and playing best move so far: {BestMove}",
+                    _id, depth, mate, bestMove.Value.UCIString());
 
                 return false;
             }
 
             var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
-            _logger.Info(
-                "[#{EngineId}] Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
-                _id, depth - 1, mate, bestScore, winningMateThreshold);
 
-            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+            _logger.Log(logLevel,
+                "[#{EngineId}] Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
+                _id, depth, mate, bestScore, winningMateThreshold);
+
+            if (!isPondering && (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold))
             {
-                if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
+                if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.StopSearchOnMate_MaxSoftTimeBoundLimit
+                    && (depth >= Configuration.EngineSettings.StopSearchOnMate_MinDepth
+                        || depth >= mate * 2))
                 {
-                    _logger.Info("[#{EngineId}] Stopping, since mate is short enough and we're short on time: soft limit {SoftLimit}ms",
+                    _logger.Log(logLevel,
+                        "[#{EngineId}] Stopping, since mate is short enough and we're short on time: soft limit {SoftLimit}ms",
                         _id, _searchConstraints.SoftLimitTimeBound);
 
                     return false;
                 }
 
-                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough",
+                _logger.Log(logLevel,
+                    "[#{EngineId}] Could stop search, since mate is short enough",
                     _id, _searchConstraints.SoftLimitTimeBound);
             }
 
-            _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
-        }
-
-        if (depth >= Configuration.EngineSettings.MaxDepth)
-        {
-            _logger.Info(
-                "[#{EngineId}] Max depth reached: {MaxDepth}",
-                _id, Configuration.EngineSettings.MaxDepth);
-            return false;
+            _logger.Log(logLevel, "[#{EngineId}] Search continues, hoping to find a faster mate", _id);
         }
 
         var maxDepth = _searchConstraints.MaxDepth;
         if (maxDepth > 0)
         {
-            var shouldContinue = depth <= maxDepth;
+            var shouldContinue = depth + 1 <= maxDepth;
 
             if (!shouldContinue)
             {
-                _logger.Info("[#{EngineId}] Depth {Depth}: stopping, max. depth reached", _id, depth - 1);
+                _logger.Log(logLevel,
+                    "[#{EngineId}] Depth {Depth}: stopping, max. depth reached",
+                    _id, depth);
             }
 
             return shouldContinue;
@@ -342,16 +404,18 @@ public sealed partial class Engine
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
             var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
-            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
-            _logger.Info(
-                "[#{EngineId}] [TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}",
-                _id, depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
+
+            _logger.Log(logLevel,
+                "[#{EngineId}] [TM] {ElapsedMilliseconds}ms | Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}ms, scaled soft limit {ScaledSoftLimit}ms",
+                _id, elapsedMilliseconds, depth, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
             if (elapsedMilliseconds > scaledSoftLimitTimeBound)
             {
-                _logger.Info(
+                _logger.Log(logLevel,
                     "[#{EngineId}] [TM] Stopping at depth {0} (nodes {1}): {2}ms > {3}ms",
-                    _id, depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
+                    _id, depth, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
+
                 return false;
             }
         }
@@ -365,8 +429,13 @@ public sealed partial class Engine
     {
         bool onlyOneLegalMove = false;
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
@@ -394,10 +463,8 @@ public sealed partial class Engine
         {
             _logger.Debug("One single move found");
 
-            // We don't have or need any eval, and we don't want to return 0 or a negative eval that
-            // could make the GUI resign or take a draw from this position.
-            // Since this only happens in root, we don't really care about being more precise for raising
-            // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
+            // We don't have or need any eval, and we return a fake but recognizable one
+            // See constant XML for details
             var score = Game.CurrentPosition.Side == Side.White
                 ? +EvaluationConstants.SingleMoveScore
                 : -EvaluationConstants.SingleMoveScore;
@@ -462,7 +529,7 @@ public sealed partial class Engine
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
             if (isPondering || !IsMainEngine)
             {
-                _logger.Info(noDepth1Message);
+                _logger.Debug(noDepth1Message);
             }
             else
             {
@@ -499,27 +566,31 @@ public sealed partial class Engine
         var score = 0;
         ShortMove ttBestMove = default;
 
-        var position = Game.PositionBeforeLastSearch;
-        var ttEntry = _tt.ProbeHash(position, ply: 0);
+        using var position = new Position(Game.PositionBeforeLastSearch);
+        var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply: 0, out var ttEntry);
 
-        if (ttEntry.NodeType != NodeType.Unknown)
+        if (ttHit)
         {
             ttBestMove = ttEntry.BestMove;
             score = ttEntry.Score;
 
-            if (ttEntry.Score == EvaluationConstants.NoHashEntry)
+            if (ttEntry.Score == EvaluationConstants.NoScore)
             {
                 score = ttEntry.StaticEval;
             }
         }
 
-        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves);
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, ttBestMove);
+            moveScores[i] = ScoreMove(position, pseudoLegalMoves[i], 0, ref evaluationContext, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -542,11 +613,22 @@ public sealed partial class Engine
                 continue;
             }
 
+            // We don't have or need any eval, and we don't want to return 0 or a negative eval that
+            // could make the GUI resign or take a draw from this position.
+            // Since this only happens in root, we don't really care about being more precise for raising
+            // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
+            var singleMoveEval = Game.CurrentPosition.Side == Side.White
+                ? EvaluationConstants.EmergencyMoveScore        // -0.66
+                : -EvaluationConstants.EmergencyMoveScore;      // +0.66
+
             return new SearchResult(
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                move, moveScores[i], 0, [move]);
+                move, singleMoveEval, 0, [move])
+            {
+                DepthReached = 0
+            };
         }
 
         _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));

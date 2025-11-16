@@ -1589,30 +1589,22 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
 
         public static BitBoard[] InitializeKnightAttacks()
         {
-            return Enumerable.Range(0, 64)
-                .Select(MaskKnightAttacks)
-                .ToArray();
+            return [.. Enumerable.Range(0, 64).Select(MaskKnightAttacks)];
         }
 
         public static BitBoard[] InitializeKingAttacks()
         {
-            return Enumerable.Range(0, 64)
-                .Select(MaskKingAttacks)
-                .ToArray();
+            return [.. Enumerable.Range(0, 64).Select(MaskKingAttacks)];
         }
 
         public static BitBoard[] InitializeBishopOccupancy()
         {
-            return Enumerable.Range(0, 64)
-                .Select(MaskBishopOccupancy)
-                .ToArray();
+            return [.. Enumerable.Range(0, 64).Select(MaskBishopOccupancy)];
         }
 
         public static BitBoard[] InitializeRookOccupancy()
         {
-            return Enumerable.Range(0, 64)
-                .Select(MaskRookOccupancy)
-                .ToArray();
+            return [.. Enumerable.Range(0, 64).Select(MaskRookOccupancy)];
         }
 
         /// <summary>

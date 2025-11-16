@@ -19,7 +19,7 @@
 ///	This way the engine knows that the GUI can deal with the registration procedure and the user
 ///	will be informed that the engine is not properly registered.
 /// </summary>
-public sealed class RegistrationCommand : IEngineBaseCommand
+public sealed class RegistrationCommand
 {
     public const string Id = "uciok";
 }

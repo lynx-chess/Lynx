@@ -48,7 +48,9 @@ public class DebugCommand_Benchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public bool SpanSplit2(string command) => DebugCommandBenchmark_DebugCommandSpanSplit2.Parse(command);
 
-    public sealed class DebugCommandBenchmark_DebugCommandStringSplit : IGUIBaseCommand
+#pragma warning disable S1118 // Utility classes should not have public constructors
+
+    public sealed class DebugCommandBenchmark_DebugCommandStringSplit
     {
         public const string Id = "debug";
 
@@ -65,7 +67,7 @@ public class DebugCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit : IGUIBaseCommand
+    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit
     {
         public const string Id = "debug";
 
@@ -83,7 +85,7 @@ public class DebugCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit2 : IGUIBaseCommand
+    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit2
     {
         public const string Id = "debug";
 
@@ -102,4 +104,6 @@ public class DebugCommand_Benchmark : BaseBenchmark
                     && Configuration.IsDebug);
         }
     }
+
+#pragma warning restore S1118 // Utility classes should not have public constructors
 }

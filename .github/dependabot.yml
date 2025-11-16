@@ -2,13 +2,17 @@ version: 2
 updates:
   - package-ecosystem: "nuget"
     directory: "/"
+    allow:
+    - dependency-type: "all"
+    ignore:
+    - dependency-name: "Moq"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     assignees :
       - "eduherminio"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-    reviewers:
+      interval: "weekly"
+    assignees :
       - "eduherminio"

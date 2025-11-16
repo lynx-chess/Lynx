@@ -368,7 +368,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public static class ParseGame_ImprovedClass4
     {
-        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         public const string Id = "position";
 
@@ -420,7 +420,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public static class ParseGame_ImprovedClass5
     {
-        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         public const string Id = "position";
 
@@ -494,7 +494,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -569,7 +569,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -650,7 +650,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -663,6 +663,10 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
         public ImprovedGame2(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
         {
+            Span<BitBoard> attacks = stackalloc BitBoard[12];
+            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
             for (int i = 0; i < rangeSpan.Length; ++i)
             {
                 if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -670,7 +674,8 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[rangeSpan[i]];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+
+                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {

@@ -32,9 +32,9 @@ public class ZobristHashGenerationTest
     {
         var originalPosition = new Position(fen);
 
-        var fenDictionary = new Dictionary<string, (string Move, ulong Hash)>()
+        var fenDictionary = new Dictionary<ulong, (string Move, ulong Hash)>(Constants.MaxNumberOfPseudolegalMovesInAPosition)
         {
-            [originalPosition.FEN()] = ("", originalPosition.UniqueIdentifier)
+            [originalPosition.UniqueIdentifier] = ("", originalPosition.UniqueIdentifier)
         };
 
         TransversePosition(originalPosition, fenDictionary);
@@ -48,17 +48,17 @@ public class ZobristHashGenerationTest
     {
         var originalPosition = new Position(fen);
 
-        var fenDictionary = new Dictionary<string, (string Move, ulong Hash)>()
+        var uniqueIdDictionary = new Dictionary<ulong, (string Move, ulong Hash)>(Constants.MaxNumberOfPseudolegalMovesInAPosition)
         {
-            [originalPosition.FEN()] = ("", originalPosition.UniqueIdentifier)
+            [originalPosition.UniqueIdentifier] = ("", originalPosition.UniqueIdentifier)
         };
 
-        TransversePosition(originalPosition, fenDictionary);
+        TransversePosition(originalPosition, uniqueIdDictionary);
     }
 
 #pragma warning restore S4144 // Methods should not have identical implementations
 
-    private static void TransversePosition(Position originalPosition, Dictionary<string, (string Move, ulong Hash)> fenDictionary, int maxDepth = 10, int depth = 0)
+    private static void TransversePosition(Position originalPosition, Dictionary<ulong, (string Move, ulong Hash)> fenDictionary, int maxDepth = 10, int depth = 0)
     {
         foreach (var move in MoveGenerator.GenerateAllMoves(originalPosition))
         {
@@ -69,13 +69,13 @@ public class ZobristHashGenerationTest
                 continue;
             }
 
-            if (fenDictionary.TryGetValue(newPosition.FEN(), out var pair))
+            if (fenDictionary.TryGetValue(newPosition.UniqueIdentifier, out var pair))
             {
                 Assert.AreEqual(pair.Hash, newPosition.UniqueIdentifier, $"From {originalPosition.FEN()} using {move}: {newPosition.FEN()}");
             }
             else
             {
-                fenDictionary.Add(newPosition.FEN(), (move.ToString(), newPosition.UniqueIdentifier));
+                fenDictionary.Add(newPosition.UniqueIdentifier, (move.ToString(), newPosition.UniqueIdentifier));
             }
 
             if (depth < maxDepth)

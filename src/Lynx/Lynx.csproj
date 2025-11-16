@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <StaticAnalysisCodeType>ProdLib</StaticAnalysisCodeType>
-    <!--<DefineConstants>MULTITHREAD_DEBUG</DefineConstants>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -14,31 +13,37 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Macross.Json.Extensions" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.2" />
-    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="9.0.2" />
-    <PackageReference Include="NLog" Version="5.4.0" />
+    <PackageReference Include="Macross.Json.Extensions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+    <PackageReference Include="NLog" />
   </ItemGroup>
 
-  <ItemGroup >
-    <PackageReference Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1">
+  <ItemGroup>
+    <PackageReference Include="ErrorProne.NET.Structs">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.7.0-beta.1">
+    <PackageReference Include="ErrorProne.NET.CoreAnalyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.CodeAnalysis.PerformanceSensitiveAnalyzers" Version="3.3.1">
+    <PackageReference Include="Microsoft.CodeAnalysis.PerformanceSensitiveAnalyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.Extensions.StaticAnalysis" Version="9.2.0">
+    <PackageReference Include="Microsoft.Extensions.StaticAnalysis">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="IDisposableAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
 
   </ItemGroup>

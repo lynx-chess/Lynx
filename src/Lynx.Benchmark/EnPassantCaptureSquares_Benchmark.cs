@@ -115,13 +115,13 @@ public class EnPassantCaptureSquares_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
-    public int Dictionary(BoardSquare square) => EnPassantCaptureSquaresDictionary[(int)square];
+    public int Dictionary(BoardSquare square) => _enPassantCaptureSquaresDictionary[(int)square];
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public int Array(BoardSquare square) => Constants.EnPassantCaptureSquares[(int)square];
 
-    private static readonly FrozenDictionary<int, int> EnPassantCaptureSquaresDictionary = new Dictionary<int, int>(16)
+    private static readonly FrozenDictionary<int, int> _enPassantCaptureSquaresDictionary = new Dictionary<int, int>(16)
     {
         [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
         [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,

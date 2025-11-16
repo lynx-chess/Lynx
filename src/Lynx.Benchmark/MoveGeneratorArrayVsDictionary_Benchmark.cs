@@ -85,6 +85,7 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
         return sum;
     }
 
+#pragma warning disable IDE0350 // Use implicitly typed lambda
     private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray =
     [
         (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
@@ -122,4 +123,5 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
         [(int)Piece.Q] = Attacks.QueenAttacks,
         [(int)Piece.q] = Attacks.QueenAttacks,
     };
+#pragma warning restore IDE0350 // Use implicitly typed lambda
 }

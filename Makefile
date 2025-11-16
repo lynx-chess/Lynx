@@ -8,6 +8,12 @@ OUTPUT_DIR=artifacts/Lynx/
 ifeq ($(OS),Windows_NT)
 	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
 		RUNTIME=win-x64
+	else ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+		RUNTIME=win-x64
+	else ifeq ($(PROCESSOR_ARCHITEW6432),ARM64)
+		RUNTIME=win-arm64
+	else ifeq ($(PROCESSOR_ARCHITECTURE),ARM64)
+		RUNTIME=win-arm64
 	else
 		RUNTIME=win-x86
 	endif
@@ -42,10 +48,10 @@ build:
 	dotnet build -c Release
 
 test:
-	dotnet test -c Release & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
+	dotnet test -c Release  & dotnet test -c Release --filter "TestCategory=Configuration" & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
 
 publish:
-	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:ExecutableName=$(EXE) -o ${OUTPUT_DIR}
+	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:ExecutableName=$(EXE) -o ${OUTPUT_DIR}
 
 run:
 	dotnet run --project src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME}

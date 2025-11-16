@@ -1,18 +1,20 @@
 ﻿#pragma warning disable IDE1006 // Naming Styles
 
+using Lynx.Model;
+
 namespace Lynx;
 
 public static class EvaluationConstants
 {
     /// <summary>
     /// 20_000 games, 20+0.2, 8moves_v3.epd, no draw or win adj.
-    /// Retained (W,D,L) = (344434, 1626308, 346994) positions.
+    /// Retained (W,D,L) = (255778, 1133525, 258436) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 126;
+    public const int EvalNormalizationCoefficient = 119;
 
-    public static ReadOnlySpan<double> As => [-17.46545479, 117.15662340, -134.62199558, 161.61339177];
+    public static ReadOnlySpan<double> As => [-67.76492157, 235.07770928, -265.49800799, 216.72078173];
 
-    public static ReadOnlySpan<double> Bs => [-9.52393314, 54.14701350, -81.11683125, 90.56669413];
+    public static ReadOnlySpan<double> Bs => [9.39499192, -0.02030904, 11.00261578, 34.82067134];
 
     public static ReadOnlySpan<int> GamePhaseByPiece =>
     [
@@ -23,16 +25,20 @@ public static class EvaluationConstants
     public const int MaxPhase = 24;
 
     /// <summary>
-    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
+    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/>
     /// </summary>
     public static readonly int[][][] LMRReductions = new int[2][][];
 
-    /// <summary>
-    /// [0, 4, 136, 276, 424, 580, 744, 916, 1096, 1284, 1480, 1684, 1896, 1896, 1896, 1896, ...]
-    /// </summary>
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
+    public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
+
+    public static readonly BitBoard[] KingRing = new BitBoard[64];
 
     public const int LMRScaleFactor = 100;
+
+    public const int CorrectionHistoryScale = 256;
+
+    public const int CorrHistScaleFactor = 100;
 
     static EvaluationConstants()
     {
@@ -41,23 +47,49 @@ public static class EvaluationConstants
 
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
-            quietReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
-            noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+            var clampedDepth = Math.Min(searchDepth, Configuration.EngineSettings.MaxDepth);
 
-            for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
+            quietReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+            for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPseudolegalMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
                 quietReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     LMRScaleFactor *
-                    (Configuration.EngineSettings.LMR_Base_Quiet + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Quiet))));
+                    (Configuration.EngineSettings.LMR_Base_Quiet + (Math.Log(movesSearchedCount) * Math.Log(clampedDepth) / Configuration.EngineSettings.LMR_Divisor_Quiet))));
 
                 noisyReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     LMRScaleFactor *
-                    (Configuration.EngineSettings.LMR_Base_Noisy + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Noisy))));
+                    (Configuration.EngineSettings.LMR_Base_Noisy + (Math.Log(movesSearchedCount) * Math.Log(clampedDepth) / Configuration.EngineSettings.LMR_Divisor_Noisy))));
             }
 
             HistoryBonus[searchDepth] = Math.Min(
-                Configuration.EngineSettings.History_MaxMoveRawBonus,
-                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
+                Configuration.EngineSettings.History_Bonus_MaxIncrement,
+                Configuration.EngineSettings.History_Bonus_Constant
+                + (Configuration.EngineSettings.History_Bonus_Linear * clampedDepth)
+                + (Configuration.EngineSettings.History_Bonus_Quadratic * clampedDepth * clampedDepth));
+
+            HistoryMalus[searchDepth] = Math.Min(
+                Configuration.EngineSettings.History_Malus_MaxDecrement,
+                Configuration.EngineSettings.History_Malus_Constant
+                + (Configuration.EngineSettings.History_Malus_Linear * clampedDepth)
+                + (Configuration.EngineSettings.History_Malus_Quadratic * clampedDepth * clampedDepth));
+        }
+
+        for (int square = 0; square < 64; ++square)
+        {
+            KingRing[square] = Attacks.KingAttacks[square];
+
+            var rank = Constants.Rank[square];
+
+            if (rank == 0)
+            {
+                KingRing[square] |= KingRing[square].ShiftUp();
+            }
+            else if (rank == 7)
+            {
+                KingRing[square] |= KingRing[square].ShiftDown();
+            }
         }
     }
 
@@ -137,14 +169,24 @@ public static class EvaluationConstants
     public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1;
 
     /// <summary>
-    /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
+    /// Outside of the evaluation ranges (higher than <see cref="MaxEval"/>)
     /// </summary>
-    public const int NoHashEntry = 25_000;
+    public const int NoScore = -32_666;
 
     /// <summary>
-    /// Evaluation to be returned when there's one single legal move
+    /// Evaluation to be returned when there's one single legal move.
+    /// It needs to be positive or negative high enough to avoid draw adjudications
+    /// It needs to be negative low enough or positive to avoid loss adjudications
     /// </summary>
-    public const int SingleMoveScore = 666;
+    public const int SingleMoveScore = 66;
+
+    /// <summary>
+    /// It needs to be positive or negative high enough to avoid draw adjudications
+    /// It needs to be negative low enough or positive to avoid loss adjudications
+    /// It needs to be negative low or positive low enough to prevent 'emergency moves' from being chosen over real moves,
+    /// sspecially if those other moves have positive scores
+    /// </summary>
+    public const int EmergencyMoveScore = -66;
 
     #region Move ordering
 

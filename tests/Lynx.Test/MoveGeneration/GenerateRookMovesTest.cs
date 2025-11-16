@@ -7,23 +7,31 @@ public class GenerateRookMovesTest
 {
     private static IEnumerable<Move> GenerateRookMoves(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+
+        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     private static IEnumerable<Move> GenerateRookCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<BitBoard> attacks = stackalloc BitBoard[12];
+        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
+
+        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
-    [TestCase("K1k/8/2n1n3/3R4/2n1n3/8/8/8 w - - 0 1", 14)]
-    [TestCase("K1k/8/2N1N3/3r4/2N1N3/8/8/8 b - - 0 1", 14)]
-    [TestCase("K1k/8/2n1n3/3R4/2n1n3/8/8/3q4 w - - 0 1", 14)]
-    [TestCase("K1k/8/2N1N3/3r4/2N1N3/8/8/3Q4 b - - 0 1", 14)]
-    [TestCase("K1k/8/2n1n3/3R4/2n1n3/8/8/3Q4 w - - 0 1", 13)]
-    [TestCase("K1k/8/2N1N3/3r4/2N1N3/8/8/3q4 b - - 0 1", 13)]
+    [TestCase("K6k/8/2n1n3/3R4/2n1n3/8/8/8 w - - 0 1", 14)]
+    [TestCase("K6k/8/2N1N3/3r4/2N1N3/8/8/8 b - - 0 1", 14)]
+    [TestCase("K6k/8/2n1n3/3R4/2n1n3/8/8/3q4 w - - 0 1", 14)]
+    [TestCase("K6k/8/2N1N3/3r4/2N1N3/8/8/3Q4 b - - 0 1", 14)]
+    [TestCase("K6k/8/2n1n3/3R4/2n1n3/8/8/3Q4 w - - 0 1", 13)]
+    [TestCase("K6k/8/2N1N3/3r4/2N1N3/8/8/3q4 b - - 0 1", 13)]
     public void RookMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
@@ -195,7 +203,7 @@ public class GenerateRookMovesTest
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a1
             && m.TargetSquare() == (int)BoardSquare.a6
-            && m.IsCapture() != default));
+            && m.CapturedPiece() != (int)Piece.None));
     }
 
     /// <summary>

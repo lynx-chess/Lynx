@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using static Lynx.EvaluationConstants;
 
@@ -12,7 +13,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, ref EvaluationContext evaluationContext, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -21,14 +22,54 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
         var isPromotion = promotedPiece != default;
-        var isCapture = move.IsCapture();
+        var capturedPiece = move.CapturedPiece();
+        var isCapture = capturedPiece != (int)Piece.None;
+
+        if (!isCapture && !isPromotion)
+        {
+            var thisPlyKillerMovesBaseIndex = ply * 2;
+            ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
+
+            // 1st killer move
+            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) == move)
+            {
+                return FirstKillerMoveValue;
+            }
+
+            // 2nd killer move
+            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) == move)
+            {
+                return SecondKillerMoveValue;
+            }
+
+            if (ply >= 1)
+            {
+                // Countermove
+                if (CounterMove(ply - 1) == move)
+                {
+                    return CounterMoveValue;
+                }
+
+                var piece = move.Piece();
+                var targetSquare = move.TargetSquare();
+
+                // Countermove history
+                return BaseMoveScore
+                + QuietHistoryEntry(position, move, ref evaluationContext)
+                + CounterMoveHistoryEntry(piece, targetSquare, ply);
+            }
+
+            // History move or 0 if not found
+            return BaseMoveScore
+                + QuietHistoryEntry(position, move, ref evaluationContext);
+        }
 
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
             if (isCapture)
             {
-                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+                return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
             return PromotionMoveScoreValue
@@ -39,14 +80,13 @@ public sealed partial class Engine
 
         if (isCapture)
         {
+            var piece = move.Piece();
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
+                $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
+
             var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
-
-            var capturedPiece = move.CapturedPiece();
-
-            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
-                $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
             return baseCaptureScore
                 + MostValueableVictimLeastValuableAttacker[move.Piece()][capturedPiece]
@@ -59,40 +99,9 @@ public sealed partial class Engine
             return PromotionMoveScoreValue;
         }
 
-        var thisPlyKillerMovesBaseIndex = ply * 2;
+        _logger.Warn("Unexpected move while scoring: {Move}", move.UCIString());
 
-        // 1st killer move
-        if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
-        {
-            return FirstKillerMoveValue;
-        }
-
-        // 2nd killer move
-        if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
-        {
-            return SecondKillerMoveValue;
-        }
-
-        var piece = move.Piece();
-        var targetSquare = move.TargetSquare();
-
-        if (ply >= 1)
-        {
-            // Countermove
-            if (CounterMove(ply - 1) == move)
-            {
-                return CounterMoveValue;
-            }
-
-            // Countermove history
-            return BaseMoveScore
-                + _quietHistory[piece][targetSquare]
-                + CounterMoveHistoryEntry(piece, targetSquare, ply);
-        }
-
-        // History move or 0 if not found
-        return BaseMoveScore
-            + _quietHistory[piece][targetSquare];
+        return BaseMoveScore;
     }
 
     /// <summary>
@@ -108,14 +117,15 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
         var isPromotion = promotedPiece != default;
-        var isCapture = move.IsCapture();
+        var capturedPiece = move.CapturedPiece();
+        var isCapture = capturedPiece != (int)Piece.None;
 
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
             if (isCapture)
             {
-                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+                return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
             return PromotionMoveScoreValue
@@ -131,8 +141,6 @@ public sealed partial class Engine
                 : BadCaptureMoveBaseScoreValue;
 
             var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
-
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
@@ -154,88 +162,94 @@ public sealed partial class Engine
     /// Quiet history, continuation history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
     {
-        // 🔍 Quiet history moves
-        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
-        int rawHistoryBonus = HistoryBonus[depth];
-
-        _quietHistory[piece][targetSquare] = ScoreHistoryMove(
-            _quietHistory[piece][targetSquare],
-            rawHistoryBonus);
-
-        if (ply >= 2)
+        // Idea by Alayan in Ethereal: don't update history on low depths
+        if (depth >= Configuration.EngineSettings.History_MinDepth || visitedMovesCounter >= Configuration.EngineSettings.History_MinVisitedMoves)
         {
-            // 🔍 Continuation history
-            // - Countermove history (continuation history, ply - 1)
-            ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(piece, targetSquare, ply);
-            counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
+            // 🔍 Quiet history moves
+            // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
+            int rawHistoryBonus = HistoryBonus[depth];
+            int rawHistoryMalus = HistoryMalus[depth];
 
-            // - Follow-up history (continuation history, ply - 1)
-            ref var followUpHistoryEntry = ref FollowUpHistoryEntry(piece, targetSquare, ply);
-            followUpHistoryEntry = ScoreHistoryMove(followUpHistoryEntry, rawHistoryBonus);
-        }
-        else if (!isRoot)
-        {
-            // 🔍 Continuation history
-            // - Counter move history (continuation history, ply - 1)
-            ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(piece, targetSquare, ply);
-            counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
-        }
+            ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
+            quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
-        // 🔍 History penalty/malus
-        for (int i = 0; i < visitedMovesCounter - 1; ++i)
-        {
-            var visitedMove = visitedMoves[i];
-
-            if (!visitedMove.IsCapture())
+            if (ply >= 2)
             {
-                var visitedMovePiece = visitedMove.Piece();
-                var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                // 🔍 Continuation history
+                // - Countermove history (continuation history, ply - 1)
+                ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(piece, targetSquare, ply);
+                counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
 
-                // Quiet history
-                // When a quiet move fails high, penalize previous visited quiet moves
-                ref var quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
-                quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryBonus);
-
-                // Continuation history
-                if (ply >= 2)
-                {
-                    ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply);
-                    counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, -rawHistoryBonus);
-
-                    ref var followUpHistoryEntry = ref FollowUpHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply);
-                    followUpHistoryEntry = ScoreHistoryMove(followUpHistoryEntry, -rawHistoryBonus);
-                }
-                else if (!isRoot)
-                {
-                    ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply);
-                    counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, -rawHistoryBonus);
-                }
+                // - Follow-up history (continuation history, ply - 1)
+                ref var followUpHistoryEntry = ref FollowUpHistoryEntry(piece, targetSquare, ply);
+                followUpHistoryEntry = ScoreHistoryMove(followUpHistoryEntry, rawHistoryBonus);
             }
-        }
-
-        var thisPlyKillerMovesBaseIndex = ply * 2;
-        var firstKillerMove = _killerMoves[thisPlyKillerMovesBaseIndex];
-
-        if (move.PromotedPiece() == default && move != firstKillerMove)
-        {
-            // 🔍 Killer moves
-            if (move != _killerMoves[thisPlyKillerMovesBaseIndex + 1])
+            else if (!isRoot)
             {
-                _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
+                // 🔍 Continuation history
+                // - Counter move history (continuation history, ply - 1)
+                ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(piece, targetSquare, ply);
+                counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
             }
 
-            _killerMoves[thisPlyKillerMovesBaseIndex] = move;
-
-            if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
+            ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
+            for (int i = 0; i < visitedMovesCounter; ++i)
             {
-                // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
-                ref var counterMove = ref CounterMove(ply - 1);
-                counterMove = move;
+                var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
+                var capturedPiece = visitedMove.CapturedPiece();
+
+                if (capturedPiece == (int)Piece.None)
+                {
+                    var visitedMovePiece = visitedMove.Piece();
+                    var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                    // 🔍 Quiet history penalty / malus
+                    // When a quiet move fails high, penalize previous visited quiet moves
+                    quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
+
+                    // Continuation history
+                    if (ply >= 2)
+                    {
+                        ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply);
+                        counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, -rawHistoryBonus);
+
+                        ref var followUpHistoryEntry = ref FollowUpHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply);
+                        followUpHistoryEntry = ScoreHistoryMove(followUpHistoryEntry, -rawHistoryBonus);
+                    }
+                    else if (!isRoot)
+                    {
+                        ref var counterMoveHistoryEntry = ref CounterMoveHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply);
+                        counterMoveHistoryEntry = ScoreHistoryMove(counterMoveHistoryEntry, -rawHistoryBonus);
+                    }
+                }
+            }
+
+            var thisPlyKillerMovesBaseIndex = ply * 2;
+            ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
+            var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
+
+            if (move.PromotedPiece() == default && move != firstKillerMove)
+            {
+                // 🔍 Killer moves
+                if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
+                {
+                    Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) = firstKillerMove;
+                }
+
+                Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) = move;
+
+                if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
+                {
+                    // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
+                    ref var counterMove = ref CounterMove(ply - 1);
+                    counterMove = move;
+                }
             }
         }
     }
@@ -246,19 +260,24 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
+        var rawHistoryBonus = HistoryBonus[depth];
+        var rawHistoryMalus = HistoryMalus[depth];
+
         ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
-        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, HistoryBonus[depth]);
+        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
+        ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
         for (int i = 0; i < visitedMovesCounter; ++i)
         {
-            var visitedMove = visitedMoves[i];
+            var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
+            var capturedPiece = visitedMove.CapturedPiece();
 
-            if (visitedMove.IsCapture())
+            if (capturedPiece != (int)Piece.None)
             {
                 ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
-                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -HistoryBonus[depth]);
+                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
             }
         }
     }
