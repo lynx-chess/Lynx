@@ -404,11 +404,11 @@ public partial class Position
         // Few pieces endgames
         if (gamePhase <= 5)
         {
-            eval >>= 1; // /2
-
             // Pawnless endgames
             if (totalPawnsCount == 0)
             {
+                eval >>= 1; // /2
+
                 switch (gamePhase)
                 {
                     case 5:
@@ -473,6 +473,7 @@ public partial class Position
 
                 if (gamePhase == 1)
                 {
+                    // Bishop vs pawn
                     if (_pieceBitBoards[(int)Piece.B + winningSideOffset] != 0
                         && (_pieceBitBoards[(int)Piece.P + winningSideOffset] & Constants.NotAorH) == 0)
                     {
