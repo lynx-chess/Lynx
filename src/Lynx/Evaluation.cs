@@ -404,6 +404,8 @@ public partial class Position
         // Few pieces endgames
         if (gamePhase <= 5)
         {
+            eval >>= 1; // /2
+
             // Pawnless endgames
             if (totalPawnsCount == 0)
             {
