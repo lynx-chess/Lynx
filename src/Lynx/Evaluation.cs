@@ -467,6 +467,11 @@ public partial class Position
             }
             else
             {
+                if (totalPawnsCount == 1)
+                {
+                    eval >>= 1; // /2
+                }
+
                 var winningSideOffset = Utils.PieceOffset(eval >= 0);
 
                 if (gamePhase == 1)
