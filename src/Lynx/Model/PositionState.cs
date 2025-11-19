@@ -8,25 +8,97 @@ partial class Position
 {
     private sealed class State
     {
-        public ulong UniqueIdentifier { get; set; }
-        public ulong KingPawnUniqueIdentifier { get; set; }
+        public ulong UniqueIdentifier
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
+
+        public ulong KingPawnUniqueIdentifier
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
+
 #pragma warning disable S3887 // Mutable, non-private fields should not be "readonly"
-        public ulong[] NonPawnHash { get; set; }
+        public ulong[] NonPawnHash
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+        }
 #pragma warning restore S3887 // Mutable, non-private fields should not be "readonly"
-        public ulong MinorHash { get; set; }
-        public ulong MajorHash { get; set; }
 
-        public int IncrementalEvalAccumulator { get; set; }
-        public int IncrementalPhaseAccumulator { get; set; }
+        public ulong MinorHash
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
 
-        public BoardSquare EnPassant { get; set; } = BoardSquare.noSquare;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
 
-        public byte Castle { get; set; }
+        public ulong MajorHash
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
+
+        public int IncrementalEvalAccumulator
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
+
+        public int IncrementalPhaseAccumulator
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
+
+        public BoardSquare EnPassant
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        } = BoardSquare.noSquare;
+
+        public byte Castle
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
 
         /// <summary>
         /// We save it so that current move doesn't affect 'sibling' moves exploration
         /// </summary>
-        public bool IsIncrementalEval;
+        public bool IsIncrementalEval
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
+        }
 
         public State()
         {
