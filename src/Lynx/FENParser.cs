@@ -17,6 +17,38 @@ public static class FENParser
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
 
+    private static readonly BitBoard[] _queensideSquares = GC.AllocateArray<BitBoard>(64, pinned: true);
+    private static readonly BitBoard[] _kingsideSquares = GC.AllocateArray<BitBoard>(64, pinned: true);
+
+    static FENParser()
+    {
+        for (int square = (int)BoardSquare.a1; square <= (int)BoardSquare.h1; ++square)
+        {
+            PopulateSquares(square);
+        }
+
+        for (int square = (int)BoardSquare.a8; square <= (int)BoardSquare.h8; ++square)
+        {
+            PopulateSquares(square);
+        }
+
+        static void PopulateSquares(int square)
+        {
+            var file = Constants.File[square];
+            int rank = Constants.Rank[square];
+
+            for (int f = file + 1; f < 8; ++f)
+            {
+                _kingsideSquares[square].SetBit(BitBoardExtensions.SquareIndex(rank, f));
+            }
+
+            for (int f = file - 1; f >= 0; --f)
+            {
+                _queensideSquares[square].SetBit(BitBoardExtensions.SquareIndex(rank, f));
+            }
+        }
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen)
     {
@@ -214,6 +246,9 @@ public static class FENParser
         var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
         var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
 
+        var whiteRooks = pieceBitboards[(int)Piece.R];
+        var blackRooks = pieceBitboards[(int)Piece.r];
+
         castlingRights = 0;
 
         for (int i = 0; i < castlingChars.Length; ++i)
@@ -227,14 +262,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WK;
 
-                        for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > whiteKing; --potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
-                            {
-                                whiteKingsideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        whiteKingsideRook = FindFurthestKingsideRook(whiteRooks, whiteKing);
 
                         if (whiteKingsideRook == CastlingData.DefaultValues)
                         {
@@ -249,14 +277,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.WQ;
 
-                        for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < whiteKing; ++potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
-                            {
-                                whiteQueensideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        whiteQueensideRook = FindFurthestQueensideRook(whiteRooks, whiteKing);
 
                         if (whiteQueensideRook == CastlingData.DefaultValues)
                         {
@@ -271,14 +292,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BK;
 
-                        for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > blackKing; --potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
-                            {
-                                blackKingsideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        blackKingsideRook = FindFurthestKingsideRook(blackRooks, blackKing);
 
                         if (blackKingsideRook == CastlingData.DefaultValues)
                         {
@@ -293,14 +307,7 @@ public static class FENParser
 
                         castlingRights |= (byte)CastlingRights.BQ;
 
-                        for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < blackKing; ++potentialRookSquareIndex)
-                        {
-                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
-                            {
-                                blackQueensideRook = potentialRookSquareIndex;
-                                break;
-                            }
-                        }
+                        blackQueensideRook = FindFurthestQueensideRook(blackRooks, blackKing);
 
                         if (blackQueensideRook == CastlingData.DefaultValues)
                         {
@@ -372,6 +379,39 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FindFurthestKingsideRook(BitBoard rooks, int kingSquare)
+    {
+        // Optimized: use precomputed kingside ray (squares strictly east)
+        var eastMask = rooks & _kingsideSquares[kingSquare];
+        if (eastMask == 0)
+        {
+            return CastlingData.DefaultValues;
+        }
+        // Need OUTERMOST (farthest) rook to the east => highest file index (largest square index on rank)
+        // Iterate LS1B until exhausted; the last extracted index will be the max
+        int furthest = CastlingData.DefaultValues;
+        while (eastMask != 0)
+        {
+            eastMask.WithoutLS1B(out var sq);
+            furthest = sq; // monotonically increasing because LS1B gives lowest remaining bit
+        }
+        return furthest;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FindFurthestQueensideRook(BitBoard rooks, int kingSquare)
+    {
+        // Optimized: use precomputed queenside ray (squares strictly west)
+        var westMask = rooks & _queensideSquares[kingSquare];
+        if (westMask == 0)
+        {
+            return CastlingData.DefaultValues;
+        }
+        // OUTERMOST (farthest) rook to the west => lowest file index (smallest square index on rank) = LS1B
+        return westMask.GetLS1BIndex();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, BitBoard[] PieceBitBoards, Side side)
     {
         bool success = true;
@@ -409,7 +449,6 @@ public static class FENParser
         /// <summary>
         /// Fast alternative to Enum.TryParse
         /// </summary>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool TryParseEnPassantSquare(ReadOnlySpan<char> enPassantSpan, out BoardSquare square)
         {
