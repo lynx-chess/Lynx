@@ -262,6 +262,12 @@ public sealed class Game : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateInCheckinStack(int n, bool inCheck) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].InCheck = inCheck;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool ReadInCheckFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].InCheck;
+
     internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
 
     private void Dispose(bool disposing)

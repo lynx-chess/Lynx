@@ -1,6 +1,7 @@
 ﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
+using NLog.LayoutRenderers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -147,6 +148,7 @@ public sealed partial class Engine
         int phase = int.MaxValue;
 
         ref var stack = ref Game.Stack(ply);
+        stack.InCheck = isInCheck;
         stack.DoubleExtensions = Game.ReadDoubleExtensionsFromStack(ply - 1);
 
         if (isInCheck && !isVerifyingSE)
@@ -194,7 +196,7 @@ public sealed partial class Engine
             if (ply >= 2)
             {
                 var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
-                improving = evalDiff >= 0;
+                improving = evalDiff >= 0 && !Game.ReadInCheckFromStack(ply - 2);
                 improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
 
