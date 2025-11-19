@@ -574,6 +574,11 @@ public sealed partial class Engine
                                 reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
                                     + Configuration.EngineSettings.LMR_Quiet;    // Quiet LMR
 
+                                if (!SEE.HasPositiveScore(position, move))
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_Quiet_SEE;
+                                }
+
                                 if (!improving)
                                 {
                                     reduction += Configuration.EngineSettings.LMR_Improving;

@@ -248,8 +248,17 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
+    public int LMR_Quiet_SEE { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
     public int LMR_Corrplexity { get; set; } = 197;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
     [SPSA<int>(25, 300, 30)]
     public int LMR_Corrplexity_Delta { get; set; } = 124;
 
