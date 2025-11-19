@@ -564,58 +564,51 @@ public sealed partial class Engine
                             if (isQuiet)
                             {
                                 reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
-                                    + Configuration.EngineSettings.LMR_Quiet;    // Quiet LMR
-
-                                if (!improving)
-                                {
-                                    reduction += Configuration.EngineSettings.LMR_Improving;
-                                }
-
-                                if (cutnode)
-                                {
-                                    reduction += Configuration.EngineSettings.LMR_Cutnode;
-                                }
-
-                                if (!ttPv)
-                                {
-                                    reduction += Configuration.EngineSettings.LMR_TTPV;
-                                }
-
-                                if (ttMoveIsCapture)    // Move isn't a capture but TT move is
-                                {
-                                    reduction += Configuration.EngineSettings.LMR_TTCapture;
-                                }
-
-                                if (pvNode)
-                                {
-                                    reduction -= Configuration.EngineSettings.LMR_PVNode;
-                                }
-
-                                if (position.IsInCheck())   // i.e. move gives check
-                                {
-                                    reduction -= Configuration.EngineSettings.LMR_InCheck;
-                                }
-
-                                if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
-                                {
-                                    reduction -= Configuration.EngineSettings.LMR_Corrplexity;
-                                }
-
-                                reduction /= EvaluationConstants.LMRScaleFactor;
-
-                                // -= history/(maxHistory/2)
-
-                                reduction -= quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+                                    + Configuration.EngineSettings.LMR_Quiet    // Quiet LMR
+                                    - (EvaluationConstants.LMRScaleFactor * quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet);
                             }
                             else
                             {
-                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
-
-                                reduction /= EvaluationConstants.LMRScaleFactor;
-
-                                // ~ history/(0.75 * maxHistory/2/)
-                                reduction -= CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
+                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
+                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
+
+                            if (!improving)
+                            {
+                                reduction += Configuration.EngineSettings.LMR_Improving;
+                            }
+
+                            if (cutnode)
+                            {
+                                reduction += Configuration.EngineSettings.LMR_Cutnode;
+                            }
+
+                            if (!ttPv)
+                            {
+                                reduction += Configuration.EngineSettings.LMR_TTPV;
+                            }
+
+                            if (ttMoveIsCapture)    // Move isn't a capture but TT move is
+                            {
+                                reduction += Configuration.EngineSettings.LMR_TTCapture;
+                            }
+
+                            if (pvNode)
+                            {
+                                reduction -= Configuration.EngineSettings.LMR_PVNode;
+                            }
+
+                            if (position.IsInCheck())   // i.e. move gives check
+                            {
+                                reduction -= Configuration.EngineSettings.LMR_InCheck;
+                            }
+
+                            if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
+                            {
+                                reduction -= Configuration.EngineSettings.LMR_Corrplexity;
+                            }
+
+                            reduction /= EvaluationConstants.LMRScaleFactor;
                         }
 
                         // 🔍 Static Exchange Evaluation (SEE) reduction
