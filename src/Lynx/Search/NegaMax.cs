@@ -871,6 +871,11 @@ public sealed partial class Engine
 
                 return standPat;
             }
+
+            if (!ttHit)
+            {
+                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+            }
         }
 
         // Better move
