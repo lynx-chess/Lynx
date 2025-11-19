@@ -368,6 +368,7 @@ public sealed partial class Engine
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
             var piece = move.Piece();
             var isCapture = move.CapturedPiece() != (int)Piece.None;
+            var isQuiet = !isCapture && !move.IsPromotion();
 
             int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
@@ -393,7 +394,7 @@ public sealed partial class Engine
 
                 // 🔍 History pruning -  all quiet moves can be pruned
                 // once we find one with a history score too low
-                if (!isCapture
+                if (isQuiet
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
                     && quietHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
@@ -405,7 +406,7 @@ public sealed partial class Engine
                 var futilityValue = staticEval
                     + Configuration.EngineSettings.FP_Margin
                     + (Configuration.EngineSettings.FP_DepthScalingFactor * depth)
-                    + (isCapture ? 0 : quietHistory / Configuration.EngineSettings.FP_HistoryDivisor);
+                    + (!isQuiet ? 0 : quietHistory / Configuration.EngineSettings.FP_HistoryDivisor);
 
                 if (depth <= Configuration.EngineSettings.FP_MaxDepth
                     && futilityValue <= alpha)
@@ -560,16 +561,7 @@ public sealed partial class Engine
                                     ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV + isRootExtraReduction
                                     : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV + isRootExtraReduction))
                         {
-                            if (isCapture)
-                            {
-                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
-
-                                reduction /= EvaluationConstants.LMRScaleFactor;
-
-                                // ~ history/(0.75 * maxHistory/2/)
-                                reduction -= CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
-                            }
-                            else
+                            if (isQuiet)
                             {
                                 reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
                                     + Configuration.EngineSettings.LMR_Quiet;    // Quiet LMR
@@ -614,6 +606,15 @@ public sealed partial class Engine
                                 // -= history/(maxHistory/2)
 
                                 reduction -= quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+                            }
+                            else
+                            {
+                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
+
+                                reduction /= EvaluationConstants.LMRScaleFactor;
+
+                                // ~ history/(0.75 * maxHistory/2/)
+                                reduction -= CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
                             }
                         }
 
@@ -730,13 +731,13 @@ public sealed partial class Engine
                         ++historyDepth;
                     }
 
-                    if (isCapture)
+                    if (isQuiet)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(position, historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode, ref evaluationContext);
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(position, historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode, ref evaluationContext);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
                     }
 
                     nodeType = NodeType.Beta;
