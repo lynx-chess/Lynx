@@ -101,12 +101,12 @@ public interface ITranspositionTable
     /// <param name="staticEval">Static evaluation of the position</param>
     /// <param name="wasPv">Whether this position was part of the principal variation</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
+    void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv, NodeType nodeType = NodeType.Unknown)
     {
         ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, null);
+        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, nodeType, wasPv ? 1 : 0, null);
     }
 
     /// <summary>

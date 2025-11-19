@@ -866,7 +866,7 @@ public sealed partial class Engine
 
                 if (!ttHit)
                 {
-                    _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                    _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv, NodeType.Beta);
                 }
 
                 return standPat;
