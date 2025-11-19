@@ -12,7 +12,10 @@ public partial class Position : IDisposable
 {
     private bool _disposedValue;
 
-    internal PositionState _state;
+    private int _stackCounter;
+    private readonly State[] _stateStack;
+
+    private State _state;
 
     private readonly ulong[] _pieceBitBoards;
     private readonly ulong[] _occupancyBitBoards;
@@ -110,7 +113,15 @@ public partial class Position : IDisposable
 
     public Position(ParseFENResult parsedFEN)
     {
-        _state = new();
+        _stackCounter = 0;
+
+        _stateStack = new State[Constants.MaxNumberMovesInAGame + Constants.ArrayDepthMargin];
+        for (int i = 0; i < _stateStack.Length; ++i)
+        {
+            _stateStack[i] = new();
+        }
+
+        _state = _stateStack[_stackCounter];
 
         _pieceBitBoards = parsedFEN.PieceBitBoards;
         _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -268,15 +279,15 @@ public partial class Position : IDisposable
     /// </summary>
     public Position(Position position)
     {
-        _state = new(position._state);
+        _stackCounter = position._stackCounter;
 
-        _state.UniqueIdentifier = position._state.UniqueIdentifier;
-        _state.KingPawnUniqueIdentifier = position._state.KingPawnUniqueIdentifier;
-        _state.MinorHash = position._state.MinorHash;
-        _state.MajorHash = position._state.MajorHash;
+        _stateStack = new State[Constants.MaxNumberMovesInAGame + Constants.ArrayDepthMargin];
+        for (int i = 0; i < _stateStack.Length; ++i)
+        {
+            _stateStack[i] = new(position._stateStack[i]);
+        }
 
-        _state.NonPawnHash[(int)Side.White] = position._state.NonPawnHash[(int)Side.White];
-        _state.NonPawnHash[(int)Side.Black] = position._state.NonPawnHash[(int)Side.Black];
+        _state = _stateStack[_stackCounter];
 
         _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
@@ -288,12 +299,6 @@ public partial class Position : IDisposable
         Array.Copy(position._board, _board, 64);
 
         _side = position._side;
-        _state.Castle = position._state.Castle;
-        _state.EnPassant = position._state.EnPassant;
-
-        _state.IsIncrementalEval = position._state.IsIncrementalEval;
-        _state.IncrementalEvalAccumulator = position._state.IncrementalEvalAccumulator;
-        _state.IncrementalPhaseAccumulator = position._state.IncrementalPhaseAccumulator;
 
         _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
@@ -356,7 +361,7 @@ public partial class Position : IDisposable
     #region Move making
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public PositionState MakeMove(Move move)
+    public void MakeMove(Move move)
     {
         Debug.Assert(ZobristTable.PositionHash(this) == _state.UniqueIdentifier);
         Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _state.NonPawnHash[(int)Side.White]);
@@ -364,7 +369,11 @@ public partial class Position : IDisposable
         Debug.Assert(ZobristTable.MinorHash(this) == _state.MinorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == _state.MajorHash);
 
-        var gameState = new PositionState(_state);
+        var oldState = _state;
+
+        ++_stackCounter;
+        _state = _stateStack[_stackCounter];
+        _state.SetupFromPrevious(oldState);
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -398,8 +407,8 @@ public partial class Position : IDisposable
         _state.UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ fullPieceMovementHash
-            ^ ZobristTable.EnPassantHash((int)_state.EnPassant)            // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(_state.Castle);                      // We clear the existing castle rights
+            ^ ZobristTable.EnPassantHash((int)oldState.EnPassant)            // We clear the existing enpassant square, if any
+            ^ ZobristTable.CastleHash(oldState.Castle);                      // We clear the existing castle rights
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
@@ -748,12 +757,10 @@ public partial class Position : IDisposable
 
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
-
-        return gameState;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnmakeMove(Move move, PositionState gameState)
+    public void UnmakeMove(Move move)
     {
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
@@ -911,20 +918,8 @@ public partial class Position : IDisposable
 
         _occupancyBitBoards[2] = _occupancyBitBoards[1] | _occupancyBitBoards[0];
 
-        // Updating saved values
-        _state.Castle = gameState.Castle;
-        _state.EnPassant = gameState.EnPassant;
-
-        _state.UniqueIdentifier = gameState.UniqueIdentifier;
-        _state.KingPawnUniqueIdentifier = gameState.KingPawnUniqueIdentifier;
-        _state.MinorHash = gameState.MinorHash;
-        _state.MajorHash = gameState.MajorHash;
-        _state.NonPawnHash[(int)Side.White] = gameState.NonPawnHash[(int)Side.White];
-        _state.NonPawnHash[(int)Side.Black] = gameState.NonPawnHash[(int)Side.Black];
-
-        _state.IncrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
-        _state.IncrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
-        _state.IsIncrementalEval = gameState.IsIncrementalEval;
+        --_stackCounter;
+        _state = _stateStack[_stackCounter];
 
         Validate();
     }
@@ -1547,12 +1542,12 @@ public partial class Position : IDisposable
         Debug.Assert(blackKings.CountBits() == 1, failureMessage, $"More than one black king, or none: {blackKings}");
 
 #if DEBUG
-        if (_castle != 0)
+        if (_state.Castle != 0)
         {
             var whiteKingSourceSquare = _initialKingSquares[(int)Side.White];
 
             // Castling rights and king/rook positions
-            if ((_castle & (int)CastlingRights.WK) != 0)
+            if ((_state.Castle & (int)CastlingRights.WK) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when short castling rights");
 
@@ -1560,7 +1555,7 @@ public partial class Position : IDisposable
                 Debug.Assert(whiteRooks.GetBit(_initialKingsideRookSquares[(int)Side.White]), failureMessage, $"No white rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.White]} when short castling rights");
             }
 
-            if ((_castle & (int)CastlingRights.WQ) != 0)
+            if ((_state.Castle & (int)CastlingRights.WQ) != 0)
             {
                 Debug.Assert(whiteKings.GetBit(whiteKingSourceSquare), failureMessage, "No white king on e1 when long castling rights");
 
@@ -1570,7 +1565,7 @@ public partial class Position : IDisposable
 
             var blackKingSourceSquare = _initialKingSquares[(int)Side.Black];
 
-            if ((_castle & (int)CastlingRights.BK) != 0)
+            if ((_state.Castle & (int)CastlingRights.BK) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when short castling rights");
 
@@ -1578,7 +1573,7 @@ public partial class Position : IDisposable
                 Debug.Assert(blackRooks.GetBit(_initialKingsideRookSquares[(int)Side.Black]), failureMessage, $"No black rook on {(BoardSquare)_initialKingsideRookSquares[(int)Side.Black]} when short castling rights");
             }
 
-            if ((_castle & (int)CastlingRights.BQ) != 0)
+            if ((_state.Castle & (int)CastlingRights.BQ) != 0)
             {
                 Debug.Assert(blackKings.GetBit(blackKingSourceSquare), failureMessage, "No black king on e8 when long castling rights");
 

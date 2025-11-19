@@ -193,9 +193,9 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public PositionState MakeMove(Move moveToPlay)
+    public void MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMove(moveToPlay);
+        CurrentPosition.MakeMove(moveToPlay);
 
         if (CurrentPosition.WasProduceByAValidMove())
         {
@@ -207,11 +207,9 @@ public sealed class Game : IDisposable
         }
         else
         {
-            CurrentPosition.UnmakeMove(moveToPlay, gameState);
+            CurrentPosition.UnmakeMove(moveToPlay);
             _logger.Warn("Error trying to play move {0} in {1}", moveToPlay.UCIString(), CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove));
         }
-
-        return gameState;
     }
 
     /// <summary>
