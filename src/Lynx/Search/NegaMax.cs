@@ -859,15 +859,16 @@ public sealed partial class Engine
 
         if (!isInCheck)
         {
-            if (!ttHit)
-            {
-                _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
-            }
-
             // Standing pat beta-cutoff (updating alpha after this check)
             if (standPat >= beta)
             {
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
+
+                if (!ttHit)
+                {
+                    _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+                }
+
                 return standPat;
             }
         }
