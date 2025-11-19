@@ -1,4 +1,6 @@
-﻿namespace Lynx.Model;
+﻿using Lynx.Model;
+
+namespace Lynx.Benchmark;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
@@ -38,24 +40,11 @@ public readonly struct GameState
 
         EnPassant = position.EnPassant;
         Castle = position.Castle;
-        IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;
-        IncrementalPhaseAccumulator = position.IncrementalPhaseAccumulator;
+        IncrementalEvalAccumulator = position._state.IncrementalEvalAccumulator;
+        IncrementalPhaseAccumulator = position._state.IncrementalPhaseAccumulator;
 
         // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
-        IsIncrementalEval = position.IsIncrementalEval;
-    }
-}
-
-public readonly struct NullMoveGameState
-{
-    public readonly ulong ZobristKey;
-
-    public readonly BoardSquare EnPassant;
-
-    public NullMoveGameState(Position position)
-    {
-        ZobristKey = position.UniqueIdentifier;
-        EnPassant = position.EnPassant;
+        IsIncrementalEval = position._state.IsIncrementalEval;
     }
 }
 

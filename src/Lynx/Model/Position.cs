@@ -12,23 +12,11 @@ public partial class Position : IDisposable
 {
     private bool _disposedValue;
 
-#pragma warning disable IDE1006 // Naming Styles
-    internal int IncrementalEvalAccumulator;
-    internal int IncrementalPhaseAccumulator;
-    internal bool IsIncrementalEval;
-#pragma warning restore IDE1006 // Naming Styles
-
-    private ulong _uniqueIdentifier;
-    private ulong _kingPawnUniqueIdentifier;
-    private readonly ulong[] _nonPawnHash;
-    private ulong _minorHash;
-    private ulong _majorHash;
+    internal PositionState _state;
 
     private readonly ulong[] _pieceBitBoards;
     private readonly ulong[] _occupancyBitBoards;
     private readonly int[] _board;
-
-    private byte _castle;
 
 #pragma warning disable S3887, CA1051
     private readonly byte[] _castlingRightsUpdateConstants;
@@ -51,27 +39,26 @@ public partial class Position : IDisposable
     private readonly int[] _initialKingSquares;
 #endif
 
-    private BoardSquare _enPassant;
     private Side _side;
 
 #pragma warning disable RCS1085 // Use auto-implemented property
 
-    public ulong UniqueIdentifier => _uniqueIdentifier;
-    public ulong KingPawnUniqueIdentifier => _kingPawnUniqueIdentifier;
-    public ulong[] NonPawnHash => _nonPawnHash;
-    public ulong MinorHash => _minorHash;
-    public ulong MajorHash => _majorHash;
+    public ulong UniqueIdentifier => _state.UniqueIdentifier;
+    public ulong KingPawnUniqueIdentifier => _state.KingPawnUniqueIdentifier;
+    public ulong[] NonPawnHash => _state.NonPawnHash;
+    public ulong MinorHash => _state.MinorHash;
+    public ulong MajorHash => _state.MajorHash;
 
     public BitBoard[] PieceBitBoards => _pieceBitBoards;
     public BitBoard[] OccupancyBitBoards => _occupancyBitBoards;
     public int[] Board => _board;
     public Side Side => _side;
-    public BoardSquare EnPassant => _enPassant;
+    public BoardSquare EnPassant => _state.EnPassant;
 
     /// <summary>
     /// See <see cref="<CastlingRights"/>
     /// </summary>
-    public byte Castle { get => _castle; private set => _castle = value; }
+    public byte Castle { get => _state.Castle; private set => _state.Castle = value; }
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
@@ -123,35 +110,36 @@ public partial class Position : IDisposable
 
     public Position(ParseFENResult parsedFEN)
     {
+        _state = new();
+
         _pieceBitBoards = parsedFEN.PieceBitBoards;
         _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
         _board = parsedFEN.Board;
 
         _side = parsedFEN.Side;
-        _castle = parsedFEN.Castle;
-        _enPassant = parsedFEN.EnPassant;
+        _state.Castle = parsedFEN.Castle;
+        _state.EnPassant = parsedFEN.EnPassant;
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
-        _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
-        _nonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
-        _nonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
+        _state.NonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
+        _state.NonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
 
-        _minorHash = ZobristTable.MinorHash(this);
-        _majorHash = ZobristTable.MajorHash(this);
-        _kingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
+        _state.MinorHash = ZobristTable.MinorHash(this);
+        _state.MajorHash = ZobristTable.MajorHash(this);
+        _state.KingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
 
-        _uniqueIdentifier = ZobristTable.PositionHash(this, _kingPawnUniqueIdentifier, _nonPawnHash[(int)Side.White], _nonPawnHash[(int)Side.Black]);
+        _state.UniqueIdentifier = ZobristTable.PositionHash(this, _state.KingPawnUniqueIdentifier, _state.NonPawnHash[(int)Side.White], _state.NonPawnHash[(int)Side.Black]);
 
-        Debug.Assert(_uniqueIdentifier == ZobristTable.PositionHash(this));
+        Debug.Assert(_state.UniqueIdentifier == ZobristTable.PositionHash(this));
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
-        IsIncrementalEval = false;
+        _state.IsIncrementalEval = false;
 
         _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Fill(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
 
         // It won't be possible to add castling rights to a position created from a FEN without them
-        if (_castle == (int)CastlingRights.None)
+        if (_state.Castle == (int)CastlingRights.None)
         {
             KingsideCastlingFreeSquares = [];
             QueensideCastlingFreeSquares = [];
@@ -280,14 +268,15 @@ public partial class Position : IDisposable
     /// </summary>
     public Position(Position position)
     {
-        _uniqueIdentifier = position._uniqueIdentifier;
-        _kingPawnUniqueIdentifier = position._kingPawnUniqueIdentifier;
-        _minorHash = position._minorHash;
-        _majorHash = position._majorHash;
+        _state = new(position._state);
 
-        _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
-        _nonPawnHash[(int)Side.White] = position._nonPawnHash[(int)Side.White];
-        _nonPawnHash[(int)Side.Black] = position._nonPawnHash[(int)Side.Black];
+        _state.UniqueIdentifier = position._state.UniqueIdentifier;
+        _state.KingPawnUniqueIdentifier = position._state.KingPawnUniqueIdentifier;
+        _state.MinorHash = position._state.MinorHash;
+        _state.MajorHash = position._state.MajorHash;
+
+        _state.NonPawnHash[(int)Side.White] = position._state.NonPawnHash[(int)Side.White];
+        _state.NonPawnHash[(int)Side.Black] = position._state.NonPawnHash[(int)Side.Black];
 
         _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
@@ -299,12 +288,12 @@ public partial class Position : IDisposable
         Array.Copy(position._board, _board, 64);
 
         _side = position._side;
-        _castle = position._castle;
-        _enPassant = position._enPassant;
+        _state.Castle = position._state.Castle;
+        _state.EnPassant = position._state.EnPassant;
 
-        IsIncrementalEval = position.IsIncrementalEval;
-        IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;
-        IncrementalPhaseAccumulator = position.IncrementalPhaseAccumulator;
+        _state.IsIncrementalEval = position._state.IsIncrementalEval;
+        _state.IncrementalEvalAccumulator = position._state.IncrementalEvalAccumulator;
+        _state.IncrementalPhaseAccumulator = position._state.IncrementalPhaseAccumulator;
 
         _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
@@ -367,15 +356,15 @@ public partial class Position : IDisposable
     #region Move making
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMove(Move move)
+    public PositionState MakeMove(Move move)
     {
-        Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
-        Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
-        Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
+        Debug.Assert(ZobristTable.PositionHash(this) == _state.UniqueIdentifier);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _state.NonPawnHash[(int)Side.White]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _state.NonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.MinorHash(this) == _state.MinorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == _state.MajorHash);
 
-        var gameState = new GameState(this);
+        var gameState = new PositionState(_state);
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -406,62 +395,62 @@ public partial class Position : IDisposable
         var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
         var fullPieceMovementHash = sourcePieceHash ^ targetPieceHash;
 
-        _uniqueIdentifier ^=
+        _state.UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ fullPieceMovementHash
-            ^ ZobristTable.EnPassantHash((int)_enPassant)            // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(_castle);                      // We clear the existing castle rights
+            ^ ZobristTable.EnPassantHash((int)_state.EnPassant)            // We clear the existing enpassant square, if any
+            ^ ZobristTable.CastleHash(_state.Castle);                      // We clear the existing castle rights
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
-            _kingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
+            _state.KingPawnUniqueIdentifier ^= sourcePieceHash;       // We remove pawn from start square
 
             if (promotedPiece == default)
             {
-                _kingPawnUniqueIdentifier ^= targetPieceHash;   // We add pawn again to end square
+                _state.KingPawnUniqueIdentifier ^= targetPieceHash;   // We add pawn again to end square
             }
             else
             {
                 // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the KingPawn hash with it, just to remove the pawn (done right above)
                 // We do need to update the NonPawn hash
-                _nonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
+                _state.NonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
 
                 if (Utils.IsMinorPiece(newPiece))
                 {
-                    _minorHash ^= targetPieceHash;
+                    _state.MinorHash ^= targetPieceHash;
                 }
                 else if (Utils.IsMajorPiece(newPiece))
                 {
-                    _majorHash ^= targetPieceHash;
+                    _state.MajorHash ^= targetPieceHash;
                 }
             }
         }
         else
         {
-            _nonPawnHash[oldSide] ^= fullPieceMovementHash;
+            _state.NonPawnHash[oldSide] ^= fullPieceMovementHash;
 
             if (piece == (int)Piece.K || piece == (int)Piece.k)
             {
                 // King (and castling) moves require calculating king buckets twice and recalculating all related parameters, so skipping incremental eval for those cases for now
                 // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
-                IsIncrementalEval = false;
+                _state.IsIncrementalEval = false;
 
-                _kingPawnUniqueIdentifier ^= fullPieceMovementHash;
+                _state.KingPawnUniqueIdentifier ^= fullPieceMovementHash;
             }
             else if (Utils.IsMinorPiece(piece))
             {
-                _minorHash ^= fullPieceMovementHash;
+                _state.MinorHash ^= fullPieceMovementHash;
             }
             else if (Utils.IsMajorPiece(piece))
             {
-                _majorHash ^= fullPieceMovementHash;
+                _state.MajorHash ^= fullPieceMovementHash;
             }
         }
 
-        _enPassant = BoardSquare.noSquare;
+        _state.EnPassant = BoardSquare.noSquare;
 
         // _incrementalEvalAccumulator updates
-        if (IsIncrementalEval)
+        if (_state.IsIncrementalEval)
         {
             var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
             var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
@@ -475,10 +464,10 @@ public partial class Position : IDisposable
                 (sameSideBucket, oppositeSideBucket) = (oppositeSideBucket, sameSideBucket);
             }
 
-            IncrementalEvalAccumulator -= PSQT(sameSideBucket, oppositeSideBucket, piece, sourceSquare);
-            IncrementalEvalAccumulator += PSQT(sameSideBucket, oppositeSideBucket, newPiece, targetSquare);
+            _state.IncrementalEvalAccumulator -= PSQT(sameSideBucket, oppositeSideBucket, piece, sourceSquare);
+            _state.IncrementalEvalAccumulator += PSQT(sameSideBucket, oppositeSideBucket, newPiece, targetSquare);
 
-            IncrementalPhaseAccumulator += extraPhaseIfIncremental;
+            _state.IncrementalPhaseAccumulator += extraPhaseIfIncremental;
 
             // No need to check for castling if it's incremental eval
             switch (move.SpecialMoveFlag())
@@ -494,30 +483,30 @@ public partial class Position : IDisposable
                             _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
 
                             var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                            _uniqueIdentifier ^= capturedPieceHash;
+                            _state.UniqueIdentifier ^= capturedPieceHash;
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
                             {
-                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
+                                _state.KingPawnUniqueIdentifier ^= capturedPieceHash;
                             }
                             else
                             {
-                                _nonPawnHash[oppositeSide] ^= capturedPieceHash;
+                                _state.NonPawnHash[oppositeSide] ^= capturedPieceHash;
 
                                 if (Utils.IsMinorPiece(capturedPiece))
                                 {
-                                    _minorHash ^= capturedPieceHash;
+                                    _state.MinorHash ^= capturedPieceHash;
                                 }
                                 else if (Utils.IsMajorPiece(capturedPiece))
                                 {
-                                    _majorHash ^= capturedPieceHash;
+                                    _state.MajorHash ^= capturedPieceHash;
                                 }
                             }
 
-                            IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                            _state.IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
-                            IncrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
+                            _state.IncrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         }
 
                         break;
@@ -528,8 +517,8 @@ public partial class Position : IDisposable
                         var enPassantSquare = sourceSquare + pawnPush;
                         Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
-                        _enPassant = (BoardSquare)enPassantSquare;
-                        _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+                        _state.EnPassant = (BoardSquare)enPassantSquare;
+                        _state.UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
 
                         break;
                     }
@@ -546,10 +535,10 @@ public partial class Position : IDisposable
                         _board[capturedSquare] = (int)Piece.None;
 
                         var capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        _uniqueIdentifier ^= capturedPawnHash;
-                        _kingPawnUniqueIdentifier ^= capturedPawnHash;
+                        _state.UniqueIdentifier ^= capturedPawnHash;
+                        _state.KingPawnUniqueIdentifier ^= capturedPawnHash;
 
-                        IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                        _state.IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;
@@ -573,24 +562,24 @@ public partial class Position : IDisposable
                             _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
 
                             ulong capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                            _uniqueIdentifier ^= capturedPieceHash;
+                            _state.UniqueIdentifier ^= capturedPieceHash;
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
                             {
-                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
+                                _state.KingPawnUniqueIdentifier ^= capturedPieceHash;
                             }
                             else
                             {
-                                _nonPawnHash[oppositeSide] ^= capturedPieceHash;
+                                _state.NonPawnHash[oppositeSide] ^= capturedPieceHash;
 
                                 if (Utils.IsMinorPiece(capturedPiece))
                                 {
-                                    _minorHash ^= capturedPieceHash;
+                                    _state.MinorHash ^= capturedPieceHash;
                                 }
                                 else if (Utils.IsMajorPiece(capturedPiece))
                                 {
-                                    _majorHash ^= capturedPieceHash;
+                                    _state.MajorHash ^= capturedPieceHash;
                                 }
                             }
                         }
@@ -603,8 +592,8 @@ public partial class Position : IDisposable
                         var enPassantSquare = sourceSquare + pawnPush;
                         Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
-                        _enPassant = (BoardSquare)enPassantSquare;
-                        _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+                        _state.EnPassant = (BoardSquare)enPassantSquare;
+                        _state.UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
 
                         break;
                     }
@@ -638,9 +627,9 @@ public partial class Position : IDisposable
 
                             var hashFix = hashToRevert ^ hashToApply;
 
-                            _uniqueIdentifier ^= hashFix;
-                            _nonPawnHash[oldSide] ^= hashFix;
-                            _kingPawnUniqueIdentifier ^= hashFix;
+                            _state.UniqueIdentifier ^= hashFix;
+                            _state.NonPawnHash[oldSide] ^= hashFix;
+                            _state.KingPawnUniqueIdentifier ^= hashFix;
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
@@ -658,9 +647,9 @@ public partial class Position : IDisposable
                         var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _uniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
-                        _majorHash ^= hashChange;
+                        _state.UniqueIdentifier ^= hashChange;
+                        _state.NonPawnHash[oldSide] ^= hashChange;
+                        _state.MajorHash ^= hashChange;
 
                         break;
                     }
@@ -694,9 +683,9 @@ public partial class Position : IDisposable
 
                             var hashFix = hashToRevert ^ hashToApply;
 
-                            _uniqueIdentifier ^= hashFix;
-                            _nonPawnHash[oldSide] ^= hashFix;
-                            _kingPawnUniqueIdentifier ^= hashFix;
+                            _state.UniqueIdentifier ^= hashFix;
+                            _state.NonPawnHash[oldSide] ^= hashFix;
+                            _state.KingPawnUniqueIdentifier ^= hashFix;
                         }
 
                         // In DFRC the square where the rook was could be occupied by the king after castling
@@ -714,9 +703,9 @@ public partial class Position : IDisposable
                         var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _uniqueIdentifier ^= hashChange;
-                        _nonPawnHash[oldSide] ^= hashChange;
-                        _majorHash ^= hashChange;
+                        _state.UniqueIdentifier ^= hashChange;
+                        _state.NonPawnHash[oldSide] ^= hashChange;
+                        _state.MajorHash ^= hashChange;
 
                         break;
                     }
@@ -733,8 +722,8 @@ public partial class Position : IDisposable
                         _board[capturedSquare] = (int)Piece.None;
 
                         ulong capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        _uniqueIdentifier ^= capturedPawnHash;
-                        _kingPawnUniqueIdentifier ^= capturedPawnHash;
+                        _state.UniqueIdentifier ^= capturedPawnHash;
+                        _state.KingPawnUniqueIdentifier ^= capturedPawnHash;
 
                         break;
                     }
@@ -745,16 +734,16 @@ public partial class Position : IDisposable
         _occupancyBitBoards[2] = _occupancyBitBoards[1] | _occupancyBitBoards[0];
 
         // Updating castling rights
-        _castle &= _castlingRightsUpdateConstants[sourceSquare];
-        _castle &= _castlingRightsUpdateConstants[targetSquare];
+        _state.Castle &= _castlingRightsUpdateConstants[sourceSquare];
+        _state.Castle &= _castlingRightsUpdateConstants[targetSquare];
 
-        _uniqueIdentifier ^= ZobristTable.CastleHash(_castle);
+        _state.UniqueIdentifier ^= ZobristTable.CastleHash(_state.Castle);
 
-        Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
-        Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
-        Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
+        Debug.Assert(ZobristTable.PositionHash(this) == _state.UniqueIdentifier);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _state.NonPawnHash[(int)Side.White]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _state.NonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.MinorHash(this) == _state.MinorHash);
+        Debug.Assert(ZobristTable.MajorHash(this) == _state.MajorHash);
         Debug.Assert(Math.Min(MaxPhase, PhaseFromScratch()) == Phase());
 
         // KingPawn hash assert won't work due to PassedPawnBonusNoEnemiesAheadBonus
@@ -764,7 +753,7 @@ public partial class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnmakeMove(Move move, GameState gameState)
+    public void UnmakeMove(Move move, PositionState gameState)
     {
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
@@ -923,19 +912,19 @@ public partial class Position : IDisposable
         _occupancyBitBoards[2] = _occupancyBitBoards[1] | _occupancyBitBoards[0];
 
         // Updating saved values
-        _castle = gameState.Castle;
-        _enPassant = gameState.EnPassant;
+        _state.Castle = gameState.Castle;
+        _state.EnPassant = gameState.EnPassant;
 
-        _uniqueIdentifier = gameState.ZobristKey;
-        _kingPawnUniqueIdentifier = gameState.KingPawnKey;
-        _minorHash = gameState.MinorKey;
-        _majorHash = gameState.MajorKey;
-        _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
-        _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
+        _state.UniqueIdentifier = gameState.UniqueIdentifier;
+        _state.KingPawnUniqueIdentifier = gameState.KingPawnUniqueIdentifier;
+        _state.MinorHash = gameState.MinorHash;
+        _state.MajorHash = gameState.MajorHash;
+        _state.NonPawnHash[(int)Side.White] = gameState.NonPawnHash[(int)Side.White];
+        _state.NonPawnHash[(int)Side.Black] = gameState.NonPawnHash[(int)Side.Black];
 
-        IncrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
-        IncrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
-        IsIncrementalEval = gameState.IsIncrementalEval;
+        _state.IncrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
+        _state.IncrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
+        _state.IsIncrementalEval = gameState.IsIncrementalEval;
 
         Validate();
     }
@@ -945,12 +934,12 @@ public partial class Position : IDisposable
     {
         var gameState = new NullMoveGameState(this);
 
-        _uniqueIdentifier ^=
+        _state.UniqueIdentifier ^=
             ZobristTable.SideHash()
-            ^ ZobristTable.EnPassantHash((int)_enPassant);
+            ^ ZobristTable.EnPassantHash((int)_state.EnPassant);
 
         _side = (Side)Utils.OppositeSide((int)_side);
-        _enPassant = BoardSquare.noSquare;
+        _state.EnPassant = BoardSquare.noSquare;
 
         Validate();
 
@@ -961,8 +950,8 @@ public partial class Position : IDisposable
     public void UnMakeNullMove(NullMoveGameState gameState)
     {
         _side = (Side)Utils.OppositeSide((int)_side);
-        _enPassant = gameState.EnPassant;
-        _uniqueIdentifier = gameState.ZobristKey;
+        _state.EnPassant = gameState.EnPassant;
+        _state.UniqueIdentifier = gameState.ZobristKey;
 
         Validate();
     }
@@ -1244,19 +1233,19 @@ public partial class Position : IDisposable
 
         if (!Configuration.EngineSettings.IsChess960)
         {
-            if ((_castle & (int)CastlingRights.WK) != default)
+            if ((_state.Castle & (int)CastlingRights.WK) != default)
             {
                 sb.Append('K');
             }
-            if ((_castle & (int)CastlingRights.WQ) != default)
+            if ((_state.Castle & (int)CastlingRights.WQ) != default)
             {
                 sb.Append('Q');
             }
-            if ((_castle & (int)CastlingRights.BK) != default)
+            if ((_state.Castle & (int)CastlingRights.BK) != default)
             {
                 sb.Append('k');
             }
-            if ((_castle & (int)CastlingRights.BQ) != default)
+            if ((_state.Castle & (int)CastlingRights.BQ) != default)
             {
                 sb.Append('q');
             }
@@ -1264,22 +1253,22 @@ public partial class Position : IDisposable
         else
         {
             // Shredder-FEN style (always showing columns), no support for X-FEN style yet (showing KQkq when not-ambiguous)
-            if ((_castle & (int)CastlingRights.WK) != default)
+            if ((_state.Castle & (int)CastlingRights.WK) != default)
             {
                 char file = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
                 sb.Append(file);
             }
-            if ((_castle & (int)CastlingRights.WQ) != default)
+            if ((_state.Castle & (int)CastlingRights.WQ) != default)
             {
                 char file = (char)('A' + Constants.File[WhiteLongCastle.TargetSquare()]);
                 sb.Append(file);
             }
-            if ((_castle & (int)CastlingRights.BK) != default)
+            if ((_state.Castle & (int)CastlingRights.BK) != default)
             {
                 char file = (char)('a' + Constants.File[BlackShortCastle.TargetSquare()]);
                 sb.Append(file);
             }
-            if ((_castle & (int)CastlingRights.BQ) != default)
+            if ((_state.Castle & (int)CastlingRights.BQ) != default)
             {
                 char file = (char)('a' + Constants.File[BlackLongCastle.TargetSquare()]);
                 sb.Append(file);
@@ -1293,7 +1282,7 @@ public partial class Position : IDisposable
 
         sb.Append(' ');
 
-        sb.Append(_enPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)_enPassant]);
+        sb.Append(_state.EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)_state.EnPassant]);
 
         sb.Append(' ').Append(halfMovesWithoutCaptureOrPawnMove).Append(' ').Append(fullMoveClock);
 
@@ -1303,7 +1292,7 @@ public partial class Position : IDisposable
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
 
     /// <summary>
-    /// Combines <see cref="_pieceBitBoards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
+    /// Combines <see cref="_pieceBitBoards"/>, <see cref="_side"/>, <see cref="_state.Castle"/> and <see cref="_state.EnPassant"/>
     /// into a human-friendly representation
     /// </summary>
     public void Print(int halfMovesWithoutCaptureOrPawnMove = -1)
@@ -1348,33 +1337,33 @@ public partial class Position : IDisposable
 #pragma warning disable RCS1214 // Unnecessary interpolated string.
         Console.WriteLine();
         Console.WriteLine($"    Side:\t{_side}");
-        Console.WriteLine($"    Enpassant:\t{(_enPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_enPassant])}");
+        Console.WriteLine($"    Enpassant:\t{(_state.EnPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)_state.EnPassant])}");
 
         if (!Configuration.EngineSettings.IsChess960)
         {
             Console.WriteLine($"    Castling:\t" +
-                $"{((_castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
-                $"{((_castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +
-                $"{((_castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
-                $"{((_castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}");
+                $"{((_state.Castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
+                $"{((_state.Castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +
+                $"{((_state.Castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
+                $"{((_state.Castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}");
         }
         else
         {
             char whiteKingSide = '-', whiteQueenside = '-', blackKingside = '-', blackQueenside = '-';
 
-            if ((_castle & (int)CastlingRights.WK) != default)
+            if ((_state.Castle & (int)CastlingRights.WK) != default)
             {
                 whiteKingSide = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
             }
-            if ((_castle & (int)CastlingRights.WQ) != default)
+            if ((_state.Castle & (int)CastlingRights.WQ) != default)
             {
                 whiteQueenside = (char)('A' + Constants.File[WhiteLongCastle.TargetSquare()]);
             }
-            if ((_castle & (int)CastlingRights.BK) != default)
+            if ((_state.Castle & (int)CastlingRights.BK) != default)
             {
                 blackKingside = (char)('a' + Constants.File[BlackShortCastle.TargetSquare()]);
             }
-            if ((_castle & (int)CastlingRights.BQ) != default)
+            if ((_state.Castle & (int)CastlingRights.BQ) != default)
             {
                 blackQueenside = (char)('a' + Constants.File[BlackLongCastle.TargetSquare()]);
             }
@@ -1600,22 +1589,22 @@ public partial class Position : IDisposable
 #endif
 
         // En-passant and pawn to be captured position
-        if (_enPassant != BoardSquare.noSquare)
+        if (_state.EnPassant != BoardSquare.noSquare)
         {
-            Debug.Assert(!_occupancyBitBoards[(int)Side.Both].GetBit((int)_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
+            Debug.Assert(!_occupancyBitBoards[(int)Side.Both].GetBit((int)_state.EnPassant), failureMessage, $"Non-empty en passant square {_state.EnPassant}");
 
-            var rank = Constants.Rank[(int)_enPassant];
-            Debug.Assert(rank == 2 || rank == 5, failureMessage, $"Wrong en-passant rank for {_enPassant}");
+            var rank = Constants.Rank[(int)_state.EnPassant];
+            Debug.Assert(rank == 2 || rank == 5, failureMessage, $"Wrong en-passant rank for {_state.EnPassant}");
 
-            var pawnToCaptureSquare = Constants.EnPassantCaptureSquares[(int)_enPassant];
+            var pawnToCaptureSquare = Constants.EnPassantCaptureSquares[(int)_state.EnPassant];
 
             if (Side == Side.White)
             {
-                Debug.Assert(blackPawns.GetBit(pawnToCaptureSquare), failureMessage, $"No black pawn on en-passant capture square for {_enPassant}");
+                Debug.Assert(blackPawns.GetBit(pawnToCaptureSquare), failureMessage, $"No black pawn on en-passant capture square for {_state.EnPassant}");
             }
             else
             {
-                Debug.Assert(whitePawns.GetBit(pawnToCaptureSquare), failureMessage, $"No white pawn on en-passant capture square for {_enPassant}");
+                Debug.Assert(whitePawns.GetBit(pawnToCaptureSquare), failureMessage, $"No white pawn on en-passant capture square for {_state.EnPassant}");
             }
         }
 
@@ -1656,7 +1645,6 @@ public partial class Position : IDisposable
                 ArrayPool<BitBoard>.Shared.Return(_pieceBitBoards);
                 ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards);
 
-                ArrayPool<ulong>.Shared.Return(_nonPawnHash);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares);
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares);

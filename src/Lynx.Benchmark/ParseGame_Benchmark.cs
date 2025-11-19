@@ -524,7 +524,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
+        public PositionState MakeMove(Move moveToPlay)
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 
@@ -605,7 +605,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
+        public PositionState MakeMove(Move moveToPlay)
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 
@@ -690,7 +690,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
+        public PositionState MakeMove(Move moveToPlay)
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 
