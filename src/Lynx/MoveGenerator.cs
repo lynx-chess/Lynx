@@ -467,13 +467,13 @@ public static class MoveGenerator
         try
         {
 #endif
-        return IsAnyPawnMoveValid(position, offset)
-            || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
-            || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-            || IsAnyCastlingMoveValid(position, ref evaluationContext);
+            return IsAnyPawnMoveValid(position, offset)
+                || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
+                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+                || IsAnyCastlingMoveValid(position, ref evaluationContext);
 #if DEBUG
         }
         catch (Exception e)
@@ -699,10 +699,10 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsValidMove(Position position, Move move)
     {
-        var gameState = position.MakeMove(move);
+        position.MakeMove(move);
 
         bool result = position.WasProduceByAValidMove();
-        position.UnmakeMove(move, gameState);
+        position.UnmakeMove(move);
 
         return result;
     }

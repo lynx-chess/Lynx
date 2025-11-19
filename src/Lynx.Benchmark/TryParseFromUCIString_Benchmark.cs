@@ -162,7 +162,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
         catch (Exception)
         {
 #pragma warning disable S112 // General or reserved exceptions should never be thrown
-            throw new($"Error parsing position command '{positionCommandSpan.ToString()}'");
+            throw new($"Error parsing position command '{positionCommandSpan}'");
 #pragma warning restore S112 // General or reserved exceptions should never be thrown
         }
     }
@@ -191,7 +191,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn($"Invalid position detected: {fen}");
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -229,10 +229,11 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
             _gameInitialPosition = new Position(CurrentPosition);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
+        public void MakeMove(Move moveToPlay)
         {
-            var gameState = CurrentPosition.MakeMove(moveToPlay);
+            CurrentPosition.MakeMove(moveToPlay);
 
             if (CurrentPosition.WasProduceByAValidMove())
             {
@@ -243,13 +244,11 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+                CurrentPosition.UnmakeMove(moveToPlay);
             }
 
             PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
             HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
-
-            return gameState;
         }
     }
 }
