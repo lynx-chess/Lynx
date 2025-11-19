@@ -609,6 +609,11 @@ public sealed partial class Engine
                                     reduction -= Configuration.EngineSettings.LMR_Corrplexity;
                                 }
 
+                                if (!ttEntryHasBestMove)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_NoTTMove;
+                                }
+
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // -= history/(maxHistory/2)

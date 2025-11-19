@@ -253,6 +253,9 @@ public sealed class EngineSettings
     [SPSA<int>(25, 300, 30)]
     public int LMR_Corrplexity_Delta { get; set; } = 124;
 
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_NoTTMove { get; set; } = 100;
+
     [SPSA<int>(enabled: false)]
     public int History_MinDepth { get; set; } = 3;
 
