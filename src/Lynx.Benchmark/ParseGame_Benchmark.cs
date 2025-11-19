@@ -524,9 +524,9 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PositionState MakeMove(Move moveToPlay)
+        public void MakeMove(Move moveToPlay)
         {
-            var gameState = CurrentPosition.MakeMove(moveToPlay);
+            CurrentPosition.MakeMove(moveToPlay);
 
             if (CurrentPosition.WasProduceByAValidMove())
             {
@@ -537,13 +537,11 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+                CurrentPosition.UnmakeMove(moveToPlay);
             }
 
             PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
             HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
-
-            return gameState;
         }
     }
 
@@ -605,9 +603,9 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PositionState MakeMove(Move moveToPlay)
+        public void MakeMove(Move moveToPlay)
         {
-            var gameState = CurrentPosition.MakeMove(moveToPlay);
+            CurrentPosition.MakeMove(moveToPlay);
 
             if (CurrentPosition.WasProduceByAValidMove())
             {
@@ -618,13 +616,11 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+                CurrentPosition.UnmakeMove(moveToPlay);
             }
 
             PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
             HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
-
-            return gameState;
         }
     }
 
@@ -690,9 +686,9 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PositionState MakeMove(Move moveToPlay)
+        public void MakeMove(Move moveToPlay)
         {
-            var gameState = CurrentPosition.MakeMove(moveToPlay);
+            CurrentPosition.MakeMove(moveToPlay);
 
             if (CurrentPosition.WasProduceByAValidMove())
             {
@@ -703,13 +699,11 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+                CurrentPosition.UnmakeMove(moveToPlay);
             }
 
             PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
             HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
-
-            return gameState;
         }
     }
 

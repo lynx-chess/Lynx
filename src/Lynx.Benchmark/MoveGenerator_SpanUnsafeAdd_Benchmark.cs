@@ -822,10 +822,10 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsValidMove(Position position, Move move)
         {
-            var gameState = position.MakeMove(move);
+            position.MakeMove(move);
 
             bool result = position.WasProduceByAValidMove();
-            position.UnmakeMove(move, gameState);
+            position.UnmakeMove(move);
 
             return result;
         }
@@ -1499,10 +1499,10 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsValidMove(Position position, Move move)
         {
-            var gameState = position.MakeMove(move);
+            position.MakeMove(move);
 
             bool result = position.WasProduceByAValidMove();
-            position.UnmakeMove(move, gameState);
+            position.UnmakeMove(move);
 
             return result;
         }

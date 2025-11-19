@@ -2,6 +2,7 @@
 using NUnit.Framework;
 
 namespace Lynx.Test.Model;
+
 public class MoveToEPDStringTest
 {
     [TestCase("d5", (int)BoardSquare.d4, (int)BoardSquare.d5, (int)Piece.P, default, 0)]
@@ -104,9 +105,9 @@ public class MoveToEPDStringTest
             .Where(m => m.Piece() == (int)piece && m.TargetSquare() == (int)targetSquare)
             .Where(m =>
             {
-                var gameState = position.MakeMove(m);
+                position.MakeMove(m);
                 var isLegal = position.WasProduceByAValidMove();
-                position.UnmakeMove(m, gameState);
+                position.UnmakeMove(m);
 
                 return isLegal;
             })
