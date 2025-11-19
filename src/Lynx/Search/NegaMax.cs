@@ -582,6 +582,11 @@ public sealed partial class Engine
                                 if (cutnode)
                                 {
                                     reduction += Configuration.EngineSettings.LMR_Cutnode;
+
+                                    if (!ttEntryHasBestMove)
+                                    {
+                                        reduction += Configuration.EngineSettings.LMR_Cutnode_NoTTMove;
+                                    }
                                 }
 
                                 if (!ttPv)
@@ -607,11 +612,6 @@ public sealed partial class Engine
                                 if (Math.Abs(staticEval - rawStaticEval) >= Configuration.EngineSettings.LMR_Corrplexity_Delta)
                                 {
                                     reduction -= Configuration.EngineSettings.LMR_Corrplexity;
-                                }
-
-                                if (!ttEntryHasBestMove)
-                                {
-                                    reduction += Configuration.EngineSettings.LMR_NoTTMove;
                                 }
 
                                 reduction /= EvaluationConstants.LMRScaleFactor;

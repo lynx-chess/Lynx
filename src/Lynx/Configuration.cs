@@ -214,6 +214,9 @@ public sealed class EngineSettings
     [SPSA<int>(25, 300, 30)]
     public int LMR_Cutnode { get; set; } = 109;
 
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_Cutnode_NoTTMove { get; set; } = 100;
+
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
@@ -252,9 +255,6 @@ public sealed class EngineSettings
 
     [SPSA<int>(25, 300, 30)]
     public int LMR_Corrplexity_Delta { get; set; } = 124;
-
-    [SPSA<int>(25, 300, 30)]
-    public int LMR_NoTTMove { get; set; } = 100;
 
     [SPSA<int>(enabled: false)]
     public int History_MinDepth { get; set; } = 3;
