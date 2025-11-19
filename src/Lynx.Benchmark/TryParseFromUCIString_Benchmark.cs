@@ -232,8 +232,9 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
             _gameInitialPosition = new Position(CurrentPosition);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameState MakeMove(Move moveToPlay)
+        public PositionState MakeMove(Move moveToPlay)
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 

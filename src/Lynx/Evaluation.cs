@@ -91,16 +91,16 @@ public partial class Position
         int blackPawnKingRingAttacks = (blackPawnAttacks & KingRing[whiteKing]).CountBits();
         evaluationContext.IncreaseKingRingAttacks((int)Side.Black, blackPawnKingRingAttacks);
 
-        if (IsIncrementalEval)
+        if (_state.IsIncrementalEval)
         {
-            packedScore = IncrementalEvalAccumulator;
-            gamePhase = IncrementalPhaseAccumulator;
+            packedScore = _state.IncrementalEvalAccumulator;
+            gamePhase = _state.IncrementalPhaseAccumulator;
 
-            var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
+            var kingPawnIndex = _state.KingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
             // pawnEvalTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
-            if (entry.Key == _kingPawnUniqueIdentifier)
+            if (entry.Key == _state.KingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
             }
@@ -152,7 +152,7 @@ public partial class Position
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(_state.KingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
 
@@ -191,14 +191,14 @@ public partial class Position
         }
         else
         {
-            IncrementalEvalAccumulator = 0;
-            IncrementalPhaseAccumulator = 0;
+            _state.IncrementalEvalAccumulator = 0;
+            _state.IncrementalPhaseAccumulator = 0;
 
-            var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
+            var kingPawnIndex = _state.KingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
             // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
-            if (entry.Key == _kingPawnUniqueIdentifier)
+            if (entry.Key == _state.KingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
 
@@ -211,7 +211,7 @@ public partial class Position
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
+                    _state.IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
                 }
@@ -225,7 +225,7 @@ public partial class Position
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _state.IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
                 }
@@ -249,7 +249,7 @@ public partial class Position
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
+                    _state.IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
 
                     pawnScore += PawnAdditionalEvaluation(ref evaluationContext, whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
@@ -268,7 +268,7 @@ public partial class Position
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
-                    IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
+                    _state.IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
@@ -276,7 +276,7 @@ public partial class Position
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(_state.KingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
 
@@ -292,9 +292,9 @@ public partial class Position
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
+                    _state.IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
 
-                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
+                    _state.IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
                     packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
                 }
@@ -313,17 +313,17 @@ public partial class Position
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _state.IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
 
-                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
+                    _state.IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
                     packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
                 }
             }
 
-            packedScore += IncrementalEvalAccumulator;
-            gamePhase += IncrementalPhaseAccumulator;
-            IsIncrementalEval = true;
+            packedScore += _state.IncrementalEvalAccumulator;
+            gamePhase += _state.IncrementalPhaseAccumulator;
+            _state.IsIncrementalEval = true;
         }
 
         // Kings - they can't be incremental due to the king buckets
@@ -519,8 +519,8 @@ public partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Phase()
     {
-        var gamePhase = IsIncrementalEval
-            ? IncrementalPhaseAccumulator
+        var gamePhase = _state.IsIncrementalEval
+            ? _state.IncrementalPhaseAccumulator
             : PhaseFromScratch();
 
         return (gamePhase > MaxPhase)    // Early promotions
