@@ -80,7 +80,7 @@ public sealed class Game : IDisposable
             MakeMove(parsedMove.Value);
         }
 
-        PositionBeforeLastSearch = new Position(CurrentPosition);
+        PositionBeforeLastSearch = new Position(CurrentPosition, 1);
         //_positionHashHistoryPointerBeforeLastSearch = _positionHashHistoryPointer;
     }
 
@@ -215,7 +215,7 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Cleans <see cref="CurrentPosition"/> value, since in case of search cancellation
     /// (either by the engine time management logic or by external stop command)
-    /// currentPosition won't be the initial one
+    /// currentPosition won't be the initial one.
     /// </summary>
     public void ResetCurrentPositionToBeforeSearchState()
     {
@@ -227,7 +227,7 @@ public sealed class Game : IDisposable
     public void UpdateInitialPosition()
     {
         PositionBeforeLastSearch.Dispose();
-        PositionBeforeLastSearch = new(CurrentPosition);
+        PositionBeforeLastSearch = new(CurrentPosition, 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

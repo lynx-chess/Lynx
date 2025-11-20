@@ -113,15 +113,14 @@ public partial class Position : IDisposable
 
     public Position(ParseFENResult parsedFEN)
     {
-        _stackCounter = 0;
-
-        _stateStack = new State[Constants.MaxNumberMovesInAGame + Constants.ArrayDepthMargin];
+        _stateStack = new State[Constants.MaxNumberMovesInAGame];
         for (int i = 0; i < _stateStack.Length; ++i)
         {
             _stateStack[i] = new();
         }
 
-        _state = _stateStack[_stackCounter];
+        _state = _stateStack[0];
+        _stackCounter = 0;
 
         _pieceBitBoards = parsedFEN.PieceBitBoards;
         _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -274,20 +273,24 @@ public partial class Position : IDisposable
         Validate();
     }
 
+    public Position(Position position)
+        : this(position, Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin)
+    { }
+
     /// <summary>
     /// Clone constructor
     /// </summary>
-    public Position(Position position)
+    public Position(Position position, int stateStackLength)
     {
-        _stackCounter = position._stackCounter;
+        Debug.Assert(position._state != null);
 
-        _stateStack = new State[Constants.MaxNumberMovesInAGame + Constants.ArrayDepthMargin];
+        _stateStack = new State[stateStackLength];
         for (int i = 0; i < _stateStack.Length; ++i)
         {
-            _stateStack[i] = new(position._stateStack[i]);
+            _stateStack[i] = new();
         }
-
-        _state = _stateStack[_stackCounter];
+        _state = _stateStack[0] = new(position._state);
+        _stackCounter = 0;
 
         _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
