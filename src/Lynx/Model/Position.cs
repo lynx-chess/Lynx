@@ -116,12 +116,7 @@ public partial class Position : IDisposable
         _stackCounter = 0;
 
         _stateStack = new State[Constants.MaxNumberMovesInAGame + Constants.ArrayDepthMargin];
-        for (int i = 0; i < _stateStack.Length; ++i)
-        {
-            _stateStack[i] = new();
-        }
-
-        _state = _stateStack[_stackCounter];
+        _state = _stateStack[_stackCounter] ??= new();
 
         _pieceBitBoards = parsedFEN.PieceBitBoards;
         _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -275,19 +270,17 @@ public partial class Position : IDisposable
     }
 
     /// <summary>
-    /// Clone constructor
+    /// Clone constructor - only to move forward making moves
     /// </summary>
     public Position(Position position)
     {
+        Debug.Assert(position._state != null);
+
         _stackCounter = position._stackCounter;
 
+        // Can we maybe use MaxDepth here, instead of MaxNumberMovesInAGame
         _stateStack = new State[Constants.MaxNumberMovesInAGame + Constants.ArrayDepthMargin];
-        for (int i = 0; i < _stateStack.Length; ++i)
-        {
-            _stateStack[i] = new(position._stateStack[i]);
-        }
-
-        _state = _stateStack[_stackCounter];
+        _state = new(position._state);
 
         _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
@@ -372,7 +365,7 @@ public partial class Position : IDisposable
         var oldState = _state;
 
         ++_stackCounter;
-        _state = _stateStack[_stackCounter];
+        _state = _stateStack[_stackCounter] ??= new();
         _state.SetupFromPrevious(oldState);
 
         var oldSide = (int)_side;
