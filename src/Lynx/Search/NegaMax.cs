@@ -570,11 +570,11 @@ public sealed partial class Engine
                                 reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
                                     + Configuration.EngineSettings.LMR_Quiet    // Quiet LMR
                                     - (EvaluationConstants.LMRScaleFactor * quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet);
-                            }
 
-                            if (!SEE.HasPositiveScore(position, move))
-                            {
-                                reduction += Configuration.EngineSettings.LMR_Quiet_SEE;
+                                if (!SEE.HasPositiveScore(position, move))
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_Quiet_SEE;
+                                }
                             }
 
                             if (!improving)
