@@ -133,6 +133,7 @@ public sealed partial class Engine : IDisposable
         SearchResult resultToReturn = IDDFS(isPondering, jointCts.Token);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
+        // This is done to allow sending consecutive search commands
         Game.ResetCurrentPositionToBeforeSearchState();
         if (!isPondering
             && resultToReturn.BestMove != default
@@ -240,7 +241,7 @@ public sealed partial class Engine : IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
 
-        #pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+#pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
 #pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
