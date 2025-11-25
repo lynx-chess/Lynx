@@ -100,8 +100,7 @@ public sealed partial class Engine : IDisposable
     public void NewGame()
     {
         AverageDepth = 0;
-        Game.Dispose();
-        Game = new Game(Constants.InitialPositionFEN);
+        Game.ParseFEN(Constants.InitialPositionFEN);
 
         ResetEngine();
     }
@@ -109,9 +108,7 @@ public sealed partial class Engine : IDisposable
     [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Game.Dispose();
-        Game = PositionCommand.ParseGame(rawPositionCommand, moves);
+        Game.ParsePositionCommand(rawPositionCommand);
     }
 
     /// <summary>
@@ -240,7 +237,7 @@ public sealed partial class Engine : IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
 
-        #pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+#pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
 #pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }

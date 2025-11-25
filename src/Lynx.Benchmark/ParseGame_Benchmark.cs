@@ -491,7 +491,8 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         public OriginalGame(ReadOnlySpan<char> fen)
         {
             var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition = new Position(parsedFen);
+            CurrentPosition = new Position(Constants.InitialPositionFEN);
+            CurrentPosition.PopulateFrom(parsedFen);
             if (!CurrentPosition.IsValid())
             {
                 _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
@@ -565,8 +566,10 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
         public ImprovedGame(ReadOnlySpan<char> fen)
         {
+            CurrentPosition = new Position(Constants.InitialPositionFEN);
             var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition = new Position(parsedFen);
+            CurrentPosition.PopulateFrom(parsedFen);
+
             if (!CurrentPosition.IsValid())
             {
                 _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
@@ -646,8 +649,10 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
         public ImprovedGame2(ReadOnlySpan<char> fen)
         {
+            CurrentPosition = new Position(Constants.InitialPositionFEN);
             var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition = new Position(parsedFen);
+            CurrentPosition.PopulateFrom(parsedFen);
+
             if (!CurrentPosition.IsValid())
             {
                 _logger.Warn("Invalid position detected: {FEN}", fen.ToString());
