@@ -140,14 +140,9 @@ public partial class Position : IDisposable
     /// Use alternative constructor instead and set it externally if relevant
     /// </summary>
     public Position(string fen)
-        : this(FENParser.ParseFEN(fen))
-    {
-    }
-
-    public Position(ParseFENResult parsedFEN)
         : this()
     {
-        PopulateFrom(parsedFEN);
+        PopulateFrom(FENParser.ParseFEN(fen));
     }
 
     /// <summary>
