@@ -1,4 +1,5 @@
-﻿using Lynx.UCI.Commands.GUI;
+﻿using Lynx.Model;
+using Lynx.UCI.Commands.GUI;
 using Moq;
 using NUnit.Framework;
 using System.Threading.Channels;
@@ -46,8 +47,8 @@ public class PositionCommandTest
     [TestCase(" position    fen         rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1   moves d2d4   g8f6     g1f3  d7d5 b1c3  e7e6 g2g3 c7c5  e2e3      ")]
     public void ParseGame_Spaces(string positionCommand)
     {
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var parsedGame = PositionCommand.ParseGame(positionCommand, movePool);
+        var parsedGame = new Game(Constants.InitialPositionFEN);
+        parsedGame.ParsePositionCommand(positionCommand);
 
 #if DEBUG
         Assert.AreEqual("d2d4", parsedGame.MoveHistory[0].UCIString());
@@ -72,8 +73,8 @@ public class PositionCommandTest
     [Test]
     public void ParseGame_Long()
     {
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var parsedGame = PositionCommand.ParseGame(Constants.LongPositionCommand, movePool);
+        var parsedGame = new Game(Constants.InitialPositionFEN);
+        parsedGame.ParsePositionCommand(Constants.LongPositionCommand);
 
         Assert.AreNotEqual(Constants.InitialPositionFEN, parsedGame.CurrentPosition);
         Assert.Greater(parsedGame.PositionHashHistoryLength(), 500);

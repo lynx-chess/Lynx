@@ -28,9 +28,9 @@ public sealed class Game : IDisposable
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
-    public Position CurrentPosition { get; private set; }
+    public Position CurrentPosition { get; }
 
-    public Position PositionBeforeLastSearch { get; private set; }
+    public Position PositionBeforeLastSearch { get; }
 
     public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove);
 
