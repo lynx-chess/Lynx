@@ -3,9 +3,6 @@ using Lynx.UCI.Commands.GUI;
 using Moq;
 using NUnit.Framework;
 using System.Threading.Channels;
-#if DEBUG
-using Lynx.Model;
-#endif
 
 namespace Lynx.Test.Commands;
 
