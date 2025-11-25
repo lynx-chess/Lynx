@@ -42,6 +42,11 @@ public sealed class Game : IDisposable
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
         _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
 
+        for (int i = 0; i < _stack.Length; ++i)
+        {
+            _stack[i].Reset();
+        }
+
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
 
