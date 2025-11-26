@@ -97,6 +97,7 @@ public sealed class Game : IDisposable
     private void Populate(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves)
     {
         _positionHashHistoryPointer = 0;
+        Array.Clear(_stack);
 
 #if DEBUG
         MoveHistory.Clear();
