@@ -145,6 +145,7 @@ public sealed partial class Engine
 
                 // We rent one per search, since it's returned to the pool on SearchResult.ToString()
                 _pVTable = ArrayPool<Move>.Shared.Rent(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1 + Constants.ArrayDepthMargin) / 2);
+                Array.Clear(_pVTable);
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
