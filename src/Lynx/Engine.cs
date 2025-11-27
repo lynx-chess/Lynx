@@ -100,8 +100,7 @@ public sealed partial class Engine : IDisposable
     public void NewGame()
     {
         AverageDepth = 0;
-        Game.Dispose();
-        Game = new Game(Constants.InitialPositionFEN);
+        Game.ParseFEN(Constants.InitialPositionFEN);
 
         ResetEngine();
     }
@@ -109,9 +108,7 @@ public sealed partial class Engine : IDisposable
     [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Game.Dispose();
-        Game = PositionCommand.ParseGame(rawPositionCommand, moves);
+        Game.ParsePositionCommand(rawPositionCommand);
     }
 
     /// <summary>

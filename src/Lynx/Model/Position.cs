@@ -17,9 +17,9 @@ public partial class Position : IDisposable
 
     private State _state;
 
-    private readonly ulong[] _pieceBitBoards;
-    private readonly ulong[] _occupancyBitBoards;
-    private readonly int[] _board;
+    private ulong[] _pieceBitBoards;
+    private ulong[] _occupancyBitBoards;
+    private int[] _board;
 
 #pragma warning disable S3887, CA1051
     private readonly byte[] _castlingRightsUpdateConstants;
@@ -29,10 +29,10 @@ public partial class Position : IDisposable
     public readonly ulong[] QueensideCastlingNonAttackedSquares;
 
 #pragma warning disable IDE1006 // Naming Styles
-    internal readonly int WhiteShortCastle;
-    internal readonly int WhiteLongCastle;
-    internal readonly int BlackShortCastle;
-    internal readonly int BlackLongCastle;
+    internal int WhiteShortCastle;
+    internal int WhiteLongCastle;
+    internal int BlackShortCastle;
+    internal int BlackLongCastle;
 #pragma warning restore IDE1006 // Naming Styles
 #pragma warning restore S3887, CA1051
 
@@ -103,16 +103,18 @@ public partial class Position : IDisposable
             ? WhiteShortCastle.SourceSquare()
             : BlackShortCastle.SourceSquare();
 
-    /// <summary>
-    /// Beware, half move counter isn't take into account
-    /// Use alternative constructor instead and set it externally if relevant
-    /// </summary>
-    public Position(string fen) : this(FENParser.ParseFEN(fen))
+    private Position()
     {
-    }
+        _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
+        _occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
+        _board = ArrayPool<int>.Shared.Rent(64);
+        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
 
-    public Position(ParseFENResult parsedFEN)
-    {
+        KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+        KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+        QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
+        QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+
         _stateStack = new State[Constants.MaxNumberMovesInAGame];
         for (int i = 0; i < _stateStack.Length; ++i)
         {
@@ -122,6 +124,34 @@ public partial class Position : IDisposable
         _state = _stateStack[0];
         _stackCounter = 0;
 
+#if DEBUG
+        _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
+        _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
+        _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
+#endif
+    }
+
+    /// <summary>
+    /// Beware, half move counter isn't take into account
+    /// Use alternative constructor instead and set it externally if relevant
+    /// </summary>
+    public Position(string fen)
+        : this()
+    {
+        PopulateFrom(FENParser.ParseFEN(fen));
+    }
+
+    /// <summary>
+    /// Clone constructor
+    /// </summary>
+    public Position(Position position)
+        : this()
+    {
+        ResetTo(position);
+    }
+
+    public void PopulateFrom(ParseFENResult parsedFEN)
+    {
         _pieceBitBoards = parsedFEN.PieceBitBoards;
         _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
         _board = parsedFEN.Board;
@@ -145,146 +175,112 @@ public partial class Position : IDisposable
 
         _state.IsIncrementalEval = false;
 
-        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Fill(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
 
-        // It won't be possible to add castling rights to a position created from a FEN without them
-        if (_state.Castle == (int)CastlingRights.None)
-        {
-            KingsideCastlingFreeSquares = [];
-            QueensideCastlingFreeSquares = [];
-            KingsideCastlingNonAttackedSquares = [];
-            QueensideCastlingNonAttackedSquares = [];
+        var whiteKingSquare = WhiteKingSquare;
+        var blackKingSquare = BlackKingSquare;
 
-#if DEBUG
-            _initialKingSquares = [];
-            _initialKingsideRookSquares = [];
-            _initialQueensideRookSquares = [];
-#endif
+        _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
+        _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
+
+        var castlingData = parsedFEN.CastlingData;
+
+        var whiteKingsideRook = castlingData.WhiteKingsideRook;
+        if (whiteKingsideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[whiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
         }
+
+        var whiteQueensideRook = castlingData.WhiteQueensideRook;
+        if (whiteQueensideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[whiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
+        }
+
+        var blackKingsideRook = castlingData.BlackKingsideRook;
+        if (blackKingsideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[blackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
+        }
+
+        var blackQueensideRook = castlingData.BlackQueensideRook;
+        if (blackQueensideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
+        }
+
+        KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingShortCastleSquare);
+        KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingShortCastleSquare);
+
+        QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
+        QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
+
+        // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
+        var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
+            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookShortCastleSquare);
+        whiteKingsideFreeMask.PopBit(whiteKingSquare);
+        whiteKingsideFreeMask.PopBit(whiteKingsideRook);
+
+        var blackKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.Black]
+            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookShortCastleSquare);
+        blackKingsideFreeMask.PopBit(blackKingSquare);
+        blackKingsideFreeMask.PopBit(blackKingsideRook);
+
+        KingsideCastlingFreeSquares[(int)Side.White] = whiteKingsideFreeMask;
+        KingsideCastlingFreeSquares[(int)Side.Black] = blackKingsideFreeMask;
+
+        // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
+        var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
+            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookLongCastleSquare);
+        whiteQueensideFreeMask.PopBit(whiteKingSquare);
+        whiteQueensideFreeMask.PopBit(whiteQueensideRook);
+
+        var blackQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.Black]
+            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookLongCastleSquare);
+        blackQueensideFreeMask.PopBit(blackKingSquare);
+        blackQueensideFreeMask.PopBit(blackQueensideRook);
+
+        QueensideCastlingFreeSquares[(int)Side.White] = whiteQueensideFreeMask;
+        QueensideCastlingFreeSquares[(int)Side.Black] = blackQueensideFreeMask;
+
+        // Usual encoding for standard chess, King to target square
+        if (!Configuration.EngineSettings.IsChess960)
+        {
+            WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
+            WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
+
+            BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
+            BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
+        }
+        // KxR encoding for DFRC
         else
         {
-            var whiteKingSquare = WhiteKingSquare;
-            var blackKingSquare = BlackKingSquare;
+            WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
+            WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
 
-            _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
-            _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
-
-            var castlingData = parsedFEN.CastlingData;
-
-            var whiteKingsideRook = castlingData.WhiteKingsideRook;
-            if (whiteKingsideRook != CastlingData.DefaultValues)
-            {
-                _castlingRightsUpdateConstants[whiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
-            }
-
-            var whiteQueensideRook = castlingData.WhiteQueensideRook;
-            if (whiteQueensideRook != CastlingData.DefaultValues)
-            {
-                _castlingRightsUpdateConstants[whiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
-            }
-
-            var blackKingsideRook = castlingData.BlackKingsideRook;
-            if (blackKingsideRook != CastlingData.DefaultValues)
-            {
-                _castlingRightsUpdateConstants[blackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
-            }
-
-            var blackQueensideRook = castlingData.BlackQueensideRook;
-            if (blackQueensideRook != CastlingData.DefaultValues)
-            {
-                _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
-            }
-
-            KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingShortCastleSquare);
-            KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingShortCastleSquare);
-
-            QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
-            QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
-
-            // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
-            KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-
-            var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookShortCastleSquare);
-            whiteKingsideFreeMask.PopBit(whiteKingSquare);
-            whiteKingsideFreeMask.PopBit(whiteKingsideRook);
-
-            var blackKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.Black]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookShortCastleSquare);
-            blackKingsideFreeMask.PopBit(blackKingSquare);
-            blackKingsideFreeMask.PopBit(blackKingsideRook);
-
-            KingsideCastlingFreeSquares[(int)Side.White] = whiteKingsideFreeMask;
-            KingsideCastlingFreeSquares[(int)Side.Black] = blackKingsideFreeMask;
-
-            // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
-            QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-
-            var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookLongCastleSquare);
-            whiteQueensideFreeMask.PopBit(whiteKingSquare);
-            whiteQueensideFreeMask.PopBit(whiteQueensideRook);
-
-            var blackQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.Black]
-                | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookLongCastleSquare);
-            blackQueensideFreeMask.PopBit(blackKingSquare);
-            blackQueensideFreeMask.PopBit(blackQueensideRook);
-
-            QueensideCastlingFreeSquares[(int)Side.White] = whiteQueensideFreeMask;
-            QueensideCastlingFreeSquares[(int)Side.Black] = blackQueensideFreeMask;
-
-            // Usual encoding for standard chess, King to target square
-            if (!Configuration.EngineSettings.IsChess960)
-            {
-                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
-                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
-
-                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
-                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
-            }
-            // KxR encoding for DFRC
-            else
-            {
-                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
-                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
-
-                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
-                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
-            }
+            BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
+            BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+        }
 
 #if DEBUG
-            _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingSquares[(int)Side.White] = whiteKingSquare;
-            _initialKingSquares[(int)Side.Black] = blackKingSquare;
+        _initialKingSquares[(int)Side.White] = whiteKingSquare;
+        _initialKingSquares[(int)Side.Black] = blackKingSquare;
 
-            _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
-            _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
+        _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
+        _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
 
-            _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
-            _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
+        _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
+        _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
 #endif
-        }
 
         Validate();
     }
 
-    public Position(Position position)
-        : this(position, Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin)
-    { }
-
-    /// <summary>
-    /// Clone constructor
-    /// </summary>
-    public Position(Position position, int stateStackLength)
+    public void ResetTo(Position position)
     {
         Debug.Assert(position._state != null);
 
-        _stateStack = new State[stateStackLength];
+        // TODO see if we can avoid
         for (int i = 0; i < _stateStack.Length; ++i)
         {
             _stateStack[i] = new();
@@ -292,71 +288,41 @@ public partial class Position : IDisposable
         _state = _stateStack[0] = new(position._state);
         _stackCounter = 0;
 
-        _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
-
-        _occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         Array.Copy(position._occupancyBitBoards, _occupancyBitBoards, 3);
-
-        _board = ArrayPool<int>.Shared.Rent(64);
         Array.Copy(position._board, _board, 64);
 
         _side = position._side;
 
-        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
         Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
 
-        // Avoid allocating arrays when the position to clone never had castling rights
-        if (position.KingsideCastlingNonAttackedSquares.Length == 0)
-        {
+        KingsideCastlingFreeSquares[(int)Side.White] = position.KingsideCastlingFreeSquares[(int)Side.White];
+        KingsideCastlingFreeSquares[(int)Side.Black] = position.KingsideCastlingFreeSquares[(int)Side.Black];
+
+        KingsideCastlingNonAttackedSquares[(int)Side.White] = position.KingsideCastlingNonAttackedSquares[(int)Side.White];
+        KingsideCastlingNonAttackedSquares[(int)Side.Black] = position.KingsideCastlingNonAttackedSquares[(int)Side.Black];
+
+        QueensideCastlingFreeSquares[(int)Side.White] = position.QueensideCastlingFreeSquares[(int)Side.White];
+        QueensideCastlingFreeSquares[(int)Side.Black] = position.QueensideCastlingFreeSquares[(int)Side.Black];
+
+        QueensideCastlingNonAttackedSquares[(int)Side.White] = position.QueensideCastlingNonAttackedSquares[(int)Side.White];
+        QueensideCastlingNonAttackedSquares[(int)Side.Black] = position.QueensideCastlingNonAttackedSquares[(int)Side.Black];
+
+        WhiteShortCastle = position.WhiteShortCastle;
+        WhiteLongCastle = position.WhiteLongCastle;
+        BlackShortCastle = position.BlackShortCastle;
+        BlackLongCastle = position.BlackLongCastle;
+
 #if DEBUG
-            _initialKingSquares = [];
-            _initialKingsideRookSquares = [];
-            _initialQueensideRookSquares = [];
+        _initialKingSquares[(int)Side.White] = position._initialKingSquares[(int)Side.White];
+        _initialKingSquares[(int)Side.Black] = position._initialKingSquares[(int)Side.Black];
+
+        _initialKingsideRookSquares[(int)Side.White] = position._initialKingsideRookSquares[(int)Side.White];
+        _initialKingsideRookSquares[(int)Side.Black] = position._initialKingsideRookSquares[(int)Side.Black];
+
+        _initialQueensideRookSquares[(int)Side.White] = position._initialQueensideRookSquares[(int)Side.White];
+        _initialQueensideRookSquares[(int)Side.Black] = position._initialQueensideRookSquares[(int)Side.Black];
 #endif
-
-            KingsideCastlingFreeSquares = [];
-            QueensideCastlingFreeSquares = [];
-            KingsideCastlingNonAttackedSquares = [];
-            QueensideCastlingNonAttackedSquares = [];
-        }
-        else
-        {
-#if DEBUG
-            _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingSquares[(int)Side.White] = position._initialKingSquares[(int)Side.White];
-            _initialKingSquares[(int)Side.Black] = position._initialKingSquares[(int)Side.Black];
-
-            _initialKingsideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialKingsideRookSquares[(int)Side.White] = position._initialKingsideRookSquares[(int)Side.White];
-            _initialKingsideRookSquares[(int)Side.Black] = position._initialKingsideRookSquares[(int)Side.Black];
-
-            _initialQueensideRookSquares = ArrayPool<int>.Shared.Rent(2);
-            _initialQueensideRookSquares[(int)Side.White] = position._initialQueensideRookSquares[(int)Side.White];
-            _initialQueensideRookSquares[(int)Side.Black] = position._initialQueensideRookSquares[(int)Side.Black];
-#endif
-
-            KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-            KingsideCastlingFreeSquares[(int)Side.White] = position.KingsideCastlingFreeSquares[(int)Side.White];
-            KingsideCastlingFreeSquares[(int)Side.Black] = position.KingsideCastlingFreeSquares[(int)Side.Black];
-
-            KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            KingsideCastlingNonAttackedSquares[(int)Side.White] = position.KingsideCastlingNonAttackedSquares[(int)Side.White];
-            KingsideCastlingNonAttackedSquares[(int)Side.Black] = position.KingsideCastlingNonAttackedSquares[(int)Side.Black];
-
-            QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-            QueensideCastlingFreeSquares[(int)Side.White] = position.QueensideCastlingFreeSquares[(int)Side.White];
-            QueensideCastlingFreeSquares[(int)Side.Black] = position.QueensideCastlingFreeSquares[(int)Side.Black];
-
-            QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-            QueensideCastlingNonAttackedSquares[(int)Side.White] = position.QueensideCastlingNonAttackedSquares[(int)Side.White];
-            QueensideCastlingNonAttackedSquares[(int)Side.Black] = position.QueensideCastlingNonAttackedSquares[(int)Side.Black];
-
-            WhiteShortCastle = position.WhiteShortCastle;
-            WhiteLongCastle = position.WhiteLongCastle;
-            BlackShortCastle = position.BlackShortCastle;
-            BlackLongCastle = position.BlackLongCastle;
-        }
 
         Validate();
     }

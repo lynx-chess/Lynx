@@ -374,8 +374,8 @@ public class OnlineTablebaseProberTest
         // Using local method due to async Span limitation
         static Game ParseGame()
         {
-            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            var game = PositionCommand.ParseGame("position fen 4K3/8/8/8/8/8/8/n3k2b w - - 0 1 moves e8d7 e1e2 d7d6 e2e3 d6c5 e3e4 c5d6 e4d4 d6e6 a1c2 e6f6 h1d5 f6f5 c2e1 f5f6 d5b3 f6f5 e1d3 f5f6 d4e4 f6g5 e4e5 g5g6 e5f4 g6h5 f4f5 h5h6 f5g4 h6g6 g4f4 g6h5 f4f5 h5h6 b3d1 h6g7 f5g5 g7f7 d1b3 f7g7 d3f4 g7h7 b3c4 h7g7 c4d3 g7f7 d3c4 f7g7 f4h5 g7h8 h5f4", movePool);
+            var game = new Game(Constants.InitialPositionFEN);
+            game.ParsePositionCommand("position fen 4K3/8/8/8/8/8/8/n3k2b w - - 0 1 moves e8d7 e1e2 d7d6 e2e3 d6c5 e3e4 c5d6 e4d4 d6e6 a1c2 e6f6 h1d5 f6f5 c2e1 f5f6 d5b3 f6f5 e1d3 f5f6 d4e4 f6g5 e4e5 g5g6 e5f4 g6h5 f4f5 h5h6 f5g4 h6g6 g4f4 g6h5 f4f5 h5h6 b3d1 h6g7 f5g5 g7f7 d1b3 f7g7 d3f4 g7h7 b3c4 h7g7 c4d3 g7f7 d3c4 f7g7 f4h5 g7h8 h5f4");
             return game;
         }
     }
@@ -400,8 +400,9 @@ public class OnlineTablebaseProberTest
         // Using local method due to async Span limitation
         static Game ParseGame()
         {
-            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            var game = PositionCommand.ParseGame("position fen 4K3/8/8/8/8/8/8/n3k2b w - - 40 1 moves e8d7 e1e2 d7d6 e2e3 d6c5 e3e4 c5d6 e4d4 d6e6 a1c2 e6f6 h1d5 f6f5 c2e1 f5f6 d5b3 f6f5 e1d3 f5f6 d4e4 f6g5 e4e5 g5g6 e5f4 g6h5 f4f5 h5h6 f5g4 h6g6 g4f4 g6h5 f4f5 h5h6 b3d1 h6g7 f5g5 g7f7 d1b3 f7g7 d3f4 g7h7 b3c4 h7g7 c4d3 g7f7 d3c4 f7g7 f4h5 g7h8 h5f4", movePool);
+            var game = new Game(Constants.InitialPositionFEN);
+
+            game.ParsePositionCommand("position fen 4K3/8/8/8/8/8/8/n3k2b w - - 40 1 moves e8d7 e1e2 d7d6 e2e3 d6c5 e3e4 c5d6 e4d4 d6e6 a1c2 e6f6 h1d5 f6f5 c2e1 f5f6 d5b3 f6f5 e1d3 f5f6 d4e4 f6g5 e4e5 g5g6 e5f4 g6h5 f4f5 h5h6 f5g4 h6g6 g4f4 g6h5 f4f5 h5h6 b3d1 h6g7 f5g5 g7f7 d1b3 f7g7 d3f4 g7h7 b3c4 h7g7 c4d3 g7f7 d3c4 f7g7 f4h5 g7h8 h5f4");
             return game;
         }
     }
