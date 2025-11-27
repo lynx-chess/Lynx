@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
+using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -9,7 +10,7 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1 + Constants.ArrayDepthMargin) / 2, pinned: true);
+    private Move[] _pVTable = [];
 
     /// <summary>
     /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
@@ -100,7 +101,6 @@ public sealed partial class Engine
         // Cleanup
         _nodes = 0;
 
-        Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
         for (int i = 0; i < 12; ++i)
         {
@@ -142,6 +142,9 @@ public sealed partial class Engine
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                // We rent one per search, since it's returned to the pool on SearchResult.ToString()
+                _pVTable = ArrayPool<Move>.Shared.Rent(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1 + Constants.ArrayDepthMargin) / 2);
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
@@ -504,9 +507,6 @@ public sealed partial class Engine
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
         int bestScore, int depth, int mate)
     {
-        var pvTableSpan = _pVTable.AsSpan();
-        var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
-
         var maxDepthReached = _maxDepthReached.Max();
 
         var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
@@ -516,7 +516,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-            pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
+            _pVTable[0], bestScore, depth, _pVTable, mate)
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,

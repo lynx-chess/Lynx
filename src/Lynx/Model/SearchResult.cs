@@ -1,4 +1,5 @@
 ﻿using Lynx.UCI.Commands.Engine;
+using System.Buffers;
 
 namespace Lynx.Model;
 
@@ -55,8 +56,11 @@ public sealed class SearchResult
 
     public override string ToString()
     {
+        ReadOnlySpan<Move> moveSpan = Moves.AsSpan();
+        var pv = moveSpan[..moveSpan.IndexOf(0)];
+
         var sb = ObjectPools.StringBuilderPool.Get();
-        sb.EnsureCapacity(128 + (Moves.Length * 5));
+        sb.EnsureCapacity(128 + (pv.Length * 5));
 
 #if MULTITHREAD_DEBUG
         sb.Append("[#").Append(EngineId).Append("] ");
@@ -101,13 +105,13 @@ public sealed class SearchResult
         }
 
         sb.Append(" pv ");
-        foreach (var move in Moves)
+        foreach (var move in pv)
         {
             sb.Append(move.UCIStringMemoized()).Append(' ');
         }
 
         // Remove the trailing space
-        if (Moves.Length > 0)
+        if (pv.Length > 0)
         {
             sb.Length--;
         }
@@ -115,6 +119,7 @@ public sealed class SearchResult
         var result = sb.ToString();
 
         ObjectPools.StringBuilderPool.Return(sb);
+        ArrayPool<Move>.Shared.Return(Moves);
 
         return result;
     }
