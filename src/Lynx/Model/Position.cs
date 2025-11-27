@@ -297,7 +297,7 @@ public partial class Position : IDisposable
         // TODO see if we can avoid
         for (int i = 0; i < _stateStack.Length; ++i)
         {
-            _stateStack[i] = new();
+            _stateStack[i].Reset();
         }
         _stateStack[0].SetupFromPrevious(position._state);
         _state = _stateStack[0];

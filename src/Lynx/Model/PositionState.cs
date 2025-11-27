@@ -106,6 +106,25 @@ partial class Position
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Reset()
+        {
+            UniqueIdentifier = default;
+            KingPawnUniqueIdentifier = default;
+            NonPawnHash[(int)Side.White] = default;
+            NonPawnHash[(int)Side.Black] = default;
+            MinorHash = default;
+            MajorHash = default;
+
+            IncrementalEvalAccumulator = default;
+            IncrementalPhaseAccumulator = default;
+
+            EnPassant = BoardSquare.noSquare;
+            Castle = default;
+
+            IsIncrementalEval = default;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetupFromPrevious(State previous)
         {
             UniqueIdentifier = previous.UniqueIdentifier;
