@@ -35,14 +35,14 @@ public class SingleLegalMoveTest : BaseTest
         var pos = new Position(fen);
         foreach (var move in MoveGenerator.GenerateAllMoves(pos))
         {
-            var state = pos.MakeMove(move);
+            pos.MakeMove(move);
             if (pos.IsValid())
             {
                 Assert.IsNull(singleMove);
                 singleMove = move;
             }
 
-            pos.UnmakeMove(move, state);
+            pos.UnmakeMove(move);
         }
 
         Assert.LessOrEqual(depth, Configuration.EngineSettings.MaxDepth);

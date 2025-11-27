@@ -130,7 +130,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
+                        using var newPosition = new Position(position, 2);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -191,7 +191,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
+                        using var newPosition = new Position(position, 2);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -254,7 +254,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
+                        using var newPosition = new Position(position, 2);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -314,7 +314,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
+                        using var newPosition = new Position(position, 2);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;

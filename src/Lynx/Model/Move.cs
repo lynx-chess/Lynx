@@ -378,9 +378,9 @@ public static class MoveExtensions
             .Where(m =>
             {
                 // If any illegal moves exist with the same simple representation there's no need to disambiguate
-                var gameState = position.MakeMove(m);
+                position.MakeMove(m);
                 var isLegal = position.WasProduceByAValidMove();
-                position.UnmakeMove(m, gameState);
+                position.UnmakeMove(m);
 
                 return isLegal;
             })

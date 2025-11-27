@@ -529,7 +529,7 @@ static void _32_Make_Move()
             game.CurrentPosition.Print();
 
             Console.WriteLine(move.ToEPDString(game.CurrentPosition));
-            var gameState = game.MakeMove(move);
+            game.MakeMove(move);
             game.CurrentPosition.Print();
 
             Console.WriteLine("White occupancy:");
@@ -538,7 +538,7 @@ static void _32_Make_Move()
             Console.WriteLine("Black occupancy:");
             game.CurrentPosition.OccupancyBitBoards[(int)Side.Black].Print();
 
-            game.CurrentPosition.UnmakeMove(move, gameState);
+            game.CurrentPosition.UnmakeMove(move);
         }
     }
 
@@ -552,9 +552,9 @@ static void _32_Make_Move()
                 game.CurrentPosition.Print();
 
                 Console.WriteLine(move.ToEPDString(game.CurrentPosition));
-                var gameState = game.MakeMove(move);
+                game.MakeMove(move);
                 game.CurrentPosition.Print();
-                game.CurrentPosition.UnmakeMove(move, gameState);
+                game.CurrentPosition.UnmakeMove(move);
             }
         }
     }
@@ -1118,14 +1118,14 @@ static void UnmakeMove()
 
             var newPosition = new Position(position);
             newPosition.MakeMove(move);
-            var savedState = position.MakeMove(move);
+            position.MakeMove(move);
 
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
 
             Console.WriteLine($"Unmaking {epdMoveString} in\t{position.FEN()}");
 
-            //position.UnmakeMove(move, savedState);
+            //position.UnmakeMove(move);
 
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
 

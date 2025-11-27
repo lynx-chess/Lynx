@@ -449,9 +449,9 @@ public sealed partial class Engine
 
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
         {
-            var gameState = Game.CurrentPosition.MakeMove(move);
+            Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
-            Game.CurrentPosition.UnmakeMove(move, gameState);
+            Game.CurrentPosition.UnmakeMove(move);
 
             if (isPositionValid)
             {
@@ -578,7 +578,7 @@ public sealed partial class Engine
         var score = 0;
         ShortMove ttBestMove = default;
 
-        using var position = new Position(Game.PositionBeforeLastSearch);
+        using var position = new Position(Game.PositionBeforeLastSearch, 2);
         var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply: 0, out var ttEntry);
 
         if (ttHit)
@@ -618,10 +618,10 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
-            var gameState = position.MakeMove(move);
+            position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
-                position.UnmakeMove(move, gameState);
+                position.UnmakeMove(move);
                 continue;
             }
 

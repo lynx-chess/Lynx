@@ -130,6 +130,7 @@ public sealed partial class Engine : IDisposable
         SearchResult resultToReturn = IDDFS(isPondering, jointCts.Token);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
+        // This is done to allow sending consecutive search commands
         Game.ResetCurrentPositionToBeforeSearchState();
         if (!isPondering
             && resultToReturn.BestMove != default

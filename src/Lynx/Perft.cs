@@ -46,13 +46,13 @@ public static class Perft
 
             foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
-                var state = position.MakeMove(move);
+                position.MakeMove(move);
 
                 if (position.WasProduceByAValidMove())
                 {
                     nodes = PerftRecursiveImpl(position, depth - 1, nodes);
                 }
-                position.UnmakeMove(move, state);
+                position.UnmakeMove(move);
             }
 
             return nodes;
@@ -74,7 +74,7 @@ public static class Perft
 
             foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
             {
-                var state = position.MakeMove(move);
+                position.MakeMove(move);
 
                 if (position.WasProduceByAValidMove())
                 {
@@ -84,7 +84,7 @@ public static class Perft
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
 
-                position.UnmakeMove(move, state);
+                position.UnmakeMove(move);
             }
 
             write(string.Empty);

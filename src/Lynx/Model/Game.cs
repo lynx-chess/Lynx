@@ -67,7 +67,6 @@ public sealed class Game : IDisposable
     {
         try
         {
-
             // We divide the position command in these two sections:
             // "position startpos                       ||"
             // "position startpos                       || moves e2e4 e7e5"
@@ -266,9 +265,9 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMove(Move moveToPlay)
+    public void MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMove(moveToPlay);
+        CurrentPosition.MakeMove(moveToPlay);
 
         if (CurrentPosition.WasProduceByAValidMove())
         {
@@ -280,17 +279,15 @@ public sealed class Game : IDisposable
         }
         else
         {
-            CurrentPosition.UnmakeMove(moveToPlay, gameState);
+            CurrentPosition.UnmakeMove(moveToPlay);
             _logger.Warn("Error trying to play move {0} in {1}", moveToPlay.UCIString(), CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove));
         }
-
-        return gameState;
     }
 
     /// <summary>
     /// Cleans <see cref="CurrentPosition"/> value, since in case of search cancellation
     /// (either by the engine time management logic or by external stop command)
-    /// currentPosition won't be the initial one
+    /// currentPosition won't be the initial one.
     /// </summary>
     public void ResetCurrentPositionToBeforeSearchState()
     {
