@@ -104,6 +104,11 @@ public partial class Position : IDisposable
             : BlackShortCastle.SourceSquare();
 
     private Position()
+        : this(Constants.MaxNumberMovesInAGame)
+    {
+    }
+
+    private Position(int stateStackLength)
     {
         _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         _occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
@@ -115,7 +120,7 @@ public partial class Position : IDisposable
         QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
         QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
 
-        _stateStack = new State[Constants.MaxNumberMovesInAGame];
+        _stateStack = new State[stateStackLength];
         for (int i = 0; i < _stateStack.Length; ++i)
         {
             _stateStack[i] = new();
@@ -146,6 +151,15 @@ public partial class Position : IDisposable
     /// </summary>
     public Position(Position position)
         : this()
+    {
+        ResetTo(position);
+    }
+
+    /// <summary>
+    /// Clone constructor
+    /// </summary>
+    public Position(Position position, int stateStackLength)
+        : this(stateStackLength)
     {
         ResetTo(position);
     }
