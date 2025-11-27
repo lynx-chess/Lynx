@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Lynx.UCI.Commands.GUI;
+using NLog;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 
@@ -27,20 +28,80 @@ public sealed class Game : IDisposable
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
-    public Position CurrentPosition { get; private set; }
+    public Position CurrentPosition { get; }
 
-    public Position PositionBeforeLastSearch { get; private set; }
+    public Position PositionBeforeLastSearch { get; }
 
     public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove);
 
-    public Game(ReadOnlySpan<char> fen) : this(fen, [], [], [])
-    {
-    }
-
-    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
+    private Game()
     {
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
         _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
+
+        CurrentPosition = new Position(Constants.InitialPositionFEN);
+        PositionBeforeLastSearch = new Position(CurrentPosition);
+
+#if DEBUG
+        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+#endif
+    }
+
+    public Game(string fen)
+        : this()
+    {
+        ParseFEN(fen);
+    }
+
+    public void ParseFEN(ReadOnlySpan<char> fen)
+    {
+        Populate(fen, []);
+    }
+
+    public void ParsePositionCommand(ReadOnlySpan<char> positionCommandSpan)
+    {
+        try
+        {
+
+            // We divide the position command in these two sections:
+            // "position startpos                       ||"
+            // "position startpos                       || moves e2e4 e7e5"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
+            Span<Range> items = stackalloc Range[2];
+            positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var initialPositionSection = positionCommandSpan[items[0]];
+
+            // We divide in these two parts
+            // "position startpos ||"       <-- If "fen" doesn't exist in the section
+            // "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
+            Span<Range> initialPositionParts = stackalloc Range[2];
+            initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == PositionCommand.Id.Length   // "position" or "position startpos"
+                ? initialPositionSection[initialPositionParts[1]]
+                : Constants.InitialPositionFEN.AsSpan();
+
+            var movesSection = positionCommandSpan[items[1]];
+
+            Populate(fen, movesSection);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
+            Populate(Constants.InitialPositionFEN, []);
+        }
+    }
+
+    private void Populate(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves)
+    {
+        _positionHashHistoryPointer = 0;
+        Array.Clear(_stack);
+
+#if DEBUG
+        MoveHistory.Clear();
+#endif
 
         for (int i = 0; i < _stack.Length; ++i)
         {
@@ -48,7 +109,7 @@ public sealed class Game : IDisposable
         }
 
         var parsedFen = FENParser.ParseFEN(fen);
-        CurrentPosition = new Position(parsedFen);
+        CurrentPosition.PopulateFrom(parsedFen);
 
         if (!CurrentPosition.IsValid())
         {
@@ -58,21 +119,24 @@ public sealed class Game : IDisposable
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
 
-#if DEBUG
-        MoveHistory = new(Constants.MaxNumberMovesInAGame);
-#endif
-
         Span<BitBoard> attacks = stackalloc BitBoard[12];
         Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
         var evaluationContext = new EvaluationContext(attacks, attacksBySide);
 
-        for (int i = 0; i < rangeSpan.Length; ++i)
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        // Number of potential half-moves provided in the string
+        Span<Range> moveRanges = stackalloc Range[(rawMoves.Length / 5) + 1];
+        rawMoves.Split(moveRanges, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        for (int i = 0; i < moveRanges.Length; ++i)
         {
-            if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
+            if (moveRanges[i].Start.Equals(moveRanges[i].End))
             {
                 break;
             }
-            var moveString = rawMoves[rangeSpan[i]];
+
+            var moveString = rawMoves[moveRanges[i]];
             var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
 
             // TODO: consider creating moves on the fly
@@ -85,7 +149,7 @@ public sealed class Game : IDisposable
             MakeMove(parsedMove.Value);
         }
 
-        PositionBeforeLastSearch = new Position(CurrentPosition);
+        PositionBeforeLastSearch.ResetTo(CurrentPosition);
         //_positionHashHistoryPointerBeforeLastSearch = _positionHashHistoryPointer;
     }
 
@@ -226,15 +290,13 @@ public sealed class Game : IDisposable
     /// </summary>
     public void ResetCurrentPositionToBeforeSearchState()
     {
-        CurrentPosition.Dispose();
-        CurrentPosition = new(PositionBeforeLastSearch);
+        CurrentPosition.ResetTo(PositionBeforeLastSearch);
         //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
     }
 
     public void UpdateInitialPosition()
     {
-        PositionBeforeLastSearch.Dispose();
-        PositionBeforeLastSearch = new(CurrentPosition);
+        PositionBeforeLastSearch.ResetTo(CurrentPosition);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

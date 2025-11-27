@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
+
 public static class TimeManager
 {
     /// <summary>
@@ -116,8 +117,11 @@ public static class TimeManager
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
             searchConstraints.HardLimitTimeBound);
 
-        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, score stability factor: {2}, soft time limit: {3} -> {4}",
-            nodeTmFactor, bestMoveStabilityFactor, scoreStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
+        if (_logger.IsTraceEnabled)
+        {
+            _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, score stability factor: {2}, soft time limit: {3} -> {4}",
+                nodeTmFactor, bestMoveStabilityFactor, scoreStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
+        }
 
         return newSoftTimeLimit;
     }
