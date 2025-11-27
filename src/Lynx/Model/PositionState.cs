@@ -105,23 +105,6 @@ partial class Position
             NonPawnHash = new ulong[2];
         }
 
-        public State(State original)
-        {
-            UniqueIdentifier = original.UniqueIdentifier;
-            KingPawnUniqueIdentifier = original.KingPawnUniqueIdentifier;
-            NonPawnHash = [original.NonPawnHash[0], original.NonPawnHash[1]];
-            MinorHash = original.MinorHash;
-            MajorHash = original.MajorHash;
-
-            IncrementalEvalAccumulator = original.IncrementalEvalAccumulator;
-            IncrementalPhaseAccumulator = original.IncrementalPhaseAccumulator;
-
-            EnPassant = original.EnPassant;
-            Castle = original.Castle;
-
-            IsIncrementalEval = original.IsIncrementalEval;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetupFromPrevious(State previous)
         {
@@ -135,6 +118,7 @@ partial class Position
             IncrementalEvalAccumulator = previous.IncrementalEvalAccumulator;
             IncrementalPhaseAccumulator = previous.IncrementalPhaseAccumulator;
 
+            EnPassant = previous.EnPassant;
             Castle = previous.Castle;
 
             IsIncrementalEval = previous.IsIncrementalEval;

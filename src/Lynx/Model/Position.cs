@@ -299,7 +299,8 @@ public partial class Position : IDisposable
         {
             _stateStack[i] = new();
         }
-        _state = _stateStack[0] = new(position._state);
+        _stateStack[0].SetupFromPrevious(position._state);
+        _state = _stateStack[0];
         _stackCounter = 0;
 
         Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
@@ -357,6 +358,7 @@ public partial class Position : IDisposable
         ++_stackCounter;
         _state = _stateStack[_stackCounter];
         _state.SetupFromPrevious(oldState);
+        _state.EnPassant = BoardSquare.noSquare;
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -438,8 +440,6 @@ public partial class Position : IDisposable
                 _state.MajorHash ^= fullPieceMovementHash;
             }
         }
-
-        _state.EnPassant = BoardSquare.noSquare;
 
         // _incrementalEvalAccumulator updates
         if (_state.IsIncrementalEval)

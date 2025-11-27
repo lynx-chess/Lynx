@@ -67,7 +67,6 @@ public sealed class Game : IDisposable
     {
         try
         {
-
             // We divide the position command in these two sections:
             // "position startpos                       ||"
             // "position startpos                       || moves e2e4 e7e5"
