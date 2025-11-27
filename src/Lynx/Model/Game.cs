@@ -37,7 +37,12 @@ public sealed class Game : IDisposable
     private Game()
     {
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+
         _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
+        for (int i = 0; i < _stack.Length; ++i)
+        {
+            _stack[i].Reset();
+        }
 
         CurrentPosition = new Position(Constants.InitialPositionFEN);
         PositionBeforeLastSearch = new Position(CurrentPosition);
@@ -97,16 +102,15 @@ public sealed class Game : IDisposable
     private void Populate(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves)
     {
         _positionHashHistoryPointer = 0;
-        Array.Clear(_stack);
-
-#if DEBUG
-        MoveHistory.Clear();
-#endif
 
         for (int i = 0; i < _stack.Length; ++i)
         {
             _stack[i].Reset();
         }
+
+#if DEBUG
+        MoveHistory.Clear();
+#endif
 
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition.PopulateFrom(parsedFen);
