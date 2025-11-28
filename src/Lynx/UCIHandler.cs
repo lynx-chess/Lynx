@@ -456,9 +456,7 @@ public sealed class UCIHandler
                 ++lineCounter;
                 if (lineCounter % 100 == 0)
                 {
-#pragma warning disable CA1849 // Call async methods when in an async method - intended
-                    Thread.Sleep(50);
-#pragma warning restore CA1849 // Call async methods when in an async method
+                    await Task.Delay(50, cancellationToken);
                 }
             }
         }

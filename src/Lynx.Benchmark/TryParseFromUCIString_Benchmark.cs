@@ -123,9 +123,10 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public Game Span(string positionCommand)
     {
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var game = new Game(Constants.InitialPositionFEN);
+        game.ParsePositionCommand(positionCommand);
 
-        return PositionCommand.ParseGame(positionCommand, movePool);
+        return game;
     }
 
     private static TryParseFromUCIString_Benchmark_Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Move[] movePool)
@@ -162,7 +163,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
         catch (Exception)
         {
 #pragma warning disable S112 // General or reserved exceptions should never be thrown
-            throw new($"Error parsing position command '{positionCommandSpan.ToString()}'");
+            throw new($"Error parsing position command '{positionCommandSpan}'");
 #pragma warning restore S112 // General or reserved exceptions should never be thrown
         }
     }
@@ -187,11 +188,13 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
         public TryParseFromUCIString_Benchmark_Game(ReadOnlySpan<char> fen)
         {
+            CurrentPosition = new Position(Constants.InitialPositionFEN);
             var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition = new Position(parsedFen);
+            CurrentPosition.PopulateFrom(parsedFen);
+
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                _logger.Warn($"Invalid position detected: {fen}");
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };

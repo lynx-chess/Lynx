@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -62,7 +62,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -95,7 +95,7 @@ jobs:
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
@@ -109,7 +109,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }} NuGet package
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}
         path: |
@@ -136,7 +136,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -178,7 +178,7 @@ jobs:
 
     - name: '[Ubuntu] Upload test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
         path: coveragereport/
@@ -194,7 +194,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -227,7 +227,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -260,7 +260,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -293,7 +293,7 @@ jobs:
       fail-fast: true
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -326,7 +326,7 @@ jobs:
       fail-fast: true
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -359,7 +359,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -391,7 +391,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
@@ -457,7 +457,7 @@ jobs:
   #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
   #  - name: '[Ubuntu] Upload unified test coverage report'
-  #    uses: actions/upload-artifact@v4
+  #    uses: actions/upload-artifact@v5
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/
@@ -477,7 +477,7 @@ jobs:
   #    PROJECT_NAME: Lynx
 
   #  steps:
-  #  - uses: actions/checkout@v5
+  #  - uses: actions/checkout@v6
 
   #  - name: Setup .NET
   #    uses: actions/setup-dotnet@v5
@@ -516,7 +516,7 @@ jobs:
 
   #  - name: '[Ubuntu] Upload test coverage report'
   #    if: matrix.os == 'ubuntu-latest'
-  #    uses: actions/upload-artifact@v4
+  #    uses: actions/upload-artifact@v5
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/

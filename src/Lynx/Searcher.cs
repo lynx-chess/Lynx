@@ -20,7 +20,7 @@ public sealed class Searcher : IDisposable
     private int _searchThreadsCount;
     private Engine _mainEngine;
     private Engine[] _extraEngines = [];
-    private TranspositionTable _ttWrapper;
+    private ITranspositionTable _ttWrapper;
 
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
@@ -40,7 +40,7 @@ public sealed class Searcher : IDisposable
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        _ttWrapper = new TranspositionTable();
+        _ttWrapper = TranspositionTableFactory.Create();
         _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
@@ -498,7 +498,7 @@ public sealed class Searcher : IDisposable
         var threadsUpdated = UpdateThreads();
         if (threadsUpdated)
         {
-            _logger.Warn("Unexpected threads update - should have happened on 'setoption'");
+            _logger.Warn("Unexpected Threads update - should have happened on 'setoption'");
         }
 
         // Hash update - after hash update to potentially take advantage of multithreaded TT
@@ -506,7 +506,7 @@ public sealed class Searcher : IDisposable
         var hashUpdated = UpdateHash();
         if (hashUpdated)
         {
-            _logger.Warn("Unexpected hash update - should have happened on 'setoption'\");");
+            _logger.Warn("Unexpected Hash update - should have happened on 'setoption'\");");
         }
 
         // We don't need to reset the main engine in case of hash update
@@ -537,7 +537,8 @@ public sealed class Searcher : IDisposable
     {
         if (_searchThreadsCount != Configuration.EngineSettings.Threads)
         {
-            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
+            _logger.Info("Updating search thread count ({CurrentCount} thread(s) -> {NewCount} thread(s))", _searchThreadsCount, Configuration.EngineSettings.Threads);
+            _engineWriter.TryWrite($"info string Updating search thread count ({_searchThreadsCount} thread(s) -> {Configuration.EngineSettings.Threads} thread(s))");
 
             // Before invoking AllocateExtraEngines
             _searchThreadsCount = Configuration.EngineSettings.Threads;
@@ -552,11 +553,12 @@ public sealed class Searcher : IDisposable
 
     public bool UpdateHash()
     {
-        if (_ttWrapper.Size != Configuration.EngineSettings.TranspositionTableSize)
+        if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
         {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
+            _engineWriter.TryWrite($"info string Resizing TT ({_ttWrapper.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
-            _ttWrapper = new TranspositionTable();
+            _ttWrapper = TranspositionTableFactory.Create();
 
             // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
             // It might impact performance though, due to preventing that zeroing from happenning during search
@@ -650,6 +652,7 @@ public sealed class Searcher : IDisposable
         _ = EvaluationConstants.HistoryBonus[1];
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();
+        _ = MoveExtensions.UCIStringMemoized(0);
     }
 
     private static void ForceGCCollection()
@@ -688,7 +691,7 @@ public sealed class Searcher : IDisposable
             {
                 _mainEngine.Dispose();
 
-                foreach(var engine in _extraEngines)
+                foreach (var engine in _extraEngines)
                 {
                     engine.Dispose();
                 }

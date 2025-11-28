@@ -13,7 +13,7 @@ public sealed partial class Engine : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly int _id;
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly TranspositionTable _tt;
+    private readonly ITranspositionTable _tt;
     private SearchConstraints _searchConstraints;
 
     private bool _disposedValue;
@@ -31,11 +31,11 @@ public sealed partial class Engine : IDisposable
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
 #pragma warning disable EPS09 // Pass an argument for an 'in' parameter explicitly
-    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
+    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, TranspositionTableFactory.Create()) { }
 #pragma warning restore EPS09 // Pass an argument for an 'in' parameter explicitly
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
+    public Engine(int id, ChannelWriter<object> engineWriter, in ITranspositionTable tt)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
@@ -52,7 +52,7 @@ public sealed partial class Engine : IDisposable
             _moveNodeCount[i] = new ulong[64];
         }
 
-        _logger.Info("Engine {0} initialized", _id);
+        _logger.Debug("Engine {0} initialized", _id);
     }
 
     public void Warmup()
@@ -98,8 +98,7 @@ public sealed partial class Engine : IDisposable
     public void NewGame()
     {
         AverageDepth = 0;
-        Game.Dispose();
-        Game = new Game(Constants.InitialPositionFEN);
+        Game.ParseFEN(Constants.InitialPositionFEN);
 
         ResetEngine();
     }
@@ -107,9 +106,7 @@ public sealed partial class Engine : IDisposable
     [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Game.Dispose();
-        Game = PositionCommand.ParseGame(rawPositionCommand, moves);
+        Game.ParsePositionCommand(rawPositionCommand);
     }
 
     /// <summary>
@@ -238,7 +235,7 @@ public sealed partial class Engine : IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
 
-        #pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
+#pragma warning disable S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
 #pragma warning restore S3234, IDISP024 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }

@@ -1,50 +1,68 @@
 ﻿/*
+ *  BenchmarkDotNet v0.15.4, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
  *
- *  BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.3091) (Hyper-V)
- *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
- *  .NET SDK 9.0.102
- *    [Host]     : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
- *    DefaultJob : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
- *
- *  | Method                  | Mean     | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
- *  |------------------------ |---------:|---------:|---------:|------:|-------:|----------:|------------:|
- *  | Original                | 42.39 us | 0.246 us | 0.218 us |  1.00 | 2.9907 |  49.63 KB |        1.00 |
- *  | Original_SkipLocalsInit | 43.48 us | 0.287 us | 0.255 us |  1.03 | 2.9907 |  49.63 KB |        1.00 |
- *  | BitBoard                | 41.62 us | 0.388 us | 0.363 us |  0.98 | 2.9907 |  49.63 KB |        1.00 |
- *  | BitBoard_NoFileArray    | 40.30 us | 0.294 us | 0.275 us |  0.95 | 2.9907 |  49.63 KB |        1.00 |
- *
- *
- *  BenchmarkDotNet v0.14.0, macOS Ventura 13.7.2 (22H313) [Darwin 22.6.0]
- *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
- *  .NET SDK 9.0.102
- *    [Host]     : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
- *    DefaultJob : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
- *
- *  | Method                  | Mean     | Error    | StdDev   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
- *  |------------------------ |---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
- *  | Original                | 55.11 us | 0.977 us | 0.816 us |  1.00 |    0.02 | 8.0566 |  49.64 KB |        1.00 |
- *  | Original_SkipLocalsInit | 55.39 us | 0.533 us | 0.445 us |  1.01 |    0.02 | 8.0566 |  49.64 KB |        1.00 |
- *  | BitBoard                | 54.91 us | 0.704 us | 0.624 us |  1.00 |    0.02 | 8.0566 |  49.64 KB |        1.00 |
- *  | BitBoard_NoFileArray    | 56.32 us | 0.862 us | 0.806 us |  1.02 |    0.02 | 8.0566 |  49.64 KB |        1.00 |
+ *  | Method                    | Mean     | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  |-------------------------- |---------:|---------:|---------:|------:|-------:|----------:|------------:|
+ *  | Original                  | 39.19 us | 0.446 us | 0.418 us |  1.00 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Original_SkipLocalsInit   | 39.53 us | 0.288 us | 0.270 us |  1.01 | 3.4790 |   57.6 KB |        1.00 |
+ *  | BitBoard                  | 36.27 us | 0.154 us | 0.136 us |  0.93 | 3.4790 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoFileArray      | 37.03 us | 0.205 us | 0.182 us |  0.95 | 3.4790 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoPawnCountArray | 36.81 us | 0.172 us | 0.152 us |  0.94 | 3.4790 |   57.6 KB |        1.00 |
  *
  *
- *  BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
+ *  BenchmarkDotNet v0.15.4, Windows 11 (10.0.26100.6584/24H2/2024Update/HudsonValley) (Hyper-V)
+ *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *
+ *  | Method                    | Mean     | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  |-------------------------- |---------:|---------:|---------:|------:|-------:|----------:|------------:|
+ *  | Original                  | 40.07 us | 0.312 us | 0.276 us |  1.00 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Original_SkipLocalsInit   | 40.49 us | 0.574 us | 0.537 us |  1.01 | 3.4790 |   57.6 KB |        1.00 |
+ *  | BitBoard                  | 39.41 us | 0.304 us | 0.285 us |  0.98 | 3.4790 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoFileArray      | 38.50 us | 0.232 us | 0.194 us |  0.96 | 3.4790 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoPawnCountArray | 38.82 us | 0.320 us | 0.299 us |  0.97 | 3.4790 |   57.6 KB |        1.00 |
+ *
+ *
+ *   BenchmarkDotNet v0.15.4, macOS Sequoia 15.6.1 (24G90) [Darwin 24.6.0]
  *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
- *  .NET SDK 9.0.102
- *    [Host]     : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
- *    DefaultJob : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
- *  | Method                  | Mean     | Error    | StdDev   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
- *  |------------------------ |---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
- *  | Original                | 29.08 us | 0.084 us | 0.075 us |  1.00 |    0.00 | 8.0872 |  49.64 KB |        1.00 |
- *  | Original_SkipLocalsInit | 29.09 us | 0.107 us | 0.089 us |  1.00 |    0.00 | 8.0872 |  49.64 KB |        1.00 |
- *  | BitBoard                | 28.24 us | 0.227 us | 0.189 us |  0.97 |    0.01 | 8.0872 |  49.64 KB |        1.00 |
- *  | BitBoard_NoFileArray    | 30.33 us | 0.605 us | 1.044 us |  1.04 |    0.04 | 8.0872 |  49.64 KB |        1.00 |
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), Arm64 RyuJIT armv8.0-a
  *
+ *  | Method                    | Mean     | Error    | StdDev   | Median   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |-------------------------- |---------:|---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
+ *  | Original                  | 25.01 us | 0.498 us | 1.356 us | 24.84 us |  1.00 |    0.08 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Original_SkipLocalsInit   | 23.79 us | 0.458 us | 0.580 us | 23.93 us |  0.95 |    0.05 | 9.3994 |   57.6 KB |        1.00 |
+ *  | BitBoard                  | 22.83 us | 0.453 us | 1.120 us | 22.31 us |  0.92 |    0.07 | 9.3994 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoFileArray      | 22.90 us | 0.457 us | 1.050 us | 22.29 us |  0.92 |    0.06 | 9.3994 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoPawnCountArray | 22.98 us | 0.458 us | 1.014 us | 22.79 us |  0.92 |    0.06 | 9.3994 |   57.6 KB |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.15.4, macOS Ventura 13.7.6 (22H625) [Darwin 22.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 9.0.305
+ *    [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
+ *
+ *  | Method                    | Mean     | Error    | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |-------------------------- |---------:|---------:|----------:|------:|--------:|-------:|----------:|------------:|
+ *  | Original                  | 66.75 us | 3.647 us | 10.637 us |  1.02 |    0.22 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Original_SkipLocalsInit   | 57.40 us | 1.487 us |  4.339 us |  0.88 |    0.15 | 9.3994 |   57.6 KB |        1.00 |
+ *  | BitBoard                  | 58.56 us | 1.531 us |  4.343 us |  0.90 |    0.15 | 9.3994 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoFileArray      | 67.81 us | 3.107 us |  8.964 us |  1.04 |    0.21 | 9.3994 |   57.6 KB |        1.00 |
+ *  | BitBoard_NoPawnCountArray | 66.54 us | 2.602 us |  7.254 us |  1.02 |    0.19 | 9.3994 |   57.6 KB |        1.00 |
 */
 
 using BenchmarkDotNet.Attributes;
 using Lynx.ConstantsGenerator;
 using Lynx.Model;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
@@ -115,6 +133,22 @@ public class PawnIslandsBenchmark : BaseBenchmark
         return sum;
     }
 
+    [Benchmark]
+    public int BitBoard_NoPawnCountArray()
+    {
+        var sum = 0;
+
+        foreach (var fen in Data)
+        {
+            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
+            BitBoard whitePawns = pieces[(int)Piece.P];
+            sum += BitBoard_NoPawnCountArray(whitePawns);
+        }
+
+        return sum;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int Original(BitBoard pawns)
     {
         const int n = 1;
@@ -152,6 +186,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
     }
 
     [SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int Original_SkipLocalsInit(BitBoard pawns)
     {
         const int n = 1;
@@ -161,8 +196,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         while (pawns != default)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
             files[Constants.File[squareIndex]] = n;
         }
@@ -189,14 +223,14 @@ public class PawnIslandsBenchmark : BaseBenchmark
         return islandCount;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int BitBoard(BitBoard pawns)
     {
         int pawnFileBitBoard = 0;
 
         while (pawns != default)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
             // BitBoard.SetBit equivalent but for byte instead of ulong
             pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
@@ -205,19 +239,40 @@ public class PawnIslandsBenchmark : BaseBenchmark
         return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int BitBoard_NoFileArray(BitBoard pawns)
     {
         int pawnFileBitBoard = 0;
 
-        while (pawns != default)
+        while (pawns != 0)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
             // BitBoard.SetBit equivalent but for byte instead of ulong
             pawnFileBitBoard |= (1 << (squareIndex % 8));
         }
 
         return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int BitBoard_NoPawnCountArray(BitBoard pawns)
+    {
+        byte pawnFileBitBoard = 0;
+
+        while (pawns != 0)
+        {
+            pawns = pawns.WithoutLS1B(out var squareIndex);
+
+            // BitBoard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitBoard |= (byte)(1 << (squareIndex % 8));
+        }
+
+        int shifted = pawnFileBitBoard << 1;
+
+        // Treat shifted’s MSB as 0 implicitly
+        int starts = pawnFileBitBoard & (~shifted);
+
+        return BitOperations.PopCount((uint)starts);
     }
 }

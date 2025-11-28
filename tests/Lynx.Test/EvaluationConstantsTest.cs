@@ -1,10 +1,12 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using NUnit.Framework;
+
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationPSQTs;
 using static Lynx.TunableEvalParameters;
 
 namespace Lynx.Test;
+
 public class EvaluationConstantsTest
 {
     /// <summary>
@@ -57,28 +59,28 @@ public class EvaluationConstantsTest
         Assert.Less(minCheckmateValue, PositiveCheckmateDetectionLimit);
         Assert.Less(minCheckmateValue, NegativeCheckmateDetectionLimit);
 
-        var recalculatedMaxCheckmateOnProbe = TranspositionTable.RecalculateMateScores(maxCheckmateValue, +Constants.AbsoluteMaxDepth);
+        var recalculatedMaxCheckmateOnProbe = ITranspositionTable.RecalculateMateScores(maxCheckmateValue, +Constants.AbsoluteMaxDepth);
         Assert.Less(recalculatedMaxCheckmateOnProbe, MaxEval);
         Assert.Greater(recalculatedMaxCheckmateOnProbe, MinEval);
 
         Assert.Greater(recalculatedMaxCheckmateOnProbe, PositiveCheckmateDetectionLimit);
         Assert.Greater(recalculatedMaxCheckmateOnProbe, NegativeCheckmateDetectionLimit);
 
-        var recalculatedMaxCheckmateOnSave = TranspositionTable.RecalculateMateScores(maxCheckmateValue, -Constants.AbsoluteMaxDepth);
+        var recalculatedMaxCheckmateOnSave = ITranspositionTable.RecalculateMateScores(maxCheckmateValue, -Constants.AbsoluteMaxDepth);
         Assert.Less(recalculatedMaxCheckmateOnSave, MaxEval);
         Assert.Greater(recalculatedMaxCheckmateOnSave, MinEval);
 
         Assert.Greater(recalculatedMaxCheckmateOnSave, PositiveCheckmateDetectionLimit);
         Assert.Greater(recalculatedMaxCheckmateOnSave, NegativeCheckmateDetectionLimit);
 
-        var recalculatedMinCheckmateOnProbe = TranspositionTable.RecalculateMateScores(minCheckmateValue, +Constants.AbsoluteMaxDepth);
+        var recalculatedMinCheckmateOnProbe = ITranspositionTable.RecalculateMateScores(minCheckmateValue, +Constants.AbsoluteMaxDepth);
         Assert.Less(recalculatedMinCheckmateOnProbe, MaxEval);
         Assert.Greater(recalculatedMinCheckmateOnProbe, MinEval);
 
         Assert.Less(recalculatedMinCheckmateOnProbe, PositiveCheckmateDetectionLimit);
         Assert.Less(recalculatedMinCheckmateOnProbe, NegativeCheckmateDetectionLimit);
 
-        var recalculatedMinCheckmateOnSave = TranspositionTable.RecalculateMateScores(minCheckmateValue, -Constants.AbsoluteMaxDepth);
+        var recalculatedMinCheckmateOnSave = ITranspositionTable.RecalculateMateScores(minCheckmateValue, -Constants.AbsoluteMaxDepth);
         Assert.Less(recalculatedMinCheckmateOnSave, MaxEval);
         Assert.Greater(recalculatedMinCheckmateOnSave, MinEval);
 
@@ -91,8 +93,8 @@ public class EvaluationConstantsTest
     {
         Assert.Greater(MaxEval, PositiveCheckmateDetectionLimit + Constants.AbsoluteMaxDepth + 10);
         Assert.Greater(MaxEval, CheckMateBaseEvaluation + Constants.AbsoluteMaxDepth + 10);
-        Assert.Greater(MaxEval, TranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
-        Assert.Greater(MaxEval, TranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
+        Assert.Greater(MaxEval, ITranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
+        Assert.Greater(MaxEval, ITranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
         Assert.Less(MaxEval, short.MaxValue);
     }
 
@@ -101,8 +103,8 @@ public class EvaluationConstantsTest
     {
         Assert.Less(MinEval, NegativeCheckmateDetectionLimit - (Constants.AbsoluteMaxDepth + 10));
         Assert.Less(MinEval, -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 10));
-        Assert.Less(MinEval, TranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
-        Assert.Less(MinEval, TranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
+        Assert.Less(MinEval, ITranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
+        Assert.Less(MinEval, ITranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
         Assert.Greater(MinEval, short.MinValue);
     }
 

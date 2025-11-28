@@ -170,4 +170,45 @@ public class ConstantsTest
         Assert.True(int.IsPow2(PawnCorrHistoryHashSize));
         Assert.True(int.IsPow2(NonPawnCorrHistoryHashSize));
     }
+
+    [Test]
+    public void ManhattanDistance()
+    {
+        Assert.AreEqual(0, Constants.ManhattanDistance[0][0]);
+        Assert.AreEqual(0, Constants.ManhattanDistance[63][63]);
+
+        Assert.AreEqual(7, Constants.ManhattanDistance[0][7]);
+        Assert.AreEqual(7, Constants.ManhattanDistance[7][0]);
+
+        Assert.AreEqual(14, Constants.ManhattanDistance[0][63]);
+        Assert.AreEqual(14, Constants.ManhattanDistance[63][0]);
+
+        Assert.AreEqual(1, Constants.ManhattanDistance[27][28]);
+        Assert.AreEqual(1, Constants.ManhattanDistance[28][27]);
+
+        Assert.AreEqual(1, Constants.ManhattanDistance[27][35]);
+        Assert.AreEqual(1, Constants.ManhattanDistance[35][27]);
+
+        Assert.AreEqual(2, Constants.ManhattanDistance[27][36]);
+        Assert.AreEqual(2, Constants.ManhattanDistance[36][27]);
+
+        Assert.AreEqual(4, Constants.ManhattanDistance[27][45]);
+        Assert.AreEqual(4, Constants.ManhattanDistance[45][27]);
+
+        Assert.AreEqual(6, Constants.ManhattanDistance[27][54]);
+        Assert.AreEqual(6, Constants.ManhattanDistance[54][27]);
+
+        Assert.AreEqual(2, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b7]);
+        Assert.AreEqual(4, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.c6]);
+        Assert.AreEqual(3, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b6]);
+    }
+
+    /// <summary>
+    /// Ensure <see cref="MultiArrayTranspositionTable.HashfullPermillApprox"/> works as expected
+    /// </summary>
+    [Test]
+    public void MaxTTArrayLength()
+    {
+        Assert.GreaterOrEqual(Constants.MaxTTArrayLength, 1000);
+    }
 }

@@ -55,7 +55,8 @@ using static Lynx.TunableEvalParameters;
 //NewMasks();
 //DarkLightSquares();
 //PawnIslands();
-PrintKingRing();
+//PrintKingRing();
+ManhattanDistance();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1051,7 +1052,7 @@ static void TranspositionTableMethod()
     static void TesSize(int size)
     {
         Console.WriteLine("Hash: {0} MB", size);
-        var length = TranspositionTable.CalculateLength(size);
+        var length = (int)SingleArrayTranspositionTable.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
@@ -1072,8 +1073,8 @@ static void TranspositionTableMethod()
     TesSize(512);
     TesSize(1024);
 
-    var ttLength = TranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-    var transpositionTable = new TranspositionTable();
+    var ttLength = SingleArrayTranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var transpositionTable = TranspositionTableFactory.Create();
 
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
@@ -1081,9 +1082,6 @@ static void TranspositionTableMethod()
 
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
-
-    var hashKey2 = transpositionTable.CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove: 0);
-    Console.WriteLine(hashKey2);
 
     transpositionTable.Clear();
 
@@ -1233,4 +1231,26 @@ static void PawnIslands()
 static void PrintKingRing()
 {
     Console.WriteLine(string.Join("UL,\n", KingRing));
+}
+
+static void ManhattanDistance()
+{
+    for (int sq1 = 0; sq1 < 64; ++sq1)
+    {
+        var sq1Rank = Constants.Rank[sq1];
+        var sq1File = Constants.File[sq1];
+
+        Console.Write("[");
+        for (int sq2 = 0; sq2 < 64; ++sq2)
+        {
+            var sq2Rank = Constants.Rank[sq2];
+            var sq2File = Constants.File[sq2];
+
+            var distance = Math.Abs(sq1Rank - sq2Rank) + Math.Abs(sq1File - sq2File);
+
+            Console.Write($"{distance}, ");
+        }
+
+        Console.WriteLine("],");
+    }
 }
