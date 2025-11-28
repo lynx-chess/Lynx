@@ -56,11 +56,14 @@ public static class EvaluationPSQTs
         {
             for (int sq = 0; sq < 64; ++sq)
             {
-                _packedPSQT[PSQTIndex(piece, sq)] = Utils.Pack(
+                ref var whitePieceEntry = ref PSQT(piece, sq);
+                ref var blackPieceEntry = ref PSQT(piece + 6, sq);
+
+                whitePieceEntry = Utils.Pack(
                     (short)(MiddleGamePieceValues[piece] + mgPositionalTables[piece][sq]),
                     (short)(EndGamePieceValues[piece] + egPositionalTables[piece][sq]));
 
-                _packedPSQT[PSQTIndex(piece + 6, sq)] = Utils.Pack(
+                blackPieceEntry = Utils.Pack(
                     (short)(MiddleGamePieceValues[piece + 6] - mgPositionalTables[piece][sq ^ 56]),
                     (short)(EndGamePieceValues[piece + 6] - egPositionalTables[piece][sq ^ 56]));
             }
@@ -71,23 +74,15 @@ public static class EvaluationPSQTs
     /// [12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PSQT(int piece, int square)
-    {
-        var index = PSQTIndex(piece, square);
-        Debug.Assert(index >= 0 && index < _packedPSQT.Length);
-
-        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
-    }
-
-    /// <summary>
-    /// [12][64]
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PSQTIndex(int piece, int square)
+    public static ref int PSQT(int piece, int square)
     {
         const int pieceOffset = 64;
 
-        return (piece * pieceOffset)
+        var index = (piece * pieceOffset)
             + square;
+
+        Debug.Assert(index >= 0 && index < _packedPSQT.Length);
+
+        return ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
     }
 }

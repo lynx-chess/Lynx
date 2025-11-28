@@ -11,7 +11,7 @@ public class PSQTTest
     [Test]
     public void PackedEvaluation()
     {
-        short[][][] mgFriend =
+        short[][] mgFriend =
         [
             MiddleGamePawnTable,
             MiddleGameKnightTable,
@@ -21,7 +21,7 @@ public class PSQTTest
             MiddleGameKingTable
         ];
 
-        short[][][] egFriend =
+        short[][] egFriend =
         [
             EndGamePawnTable,
             EndGameKnightTable,
@@ -29,26 +29,6 @@ public class PSQTTest
             EndGameRookTable,
             EndGameQueenTable,
             EndGameKingTable
-        ];
-
-        short[][][] mgEnemy =
-        [
-            MiddleGameEnemyPawnTable,
-            MiddleGameEnemyKnightTable,
-            MiddleGameEnemyBishopTable,
-            MiddleGameEnemyRookTable,
-            MiddleGameEnemyQueenTable,
-            MiddleGameEnemyKingTable
-        ];
-
-        short[][][] egEnemy =
-        [
-            EndGameEnemyPawnTable,
-            EndGameEnemyKnightTable,
-            EndGameEnemyBishopTable,
-            EndGameEnemyRookTable,
-            EndGameEnemyQueenTable,
-            EndGameEnemyKingTable
         ];
 
         for (int friendBucket = 0; friendBucket < PSQTBucketCount; ++friendBucket)
@@ -63,13 +43,9 @@ public class PSQTTest
 
                         if (piece < (int)Piece.p) // white piece
                         {
-                            mg =
-                                MiddleGamePieceValues[0][friendBucket][piece] + mgFriend[piece][friendBucket][sq]
-                                + MiddleGamePieceValues[1][enemyBucket][piece] + mgEnemy[piece][enemyBucket][sq];
+                            mg = MiddleGamePieceValues[piece] + mgFriend[piece][sq];
 
-                            eg =
-                                EndGamePieceValues[0][friendBucket][piece] + egFriend[piece][friendBucket][sq]
-                                + EndGamePieceValues[1][enemyBucket][piece] + egEnemy[piece][enemyBucket][sq];
+                            eg = EndGamePieceValues[piece] + egFriend[piece][sq];
                         }
                         else // black piece
                         {
@@ -77,16 +53,13 @@ public class PSQTTest
                             // Mirror square and subtract (equivalent to adding the pre-negated table)
                             var mirror = sq ^ 56;
 
-                            mg =
-                                MiddleGamePieceValues[0][friendBucket][piece] - mgFriend[basePiece][friendBucket][mirror]
-                                + MiddleGamePieceValues[1][enemyBucket][piece] - mgEnemy[basePiece][enemyBucket][mirror];
+                            mg = MiddleGamePieceValues[piece] - mgFriend[basePiece][mirror];
 
                             eg =
-                                EndGamePieceValues[0][friendBucket][piece] - egFriend[basePiece][friendBucket][mirror]
-                                + EndGamePieceValues[1][enemyBucket][piece] - egEnemy[basePiece][enemyBucket][mirror];
+                                EndGamePieceValues[piece] - egFriend[basePiece][mirror];
                         }
 
-                        var packed = PSQT(friendBucket, enemyBucket, piece, sq);
+                        var packed = PSQT(piece, sq);
                         Assert.AreEqual(mg, Utils.UnpackMG(packed), $"MG mismatch piece {piece} sq {sq} fb {friendBucket} eb {enemyBucket}");
                         Assert.AreEqual(eg, Utils.UnpackEG(packed), $"EG mismatch piece {piece} sq {sq} fb {friendBucket} eb {enemyBucket}");
                     }
