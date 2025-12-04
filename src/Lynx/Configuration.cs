@@ -480,6 +480,9 @@ public sealed class EngineSettings
     [SPSA<int>(0, 50, 5)]
     public int SE_DoubleExtensions_Margin { get; set; } = 1;
 
+    [SPSA<int>(0, 100, 10)]
+    public int SE_DoubleExtensions_CaptureMargin { get; set; } = 50;
+
     [SPSA<int>(enabled: false)]
     public int SE_DoubleExtensions_Max { get; set; } = 6;
 
