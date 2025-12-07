@@ -362,7 +362,7 @@ public partial class Position : IDisposable
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
-            extraPhaseIfIncremental = GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
+            extraPhaseIfIncremental = TunableEvalParameters.GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
         }
 
         _pieceBitBoards[piece].PopBit(sourceSquare);
@@ -431,23 +431,11 @@ public partial class Position : IDisposable
 
         _enPassant = BoardSquare.noSquare;
 
-        // _incrementalEvalAccumulator updates
+        // IncrementalEvalAccumulator updates
         if (IsIncrementalEval)
         {
-            var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
-            var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
-            var whiteBucket = PSQTBucketLayout[whiteKing];
-            var blackBucket = PSQTBucketLayout[blackKing ^ 56];
-
-            int sameSideBucket = whiteBucket;
-            int oppositeSideBucket = blackBucket;
-            if (_side == Side.Black)
-            {
-                (sameSideBucket, oppositeSideBucket) = (oppositeSideBucket, sameSideBucket);
-            }
-
-            IncrementalEvalAccumulator -= PSQT(sameSideBucket, oppositeSideBucket, piece, sourceSquare);
-            IncrementalEvalAccumulator += PSQT(sameSideBucket, oppositeSideBucket, newPiece, targetSquare);
+            IncrementalEvalAccumulator -= PSQT(piece, sourceSquare);
+            IncrementalEvalAccumulator += PSQT(newPiece, targetSquare);
 
             IncrementalPhaseAccumulator += extraPhaseIfIncremental;
 
@@ -486,9 +474,9 @@ public partial class Position : IDisposable
                                 }
                             }
 
-                            IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                            IncrementalEvalAccumulator -= PSQT(capturedPiece, capturedSquare);
 
-                            IncrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
+                            IncrementalPhaseAccumulator -= TunableEvalParameters.GamePhaseByPiece[capturedPiece];
                         }
 
                         break;
@@ -501,6 +489,56 @@ public partial class Position : IDisposable
 
                         _enPassant = (BoardSquare)enPassantSquare;
                         _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+
+                        break;
+                    }
+                case SpecialMoveType.ShortCastle:
+                    {
+                        var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+                        var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                        var rookIndex = (int)Piece.R + offset;
+
+                        _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                        _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                        _board[rookSourceSquare] = (int)Piece.None;
+
+                        _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+                        _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                        _board[rookTargetSquare] = rookIndex;
+
+                        var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+
+                        _uniqueIdentifier ^= hashChange;
+                        _nonPawnHash[oldSide] ^= hashChange;
+
+                        IncrementalEvalAccumulator -= PSQT(rookIndex, rookSourceSquare);
+                        IncrementalEvalAccumulator += PSQT(rookIndex, rookTargetSquare);
+
+                        break;
+                    }
+                case SpecialMoveType.LongCastle:
+                    {
+                        var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+                        var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                        var rookIndex = (int)Piece.R + offset;
+
+                        _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                        _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                        _board[rookSourceSquare] = (int)Piece.None;
+
+                        _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+                        _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                        _board[rookTargetSquare] = rookIndex;
+
+                        var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+
+                        _uniqueIdentifier ^= hashChange;
+                        _nonPawnHash[oldSide] ^= hashChange;
+
+                        IncrementalEvalAccumulator -= PSQT(rookIndex, rookSourceSquare);
+                        IncrementalEvalAccumulator += PSQT(rookIndex, rookTargetSquare);
 
                         break;
                     }
@@ -520,14 +558,14 @@ public partial class Position : IDisposable
                         _uniqueIdentifier ^= capturedPawnHash;
                         _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
-                        IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                        IncrementalEvalAccumulator -= PSQT(capturedPiece, capturedSquare);
 
-                        //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
+                        //IncrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;
                     }
             }
         }
-        // No _incrementalEvalAccumulator updates
+        // No IncrementalEvalAccumulator updates
         else
         {
             switch (move.SpecialMoveFlag())

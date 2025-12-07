@@ -26,100 +26,59 @@ public static class EvaluationPSQTs
 #pragma warning restore S4663 // Comments should not be empty
 
     /// <summary>
-    /// 2 x PSQTBucketCount x PSQTBucketCount x 12 x 64
+    /// 12 x 64
     /// </summary>
-    internal static readonly int[] _packedPSQT = GC.AllocateArray<int>(2 * PSQTBucketCount * PSQTBucketCount * 12 * 64, pinned: true);
+    internal static readonly int[] _packedPSQT = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     static EvaluationPSQTs()
     {
-        short[][][][] mgPositionalTables =
+        short[][] mgPositionalTables =
         [
-            [
-                MiddleGamePawnTable,
-                MiddleGameKnightTable,
-                MiddleGameBishopTable,
-                MiddleGameRookTable,
-                MiddleGameQueenTable,
-                MiddleGameKingTable
-            ],
-            [
-                MiddleGameEnemyPawnTable,
-                MiddleGameEnemyKnightTable,
-                MiddleGameEnemyBishopTable,
-                MiddleGameEnemyRookTable,
-                MiddleGameEnemyQueenTable,
-                MiddleGameEnemyKingTable
-            ]
+            MiddleGamePawnTable,
+            MiddleGameKnightTable,
+            MiddleGameBishopTable,
+            MiddleGameRookTable,
+            MiddleGameQueenTable,
+            MiddleGameKingTable
         ];
 
-        short[][][][] egPositionalTables =
+        short[][] egPositionalTables =
         [
-            [
-                EndGamePawnTable,
-                EndGameKnightTable,
-                EndGameBishopTable,
-                EndGameRookTable,
-                EndGameQueenTable,
-                EndGameKingTable
-            ],
-            [
-                EndGameEnemyPawnTable,
-                EndGameEnemyKnightTable,
-                EndGameEnemyBishopTable,
-                EndGameEnemyRookTable,
-                EndGameEnemyQueenTable,
-                EndGameEnemyKingTable
-            ]
+            EndGamePawnTable,
+            EndGameKnightTable,
+            EndGameBishopTable,
+            EndGameRookTable,
+            EndGameQueenTable,
+            EndGameKingTable
         ];
 
-        for (int friendBucket = 0; friendBucket < PSQTBucketCount; ++friendBucket)
+        for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
         {
-            for (int enemyBucket = 0; enemyBucket < PSQTBucketCount; ++enemyBucket)
+            for (int sq = 0; sq < 64; ++sq)
             {
-                for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
-                {
-                    for (int sq = 0; sq < 64; ++sq)
-                    {
-                        const int Friend = 0;
-                        const int Enemy = 1;
+                ref var whitePieceEntry = ref PSQT(piece, sq);
+                ref var blackPieceEntry = ref PSQT(piece + 6, sq);
 
-                        ref var whitePieceEntry = ref PSQT(friendBucket, enemyBucket, piece, sq);
-                        ref var blackPieceEntry = ref PSQT(friendBucket, enemyBucket, piece + 6, sq);
+                whitePieceEntry = Utils.Pack(
+                    (short)(MiddleGamePieceValues[piece] + mgPositionalTables[piece][sq]),
+                    (short)(EndGamePieceValues[piece] + egPositionalTables[piece][sq]));
 
-                        whitePieceEntry =
-                            Utils.Pack(
-                                (short)(MiddleGamePieceValues[Friend][friendBucket][piece] + mgPositionalTables[Friend][piece][friendBucket][sq]),
-                                (short)(EndGamePieceValues[Friend][friendBucket][piece] + egPositionalTables[Friend][piece][friendBucket][sq]))
-                            + Utils.Pack(
-                                (short)(MiddleGamePieceValues[Enemy][enemyBucket][piece] + mgPositionalTables[Enemy][piece][enemyBucket][sq]),
-                                (short)(EndGamePieceValues[Enemy][enemyBucket][piece] + egPositionalTables[Enemy][piece][enemyBucket][sq]));
-
-                        blackPieceEntry =
-                            Utils.Pack(
-                                (short)(MiddleGamePieceValues[Friend][friendBucket][piece + 6] - mgPositionalTables[Friend][piece][friendBucket][sq ^ 56]),
-                                (short)(EndGamePieceValues[Friend][friendBucket][piece + 6] - egPositionalTables[Friend][piece][friendBucket][sq ^ 56]))
-                            + Utils.Pack(
-                                (short)(MiddleGamePieceValues[Enemy][enemyBucket][piece + 6] - mgPositionalTables[Enemy][piece][enemyBucket][sq ^ 56]),
-                                (short)(EndGamePieceValues[Enemy][enemyBucket][piece + 6] - egPositionalTables[Enemy][piece][enemyBucket][sq ^ 56]));
-                    }
-                }
+                blackPieceEntry = Utils.Pack(
+                    (short)(MiddleGamePieceValues[piece + 6] - mgPositionalTables[piece][sq ^ 56]),
+                    (short)(EndGamePieceValues[piece + 6] - egPositionalTables[piece][sq ^ 56]));
             }
         }
     }
 
     /// <summary>
-    /// [2][PSQTBucketCount][PSQTBucketCount][12][64]
+    /// [12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ref int PSQT(int friendBucket, int enemyBucket, int piece, int square)
+    public static ref int PSQT(int piece, int square)
     {
-        const int friendBucketOffset = PSQTBucketCount * 12 * 64;
-        const int enemyBucketOffset = 12 * 64;
         const int pieceOffset = 64;
 
-        var index = (friendBucket * friendBucketOffset)
-            + (enemyBucket * enemyBucketOffset)
-            + (piece * pieceOffset)
+        var index = (piece * pieceOffset)
             + square;
 
         Debug.Assert(index >= 0 && index < _packedPSQT.Length);
