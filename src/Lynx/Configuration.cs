@@ -319,10 +319,13 @@ public sealed class EngineSettings
     public int RFP_MaxDepth { get; set; } = 9;
 
     [SPSA<int>(50, 150, 10)]
-    public int RFP_Improving_Margin { get; set; } = 75;
+    public int RFP_Improving_Margin { get; set; } = 45;
 
     [SPSA<int>(50, 150, 10)]
-    public int RFP_NotImproving_Margin { get; set; } = 117;
+    public int RFP_NotImproving_Margin { get; set; } = 85;
+
+    [SPSA<int>(0, 10, 1)]
+    public int RFP_Quadratic { get; set; } = 6;
 
     /// <summary>
     /// Should be tuned only if improvingRate is ever used for something else
