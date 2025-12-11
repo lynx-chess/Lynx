@@ -222,6 +222,8 @@ public sealed partial class Engine
                         ? Configuration.EngineSettings.RFP_Improving_Margin * (depth - 1)
                         : Configuration.EngineSettings.RFP_NotImproving_Margin * depth;
 
+                    rfpMargin += Configuration.EngineSettings.RFP_Quadratic * depth * depth;
+
                     // RFP_ImprovingFactor should be tuned if improvingRate is ever used for something else
                     var improvingFactor = improvingRate * (Configuration.EngineSettings.RFP_ImprovingFactor * depth);
 
