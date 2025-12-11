@@ -164,7 +164,9 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
     {
         var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
 
-        return (ulong)(((UInt128)key * (UInt128)Length) >> 64);
+        return Bmi2.X64.IsSupported
+            ? Bmi2.X64.MultiplyNoFlags(key, Length)
+            : (ulong)(((UInt128)key * (UInt128)Length) >> 64);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
