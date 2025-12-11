@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-15-intel]
       fail-fast: false
 
     env:
