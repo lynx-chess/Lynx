@@ -87,7 +87,9 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     {
         var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
 
-        return (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
+        return Bmi2.X64.IsSupported
+            ? Bmi2.X64.MultiplyNoFlags(key, (ulong)_tt.Length)
+            : (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
     }
 
     #pragma warning disable S4144 // Methods should not have identical implementations
