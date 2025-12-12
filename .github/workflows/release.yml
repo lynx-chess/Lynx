@@ -55,7 +55,7 @@ jobs:
           - runtime-identifier: linux-musl-x64
             os: ubuntu-latest
           - runtime-identifier: osx-x64
-            os: macos-13
+            os: macOS-15-intel
           - runtime-identifier: osx-arm64
             os: macos-latest
       fail-fast: false

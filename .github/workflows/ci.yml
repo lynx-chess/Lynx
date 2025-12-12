@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm, macOS-latest, macOS-13, windows-latest, windows-11-arm]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macOS-latest, macOS-15-intel, windows-latest, windows-11-arm]
       fail-fast: false
 
     steps:
@@ -49,7 +49,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
         include:
           - os: ubuntu-latest
             runtime-identifier: linux-x64
@@ -57,8 +57,6 @@ jobs:
             runtime-identifier: win-x64
           - os: macOS-latest
             runtime-identifier: osx-arm64
-          - os: macOS-13
-            runtime-identifier: osx-x64
       fail-fast: false
 
     steps:
@@ -123,7 +121,7 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
-        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-15-intel]
         include:
           - os: ubuntu-latest
             runtime-identifier: linux-x64
@@ -131,7 +129,7 @@ jobs:
             runtime-identifier: win-x64
           - os: macOS-latest
             runtime-identifier: osx-arm64
-          - os: macOS-13
+          - os: macOS-15-intel
             runtime-identifier: osx-x64
       fail-fast: false
 
@@ -189,7 +187,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
         category: [LongRunning]
       fail-fast: false
 
@@ -321,7 +319,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-15-intel]
         category: [PerftFRCExhaustive]
       fail-fast: true
 
@@ -354,7 +352,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
         category: [Configuration]
       fail-fast: false
 
@@ -469,7 +467,7 @@ jobs:
 
   #  strategy:
   #    matrix:
-  #      os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+  #      os: [ubuntu-latest, windows-latest, macOS-latest]
   #    fail-fast: false
 
   #  env:
