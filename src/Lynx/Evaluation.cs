@@ -442,7 +442,7 @@ public partial class Position
                             // Rook vs a minor is a draw
                             // Without rooks, only BB vs N is a win and BN vs N can have some chances
 
-                            eval >>= 1; // /2
+                            eval >>= 2; // /4
 
                             break;
                         }
