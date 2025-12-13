@@ -486,10 +486,12 @@ public partial class Position
                 }
                 else if (gamePhase == 2)
                 {
+                    eval >>= 1; // /2
+
                     var whiteBishops = _pieceBitBoards[(int)Piece.B];
                     var blackBishops = _pieceBitBoards[(int)Piece.b];
 
-                    // Opposite color bishop endgame with pawns are drawish
+                    // Opposite color bishop endgame with pawns are even more drawish
                     if (whiteBishops > 0
                         && blackBishops > 0
                         && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
