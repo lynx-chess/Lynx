@@ -486,7 +486,10 @@ public partial class Position
                 }
                 else if (gamePhase == 2)
                 {
-                    eval >>= 1; // /2
+                    if (totalPawnsCount == 1)
+                    {
+                        eval >>= 1; // /2
+                    }
 
                     var whiteBishops = _pieceBitBoards[(int)Piece.B];
                     var blackBishops = _pieceBitBoards[(int)Piece.b];
