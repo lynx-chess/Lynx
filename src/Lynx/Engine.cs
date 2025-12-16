@@ -77,7 +77,6 @@ public sealed partial class Engine : IDisposable
 
         Array.Clear(_quietHistory);
         Array.Clear(_captureHistory);
-        Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
 
         Array.Clear(_pawnEvalTable);

@@ -52,8 +52,7 @@ public sealed partial class Engine
 
                 // Counter move history
                 return BaseMoveScore
-                    + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + QuietHistoryEntry(position, move, ref evaluationContext);
             }
 
             // History move or 0 if not found
@@ -175,14 +174,6 @@ public sealed partial class Engine
             ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
             quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
-            if (!isRoot)
-            {
-                // 🔍 Continuation history
-                // - Counter move history (continuation history, ply - 1)
-                ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-                continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
-            }
-
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
             for (int i = 0; i < visitedMovesCounter; ++i)
             {
@@ -198,13 +189,6 @@ public sealed partial class Engine
                     // When a quiet move fails high, penalize previous visited quiet moves
                     quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
                     quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
-
-                    if (!isRoot)
-                    {
-                        // 🔍 Continuation history penalty / malus
-                        ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                        continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
-                    }
                 }
             }
         }

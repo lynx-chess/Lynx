@@ -34,14 +34,6 @@ public sealed partial class Engine
     private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
 
     /// <summary>
-    /// 12 x 64 x 12 x 64 x <see cref="EvaluationConstants.ContinuationHistoryPlyCount"/>
-    /// piece x target square x last piece x last target square x plies back
-    /// ply 0 -> Continuation move history
-    /// ply 1 -> Follow-up move history
-    /// </summary>
-    private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
-
-    /// <summary>
     /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
     /// Pawn hash x side to move
     /// </summary>
