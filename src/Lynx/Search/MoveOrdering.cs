@@ -42,23 +42,16 @@ public sealed partial class Engine
                 return SecondKillerMoveValue;
             }
 
-            if (ply >= 1)
+            // Countermove
+            if (CounterMove(ply - 1) == move)
             {
-                // Countermove
-                if (CounterMove(ply - 1) == move)
-                {
-                    return CounterMoveValue;
-                }
-
-                // Counter move history
-                return BaseMoveScore
-                    + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                return CounterMoveValue;
             }
 
-            // History move or 0 if not found
+            // History + counter move history
             return BaseMoveScore
-                + QuietHistoryEntry(position, move, ref evaluationContext);
+                + QuietHistoryEntry(position, move, ref evaluationContext)
+                + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
         }
 
         // Queen promotion
@@ -178,9 +171,7 @@ public sealed partial class Engine
             if (!isRoot)
             {
                 // 🔍 Continuation history
-                // - Counter move history (continuation history, ply - 1)
-                ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-                continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
+                UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -202,8 +193,7 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                        continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                        UpdateContinuationHistory(visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
                     }
                 }
             }

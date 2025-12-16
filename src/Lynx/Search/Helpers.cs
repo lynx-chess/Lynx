@@ -90,11 +90,35 @@ public sealed partial class Engine
         return ref _captureHistory[index];
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateContinuationHistory(int piece, int targetSquare, int ply, int bonus)
+    {
+        if (ply >= 0)
+        {
+            // - Counter move history (continuation history, ply - 1)
+            var index = ContinuationHistoryIndex(piece, targetSquare, ply - 1);
+            var contHist = _continuationHistory[index];
+            _continuationHistory[index] = ScoreHistoryMove(contHist, bonus);
+        }
+    }
+
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
+    private int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
+    {
+        if (ply >= 0)
+        {
+            var index = ContinuationHistoryIndex(piece, targetSquare, ply);
+
+            return _continuationHistory[index];
+        }
+
+        return 0;
+    }
+
+    private int ContinuationHistoryIndex(int piece, int targetSquare, int ply)
     {
         const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
         const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
@@ -107,11 +131,11 @@ public sealed partial class Engine
             + (targetSquare * targetSquareOffset)
             + (previousMove.Piece() * previousMovePieceOffset)
             + (previousMove.TargetSquare() * previousMoveTargetSquareOffset);
+        //+ EvaluationConstants.ContinuationHistoryPlyCount;
 
         Debug.Assert(index < _continuationHistory.Length);
 
-        return ref _continuationHistory[index];
-        //+ 0];
+        return index;
     }
 
     /// <summary>
