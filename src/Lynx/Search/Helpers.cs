@@ -93,13 +93,10 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UpdateContinuationHistory(int piece, int targetSquare, int ply, int bonus)
     {
-        if (ply >= 0)
-        {
-            // - Counter move history (continuation history, ply - 1)
-            var index = ContinuationHistoryIndex(piece, targetSquare, ply - 1);
-            var contHist = _continuationHistory[index];
-            _continuationHistory[index] = ScoreHistoryMove(contHist, bonus);
-        }
+        // - Counter move history (continuation history, ply - 1)
+        var index = ContinuationHistoryIndex(piece, targetSquare, ply - 1);
+        var contHist = _continuationHistory[index];
+        _continuationHistory[index] = ScoreHistoryMove(contHist, bonus);
     }
 
     /// <summary>
@@ -108,14 +105,9 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
     {
-        if (ply >= 0)
-        {
-            var index = ContinuationHistoryIndex(piece, targetSquare, ply);
+        var index = ContinuationHistoryIndex(piece, targetSquare, ply);
 
-            return _continuationHistory[index];
-        }
-
-        return 0;
+        return _continuationHistory[index];
     }
 
     private int ContinuationHistoryIndex(int piece, int targetSquare, int ply)
