@@ -168,11 +168,8 @@ public sealed partial class Engine
             ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
             quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
-            if (!isRoot)
-            {
-                // 🔍 Continuation history
-                UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
-            }
+            // 🔍 Continuation history
+            UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
             for (int i = 0; i < visitedMovesCounter; ++i)
@@ -190,11 +187,8 @@ public sealed partial class Engine
                     quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
                     quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
-                    if (!isRoot)
-                    {
-                        // 🔍 Continuation history penalty / malus
-                        UpdateContinuationHistory(visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
-                    }
+                    // 🔍 Continuation history penalty / malus
+                    UpdateContinuationHistory(visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
                 }
             }
         }
