@@ -180,6 +180,22 @@ public static class BitBoardExtensions
         return down.ShiftRight() | down.ShiftLeft();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard PawnPush(this BitBoard board, Side side)
+    {
+        return side == Side.White
+            ? board.ShiftUp() 
+            : board.ShiftDown();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard PawnAttacks(this BitBoard board, Side side)
+    {
+        return side == Side.White
+            ? board.ShiftUpRightAndLeft() 
+            : board.ShiftDownRightAndLeft();
+    }
+
     #region Static methods
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

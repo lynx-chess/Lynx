@@ -33,7 +33,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -71,7 +71,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -93,7 +93,7 @@ jobs:
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
@@ -107,7 +107,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }} NuGet package
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}
         path: |
@@ -145,7 +145,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -176,7 +176,7 @@ jobs:
 
     - name: '[Ubuntu] Upload test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
         path: coveragereport/
@@ -200,7 +200,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -233,7 +233,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -266,7 +266,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -299,7 +299,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -332,7 +332,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -365,7 +365,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -397,7 +397,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -455,7 +455,7 @@ jobs:
   #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
   #  - name: '[Ubuntu] Upload unified test coverage report'
-  #    uses: actions/upload-artifact@v5
+  #    uses: actions/upload-artifact@v6
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/
@@ -483,7 +483,7 @@ jobs:
   #      dotnet-version: ${{ env.DOTNET_VERSION }}
 
   #  - name: Nuget cache
-  #    uses: actions/cache@v4
+  #    uses: actions/cache@v5
   #    with:
   #      path:
   #        ~/.nuget/packages
@@ -514,7 +514,7 @@ jobs:
 
   #  - name: '[Ubuntu] Upload test coverage report'
   #    if: matrix.os == 'ubuntu-latest'
-  #    uses: actions/upload-artifact@v5
+  #    uses: actions/upload-artifact@v6
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/
