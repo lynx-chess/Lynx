@@ -25,13 +25,13 @@ public sealed partial class Engine
     /// 12 x 64 x 2 x 2
     /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly int[] _quietHistory = GC.AllocateArray<int>(12 * 64 * 2 * 2, pinned: true);
+    private readonly short[] _quietHistory = GC.AllocateArray<short>(12 * 64 * 2 * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
     /// piece x target square x captured piece
     /// </summary>
-    private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
+    private readonly short[] _captureHistory = GC.AllocateArray<short>(12 * 64 * 12, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12 x 64 x <see cref="EvaluationConstants.ContinuationHistoryPlyCount"/>
