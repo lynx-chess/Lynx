@@ -6458,8 +6458,6 @@ public static class EvaluationParams
 		Pack(20, 29),
 		Pack(24, 5),
 		Pack(18, 21),
-		Pack(21, -1),
-		Pack(34, -4)
 	];
 
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
