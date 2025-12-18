@@ -1041,11 +1041,12 @@ public partial class Position
         pushes |= doublePushes;
 
         var pushThreats = (pushes & safe).PawnAttacks(side) & nonPawnEnemies;
+        packedBonus += PawnPushThreatBonus * pushThreats.CountBits();
 
         while (pushThreats != 0)
         {
             pushThreats = pushThreats.WithoutLS1B(out var pushThreat);
-            packedBonus += PawnPushThreatBonus[_board[pushThreat] % 6];
+            packedBonus += PawnPushThreatByPieceBonus[_board[pushThreat] % 6];
         }
 
         return packedBonus;

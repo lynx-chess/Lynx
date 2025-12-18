@@ -6073,7 +6073,12 @@ public static class EvaluationParams
 	/// </summary>
 	public const int QueenKingRingAttacksBonus = 14;
 
-	public static readonly int[] TotalKingRingAttacksBonus =
+    /// <summary>
+    /// <see cref="Utils.Pack(11, -2)"/>
+    /// </summary>
+    public const int PawnPushThreatBonus = -131061;
+
+    public static readonly int[] TotalKingRingAttacksBonus =
 	[
 		Pack(19, -0),
 		Pack(-7, -7),
@@ -6452,7 +6457,7 @@ public static class EvaluationParams
 		Pack(0, 0)
 	];
 
-	public static readonly int[] PawnPushThreatBonus =
+	public static readonly int[] PawnPushThreatByPieceBonus =
 	[
 		Pack(0, 0),
 		Pack(20, 29),
