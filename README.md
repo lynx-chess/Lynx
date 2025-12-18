@@ -70,7 +70,7 @@ However, you can also choose to build Lynx yourself.
 
 ### Requirements
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/9.0).
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/10.0).
 
 If you're a Linux user and are new to .NET ecosystem, the conversation in [this issue](https://github.com/lynx-chess/Lynx/issues/33) may help.
 
