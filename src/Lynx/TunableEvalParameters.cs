@@ -6073,11 +6073,6 @@ public static class EvaluationParams
 	/// </summary>
 	public const int QueenKingRingAttacksBonus = 14;
 
-	/// <summary>
-	/// <see cref="Utils.Pack(22, 11)"/>
-	/// </summary>
-	public const int PawnPushThreatBonus = 720918;
-
 	public static readonly int[] TotalKingRingAttacksBonus =
 	[
 		Pack(19, -0),
@@ -6455,6 +6450,16 @@ public static class EvaluationParams
 		Pack(40, -3),
 		Pack(-190, -160),
 		Pack(0, 0)
+	];
+
+	public static readonly int[] PawnPushThreatBonus =
+	[
+		Pack(0, 0),
+		Pack(1, 1),
+		Pack(2, 2),
+		Pack(3, 3),
+		Pack(4, 4),
+		Pack(5, 5)
 	];
 
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
