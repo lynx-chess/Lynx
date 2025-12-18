@@ -36,12 +36,12 @@ public class EnumCasting_Benchmark : BaseBenchmark
         var sum = 0;
         for (int i = 0; i < iterations; ++i)
         {
-            sum += MiddleGamePieceValues[0][0][Pawn];
-            sum += MiddleGamePieceValues[0][0][Pawn];
-            sum += MiddleGamePieceValues[0][0][Pawn];
-            sum += MiddleGamePieceValues[0][0][Pawn];
-            sum += MiddleGamePieceValues[0][0][Pawn];
-            sum += MiddleGamePieceValues[0][0][Pawn];
+            sum += MiddleGamePieceValues[Pawn];
+            sum += MiddleGamePieceValues[Pawn];
+            sum += MiddleGamePieceValues[Pawn];
+            sum += MiddleGamePieceValues[Pawn];
+            sum += MiddleGamePieceValues[Pawn];
+            sum += MiddleGamePieceValues[Pawn];
         }
 
         return sum;
@@ -54,12 +54,12 @@ public class EnumCasting_Benchmark : BaseBenchmark
         var sum = 0;
         for (int i = 0; i < iterations; ++i)
         {
-            sum += MiddleGamePieceValues[0][0][(int)Piece.P];
-            sum += MiddleGamePieceValues[0][0][(int)Piece.P];
-            sum += MiddleGamePieceValues[0][0][(int)Piece.P];
-            sum += MiddleGamePieceValues[0][0][(int)Piece.P];
-            sum += MiddleGamePieceValues[0][0][(int)Piece.P];
-            sum += MiddleGamePieceValues[0][0][(int)Piece.P];
+            sum += MiddleGamePieceValues[(int)Piece.P];
+            sum += MiddleGamePieceValues[(int)Piece.P];
+            sum += MiddleGamePieceValues[(int)Piece.P];
+            sum += MiddleGamePieceValues[(int)Piece.P];
+            sum += MiddleGamePieceValues[(int)Piece.P];
+            sum += MiddleGamePieceValues[(int)Piece.P];
         }
 
         return sum;
