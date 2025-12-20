@@ -391,7 +391,7 @@ public sealed partial class Engine
                 if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry 
                     + (Configuration.EngineSettings.LMP_MovesDepthMultiplier 
                         * depth 
-                        * ((improving || staticEval > beta + 30) ? 2 : 1))) // Based on formula suggested by Antares
+                        * ((improving || staticEval > beta - 30) ? 2 : 1))) // Based on formula suggested by Antares
                 {
                     break;
                 }
