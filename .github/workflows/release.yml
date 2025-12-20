@@ -30,7 +30,7 @@ on:
         required: false
 
 env:
-  DOTNET_VERSION: 9.0.x
+  DOTNET_VERSION: 10.0.x
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
@@ -73,7 +73,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -93,7 +93,7 @@ jobs:
 
     - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version != ''
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Lynx-${{ github.event.inputs.new_engine_version }}-${{ matrix.runtime-identifier }}
         path: |
@@ -103,7 +103,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version == ''
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
@@ -121,7 +121,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version != ''
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Lynx-${{ github.event.inputs.new_engine_version }}-nuget
         path: |
@@ -131,7 +131,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version == ''
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-nuget
         path: |
@@ -190,7 +190,7 @@ jobs:
         git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
         git push --tags
 
-    - uses: actions/download-artifact@v6
+    - uses: actions/download-artifact@v7
       with:
         path: artifacts/
 

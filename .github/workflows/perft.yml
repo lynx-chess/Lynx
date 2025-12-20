@@ -16,14 +16,13 @@ on:
         default: false
         type: boolean
 
-jobs:
+env:
+    DOTNET_VERSION: 10.0.x
+    DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
+jobs:
   perft:
     runs-on: ubuntu-latest
-
-    env:
-      DOTNET_VERSION: 9.0.x
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
     steps:
     - uses: actions/checkout@v6
@@ -34,7 +33,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages
@@ -54,10 +53,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.inputs.divide
 
-    env:
-      DOTNET_VERSION: 9.0.x
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-
     steps:
     - uses: actions/checkout@v6
 
@@ -67,7 +62,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path:
           ~/.nuget/packages

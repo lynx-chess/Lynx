@@ -381,8 +381,8 @@ public partial class Position
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats(evaluationContext, oppositeSide: (int)Side.Black)
-            - Threats(evaluationContext, oppositeSide: (int)Side.White);
+        packedScore += Threats(evaluationContext, side: Side.White, oppositeSide: (int)Side.Black)
+            - Threats(evaluationContext, side: Side.Black, oppositeSide: (int)Side.White);
 
         // Checks
         packedScore += Checks(evaluationContext, (int)Side.White, (int)Side.Black)
@@ -991,8 +991,9 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(EvaluationContext evaluationContext, int oppositeSide)
+    private int Threats(EvaluationContext evaluationContext, Side side, int oppositeSide)
     {
+        var occupancy = OccupancyBitBoards[(int)Side.Both];
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
         var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
         int packedBonus = 0;
@@ -1002,7 +1003,8 @@ public partial class Position
         var defendedThreatsBonus = _defendedThreatsBonus;
         var undefendedThreatsBonus = _undefendedThreatsBonus;
 
-        var defendedSquares = attacks[(int)Piece.P + oppositeSideOffset];
+        var oppositeSidePawnIndex = (int)Piece.P + oppositeSideOffset;
+        var defendedSquares = attacks[oppositeSidePawnIndex];
 
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
@@ -1026,6 +1028,26 @@ public partial class Position
                 packedBonus += undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
             }
         }
+
+        // Pawn push threats
+        var ourPawns = PieceBitBoards[(int)Piece.p - oppositeSidePawnIndex];
+        var theirPawns = PieceBitBoards[oppositeSidePawnIndex];
+
+        var nonPawnEnemies = OccupancyBitBoards[oppositeSide] & ~theirPawns;
+        var safe = ~defendedSquares;
+        // TODO: if we take into account all the piece attacks for defendedSquares
+        //| (evaluationContext.AttacksBySide[(int)Side] & ~evaluationContext.Attacks[oppositeSidePawnIndex]);
+
+        var pushes = ~occupancy & ourPawns.PawnPush(side);
+
+        // Double pushes
+        var thirdRank = Masks.RankMasks[side == Side.White ? (int)BoardSquare.a3 : (int)BoardSquare.a6];
+        var doublePushes = ~occupancy & (pushes & thirdRank).PawnPush(side);
+        pushes |= doublePushes;
+
+        var pushThreats = (pushes & safe).PawnAttacks(side) & nonPawnEnemies;
+
+        packedBonus += PawnPushThreatBonus * pushThreats.CountBits();
 
         return packedBonus;
     }
