@@ -664,7 +664,7 @@ public sealed partial class Engine
                             : -EvaluationConstants.HistoryMalus[depth];
 
                         ref var contHist = ref ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
-                        contHist = ScoreHistoryMove(contHist, historyBonus);
+                        contHist = (short)ScoreHistoryMove(contHist, historyBonus);
                     }
                 }
 

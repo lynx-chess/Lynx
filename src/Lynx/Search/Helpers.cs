@@ -94,7 +94,7 @@ public sealed partial class Engine
     /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
+    private ref short ContinuationHistoryEntry(int piece, int targetSquare, int ply)
     {
         const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
         const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;

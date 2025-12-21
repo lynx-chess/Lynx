@@ -39,7 +39,7 @@ public sealed partial class Engine
     /// ply 0 -> Continuation move history
     /// ply 1 -> Follow-up move history
     /// </summary>
-    private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
+    private readonly short[] _continuationHistory = GC.AllocateArray<short>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
