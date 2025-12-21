@@ -25,13 +25,13 @@ public sealed partial class Engine
     /// 12 x 64 x 2 x 2
     /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly int[] _quietHistory = GC.AllocateArray<int>(12 * 64 * 2 * 2, pinned: true);
+    private readonly short[] _quietHistory = GC.AllocateArray<short>(12 * 64 * 2 * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
     /// piece x target square x captured piece
     /// </summary>
-    private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
+    private readonly short[] _captureHistory = GC.AllocateArray<short>(12 * 64 * 12, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12 x 64 x <see cref="EvaluationConstants.ContinuationHistoryPlyCount"/>
@@ -45,25 +45,25 @@ public sealed partial class Engine
     /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
     /// Pawn hash x side to move
     /// </summary>
-    private readonly int[] _pawnCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistoryHashSize * 2, pinned: true);
+    private readonly short[] _pawnCorrHistory = GC.AllocateArray<short>(Constants.PawnCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.NonPawnCorrHistoryHashMask"/> x 2 x 2
     /// Non-pawn side hash x side to move x piece hash side
     /// </summary>
-    private readonly int[] _nonPawnCorrHistory = GC.AllocateArray<int>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
+    private readonly short[] _nonPawnCorrHistory = GC.AllocateArray<short>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.MinorCorrHistoryHashSize"/> x 2
     /// Minor hash x side to move
     /// </summary>
-    private readonly int[] _minorCorrHistory = GC.AllocateArray<int>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
+    private readonly short[] _minorCorrHistory = GC.AllocateArray<short>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.MajorCorrHistoryHashSize"/> x 2
     /// Major hash x side to move
     /// </summary>
-    private readonly int[] _majorCorrHistory = GC.AllocateArray<int>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
+    private readonly short[] _majorCorrHistory = GC.AllocateArray<short>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64

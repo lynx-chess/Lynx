@@ -49,7 +49,7 @@ public sealed partial class Engine
     /// [12][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref int QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private ref short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
     {
         const int pieceOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
@@ -76,7 +76,7 @@ public sealed partial class Engine
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref int CaptureHistoryEntry(Move move)
+    private ref short CaptureHistoryEntry(Move move)
     {
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
@@ -199,7 +199,7 @@ public sealed partial class Engine
 
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
+        static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
         {
             const int weightScale = 256;
             var maxIncrement = Configuration.EngineSettings.CorrHistory_MaxRawBonus;
@@ -212,7 +212,7 @@ public sealed partial class Engine
 
             weightedEval = Math.Clamp(weightedEval, previousCorrectedScore - maxIncrement, previousCorrectedScore + maxIncrement);
 
-            return Math.Clamp(weightedEval, -maxVal, +maxVal);
+            return (short)Math.Clamp(weightedEval, -maxVal, +maxVal);
         }
     }
 
