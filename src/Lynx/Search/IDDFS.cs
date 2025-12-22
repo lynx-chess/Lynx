@@ -214,7 +214,7 @@ public sealed partial class Engine
                             break;
                         }
 
-                        _trend = Math.Clamp(bestScore, -64, 64);
+                        _trend = Math.Clamp(Game.PositionBeforeLastSearch.Side == Side.White ? +bestScore : -bestScore, -64, 64);
 
                         if (bestScore > EvaluationConstants.CheckMateBaseEvaluation)
                         {
