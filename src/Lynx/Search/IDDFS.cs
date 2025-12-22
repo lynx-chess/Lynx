@@ -89,6 +89,8 @@ public sealed partial class Engine
     private int _bestMoveStability;
     private int _scoreDelta;
 
+    private int _trend;
+
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
     /// Requires <see cref="_searchConstraints"/> to be populated before invoking it
@@ -99,6 +101,7 @@ public sealed partial class Engine
     {
         // Cleanup
         _nodes = 0;
+        _trend = 0;
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
@@ -210,6 +213,8 @@ public sealed partial class Engine
                         {
                             break;
                         }
+
+                        _trend = Math.Clamp(bestScore, -64, 64);
 
                         if (bestScore > EvaluationConstants.CheckMateBaseEvaluation)
                         {
