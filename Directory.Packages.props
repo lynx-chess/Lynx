@@ -25,7 +25,7 @@
 
   <!-- Analyzers -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.StaticAnalysis" Version="9.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.StaticAnalysis" Version="10.1.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PerformanceSensitiveAnalyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1" />
