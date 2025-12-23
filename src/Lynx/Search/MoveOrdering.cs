@@ -53,7 +53,7 @@ public sealed partial class Engine
                 // Counter move history
                 return BaseMoveScore
                     + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + (int)ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
             }
 
             // History move or 0 if not found
@@ -173,14 +173,14 @@ public sealed partial class Engine
             int rawHistoryMalus = HistoryMalus[depth];
 
             ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
-            quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
+            quietHistoryEntry = (short)ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
             {
                 // 🔍 Continuation history
                 // - Counter move history (continuation history, ply - 1)
                 ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-                continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
+                continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -197,13 +197,13 @@ public sealed partial class Engine
                     // 🔍 Quiet history penalty / malus
                     // When a quiet move fails high, penalize previous visited quiet moves
                     quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
-                    quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
+                    quietHistoryEntry = (short)ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
                         ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                        continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                        continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
                     }
                 }
             }
@@ -242,7 +242,7 @@ public sealed partial class Engine
         var rawHistoryMalus = HistoryMalus[depth];
 
         ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
-        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
+        captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
@@ -255,7 +255,7 @@ public sealed partial class Engine
             if (capturedPiece != (int)Piece.None)
             {
                 ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
-                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
+                captureHistoryVisitedMove = (short)ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
             }
         }
     }
