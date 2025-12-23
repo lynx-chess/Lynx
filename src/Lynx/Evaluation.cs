@@ -1046,8 +1046,10 @@ public partial class Position
         pushes |= doublePushes;
 
         var pushThreats = (pushes & safe).PawnAttacks(side) & nonPawnEnemies;
+        var pushThreatsCount = pushThreats.CountBits();
 
-        packedBonus += PawnPushThreatBonus * pushThreats.CountBits();
+        packedBonus += PawnPushThreatBonus * pushThreatsCount;
+        packedBonus += PawnPushThreatByCountBonus[pushThreatsCount];
 
         return packedBonus;
     }
