@@ -1049,7 +1049,7 @@ public partial class Position
         var pushThreatsCount = pushThreats.CountBits();
 
         packedBonus += PawnPushThreatBonus * pushThreatsCount;
-        packedBonus += PawnPushThreatByCountBonus[pushThreatsCount];
+        packedBonus += PawnPushThreatByCountBonus[(Math.Min(3, pushThreatsCount))];
 
         return packedBonus;
     }
