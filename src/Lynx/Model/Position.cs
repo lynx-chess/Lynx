@@ -71,7 +71,7 @@ public partial class Position : IDisposable
     /// <summary>
     /// See <see cref="<CastlingRights"/>
     /// </summary>
-    public byte Castle { get => _castle; private set => _castle = value; }
+    public byte Castle { get => _castle; }
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 

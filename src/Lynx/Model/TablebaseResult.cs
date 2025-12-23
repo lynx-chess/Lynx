@@ -22,7 +22,7 @@ public enum TablebaseEvaluationCategory : byte
     Cancelled = byte.MaxValue
 }
 
-public record class TablebaseEvaluation()
+public record class TablebaseEvaluation
 {
     public TablebaseEvaluationCategory Category { get; init; }
 
@@ -45,7 +45,7 @@ public record class TablebaseEvaluation()
 #pragma warning restore CA1002 // Do not expose generic lists
 }
 
-public record class TablebaseEvalMove()
+public record class TablebaseEvalMove
 {
     public string Uci { get; init; } = string.Empty;
 
