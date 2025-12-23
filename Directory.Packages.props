@@ -6,7 +6,6 @@
 
   <PropertyGroup>
     <MicrosoftExtensionsVersion>10.0.1</MicrosoftExtensionsVersion>
-    <NLogVersion>6.0.7</NLogVersion>
     <BenchmarkDotnetVersion>0.15.8</BenchmarkDotnetVersion>
   </PropertyGroup>
 
@@ -17,9 +16,8 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="NLog" Version="$(NLogVersion)" />
-    <PackageVersion Include="NLog.Extensions.Logging" Version="$(NLogVersion)" />
-    <PackageVersion Include="NLog.Extensions.Version" Version="$(NLogVersion)" />
+    <PackageVersion Include="NLog" Version="6.0.7" />
+    <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.0" />
     <PackageVersion Include="Macross.Json.Extensions" Version="3.0.0" />
   </ItemGroup>
 
