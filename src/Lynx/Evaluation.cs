@@ -381,8 +381,8 @@ public partial class Position
                 - (whitePawnAttacks & _occupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats(evaluationContext, side: Side.White, oppositeSide: (int)Side.Black)
-            - Threats(evaluationContext, side: Side.Black, oppositeSide: (int)Side.White);
+        packedScore += Threats(evaluationContext, side: Side.White, oppositeSide: (int)Side.Black, whiteBucket)
+            - Threats(evaluationContext, side: Side.Black, oppositeSide: (int)Side.White, blackBucket);
 
         // Checks
         packedScore += Checks(evaluationContext, (int)Side.White, (int)Side.Black)
@@ -991,7 +991,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(EvaluationContext evaluationContext, Side side, int oppositeSide)
+    private int Threats(EvaluationContext evaluationContext, Side side, int oppositeSide, int bucket)
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
@@ -1059,7 +1059,7 @@ public partial class Position
             if ((passedPawnMask & theirPawns) == 0)
             {
                 var rank = isWhite ? Constants.Rank[safePush] : 7 - Constants.Rank[safePush];
-                packedBonus += PassedPawnPushBonus[rank];
+                packedBonus += PassedPawnPushBonus[bucket][rank];
             }
         }
 
