@@ -6078,7 +6078,7 @@ public static class EvaluationParams
 	/// </summary>
 	public const int PawnPushThreatBonus = 589846;
 
-	public static readonly TaperedEvaluationTermByRank PassedPawnPushBonus =
+	public static readonly int[] PassedPawnPushBonus =
 	[
 		Pack(0, 0),
 		Pack(0, 0),
@@ -6117,7 +6117,7 @@ public static class EvaluationParams
 		Pack(-5, 23)
 	];
 
-	public static readonly TaperedEvaluationTermByRank IsolatedPawnPenalty =
+	public static readonly int[] IsolatedPawnPenalty =
 	[
 		Pack(1, -21),
 		Pack(-4, -24),
@@ -6129,7 +6129,7 @@ public static class EvaluationParams
 		Pack(-1, -25)
 	];
 
-	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+	public static readonly int[] PawnPhalanxBonus =
 	[
 		Pack(0, 0),
 		Pack(6, 5),
@@ -6140,7 +6140,7 @@ public static class EvaluationParams
 		Pack(97, 358)
 	];
 
-	public static readonly TaperedEvaluationTermByRank ConnectedRooksBonus =
+	public static readonly int[] ConnectedRooksBonus =
 	[
 		Pack(-2, -1),
 		Pack(20, 2),
@@ -6161,7 +6161,7 @@ public static class EvaluationParams
 		Pack(-30, 51)
 	];
 
-	public static readonly TaperedEvaluationTermByCount8 BadBishop_SameColorPawnsPenalty =
+	public static readonly int[] BadBishop_SameColorPawnsPenalty =
 	[
 		Pack(150, 153),
 		Pack(149, 152),
@@ -6174,7 +6174,7 @@ public static class EvaluationParams
 		Pack(116, 92)
 	];
 
-	public static readonly TaperedEvaluationTermByCount8 BadBishop_BlockedCentralPawnsPenalty =
+	public static readonly int[] BadBishop_BlockedCentralPawnsPenalty =
 	[
 		Pack(160, 157),
 		Pack(157, 147),
@@ -6205,7 +6205,7 @@ public static class EvaluationParams
 		Pack(7, 9)
 	];
 
-	public static readonly TaperedEvaluationTermByRank FriendlyKingDistanceToPassedPawnBonus =
+	public static readonly int[] FriendlyKingDistanceToPassedPawnBonus =
 	[
 		Pack(0, 0),
 		Pack(21, 29),
@@ -6217,7 +6217,7 @@ public static class EvaluationParams
 		Pack(10, -4)
 	];
 
-	public static readonly TaperedEvaluationTermByRank EnemyKingDistanceToPassedPawnPenalty =
+	public static readonly int[] EnemyKingDistanceToPassedPawnPenalty =
 	[
 		Pack(0, 0),
 		Pack(-20, -7),
@@ -6229,7 +6229,7 @@ public static class EvaluationParams
 		Pack(37, 44)
 	];
 
-	public static readonly TaperedEvaluationTermByRank BackwardsPawnPenalty =
+	public static readonly int[] BackwardsPawnPenalty =
 	[
 		Pack(0, 0),
 		Pack(-4, -16),
@@ -6241,7 +6241,7 @@ public static class EvaluationParams
 		Pack(0, 0)
 	];
 
-	public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus =
+	public static readonly int[] VirtualKingMobilityBonus =
 	[
 		Pack(-0, -6),
 		Pack(-2, -1),
@@ -6273,7 +6273,7 @@ public static class EvaluationParams
 		Pack(-83, 16)
 	];
 
-	public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus =
+	public static readonly int[] KnightMobilityBonus =
 	[
 		Pack(-28, -83),
 		Pack(0, 0),
@@ -6286,7 +6286,7 @@ public static class EvaluationParams
 		Pack(74, 69)
 	];
 
-	public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus =
+	public static readonly int[] BishopMobilityBonus =
 	[
 		Pack(-16, -37),
 		Pack(0, 0),
@@ -6305,7 +6305,7 @@ public static class EvaluationParams
 		Pack(0, 0)
 	];
 
-	public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus =
+	public static readonly int[] RookMobilityBonus =
 	[
 		Pack(-44, -82),
 		Pack(0, 0),
@@ -6324,7 +6324,7 @@ public static class EvaluationParams
 		Pack(115, 68)
 	];
 
-	public static readonly TaperedEvaluationTermByCount27 QueenMobilityBonus =
+	public static readonly int[] QueenMobilityBonus =
 	[
 		Pack(-789, -670),
 		Pack(0, 0),
@@ -6356,7 +6356,7 @@ public static class EvaluationParams
 		Pack(12, 355)
 	];
 
-	public static readonly TaperedEvaluationTermByCount8 KingMobilityBonus =
+	public static readonly int[] KingMobilityBonus =
 	[
 		Pack(48, -116),
 		Pack(-2, -64),
@@ -6469,7 +6469,7 @@ public static class EvaluationParams
 		Pack(0, 0)
 	];
 
-	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
+	public static readonly int[][] PassedPawnBonus =
 	[
 		[
 			Pack(0, 0),
@@ -6680,7 +6680,7 @@ public static class EvaluationParams
 		],
 	];
 
-	public static readonly TaperedEvaluationTermByRank[] PassedPawnEnemyBonus =
+	public static readonly int[][] PassedPawnEnemyBonus =
 	[
 		[
 			Pack(0, 0),
@@ -6891,7 +6891,7 @@ public static class EvaluationParams
 		],
 	];
 
-	public static readonly TaperedEvaluationTermByRank[] PassedPawnNoEnemiesAheadBonus =
+	public static readonly int[][] PassedPawnNoEnemiesAheadBonus =
 	[
 		[
 			Pack(0, 0),
@@ -7102,7 +7102,7 @@ public static class EvaluationParams
 		],
 	];
 
-	public static readonly TaperedEvaluationTermByRank[] PassedPawnNoEnemiesAheadEnemyBonus =
+	public static readonly int[][] PassedPawnNoEnemiesAheadEnemyBonus =
 	[
 		[
 			Pack(0, 0),
