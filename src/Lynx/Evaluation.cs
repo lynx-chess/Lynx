@@ -1053,11 +1053,13 @@ public partial class Position
         while (safePushes != 0)
         {
             safePushes = safePushes.WithoutLS1B(out var safePush);
-            var passedPawnMask = side == Side.White ? Masks.WhitePassedPawnMasks[safePush] : Masks.BlackPassedPawnMasks[safePush];
+            var isWhite = side == Side.White;
+            var passedPawnMask = isWhite ? Masks.WhitePassedPawnMasks[safePush] : Masks.BlackPassedPawnMasks[safePush];
 
             if ((passedPawnMask & theirPawns) == 0)
             {
-                packedBonus += PassedPawnPushBonus;
+                var rank = isWhite ? Constants.Rank[safePush] : 7 - Constants.Rank[safePush];
+                packedBonus += PassedPawnPushBonus[rank];
             }
         }
 
