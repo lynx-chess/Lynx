@@ -1044,12 +1044,13 @@ public partial class Position
         var thirdRank = Masks.RankMasks[side == Side.White ? (int)BoardSquare.a3 : (int)BoardSquare.a6];
         var doublePushes = ~occupancy & (pushes & thirdRank).PawnPush(side);
         pushes |= doublePushes;
-        var safePushes = pushes & safe;
 
+        var safePushes = pushes & safe;
         var pushThreats = safePushes.PawnAttacks(side) & nonPawnEnemies;
 
         packedBonus += PawnPushThreatBonus * pushThreats.CountBits();
 
+        // Passed pawn pushes
         while (safePushes != 0)
         {
             safePushes = safePushes.WithoutLS1B(out var safePush);
