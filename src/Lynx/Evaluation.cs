@@ -1035,7 +1035,7 @@ public partial class Position
         var theirPawns = PieceBitBoards[oppositeSidePawnIndex];
 
         var nonPawnEnemies = OccupancyBitBoards[oppositeSide] & ~theirPawns;
-        var safe = ~attacksBySide[oppositeSide];
+        var safe = ~attacksBySide[oppositeSide] | (~attacks[oppositeSidePawnIndex] & attacksBySide[(int)side]);
         // TODO: if we take into account all the piece attacks for defendedSquares
         //| (evaluationContext.AttacksBySide[(int)Side] & ~evaluationContext.Attacks[oppositeSidePawnIndex]);
 
