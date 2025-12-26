@@ -1034,10 +1034,8 @@ public partial class Position
         var ourPawns = PieceBitBoards[(int)Piece.p - oppositeSidePawnIndex];
         var theirPawns = PieceBitBoards[oppositeSidePawnIndex];
 
-        var nonPawnEnemies = OccupancyBitBoards[oppositeSide] & ~theirPawns;
-        var safe = ~attacksBySide[oppositeSide] | (~attacks[oppositeSidePawnIndex] & attacksBySide[(int)side]);
-        // TODO: if we take into account all the piece attacks for defendedSquares
-        //| (evaluationContext.AttacksBySide[(int)Side] & ~evaluationContext.Attacks[oppositeSidePawnIndex]);
+        var nonPawnEnemies = oppositeSidePieces & ~theirPawns;
+        var safeSquares = ~attacksBySide[oppositeSide] | (~attacks[oppositeSidePawnIndex] & attacksBySide[(int)side]);
 
         var pushes = ~occupancy & ourPawns.PawnPush(side);
 
@@ -1046,7 +1044,7 @@ public partial class Position
         var doublePushes = ~occupancy & (pushes & thirdRank).PawnPush(side);
         pushes |= doublePushes;
 
-        var safePushes = pushes & safe;
+        var safePushes = pushes & safeSquares;
         var pushThreats = safePushes.PawnAttacks(side) & nonPawnEnemies;
 
         packedBonus += PawnPushThreatBonus * pushThreats.CountBits();
