@@ -999,6 +999,7 @@ public partial class Position
         int packedBonus = 0;
 
         var attacks = evaluationContext.Attacks;
+        var attacksBySide = evaluationContext.AttacksBySide;
         var board = _board;
         var defendedThreatsBonus = _defendedThreatsBonus;
         var undefendedThreatsBonus = _undefendedThreatsBonus;
@@ -1034,7 +1035,7 @@ public partial class Position
         var theirPawns = PieceBitBoards[oppositeSidePawnIndex];
 
         var nonPawnEnemies = OccupancyBitBoards[oppositeSide] & ~theirPawns;
-        var safe = ~defendedSquares;
+        var safe = ~attacksBySide[oppositeSide] | (~attacks[oppositeSidePawnIndex] & attacksBySide[(int)side]);
         // TODO: if we take into account all the piece attacks for defendedSquares
         //| (evaluationContext.AttacksBySide[(int)Side] & ~evaluationContext.Attacks[oppositeSidePawnIndex]);
 
