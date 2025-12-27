@@ -999,6 +999,7 @@ public partial class Position
         int packedBonus = 0;
 
         var attacks = evaluationContext.Attacks;
+        var attacksBySide = evaluationContext.AttacksBySide;
         var board = _board;
         var defendedThreatsBonus = _defendedThreatsBonus;
         var undefendedThreatsBonus = _undefendedThreatsBonus;
@@ -1033,10 +1034,8 @@ public partial class Position
         var ourPawns = PieceBitBoards[(int)Piece.p - oppositeSidePawnIndex];
         var theirPawns = PieceBitBoards[oppositeSidePawnIndex];
 
-        var nonPawnEnemies = OccupancyBitBoards[oppositeSide] & ~theirPawns;
-        var safe = ~defendedSquares;
-        // TODO: if we take into account all the piece attacks for defendedSquares
-        //| (evaluationContext.AttacksBySide[(int)Side] & ~evaluationContext.Attacks[oppositeSidePawnIndex]);
+        var nonPawnEnemies = oppositeSidePieces & ~theirPawns;
+        var safeSquares = ~attacksBySide[oppositeSide] | (~attacks[oppositeSidePawnIndex] & attacksBySide[(int)side]);
 
         var pushes = ~occupancy & ourPawns.PawnPush(side);
 
@@ -1045,11 +1044,26 @@ public partial class Position
         var doublePushes = ~occupancy & (pushes & thirdRank).PawnPush(side);
         pushes |= doublePushes;
 
-        var pushThreats = (pushes & safe).PawnAttacks(side) & nonPawnEnemies;
+        var safePushes = pushes & safeSquares;
+        var pushThreats = safePushes.PawnAttacks(side) & nonPawnEnemies;
         var pushThreatsCount = pushThreats.CountBits();
 
         packedBonus += PawnPushThreatBonus * pushThreatsCount;
         packedBonus += PawnPushThreatByCountBonus[(Math.Min(3, pushThreatsCount))];
+
+        // Passed pawn pushes
+        while (safePushes != 0)
+        {
+            safePushes = safePushes.WithoutLS1B(out var safePush);
+            var isWhite = side == Side.White;
+            var passedPawnMask = isWhite ? Masks.WhitePassedPawnMasks[safePush] : Masks.BlackPassedPawnMasks[safePush];
+
+            if ((passedPawnMask & theirPawns) == 0)
+            {
+                var rank = isWhite ? Constants.Rank[safePush] : 7 - Constants.Rank[safePush];
+                packedBonus += PassedPawnPushBonus[rank];
+            }
+        }
 
         return packedBonus;
     }
