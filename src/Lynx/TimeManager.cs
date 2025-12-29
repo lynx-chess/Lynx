@@ -55,7 +55,7 @@ public static class TimeManager
         }
         else if (goCommand.MoveTime > 0)
         {
-            softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
+            hardLimitTimeBound = goCommand.MoveTime;
             _logger.Info("Time to move: {0}ms", hardLimitTimeBound);
         }
         else if (goCommand.Depth > 0)
