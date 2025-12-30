@@ -1046,8 +1046,10 @@ public partial class Position
 
         var safePushes = pushes & safeSquares;
         var pushThreats = safePushes.PawnAttacks(side) & nonPawnEnemies;
+        var pushThreatsCount = pushThreats.CountBits();
 
-        packedBonus += PawnPushThreatBonus * pushThreats.CountBits();
+        packedBonus += PawnPushThreatBonus * pushThreatsCount;
+        packedBonus += PawnPushThreatByCountBonus[(Math.Min(3, pushThreatsCount))];
 
         // Passed pawn pushes
         while (safePushes != 0)
