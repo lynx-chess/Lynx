@@ -6074,6 +6074,31 @@ public static class EvaluationParams
 	public const int QueenKingRingAttacksBonus = 14;
 
 	/// <summary>
+	/// <see cref="Utils.Pack(26, -5)"/>
+	/// </summary>
+	public const int PawnOuterKingRingAttacksBonus = -327654;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(27, -10)"/>
+	/// </summary>
+	public const int KnightOuterKingRingAttacksBonus = -655333;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(23, -4)"/>
+	/// </summary>
+	public const int BishopOuterKingRingAttacksBonus = -262121;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(11, -2)"/>
+	/// </summary>
+	public const int RookOuterKingRingAttacksBonus = -131061;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(14, 0)"/>
+	/// </summary>
+	public const int QueenOuterKingRingAttacksBonus = 14;
+
+	/// <summary>
 	/// <see cref="Utils.Pack(22, 19)"/>
 	/// </summary>
 	public const int PawnPushThreatBonus = 1245206;

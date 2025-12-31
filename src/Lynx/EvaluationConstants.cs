@@ -33,6 +33,7 @@ public static class EvaluationConstants
     public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
     public static readonly BitBoard[] KingRing = new BitBoard[64];
+    public static readonly BitBoard[] OuterKingRing = new BitBoard[64];
 
     public const int LMRScaleFactor = 100;
 
@@ -78,7 +79,15 @@ public static class EvaluationConstants
 
         for (int square = 0; square < 64; ++square)
         {
-            KingRing[square] = Attacks.KingAttacks[square];
+            var kingRing = Attacks.KingAttacks[square];
+            KingRing[square] = kingRing;
+
+            while (kingRing != 0)
+            {
+                kingRing = kingRing.WithoutLS1B(out var kingRingSquare);
+
+                OuterKingRing[square] |= Attacks.KingAttacks[kingRingSquare];
+            }
 
             var rank = Constants.Rank[square];
 
@@ -90,6 +99,9 @@ public static class EvaluationConstants
             {
                 KingRing[square] |= KingRing[square].ShiftDown();
             }
+
+            OuterKingRing[square] ^= KingRing[square];
+            OuterKingRing[square].PopBit(square);
         }
     }
 

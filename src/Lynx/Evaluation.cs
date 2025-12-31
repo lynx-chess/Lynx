@@ -84,6 +84,7 @@ public partial class Position
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
+        // Pawn king ring attacks
         int whitePawnKingRingAttacks = (whitePawnAttacks & KingRing[blackKing]).CountBits();
         evaluationContext.IncreaseKingRingAttacks((int)Side.White, whitePawnKingRingAttacks);
 
@@ -119,6 +120,10 @@ public partial class Position
                 // King ring attacks
                 pawnScore += PawnKingRingAttacksBonus * whitePawnKingRingAttacks;
 
+                // Outer king ring attacks
+                int whitePawnOuterKingRingAttacks = (whitePawnAttacks & OuterKingRing[blackKing]).CountBits();
+                pawnScore += PawnOuterKingRingAttacksBonus * whitePawnOuterKingRingAttacks;
+
                 // Bitboard copy that we 'empty'
                 var whitePawnsCopy = whitePawns;
                 while (whitePawnsCopy != default)
@@ -136,8 +141,12 @@ public partial class Position
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
 
-                // King ring attacks;
+                // King ring attacks
                 pawnScore -= PawnKingRingAttacksBonus * blackPawnKingRingAttacks;
+
+                // Outer king ring attacks
+                int blackPawnOuterKingRingAttacks = (blackPawnAttacks & OuterKingRing[whiteKing]).CountBits();
+                pawnScore -= PawnOuterKingRingAttacksBonus * blackPawnOuterKingRingAttacks;
 
                 // Bitboard copy that we 'empty'
                 var blackPawnsCopy = blackPawns;
@@ -676,6 +685,11 @@ public partial class Position
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
+        // Outer king ring attacks
+        var outerKingRing = OuterKingRing[oppositeSideKingSquare];
+        var outerKingRingAttacksCount = (attacks & outerKingRing).CountBits();
+        packedBonus += KnightOuterKingRingAttacksBonus * outerKingRingAttacksCount;
+
         return packedBonus;
     }
 
@@ -703,6 +717,11 @@ public partial class Position
         packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+
+        // Outer king ring attacks
+        var outerKingRing = OuterKingRing[oppositeSideKingSquare];
+        var outerKingRingAttacksCount = (attacks & outerKingRing).CountBits();
+        packedBonus += BishopOuterKingRingAttacksBonus * outerKingRingAttacksCount;
 
         // Bad bishop
         var sameColorPawns = sameSidePawns &
@@ -816,6 +835,11 @@ public partial class Position
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
 
+        // Outer king ring attacks
+        var outerKingRing = OuterKingRing[oppositeSideKingSquare];
+        var outerKingRingAttacksCount = (attacks & outerKingRing).CountBits();
+        packedBonus += RookOuterKingRingAttacksBonus * outerKingRingAttacksCount;
+
         var fileMask = Masks.FileMask(squareIndex);
 
         // Rook on open file
@@ -871,6 +895,11 @@ public partial class Position
         packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
 
         evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+
+        // Outer king ring attacks
+        var outerKingRing = OuterKingRing[oppositeSideKingSquare];
+        var outerKingRingAttacksCount = (attacks & outerKingRing).CountBits();
+        packedBonus += QueenOuterKingRingAttacksBonus * outerKingRingAttacksCount;
 
         return packedBonus;
     }
