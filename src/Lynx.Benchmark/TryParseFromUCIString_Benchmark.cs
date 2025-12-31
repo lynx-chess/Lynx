@@ -207,9 +207,8 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
         public TryParseFromUCIString_Benchmark_Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
         {
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(buffer);
 
             for (int i = 0; i < rangeSpan.Length; ++i)
             {

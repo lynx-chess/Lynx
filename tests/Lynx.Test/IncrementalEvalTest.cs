@@ -23,9 +23,8 @@ public class IncrementalEvalTest
             Span<Move> moveSpan = stackalloc Move[2];
             var index = 0;
 
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(buffer);
 
             MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
 

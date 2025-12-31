@@ -224,9 +224,8 @@ public class RegressionTest : BaseTest
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         Assert.False(engine.Game.Is50MovesRepetition(ref evaluationContext));
         var bestMove = engine.BestMove(new GoCommand("go depth 1"));

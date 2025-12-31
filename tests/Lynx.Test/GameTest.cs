@@ -187,9 +187,8 @@ public class GameTest : BaseTest
 
         // If the checkmate is in the move when it's claimed, checkmate remains
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         Assert.False(game.Is50MovesRepetition(ref evaluationContext));
     }
@@ -219,9 +218,8 @@ public class GameTest : BaseTest
 #endif
         Assert.AreEqual(100 + 1, game.PositionHashHistoryLength());
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         Assert.True(game.Is50MovesRepetition(ref evaluationContext));
     }
@@ -255,9 +253,8 @@ public class GameTest : BaseTest
 #endif
         Assert.AreEqual(51 + 1, game.PositionHashHistoryLength());
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         Assert.False(game.Is50MovesRepetition(ref evaluationContext));
     }
