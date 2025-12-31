@@ -80,6 +80,18 @@ public static class EvaluationConstants
         for (int square = 0; square < 64; ++square)
         {
             var kingRing = Attacks.KingAttacks[square];
+
+            var rank = Constants.Rank[square];
+
+            if (rank == 0)
+            {
+                kingRing |= kingRing.ShiftUp();
+            }
+            else if (rank == 7)
+            {
+                kingRing |= kingRing.ShiftDown();
+            }
+
             KingRing[square] = kingRing;
 
             while (kingRing != 0)
@@ -87,17 +99,6 @@ public static class EvaluationConstants
                 kingRing = kingRing.WithoutLS1B(out var kingRingSquare);
 
                 OuterKingRing[square] |= Attacks.KingAttacks[kingRingSquare];
-            }
-
-            var rank = Constants.Rank[square];
-
-            if (rank == 0)
-            {
-                KingRing[square] |= KingRing[square].ShiftUp();
-            }
-            else if (rank == 7)
-            {
-                KingRing[square] |= KingRing[square].ShiftDown();
             }
 
             OuterKingRing[square] ^= KingRing[square];
