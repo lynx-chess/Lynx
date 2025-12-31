@@ -70,46 +70,43 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     [Benchmark(Baseline = true)]
     public int Original()
     {
-        Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var position in _positions)
         {
             position.CalculateThreats_Original(ref evaluationContext);
         }
 
-        return attacks[0].CountBits() + attacksBySide[0].CountBits();
+        return buffer[0].CountBits() + buffer[EvaluationContext.RequiredBufferSize - 2].CountBits();
     }
 
     [Benchmark]
     public int Reference()
     {
-        Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var position in _positions)
         {
             position.CalculateThreats_Reference(ref evaluationContext);
         }
 
-        return attacks[0].CountBits() + attacksBySide[0].CountBits();
+        return buffer[0].CountBits() + buffer[EvaluationContext.RequiredBufferSize - 2].CountBits();
     }
 
     [Benchmark]
     public int UnsafeAdd()
     {
-        Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var position in _positions)
         {
             position.CalculateThreats_UnsafeAdd(ref evaluationContext);
         }
 
-        return attacks[0].CountBits() + attacksBySide[0].CountBits();
+        return buffer[0].CountBits() + buffer[EvaluationContext.RequiredBufferSize - 2].CountBits();
     }
 }
 

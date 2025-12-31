@@ -109,16 +109,14 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
     {
         var total = 0;
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         for (int i = 0; i < data; ++i)
         {
             foreach (var position in _positions)
             {
-                attacks.Clear();
-                attacksBySide.Clear();
+                evaluationContext.Reset();
                 position.CalculateThreats(ref evaluationContext);
 
                 var movePool = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberOfPseudolegalMovesInAPosition);
@@ -139,16 +137,15 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
     {
         var total = 0;
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         for (int i = 0; i < data; ++i)
         {
             foreach (var position in _positions)
             {
-                attacks.Clear();
-                attacksBySide.Clear();
+                evaluationContext.Reset();
+
                 position.CalculateThreats(ref evaluationContext);
 
                 var movePool = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberOfPseudolegalMovesInAPosition);
@@ -197,9 +194,8 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(buffer);
 
             return (capturesOnly
                 ? GenerateAllCaptures(position, ref evaluationContext, moves)
@@ -865,9 +861,8 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(buffer);
 
             return (capturesOnly
                 ? GenerateAllCaptures(position, ref evaluationContext, moves)

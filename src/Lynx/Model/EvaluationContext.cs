@@ -1,22 +1,39 @@
-﻿namespace Lynx.Model;
+﻿using System.Diagnostics;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
 public ref struct EvaluationContext
 {
+    private const int AttacksCount = 12;
+    private const int AttacksBySideCount = 2;
+
+    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount;
+
     public Span<BitBoard> Attacks;
     public Span<BitBoard> AttacksBySide;
 
     public int WhiteKingRingAttacks;
     public int BlackKingRingAttacks;
 
-    public EvaluationContext(Span<BitBoard> attacks, Span<BitBoard> attacksBySide)
+    public EvaluationContext(Span<BitBoard> buffer)
     {
-        Attacks = attacks;
-        AttacksBySide = attacksBySide;
+        Debug.Assert(buffer.Length == RequiredBufferSize);
 
+        buffer.Clear();
+
+        Attacks = buffer[..AttacksCount];
+        AttacksBySide = buffer.Slice(AttacksCount, AttacksBySideCount);
+    }
+
+    public void Reset()
+    {
         Attacks.Clear();
         AttacksBySide.Clear();
+
+        WhiteKingRingAttacks = 0;
+        BlackKingRingAttacks = 0;
     }
 
     public void IncreaseKingRingAttacks(int side, int count)

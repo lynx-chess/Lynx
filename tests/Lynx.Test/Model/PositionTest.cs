@@ -1201,9 +1201,8 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         while (!bitBoard.Empty())
         {

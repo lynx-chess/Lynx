@@ -66,16 +66,14 @@ public class Threats_Benchmark : BaseBenchmark
     [Benchmark(Baseline = true)]
     public int Original()
     {
-        Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         var total = 0;
 
         foreach (var position in _positions)
         {
-            attacks.Clear();
-            attacksBySide.Clear();
+            evaluationContext.Reset();
             position.CalculateThreats(ref evaluationContext);
 
             total += position.Threats_Original(evaluationContext, (int)Side.White)
@@ -88,16 +86,14 @@ public class Threats_Benchmark : BaseBenchmark
     [Benchmark]
     public int Optimized()
     {
-        Span<BitBoard> attacks = stackalloc BitBoard[Enum.GetValues<Piece>().Length];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         var total = 0;
 
         foreach (var position in _positions)
         {
-            attacks.Clear();
-            attacksBySide.Clear();
+            evaluationContext.Reset();
             position.CalculateThreats(ref evaluationContext);
 
             total += position.Threats_Optimized(evaluationContext, (int)Side.White)
