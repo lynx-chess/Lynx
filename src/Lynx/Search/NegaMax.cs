@@ -464,10 +464,10 @@ public sealed partial class Engine
                 var verificationDepth = (depth - 1) / 2;    // TODO tune?
                 var singularBeta = ttEntry.Score - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
 
-                // Potential author idea
+                // No longer PV - Potential author idea
                 if (ttPv && !pvNode)
                 {
-                    singularBeta += Configuration.EngineSettings.SE_NoPV;
+                    singularBeta -= Configuration.EngineSettings.SE_NoPV;
                 }
 
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
