@@ -627,6 +627,7 @@ public sealed partial class Engine
                         {
                             // From Schoenemann
                             newDepth = 0;
+                            reduction = 0;
                         }
                         else
                         {
