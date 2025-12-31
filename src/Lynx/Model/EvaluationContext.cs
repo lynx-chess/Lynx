@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
@@ -36,6 +37,7 @@ public ref struct EvaluationContext
         BlackKingRingAttacks = 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void IncreaseKingRingAttacks(int side, int count)
     {
         if (side == (int)Side.White)
