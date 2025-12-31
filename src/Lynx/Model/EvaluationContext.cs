@@ -1,4 +1,6 @@
-﻿namespace Lynx.Model;
+﻿using System.Runtime.CompilerServices;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
@@ -19,6 +21,7 @@ public ref struct EvaluationContext
         AttacksBySide.Clear();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void IncreaseKingRingAttacks(int side, int count)
     {
         if (side == (int)Side.White)
