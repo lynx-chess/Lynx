@@ -28,7 +28,7 @@ public ref struct EvaluationContext
         AttacksBySide = buffer.Slice(AttacksCount, AttacksBySideCount);
     }
 
-    public void Reset()
+    public readonly void Reset()
     {
         Attacks.Clear();
         AttacksBySide.Clear();
