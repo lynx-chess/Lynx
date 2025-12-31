@@ -9,14 +9,13 @@ public ref struct EvaluationContext
 {
     private const int AttacksCount = 12;
     private const int AttacksBySideCount = 2;
+    private const int KingRingAttacksCount = 2;
 
-    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount;
+    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount + KingRingAttacksCount;
 
     public Span<BitBoard> Attacks;
     public Span<BitBoard> AttacksBySide;
-
-    public int WhiteKingRingAttacks;
-    public int BlackKingRingAttacks;
+    public Span<BitBoard> KingRingAttacks;
 
     public EvaluationContext(Span<BitBoard> buffer)
     {
@@ -26,28 +25,20 @@ public ref struct EvaluationContext
 
         Attacks = buffer[..AttacksCount];
         AttacksBySide = buffer.Slice(AttacksCount, AttacksBySideCount);
+        KingRingAttacks = buffer.Slice(AttacksCount + AttacksBySideCount, KingRingAttacksCount);
     }
 
     public readonly void Reset()
     {
         Attacks.Clear();
         AttacksBySide.Clear();
-
-        WhiteKingRingAttacks = 0;
-        BlackKingRingAttacks = 0;
+        KingRingAttacks.Clear();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void IncreaseKingRingAttacks(int side, int count)
     {
-        if (side == (int)Side.White)
-        {
-            WhiteKingRingAttacks += count;
-        }
-        else
-        {
-            BlackKingRingAttacks += count;
-        }
+        KingRingAttacks[side] += (ulong)count;
     }
 }
 
