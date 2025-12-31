@@ -8,11 +8,13 @@ public ref struct EvaluationContext
 {
     private const int AttacksCount = 12;
     private const int AttacksBySideCount = 2;
+    private const int PassedPawnsCount = 2;
 
-    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount;
+    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount + PassedPawnsCount;
 
     public Span<BitBoard> Attacks;
     public Span<BitBoard> AttacksBySide;
+    public Span<BitBoard> PassedPawns;
 
     public int WhiteKingRingAttacks;
     public int BlackKingRingAttacks;
@@ -25,12 +27,14 @@ public ref struct EvaluationContext
 
         Attacks = buffer[..AttacksCount];
         AttacksBySide = buffer.Slice(AttacksCount, AttacksBySideCount);
+        PassedPawns = buffer.Slice(AttacksCount + AttacksBySideCount, PassedPawnsCount);
     }
 
     public void Reset()
     {
         Attacks.Clear();
         AttacksBySide.Clear();
+        PassedPawns.Clear();
 
         WhiteKingRingAttacks = 0;
         BlackKingRingAttacks = 0;

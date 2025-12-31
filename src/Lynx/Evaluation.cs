@@ -90,6 +90,11 @@ public partial class Position
         int blackPawnKingRingAttacks = (blackPawnAttacks & KingRing[whiteKing]).CountBits();
         evaluationContext.IncreaseKingRingAttacks((int)Side.Black, blackPawnKingRingAttacks);
 
+        if(2788839769438935258 == UniqueIdentifier)
+        {
+            ;
+        }
+
         if (IsIncrementalEval)
         {
             packedScore = IncrementalEvalAccumulator;
@@ -102,6 +107,9 @@ public partial class Position
             if (entry.Key == _kingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
+
+                evaluationContext.PassedPawns[(int)Side.White] = entry.WhitePassedPawns;
+                evaluationContext.PassedPawns[(int)Side.Black] = entry.BlackPassedPawns;
             }
             // Not hit in pawnEvalTable table
             else
@@ -151,7 +159,7 @@ public partial class Position
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore, ref evaluationContext);
                 packedScore += pawnScore;
             }
 
@@ -200,6 +208,9 @@ public partial class Position
             if (entry.Key == _kingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
+
+                evaluationContext.PassedPawns[(int)Side.White] = entry.WhitePassedPawns;
+                evaluationContext.PassedPawns[(int)Side.Black] = entry.BlackPassedPawns;
 
                 // White pawns
                 // No PieceProtectedByPawnBonus - included in pawn table | packedScore += PieceProtectedByPawnBonus[...]
@@ -275,7 +286,7 @@ public partial class Position
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore, ref evaluationContext);
                 packedScore += pawnScore;
             }
 
@@ -594,6 +605,7 @@ public partial class Position
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
         int pushSquare;
+        var side = Side.White;
 
         if (pieceIndex == (int)Piece.p)
         {
@@ -601,6 +613,7 @@ public partial class Position
             oppositeSide = (int)Side.White;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
             pushSquare = squareIndex + 8;
+            side = Side.Black;
         }
         else
         {
@@ -626,6 +639,8 @@ public partial class Position
         // Passed pawn
         if ((oppositeSidePawns & passedPawnsMask) == default)
         {
+            evaluationContext.PassedPawns[(int)side].SetBit(pushSquare);
+
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & _occupancyBitBoards[oppositeSide]) == 0)
             {
@@ -1057,6 +1072,12 @@ public partial class Position
 
             if ((passedPawnMask & theirPawns) == 0)
             {
+                if(!evaluationContext.PassedPawns[(int)side].GetBit(safePush))
+                {
+                    // It doesn't match because we're catching passed pawns and here we check passed pushes
+                    throw new();
+                }
+
                 var rank = isWhite ? Constants.Rank[safePush] : 7 - Constants.Rank[safePush];
                 packedBonus += PassedPawnPushBonus[rank];
             }

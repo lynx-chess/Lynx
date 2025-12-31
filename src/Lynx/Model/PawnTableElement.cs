@@ -6,12 +6,18 @@ public struct PawnTableElement
 {
     public ulong Key;
 
+    public BitBoard WhitePassedPawns;
+    
+    public BitBoard BlackPassedPawns;
+
     public int PackedScore;
 
-    public void Update(ulong key, int packedScore)
+    public void Update(ulong key, int packedScore, ref EvaluationContext evaluationContext)
     {
         Key = key;
         PackedScore = packedScore;
+        WhitePassedPawns = evaluationContext.PassedPawns[(int)Side.White];
+        BlackPassedPawns = evaluationContext.PassedPawns[(int)Side.Black];
     }
 }
 
