@@ -489,6 +489,9 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int SE_LowDepthExtension { get; set; } = 9;
 
+    [SPSA<int>(0, 20, 2)]
+    public int SE_NoPV { get; set; } = 10;
+
     #endregion
 }
 
