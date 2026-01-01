@@ -112,7 +112,8 @@ public sealed partial class Engine
         // Age quiet history
         for (int i = 0; i < QuietHistoryLength; ++i)
         {
-            _quietHistory[i] >>= 1; // /=2
+            _quietHistory[i] *= 3;
+            _quietHistory[i] /= 4;
         }
 
         int bestScore = 0;
