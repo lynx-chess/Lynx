@@ -995,6 +995,7 @@ public partial class Position
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
         var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
+        var oppositeSidePawnIndex = (int)Piece.P + oppositeSideOffset;
         int packedBonus = 0;
 
         var attacks = evaluationContext.Attacks;
@@ -1003,12 +1004,15 @@ public partial class Position
         var defendedThreatsBonus = _defendedThreatsBonus;
         var undefendedThreatsBonus = _undefendedThreatsBonus;
 
-        var oppositeSidePawnIndex = (int)Piece.P + oppositeSideOffset;
-        var defendedSquares = attacks[oppositeSidePawnIndex];
-
+        // Equivalent to just attacks[oppositeSidePawnIndex] due to how it's currently used,
+        // since ~attacksBySide[(int)side] is always false given we're evaluation threats
+        var defendedSquares = attacks[oppositeSidePawnIndex]
+            | (attacksBySide[oppositeSide] & ~attacksBySide[(int)side]);
+       
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
-            var threats = attacks[6 + i - oppositeSideOffset] & oppositeSidePieces;
+            var ourPiecesIndex = 6 + i - oppositeSideOffset;
+            var threats = attacks[ourPiecesIndex] & oppositeSidePieces;
 
             var defended = threats & defendedSquares;
             while (defended != 0)
@@ -1034,7 +1038,7 @@ public partial class Position
         var theirPawns = PieceBitBoards[oppositeSidePawnIndex];
 
         var nonPawnEnemies = oppositeSidePieces & ~theirPawns;
-        var safeSquares = ~attacksBySide[oppositeSide] | (~attacks[oppositeSidePawnIndex] & attacksBySide[(int)side]);
+        var safeSquaresToPush = ~defendedSquares;
 
         var pushes = ~occupancy & ourPawns.PawnPush(side);
 
@@ -1043,7 +1047,7 @@ public partial class Position
         var doublePushes = ~occupancy & (pushes & thirdRank).PawnPush(side);
         pushes |= doublePushes;
 
-        var safePushes = pushes & safeSquares;
+        var safePushes = pushes & safeSquaresToPush;
         var pushThreats = safePushes.PawnAttacks(side) & nonPawnEnemies;
 
         packedBonus += PawnPushThreatBonus * pushThreats.CountBits();
