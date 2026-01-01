@@ -85,10 +85,10 @@ public partial class Position
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
         int whitePawnKingRingAttacks = (whitePawnAttacks & KingRing[blackKing]).CountBits();
-        evaluationContext.IncreaseKingRingAttacks((int)Side.White, whitePawnKingRingAttacks);
+        evaluationContext.IncreaseKingRingAttacks((int)Side.White, whitePawnKingRingAttacks, 0);
 
         int blackPawnKingRingAttacks = (blackPawnAttacks & KingRing[whiteKing]).CountBits();
-        evaluationContext.IncreaseKingRingAttacks((int)Side.Black, blackPawnKingRingAttacks);
+        evaluationContext.IncreaseKingRingAttacks((int)Side.Black, blackPawnKingRingAttacks, 0);
 
         if (IsIncrementalEval)
         {
@@ -362,6 +362,19 @@ public partial class Position
         packedScore +=
             TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
             - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
+
+        // King danger
+        var whiteKingDanger = evaluationContext.WhiteKingRingAttacks * evaluationContext.WhiteKingRingWeigthedAttacks;
+        if(whiteKingDanger > 100)
+        {
+            packedScore -= Utils.Pack((short)(whiteKingDanger * whiteKingDanger / 4096), (short)(whiteKingDanger / 16));
+        }
+
+        var blackKingDanger = evaluationContext.BlackKingRingAttacks * evaluationContext.BlackKingRingWeigthedAttacks;
+        if (blackKingDanger > 100)
+        {
+            packedScore += Utils.Pack((short)(blackKingDanger * blackKingDanger / 4096), (short)(blackKingDanger / 16));
+        }
 
         // Bishop pair bonus
         if (_pieceBitBoards[(int)Piece.B].CountBits() >= 2)
@@ -654,6 +667,12 @@ public partial class Position
         return packedBonus;
     }
 
+    private static readonly int[] KingRingAttacksWeights =
+    [
+        0, 81, 52, 44, 10, 0,
+        0, 81, 52, 44, 10, 0,
+    ];
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int KnightAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
     {
@@ -674,7 +693,7 @@ public partial class Position
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += KnightKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount, kingRingAttacksCount * KingRingAttacksWeights[pieceIndex]);
 
         return packedBonus;
     }
@@ -702,7 +721,7 @@ public partial class Position
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount, kingRingAttacksCount * KingRingAttacksWeights[pieceIndex]);
 
         // Bad bishop
         var sameColorPawns = sameSidePawns &
@@ -814,7 +833,7 @@ public partial class Position
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += RookKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount, kingRingAttacksCount * KingRingAttacksWeights[pieceIndex]);
 
         var fileMask = Masks.FileMask(squareIndex);
 
@@ -870,7 +889,7 @@ public partial class Position
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
 
-        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount);
+        evaluationContext.IncreaseKingRingAttacks(pieceSide, kingRingAttacksCount, kingRingAttacksCount * KingRingAttacksWeights[pieceIndex]);
 
         return packedBonus;
     }
@@ -1008,7 +1027,7 @@ public partial class Position
         // since ~attacksBySide[(int)side] is always false given we're evaluation threats
         var defendedSquares = attacks[oppositeSidePawnIndex]
             | (attacksBySide[oppositeSide] & ~attacksBySide[(int)side]);
-       
+
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
             var ourPiecesIndex = 6 + i - oppositeSideOffset;

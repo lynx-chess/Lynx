@@ -18,6 +18,9 @@ public ref struct EvaluationContext
     public int WhiteKingRingAttacks;
     public int BlackKingRingAttacks;
 
+    public int WhiteKingRingWeigthedAttacks;
+    public int BlackKingRingWeigthedAttacks;
+
     public EvaluationContext(Span<BitBoard> buffer)
     {
         Debug.Assert(buffer.Length == RequiredBufferSize);
@@ -38,15 +41,17 @@ public ref struct EvaluationContext
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void IncreaseKingRingAttacks(int side, int count)
+    public void IncreaseKingRingAttacks(int side, int attacks, int weightedAttacks)
     {
         if (side == (int)Side.White)
         {
-            WhiteKingRingAttacks += count;
+            WhiteKingRingAttacks += attacks;
+            WhiteKingRingWeigthedAttacks += weightedAttacks;
         }
         else
         {
-            BlackKingRingAttacks += count;
+            BlackKingRingAttacks += attacks;
+            BlackKingRingWeigthedAttacks += weightedAttacks;
         }
     }
 }
