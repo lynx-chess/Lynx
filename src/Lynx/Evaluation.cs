@@ -365,16 +365,9 @@ public partial class Position
 
         // King danger
         var whiteKingDanger = evaluationContext.WhiteKingRingAttacks * evaluationContext.WhiteKingRingWeigthedAttacks;
-        if(whiteKingDanger > 100)
-        {
-            packedScore -= Utils.Pack((short)(whiteKingDanger * whiteKingDanger / 4096), (short)(whiteKingDanger / 16));
-        }
-
         var blackKingDanger = evaluationContext.BlackKingRingAttacks * evaluationContext.BlackKingRingWeigthedAttacks;
-        if (blackKingDanger > 100)
-        {
-            packedScore += Utils.Pack((short)(blackKingDanger * blackKingDanger / 4096), (short)(blackKingDanger / 16));
-        }
+        packedScore -= Utils.Pack((short)(whiteKingDanger / 128), 0);
+        packedScore += Utils.Pack((short)(blackKingDanger / 128), 0);
 
         // Bishop pair bonus
         if (_pieceBitBoards[(int)Piece.B].CountBits() >= 2)
@@ -669,8 +662,8 @@ public partial class Position
 
     private static readonly int[] KingRingAttacksWeights =
     [
-        0, 81, 52, 44, 10, 0,
-        0, 81, 52, 44, 10, 0,
+        0, 36, 22, 23, 78, 0,
+        0, 36, 22, 23, 78, 0,
     ];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
