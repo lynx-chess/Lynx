@@ -109,14 +109,7 @@ public sealed partial class Engine
             Array.Clear(_moveNodeCount[i]);
         }
 
-        // Age quiet history
-        for (int i = 0; i < QuietHistoryLength; i+=4)
-        {
-            _quietHistory[i] = (short)(_quietHistory[i] * 3 / 4);
-            _quietHistory[i + 1] = (short)(_quietHistory[i + 1] * 3 / 4);
-            _quietHistory[i + 2] = (short)(_quietHistory[i + 2] * 3 / 4);
-            _quietHistory[i + 3] = (short)(_quietHistory[i + 3] * 3 / 4);
-        }
+        AgeQuietHistory();
 
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;

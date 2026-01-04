@@ -288,6 +288,28 @@ public sealed partial class Engine
         _moveNodeCount[move.Piece()][move.TargetSquare()] += nodesToAdd;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void AgeQuietHistory()
+    {
+        fixed (short* ttPtr = _quietHistory)
+        {
+            for (int i = 0; i < QuietHistoryLength; i += 4)
+            {
+                var start = ttPtr + 4 * i;
+
+                int tmp1 = *start * 3;
+                int tmp2 = *(start + 1) * 3;
+                int tmp3 = *(start + 2) * 3;
+                int tmp4 = *(start + 3) * 3;
+
+                _quietHistory[i] = (short)(tmp1 / 4);
+                _quietHistory[i + 1] = (short)(tmp2 / 4);
+                _quietHistory[i + 2] = (short)(tmp3 / 4);
+                _quietHistory[i + 3] = (short)(tmp4 / 4);
+            }
+        }
+    }
+
     #region Debugging
 
 #pragma warning disable S125 // Sections of code should not be commented out
