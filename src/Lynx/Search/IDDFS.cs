@@ -110,10 +110,12 @@ public sealed partial class Engine
         }
 
         // Age quiet history
-        for (int i = 0; i < QuietHistoryLength; ++i)
+        for (int i = 0; i < QuietHistoryLength; i+=4)
         {
-            int tmp = _quietHistory[i] * 3;
-            _quietHistory[i] = (short)(tmp / 4);
+            _quietHistory[i] = (short)(_quietHistory[i] * 3 / 4);
+            _quietHistory[i + 1] = (short)(_quietHistory[i + 1] * 3 / 4);
+            _quietHistory[i + 2] = (short)(_quietHistory[i + 2] * 3 / 4);
+            _quietHistory[i + 3] = (short)(_quietHistory[i + 3] * 3 / 4);
         }
 
         int bestScore = 0;
