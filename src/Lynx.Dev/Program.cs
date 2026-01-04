@@ -56,7 +56,8 @@ using static Lynx.TunableEvalParameters;
 //DarkLightSquares();
 //PawnIslands();
 //PrintKingRing();
-ManhattanDistance();
+//ManhattanDistance();
+PrintOuterKingRing();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1229,6 +1230,11 @@ static void PawnIslands()
 static void PrintKingRing()
 {
     Console.WriteLine(string.Join("UL,\n", KingRing));
+}
+
+static void PrintOuterKingRing()
+{
+    Console.WriteLine(string.Join("UL,\n", OuterKingRing));
 }
 
 static void ManhattanDistance()
