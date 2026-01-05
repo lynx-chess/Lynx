@@ -169,4 +169,42 @@ public class HistoryAging_Vectorization_Benchmark : BaseBenchmark
             }
         }
     }
+
+    [Benchmark]
+    public unsafe void ManuallyVectorizedWithTemporaryVariableAndFixed2_Length8()
+    {
+        fixed (short* histPtr = _quietHistory)
+        {
+            for (int i = 0; i < QuietHistoryLength; i += 8)
+            {
+                var start = histPtr + i;
+
+                short* h2 = start + 1;
+                short* h3 = start + 2;
+                short* h4 = start + 3;
+                short* h5 = start + 4;
+                short* h6 = start + 5;
+                short* h7 = start + 6;
+                short* h8 = start + 7;
+
+                int tmp1 = *start * 3;
+                int tmp2 = *h2 * 3;
+                int tmp3 = *h3 * 3;
+                int tmp4 = *h4 * 3;
+                int tmp5 = *h5 * 3;
+                int tmp6 = *h6 * 3;
+                int tmp7 = *h7 * 3;
+                int tmp8 = *h8 * 3;
+
+                *start = (short)(tmp1 / 4);
+                *h2 = (short)(tmp2 / 4);
+                *h3 = (short)(tmp3 / 4);
+                *h4 = (short)(tmp4 / 4);
+                *h5 = (short)(tmp5 / 4);
+                *h6 = (short)(tmp6 / 4);
+                *h7 = (short)(tmp7 / 4);
+                *h8 = (short)(tmp8 / 4);
+            }
+        }
+    }
 }
