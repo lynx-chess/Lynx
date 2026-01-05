@@ -48,7 +48,7 @@
  *  | ManuallyVectorizedWithTemporaryVariableAndFixed  | 2.418 us | 0.0170 us | 0.0151 us |  0.83 |         - |          NA |
  *  | ManuallyVectorizedWithTemporaryVariableAndFixed2 | 2.164 us | 0.0159 us | 0.0141 us |  0.75 |         - |          NA |
  *  
- *  For macOS intel:
+ *  For BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.2 (24G325) [Darwin 24.6.0] - Apple M1 (Virtual)
  *  Fatal error.
  *  System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
  *     at Lynx.Benchmark.HistoryAging_Vectorization_Benchmark.ManuallyVectorizedWithTemporaryVariableAndFixed()
