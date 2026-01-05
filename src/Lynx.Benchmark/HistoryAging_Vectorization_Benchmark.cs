@@ -129,7 +129,7 @@ public class HistoryAging_Vectorization_Benchmark : BaseBenchmark
         {
             for (int i = 0; i < QuietHistoryLength; i += 4)
             {
-                var start = histPtr + 4 * i;
+                var start = histPtr + i;
 
                 int tmp1 = *start * 3;
                 int tmp2 = *(start + 1) * 3;
@@ -151,7 +151,7 @@ public class HistoryAging_Vectorization_Benchmark : BaseBenchmark
         {
             for (int i = 0; i < QuietHistoryLength; i += 4)
             {
-                var start = histPtr + 4 * i;
+                var start = histPtr + i;
 
                 short* h2 = start + 1;
                 short* h3 = start + 2;

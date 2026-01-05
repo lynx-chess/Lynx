@@ -301,7 +301,7 @@ public sealed partial class Engine
         {
             for (int i = 0; i < QuietHistoryLength; i += 4)
             {
-                short* start = ttPtr + 4 * i;
+                short* start = ttPtr + i;
 
                 short* h2 = start + 1;
                 short* h3 = start + 2;
