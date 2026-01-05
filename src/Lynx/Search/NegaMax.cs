@@ -640,28 +640,31 @@ public sealed partial class Engine
                     score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
 
                     // 🔍 Principal Variation Search (PVS)
-                    if (score > alpha && newDepth > reducedDepth)
+                    if (score > alpha)
                     {
-                        // Optimistic search, validating that the rest of the moves are worse than bestmove.
-                        // It should produce more cutoffs and therefore be faster.
-                        // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
-
-                        var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
-                        var shallower = score < bestScore + depth;
-
-                        if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
-                        {
-                            ++newDepth;
-                        }
-                        else if (shallower && !deeper && newDepth > 1)
-                        {
-                            --newDepth;
-                        }
-
                         if (newDepth > reducedDepth)
                         {
-                            // Search with full depth but narrowed score bandwidth (zero-window search)
-                            score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                            // Optimistic search, validating that the rest of the moves are worse than bestmove.
+                            // It should produce more cutoffs and therefore be faster.
+                            // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+
+                            var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
+                            var shallower = score < bestScore + depth;
+
+                            if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
+                            {
+                                ++newDepth;
+                            }
+                            else if (shallower && !deeper && newDepth > 1)
+                            {
+                                --newDepth;
+                            }
+
+                            if (newDepth > reducedDepth)
+                            {
+                                // Search with full depth but narrowed score bandwidth (zero-window search)
+                                score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                            }
                         }
 
                         // 🔍 Post-LMR continuation history update
