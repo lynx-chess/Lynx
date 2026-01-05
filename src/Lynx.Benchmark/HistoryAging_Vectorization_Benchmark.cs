@@ -1,29 +1,36 @@
 ﻿/*
  *
+ *  BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  Intel Xeon Platinum 8370C CPU 2.80GHz (Max: 2.79GHz), 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 10.0.101
+ *    [Host]     : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v4
+ *    DefaultJob : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v4
+ *  
+ *  | Method                                           | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |------------------------------------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
+ *  | Naive                                            | 2.925 us | 0.0555 us | 0.0865 us | 2.876 us |  1.00 |    0.04 |         - |          NA |
+ *  | TemporaryVariable                                | 3.053 us | 0.0595 us | 0.0835 us | 3.029 us |  1.04 |    0.04 |         - |          NA |
+ *  | ManuallyVectorized                               | 2.547 us | 0.0022 us | 0.0020 us | 2.546 us |  0.87 |    0.02 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariable          | 2.355 us | 0.0029 us | 0.0025 us | 2.354 us |  0.81 |    0.02 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariableAndFixed  | 2.312 us | 0.0028 us | 0.0022 us | 2.311 us |  0.79 |    0.02 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariableAndFixed2 | 1.921 us | 0.0023 us | 0.0020 us | 1.921 us |  0.66 |    0.02 |         - |          NA |
+ *  
+ *  
+ *  
  *  BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.7462/24H2/2024Update/HudsonValley) (Hyper-V)
  *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
  *  .NET SDK 10.0.101
  *    [Host]     : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
  *    DefaultJob : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
  *  
- *  | Method             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- *  |------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | Naive              | 3.423 us | 0.0032 us | 0.0027 us |  1.00 |         - |          NA |
- *  | TemporaryVariable  | 2.936 us | 0.0047 us | 0.0044 us |  0.86 |         - |          NA |
- *  | ManuallyVectorized | 2.991 us | 0.0026 us | 0.0022 us |  0.87 |         - |          NA |
- *  
- *  
- *  BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
- *  AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
- *  .NET SDK 10.0.101
- *    [Host]     : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
- *    DefaultJob : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
- *  
- *  | Method             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- *  |------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | Naive              | 3.399 us | 0.0026 us | 0.0021 us |  1.00 |         - |          NA |
- *  | TemporaryVariable  | 2.905 us | 0.0051 us | 0.0045 us |  0.85 |         - |          NA |
- *  | ManuallyVectorized | 2.981 us | 0.0020 us | 0.0018 us |  0.88 |         - |          NA |
+ *  | Method                                           | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |------------------------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | Naive                                            | 3.428 us | 0.0074 us | 0.0066 us |  1.00 |         - |          NA |
+ *  | TemporaryVariable                                | 2.935 us | 0.0033 us | 0.0029 us |  0.86 |         - |          NA |
+ *  | ManuallyVectorized                               | 2.994 us | 0.0026 us | 0.0020 us |  0.87 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariable          | 2.734 us | 0.0139 us | 0.0124 us |  0.80 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariableAndFixed  | 2.685 us | 0.0081 us | 0.0072 us |  0.78 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariableAndFixed2 | 2.413 us | 0.0031 us | 0.0027 us |  0.70 |         - |          NA |
  *  
  *  
  *   BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.3 (24G419) [Darwin 24.6.0]
@@ -32,23 +39,25 @@
  *    [Host]     : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
  *    DefaultJob : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
  *  
- *  | Method             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- *  |------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | Naive              | 2.939 us | 0.0314 us | 0.0279 us |  1.00 |         - |          NA |
- *  | TemporaryVariable  | 2.717 us | 0.0088 us | 0.0082 us |  0.92 |         - |          NA |
- *  | ManuallyVectorized | 2.902 us | 0.0097 us | 0.0091 us |  0.99 |         - |          NA |
+ *  | Method                                           | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |------------------------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | Naive                                            | 2.903 us | 0.0104 us | 0.0093 us |  1.00 |         - |          NA |
+ *  | TemporaryVariable                                | 2.725 us | 0.0205 us | 0.0171 us |  0.94 |         - |          NA |
+ *  | ManuallyVectorized                               | 2.908 us | 0.0164 us | 0.0137 us |  1.00 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariable          | 3.107 us | 0.0271 us | 0.0240 us |  1.07 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariableAndFixed  | 2.418 us | 0.0170 us | 0.0151 us |  0.83 |         - |          NA |
+ *  | ManuallyVectorizedWithTemporaryVariableAndFixed2 | 2.164 us | 0.0159 us | 0.0141 us |  0.75 |         - |          NA |
  *  
- *  
- *  BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.2 (24G325) [Darwin 24.6.0]
- *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
- *  .NET SDK 10.0.101
- *    [Host]     : .NET 10.0.1 (10.0.1, 10.0.125.57005), Arm64 RyuJIT armv8.0-a
- *    DefaultJob : .NET 10.0.1 (10.0.1, 10.0.125.57005), Arm64 RyuJIT armv8.0-a
- *  | Method             | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
- *  |------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
- *  | Naive              | 2.898 us | 0.0653 us | 0.1895 us | 2.819 us |  1.00 |    0.09 |         - |          NA |
- *  | TemporaryVariable  | 2.923 us | 0.0848 us | 0.2488 us | 2.922 us |  1.01 |    0.11 |         - |          NA |
- *  | ManuallyVectorized | 2.494 us | 0.0715 us | 0.2085 us | 2.483 us |  0.86 |    0.09 |         - |          NA |
+ *  For macOS intel:
+ *  Fatal error.
+ *  System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt.
+ *     at Lynx.Benchmark.HistoryAging_Vectorization_Benchmark.ManuallyVectorizedWithTemporaryVariableAndFixed()
+ *     at BenchmarkDotNet.Autogenerated.Runnable_4.WorkloadActionNoUnroll(Int64)
+ *     at BenchmarkDotNet.Engines.Engine.Measure(System.Action`1<Int64>, Int64)
+ *     at BenchmarkDotNet.Engines.Engine.RunIteration(BenchmarkDotNet.Engines.IterationData)
+ *     at BenchmarkDotNet.Engines.EngineFactory.Jit(BenchmarkDotNet.Engines.Engine, Int32, Int32, Int32)
+ *     at BenchmarkDotNet.Engines.EngineFactory.CreateReadyToRun(BenchmarkDotNet.Engines.EngineParameters)
+ *     at BenchmarkDotNet.Autogenerated.Runnable_4.Run(BenchmarkDotNet.Engines.IHost, System.String)
  * 
 */
 
@@ -116,11 +125,11 @@ public class HistoryAging_Vectorization_Benchmark : BaseBenchmark
     [Benchmark]
     public unsafe void ManuallyVectorizedWithTemporaryVariableAndFixed()
     {
-        fixed (short* ttPtr = _quietHistory)
+        fixed (short* histPtr = _quietHistory)
         {
             for (int i = 0; i < QuietHistoryLength; i += 4)
             {
-                var start = ttPtr + 4 * i;
+                var start = histPtr + 4 * i;
 
                 int tmp1 = *start * 3;
                 int tmp2 = *(start + 1) * 3;
@@ -138,11 +147,11 @@ public class HistoryAging_Vectorization_Benchmark : BaseBenchmark
     [Benchmark]
     public unsafe void ManuallyVectorizedWithTemporaryVariableAndFixed2()
     {
-        fixed (short* ttPtr = _quietHistory)
+        fixed (short* histPtr = _quietHistory)
         {
             for (int i = 0; i < QuietHistoryLength; i += 4)
             {
-                var start = ttPtr + 4 * i;
+                var start = histPtr + 4 * i;
 
                 short* h2 = start + 1;
                 short* h3 = start + 2;

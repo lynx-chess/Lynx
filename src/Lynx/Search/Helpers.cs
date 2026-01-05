@@ -288,24 +288,34 @@ public sealed partial class Engine
         _moveNodeCount[move.Piece()][move.TargetSquare()] += nodesToAdd;
     }
 
+    /// <summary>
+    /// See HistoryAging_Vectorization_Benchmark.cs to justify this impl.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void AgeQuietHistory()
     {
+        // Since _quietHistory is a pinned array
+        // This is no-op pinning as it does not influence the GC compaction
+        // https://tooslowexception.com/pinned-object-heap-in-net-5/
         fixed (short* ttPtr = _quietHistory)
         {
             for (int i = 0; i < QuietHistoryLength; i += 4)
             {
-                var start = ttPtr + 4 * i;
+                short* start = ttPtr + 4 * i;
+
+                short* h2 = start + 1;
+                short* h3 = start + 2;
+                short* h4 = start + 3;
 
                 int tmp1 = *start * 3;
-                int tmp2 = *(start + 1) * 3;
-                int tmp3 = *(start + 2) * 3;
-                int tmp4 = *(start + 3) * 3;
+                int tmp2 = *h2 * 3;
+                int tmp3 = *h3 * 3;
+                int tmp4 = *h4 * 3;
 
-                _quietHistory[i] = (short)(tmp1 / 4);
-                _quietHistory[i + 1] = (short)(tmp2 / 4);
-                _quietHistory[i + 2] = (short)(tmp3 / 4);
-                _quietHistory[i + 3] = (short)(tmp4 / 4);
+                *start = (short)(tmp1 / 4);
+                *h2 = (short)(tmp2 / 4);
+                *h3 = (short)(tmp3 / 4);
+                *h4 = (short)(tmp4 / 4);
             }
         }
     }
