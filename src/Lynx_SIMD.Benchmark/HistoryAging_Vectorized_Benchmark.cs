@@ -15,6 +15,70 @@
  *  | Vectorized     | Scalar    | 1.165 us | 0.0072 us |  1.00 |     825 B |         - |          NA |
  *  | Vectorized     | Vector128 | 4.072 us | 0.0255 us |  3.50 |     780 B |         - |          NA |
  *  | Vectorized     | Vector256 | 4.214 us | 0.1248 us |  3.62 |   1,107 B |         - |          NA |
+ *  
+ *  
+ *  BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 10.0.101
+ *    [Host]    : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
+ *    Scalar    : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT
+ *    Vector128 : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v2
+ *    Vector256 : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
+ *  
+ *  IterationTime=250ms  MaxIterationCount=20  WarmupCount=1  
+ *  
+ *  | Method     | Job       | Mean     | StdDev    | Ratio | Code Size | Allocated | Alloc Ratio |
+ *  |----------- |---------- |---------:|----------:|------:|----------:|----------:|------------:|
+ *  | Vectorized | Scalar    | 2.350 us | 0.0025 us |  1.00 |     451 B |         - |          NA |
+ *  | Vectorized | Vector128 | 7.521 us | 0.0024 us |  3.20 |     755 B |         - |          NA |
+ *  | Vectorized | Vector256 | 7.532 us | 0.0072 us |  3.21 |   1,066 B |         - |          NA |
+ *  
+ *  
+ *  BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.7462/24H2/2024Update/HudsonValley) (Hyper-V)
+ *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 10.0.101
+ *    [Host]    : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
+ *    Scalar    : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT
+ *    Vector128 : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v2
+ *    Vector256 : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
+ *  
+ *  IterationTime=250ms  MaxIterationCount=20  WarmupCount=1  
+ *  
+ *  | Method     | Job       | Mean     | StdDev    | Ratio | Code Size | Allocated | Alloc Ratio |
+ *  |----------- |---------- |---------:|----------:|------:|----------:|----------:|------------:|
+ *  | Vectorized | Scalar    | 2.366 us | 0.0068 us |  1.00 |     825 B |         - |          NA |
+ *  | Vectorized | Vector128 | 7.541 us | 0.0026 us |  3.19 |     780 B |         - |          NA |
+ *  | Vectorized | Vector256 | 7.552 us | 0.0065 us |  3.19 |   1,112 B |         - |          NA |
+ *  
+ *  
+ *  BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.3 (24G419) [Darwin 24.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 10.0.101
+ *    [Host]    : .NET 10.0.1 (10.0.1, 10.0.125.57005), Arm64 RyuJIT armv8.0-a
+ *    Scalar    : .NET 10.0.1 (10.0.1, 10.0.125.57005), Arm64 RyuJIT
+ *    Vector128 : .NET 10.0.1 (10.0.1, 10.0.125.57005), Arm64 RyuJIT armv8.0-a
+ *  
+ *  IterationTime=250ms  MaxIterationCount=20  WarmupCount=1  
+ *  
+ *  | Method     | Job       | Mean     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |----------- |---------- |---------:|----------:|------:|----------:|------------:|
+ *  | Vectorized | Scalar    | 1.807 us | 0.2691 us |  1.02 |         - |          NA |
+ *  | Vectorized | Vector128 | 1.599 us | 0.1858 us |  0.90 |         - |          NA |
+ *  
+ *  
+ *  BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.3 (24G419) [Darwin 24.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 10.0.101
+ *    [Host]    : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
+ *    Scalar    : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT
+ *    Vector128 : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v2
+ *    Vector256 : .NET 10.0.1 (10.0.1, 10.0.125.57005), X64 RyuJIT x86-64-v3
+ *  IterationTime=250ms  MaxIterationCount=20  WarmupCount=1  
+ *  | Method     | Job       | Mean     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |----------- |---------- |---------:|----------:|------:|----------:|------------:|
+ *  | Vectorized | Scalar    | 2.190 us | 0.1392 us |  1.00 |         - |          NA |
+ *  | Vectorized | Vector128 | 5.770 us | 0.1862 us |  2.64 |         - |          NA |
+ *  | Vectorized | Vector256 | 6.001 us | 0.2676 us |  2.75 |         - |          NA |
  *
 */
 

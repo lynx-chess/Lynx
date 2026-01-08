@@ -15,9 +15,13 @@ Job enough = Job.Default
 
 IConfig config = DefaultConfig.Instance
     .HideColumns(Column.EnvironmentVariables, Column.RatioSD, Column.Error)
-    .AddDiagnoser(new DisassemblyDiagnoser(new DisassemblyDiagnoserConfig
-        (exportGithubMarkdown: true, printInstructionAddresses: false)))
     .AddJob(enough.WithEnvironmentVariable("DOTNET_EnableHWIntrinsic", "0").WithId("Scalar").AsBaseline());
+
+if(OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+{
+    config.AddDiagnoser(new DisassemblyDiagnoser(new DisassemblyDiagnoserConfig
+        (exportGithubMarkdown: true, printInstructionAddresses: false)));
+}
 
 if (Vector256.IsHardwareAccelerated)
 {
