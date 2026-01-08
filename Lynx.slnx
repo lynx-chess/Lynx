@@ -9,13 +9,13 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".github/workflows/bench.yml" />
+    <File Path=".github/workflows/benchmarks-simd.yml" />
     <File Path=".github/workflows/benchmarks.yml" />
     <File Path=".github/workflows/ci.yml" />
     <File Path=".github/workflows/on-demand-tests.yml" />
     <File Path=".github/workflows/on_release.yml" />
     <File Path=".github/workflows/perft.yml" />
     <File Path=".github/workflows/release.yml" />
-    <File Path=".github/workflows/simd-benchmarks.yml" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
     <File Path="global.json" />

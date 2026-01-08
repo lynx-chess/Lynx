@@ -1,4 +1,4 @@
-name: Benchmarks
+name: Benchmarks SIMD
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  simd-benchmark:
+  benchmark-simd:
     runs-on: ${{ matrix.os }}
 
     strategy:
