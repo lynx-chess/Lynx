@@ -6078,6 +6078,11 @@ public static class EvaluationParams
 	/// </summary>
 	public const int PawnPushThreatBonus = 1245206;
 
+	/// <summary>
+	/// <see cref="Utils.Pack(22, 19)"/>
+	/// </summary>
+	public const int TrappedRookPenalty = 1245206;
+
 	public static readonly int[] PassedPawnPushBonus =
 	[
 		Pack(0, 0),
