@@ -1,0 +1,57 @@
+name: Benchmarks SIMD
+
+on:
+  workflow_dispatch:
+    inputs:
+      benchmark_name:
+        description: 'Benchmark name'
+        default: '*'
+        required: false
+
+jobs:
+
+  benchmark-simd:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-15-intel]
+      fail-fast: false
+
+    env:
+      DOTNET_VERSION: 10.0.x
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v5
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+      working-directory: ./src/Lynx_SIMD.Benchmark
+
+    - name: Run ${{ github.event.inputs.benchmark_name }} benchmark
+      run: dotnet run -c Release --no-build --filter '${{ github.event.inputs.benchmark_name }}'
+      working-directory: ./src/Lynx_SIMD.Benchmark
+
+    - name: 'Upload ${{ matrix.os }} artifacts'
+      continue-on-error: false
+      uses: actions/upload-artifact@v6
+      with:
+        name: artifacts-${{ matrix.os }}-${{ github.run_number }}
+        # Can't include 'github.event.inputs.benchmark_name' in the name, since * is an invalid character
+        path: ./src/Lynx_SIMD.Benchmark/BenchmarkDotNet.Artifacts/results/
+        if-no-files-found: error

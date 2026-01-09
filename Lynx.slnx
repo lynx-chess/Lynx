@@ -3,11 +3,13 @@
     <Project Path="src/Lynx.Benchmark/Lynx.Benchmark.csproj" />
     <Project Path="src/Lynx.ConstantsGenerator/Lynx.ConstantsGenerator.csproj" />
     <Project Path="src/Lynx.Dev/Lynx.Dev.csproj" />
+    <Project Path="src/Lynx_SIMD.Benchmark/Lynx_SIMD.Benchmark.csproj" />
     <Project Path="tests/Lynx.Test/Lynx.Test.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".github/workflows/bench.yml" />
+    <File Path=".github/workflows/benchmarks-simd.yml" />
     <File Path=".github/workflows/benchmarks.yml" />
     <File Path=".github/workflows/ci.yml" />
     <File Path=".github/workflows/on-demand-tests.yml" />
