@@ -833,7 +833,7 @@ public partial class Position
             packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
         // Trapped rook - impl based on Stash
-        else if (mobility <= 4)
+        else if (mobility <= 3)
         {
             var rank = Constants.Rank[squareIndex];
 
@@ -842,7 +842,7 @@ public partial class Position
                 rank = 7 - rank;
             }
 
-            if (rank <= 2)
+            if (rank <= 1)
             {
                 const int EFile = 4;
 
