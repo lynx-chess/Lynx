@@ -832,7 +832,6 @@ public partial class Position
             packedBonus += SemiOpenFileRookBonus[bucket][file];
             packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
-        // Trapped rook - impl based on Stash
         else if (mobility <= 3)
         {
             var rank = Constants.Rank[squareIndex];
@@ -849,10 +848,60 @@ public partial class Position
                 var rookFile = Constants.File[squareIndex];
                 var kingFile = Constants.File[sameSideKingSquare];
 
-                // TODO: fix for queenside rook before castling
-                if (kingFile != rookFile && (kingFile < rookFile) == (kingFile >= EFile))
+                if (kingFile != rookFile)
                 {
-                    packedBonus += TrappedRookPenalty;
+                    // Queenside rook
+                    if (kingFile < rookFile && kingFile >= EFile)
+                    {
+                        if (pieceSide == (int)Side.White)
+                        {
+                            if ((_castle & (int)CastlingRights.WQ) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                            else
+                            {
+                                packedBonus += TrappedRookPenalty;
+                            }
+                        }
+                        else
+                        {
+                            if ((_castle & (int)CastlingRights.BQ) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                            else
+                            {
+                                packedBonus += TrappedRookPenalty;
+                            }
+                        }
+                    }
+                    // Kingside rook
+                    else if (kingFile <= EFile)
+                    {
+                        if (pieceSide == (int)Side.White)
+                        {
+                            if ((_castle & (int)CastlingRights.WK) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                            else
+                            {
+                                packedBonus += TrappedRookPenalty;
+                            }
+                        }
+                        else
+                        {
+                            if ((_castle & (int)CastlingRights.BK) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                            else
+                            {
+                                packedBonus += TrappedRookPenalty;
+                            }
+                        }
+                    }
                 }
             }
         }
