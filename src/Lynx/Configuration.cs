@@ -492,6 +492,12 @@ public sealed class EngineSettings
     [SPSA<int>(0, 20, 2)]
     public int SE_NoPV { get; set; } = 10;
 
+    [SPSA<int>(enabled: false)]
+    public int CutnodeReduction_MinDepth { get; set; } = 8;
+
+    [SPSA<int>(enabled: false)]
+    public int CutnodeReduction_TTDepthMargin { get; set; } = 4;
+
     #endregion
 }
 

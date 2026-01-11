@@ -118,13 +118,29 @@ public sealed partial class Engine
             ttWasPv = false;
         }
 
-        // Internal iterative reduction (IIR)
+        var ttBestMove = ttEntry.BestMove;
+        bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
+
+        // 🔍 Internal iterative reduction (IIR)
         // If this position isn't found in TT, it has never been searched before,
         // so the search will be potentially expensive.
         // Therefore, we search with reduced depth for now, expecting to record a TT move
         // which we'll be able to use later for the full depth search
         if (depth >= Configuration.EngineSettings.IIR_MinDepth
             && (!ttEntryHasBestMove))
+        {
+            --depthExtension;
+        }
+
+        // 🔍 Cutnode reduction
+        // Similar to IIR, but only for cutnodes.
+        // I first saw this in Hobbes
+        if (!isVerifyingSE
+            && isCutNode
+            && depth >= Configuration.EngineSettings.CutnodeReduction_MinDepth
+            && (!ttHit
+                || ttBestMove == default
+                || ttEntry.Depth + Configuration.EngineSettings.CutnodeReduction_TTDepthMargin <= depth))
         {
             --depthExtension;
         }
@@ -316,8 +332,6 @@ public sealed partial class Engine
         }
 
         Debug.Assert(depth >= 0, "Assertion failed", "QSearch should have been triggered");
-
-        var ttBestMove = ttEntry.BestMove;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
@@ -547,8 +561,6 @@ public sealed partial class Engine
                     : Game.HalfMovesWithoutCaptureOrPawnMove + 1;
 
                 _tt.PrefetchTTEntry(position, nextHalfMovesCounter);
-
-                bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
                 var newDepth = depth + depthExtension - 1 + singularDepthExtensions;
 
