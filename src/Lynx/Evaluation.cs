@@ -859,20 +859,12 @@ public partial class Position
                             {
                                 packedBonus += BuriedRookPenalty;
                             }
-                            else
-                            {
-                                packedBonus += TrappedRookPenalty;
-                            }
                         }
                         else
                         {
                             if ((_castle & (int)CastlingRights.BQ) == default)
                             {
                                 packedBonus += BuriedRookPenalty;
-                            }
-                            else
-                            {
-                                packedBonus += TrappedRookPenalty;
                             }
                         }
                     }
@@ -885,20 +877,12 @@ public partial class Position
                             {
                                 packedBonus += BuriedRookPenalty;
                             }
-                            else
-                            {
-                                packedBonus += TrappedRookPenalty;
-                            }
                         }
                         else
                         {
                             if ((_castle & (int)CastlingRights.BK) == default)
                             {
                                 packedBonus += BuriedRookPenalty;
-                            }
-                            else
-                            {
-                                packedBonus += TrappedRookPenalty;
                             }
                         }
                     }
