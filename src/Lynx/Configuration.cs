@@ -218,6 +218,12 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
+    public int LMR_Cutnode_NoTTMove { get; set; } = 35;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
     public int LMR_TTPV { get; set; } = 40;
 
     /// <summary>

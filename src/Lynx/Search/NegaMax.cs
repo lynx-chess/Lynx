@@ -588,6 +588,11 @@ public sealed partial class Engine
                             if (cutnode)
                             {
                                 reduction += Configuration.EngineSettings.LMR_Cutnode;
+
+                                if (ttBestMove == default)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_Cutnode_NoTTMove;
+                                }
                             }
 
                             if (!ttPv)
