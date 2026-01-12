@@ -832,7 +832,9 @@ public partial class Position
             packedBonus += SemiOpenFileRookBonus[bucket][file];
             packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
-        else if (mobility <= 3)
+        // Trapped rook
+        else if (Configuration.EngineSettings.IsChess960 
+            && mobility <= 3)
         {
             var rank = Constants.Rank[squareIndex];
 
