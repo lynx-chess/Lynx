@@ -167,7 +167,7 @@ public partial class Position
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
+                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, whiteKing, blackKing);
                 }
             }
 
@@ -184,7 +184,7 @@ public partial class Position
                 {
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
-                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, blackKing, whiteKing);
                 }
             }
         }
@@ -295,7 +295,7 @@ public partial class Position
 
                     IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
+                    packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, whiteKing, blackKing);
                 }
             }
 
@@ -316,7 +316,7 @@ public partial class Position
 
                     IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
+                    packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, blackKing, whiteKing);
                 }
             }
 
@@ -573,11 +573,11 @@ public partial class Position
     /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(ref EvaluationContext evaluationContext, int pieceSquareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
+    internal int AdditionalPieceEvaluation(ref EvaluationContext evaluationContext, int pieceSquareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int sameSideKingSquare, int oppositeSideKingSquare)
     {
         return pieceIndex switch
         {
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, bucket, oppositeSideBucket, pieceIndex, pieceSide, enemyPawnAttacks, sameSideKingSquare, oppositeSideKingSquare),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
@@ -794,7 +794,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int oppositeSideKingSquare)
+    private int RookAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks, int sameSideKingSquare, int oppositeSideKingSquare)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
         var sameSidePawns = _pieceBitBoards[pieceIndex - pawnToRookOffset];
@@ -831,6 +831,65 @@ public partial class Position
             var file = Constants.File[squareIndex];
             packedBonus += SemiOpenFileRookBonus[bucket][file];
             packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][file];
+        }
+        // Trapped rook
+        else if (Configuration.EngineSettings.IsChess960 
+            && mobility <= 3)
+        {
+            var rank = Constants.Rank[squareIndex];
+
+            if (pieceIndex == (int)Piece.r)
+            {
+                rank = 7 - rank;
+            }
+
+            if (rank <= 1)
+            {
+                const int EFile = 4;
+
+                var rookFile = Constants.File[squareIndex];
+                var kingFile = Constants.File[sameSideKingSquare];
+
+                if (kingFile != rookFile)
+                {
+                    // Queenside rook
+                    if (kingFile < rookFile && kingFile >= EFile)
+                    {
+                        if (pieceSide == (int)Side.White)
+                        {
+                            if ((_castle & (int)CastlingRights.WQ) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                        }
+                        else
+                        {
+                            if ((_castle & (int)CastlingRights.BQ) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                        }
+                    }
+                    // Kingside rook
+                    else if (kingFile <= EFile)
+                    {
+                        if (pieceSide == (int)Side.White)
+                        {
+                            if ((_castle & (int)CastlingRights.WK) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                        }
+                        else
+                        {
+                            if ((_castle & (int)CastlingRights.BK) == default)
+                            {
+                                packedBonus += BuriedRookPenalty;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Connected rooks
@@ -1008,7 +1067,7 @@ public partial class Position
         // since ~attacksBySide[(int)side] is always false given we're evaluation threats
         var defendedSquares = attacks[oppositeSidePawnIndex]
             | (attacksBySide[oppositeSide] & ~attacksBySide[(int)side]);
-       
+
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
             var ourPiecesIndex = 6 + i - oppositeSideOffset;
