@@ -15,7 +15,7 @@
     <Configuration>Release</Configuration>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed Condition="'$(TargetArchitecture)' != 'riscv64' AND '$(TargetArchitecture)' != 'ppc64le'">true</PublishTrimmed>
+    <PublishTrimmed Condition="'$(RuntimeIdentifier)' != 'linux-ppc64le' AND '$(RuntimeIdentifier)' != 'linux-riscv64'">true</PublishTrimmed>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 
