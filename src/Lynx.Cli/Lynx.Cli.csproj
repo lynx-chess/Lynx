@@ -14,8 +14,8 @@
   <PropertyGroup Condition="'$(Optimized.ToLower())'=='true'">
     <Configuration>Release</Configuration>
     <SelfContained>true</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed Condition="'$(RuntimeIdentifier)' != 'linux-ppc64le' AND '$(RuntimeIdentifier)' != 'linux-riscv64'">true</PublishTrimmed>
+    <PublishSingleFile Condition="'$(RuntimeIdentifier)' != 'linux-ppc64le' AND '$(RuntimeIdentifier)' != 'linux-s390x' AND '$(RuntimeIdentifier)' != 'linux-riscv64'">&gt;true</PublishSingleFile>
+    <PublishTrimmed Condition="'$(RuntimeIdentifier)' != 'linux-ppc64le' AND '$(RuntimeIdentifier)' != 'linux-s390x' AND '$(RuntimeIdentifier)' != 'linux-riscv64'">true</PublishTrimmed>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 
@@ -51,7 +51,15 @@
     </None>
   </ItemGroup>
 
-  <Target Name="Rename" AfterTargets="Publish" Condition="'$(ExecutableName)'!='' and '$(ExecutableName)'!='$(AssemblyName)'">
+  <Target Name="Rename" BeforeTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-ppc64le' OR '$(RuntimeIdentifier)' == 'linux-s390x'">
+    <Message Text="$(RuntimeIdentifier) nuget packages can be manually downloaded from https://github.com/IBM/dotnet-s390x/releases" Importance="high" />
+  </Target>
+
+  <Target Name="Rename" BeforeTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-riscv64'">
+    <Message Text="$(RuntimeIdentifier) nuget packages need to be manually generated/downloaded" Importance="high" />
+  </Target>
+
+  <Target Name="Rename" AfterTargets="Publish" Condition="'$(ExecutableName)' != '' and '$(ExecutableName)' != '$(AssemblyName)'">
     <Message Text="Attempting to rename executable file from $(PublishDir)/$(AssemblyName) to $(PublishDir)/$(ExecutableName)" Importance="high" />
     <Move SourceFiles="$(PublishDir)/$(AssemblyName)" DestinationFiles="$(PublishDir)/$(ExecutableName)" ContinueOnError="true" />
     <Message Text="Attempting to rename executable file from $(PublishDir)\$(AssemblyName).exe to $(PublishDir)/$(ExecutableName).exe" Importance="high" />
