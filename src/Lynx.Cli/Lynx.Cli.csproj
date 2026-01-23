@@ -14,7 +14,7 @@
   <PropertyGroup Condition="'$(Optimized.ToLower())'=='true'">
     <Configuration>Release</Configuration>
     <SelfContained>true</SelfContained>
-    <PublishSingleFile Condition="'$(RuntimeIdentifier)' != 'linux-ppc64le' AND '$(RuntimeIdentifier)' != 'linux-s390x' AND '$(RuntimeIdentifier)' != 'linux-riscv64'">&gt;true</PublishSingleFile>
+    <PublishSingleFile Condition="'$(RuntimeIdentifier)' != 'linux-ppc64le' AND '$(RuntimeIdentifier)' != 'linux-s390x' AND '$(RuntimeIdentifier)' != 'linux-riscv64'">true</PublishSingleFile>
     <PublishTrimmed Condition="'$(RuntimeIdentifier)' != 'linux-ppc64le' AND '$(RuntimeIdentifier)' != 'linux-s390x' AND '$(RuntimeIdentifier)' != 'linux-riscv64'">true</PublishTrimmed>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
