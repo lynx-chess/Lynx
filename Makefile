@@ -22,7 +22,9 @@ else
 	UNAME_P := $(shell uname -p)
 	ifeq ($(UNAME_S),Linux)
 		RUNTIME=linux-x64
-		ifneq ($(filter aarch64%,$(UNAME_P)),)
+		ifneq ($(filter ppc64le%,$(UNAME_P)),)
+			RUNTIME=linux-ppc64le
+		else ifneq ($(filter aarch64%,$(UNAME_P)),)
 			RUNTIME=linux-arm64
 		else ifneq ($(filter armv8%,$(UNAME_P)),)
 			RUNTIME=linux-arm64
