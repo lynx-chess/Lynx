@@ -51,12 +51,12 @@
     </None>
   </ItemGroup>
 
-  <Target Name="Rename" BeforeTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-ppc64le' OR '$(RuntimeIdentifier)' == 'linux-s390x'">
-    <Message Text="$(RuntimeIdentifier) nuget packages can be manually downloaded from https://github.com/IBM/dotnet-s390x/releases" Importance="high" />
+  <Target Name="PowerPC_warning" BeforeTargets="Restore" Condition="'$(RuntimeIdentifier)' == 'linux-ppc64le' OR '$(RuntimeIdentifier)' == 'linux-s390x'">
+    <Message Text="⚠️ $(RuntimeIdentifier) nuget packages aren't available in nuget.org. They can be manually downloaded from https://github.com/IBM/dotnet-s390x/releases" Importance="high" />
   </Target>
 
-  <Target Name="Rename" BeforeTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-riscv64'">
-    <Message Text="$(RuntimeIdentifier) nuget packages need to be manually generated/downloaded" Importance="high" />
+  <Target Name="RISC-V_warning" BeforeTargets="Restore" Condition="'$(RuntimeIdentifier)' == 'linux-riscv64'">
+    <Message Text="⚠️ $(RuntimeIdentifier) nuget packages aren't available in nuget.org." Importance="high" />
   </Target>
 
   <Target Name="Rename" AfterTargets="Publish" Condition="'$(ExecutableName)' != '' and '$(ExecutableName)' != '$(AssemblyName)'">
