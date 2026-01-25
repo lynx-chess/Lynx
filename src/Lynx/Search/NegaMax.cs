@@ -570,8 +570,11 @@ public sealed partial class Engine
                         {
                             if (isCapture)
                             {
-                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
-                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
+                                if (moveScore < EvaluationConstants.GoodCaptureMoveBaseScoreValue)
+                                {
+                                    reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
+                                        - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
+                                }
                             }
                             else
                             {
