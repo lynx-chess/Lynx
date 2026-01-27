@@ -452,7 +452,7 @@ public sealed partial class Engine
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
                 isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
-                && depth >= Configuration.EngineSettings.SE_MinDepth
+                && depth >= Configuration.EngineSettings.SE_MinDepth + (ttPv ? 1 : 0)
                 && ttEntry.Depth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 && Math.Abs(ttEntry.Score) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttEntry.NodeType != NodeType.Alpha
