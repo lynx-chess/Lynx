@@ -472,7 +472,7 @@ public sealed class EngineSettings
     public int TT_50MR_Step { get; set; } = 10;
 
     [SPSA<int>(enabled: false)]
-    public int SE_MinDepth { get; set; } = 6;
+    public int SE_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
     public int SE_TTDepthOffset { get; set; } = 3;
