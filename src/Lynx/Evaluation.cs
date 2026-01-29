@@ -17,7 +17,7 @@ public partial class Position
         BishopThreatsBonus_Defended,
         RookThreatsBonus_Defended,
         QueenThreatsBonus_Defended,
-        KingThreatsBonus_Defended
+        KingThreatsBonus_Defended,
     ];
 
     private static readonly int[][] _undefendedThreatsBonus =
@@ -27,7 +27,7 @@ public partial class Position
         BishopThreatsBonus,
         RookThreatsBonus,
         QueenThreatsBonus,
-        KingThreatsBonus
+        KingThreatsBonus,
     ];
 
     /// <summary>
@@ -563,10 +563,8 @@ public partial class Position
             // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
             return -CheckMateBaseEvaluation + ply;
         }
-        else
-        {
-            return 0;
-        }
+
+        return 0;
     }
 
     /// <summary>
@@ -581,7 +579,7 @@ public partial class Position
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(ref evaluationContext, pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks, oppositeSideKingSquare),
-            _ => 0
+            _ => 0,
         };
     }
 
@@ -1008,7 +1006,7 @@ public partial class Position
         // since ~attacksBySide[(int)side] is always false given we're evaluation threats
         var defendedSquares = attacks[oppositeSidePawnIndex]
             | (attacksBySide[oppositeSide] & ~attacksBySide[(int)side]);
-       
+
         for (int i = (int)Piece.N; i <= (int)Piece.K; ++i)
         {
             var ourPiecesIndex = 6 + i - oppositeSideOffset;
