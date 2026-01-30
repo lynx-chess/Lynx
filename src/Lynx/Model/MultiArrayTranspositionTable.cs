@@ -9,6 +9,7 @@ namespace Lynx.Model;
 /// <summary>
 /// Multi-array transposition table implementation (current branch)
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -45,7 +46,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         if (_ttArrayCount > Constants.MaxTTArrayLength)
         {
             var ttLengthGB = (double)Length / 1024 / 1024 / 1024;
-            throw new ArgumentException($"Invalid TT Hash size: {ttLengthGB} GB, {Length} values (> {Constants.MaxTTArrayLength})");
+            throw new ConfigurationException($"Invalid TT Hash size: {ttLengthGB} GB, {Length} values (> {Constants.MaxTTArrayLength})");
         }
 
         _tt = GC.AllocateArray<TranspositionTableElement[]>(_ttArrayCount, pinned: true);

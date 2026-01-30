@@ -271,7 +271,7 @@ public static class Utils
     {
         if (side == (int)Side.Both)
         {
-            throw new ArgumentException($"{Side.Both} wasn't expected");
+            throw new ConfigurationException($"{nameof(Side.Both)} wasn't expected");
         }
     }
 
