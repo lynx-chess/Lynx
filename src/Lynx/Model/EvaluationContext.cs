@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
+[StructLayout(LayoutKind.Sequential)]
 public ref struct EvaluationContext
 {
     private const int AttacksCount = 12;

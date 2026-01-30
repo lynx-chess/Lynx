@@ -9,6 +9,7 @@ namespace Lynx.Model;
 /// <summary>
 /// Single array transposition table implementation (from main branch)
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct SingleArrayTranspositionTable : ITranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -150,7 +151,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
 
         if (ttLength > (ulong)Array.MaxLength)
         {
-            throw new ArgumentException($"Invalid TT Hash size: {ttLengthMB} MB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+            throw new ConfigurationException($"Invalid TT Hash size: {ttLengthMB} MB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
         _logger.Info("Hash value:\t{0} MB", sizeMBs);

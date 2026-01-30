@@ -654,7 +654,7 @@ public sealed partial class Engine
                         var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
                         var shallower = score < bestScore + depth;
 
-                        if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
+                        if (deeper && !shallower && newDepth < Configuration.EngineSettings.MaxDepth)
                         {
                             ++newDepth;
                         }

@@ -1,7 +1,10 @@
-﻿namespace Lynx.Model;
+﻿using System.Runtime.InteropServices;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct GameState
 {
     public readonly ulong ZobristKey;
@@ -46,6 +49,7 @@ public readonly struct GameState
     }
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct NullMoveGameState
 {
     public readonly ulong ZobristKey;

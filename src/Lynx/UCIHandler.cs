@@ -440,7 +440,7 @@ public sealed class UCIHandler
                 }
 
                 var ourFen = position.FEN();
-                if (ourFen != fen)
+                if (!string.Equals(ourFen, fen, StringComparison.Ordinal))
                 {
                     _logger.Debug("Raw fen: {0}, parsed fen: {1}", fen, ourFen);
                 }
