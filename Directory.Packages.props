@@ -15,7 +15,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.102" />
     <PackageVersion Include="NLog" Version="6.0.7" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.0" />
     <PackageVersion Include="Macross.Json.Extensions" Version="3.0.0" />
@@ -23,11 +23,14 @@
 
   <!-- Analyzers -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.StaticAnalysis" Version="10.1.0" />
+    <PackageVersion Include="Microsoft.Extensions.StaticAnalysis" Version="10.2.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PerformanceSensitiveAnalyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1" />
     <PackageVersion Include="IDisposableAnalyzers" Version="4.0.8" />
+    <PackageVersion Include="Meziantou.Analyzer " Version="2.0.286" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.18.0.131500" />
   </ItemGroup>
 
   <!-- Tests -->
