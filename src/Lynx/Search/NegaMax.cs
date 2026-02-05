@@ -572,11 +572,8 @@ public sealed partial class Engine
                         {
                             if (isCapture)
                             {
-                                if (moveScore < EvaluationConstants.GoodCaptureMoveBaseScoreValue)
-                                {
-                                    reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
-                                        - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
-                                }
+                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
+                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
