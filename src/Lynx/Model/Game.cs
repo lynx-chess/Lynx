@@ -10,9 +10,9 @@ public sealed class Game : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
-#pragma warning disable CA1002 // Do not expose generic lists
+#pragma warning disable CA1002, MA0016 // Do not expose generic lists
     public List<Move> MoveHistory { get; }
-#pragma warning restore CA1002 // Do not expose generic lists
+#pragma warning restore CA1002, MA0016 // Do not expose generic lists
 #endif
 
     //private int _positionHashHistoryPointerBeforeLastSearch;
@@ -123,7 +123,7 @@ public sealed class Game : IDisposable
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];

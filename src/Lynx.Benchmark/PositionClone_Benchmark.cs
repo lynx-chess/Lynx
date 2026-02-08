@@ -42,12 +42,12 @@ file readonly struct Position
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards { get; }
+    public Bitboard[] PieceBitboards { get; }
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards { get; }
+    public Bitboard[] OccupancyBitboards { get; }
 
     public Side Side { get; }
 
@@ -60,8 +60,8 @@ file readonly struct Position
         FEN = fen;
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        PieceBitBoards = parsedFEN.PieceBitBoards;
-        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        PieceBitboards = parsedFEN.PieceBitboards;
+        OccupancyBitboards = parsedFEN.OccupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -79,9 +79,9 @@ file readonly struct Position
     public Position(Position position, int _)
     {
         FEN = position.FEN;
-        PieceBitBoards = position.PieceBitBoards;
+        PieceBitboards = position.PieceBitboards;
 
-        OccupancyBitBoards = position.OccupancyBitBoards;
+        OccupancyBitboards = position.OccupancyBitboards;
 
         Side = position.Side;
         Castle = position.Castle;
@@ -95,11 +95,11 @@ file readonly struct Position
     {
         FEN = position.FEN;
 
-        PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        PieceBitboards = new Bitboard[12];
+        Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-        OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        OccupancyBitboards = new Bitboard[3];
+        Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
         Side = position.Side;
         Castle = position.Castle;

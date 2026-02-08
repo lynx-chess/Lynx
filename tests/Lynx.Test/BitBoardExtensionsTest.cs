@@ -2,7 +2,7 @@
 using NUnit.Framework;
 
 namespace Lynx.Test;
-public class BitBoardExtensionsTest
+public class BitboardExtensionsTest
 {
     [TestCase(0b10001UL, 1UL)]
     [TestCase(0b11001UL, 1UL)]
@@ -28,7 +28,7 @@ public class BitBoardExtensionsTest
     [TestCase(0b00101UL, 0b1UL)]
     [TestCase(0b00010UL, 0b10UL)]
     [TestCase(0b00001UL, 0b1UL)]
-    public void LSB(BitBoard n, ulong lsb)
+    public void LSB(Bitboard n, ulong lsb)
     {
         Assert.AreEqual(lsb, n.LSB());
 
@@ -100,7 +100,7 @@ public class BitBoardExtensionsTest
     public void Contains_DoesNotContain(string fen, Piece piece, BoardSquare square, bool shouldContain)
     {
         var position = new Position(fen);
-        var bb = position.PieceBitBoards[(int)piece];
+        var bb = position.PieceBitboards[(int)piece];
 
         Assert.AreEqual(shouldContain, bb.Contains((int)square));
         Assert.AreEqual(!shouldContain, bb.DoesNotContain((int)square));

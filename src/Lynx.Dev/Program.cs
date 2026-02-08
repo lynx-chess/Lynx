@@ -136,7 +136,7 @@ static void _7_Rook_Occupancy()
 static void _8_Slider_Pieces_Attacks()
 {
     // Occupancy bitboard
-    BitBoard block = default;
+    Bitboard block = default;
 
     block.SetBit(BoardSquare.b6);
     block.SetBit(BoardSquare.g7);
@@ -148,7 +148,7 @@ static void _8_Slider_Pieces_Attacks()
     block.Print();
     bishopAttacks.Print();
 
-    block = BitBoardExtensions.Initialize(BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4);
+    block = BitboardExtensions.Initialize(BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4);
 
     var rookAttacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)BoardSquare.d4, block);
     block.Print();
@@ -157,12 +157,12 @@ static void _8_Slider_Pieces_Attacks()
 
 static void _9_BitCount()
 {
-    BitBoard bitBoard = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
+    Bitboard bitboard = BitboardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
-    bitBoard.ResetLS1B();
-    bitBoard.Print();
+    bitboard.ResetLS1B();
+    bitboard.Print();
 
-    var bb = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
+    var bb = BitboardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
     Console.WriteLine(bb.GetLS1BIndex());
     Console.WriteLine(bb.GetLS1BIndex());
@@ -207,7 +207,7 @@ static void _11_OccupancyBitCountLookupTables()
     {
         for (var file = 0; file < 8; ++file)
         {
-            int square = BitBoardExtensions.SquareIndex(rank, file);
+            int square = BitboardExtensions.SquareIndex(rank, file);
 
             var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -220,7 +220,7 @@ static void _11_OccupancyBitCountLookupTables()
     {
         for (var file = 0; file < 8; ++file)
         {
-            int square = BitBoardExtensions.SquareIndex(rank, file);
+            int square = BitboardExtensions.SquareIndex(rank, file);
 
             var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -261,7 +261,7 @@ static void _14_GeneratingMagicNumbersByBruteForce()
 
 static void _16_InitializingSliderPiecesAttackTables()
 {
-    var occupancy = new BitBoard();
+    var occupancy = new Bitboard();
     occupancy.SetBit(BoardSquare.e5);
     occupancy.SetBit(BoardSquare.d5);
     occupancy.SetBit(BoardSquare.d8);
@@ -278,9 +278,9 @@ static void _17_Defining_variables()
 {
     var position = new Position(Constants.EmptyBoardFEN);
 
-    var whitePawnBitBoard = position.PieceBitBoards[(int)Piece.P];
-    whitePawnBitBoard.SetBit(BoardSquare.e2);
-    whitePawnBitBoard.Print();
+    var whitePawnBitboard = position.PieceBitboards[(int)Piece.P];
+    whitePawnBitboard.SetBit(BoardSquare.e2);
+    whitePawnBitboard.Print();
 
     Console.WriteLine($"Piece: {Constants.PiecesByChar['K']}");
 
@@ -303,9 +303,9 @@ static void _18_Printing_Chess_Board()
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
 
-    for (int bbIndex = 0; bbIndex < position.PieceBitBoards.Length; ++bbIndex)
+    for (int bbIndex = 0; bbIndex < position.PieceBitboards.Length; ++bbIndex)
     {
-        position.PieceBitBoards[bbIndex].Print();
+        position.PieceBitboards[bbIndex].Print();
     }
 }
 
@@ -313,38 +313,38 @@ static void _19_Parse_FEN()
 {
     var position = new Position(CmkPosition);
 
-    position.PieceBitBoards[(int)Piece.Q].Print();
+    position.PieceBitboards[(int)Piece.Q].Print();
 
     position.Print();
-    position.OccupancyBitBoards[(int)Side.White].Print();
-    position.OccupancyBitBoards[(int)Side.Black].Print();
-    position.OccupancyBitBoards[(int)Side.Both].Print();
+    position.OccupancyBitboards[(int)Side.White].Print();
+    position.OccupancyBitboards[(int)Side.Black].Print();
+    position.OccupancyBitboards[(int)Side.Both].Print();
 }
 
 static void _20_QueenAttacks()
 {
     var position = new Position(Constants.InitialPositionFEN);
-    Attacks.QueenAttacks((int)BoardSquare.e4, position.OccupancyBitBoards[(int)Side.Both]).Print();
+    Attacks.QueenAttacks((int)BoardSquare.e4, position.OccupancyBitboards[(int)Side.Both]).Print();
 }
 
 static void _21_IsSquareAttacked()
 {
     var position = new Position("8/8/8/3p4/8/8/8/8 w - - 0 1");
 
-    position.PieceBitBoards[(int)Piece.p].Print();
+    position.PieceBitboards[(int)Piece.p].Print();
 
     Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4].Print();
 
     var and =
-        position.PieceBitBoards[(int)Piece.p]
+        position.PieceBitboards[(int)Piece.p]
         & Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4];
     and.Print();
 
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquare.c6);
-    position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquare.f6);
+    position.PieceBitboards[(int)Piece.n].SetBit(BoardSquare.c6);
+    position.PieceBitboards[(int)Piece.n].SetBit(BoardSquare.f6);
 
     position.PrintAttackedSquares(Side.Black);
 
@@ -353,24 +353,24 @@ static void _21_IsSquareAttacked()
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.b7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.d7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.f7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.h7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.b3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.d3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.f3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.h3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.d1);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.c4);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.g4);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.b7);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.d7);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.f7);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.h7);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.b3);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.d3);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.f3);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.h3);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.d1);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.c4);
+    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.g4);
 
     position.PrintAttackedSquares(Side.Black);
 
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquare.e4);
+    position.PieceBitboards[(int)Piece.K].SetBit(BoardSquare.e4);
     position.PrintAttackedSquares(Side.White);
 
     Console.WriteLine("=====================================");
@@ -385,7 +385,7 @@ static void _22_Generate_Moves()
     var position = new Position("r1P1k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ");
     position.Print();
 
-    //position.OccupancyBitBoards[2] |= 0b11100111UL << 8 * 4;
+    //position.OccupancyBitboards[2] |= 0b11100111UL << 8 * 4;
     var moves = MoveGenerator.GenerateAllMoves(position);
 
     foreach (var move in moves)
@@ -394,8 +394,8 @@ static void _22_Generate_Moves()
     }
 
     position = new Position(KillerPosition);
-    position.PieceBitBoards[0].Print();
-    position.PieceBitBoards[6].Print();
+    position.PieceBitboards[0].Print();
+    position.PieceBitboards[6].Print();
     position.Print();
     moves = MoveGenerator.GenerateAllMoves(position);
 
@@ -413,7 +413,7 @@ static void _23_Castling_Moves()
     int index = 0;
     var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-    Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+    Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
     var evaluationContext = new EvaluationContext(buffer);
 
     MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
@@ -532,10 +532,10 @@ static void _32_Make_Move()
             game.CurrentPosition.Print();
 
             Console.WriteLine("White occupancy:");
-            game.CurrentPosition.OccupancyBitBoards[(int)Side.White].Print();
+            game.CurrentPosition.OccupancyBitboards[(int)Side.White].Print();
 
             Console.WriteLine("Black occupancy:");
-            game.CurrentPosition.OccupancyBitBoards[(int)Side.Black].Print();
+            game.CurrentPosition.OccupancyBitboards[(int)Side.Black].Print();
 
             game.CurrentPosition.UnmakeMove(move, gameState);
         }
@@ -704,7 +704,7 @@ static void _54_ScoreMove()
 
     var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position.FEN()));
-    Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+    Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
     var evaluationContext = new EvaluationContext(buffer);
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
@@ -755,7 +755,7 @@ static long CalculatePositionHash(long[,] zobristTable, Position position)
     {
         for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {
-            if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
+            if (position.PieceBitboards[pieceIndex].GetBit(squareIndex))
             {
                 positionHash ^= zobristTable[squareIndex, pieceIndex];
             }
@@ -841,12 +841,12 @@ static void CountBits()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitBoards)
+        foreach (var bitboard in position.PieceBitboards)
         {
             counter += CountBits_Naive(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitBoards)
+        foreach (var bitboard in position.OccupancyBitboards)
         {
             counter += CountBits_Naive(bitboard);
         }
@@ -858,12 +858,12 @@ static void CountBits()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitBoards)
+        foreach (var bitboard in position.PieceBitboards)
         {
             counter += CountBits_PopCount(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitBoards)
+        foreach (var bitboard in position.OccupancyBitboards)
         {
             counter += CountBits_PopCount(bitboard);
         }
@@ -920,12 +920,12 @@ static void GetLS1BIndex()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitBoards)
+        foreach (var bitboard in position.PieceBitboards)
         {
             counter += Original_GetLS1BIndex_Impl(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitBoards)
+        foreach (var bitboard in position.OccupancyBitboards)
         {
             counter += Original_GetLS1BIndex_Impl(bitboard);
         }
@@ -937,12 +937,12 @@ static void GetLS1BIndex()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitBoards)
+        foreach (var bitboard in position.PieceBitboards)
         {
             counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitBoards)
+        foreach (var bitboard in position.OccupancyBitboards)
         {
             counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }
@@ -1145,13 +1145,13 @@ static void PieceSquareTables()
     short[] middleGamePawnTableBlack = [.. MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56])];
     short[] endGamePawnTableBlack = [.. EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56])];
 
-    PrintBitBoard(MiddleGamePawnTable);
-    PrintBitBoard(middleGamePawnTableBlack);
+    PrintBitboard(MiddleGamePawnTable);
+    PrintBitboard(middleGamePawnTableBlack);
 
-    PrintBitBoard(EndGamePawnTable);
-    PrintBitBoard(endGamePawnTableBlack);
+    PrintBitboard(EndGamePawnTable);
+    PrintBitboard(endGamePawnTableBlack);
 
-    static void PrintBitBoard<T>(T[] bitboard)
+    static void PrintBitboard<T>(T[] bitboard)
     {
         for (var rank = 0; rank < 8; ++rank)
         {
@@ -1162,7 +1162,7 @@ static void PieceSquareTables()
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitboardExtensions.SquareIndex(rank, file);
 
                 Console.Write($" {bitboard[squareIndex]}\t");
             }
@@ -1178,9 +1178,9 @@ static void NewMasks()
     Masks.WhiteSidePassedPawnMasks[(int)BoardSquare.c4].Print();
     Masks.BlackSidePassedPawnMasks[(int)BoardSquare.c5].Print();
 
-    PrintBitBoardArray(Masks.WhitePassedPawnMasks);
-    PrintBitBoardArray(Masks.WhiteSidePassedPawnMasks);
-    PrintBitBoardArray(Masks.BlackSidePassedPawnMasks);
+    PrintBitboardArray(Masks.WhitePassedPawnMasks);
+    PrintBitboardArray(Masks.WhiteSidePassedPawnMasks);
+    PrintBitboardArray(Masks.BlackSidePassedPawnMasks);
 
     Masks.WhiteKnightOutpostMask.Print();
     Masks.BlackKnightOutpostMask.Print();
@@ -1195,7 +1195,7 @@ static void NewMasks()
     Console.WriteLine((((9 * (int)BoardSquare.a1) + 8) & 8) != 0);
 }
 
-static void PrintBitBoardArray(ulong[] bb)
+static void PrintBitboardArray(ulong[] bb)
 {
     for (int i = 0; i < 64; ++i)
     {
@@ -1212,12 +1212,12 @@ static void PrintBitBoardArray(ulong[] bb)
 
 static void DarkLightSquares()
 {
-    Constants.DarkSquaresBitBoard.Print();
-    Constants.LightSquaresBitBoard.Print();
+    Constants.DarkSquaresBitboard.Print();
+    Constants.LightSquaresBitboard.Print();
 
     for (int i = 0; i < 64; ++i)
     {
-        Debug.Assert(Constants.DarkSquaresBitBoard.GetBit(i) ^ Constants.LightSquaresBitBoard.GetBit(i));
+        Debug.Assert(Constants.DarkSquaresBitboard.GetBit(i) ^ Constants.LightSquaresBitboard.GetBit(i));
     }
 }
 

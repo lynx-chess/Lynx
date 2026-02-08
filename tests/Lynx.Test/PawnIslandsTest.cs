@@ -47,8 +47,8 @@ public class PawnIslandsTest
     [TestCase("5k1K/8/8/8/8/8/P6P/8 w - - 0 1", 2)]
     public void PawnIslandsCount(string fen, int expectedPawnIslands)
     {
-        var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
-        BitBoard whitePawns = pieces[(int)Piece.P];
+        var pieces = FENParser.ParseFEN(fen).PieceBitboards;
+        Bitboard whitePawns = pieces[(int)Piece.P];
 
         // Original method test
         var pawnIslands = PawnIslandsGenerator.IdentifyIslands(whitePawns);
@@ -66,37 +66,37 @@ public class PawnIslandsTest
         Assert.AreEqual(EvaluationParams.PawnIslandsBonus[expectedPawnIslands] - EvaluationParams.PawnIslandsBonus[0], pawnIslandsBonus, "Error in the Position implementation");
     }
 
-    private static int CountPawnIslands(BitBoard pawns)
+    private static int CountPawnIslands(Bitboard pawns)
     {
-        int pawnFileBitBoard = 0;
+        int pawnFileBitboard = 0;
 
         while (pawns != 0)
         {
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
-            // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
+            // Bitboard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitboard |= (1 << Constants.File[squareIndex]);
         }
 
-        return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
+        return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitboard];
     }
 
-    private static int CountPawnIslandsImproved(BitBoard pawns)
+    private static int CountPawnIslandsImproved(Bitboard pawns)
     {
-        byte pawnFileBitBoard = 0;
+        byte pawnFileBitboard = 0;
 
         while (pawns != 0)
         {
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
-            // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (byte)(1 << (squareIndex % 8));
+            // Bitboard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitboard |= (byte)(1 << (squareIndex % 8));
         }
 
-        int shifted = pawnFileBitBoard << 1;
+        int shifted = pawnFileBitboard << 1;
 
         // Treat shifted’s MSB as 0 implicitly
-        int starts = pawnFileBitBoard & (~shifted);
+        int starts = pawnFileBitboard & (~shifted);
 
         return BitOperations.PopCount((uint)starts);
     }

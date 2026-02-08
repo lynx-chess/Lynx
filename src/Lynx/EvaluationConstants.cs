@@ -32,7 +32,7 @@ public static class EvaluationConstants
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
-    public static readonly BitBoard[] KingRing = new BitBoard[64];
+    public static readonly Bitboard[] KingRing = new Bitboard[64];
 
     public const int LMRScaleFactor = 100;
 

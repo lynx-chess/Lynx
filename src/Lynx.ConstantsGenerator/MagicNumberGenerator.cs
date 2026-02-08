@@ -38,9 +38,9 @@ public static class MagicNumberGenerator
 
     public static ulong FindMagicNumbers(int squareIndex, bool isBishop)
     {
-        Span<BitBoard> occupancies = stackalloc BitBoard[4096];
-        Span<BitBoard> attacks = stackalloc BitBoard[4096];
-        Span<BitBoard> usedAttacks = stackalloc BitBoard[4096];
+        Span<Bitboard> occupancies = stackalloc Bitboard[4096];
+        Span<Bitboard> attacks = stackalloc Bitboard[4096];
+        Span<Bitboard> usedAttacks = stackalloc Bitboard[4096];
 
         var occupancyMask = isBishop
             ? AttackGenerator.MaskBishopOccupancy(squareIndex)
@@ -117,7 +117,7 @@ public static class MagicNumberGenerator
     /// </summary>
     public static void InitializeMagicNumbers()
     {
-        Console.Write("\tpublic static ReadOnlySpan<BitBoard> RookMagicNumbers =>\n\t[\n\t\t");
+        Console.Write("\tpublic static ReadOnlySpan<Bitboard> RookMagicNumbers =>\n\t[\n\t\t");
         for (int square = 0; square < 64; ++square)
         {
             var magicRook = FindMagicNumbers(square, false);
@@ -131,7 +131,7 @@ public static class MagicNumberGenerator
 
         Console.WriteLine("\n\t];\n");
 
-        Console.Write("\tpublic static ReadOnlySpan<BitBoard> BishopMagicNumbers =>\n\t[\n\t\t");
+        Console.Write("\tpublic static ReadOnlySpan<Bitboard> BishopMagicNumbers =>\n\t[\n\t\t");
         for (int square = 0; square < 64; ++square)
         {
             var magicBishop = FindMagicNumbers(square, true);

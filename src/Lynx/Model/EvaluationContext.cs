@@ -14,13 +14,13 @@ public ref struct EvaluationContext
 
     public const int RequiredBufferSize = AttacksCount + AttacksBySideCount;
 
-    public Span<BitBoard> Attacks;
-    public Span<BitBoard> AttacksBySide;
+    public Span<Bitboard> Attacks;
+    public Span<Bitboard> AttacksBySide;
 
     public int WhiteKingRingAttacks;
     public int BlackKingRingAttacks;
 
-    public EvaluationContext(Span<BitBoard> buffer)
+    public EvaluationContext(Span<Bitboard> buffer)
     {
         Debug.Assert(buffer.Length == RequiredBufferSize);
 

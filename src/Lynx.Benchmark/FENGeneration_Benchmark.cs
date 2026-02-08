@@ -350,12 +350,12 @@ internal struct StructCustomPosition
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards { get; }
+    public Bitboard[] PieceBitboards { get; }
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards { get; }
+    public Bitboard[] OccupancyBitboards { get; }
 
     public Side Side { get; }
 
@@ -369,8 +369,8 @@ internal struct StructCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        PieceBitBoards = parsedFEN.PieceBitBoards;
-        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        PieceBitboards = parsedFEN.PieceBitboards;
+        OccupancyBitboards = parsedFEN.OccupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -383,11 +383,11 @@ internal struct StructCustomPosition
     {
         _fen = position.FEN;
 
-        PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        PieceBitboards = new Bitboard[12];
+        Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-        OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        OccupancyBitboards = new Bitboard[3];
+        Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -414,11 +414,11 @@ internal struct StructCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -428,24 +428,24 @@ internal struct StructCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -461,11 +461,11 @@ internal struct StructCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -473,15 +473,15 @@ internal struct StructCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -513,11 +513,11 @@ internal struct StructCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -527,24 +527,24 @@ internal struct StructCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -560,11 +560,11 @@ internal struct StructCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -572,15 +572,15 @@ internal struct StructCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -602,7 +602,7 @@ internal struct StructCustomPosition
             int foundPiece = -1;
             for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                if (PieceBitboards[pieceBoardIndex].GetBit(square))
                 {
                     foundPiece = pieceBoardIndex;
                     break;
@@ -691,12 +691,12 @@ internal readonly struct ReadonlyStructCustomPosition
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards { get; }
+    public Bitboard[] PieceBitboards { get; }
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards { get; }
+    public Bitboard[] OccupancyBitboards { get; }
 
     public Side Side { get; }
 
@@ -710,8 +710,8 @@ internal readonly struct ReadonlyStructCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        PieceBitBoards = parsedFEN.PieceBitBoards;
-        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        PieceBitboards = parsedFEN.PieceBitboards;
+        OccupancyBitboards = parsedFEN.OccupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -724,11 +724,11 @@ internal readonly struct ReadonlyStructCustomPosition
     {
         FEN = position.FEN;
 
-        PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        PieceBitboards = new Bitboard[12];
+        Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-        OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        OccupancyBitboards = new Bitboard[3];
+        Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -754,11 +754,11 @@ internal readonly struct ReadonlyStructCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -768,24 +768,24 @@ internal readonly struct ReadonlyStructCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -801,11 +801,11 @@ internal readonly struct ReadonlyStructCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -813,15 +813,15 @@ internal readonly struct ReadonlyStructCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -854,11 +854,11 @@ internal readonly struct ReadonlyStructCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -868,24 +868,24 @@ internal readonly struct ReadonlyStructCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -901,11 +901,11 @@ internal readonly struct ReadonlyStructCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -913,15 +913,15 @@ internal readonly struct ReadonlyStructCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -943,7 +943,7 @@ internal readonly struct ReadonlyStructCustomPosition
             int foundPiece = -1;
             for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                if (PieceBitboards[pieceBoardIndex].GetBit(square))
                 {
                     foundPiece = pieceBoardIndex;
                     break;
@@ -1038,12 +1038,12 @@ internal class ClassCustomPosition
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards { get; }
+    public Bitboard[] PieceBitboards { get; }
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards { get; }
+    public Bitboard[] OccupancyBitboards { get; }
 
     public Side Side { get; }
 
@@ -1057,8 +1057,8 @@ internal class ClassCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        PieceBitBoards = parsedFEN.PieceBitBoards;
-        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        PieceBitboards = parsedFEN.PieceBitboards;
+        OccupancyBitboards = parsedFEN.OccupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -1071,11 +1071,11 @@ internal class ClassCustomPosition
     {
         _fen = position.FEN;
 
-        PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        PieceBitboards = new Bitboard[12];
+        Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-        OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        OccupancyBitboards = new Bitboard[3];
+        Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -1102,11 +1102,11 @@ internal class ClassCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -1116,24 +1116,24 @@ internal class ClassCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -1149,11 +1149,11 @@ internal class ClassCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -1161,15 +1161,15 @@ internal class ClassCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1200,11 +1200,11 @@ internal class ClassCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -1214,24 +1214,24 @@ internal class ClassCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -1247,11 +1247,11 @@ internal class ClassCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -1259,15 +1259,15 @@ internal class ClassCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1289,7 +1289,7 @@ internal class ClassCustomPosition
             int foundPiece = -1;
             for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                if (PieceBitboards[pieceBoardIndex].GetBit(square))
                 {
                     foundPiece = pieceBoardIndex;
                     break;
@@ -1384,12 +1384,12 @@ internal record class RecordClassCustomPosition
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards { get; }
+    public Bitboard[] PieceBitboards { get; }
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards { get; }
+    public Bitboard[] OccupancyBitboards { get; }
 
     public Side Side { get; }
 
@@ -1403,8 +1403,8 @@ internal record class RecordClassCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        PieceBitBoards = parsedFEN.PieceBitBoards;
-        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        PieceBitboards = parsedFEN.PieceBitboards;
+        OccupancyBitboards = parsedFEN.OccupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -1417,11 +1417,11 @@ internal record class RecordClassCustomPosition
     {
         _fen = position.FEN;
 
-        PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        PieceBitboards = new Bitboard[12];
+        Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-        OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        OccupancyBitboards = new Bitboard[3];
+        Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -1448,11 +1448,11 @@ internal record class RecordClassCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -1462,24 +1462,24 @@ internal record class RecordClassCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -1495,11 +1495,11 @@ internal record class RecordClassCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -1507,15 +1507,15 @@ internal record class RecordClassCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1546,11 +1546,11 @@ internal record class RecordClassCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -1560,24 +1560,24 @@ internal record class RecordClassCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -1593,11 +1593,11 @@ internal record class RecordClassCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -1605,15 +1605,15 @@ internal record class RecordClassCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1635,7 +1635,7 @@ internal record class RecordClassCustomPosition
             int foundPiece = -1;
             for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                if (PieceBitboards[pieceBoardIndex].GetBit(square))
                 {
                     foundPiece = pieceBoardIndex;
                     break;
@@ -1730,12 +1730,12 @@ internal record struct RecordStructCustomPosition
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards { get; }
+    public Bitboard[] PieceBitboards { get; }
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards { get; }
+    public Bitboard[] OccupancyBitboards { get; }
 
     public Side Side { get; }
 
@@ -1749,8 +1749,8 @@ internal record struct RecordStructCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        PieceBitBoards = parsedFEN.PieceBitBoards;
-        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        PieceBitboards = parsedFEN.PieceBitboards;
+        OccupancyBitboards = parsedFEN.OccupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -1763,11 +1763,11 @@ internal record struct RecordStructCustomPosition
     {
         _fen = position.FEN;
 
-        PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        PieceBitboards = new Bitboard[12];
+        Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-        OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        OccupancyBitboards = new Bitboard[3];
+        Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -1794,11 +1794,11 @@ internal record struct RecordStructCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -1808,24 +1808,24 @@ internal record struct RecordStructCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -1841,11 +1841,11 @@ internal record struct RecordStructCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -1853,15 +1853,15 @@ internal record struct RecordStructCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1892,11 +1892,11 @@ internal record struct RecordStructCustomPosition
 
         EnPassant = BoardSquare.noSquare;
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
         if (move.CapturedPiece() != (int)Piece.None)
         {
@@ -1906,24 +1906,24 @@ internal record struct RecordStructCustomPosition
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
             }
             else
             {
                 var limit = (int)Piece.K + oppositeSideOffset;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                     {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        PieceBitboards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                OccupancyBitboards[oppositeSide].PopBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
@@ -1939,11 +1939,11 @@ internal record struct RecordStructCustomPosition
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -1951,15 +1951,15 @@ internal record struct RecordStructCustomPosition
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1981,7 +1981,7 @@ internal record struct RecordStructCustomPosition
             int foundPiece = -1;
             for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                if (PieceBitboards[pieceBoardIndex].GetBit(square))
                 {
                     foundPiece = pieceBoardIndex;
                     break;

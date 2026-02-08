@@ -83,7 +83,7 @@ public static class BenchmarkLegacyMoveExtensions
             var limit = (int)Piece.K + oppositeSideOffset;
             for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                if (position.PieceBitboards[pieceIndex].GetBit(targetSquare))
                 {
                     targetPiece = pieceIndex;
                     break;

@@ -164,7 +164,7 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (!bitboard.Empty())
             {
@@ -186,7 +186,7 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (!bitboard.Empty())
             {
@@ -207,7 +207,7 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (!bitboard.Empty())
             {
@@ -228,7 +228,7 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (!bitboard.Empty())
             {
@@ -242,10 +242,10 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
     }
 }
 
-internal static class BitBoardExtensions_GetAndResetLS1BIndex_Benchmark
+internal static class BitboardExtensions_GetAndResetLS1BIndex_Benchmark
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetLS1BIndex(this BitBoard board)
+    public static int GetLS1BIndex(this Bitboard board)
     {
         Utils.Assert(board != default);
 
@@ -253,13 +253,13 @@ internal static class BitBoardExtensions_GetAndResetLS1BIndex_Benchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ResetLS1B(this ref BitBoard board)
+    public static void ResetLS1B(this ref Bitboard board)
     {
         board &= (board - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetLS1BIndexAndPopIt(this ref BitBoard board)
+    public static int GetLS1BIndexAndPopIt(this ref Bitboard board)
     {
         //var index = GetLS1BIndex(board);
         var index = BitOperations.TrailingZeroCount(board);
@@ -271,7 +271,7 @@ internal static class BitBoardExtensions_GetAndResetLS1BIndex_Benchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetLS1BIndexAndToggleIt(this ref BitBoard board)
+    public static int GetLS1BIndexAndToggleIt(this ref Bitboard board)
     {
         //var index = GetLS1BIndex(board);
         var index = BitOperations.TrailingZeroCount(board);
@@ -283,7 +283,7 @@ internal static class BitBoardExtensions_GetAndResetLS1BIndex_Benchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard WithoutLS1B_OutIndex(this BitBoard board, out int index)
+    public static Bitboard WithoutLS1B_OutIndex(this Bitboard board, out int index)
     {
         index = BitOperations.TrailingZeroCount(board);
 

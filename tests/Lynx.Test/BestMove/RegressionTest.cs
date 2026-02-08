@@ -224,7 +224,7 @@ public class RegressionTest : BaseTest
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         Assert.False(engine.Game.Is50MovesRepetition(ref evaluationContext));

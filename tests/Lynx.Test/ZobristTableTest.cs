@@ -168,7 +168,7 @@ public class ZobristTableTest
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
+                if (position.PieceBitboards[pieceIndex].GetBit(squareIndex))
                 {
                     positionHash ^= ZobristTable.PieceHash(squareIndex, pieceIndex);
                 }
