@@ -373,7 +373,7 @@ public sealed partial class Engine
             int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
 
-            // If we prune while getting checmated, we risk not finding any move and having an empty PV
+            // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-low pruning (moves with low scores) - prune less when improving

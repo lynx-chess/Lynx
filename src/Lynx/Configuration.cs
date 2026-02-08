@@ -163,7 +163,7 @@ public sealed class EngineSettings
     public double NodeTmScale { get; set; } = 1.80;
 
     [SPSA<int>(enabled: false)]
-    public int ScoreStabiity_MinDepth { get; set; } = 7;
+    public int ScoreStability_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
     public int StopSearchOnMate_MaxSoftTimeBoundLimit { get; set; } = 10_000;

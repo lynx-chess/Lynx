@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Lynx;
 
 /// <summary>
-/// Implementation based on Stormprhax, some comments and clarifications from Altair
+/// Implementation based on Stormphrax, some comments and clarifications from Altair
 /// </summary>
 public static class SEE
 {

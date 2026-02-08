@@ -78,7 +78,7 @@ public static class ZobristTable
 
     /// <summary>
     /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>.
-    /// Differenciates white and black sides
+    /// Differentiates white and black sides
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong SideHash(ulong side)
