@@ -65,7 +65,7 @@ public interface ITranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
-        Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overriden");
+        Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overridden");
 
         ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 

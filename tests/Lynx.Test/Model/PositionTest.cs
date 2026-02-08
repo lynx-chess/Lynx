@@ -1105,8 +1105,8 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black);
-        Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winnigSideOffset));
+        var winningSideOffset = Utils.PieceOffset(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black);
+        Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winningSideOffset));
 
         static bool IsBishopPawnDraw(Position position, int winningSideOffset)
         {
@@ -1161,7 +1161,7 @@ public class PositionTest
             // The are two cases when the defending king can't reduce the distance to the corner:
             // - If the attacking one is in the middle, and therefore their difference is at least 2 distance squares - not a concern
             // - If the pawn is in 7th rank and blocks the defending king from approaching the corner - we don't use this for comparing defending and attacking conditions
-            int oneIfDefendingSideTomove = (int)position.Side ^ inverseWinningSide ^ 1;
+            int oneIfDefendingSideToMove = (int)position.Side ^ inverseWinningSide ^ 1;
 
             var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing];
 
@@ -1169,8 +1169,8 @@ public class PositionTest
                 defendingKingCornerDistance <= 1
                 || (closerPawnCornerDistance > defendingKingCornerDistance        // Avoids bishop + king blocking, i.e. 2k5/P7/2K5/8/8/8/8/B7 b - - 0 1, 4k3/8/4K3/P7/8/8/8/B7 b - - 0 1
                     && attackingKingCornerDistance > 2  // Avoids bishop blocking, i.e. 2k5/8/2K5/8/5B2/8/P7/8 b - - 0 1
-                    && defendingKingCornerDistance - oneIfDefendingSideTomove < attackingKingCornerDistance
-                    && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing]);     // Avoids king diagonal blocking, i.e. 3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48
+                    && defendingKingCornerDistance - oneIfDefendingSideToMove < attackingKingCornerDistance
+                    && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideToMove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing]);     // Avoids king diagonal blocking, i.e. 3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48
         }
     }
 
