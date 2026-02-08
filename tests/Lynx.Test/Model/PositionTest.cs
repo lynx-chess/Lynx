@@ -1231,11 +1231,11 @@ public class PositionTest
     {
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitboards[pieceIndex];
+            var bb = position.PieceBitboards[pieceIndex];
 
-            while (bitboard != default)
+            while (bb != default)
             {
-                bitboard.ResetLS1B();
+                bb.ResetLS1B();
             }
         }
 
