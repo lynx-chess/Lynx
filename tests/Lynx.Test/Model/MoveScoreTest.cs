@@ -16,7 +16,7 @@ public class MoveScoreTest : BaseTest
     /// 2   P P P B B P P P
     /// 1   R . . . K . . R
     ///     a b c d e f g h
-    /// This tests indirectly <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
+    /// This tests indirectly <see cref="EvaluationConstants.MostValuableVictimLeastValuableAttacker"/>
     /// </summary>
     [TestCase(Constants.TrickyTestPositionFEN)]
     public void MoveScore(string fen)
@@ -76,6 +76,6 @@ public class MoveScoreTest : BaseTest
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
         Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
-        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0][6], engine.ScoreMove(engine.Game.CurrentPosition, allMoves[0], default, ref evaluationContext));
+        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValuableVictimLeastValuableAttacker[0][6], engine.ScoreMove(engine.Game.CurrentPosition, allMoves[0], default, ref evaluationContext));
     }
 }

@@ -106,7 +106,7 @@ public static class EvaluationConstants
     ///      Queen              101    201    301    401    501    0
     ///       King              100    200    300    400    500    0
     /// </summary>
-    public static readonly int[][] MostValueableVictimLeastValuableAttacker =
+    public static readonly int[][] MostValuableVictimLeastValuableAttacker =
     [         //    P     N     B     R      Q  K    p    n      b    r      q          k
         /* P */ [   0,    0,    0,    0,     0, 0,  1500, 4000, 4500, 5500, 11500 ], // 0],
         /* N */ [   0,    0,    0,    0,     0, 0,  1400, 3900, 4400, 5400, 11400 ], // 0],

@@ -10,7 +10,7 @@ namespace Lynx;
 public sealed partial class Engine
 {
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValuableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Position position, Move move, int ply, ref EvaluationContext evaluationContext, ShortMove bestMoveTTCandidate = default)
@@ -86,7 +86,7 @@ public sealed partial class Engine
                 : BadCaptureMoveBaseScoreValue;
 
             return baseCaptureScore
-                + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
+                + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(move);
         }
@@ -102,7 +102,7 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValuableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMoveQSearch(Move move, ShortMove bestMoveTTCandidate = default)
@@ -142,7 +142,7 @@ public sealed partial class Engine
                 $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
             return baseCaptureScore
-                + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
+                + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(move);
         }
@@ -156,7 +156,7 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// Quiet history, contination history, killers and counter moves
+    /// Quiet history, continuation history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
