@@ -8,22 +8,22 @@ public static class ReferenceMoveGenerator
     /// Indexed by <see cref="Piece"/>.
     /// Checks are not considered
     /// </summary>
-    private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
+    private static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
     [
 #pragma warning disable IDE0350 // Use implicitly typed lambda
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
-        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
-        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+        (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
-        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
-        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+        (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 #pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
@@ -37,7 +37,7 @@ public static class ReferenceMoveGenerator
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
-        var bitboard = position.PieceBitBoards[piece];
+        var bitboard = position.PieceBitboards[piece];
 
         while (bitboard != default)
         {
@@ -53,7 +53,7 @@ public static class ReferenceMoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitboards[2].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -74,7 +74,7 @@ public static class ReferenceMoveGenerator
                 if (!capturesOnly)
                 {
                     var doublePushSquare = sourceSquare + (2 * pawnPush);
-                    if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
+                    if (!position.OccupancyBitboards[2].GetBit(doublePushSquare)
                         && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                     {
                         yield return MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
@@ -86,13 +86,13 @@ public static class ReferenceMoveGenerator
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
-            // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
+            // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
-            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+            var attackedSquares = attacks & position.OccupancyBitboards[oppositeSide];
             while (attackedSquares != default)
             {
                 targetSquare = attackedSquares.GetLS1BIndex();
@@ -156,7 +156,7 @@ public static class ReferenceMoveGenerator
     /// <param name="piece"><see cref="Piece"/></param>
     private static IEnumerable<Move> GeneratePieceMovesForReference(int piece, Position position, int offset, bool capturesOnly = false)
     {
-        var bitboard = position.PieceBitBoards[piece];
+        var bitboard = position.PieceBitboards[piece];
         int sourceSquare, targetSquare;
 
         while (bitboard != default)
@@ -164,15 +164,15 @@ public static class ReferenceMoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
-                & ~position.OccupancyBitBoards[(int)position.Side];
+            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitboards[(int)Side.Both])
+                & ~position.OccupancyBitboards[(int)position.Side];
 
             while (attacks != default)
             {
                 targetSquare = attacks.GetLS1BIndex();
                 attacks.ResetLS1B();
 
-                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                if (position.OccupancyBitboards[(int)Side.Both].GetBit(targetSquare))
                 {
                     var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
                     yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
@@ -191,7 +191,7 @@ public static class ReferenceMoveGenerator
         var start = (int)Piece.p - offset;
         for (int pieceIndex = start; pieceIndex < start + 5; ++pieceIndex)
         {
-            if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+            if (position.PieceBitboards[pieceIndex].GetBit(targetSquare))
             {
                 return pieceIndex;
             }

@@ -205,13 +205,13 @@ public class PsqtImmutableArrays_Benchmark : BaseBenchmark
 
     private static int ImmutableArrays_PositionEvaluation(Position position, int piece)
     {
-        var bitBoard = position.PieceBitBoards[piece];
+        var bitboard = position.PieceBitboards[piece];
         int eval = 0;
 
-        while (!bitBoard.Empty())
+        while (!bitboard.Empty())
         {
-            var pieceSquareIndex = bitBoard.GetLS1BIndex();
-            bitBoard.ResetLS1B();
+            var pieceSquareIndex = bitboard.GetLS1BIndex();
+            bitboard.ResetLS1B();
             eval += PsqtImmutableArrays_ImmutableArrayEvaluationConstants.MiddleGameTable[piece, pieceSquareIndex];
         }
 
@@ -220,13 +220,13 @@ public class PsqtImmutableArrays_Benchmark : BaseBenchmark
 
     private static int Arrays_PositionEvaluation(Position position, int piece)
     {
-        var bitBoard = position.PieceBitBoards[piece];
+        var bitboard = position.PieceBitboards[piece];
         int eval = 0;
 
-        while (!bitBoard.Empty())
+        while (!bitboard.Empty())
         {
-            var pieceSquareIndex = bitBoard.GetLS1BIndex();
-            bitBoard.ResetLS1B();
+            var pieceSquareIndex = bitboard.GetLS1BIndex();
+            bitboard.ResetLS1B();
             eval += PsqtImmutableArrays_ArrayEvaluationConstants.MiddleGameTable[piece, pieceSquareIndex];
         }
 

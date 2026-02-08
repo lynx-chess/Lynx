@@ -130,16 +130,16 @@ public class ToggleBits_Benchmark : BaseBenchmark
     public Position SetPop(string fen)
     {
         var position = new Position(fen);
-        for (int b = 0; b < position.PieceBitBoards.Length; ++b)
+        for (int b = 0; b < position.PieceBitboards.Length; ++b)
         {
-            var bb = position.PieceBitBoards[b];
+            var bb = position.PieceBitboards[b];
             for (int i = 0; i < 32; ++i)
             {
                 bb.PopBit(i);
                 bb.SetBit(i + 32);
 
-                position.OccupancyBitBoards[i % 2].PopBit(i);
-                position.OccupancyBitBoards[i % 2].SetBit(i + 32);
+                position.OccupancyBitboards[i % 2].PopBit(i);
+                position.OccupancyBitboards[i % 2].SetBit(i + 32);
             }
         }
 
@@ -151,13 +151,13 @@ public class ToggleBits_Benchmark : BaseBenchmark
     public Position Toggle(string fen)
     {
         var position = new Position(fen);
-        for (int b = 0; b < position.PieceBitBoards.Length; ++b)
+        for (int b = 0; b < position.PieceBitboards.Length; ++b)
         {
-            var bb = position.PieceBitBoards[b];
+            var bb = position.PieceBitboards[b];
             for (int i = 0; i < 32; ++i)
             {
                 bb.ToggleBits(i, i + 32);
-                position.OccupancyBitBoards[i % 2].ToggleBits(i, i + 32);
+                position.OccupancyBitboards[i % 2].ToggleBits(i, i + 32);
             }
         }
 

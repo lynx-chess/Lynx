@@ -25,8 +25,8 @@ namespace Lynx.Benchmark;
 
 public static class BenchmarkExtensions
 {
-    public static void ResetLS1BBenchmark(this ref BitBoard board) => board &= (board - 1);
-    public static BitBoard WithoutLS1BBenchmark(this BitBoard board) => board & (board - 1);
+    public static void ResetLS1BBenchmark(this ref Bitboard board) => board &= (board - 1);
+    public static Bitboard WithoutLS1BBenchmark(this Bitboard board) => board & (board - 1);
 }
 
 public class ResetLS1BvsWithoutLS1B_Benchmark : BaseBenchmark
@@ -47,16 +47,16 @@ public class ResetLS1BvsWithoutLS1B_Benchmark : BaseBenchmark
     {
         ulong counter = 0;
 
-        for (int i = 0; i < position.PieceBitBoards.Length; ++i)
+        for (int i = 0; i < position.PieceBitboards.Length; ++i)
         {
-            var bitboard = position.PieceBitBoards[i];
+            var bitboard = position.PieceBitboards[i];
             bitboard.ResetLS1BBenchmark();
             counter += bitboard;
         }
 
-        for (int i = 0; i < position.OccupancyBitBoards.Length; ++i)
+        for (int i = 0; i < position.OccupancyBitboards.Length; ++i)
         {
-            var bitboard = position.OccupancyBitBoards[i];
+            var bitboard = position.OccupancyBitboards[i];
             bitboard.ResetLS1BBenchmark();
             counter += bitboard;
         }
@@ -70,15 +70,15 @@ public class ResetLS1BvsWithoutLS1B_Benchmark : BaseBenchmark
     {
         ulong counter = 0;
 
-        for (int i = 0; i < position.PieceBitBoards.Length; ++i)
+        for (int i = 0; i < position.PieceBitboards.Length; ++i)
         {
-            var bitboard = position.PieceBitBoards[i];
+            var bitboard = position.PieceBitboards[i];
             counter += bitboard.WithoutLS1BBenchmark();
         }
 
-        for (int i = 0; i < position.OccupancyBitBoards.Length; ++i)
+        for (int i = 0; i < position.OccupancyBitboards.Length; ++i)
         {
-            var bitboard = position.OccupancyBitBoards[i];
+            var bitboard = position.OccupancyBitboards[i];
             counter += bitboard.WithoutLS1BBenchmark();
         }
 

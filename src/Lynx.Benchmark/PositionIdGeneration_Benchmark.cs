@@ -86,9 +86,9 @@ internal static class PositionExtensions
     {
         var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
 
-        for (int index = 0; index < position.PieceBitBoards.Length; ++index)
+        for (int index = 0; index < position.PieceBitboards.Length; ++index)
         {
-            sb.Append(position.PieceBitBoards[index]);
+            sb.Append(position.PieceBitboards[index]);
 #if DEBUG
             sb.Append('|');
 #endif

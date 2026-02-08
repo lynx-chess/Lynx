@@ -66,7 +66,7 @@ public class Threats_Benchmark : BaseBenchmark
     [Benchmark(Baseline = true)]
     public int Original()
     {
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         var total = 0;
@@ -86,7 +86,7 @@ public class Threats_Benchmark : BaseBenchmark
     [Benchmark]
     public int Optimized()
     {
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         var total = 0;
@@ -106,8 +106,8 @@ public class Threats_Benchmark : BaseBenchmark
 
 class Position_Threats_Benchmark
 {
-    private readonly ulong[] _pieceBitBoards;
-    private readonly ulong[] _occupancyBitBoards;
+    private readonly ulong[] _pieceBitboards;
+    private readonly ulong[] _occupancyBitboards;
     private readonly int[] _board;
 
 #pragma warning disable RCS1085 // Use auto-implemented property
@@ -115,12 +115,12 @@ class Position_Threats_Benchmark
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards => _pieceBitBoards;
+    public Bitboard[] PieceBitboards => _pieceBitboards;
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards => _occupancyBitBoards;
+    public Bitboard[] OccupancyBitboards => _occupancyBitboards;
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
@@ -154,20 +154,20 @@ class Position_Threats_Benchmark
 
     public Position_Threats_Benchmark(ParseFENResult parsedFEN)
     {
-        _pieceBitBoards = parsedFEN.PieceBitBoards;
-        _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        _pieceBitboards = parsedFEN.PieceBitboards;
+        _occupancyBitboards = parsedFEN.OccupancyBitboards;
         _board = parsedFEN.Board;
     }
 
     public void CalculateThreats(ref EvaluationContext evaluationContext)
     {
-        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var occupancy = _occupancyBitboards[(int)Side.Both];
         ref var attacksByWhite = ref evaluationContext.AttacksBySide[(int)Side.White];
         ref var attacksByBlack = ref evaluationContext.AttacksBySide[(int)Side.Black];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
-            var board = _pieceBitBoards[pieceIndex];
+            var board = _pieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
@@ -182,7 +182,7 @@ class Position_Threats_Benchmark
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var board = _pieceBitBoards[pieceIndex];
+            var board = _pieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
@@ -200,7 +200,7 @@ class Position_Threats_Benchmark
     public int Threats_Original(EvaluationContext evaluationContext, int oppositeSide)
     {
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
+        var oppositeSidePieces = _occupancyBitboards[oppositeSide];
         int packedBonus = 0;
 
         var attacks = evaluationContext.Attacks;
@@ -240,7 +240,7 @@ class Position_Threats_Benchmark
     public int Threats_Optimized(EvaluationContext evaluationContext, int oppositeSide)
     {
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-        var oppositeSidePieces = _occupancyBitBoards[oppositeSide];
+        var oppositeSidePieces = _occupancyBitboards[oppositeSide];
         int packedBonus = 0;
 
         var attacks = evaluationContext.Attacks;

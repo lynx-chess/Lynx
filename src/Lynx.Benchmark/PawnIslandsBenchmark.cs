@@ -9,9 +9,9 @@
  *  |-------------------------- |---------:|---------:|---------:|------:|-------:|----------:|------------:|
  *  | Original                  | 39.19 us | 0.446 us | 0.418 us |  1.00 | 3.4790 |   57.6 KB |        1.00 |
  *  | Original_SkipLocalsInit   | 39.53 us | 0.288 us | 0.270 us |  1.01 | 3.4790 |   57.6 KB |        1.00 |
- *  | BitBoard                  | 36.27 us | 0.154 us | 0.136 us |  0.93 | 3.4790 |   57.6 KB |        1.00 |
- *  | BitBoard_NoFileArray      | 37.03 us | 0.205 us | 0.182 us |  0.95 | 3.4790 |   57.6 KB |        1.00 |
- *  | BitBoard_NoPawnCountArray | 36.81 us | 0.172 us | 0.152 us |  0.94 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Bitboard                  | 36.27 us | 0.154 us | 0.136 us |  0.93 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoFileArray      | 37.03 us | 0.205 us | 0.182 us |  0.95 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoPawnCountArray | 36.81 us | 0.172 us | 0.152 us |  0.94 | 3.4790 |   57.6 KB |        1.00 |
  *
  *
  *  BenchmarkDotNet v0.15.4, Windows 11 (10.0.26100.6584/24H2/2024Update/HudsonValley) (Hyper-V)
@@ -24,9 +24,9 @@
  *  |-------------------------- |---------:|---------:|---------:|------:|-------:|----------:|------------:|
  *  | Original                  | 40.07 us | 0.312 us | 0.276 us |  1.00 | 3.4790 |   57.6 KB |        1.00 |
  *  | Original_SkipLocalsInit   | 40.49 us | 0.574 us | 0.537 us |  1.01 | 3.4790 |   57.6 KB |        1.00 |
- *  | BitBoard                  | 39.41 us | 0.304 us | 0.285 us |  0.98 | 3.4790 |   57.6 KB |        1.00 |
- *  | BitBoard_NoFileArray      | 38.50 us | 0.232 us | 0.194 us |  0.96 | 3.4790 |   57.6 KB |        1.00 |
- *  | BitBoard_NoPawnCountArray | 38.82 us | 0.320 us | 0.299 us |  0.97 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Bitboard                  | 39.41 us | 0.304 us | 0.285 us |  0.98 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoFileArray      | 38.50 us | 0.232 us | 0.194 us |  0.96 | 3.4790 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoPawnCountArray | 38.82 us | 0.320 us | 0.299 us |  0.97 | 3.4790 |   57.6 KB |        1.00 |
  *
  *
  *   BenchmarkDotNet v0.15.4, macOS Sequoia 15.6.1 (24G90) [Darwin 24.6.0]
@@ -39,9 +39,9 @@
  *  |-------------------------- |---------:|---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
  *  | Original                  | 25.01 us | 0.498 us | 1.356 us | 24.84 us |  1.00 |    0.08 | 9.3994 |   57.6 KB |        1.00 |
  *  | Original_SkipLocalsInit   | 23.79 us | 0.458 us | 0.580 us | 23.93 us |  0.95 |    0.05 | 9.3994 |   57.6 KB |        1.00 |
- *  | BitBoard                  | 22.83 us | 0.453 us | 1.120 us | 22.31 us |  0.92 |    0.07 | 9.3994 |   57.6 KB |        1.00 |
- *  | BitBoard_NoFileArray      | 22.90 us | 0.457 us | 1.050 us | 22.29 us |  0.92 |    0.06 | 9.3994 |   57.6 KB |        1.00 |
- *  | BitBoard_NoPawnCountArray | 22.98 us | 0.458 us | 1.014 us | 22.79 us |  0.92 |    0.06 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Bitboard                  | 22.83 us | 0.453 us | 1.120 us | 22.31 us |  0.92 |    0.07 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoFileArray      | 22.90 us | 0.457 us | 1.050 us | 22.29 us |  0.92 |    0.06 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoPawnCountArray | 22.98 us | 0.458 us | 1.014 us | 22.79 us |  0.92 |    0.06 | 9.3994 |   57.6 KB |        1.00 |
  *
  *
  *  BenchmarkDotNet v0.15.4, macOS Ventura 13.7.6 (22H625) [Darwin 22.6.0]
@@ -54,9 +54,9 @@
  *  |-------------------------- |---------:|---------:|----------:|------:|--------:|-------:|----------:|------------:|
  *  | Original                  | 66.75 us | 3.647 us | 10.637 us |  1.02 |    0.22 | 9.3994 |   57.6 KB |        1.00 |
  *  | Original_SkipLocalsInit   | 57.40 us | 1.487 us |  4.339 us |  0.88 |    0.15 | 9.3994 |   57.6 KB |        1.00 |
- *  | BitBoard                  | 58.56 us | 1.531 us |  4.343 us |  0.90 |    0.15 | 9.3994 |   57.6 KB |        1.00 |
- *  | BitBoard_NoFileArray      | 67.81 us | 3.107 us |  8.964 us |  1.04 |    0.21 | 9.3994 |   57.6 KB |        1.00 |
- *  | BitBoard_NoPawnCountArray | 66.54 us | 2.602 us |  7.254 us |  1.02 |    0.19 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Bitboard                  | 58.56 us | 1.531 us |  4.343 us |  0.90 |    0.15 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoFileArray      | 67.81 us | 3.107 us |  8.964 us |  1.04 |    0.21 | 9.3994 |   57.6 KB |        1.00 |
+ *  | Bitboard_NoPawnCountArray | 66.54 us | 2.602 us |  7.254 us |  1.02 |    0.19 | 9.3994 |   57.6 KB |        1.00 |
 */
 
 using BenchmarkDotNet.Attributes;
@@ -80,8 +80,8 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         foreach (var fen in Engine._benchmarkFens)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
-            BitBoard whitePawns = pieces[(int)Piece.P];
+            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
+            Bitboard whitePawns = pieces[(int)Piece.P];
             sum += Original(whitePawns);
         }
 
@@ -95,8 +95,8 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         foreach (var fen in Engine._benchmarkFens)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
-            BitBoard whitePawns = pieces[(int)Piece.P];
+            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
+            Bitboard whitePawns = pieces[(int)Piece.P];
             sum += Original_SkipLocalsInit(whitePawns);
         }
 
@@ -104,52 +104,52 @@ public class PawnIslandsBenchmark : BaseBenchmark
     }
 
     [Benchmark]
-    public int BitBoard()
+    public int Bitboard()
     {
         var sum = 0;
 
         foreach (var fen in Data)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
-            BitBoard whitePawns = pieces[(int)Piece.P];
-            sum += BitBoard(whitePawns);
+            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
+            Bitboard whitePawns = pieces[(int)Piece.P];
+            sum += Bitboard(whitePawns);
         }
 
         return sum;
     }
 
     [Benchmark]
-    public int BitBoard_NoFileArray()
+    public int Bitboard_NoFileArray()
     {
         var sum = 0;
 
         foreach (var fen in Data)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
-            BitBoard whitePawns = pieces[(int)Piece.P];
-            sum += BitBoard_NoFileArray(whitePawns);
+            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
+            Bitboard whitePawns = pieces[(int)Piece.P];
+            sum += Bitboard_NoFileArray(whitePawns);
         }
 
         return sum;
     }
 
     [Benchmark]
-    public int BitBoard_NoPawnCountArray()
+    public int Bitboard_NoPawnCountArray()
     {
         var sum = 0;
 
         foreach (var fen in Data)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
-            BitBoard whitePawns = pieces[(int)Piece.P];
-            sum += BitBoard_NoPawnCountArray(whitePawns);
+            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
+            Bitboard whitePawns = pieces[(int)Piece.P];
+            sum += Bitboard_NoPawnCountArray(whitePawns);
         }
 
         return sum;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Original(BitBoard pawns)
+    private static int Original(Bitboard pawns)
     {
         const int n = 1;
 
@@ -187,7 +187,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Original_SkipLocalsInit(BitBoard pawns)
+    private static int Original_SkipLocalsInit(Bitboard pawns)
     {
         const int n = 1;
 
@@ -224,54 +224,54 @@ public class PawnIslandsBenchmark : BaseBenchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int BitBoard(BitBoard pawns)
+    private static int Bitboard(Bitboard pawns)
     {
-        int pawnFileBitBoard = 0;
+        int pawnFileBitboard = 0;
 
         while (pawns != default)
         {
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
-            // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
+            // Bitboard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitboard |= (1 << Constants.File[squareIndex]);
         }
 
-        return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
+        return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitboard];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int BitBoard_NoFileArray(BitBoard pawns)
+    private static int Bitboard_NoFileArray(Bitboard pawns)
     {
-        int pawnFileBitBoard = 0;
+        int pawnFileBitboard = 0;
 
         while (pawns != 0)
         {
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
-            // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (1 << (squareIndex % 8));
+            // Bitboard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitboard |= (1 << (squareIndex % 8));
         }
 
-        return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
+        return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitboard];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int BitBoard_NoPawnCountArray(BitBoard pawns)
+    private static int Bitboard_NoPawnCountArray(Bitboard pawns)
     {
-        byte pawnFileBitBoard = 0;
+        byte pawnFileBitboard = 0;
 
         while (pawns != 0)
         {
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
-            // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (byte)(1 << (squareIndex % 8));
+            // Bitboard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitboard |= (byte)(1 << (squareIndex % 8));
         }
 
-        int shifted = pawnFileBitBoard << 1;
+        int shifted = pawnFileBitboard << 1;
 
         // Treat shifted’s MSB as 0 implicitly
-        int starts = pawnFileBitBoard & (~shifted);
+        int starts = pawnFileBitboard & (~shifted);
 
         return BitOperations.PopCount((uint)starts);
     }

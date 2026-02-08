@@ -360,7 +360,7 @@ public sealed partial class Engine
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
 
             if (!MoveExtensions.TryParseFromUCIString(

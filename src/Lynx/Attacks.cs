@@ -6,20 +6,20 @@ namespace Lynx;
 
 public static class Attacks
 {
-    private static readonly BitBoard[] _bishopOccupancyMasks;
-    private static readonly BitBoard[] _rookOccupancyMasks;
+    private static readonly Bitboard[] _bishopOccupancyMasks;
+    private static readonly Bitboard[] _rookOccupancyMasks;
 
     /// <summary>
     /// [64 (Squares), 512 (Occupancies)]
-    /// Use <see cref="BishopAttacks(int, BitBoard)"/>
+    /// Use <see cref="BishopAttacks(int, Bitboard)"/>
     /// </summary>
-    private static readonly BitBoard[][] _bishopAttacks;
+    private static readonly Bitboard[][] _bishopAttacks;
 
     /// <summary>
     /// [64 (Squares), 4096 (Occupancies)]
-    /// Use <see cref="RookAttacks(int, BitBoard)"/>
+    /// Use <see cref="RookAttacks(int, Bitboard)"/>
     /// </summary>
-    private static readonly BitBoard[][] _rookAttacks;
+    private static readonly Bitboard[][] _rookAttacks;
 
     private static readonly ulong[] _pextAttacks;
     private static readonly ulong[] _pextBishopOffset;
@@ -28,9 +28,9 @@ public static class Attacks
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
     /// </summary>
-    public static BitBoard[][] PawnAttacks { get; }
-    public static BitBoard[] KnightAttacks { get; }
-    public static BitBoard[] KingAttacks { get; }
+    public static Bitboard[][] PawnAttacks { get; }
+    public static Bitboard[] KnightAttacks { get; }
+    public static Bitboard[] KingAttacks { get; }
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
     static Attacks()
@@ -45,9 +45,9 @@ public static class Attacks
 
         if (Bmi2.X64.IsSupported)
         {
-            _pextAttacks = GC.AllocateArray<BitBoard>(5248 + 102400, pinned: true);
-            _pextBishopOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
-            _pextRookOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
+            _pextAttacks = GC.AllocateArray<Bitboard>(5248 + 102400, pinned: true);
+            _pextBishopOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
+            _pextRookOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
 
             InitializeBishopAndRookPextAttacks();
         }
@@ -60,7 +60,7 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard BishopAttacks(int squareIndex, Bitboard occupancy)
     {
         return Bmi2.X64.IsSupported
             ? _pextAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
@@ -72,7 +72,7 @@ public static class Attacks
     /// </summary>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard MagicNumbersBishopAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard MagicNumbersBishopAttacks(int squareIndex, Bitboard occupancy)
     {
         var occ = occupancy & _bishopOccupancyMasks[squareIndex];
         occ *= Constants.BishopMagicNumbers[squareIndex];
@@ -86,7 +86,7 @@ public static class Attacks
     /// </summary>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard RookAttacks(int squareIndex, Bitboard occupancy)
     {
         return Bmi2.IsSupported
             ? _pextAttacks[_pextRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])]
@@ -94,7 +94,7 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard MagicNumbersRookAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard MagicNumbersRookAttacks(int squareIndex, Bitboard occupancy)
     {
         var occ = occupancy & _rookOccupancyMasks[squareIndex];
         occ *= Constants.RookMagicNumbers[squareIndex];
@@ -105,11 +105,11 @@ public static class Attacks
 
     /// <summary>
     /// Get Queen attacks assuming current board occupancy
-    /// Use <see cref="QueenAttacks(BitBoard, BitBoard)"/> if rook and bishop attacks are already calculated
+    /// Use <see cref="QueenAttacks(Bitboard, Bitboard)"/> if rook and bishop attacks are already calculated
     /// </summary>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard QueenAttacks(int squareIndex, Bitboard occupancy)
     {
         return QueenAttacks(
             RookAttacks(squareIndex, occupancy),
@@ -120,7 +120,7 @@ public static class Attacks
     /// Get Queen attacks having rook and bishop attacks pre-calculated
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks) => rookAttacks | bishopAttacks;
+    public static Bitboard QueenAttacks(Bitboard rookAttacks, Bitboard bishopAttacks) => rookAttacks | bishopAttacks;
 
     /// <summary>
     /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/Pext.cs)

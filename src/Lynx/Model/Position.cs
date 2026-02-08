@@ -24,8 +24,8 @@ public partial class Position : IDisposable
     private ulong _minorHash;
     private ulong _majorHash;
 
-    private ulong[] _pieceBitBoards;
-    private ulong[] _occupancyBitBoards;
+    private ulong[] _pieceBitboards;
+    private ulong[] _occupancyBitboards;
     private int[] _board;
 
     private byte _castle;
@@ -62,8 +62,8 @@ public partial class Position : IDisposable
     public ulong MinorHash => _minorHash;
     public ulong MajorHash => _majorHash;
 
-    public BitBoard[] PieceBitBoards => _pieceBitBoards;
-    public BitBoard[] OccupancyBitBoards => _occupancyBitBoards;
+    public Bitboard[] PieceBitboards => _pieceBitboards;
+    public Bitboard[] OccupancyBitboards => _occupancyBitboards;
     public int[] Board => _board;
     public Side Side => _side;
     public BoardSquare EnPassant => _enPassant;
@@ -75,38 +75,38 @@ public partial class Position : IDisposable
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
-    public BitBoard Queens
+    public Bitboard Queens
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitBoards[(int)Piece.Q] | _pieceBitBoards[(int)Piece.q];
+        get => _pieceBitboards[(int)Piece.Q] | _pieceBitboards[(int)Piece.q];
     }
 
-    public BitBoard Rooks
+    public Bitboard Rooks
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitBoards[(int)Piece.R] | _pieceBitBoards[(int)Piece.r];
+        get => _pieceBitboards[(int)Piece.R] | _pieceBitboards[(int)Piece.r];
     }
 
-    public BitBoard Bishops
+    public Bitboard Bishops
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitBoards[(int)Piece.B] | _pieceBitBoards[(int)Piece.b];
+        get => _pieceBitboards[(int)Piece.B] | _pieceBitboards[(int)Piece.b];
     }
 
-    public BitBoard Knights
+    public Bitboard Knights
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitBoards[(int)Piece.N] | _pieceBitBoards[(int)Piece.n];
+        get => _pieceBitboards[(int)Piece.N] | _pieceBitboards[(int)Piece.n];
     }
 
-    public BitBoard Kings
+    public Bitboard Kings
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitBoards[(int)Piece.K] | _pieceBitBoards[(int)Piece.k];
+        get => _pieceBitboards[(int)Piece.K] | _pieceBitboards[(int)Piece.k];
     }
 
-    public int WhiteKingSquare => _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
-    public int BlackKingSquare => _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
+    public int WhiteKingSquare => _pieceBitboards[(int)Piece.K].GetLS1BIndex();
+    public int BlackKingSquare => _pieceBitboards[(int)Piece.k].GetLS1BIndex();
 
     public int InitialKingSquare(int side) =>
         side == (int)Side.White
@@ -116,8 +116,8 @@ public partial class Position : IDisposable
     private Position()
     {
         // Allocate all required backing arrays (independent copy, avoids sharing state)
-        _pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
-        _occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
+        _pieceBitboards = ArrayPool<Bitboard>.Shared.Rent(12);
+        _occupancyBitboards = ArrayPool<Bitboard>.Shared.Rent(3);
         _board = ArrayPool<int>.Shared.Rent(64);
         _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
         _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
@@ -156,8 +156,8 @@ public partial class Position : IDisposable
 
     public void PopulateFrom(ParseFENResult parsedFEN)
     {
-        _pieceBitBoards = parsedFEN.PieceBitBoards;
-        _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        _pieceBitboards = parsedFEN.PieceBitboards;
+        _occupancyBitboards = parsedFEN.OccupancyBitboards;
         _board = parsedFEN.Board;
 
         _side = parsedFEN.Side;
@@ -213,20 +213,20 @@ public partial class Position : IDisposable
             _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
         }
 
-        KingsideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingShortCastleSquare);
-        KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingShortCastleSquare);
+        KingsideCastlingNonAttackedSquares[(int)Side.White] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingShortCastleSquare);
+        KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingShortCastleSquare);
 
-        QueensideCastlingNonAttackedSquares[(int)Side.White] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
-        QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
+        QueensideCastlingNonAttackedSquares[(int)Side.White] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
+        QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
 
         // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
         var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
-            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookShortCastleSquare);
+            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookShortCastleSquare);
         whiteKingsideFreeMask.PopBit(whiteKingSquare);
         whiteKingsideFreeMask.PopBit(whiteKingsideRook);
 
         var blackKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.Black]
-            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookShortCastleSquare);
+            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookShortCastleSquare);
         blackKingsideFreeMask.PopBit(blackKingSquare);
         blackKingsideFreeMask.PopBit(blackKingsideRook);
 
@@ -235,12 +235,12 @@ public partial class Position : IDisposable
 
         // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
         var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
-            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookLongCastleSquare);
+            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookLongCastleSquare);
         whiteQueensideFreeMask.PopBit(whiteKingSquare);
         whiteQueensideFreeMask.PopBit(whiteQueensideRook);
 
         var blackQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.Black]
-            | BitBoardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookLongCastleSquare);
+            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookLongCastleSquare);
         blackQueensideFreeMask.PopBit(blackKingSquare);
         blackQueensideFreeMask.PopBit(blackQueensideRook);
 
@@ -290,8 +290,8 @@ public partial class Position : IDisposable
         _nonPawnHash[(int)Side.White] = position._nonPawnHash[(int)Side.White];
         _nonPawnHash[(int)Side.Black] = position._nonPawnHash[(int)Side.Black];
 
-        Array.Copy(position._pieceBitBoards, _pieceBitBoards, 12);
-        Array.Copy(position._occupancyBitBoards, _occupancyBitBoards, 3);
+        Array.Copy(position._pieceBitboards, _pieceBitboards, 12);
+        Array.Copy(position._occupancyBitboards, _occupancyBitboards, 3);
         Array.Copy(position._board, _board, 64);
 
         _side = position._side;
@@ -365,12 +365,12 @@ public partial class Position : IDisposable
             extraPhaseIfIncremental = GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
         }
 
-        _pieceBitBoards[piece].PopBit(sourceSquare);
-        _occupancyBitBoards[oldSide].PopBit(sourceSquare);
+        _pieceBitboards[piece].PopBit(sourceSquare);
+        _occupancyBitboards[oldSide].PopBit(sourceSquare);
         _board[sourceSquare] = (int)Piece.None;
 
-        _pieceBitBoards[newPiece].SetBit(targetSquare);
-        _occupancyBitBoards[oldSide].SetBit(targetSquare);
+        _pieceBitboards[newPiece].SetBit(targetSquare);
+        _occupancyBitboards[oldSide].SetBit(targetSquare);
         _board[targetSquare] = newPiece;
 
         var sourcePieceHash = ZobristTable.PieceHash(sourceSquare, piece);
@@ -434,8 +434,8 @@ public partial class Position : IDisposable
         // _incrementalEvalAccumulator updates
         if (IsIncrementalEval)
         {
-            var whiteKing = _pieceBitBoards[(int)Piece.K].GetLS1BIndex();
-            var blackKing = _pieceBitBoards[(int)Piece.k].GetLS1BIndex();
+            var whiteKing = _pieceBitboards[(int)Piece.K].GetLS1BIndex();
+            var blackKing = _pieceBitboards[(int)Piece.k].GetLS1BIndex();
             var whiteBucket = PSQTBucketLayout[whiteKing];
             var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
@@ -461,8 +461,8 @@ public partial class Position : IDisposable
                         {
                             var capturedSquare = targetSquare;
 
-                            _pieceBitBoards[capturedPiece].PopBit(capturedSquare);
-                            _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                            _pieceBitboards[capturedPiece].PopBit(capturedSquare);
+                            _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
 
                             var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                             _uniqueIdentifier ^= capturedPieceHash;
@@ -510,10 +510,10 @@ public partial class Position : IDisposable
 
                         var capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
                         var capturedPiece = oppositePawnIndex;
-                        Utils.Assert(_pieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
+                        Utils.Assert(_pieceBitboards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
 
-                        _pieceBitBoards[capturedPiece].PopBit(capturedSquare);
-                        _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                        _pieceBitboards[capturedPiece].PopBit(capturedSquare);
+                        _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
                         _board[capturedSquare] = (int)Piece.None;
 
                         var capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
@@ -540,8 +540,8 @@ public partial class Position : IDisposable
                         {
                             var capturedSquare = targetSquare;
 
-                            _pieceBitBoards[capturedPiece].PopBit(capturedSquare);
-                            _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                            _pieceBitboards[capturedPiece].PopBit(capturedSquare);
+                            _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
 
                             ulong capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                             _uniqueIdentifier ^= capturedPieceHash;
@@ -587,7 +587,7 @@ public partial class Position : IDisposable
                         var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                         var rookIndex = (int)Piece.R + offset;
 
-                        _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                        _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
 
                         var kingTargetSquare = Utils.KingShortCastleSquare(oldSide);
 
@@ -597,13 +597,13 @@ public partial class Position : IDisposable
                             // We need to revert the incorrect changes + apply the right ones
                             // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                             // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                            _pieceBitBoards[newPiece].PopBit(targetSquare);
-                            _occupancyBitBoards[oldSide].PopBit(targetSquare);
+                            _pieceBitboards[newPiece].PopBit(targetSquare);
+                            _occupancyBitboards[oldSide].PopBit(targetSquare);
                             _board[targetSquare] = (int)Piece.None;
                             var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
 
-                            _pieceBitBoards[newPiece].SetBit(kingTargetSquare);
-                            _occupancyBitBoards[oldSide].SetBit(kingTargetSquare);
+                            _pieceBitboards[newPiece].SetBit(kingTargetSquare);
+                            _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
                             _board[kingTargetSquare] = newPiece;
                             var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
 
@@ -618,12 +618,12 @@ public partial class Position : IDisposable
                         // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                         if (rookSourceSquare != kingTargetSquare)
                         {
-                            _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                            _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
                             _board[rookSourceSquare] = (int)Piece.None;
                         }
 
-                        _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                        _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                        _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                        _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
                         _board[rookTargetSquare] = rookIndex;
 
                         var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -643,7 +643,7 @@ public partial class Position : IDisposable
                         var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                         var rookIndex = (int)Piece.R + offset;
 
-                        _pieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                        _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
 
                         var kingTargetSquare = Utils.KingLongCastleSquare(oldSide);
 
@@ -653,13 +653,13 @@ public partial class Position : IDisposable
                             // We need to revert the incorrect changes + apply the right ones
                             // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                             // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                            _pieceBitBoards[newPiece].PopBit(targetSquare);
-                            _occupancyBitBoards[oldSide].PopBit(targetSquare);
+                            _pieceBitboards[newPiece].PopBit(targetSquare);
+                            _occupancyBitboards[oldSide].PopBit(targetSquare);
                             _board[targetSquare] = (int)Piece.None;
                             var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
 
-                            _pieceBitBoards[newPiece].SetBit(kingTargetSquare);
-                            _occupancyBitBoards[oldSide].SetBit(kingTargetSquare);
+                            _pieceBitboards[newPiece].SetBit(kingTargetSquare);
+                            _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
                             _board[kingTargetSquare] = newPiece;
                             var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
 
@@ -674,12 +674,12 @@ public partial class Position : IDisposable
                         // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                         if (rookSourceSquare != kingTargetSquare)
                         {
-                            _occupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                            _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
                             _board[rookSourceSquare] = (int)Piece.None;
                         }
 
-                        _pieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                        _occupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                        _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                        _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
                         _board[rookTargetSquare] = rookIndex;
 
                         var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -697,10 +697,10 @@ public partial class Position : IDisposable
 
                         var capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
                         var capturedPiece = oppositePawnIndex;
-                        Utils.Assert(_pieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
+                        Utils.Assert(_pieceBitboards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
 
-                        _pieceBitBoards[capturedPiece].PopBit(capturedSquare);
-                        _occupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                        _pieceBitboards[capturedPiece].PopBit(capturedSquare);
+                        _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
                         _board[capturedSquare] = (int)Piece.None;
 
                         ulong capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
@@ -713,7 +713,7 @@ public partial class Position : IDisposable
         }
 
         _side = (Side)oppositeSide;
-        _occupancyBitBoards[2] = _occupancyBitBoards[1] | _occupancyBitBoards[0];
+        _occupancyBitboards[2] = _occupancyBitboards[1] | _occupancyBitboards[0];
 
         // Updating castling rights
         _castle &= _castlingRightsUpdateConstants[sourceSquare];
@@ -753,8 +753,8 @@ public partial class Position : IDisposable
             newPiece = promotedPiece;
         }
 
-        _pieceBitBoards[newPiece].PopBit(targetSquare);
-        _occupancyBitBoards[side].PopBit(targetSquare);
+        _pieceBitboards[newPiece].PopBit(targetSquare);
+        _occupancyBitboards[side].PopBit(targetSquare);
         _board[targetSquare] = (int)Piece.None;
 
         // We purposely delay the sets here until after the switch
@@ -767,8 +767,8 @@ public partial class Position : IDisposable
 
                     if (capturedPiece != (int)Piece.None)
                     {
-                        _pieceBitBoards[capturedPiece].SetBit(targetSquare);
-                        _occupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                        _pieceBitboards[capturedPiece].SetBit(targetSquare);
+                        _occupancyBitboards[oppositeSide].SetBit(targetSquare);
                         _board[targetSquare] = capturedPiece;
                     }
 
@@ -789,8 +789,8 @@ public partial class Position : IDisposable
                         // Since we set the king squares after the switch, we don't need the guard here
                         // if (kingTargetSquare != sourceSquare)
                         //{
-                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
+                        _pieceBitboards[newPiece].PopBit(kingTargetSquare);
+                        _occupancyBitboards[side].PopBit(kingTargetSquare);
                         _board[kingTargetSquare] = (int)Piece.None;
                         //}
 
@@ -805,18 +805,18 @@ public partial class Position : IDisposable
                     var rookIndex = (int)Piece.R + offset;
 
                     // Popping before setting, because in DFRC they can be the same square
-                    _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+                    _pieceBitboards[rookIndex].PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                    _occupancyBitboards[side].PopBit(rookTargetSquare);
                     _board[rookTargetSquare] = (int)Piece.None;
                     //}
 
-                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
+                    _pieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                    _occupancyBitboards[side].SetBit(rookSourceSquare);
                     _board[rookSourceSquare] = rookIndex;
 
                     break;
@@ -837,8 +837,8 @@ public partial class Position : IDisposable
                         //if (kingTargetSquare != sourceSquare)
                         //{
 
-                        _pieceBitBoards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitBoards[side].PopBit(kingTargetSquare);
+                        _pieceBitboards[newPiece].PopBit(kingTargetSquare);
+                        _occupancyBitboards[side].PopBit(kingTargetSquare);
                         _board[kingTargetSquare] = (int)Piece.None;
                         //}
 
@@ -853,18 +853,18 @@ public partial class Position : IDisposable
                     var rookIndex = (int)Piece.R + offset;
 
                     // Popping before setting, because in DFRC they can be the same square
-                    _pieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+                    _pieceBitboards[rookIndex].PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                    _occupancyBitBoards[side].PopBit(rookTargetSquare);
+                    _occupancyBitboards[side].PopBit(rookTargetSquare);
                     _board[rookTargetSquare] = (int)Piece.None;
                     //}
 
-                    _pieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitBoards[side].SetBit(rookSourceSquare);
+                    _pieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                    _occupancyBitboards[side].SetBit(rookSourceSquare);
                     _board[rookSourceSquare] = rookIndex;
 
                     break;
@@ -876,22 +876,22 @@ public partial class Position : IDisposable
                     var oppositePawnIndex = (int)Piece.p - offset;
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
 
-                    Utils.Assert(_occupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    Utils.Assert(_occupancyBitboards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
                         $"Expected empty {capturedPawnSquare}");
 
-                    _pieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                    _occupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+                    _pieceBitboards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    _occupancyBitboards[oppositeSide].SetBit(capturedPawnSquare);
                     _board[capturedPawnSquare] = oppositePawnIndex;
 
                     break;
                 }
         }
 
-        _pieceBitBoards[piece].SetBit(sourceSquare);
-        _occupancyBitBoards[side].SetBit(sourceSquare);
+        _pieceBitboards[piece].SetBit(sourceSquare);
+        _occupancyBitboards[side].SetBit(sourceSquare);
         _board[sourceSquare] = piece;
 
-        _occupancyBitBoards[2] = _occupancyBitBoards[1] | _occupancyBitBoards[0];
+        _occupancyBitboards[2] = _occupancyBitboards[1] | _occupancyBitboards[0];
 
         // Updating saved values
         _castle = gameState.Castle;
@@ -946,11 +946,11 @@ public partial class Position : IDisposable
     {
         var offset = Utils.PieceOffset((int)_side);
 
-        var kingBitBoard = _pieceBitBoards[(int)Piece.K + offset];
-        var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
+        var kingBitboard = _pieceBitboards[(int)Piece.K + offset];
+        var kingSquare = kingBitboard == default ? -1 : kingBitboard.GetLS1BIndex();
 
-        var oppositeKingBitBoard = _pieceBitBoards[(int)Piece.k - offset];
-        var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
+        var oppositeKingBitboard = _pieceBitboards[(int)Piece.k - offset];
+        var oppositeKingSquare = oppositeKingBitboard == default ? -1 : oppositeKingBitboard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
             && !IsSquareAttacked(oppositeKingSquare, _side);
@@ -965,9 +965,9 @@ public partial class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
-        Debug.Assert(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
+        Debug.Assert(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
 
-        var oppositeKingSquare = _pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
+        var oppositeKingSquare = _pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
 
 #if DEBUG
         var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
@@ -993,14 +993,14 @@ public partial class Position : IDisposable
     /// <param name="rooks">Includes Queen bitboard</param>
     /// <param name="bishops">Includes Queen bitboard</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
+    public ulong AllAttackersTo(int square, Bitboard occupancy, Bitboard rooks, Bitboard bishops)
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
-            | (_pieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
+            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
+            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -1010,15 +1010,15 @@ public partial class Position : IDisposable
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
-        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var occupancy = _occupancyBitboards[(int)Side.Both];
         var queens = Queens;
         var rooks = queens | Rooks;
         var bishops = queens | Bishops;
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
-            | (_pieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
+            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
+            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -1031,16 +1031,16 @@ public partial class Position : IDisposable
 
         var offset = Utils.PieceOffset(side);
 
-        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var occupancy = _occupancyBitboards[(int)Side.Both];
 
-        var queens = _pieceBitBoards[(int)Piece.q - offset];
-        var rooks = queens | _pieceBitBoards[(int)Piece.r - offset];
-        var bishops = queens | _pieceBitBoards[(int)Piece.b - offset];
+        var queens = _pieceBitboards[(int)Piece.q - offset];
+        var rooks = queens | _pieceBitboards[(int)Piece.r - offset];
+        var bishops = queens | _pieceBitboards[(int)Piece.b - offset];
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitBoards[(int)Piece.p - offset] & Attacks.PawnAttacks[side][square])
-            | (_pieceBitBoards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
+            | (_pieceBitboards[(int)Piece.p - offset] & Attacks.PawnAttacks[side][square])
+            | (_pieceBitboards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1050,7 +1050,7 @@ public partial class Position : IDisposable
 
         var sideToMoveInt = (int)sideToMove;
         var offset = Utils.PieceOffset(sideToMoveInt);
-        var bothSidesOccupancy = _occupancyBitBoards[(int)Side.Both];
+        var bothSidesOccupancy = _occupancyBitboards[(int)Side.Both];
 
         // I tried to order them from most to least likely - not tested
         return
@@ -1092,9 +1092,9 @@ public partial class Position : IDisposable
         var oppositeSideInt = Utils.OppositeSide((int)_side);
         var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
 
-        var kingSquare = _pieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
+        var kingSquare = _pieceBitboards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
 
-        var bothSidesOccupancy = _occupancyBitBoards[(int)Side.Both];
+        var bothSidesOccupancy = _occupancyBitboards[(int)Side.Both];
 
         // I tried to order them from most to least likely - not tested
         return
@@ -1110,45 +1110,45 @@ public partial class Position : IDisposable
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & _pieceBitBoards[offset]) != default;
+        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & _pieceBitboards[offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByKnights(int squareIndex, int offset)
     {
-        return (Attacks.KnightAttacks[squareIndex] & _pieceBitBoards[(int)Piece.N + offset]) != default;
+        return (Attacks.KnightAttacks[squareIndex] & _pieceBitboards[(int)Piece.N + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByKing(int squareIndex, int offset)
     {
-        return (Attacks.KingAttacks[squareIndex] & _pieceBitBoards[(int)Piece.K + offset]) != default;
+        return (Attacks.KingAttacks[squareIndex] & _pieceBitboards[(int)Piece.K + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard bishopAttacks)
+    private bool IsSquareAttackedByBishops(int squareIndex, int offset, Bitboard bothSidesOccupancy, out Bitboard bishopAttacks)
     {
         bishopAttacks = Attacks.BishopAttacks(squareIndex, bothSidesOccupancy);
-        return (bishopAttacks & _pieceBitBoards[(int)Piece.B + offset]) != default;
+        return (bishopAttacks & _pieceBitboards[(int)Piece.B + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard rookAttacks)
+    private bool IsSquareAttackedByRooks(int squareIndex, int offset, Bitboard bothSidesOccupancy, out Bitboard rookAttacks)
     {
         rookAttacks = Attacks.RookAttacks(squareIndex, bothSidesOccupancy);
-        return (rookAttacks & _pieceBitBoards[(int)Piece.R + offset]) != default;
+        return (rookAttacks & _pieceBitboards[(int)Piece.R + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks)
+    private bool IsSquareAttackedByQueens(int offset, Bitboard bishopAttacks, Bitboard rookAttacks)
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-        return (queenAttacks & _pieceBitBoards[(int)Piece.Q + offset]) != default;
+        return (queenAttacks & _pieceBitboards[(int)Piece.Q + offset]) != default;
     }
 
     #endregion
 
-    public int CountPieces() => _pieceBitBoards.Sum(b => b.CountBits());
+    public int CountPieces() => _pieceBitboards.Sum(b => b.CountBits());
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
@@ -1163,7 +1163,7 @@ public partial class Position : IDisposable
             int foundPiece = -1;
             for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                if (_pieceBitBoards[pieceBoardIndex].GetBit(square))
+                if (_pieceBitboards[pieceBoardIndex].GetBit(square))
                 {
                     foundPiece = pieceBoardIndex;
                     break;
@@ -1274,7 +1274,7 @@ public partial class Position : IDisposable
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
 
     /// <summary>
-    /// Combines <see cref="_pieceBitBoards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
+    /// Combines <see cref="_pieceBitboards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
     /// into a human-friendly representation
     /// </summary>
     public void Print(int halfMovesWithoutCaptureOrPawnMove = -1)
@@ -1291,13 +1291,13 @@ public partial class Position : IDisposable
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitboardExtensions.SquareIndex(rank, file);
 
                 var piece = -1;
 
-                for (int bbIndex = 0; bbIndex < _pieceBitBoards.Length; ++bbIndex)
+                for (int bbIndex = 0; bbIndex < _pieceBitboards.Length; ++bbIndex)
                 {
-                    if (_pieceBitBoards[bbIndex].GetBit(squareIndex))
+                    if (_pieceBitboards[bbIndex].GetBit(squareIndex))
                     {
                         piece = bbIndex;
                         break;
@@ -1383,7 +1383,7 @@ public partial class Position : IDisposable
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitboardExtensions.SquareIndex(rank, file);
 
                 var pieceRepresentation = IsSquareAttacked(squareIndex, sideToMove)
                     ? '1'
@@ -1411,28 +1411,28 @@ public partial class Position : IDisposable
 
         Debug.Assert(Side != Side.Both, failureMessage, "Side == Side.Both");
 
-        var whitePawns = _pieceBitBoards[(int)Piece.P];
-        var blackPawns = _pieceBitBoards[(int)Piece.p];
-        var whiteKnights = _pieceBitBoards[(int)Piece.N];
-        var whiteBishops = _pieceBitBoards[(int)Piece.B];
-        var whiteRooks = _pieceBitBoards[(int)Piece.R];
-        var whiteQueens = _pieceBitBoards[(int)Piece.Q];
-        var whiteKings = _pieceBitBoards[(int)Piece.K];
-        var blackKnights = _pieceBitBoards[(int)Piece.n];
-        var blackBishops = _pieceBitBoards[(int)Piece.b];
-        var blackRooks = _pieceBitBoards[(int)Piece.r];
-        var blackQueens = _pieceBitBoards[(int)Piece.q];
-        var blackKings = _pieceBitBoards[(int)Piece.k];
+        var whitePawns = _pieceBitboards[(int)Piece.P];
+        var blackPawns = _pieceBitboards[(int)Piece.p];
+        var whiteKnights = _pieceBitboards[(int)Piece.N];
+        var whiteBishops = _pieceBitboards[(int)Piece.B];
+        var whiteRooks = _pieceBitboards[(int)Piece.R];
+        var whiteQueens = _pieceBitboards[(int)Piece.Q];
+        var whiteKings = _pieceBitboards[(int)Piece.K];
+        var blackKnights = _pieceBitboards[(int)Piece.n];
+        var blackBishops = _pieceBitboards[(int)Piece.b];
+        var blackRooks = _pieceBitboards[(int)Piece.r];
+        var blackQueens = _pieceBitboards[(int)Piece.q];
+        var blackKings = _pieceBitboards[(int)Piece.k];
 
         // No pawns in 1 and 8 ranks
         Debug.Assert((whitePawns & Constants.PawnSquares) == whitePawns, failureMessage, "White pawn(s) un 1-8");
         Debug.Assert((blackPawns & Constants.PawnSquares) == blackPawns, failureMessage, "Black pawn(s) un 1-8");
 
         // No side occupancy overlap
-        Debug.Assert((_occupancyBitBoards[(int)Side.White] & _occupancyBitBoards[(int)Side.Black]) == 0, failureMessage, "White and Black overlap");
+        Debug.Assert((_occupancyBitboards[(int)Side.White] & _occupancyBitboards[(int)Side.Black]) == 0, failureMessage, "White and Black overlap");
 
         // Side.Both occupancy overlap
-        Debug.Assert((_occupancyBitBoards[(int)Side.White] | _occupancyBitBoards[(int)Side.Black]) == _occupancyBitBoards[(int)Side.Both], failureMessage, "Occupancy not correct");
+        Debug.Assert((_occupancyBitboards[(int)Side.White] | _occupancyBitboards[(int)Side.Black]) == _occupancyBitboards[(int)Side.Both], failureMessage, "Occupancy not correct");
 
         // No piece overlap
         const string pieceOverlapMessage = "Piece overlap";
@@ -1573,7 +1573,7 @@ public partial class Position : IDisposable
         // En-passant and pawn to be captured position
         if (_enPassant != BoardSquare.noSquare)
         {
-            Debug.Assert(!_occupancyBitBoards[(int)Side.Both].GetBit((int)_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
+            Debug.Assert(!_occupancyBitboards[(int)Side.Both].GetBit((int)_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
 
             var rank = Constants.Rank[(int)_enPassant];
             Debug.Assert(rank == 2 || rank == 5, failureMessage, $"Wrong en-passant rank for {_enPassant}");
@@ -1591,7 +1591,7 @@ public partial class Position : IDisposable
         }
 
         // Can't capture opponent's king
-        Debug.Assert(!IsSquareAttacked(_pieceBitBoards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
+        Debug.Assert(!IsSquareAttacked(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
 
         Debug.Assert(Math.Min(MaxPhase, PhaseFromScratch()) == Phase(), failureMessage, $"Wrong incremental phase: {Phase()} vs from scratch {Math.Min(MaxPhase, PhaseFromScratch())}");
     }
@@ -1601,19 +1601,19 @@ public partial class Position : IDisposable
     {
         var attacks = evaluationContext.Attacks;
 
-        Debug.Assert(_pieceBitBoards[(int)Piece.P] == 0 || attacks[(int)Piece.P] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.N] == 0 || attacks[(int)Piece.N] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.B] == 0 || attacks[(int)Piece.B] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.R] == 0 || attacks[(int)Piece.R] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.Q] == 0 || attacks[(int)Piece.Q] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.P] == 0 || attacks[(int)Piece.P] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.N] == 0 || attacks[(int)Piece.N] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.B] == 0 || attacks[(int)Piece.B] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.R] == 0 || attacks[(int)Piece.R] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.Q] == 0 || attacks[(int)Piece.Q] != 0);
         Debug.Assert(attacks[(int)Piece.K] != 0);
         Debug.Assert(evaluationContext.AttacksBySide[(int)Side.White] != 0);
 
-        Debug.Assert(_pieceBitBoards[(int)Piece.p] == 0 || attacks[(int)Piece.p] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.n] == 0 || attacks[(int)Piece.n] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.b] == 0 || attacks[(int)Piece.b] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.r] == 0 || attacks[(int)Piece.r] != 0);
-        Debug.Assert(_pieceBitBoards[(int)Piece.q] == 0 || attacks[(int)Piece.q] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.p] == 0 || attacks[(int)Piece.p] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.n] == 0 || attacks[(int)Piece.n] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.b] == 0 || attacks[(int)Piece.b] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.r] == 0 || attacks[(int)Piece.r] != 0);
+        Debug.Assert(_pieceBitboards[(int)Piece.q] == 0 || attacks[(int)Piece.q] != 0);
         Debug.Assert(attacks[(int)Piece.k] != 0);
         Debug.Assert(evaluationContext.AttacksBySide[(int)Side.Black] != 0);
     }
@@ -1624,8 +1624,8 @@ public partial class Position : IDisposable
         {
             if (disposing)
             {
-                ArrayPool<BitBoard>.Shared.Return(_pieceBitBoards);
-                ArrayPool<BitBoard>.Shared.Return(_occupancyBitBoards);
+                ArrayPool<Bitboard>.Shared.Return(_pieceBitboards);
+                ArrayPool<Bitboard>.Shared.Return(_occupancyBitboards);
 
                 ArrayPool<ulong>.Shared.Return(_nonPawnHash);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares);

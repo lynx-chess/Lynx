@@ -1,7 +1,7 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 
-using static Lynx.Model.BitBoardExtensions;
+using static Lynx.Model.BitboardExtensions;
 
 namespace Lynx.Test.Model;
 

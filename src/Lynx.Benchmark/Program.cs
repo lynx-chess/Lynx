@@ -4,7 +4,7 @@ using System.Reflection;
 using BenchmarkDotNet.Configs;
 #endif
 
-//Lynx.Benchmark.BitBoard_Struct_ReadonlyStruct_Class_Record.SizeTest();
+//Lynx.Benchmark.Bitboard_Struct_ReadonlyStruct_Class_Record.SizeTest();
 
 #if DEBUG
 BenchmarkSwitcher.FromAssembly(Assembly.GetExecutingAssembly()).Run(args, new DebugInProcessConfig());
