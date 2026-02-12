@@ -390,7 +390,7 @@ public sealed class UCIHandler
 
             if (Bmi1.IsSupported)
             {
-                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for BitBoard LSB operations");
+                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for Bitboard LSB operations");
             }
 
             if (Bmi2.IsSupported)

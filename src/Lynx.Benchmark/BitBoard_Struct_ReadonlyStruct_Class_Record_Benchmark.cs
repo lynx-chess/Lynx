@@ -32,13 +32,13 @@ using Lynx.Model;
 
 namespace Lynx.Benchmark;
 
-public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchmark
+public class Bitboard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchmark
 {
-    private struct BitBoardOps
+    private struct BitboardOps
     {
         public ulong Board { readonly get; private set; }
 
-        public BitBoardOps(ulong b)
+        public BitboardOps(ulong b)
         {
             Board = b;
         }
@@ -88,11 +88,11 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         #endregion
     }
 
-    private readonly struct BitBoardOpsReadonly
+    private readonly struct BitboardOpsReadonly
     {
         public ulong Board { get; }
 
-        public BitBoardOpsReadonly(ulong b)
+        public BitboardOpsReadonly(ulong b)
         {
             Board = b;
         }
@@ -140,12 +140,12 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
     }
 
 #pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
-    private class BitBoardOpsClass
+    private class BitboardOpsClass
 #pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         public ulong Board { get; private set; }
-        public BitBoardOpsClass() { }
-        public BitBoardOpsClass(ulong b)
+        public BitboardOpsClass() { }
+        public BitboardOpsClass(ulong b)
         {
             Board = b;
         }
@@ -196,13 +196,13 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
     }
 
 #pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
-    private record BitBoardOpsRecord
+    private record BitboardOpsRecord
 #pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         public ulong Board { get; private set; }
 
-        public BitBoardOpsRecord() { }
-        public BitBoardOpsRecord(ulong b)
+        public BitboardOpsRecord() { }
+        public BitboardOpsRecord(ulong b)
         {
             Board = b;
         }
@@ -252,7 +252,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
     }
 
 #pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
-    private record BitBoardOpsProperRecord(ulong Board)
+    private record BitboardOpsProperRecord(ulong Board)
 #pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         public static ulong SetBit(ulong bb, int square)
@@ -302,11 +302,11 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
     internal static void SizeTest()
     {
         List<ulong> ulongs = new(10_000);
-        List<BitBoardOpsClass> classes = new(10_000);
-        List<BitBoardOpsRecord> records = new(10_000);
-        List<BitBoardOpsProperRecord> properRecords = new(10_000);
-        List<BitBoardOps> structs = new(10_000);
-        List<BitBoardOpsReadonly> readonlyStructs = new(10_000);
+        List<BitboardOpsClass> classes = new(10_000);
+        List<BitboardOpsRecord> records = new(10_000);
+        List<BitboardOpsProperRecord> properRecords = new(10_000);
+        List<BitboardOps> structs = new(10_000);
+        List<BitboardOpsReadonly> readonlyStructs = new(10_000);
 
         for (ulong i = 0; i < 10_000; ++i)
         {
@@ -329,7 +329,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsReadonly(AttackGenerator.MaskBishopOccupancy(square));
+            var occupancyMask = new BitboardOpsReadonly(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -350,7 +350,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOps(AttackGenerator.MaskBishopOccupancy(square));
+            var occupancyMask = new BitboardOps(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -371,7 +371,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsClass(AttackGenerator.MaskBishopOccupancy(square));
+            var occupancyMask = new BitboardOpsClass(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -392,7 +392,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsRecord(AttackGenerator.MaskBishopOccupancy(square));
+            var occupancyMask = new BitboardOpsRecord(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -433,7 +433,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsProperRecord(AttackGenerator.MaskBishopOccupancy(square));
+            var occupancyMask = new BitboardOpsProperRecord(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -446,34 +446,34 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         }
     }
 
-    private static BitBoardOpsReadonly SetBishopOrRookOccupancy_Static(int index, in BitBoardOpsReadonly occupancyMask)
+    private static BitboardOpsReadonly SetBishopOrRookOccupancy_Static(int index, in BitboardOpsReadonly occupancyMask)
     {
         var occ = occupancyMask.Board;
-        var bitsInMask = BitBoardOpsReadonly.CountBits(occ);
+        var bitsInMask = BitboardOpsReadonly.CountBits(occ);
         var occupancy = 0UL;
 
         // Loop over the range of bits within attack mask
         for (int count = 0; count < bitsInMask; ++count)
         {
             // Extract LS1B and reset it
-            int squareIndex = BitBoardOpsReadonly.GetLS1BIndex(occ);
-            occ = BitBoardOpsReadonly.PopBit(occ, squareIndex);
+            int squareIndex = BitboardOpsReadonly.GetLS1BIndex(occ);
+            occ = BitboardOpsReadonly.PopBit(occ, squareIndex);
 
             // Make sure occupancy is on board
             if ((index & (1 << count)) != default)
             {
                 // Update occupancy
-                occupancy = BitBoardOpsReadonly.SetBit(occupancy, squareIndex);
+                occupancy = BitboardOpsReadonly.SetBit(occupancy, squareIndex);
             }
         }
 
-        return new BitBoardOpsReadonly(occupancy);
+        return new BitboardOpsReadonly(occupancy);
     }
 
-    private static BitBoardOps SetBishopOrRookOccupancy_OOP(int index, BitBoardOps occupancyMask)
+    private static BitboardOps SetBishopOrRookOccupancy_OOP(int index, BitboardOps occupancyMask)
     {
         var bitsInMask = occupancyMask.CountBits();
-        var occupancy = new BitBoardOps();
+        var occupancy = new BitboardOps();
 
         // Loop over the range of bits within attack mask
         for (int count = 0; count < bitsInMask; ++count)
@@ -493,18 +493,18 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         return occupancy;
     }
 
-    private static BitBoardOpsClass SetBishopOrRookOccupancy_OOP_Class(int index, BitBoardOpsClass occupancyMask)
+    private static BitboardOpsClass SetBishopOrRookOccupancy_OOP_Class(int index, BitboardOpsClass occupancyMask)
     {
         var bitsInMask = occupancyMask.CountBits();
         var occupancyMaskCopy = occupancyMask.Board;
-        var occupancy = new BitBoardOpsClass();
+        var occupancy = new BitboardOpsClass();
 
         // Loop over the range of bits within attack mask
         for (int count = 0; count < bitsInMask; ++count)
         {
             // Extract LS1B and reset it
-            int squareIndex = BitBoardOpsClass.GetLS1BIndex(occupancyMaskCopy);
-            occupancyMaskCopy = BitBoardOpsClass.PopBit(occupancyMaskCopy, squareIndex);
+            int squareIndex = BitboardOpsClass.GetLS1BIndex(occupancyMaskCopy);
+            occupancyMaskCopy = BitboardOpsClass.PopBit(occupancyMaskCopy, squareIndex);
 
             // Make sure occupancy is on board
             if ((index & (1 << count)) != default)
@@ -517,18 +517,18 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         return occupancy;
     }
 
-    private static BitBoardOpsRecord SetBishopOrRookOccupancy_OOP_Record(int index, BitBoardOpsRecord occupancyMask)
+    private static BitboardOpsRecord SetBishopOrRookOccupancy_OOP_Record(int index, BitboardOpsRecord occupancyMask)
     {
         var bitsInMask = occupancyMask.CountBits();
         var occ = occupancyMask.Board;
-        var occupancy = new BitBoardOpsRecord();
+        var occupancy = new BitboardOpsRecord();
 
         // Loop over the range of bits within attack mask
         for (int count = 0; count < bitsInMask; ++count)
         {
             // Extract LS1B and reset it
-            int squareIndex = BitBoardOpsRecord.GetLS1BIndex(occ);
-            occ = BitBoardOpsRecord.PopBit(occ, squareIndex);
+            int squareIndex = BitboardOpsRecord.GetLS1BIndex(occ);
+            occ = BitboardOpsRecord.PopBit(occ, squareIndex);
 
             // Make sure occupancy is on board
             if ((index & (1 << count)) != default)
@@ -541,7 +541,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         return occupancy;
     }
 
-    private static BitBoardOpsProperRecord SetBishopOrRookOccupancy_OOP_ProperRecord(int index, BitBoardOpsProperRecord occupancyMask)
+    private static BitboardOpsProperRecord SetBishopOrRookOccupancy_OOP_ProperRecord(int index, BitboardOpsProperRecord occupancyMask)
     {
         var bitsInMask = occupancyMask.CountBits();
         var occ = occupancyMask.Board;
@@ -551,37 +551,37 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         for (int count = 0; count < bitsInMask; ++count)
         {
             // Extract LS1B and reset it
-            int squareIndex = BitBoardOpsProperRecord.GetLS1BIndex(occ);
-            occ = BitBoardOpsProperRecord.PopBit(occ, squareIndex);
+            int squareIndex = BitboardOpsProperRecord.GetLS1BIndex(occ);
+            occ = BitboardOpsProperRecord.PopBit(occ, squareIndex);
 
             // Make sure occupancy is on board
             if ((index & (1 << count)) != default)
             {
                 // Update occupancy
-                occupancy = BitBoardOpsProperRecord.SetBit(occupancy, squareIndex);
+                occupancy = BitboardOpsProperRecord.SetBit(occupancy, squareIndex);
             }
         }
 
-        return new BitBoardOpsProperRecord(occupancy);
+        return new BitboardOpsProperRecord(occupancy);
     }
 
     private static ulong SetBishopOrRookOccupancy_PureUlongs(int index, ulong occupancyMask)
     {
-        var bitsInMask = BitBoardOpsClass.CountBits(occupancyMask);
+        var bitsInMask = BitboardOpsClass.CountBits(occupancyMask);
         var occupancy = 0UL;
 
         // Loop over the range of bits within attack mask
         for (int count = 0; count < bitsInMask; ++count)
         {
             // Extract LS1B and reset it
-            int squareIndex = BitBoardOpsClass.GetLS1BIndex(occupancyMask);
-            occupancyMask = BitBoardOpsClass.PopBit(occupancyMask, squareIndex);
+            int squareIndex = BitboardOpsClass.GetLS1BIndex(occupancyMask);
+            occupancyMask = BitboardOpsClass.PopBit(occupancyMask, squareIndex);
 
             // Make sure occupancy is on board
             if ((index & (1 << count)) != default)
             {
                 // Update occupancy
-                occupancy = BitBoardOpsProperRecord.SetBit(occupancy, squareIndex);
+                occupancy = BitboardOpsProperRecord.SetBit(occupancy, squareIndex);
             }
         }
 

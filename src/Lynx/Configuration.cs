@@ -137,7 +137,7 @@ public sealed class EngineSettings
     #region Time management
 
     /// <summary>
-    /// Min milliseconds left after substracting <see cref="MoveOverhead"/>
+    /// Min milliseconds left after subtracting <see cref="MoveOverhead"/>
     /// from wtime/btime or movetime. This min value is used to avoid 0 or negative time left.
     /// Resulting milliseconds left are later used to calculate hard and soft time bounds
     /// </summary>
@@ -163,7 +163,7 @@ public sealed class EngineSettings
     public double NodeTmScale { get; set; } = 1.80;
 
     [SPSA<int>(enabled: false)]
-    public int ScoreStabiity_MinDepth { get; set; } = 7;
+    public int ScoreStability_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
     public int StopSearchOnMate_MaxSoftTimeBoundLimit { get; set; } = 10_000;

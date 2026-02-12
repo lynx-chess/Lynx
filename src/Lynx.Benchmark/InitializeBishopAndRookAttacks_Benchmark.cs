@@ -18,15 +18,15 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
 
     public class CustomPosition
     {
-        private readonly BitBoard[][] _pawnAttacks = new BitBoard[2][];
-        private readonly BitBoard[] _knightAttacks = new BitBoard[64];
-        private readonly BitBoard[] _kingAttacks = new BitBoard[64];
+        private readonly Bitboard[][] _pawnAttacks = new Bitboard[2][];
+        private readonly Bitboard[] _knightAttacks = new Bitboard[64];
+        private readonly Bitboard[] _kingAttacks = new Bitboard[64];
 
-        private readonly BitBoard[] _bishopOccupancyMasks = new BitBoard[64];
-        private readonly BitBoard[] _rookOccupancyMasks = new BitBoard[64];
+        private readonly Bitboard[] _bishopOccupancyMasks = new Bitboard[64];
+        private readonly Bitboard[] _rookOccupancyMasks = new Bitboard[64];
 
-        private readonly BitBoard[][] _bishopAttacks = new BitBoard[64][];
-        private readonly BitBoard[][] _rookAttacks = new BitBoard[64][];
+        private readonly Bitboard[][] _bishopAttacks = new Bitboard[64][];
+        private readonly Bitboard[][] _rookAttacks = new Bitboard[64][];
 
         public CustomPosition()
         {

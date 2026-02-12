@@ -15,10 +15,10 @@ public class MasksTest
     {
         var position = new Position(fen);
 
-        var expectedBitBoard = position.PieceBitBoards[(int)Piece.P] | position.PieceBitBoards[(int)Piece.p];
-        var actualBitBoard = Masks.RankMasks[(int)square];
+        var expectedBitboard = position.PieceBitboards[(int)Piece.P] | position.PieceBitboards[(int)Piece.p];
+        var actualBitboard = Masks.RankMasks[(int)square];
 
-        Assert.AreEqual(expectedBitBoard, actualBitBoard);
+        Assert.AreEqual(expectedBitboard, actualBitboard);
     }
 
     [Explicit]
@@ -33,10 +33,10 @@ public class MasksTest
     {
         var position = new Position(fen);
 
-        var expectedBitBoard = position.PieceBitBoards[(int)Piece.P] | position.PieceBitBoards[(int)Piece.p];
-        var actualBitBoard = Masks.IsolatedPawnMasks[(int)square];
+        var expectedBitboard = position.PieceBitboards[(int)Piece.P] | position.PieceBitboards[(int)Piece.p];
+        var actualBitboard = Masks.IsolatedPawnMasks[(int)square];
 
-        Assert.AreEqual(expectedBitBoard, actualBitBoard);
+        Assert.AreEqual(expectedBitboard, actualBitboard);
     }
 
     [Explicit]
@@ -53,10 +53,10 @@ public class MasksTest
     {
         var position = new Position(fen);
 
-        var expectedBitBoard = position.PieceBitBoards[(int)Piece.P] | position.PieceBitBoards[(int)Piece.p];
-        var actualBitBoard = Masks.WhitePassedPawnMasks[(int)square];
+        var expectedBitboard = position.PieceBitboards[(int)Piece.P] | position.PieceBitboards[(int)Piece.p];
+        var actualBitboard = Masks.WhitePassedPawnMasks[(int)square];
 
-        Assert.AreEqual(expectedBitBoard, actualBitBoard);
+        Assert.AreEqual(expectedBitboard, actualBitboard);
     }
 
     [Explicit]
@@ -73,10 +73,10 @@ public class MasksTest
     {
         var position = new Position(fen);
 
-        var expectedBitBoard = position.PieceBitBoards[(int)Piece.P] | position.PieceBitBoards[(int)Piece.p];
-        var actualBitBoard = Masks.BlackPassedPawnMasks[(int)square];
+        var expectedBitboard = position.PieceBitboards[(int)Piece.P] | position.PieceBitboards[(int)Piece.p];
+        var actualBitboard = Masks.BlackPassedPawnMasks[(int)square];
 
-        Assert.AreEqual(expectedBitBoard, actualBitBoard);
+        Assert.AreEqual(expectedBitboard, actualBitboard);
     }
 
     [Explicit]
@@ -93,10 +93,10 @@ public class MasksTest
     {
         var position = new Position(fen);
 
-        var expectedBitBoard = position.PieceBitBoards[(int)Piece.P] | position.PieceBitBoards[(int)Piece.p];
-        var actualBitBoard = Masks.WhiteSidePassedPawnMasks[(int)square];
+        var expectedBitboard = position.PieceBitboards[(int)Piece.P] | position.PieceBitboards[(int)Piece.p];
+        var actualBitboard = Masks.WhiteSidePassedPawnMasks[(int)square];
 
-        Assert.AreEqual(expectedBitBoard, actualBitBoard);
+        Assert.AreEqual(expectedBitboard, actualBitboard);
     }
 
     [Explicit]
@@ -113,10 +113,10 @@ public class MasksTest
     {
         var position = new Position(fen);
 
-        var expectedBitBoard = position.PieceBitBoards[(int)Piece.P] | position.PieceBitBoards[(int)Piece.p];
-        var actualBitBoard = Masks.BlackSidePassedPawnMasks[(int)square];
+        var expectedBitboard = position.PieceBitboards[(int)Piece.P] | position.PieceBitboards[(int)Piece.p];
+        var actualBitboard = Masks.BlackSidePassedPawnMasks[(int)square];
 
-        Assert.AreEqual(expectedBitBoard, actualBitBoard);
+        Assert.AreEqual(expectedBitboard, actualBitboard);
     }
 
     [TestCase(BoardSquare.a1)]

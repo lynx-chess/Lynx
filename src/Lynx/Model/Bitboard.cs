@@ -5,18 +5,18 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
-public static class BitBoardExtensions
+public static class BitboardExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool Empty(this BitBoard board) => board == default;
+    public static bool Empty(this Bitboard board) => board == default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool NotEmpty(this BitBoard board) => board != default;
+    public static bool NotEmpty(this Bitboard board) => board != default;
 
-    public static BitBoard Initialize(params ReadOnlySpan<BoardSquare> occupiedSquares)
+    public static Bitboard Initialize(params ReadOnlySpan<BoardSquare> occupiedSquares)
     {
 #pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
-        BitBoard board = default;
+        Bitboard board = default;
 #pragma warning restore S3353 // Unchanged local variables should be "const"
 
         foreach (var square in occupiedSquares)
@@ -27,11 +27,11 @@ public static class BitBoardExtensions
         return board;
     }
 
-    internal static void Clear(this ref BitBoard board) => board = default;
+    internal static void Clear(this ref Bitboard board) => board = default;
 
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
     [Obsolete("Test only")]
-    internal static void Print(this BitBoard board)
+    internal static void Print(this Bitboard board)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator);
@@ -61,19 +61,19 @@ public static class BitBoardExtensions
 #pragma warning restore S106,S2228 // Standard outputs should not be used directly to log anything
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool GetBit(this BitBoard board, int squareIndex)
+    public static bool GetBit(this Bitboard board, int squareIndex)
     {
         return (board & (1UL << squareIndex)) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard SetBit(this ref BitBoard board, int square)
+    public static Bitboard SetBit(this ref Bitboard board, int square)
     {
         return board |= (1UL << square);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard PopBit(this ref BitBoard board, int square)
+    public static Bitboard PopBit(this ref Bitboard board, int square)
     {
         return board &= ~(1UL << square);
     }
@@ -82,31 +82,31 @@ public static class BitBoardExtensions
     /// https://www.chessprogramming.org/Population_Count#Single_Populated_Bitboards
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSinglePopulated(this BitBoard board)
+    public static bool IsSinglePopulated(this Bitboard board)
     {
         return board != default && WithoutLS1B(board) == default;
     }
 
     /// <summary>
-    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L32
+    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitboardUtility.cs#L32
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ToggleBit(this ref BitBoard bitboard, int squareIndex)
+    public static void ToggleBit(this ref Bitboard bitboard, int squareIndex)
     {
         bitboard ^= 1ul << squareIndex;
     }
 
     /// <summary>
-    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L37
+    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitboardUtility.cs#L37
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ToggleBits(this ref BitBoard bitboard, int squareA, int squareB)
+    public static void ToggleBits(this ref Bitboard bitboard, int squareA, int squareB)
     {
         bitboard ^= (1ul << squareA | 1ul << squareB);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong LSB(this BitBoard board)
+    public static ulong LSB(this Bitboard board)
     {
         if (System.Runtime.Intrinsics.X86.Bmi1.IsSupported)
         {
@@ -117,43 +117,43 @@ public static class BitBoardExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftUp(this BitBoard board)
+    public static Bitboard ShiftUp(this Bitboard board)
     {
         return board >> 8;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftDown(this BitBoard board)
+    public static Bitboard ShiftDown(this Bitboard board)
     {
         return board << 8;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftLeft(this BitBoard board)
+    public static Bitboard ShiftLeft(this Bitboard board)
     {
         return (board >> 1) & Constants.NotHFile;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftRight(this BitBoard board)
+    public static Bitboard ShiftRight(this Bitboard board)
     {
         return (board << 1) & Constants.NotAFile;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftUpRight(this BitBoard board)
+    public static Bitboard ShiftUpRight(this Bitboard board)
     {
         return board.ShiftUp().ShiftRight();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftUpLeft(this BitBoard board)
+    public static Bitboard ShiftUpLeft(this Bitboard board)
     {
         return board.ShiftUp().ShiftLeft();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftUpRightAndLeft(this BitBoard board)
+    public static Bitboard ShiftUpRightAndLeft(this Bitboard board)
     {
         var up = board.ShiftUp();
 
@@ -161,19 +161,19 @@ public static class BitBoardExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftDownRight(this BitBoard board)
+    public static Bitboard ShiftDownRight(this Bitboard board)
     {
         return board.ShiftDown().ShiftRight();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftDownLeft(this BitBoard board)
+    public static Bitboard ShiftDownLeft(this Bitboard board)
     {
         return board.ShiftDown().ShiftLeft();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard ShiftDownRightAndLeft(this BitBoard board)
+    public static Bitboard ShiftDownRightAndLeft(this Bitboard board)
     {
         var down = board.ShiftDown();
 
@@ -181,7 +181,7 @@ public static class BitBoardExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard PawnPush(this BitBoard board, Side side)
+    public static Bitboard PawnPush(this Bitboard board, Side side)
     {
         return side == Side.White
             ? board.ShiftUp() 
@@ -189,7 +189,7 @@ public static class BitBoardExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard PawnAttacks(this BitBoard board, Side side)
+    public static Bitboard PawnAttacks(this Bitboard board, Side side)
     {
         return side == Side.White
             ? board.ShiftUpRightAndLeft() 
@@ -210,7 +210,7 @@ public static class BitBoardExtensions
     /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetLS1BIndex(this BitBoard board)
+    public static int GetLS1BIndex(this Bitboard board)
     {
         Utils.Assert(board != default);
 
@@ -225,7 +225,7 @@ public static class BitBoardExtensions
     /// </summary>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard WithoutLS1B(this BitBoard board, out int index)
+    public static Bitboard WithoutLS1B(this Bitboard board, out int index)
     {
         index = BitOperations.TrailingZeroCount(board);
 
@@ -237,7 +237,7 @@ public static class BitBoardExtensions
     /// </summary>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard WithoutLS1B(this BitBoard board)
+    public static Bitboard WithoutLS1B(this Bitboard board)
     {
         return board & (board - 1);
     }
@@ -247,13 +247,13 @@ public static class BitBoardExtensions
     /// </summary>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ResetLS1B(this ref BitBoard board)
+    public static void ResetLS1B(this ref Bitboard board)
     {
         board &= (board - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CountBits(this BitBoard board)
+    public static int CountBits(this Bitboard board)
     {
         return BitOperations.PopCount(board);
     }
@@ -267,14 +267,14 @@ public static class BitBoardExtensions
         return 1UL << boardSquare;
     }
 
-    public static bool Contains(this BitBoard board, int boardSquare)
+    public static bool Contains(this Bitboard board, int boardSquare)
     {
         var bit = SquareBit(boardSquare);
 
         return (board & bit) != default;
     }
 
-    public static bool DoesNotContain(this BitBoard board, int boardSquare)
+    public static bool DoesNotContain(this Bitboard board, int boardSquare)
     {
         var bit = SquareBit(boardSquare);
 
@@ -321,15 +321,15 @@ public static class BitBoardExtensions
 
     [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool GetBit(this BitBoard board, BoardSquare square) => board.GetBit((int)square);
+    public static bool GetBit(this Bitboard board, BoardSquare square) => board.GetBit((int)square);
 
     [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard SetBit(this ref BitBoard board, BoardSquare square) => board.SetBit((int)square);
+    public static Bitboard SetBit(this ref Bitboard board, BoardSquare square) => board.SetBit((int)square);
 
     [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard PopBit(this ref BitBoard board, BoardSquare square) => board.PopBit((int)square);
+    public static Bitboard PopBit(this ref Bitboard board, BoardSquare square) => board.PopBit((int)square);
 
     #endregion
 }

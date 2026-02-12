@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace Lynx;
 
 /// <summary>
-/// Implementation based on Stormprhax, some comments and clarifications from Altair
+/// Implementation based on Stormphrax, some comments and clarifications from Altair
 /// </summary>
 public static class SEE
 {
@@ -51,9 +51,9 @@ public static class SEE
 
         var targetSquare = move.TargetSquare();
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both]
-            ^ BitBoardExtensions.SquareBit(move.SourceSquare())
-            ^ BitBoardExtensions.SquareBit(targetSquare);
+        var occupancy = position.OccupancyBitboards[(int)Side.Both]
+            ^ BitboardExtensions.SquareBit(move.SourceSquare())
+            ^ BitboardExtensions.SquareBit(targetSquare);
 
         var queens = position.Queens;
         var bishops = queens | position.Bishops;
@@ -65,7 +65,7 @@ public static class SEE
 
         while (true)
         {
-            var ourAttackers = attackers & position.OccupancyBitBoards[us];
+            var ourAttackers = attackers & position.OccupancyBitboards[us];
 
             if (ourAttackers.Empty())
             {
@@ -95,7 +95,7 @@ public static class SEE
             {
                 // Our only attacker is our king, but the opponent still has defenders
                 if ((nextPiece == (int)Piece.K)
-                    && (attackers & position.OccupancyBitBoards[us]).NotEmpty())
+                    && (attackers & position.OccupancyBitboards[us]).NotEmpty())
                 {
                     us = Utils.OppositeSide(us);
                 }
@@ -137,9 +137,9 @@ public static class SEE
 
         var targetSquare = move.TargetSquare();
 
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both]
-            ^ BitBoardExtensions.SquareBit(move.SourceSquare())
-            ^ BitBoardExtensions.SquareBit(targetSquare);
+        var occupancy = position.OccupancyBitboards[(int)Side.Both]
+            ^ BitboardExtensions.SquareBit(move.SourceSquare())
+            ^ BitboardExtensions.SquareBit(targetSquare);
 
         var queens = position.Queens;
         var bishops = queens | position.Bishops;
@@ -151,7 +151,7 @@ public static class SEE
 
         while (true)
         {
-            var ourAttackers = attackers & position.OccupancyBitBoards[us];
+            var ourAttackers = attackers & position.OccupancyBitboards[us];
 
             if (ourAttackers.Empty())
             {
@@ -181,7 +181,7 @@ public static class SEE
             {
                 // Our only attacker is our king, but the opponent still has defenders
                 if ((nextPiece == (int)Piece.K)
-                    && (attackers & position.OccupancyBitBoards[us]).NotEmpty())
+                    && (attackers & position.OccupancyBitboards[us]).NotEmpty())
                 {
                     us = Utils.OppositeSide(us);
                 }
@@ -218,13 +218,13 @@ public static class SEE
     /// Returns only <see cref="Side.White"/> pieces
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int PopLeastValuableAttacker(Position position, ref BitBoard occupancy, BitBoard attackers, int color)
+    private static int PopLeastValuableAttacker(Position position, ref Bitboard occupancy, Bitboard attackers, int color)
     {
         var offset = Utils.PieceOffset(color);
 
         for (int i = 0; i < 6; ++i)
         {
-            var board = attackers & position.PieceBitBoards[i + offset];
+            var board = attackers & position.PieceBitboards[i + offset];
 
             if (board.NotEmpty())
             {

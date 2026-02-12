@@ -43,38 +43,38 @@ public class PositionTest
         Assert.AreEqual(position.Castle, clonedPosition.Castle);
         Assert.AreEqual(position.EnPassant, clonedPosition.EnPassant);
 
-        for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
+        for (int piece = 0; piece < position.PieceBitboards.Length; ++piece)
         {
-            Assert.AreEqual(position.PieceBitBoards[piece], clonedPosition.PieceBitBoards[piece]);
+            Assert.AreEqual(position.PieceBitboards[piece], clonedPosition.PieceBitboards[piece]);
         }
 
-        for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
+        for (int occupancy = 0; occupancy < position.OccupancyBitboards.Length; ++occupancy)
         {
-            Assert.AreEqual(position.OccupancyBitBoards[occupancy], clonedPosition.OccupancyBitBoards[occupancy]);
+            Assert.AreEqual(position.OccupancyBitboards[occupancy], clonedPosition.OccupancyBitboards[occupancy]);
         }
 
         // Act: modify original, to ensure they're not sharing references to the same memory object
-        for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
+        for (int piece = 0; piece < position.PieceBitboards.Length; ++piece)
         {
-            position.PieceBitBoards[piece].ResetLS1B();
-            position.PieceBitBoards[piece].SetBit((int)BoardSquare.e5 + piece);
+            position.PieceBitboards[piece].ResetLS1B();
+            position.PieceBitboards[piece].SetBit((int)BoardSquare.e5 + piece);
         }
 
-        for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
+        for (int occupancy = 0; occupancy < position.OccupancyBitboards.Length; ++occupancy)
         {
-            position.OccupancyBitBoards[occupancy].ResetLS1B();
-            position.OccupancyBitBoards[occupancy].SetBit((int)BoardSquare.g7 + occupancy);
+            position.OccupancyBitboards[occupancy].ResetLS1B();
+            position.OccupancyBitboards[occupancy].SetBit((int)BoardSquare.g7 + occupancy);
         }
 
         // Assert
-        for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
+        for (int piece = 0; piece < position.PieceBitboards.Length; ++piece)
         {
-            Assert.AreNotEqual(position.PieceBitBoards[piece], clonedPosition.PieceBitBoards[piece]);
+            Assert.AreNotEqual(position.PieceBitboards[piece], clonedPosition.PieceBitboards[piece]);
         }
 
-        for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
+        for (int occupancy = 0; occupancy < position.OccupancyBitboards.Length; ++occupancy)
         {
-            Assert.AreNotEqual(position.OccupancyBitBoards[occupancy], clonedPosition.OccupancyBitBoards[occupancy]);
+            Assert.AreNotEqual(position.OccupancyBitboards[occupancy], clonedPosition.OccupancyBitboards[occupancy]);
         }
     }
 
@@ -408,8 +408,8 @@ public class PositionTest
             passedPawnsMask = Masks.BlackPassedPawnMasks[(int)square];
         }
 
-        var whiteKingDistance = Constants.ChebyshevDistance[(int)square][position.PieceBitBoards[(int)Piece.K].GetLS1BIndex()];
-        var blackKingDistance = Constants.ChebyshevDistance[(int)square][position.PieceBitBoards[(int)Piece.k].GetLS1BIndex()];
+        var whiteKingDistance = Constants.ChebyshevDistance[(int)square][position.PieceBitboards[(int)Piece.K].GetLS1BIndex()];
+        var blackKingDistance = Constants.ChebyshevDistance[(int)square][position.PieceBitboards[(int)Piece.k].GetLS1BIndex()];
 
         var friendlyKingDistance = position.Side == Side.White
             ? whiteKingDistance
@@ -420,7 +420,7 @@ public class PositionTest
             : whiteKingDistance;
 
         var expectedEval = 0;
-        if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)
+        if ((passedPawnsMask & position.OccupancyBitboards[OppositeSide(position.Side)]) == 0)
         {
             expectedEval += UnpackMG(PassedPawnNoEnemiesAheadBonus[0][rank]);
             expectedEval += UnpackMG(PassedPawnNoEnemiesAheadEnemyBonus[0][rank]);
@@ -819,20 +819,20 @@ public class PositionTest
         int evaluation = AdditionalPieceEvaluation(position, Piece.Q)
             - AdditionalPieceEvaluation(position, Piece.q);
 
-        BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
-        BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
+        Bitboard whitePawnAttacks = position.PieceBitboards[(int)Piece.P].ShiftUpRight() | position.PieceBitboards[(int)Piece.P].ShiftUpLeft();
+        Bitboard blackPawnAttacks = position.PieceBitboards[(int)Piece.p].ShiftDownRight() | position.PieceBitboards[(int)Piece.p].ShiftDownLeft();
 
-        var whiteQueenAttacks = Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.Q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both]);
-        var blackQueenAttacks = Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both]);
+        var whiteQueenAttacks = Attacks.QueenAttacks(position.PieceBitboards[(int)Piece.Q].GetLS1BIndex(), position.OccupancyBitboards[(int)Side.Both]);
+        var blackQueenAttacks = Attacks.QueenAttacks(position.PieceBitboards[(int)Piece.q].GetLS1BIndex(), position.OccupancyBitboards[(int)Side.Both]);
 
         var whiteMobility =
             (whiteQueenAttacks
-                & (~(position.PieceBitBoards[(int)Piece.P] | blackPawnAttacks)))
+                & (~(position.PieceBitboards[(int)Piece.P] | blackPawnAttacks)))
             .CountBits();
 
         var blackMobility =
             (blackQueenAttacks
-                & (~(position.PieceBitBoards[(int)Piece.p] | whitePawnAttacks)))
+                & (~(position.PieceBitboards[(int)Piece.p] | whitePawnAttacks)))
             .CountBits();
 
         var whiteKingRing = KingRing[position.BlackKingSquare];
@@ -941,7 +941,7 @@ public class PositionTest
         /// 1   0 0 0 0 0 1 1 0
         ///     a b c d e f g h
         /// </summary>
-        const BitBoard WhiteShortCastleFreeSquares = 0x6000000000000000;
+        const Bitboard WhiteShortCastleFreeSquares = 0x6000000000000000;
 
         /// <summary>
         /// 8   0 0 0 0 0 0 0 0
@@ -954,7 +954,7 @@ public class PositionTest
         /// 1   0 1 1 1 0 0 0 0
         ///     a b c d e f g h
         /// </summary>
-        const BitBoard WhiteLongCastleFreeSquares = 0xe00000000000000;
+        const Bitboard WhiteLongCastleFreeSquares = 0xe00000000000000;
 
         /// <summary>
         /// 8   0 0 0 0 0 1 1 0
@@ -967,7 +967,7 @@ public class PositionTest
         /// 1   0 0 0 0 0 0 0 0
         ///     a b c d e f g h
         /// </summary>
-        const BitBoard BlackShortCastleFreeSquares = 0x60;
+        const Bitboard BlackShortCastleFreeSquares = 0x60;
 
         /// <summary>
         /// 8   0 1 1 1 0 0 0 0
@@ -980,7 +980,7 @@ public class PositionTest
         /// 1   0 0 0 0 0 0 0 0
         ///     a b c d e f g h
         /// </summary>
-        const BitBoard BlackLongCastleFreeSquares = 0xe;
+        const Bitboard BlackLongCastleFreeSquares = 0xe;
 
         var position = new Position(Constants.InitialPositionFEN);
 
@@ -1105,12 +1105,12 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(position.PieceBitBoards[(int)Piece.P] != 0 ? Side.White : Side.Black);
-        Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winnigSideOffset));
+        var winningSideOffset = Utils.PieceOffset(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black);
+        Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winningSideOffset));
 
         static bool IsBishopPawnDraw(Position position, int winningSideOffset)
         {
-            var pawns = position.PieceBitBoards[(int)Piece.P + winningSideOffset];
+            var pawns = position.PieceBitboards[(int)Piece.P + winningSideOffset];
 
             bool hasAFilePawn = (pawns & Constants.AFile) != 0;
             bool hasHFilePawn = (pawns & Constants.HFile) != 0;
@@ -1132,14 +1132,14 @@ public class PositionTest
                     : (int)BoardSquare.h8)
                 + (inverseWinningSide * whiteBlackDiff);
 
-            var bishopSquare = position.PieceBitBoards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+            var bishopSquare = position.PieceBitboards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
             if (BoardSquareExtensions.SameColor(bishopSquare, promotionCornerSquare))
             {
                 return false;
             }
 
-            var attackingKing = position.PieceBitBoards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
-            var defendingKing = position.PieceBitBoards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+            var attackingKing = position.PieceBitboards[(int)Piece.K + winningSideOffset].GetLS1BIndex();
+            var defendingKing = position.PieceBitboards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
 
             pawns = pawns.WithoutLS1B(out var pawnSquare);
             var closerPawnCornerDistance = Math.Abs(promotionCornerSquare - pawnSquare) >> 3;  // /8
@@ -1161,7 +1161,7 @@ public class PositionTest
             // The are two cases when the defending king can't reduce the distance to the corner:
             // - If the attacking one is in the middle, and therefore their difference is at least 2 distance squares - not a concern
             // - If the pawn is in 7th rank and blocks the defending king from approaching the corner - we don't use this for comparing defending and attacking conditions
-            int oneIfDefendingSideTomove = (int)position.Side ^ inverseWinningSide ^ 1;
+            int oneIfDefendingSideToMove = (int)position.Side ^ inverseWinningSide ^ 1;
 
             var defendingKingCornerDistance = Constants.ChebyshevDistance[promotionCornerSquare][defendingKing];
 
@@ -1169,15 +1169,15 @@ public class PositionTest
                 defendingKingCornerDistance <= 1
                 || (closerPawnCornerDistance > defendingKingCornerDistance        // Avoids bishop + king blocking, i.e. 2k5/P7/2K5/8/8/8/8/B7 b - - 0 1, 4k3/8/4K3/P7/8/8/8/B7 b - - 0 1
                     && attackingKingCornerDistance > 2  // Avoids bishop blocking, i.e. 2k5/8/2K5/8/5B2/8/P7/8 b - - 0 1
-                    && defendingKingCornerDistance - oneIfDefendingSideTomove < attackingKingCornerDistance
-                    && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideTomove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing]);     // Avoids king diagonal blocking, i.e. 3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48
+                    && defendingKingCornerDistance - oneIfDefendingSideToMove < attackingKingCornerDistance
+                    && Constants.ManhattanDistance[promotionCornerSquare][defendingKing] - (2 * oneIfDefendingSideToMove) < Constants.ManhattanDistance[promotionCornerSquare][attackingKing]);     // Avoids king diagonal blocking, i.e. 3K4/8/2k5/8/8/2B5/P7/8 w - - 0 48
         }
     }
 
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
-        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        var whiteKing = position.PieceBitboards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = position.PieceBitboards[(int)Piece.k].GetLS1BIndex();
 
         var sameSideKingSquare = piece <= Piece.K
             ? whiteKing
@@ -1187,8 +1187,8 @@ public class PositionTest
             ? blackKing
             : whiteKing;
 
-        BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
-        BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
+        Bitboard whitePawnAttacks = position.PieceBitboards[(int)Piece.P].ShiftUpRight() | position.PieceBitboards[(int)Piece.P].ShiftUpLeft();
+        Bitboard blackPawnAttacks = position.PieceBitboards[(int)Piece.p].ShiftDownRight() | position.PieceBitboards[(int)Piece.p].ShiftDownLeft();
 
         var oppositeSidePawnAttacks = piece <= Piece.K
             ? blackPawnAttacks
@@ -1198,23 +1198,23 @@ public class PositionTest
             ? (int)Side.White
             : (int)Side.Black;
 
-        var bitBoard = position.PieceBitBoards[(int)piece];
+        var bitboard = position.PieceBitboards[(int)piece];
         int eval = 0;
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
-        while (!bitBoard.Empty())
+        while (!bitboard.Empty())
         {
-            var pieceSquareIndex = bitBoard.GetLS1BIndex();
-            bitBoard.ResetLS1B();
+            var pieceSquareIndex = bitboard.GetLS1BIndex();
+            bitboard.ResetLS1B();
             eval += UnpackMG(AdditionalPieceEvaluation(position, ref evaluationContext, 0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
 
         // Position.AdditionalPieceEvaluation but including pawns
-        static int AdditionalPieceEvaluation(Position position, ref EvaluationContext evaluationContext, int bucket, int oppositeSideBucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+        static int AdditionalPieceEvaluation(Position position, ref EvaluationContext evaluationContext, int bucket, int oppositeSideBucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, Bitboard enemyPawnAttacks)
         {
             Assert.AreNotEqual(pieceIndex, (int)Piece.K);
             Assert.AreNotEqual(pieceIndex, (int)Piece.k);
@@ -1231,22 +1231,22 @@ public class PositionTest
     {
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bb = position.PieceBitboards[pieceIndex];
 
-            while (bitboard != default)
+            while (bb != default)
             {
-                bitboard.ResetLS1B();
+                bb.ResetLS1B();
             }
         }
 
-        BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
-        BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
+        Bitboard whitePawnAttacks = position.PieceBitboards[(int)Piece.P].ShiftUpRight() | position.PieceBitboards[(int)Piece.P].ShiftUpLeft();
+        Bitboard blackPawnAttacks = position.PieceBitboards[(int)Piece.p].ShiftDownRight() | position.PieceBitboards[(int)Piece.p].ShiftDownLeft();
 
-        var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
+        var bitboard = position.PieceBitboards[(int)piece].GetLS1BIndex();
 
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(bitBoard, 0, (int)Side.Black, whitePawnAttacks));
+            ? position.KingAdditionalEvaluation(bitboard, 0, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(bitboard, 0, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)

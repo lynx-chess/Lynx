@@ -668,7 +668,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
         public ImprovedGame2(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
         {
-            Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
 
             for (int i = 0; i < rangeSpan.Length; ++i)

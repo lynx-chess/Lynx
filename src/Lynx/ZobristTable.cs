@@ -78,7 +78,7 @@ public static class ZobristTable
 
     /// <summary>
     /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>.
-    /// Differenciates white and black sides
+    /// Differentiates white and black sides
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong SideHash(ulong side)
@@ -132,7 +132,7 @@ public static class ZobristTable
 
         for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (bitboard != default)
             {
@@ -170,7 +170,7 @@ public static class ZobristTable
     {
         ulong pawnKingHash = 0;
 
-        var whitePawns = position.PieceBitBoards[(int)Piece.P];
+        var whitePawns = position.PieceBitboards[(int)Piece.P];
         while (whitePawns != default)
         {
             whitePawns = whitePawns.WithoutLS1B(out var pieceSquareIndex);
@@ -178,7 +178,7 @@ public static class ZobristTable
             pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.P);
         }
 
-        var blackPawns = position.PieceBitBoards[(int)Piece.p];
+        var blackPawns = position.PieceBitboards[(int)Piece.p];
         while (blackPawns != default)
         {
             blackPawns = blackPawns.WithoutLS1B(out var pieceSquareIndex);
@@ -186,10 +186,10 @@ public static class ZobristTable
             pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.p);
         }
 
-        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        var whiteKing = position.PieceBitboards[(int)Piece.K].GetLS1BIndex();
         pawnKingHash ^= PieceHash(whiteKing, (int)Piece.K);
 
-        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        var blackKing = position.PieceBitboards[(int)Piece.k].GetLS1BIndex();
         pawnKingHash ^= PieceHash(blackKing, (int)Piece.k);
 
         return pawnKingHash;
@@ -205,7 +205,7 @@ public static class ZobristTable
 
         for (int pieceIndex = start; pieceIndex < end; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (bitboard != default)
             {
@@ -225,7 +225,7 @@ public static class ZobristTable
 
         for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.B; ++pieceIndex)
         {
-            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            var whiteBitboard = position.PieceBitboards[pieceIndex];
             while (whiteBitboard != default)
             {
                 whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
@@ -233,7 +233,7 @@ public static class ZobristTable
                 minorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
 
-            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            var blackBitboard = position.PieceBitboards[pieceIndex + 6];
             while (blackBitboard != default)
             {
                 blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
@@ -252,14 +252,14 @@ public static class ZobristTable
 
         for (int pieceIndex = (int)Piece.R; pieceIndex <= (int)Piece.Q; ++pieceIndex)
         {
-            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            var whiteBitboard = position.PieceBitboards[pieceIndex];
             while (whiteBitboard != default)
             {
                 whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
                 majorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
 
-            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            var blackBitboard = position.PieceBitboards[pieceIndex + 6];
             while (blackBitboard != default)
             {
                 blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);

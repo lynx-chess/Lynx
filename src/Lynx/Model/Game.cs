@@ -10,9 +10,9 @@ public sealed class Game : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
-#pragma warning disable CA1002 // Do not expose generic lists
+#pragma warning disable CA1002, MA0016 // Do not expose generic lists
     public List<Move> MoveHistory { get; }
-#pragma warning restore CA1002 // Do not expose generic lists
+#pragma warning restore CA1002, MA0016 // Do not expose generic lists
 #endif
 
     //private int _positionHashHistoryPointerBeforeLastSearch;
@@ -123,7 +123,7 @@ public sealed class Game : IDisposable
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
@@ -167,7 +167,7 @@ public sealed class Game : IDisposable
     ///     At depth 3, there's a capture, but the eval should still be 0
     ///     At depth 4 there's no capture, but the eval should still be 0
     /// </remarks>
-    /// <returns>true if threefol/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
+    /// <returns>true if threefold/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Update50movesRule(Move moveToPlay)
     {
@@ -213,7 +213,7 @@ public sealed class Game : IDisposable
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
-        // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
+        // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 earlier and finish HalfMovesWithoutCaptureOrPawnMove earlier
         var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
         for (int i = _positionHashHistoryPointer - 3; i >= limit; i -= 2)
         {
@@ -245,7 +245,7 @@ public sealed class Game : IDisposable
     {
         var currentHash = position.UniqueIdentifier;
 
-        // Since positionHashHistory hasn't been updated with position, [Count] would be the last one, so we want to start searching 2 ealier
+        // Since positionHashHistory hasn't been updated with position, [Count] would be the last one, so we want to start searching 2 earlier
         var limit = Math.Max(0, positionHashHistory.Length - halfMovesWithoutCaptureOrPawnMove);
         for (int i = positionHashHistory.Length - 2; i >= limit; i -= 2)
         {
@@ -303,7 +303,7 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UpdateMoveinStack(int n, Move move) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
+    public void UpdateMoveInStack(int n, Move move) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Move ReadMoveFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
