@@ -395,8 +395,8 @@ public sealed partial class Engine
                 // 🔍 History pruning -  all quiet moves can be pruned
                 // once we find one with a history score too low
                 if (!isCapture
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && quietHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && depth < Configuration.EngineSettings.HistoryPruning_MaxDepth    // TODO use LMR depth
+                    && quietHistory < Configuration.EngineSettings.HistoryPruning_Margin * (depth - 1))
                 {
                     break;
                 }

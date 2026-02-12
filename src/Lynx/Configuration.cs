@@ -403,10 +403,10 @@ public sealed class EngineSettings
     public int FP_HistoryDivisor { get; set; } = 32;
 
     [SPSA<int>(enabled: false)]
-    public int HistoryPrunning_MaxDepth { get; set; } = 5;
+    public int HistoryPruning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -1506;
+    public int HistoryPruning_Margin { get; set; } = -1506;
 
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
