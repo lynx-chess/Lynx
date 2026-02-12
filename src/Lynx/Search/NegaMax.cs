@@ -209,6 +209,26 @@ public sealed partial class Engine
                 ttCorrectedStaticEval = ttScore;
             }
 
+            var parent = Game.Stack(ply - 1);
+
+            // History eval diff correction
+            if (!isVerifyingSE && !parentWasNullMove
+                && !isInCheck && !isRoot
+                && parent.StaticEval != int.MaxValue
+                && parent.Move.CapturedPiece() != (int)Piece.None)
+            {
+                var margin = Configuration.EngineSettings.History_EvalDiff_ImprovementMargin;
+                var coefficient = Configuration.EngineSettings.History_EvalDiff_ImprovementCoefficient;
+                var limit = Configuration.EngineSettings.History_EvalDiff_MaxBonus;
+
+                // Formula from SP
+                var improvement = staticEval + stack.StaticEval - margin;
+                var bonus = Math.Clamp(coefficient * -improvement, -limit, +limit);
+
+                ref var quietHistoryEntry = ref QuietHistoryEntry(Utils.OppositeSide((int)position.Side), parent.Move, parent.AttacksBySide);
+                quietHistoryEntry = (short)ScoreHistoryMove(quietHistoryEntry, bonus);
+            }
+
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (!pvNode)
             {
@@ -370,7 +390,7 @@ public sealed partial class Engine
             var piece = move.Piece();
             var isCapture = move.CapturedPiece() != (int)Piece.None;
 
-            int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
+            int quietHistory = QuietHistoryEntry((int)position.Side, move, evaluationContext.AttacksBySide)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
@@ -522,6 +542,7 @@ public sealed partial class Engine
             var canBeRepetition = Game.Update50movesRule(move);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
+            evaluationContext.AttacksBySide.CopyTo(stack.AttacksBySide);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()

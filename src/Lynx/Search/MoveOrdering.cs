@@ -52,13 +52,13 @@ public sealed partial class Engine
 
                 // Counter move history
                 return BaseMoveScore
-                    + QuietHistoryEntry(position, move, ref evaluationContext)
+                    + QuietHistoryEntry((int)position.Side, move, evaluationContext.AttacksBySide)
                     + (int)ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
             }
 
             // History move or 0 if not found
             return BaseMoveScore
-                + QuietHistoryEntry(position, move, ref evaluationContext);
+                + QuietHistoryEntry((int)position.Side, move, evaluationContext.AttacksBySide);
         }
 
         // Queen promotion
@@ -172,7 +172,7 @@ public sealed partial class Engine
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
-            ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
+            ref var quietHistoryEntry = ref QuietHistoryEntry((int)position.Side, move, evaluationContext.AttacksBySide);
             quietHistoryEntry = (short)ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
@@ -196,7 +196,7 @@ public sealed partial class Engine
 
                     // 🔍 Quiet history penalty / malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    quietHistoryEntry = ref QuietHistoryEntry((int)position.Side, visitedMove, evaluationContext.AttacksBySide);
                     quietHistoryEntry = (short)ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)

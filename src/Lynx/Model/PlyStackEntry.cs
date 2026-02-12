@@ -11,8 +11,11 @@ public struct PlyStackEntry
 
     public Move Move { get; set; }
 
+    public Bitboard[] AttacksBySide { get; set; }
+
     public PlyStackEntry()
     {
+        AttacksBySide = new Bitboard[2];
         Reset();
     }
 
@@ -21,5 +24,9 @@ public struct PlyStackEntry
         StaticEval = int.MaxValue;
         DoubleExtensions = 0;
         Move = 0;
+
+        AttacksBySide ??= new Bitboard[2];
+
+        Array.Clear(AttacksBySide, 0, 2);
     }
 }
