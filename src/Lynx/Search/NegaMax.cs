@@ -222,7 +222,7 @@ public sealed partial class Engine
                 var limit = Configuration.EngineSettings.History_EvalDiff_MaxBonus;
 
                 // Formula from SP
-                var improvement = staticEval + stack.StaticEval - margin;
+                var improvement = staticEval + stack.StaticEval;// - margin;
                 var bonus = Math.Clamp(coefficient * -improvement, -limit, +limit);
 
                 ref var quietHistoryEntry = ref QuietHistoryEntry(Utils.OppositeSide((int)position.Side), parent.Move, parent.AttacksBySide);
