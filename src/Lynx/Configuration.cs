@@ -253,6 +253,12 @@ public sealed class EngineSettings
     [SPSA<int>(25, 300, 30)]
     public int LMR_Corrplexity_Delta { get; set; } = 124;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_AlphaRaiseCounter { get; set; } = 50;
+
     [SPSA<int>(enabled: false)]
     public int History_MinDepth { get; set; } = 3;
 
