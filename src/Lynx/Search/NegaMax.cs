@@ -932,9 +932,14 @@ public sealed partial class Engine
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
 
             // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (isCapture)
             {
-                continue;
+                var threshold = Configuration.EngineSettings.QSearch_SEE_Threshold_Noisy * depth * depth;
+
+                if (!SEE.IsGoodCapture(position, move, threshold))
+                {
+                    continue;
+                }
             }
 
             var gameState = position.MakeMove(move);
