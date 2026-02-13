@@ -418,10 +418,10 @@ public sealed class EngineSettings
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
 
     [SPSA<int>(-100, -10, 10)]
-    public int PVS_SEE_Threshold_Quiet { get; set; } = -46;
+    public int PVS_SEE_Threshold_Quiet { get; set; } = -20;
 
     [SPSA<int>(-150, -50, 10)]
-    public int PVS_SEE_Threshold_Noisy { get; set; } = -111;
+    public int PVS_SEE_Threshold_Noisy { get; set; } = -100;
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveValue"/>
