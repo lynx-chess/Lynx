@@ -274,7 +274,8 @@ public sealed partial class Engine
                 var staticEvalBetaDiff = ttCorrectedStaticEval - beta;
 
                 // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
-                if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                if (cutnode
+                    && depth >= Configuration.EngineSettings.NMP_MinDepth
                     && staticEvalBetaDiff >= Configuration.EngineSettings.NMP_Margin
                     && !parentWasNullMove
                     && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
