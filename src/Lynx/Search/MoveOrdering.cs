@@ -10,7 +10,7 @@ namespace Lynx;
 public sealed partial class Engine
 {
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValuableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Position position, Move move, int ply, ref EvaluationContext evaluationContext, ShortMove bestMoveTTCandidate = default)
@@ -102,7 +102,7 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValuableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMoveQSearch(Move move, ShortMove bestMoveTTCandidate = default)
@@ -172,8 +172,11 @@ public sealed partial class Engine
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
-            ref var quietHistoryEntry = ref QuietHistoryEntry(position, move, ref evaluationContext);
-            quietHistoryEntry = (short)ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
+            ref var pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(position, move, ref evaluationContext);
+            pieceToQuietHistoryEntry = (short)ScoreHistoryMove(pieceToQuietHistoryEntry, rawHistoryBonus);
+
+            ref var butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(position, move, ref evaluationContext);
+            butterflyQuietHistoryEntry = (short)ScoreHistoryMove(butterflyQuietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
             {
@@ -196,8 +199,11 @@ public sealed partial class Engine
 
                     // 🔍 Quiet history penalty / malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    quietHistoryEntry = ref QuietHistoryEntry(position, visitedMove, ref evaluationContext);
-                    quietHistoryEntry = (short)ScoreHistoryMove(quietHistoryEntry, -rawHistoryMalus);
+                    pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    pieceToQuietHistoryEntry = (short)ScoreHistoryMove(pieceToQuietHistoryEntry, -rawHistoryMalus);
+
+                    butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    butterflyQuietHistoryEntry = (short)ScoreHistoryMove(butterflyQuietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)
                     {

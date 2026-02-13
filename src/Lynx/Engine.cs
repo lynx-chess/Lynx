@@ -75,7 +75,8 @@ public sealed partial class Engine : IDisposable
             Array.Clear(_moveNodeCount[i]);
         }
 
-        Array.Clear(_quietHistory);
+        Array.Clear(_pieceToQuietHistory);
+        Array.Clear(_butterflyQuietHistory);
         Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);

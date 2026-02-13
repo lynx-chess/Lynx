@@ -21,13 +21,21 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
-    private const int QuietHistoryLength = 12 * 64 * 2 * 2;
+    private const int PieceToQuietHistoryLength = 12 * 64 * 2 * 2;
+
+    private const int ButterflyHistoryLength = 64 * 64 * 2 * 2;
 
     /// <summary>
     /// 12 x 64 x 2 x 2
     /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly short[] _quietHistory = GC.AllocateArray<short>(QuietHistoryLength, pinned: true);
+    private readonly short[] _pieceToQuietHistory = GC.AllocateArray<short>(PieceToQuietHistoryLength, pinned: true);
+
+    /// <summary>
+    /// 64 x 64 x 2 x 2
+    /// source square x target square x source is attacked x target is attacked
+    /// </summary>
+    private readonly short[] _butterflyQuietHistory = GC.AllocateArray<short>(ButterflyHistoryLength, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
@@ -138,8 +146,7 @@ public sealed partial class Engine
             }
 
             Array.Clear(_killerMoves);
-            // Not clearing _quietHistory on purpose
-            // Not clearing _captureHistory on purpose
+            // Not clearing quiet and capture histories here on purpose
 
             int mate = 0;
 
