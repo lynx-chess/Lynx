@@ -68,7 +68,7 @@ public sealed class EngineSettings
     /// </summary>
     public int BenchDepth { get; set; } = 13;
 
-    private int _transpositionTableSize = 16;
+    private int _transpositionTableSize = 32;
 
     /// <summary>
     /// In MB, clamped to [<see cref="Constants.AbsoluteMinTTSize"/>, <see cref="Constants.AbsoluteMaxTTSize"/>]
