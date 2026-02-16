@@ -4,7 +4,7 @@ using static Lynx.Utils;
 
 namespace Lynx;
 
-#pragma warning disable IDE0055, IDE1006, RCS1036 // Discard formatting and naming styles
+#pragma warning disable IDE0055, IDE1006, RCS1036, MA0007 // Discard formatting and naming styles
 
 internal static class TunableEvalParameters
 {
@@ -8719,4 +8719,4 @@ public static class EvaluationParams
 
 }
 
-#pragma warning restore IDE0055, IDE1006, RCS1036 // Discard formatting and naming styles
+#pragma warning restore IDE0055, IDE1006, RCS1036, MA0007 // Discard formatting and naming styles
