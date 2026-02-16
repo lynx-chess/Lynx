@@ -424,7 +424,7 @@ public sealed class EngineSettings
     public int PVS_SEE_Threshold_Noisy { get; set; } = -111;
 
     [SPSA<int>(-150, -50, 10)]
-    public int QSearch_SEE_Threshold_Noisy { get; set; } = -111;
+    public int QSearch_SEE_Threshold { get; set; } = -95;
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveValue"/>

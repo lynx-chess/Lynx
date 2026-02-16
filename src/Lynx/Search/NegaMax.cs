@@ -931,10 +931,12 @@ public sealed partial class Engine
             var move = Unsafe.Add(ref movesRef, moveIndex);
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
 
+            var isCapture = move.CapturedPiece() != (int)Piece.None;
+
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (isCapture)
             {
-                var threshold = Configuration.EngineSettings.QSearch_SEE_Threshold_Noisy * depth * depth;
+                var threshold = Configuration.EngineSettings.QSearch_SEE_Threshold;
 
                 if (!SEE.IsGoodCapture(position, move, threshold))
                 {
@@ -976,7 +978,7 @@ public sealed partial class Engine
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 #pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
-                    if (move.CapturedPiece() != (int)Piece.None)
+                    if (isCapture)
                     {
                         UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
                     }
