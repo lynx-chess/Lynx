@@ -225,7 +225,7 @@ public sealed class UCIHandler
                     {
                         var opponent = command[commandItems[4].Start.Value..].ToString();
 
-                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty));
+                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty, StringComparison.OrdinalIgnoreCase));
                     }
                     break;
                 }
@@ -417,7 +417,7 @@ public sealed class UCIHandler
 
         try
         {
-            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
+            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ', StringComparison.OrdinalIgnoreCase) + 1)..].Replace("\"", string.Empty, StringComparison.OrdinalIgnoreCase));
             if (!File.Exists(fullPath))
             {
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
@@ -451,7 +451,9 @@ public sealed class UCIHandler
                     eval = -eval;   // White perspective
                 }
 
+#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
+#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
                 ++lineCounter;
                 if (lineCounter % 100 == 0)
