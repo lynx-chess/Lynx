@@ -66,7 +66,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 10;
+    public int BenchDepth { get; set; } = 13;
 
     private int _transpositionTableSize = 256;
 
