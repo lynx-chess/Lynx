@@ -12,15 +12,20 @@ public static class EvaluationConstants
     /// </summary>
     public const int EvalNormalizationCoefficient = 119;
 
-    public static ReadOnlySpan<double> As => [-67.76492157, 235.07770928, -265.49800799, 216.72078173];
+    private static readonly double[] _As = [-67.76492157, 235.07770928, -265.49800799, 216.72078173];
+    private static readonly double[] _Bs = [9.39499192, -0.02030904, 11.00261578, 34.82067134];
 
-    public static ReadOnlySpan<double> Bs => [9.39499192, -0.02030904, 11.00261578, 34.82067134];
+    public static ReadOnlySpan<double> As => _As;
 
-    public static ReadOnlySpan<int> GamePhaseByPiece =>
+    public static ReadOnlySpan<double> Bs => _Bs;
+
+    private static readonly int[] _gamePhaseByPiece =
     [
         0, 1, 1, 2, 4, 0,
         0, 1, 1, 2, 4, 0
     ];
+
+    public static ReadOnlySpan<int> GamePhaseByPiece => _gamePhaseByPiece;
 
     public const int MaxPhase = 24;
 
@@ -122,12 +127,14 @@ public static class EvaluationConstants
         /* k */ [1000, 3500, 4001, 5000, 11000, 0,     0,    0,    0,    0,     0 ], // 0]
     ];
 
-    public static ReadOnlySpan<int> MVV_PieceValues =>
+    private static readonly int[] _MVV_PieceValues =
     [
         1000, 3500, 4000, 5000, 11000, 0,
         1000, 3500, 4000, 5000, 11000, 0,
-        0
+        0,
     ];
+
+    public static ReadOnlySpan<int> MVV_PieceValues => _MVV_PieceValues;
 
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one

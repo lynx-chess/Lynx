@@ -11,12 +11,14 @@ public static class SEE
 {
     #pragma warning disable IDE0055 // Discard formatting in this region
 
-    private static ReadOnlySpan<int> PieceValues =>
+    private static readonly int[] _pieceValues =
     [
         100, 450, 450, 650, 1250, 0,
         100, 450, 450, 650, 1250, 0,
         0
     ];
+
+    private static ReadOnlySpan<int> PieceValues => _pieceValues;
 
     #pragma warning restore IDE0055
 

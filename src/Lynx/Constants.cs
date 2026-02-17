@@ -171,7 +171,7 @@ public static class Constants
     /// <summary>
     /// Relevant bishop occupancy bit count per square
     /// </summary>
-    public static ReadOnlySpan<int> BishopRelevantOccupancyBits =>
+    private static readonly int[] _bishopRelevantOccupancyBits =
     [
         6, 5, 5, 5, 5, 5, 5, 6,
         5, 5, 5, 5, 5, 5, 5, 5,
@@ -183,10 +183,12 @@ public static class Constants
         6, 5, 5, 5, 5, 5, 5, 6,
     ];
 
+    public static ReadOnlySpan<int> BishopRelevantOccupancyBits => _bishopRelevantOccupancyBits;
+
     /// <summary>
     /// Relevant rook occupancy bit count per square
     /// </summary>
-    public static ReadOnlySpan<int> RookRelevantOccupancyBits =>
+    private static readonly int[] _rookRelevantOccupancyBits =
     [
         12, 11, 11, 11, 11, 11, 11, 12,
         11, 10, 10, 10, 10, 10, 10, 11,
@@ -195,10 +197,12 @@ public static class Constants
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
-        12, 11, 11, 11, 11, 11, 11, 12
+        12, 11, 11, 11, 11, 11, 11, 12,
     ];
 
-    public static ReadOnlySpan<Bitboard> RookMagicNumbers =>
+    public static ReadOnlySpan<int> RookRelevantOccupancyBits => _rookRelevantOccupancyBits;
+
+    public static readonly Bitboard[] _rookMagicNumbers =
     [
         0x8080104000208000,   0xa240004020021004,   0x880200080081000,    0x2080058010010800,   0x1001001020408008,   0x4200011042000884,   0x6001c020002c805,    0x2000100802a0044,
         0x20800020804000,     0x5000c00020005000,   0x801000802002,       0x8005001001002208,   0x2000412000820,      0x23000218140100,     0x100a002600081401,   0x2520800060800100,
@@ -210,7 +214,9 @@ public static class Constants
         0x8096800102104025,   0x8004204204110082,   0xd042200011000843,   0x422208c0900f001,    0x61001002080005,     0x4002001028218422,   0x2040104088020104,   0x300108b104064082,
     ];
 
-    public static ReadOnlySpan<Bitboard> BishopMagicNumbers =>
+    public static ReadOnlySpan<Bitboard> RookMagicNumbers => _rookMagicNumbers;
+
+    public static readonly Bitboard[] _bishopMagicNumbers =
     [
         0x10440804a02200,     0x2002241404004050,   0x808008c10800204,    0x8204848201002,      0x8411104001420404,   0x422080208050010,    0x8002020120880e44,   0x3084800880800,
         0x1904210042080,      0x1004103018888888,   0x20264802404a0000,   0x21042402800002,     0x8400840420400002,   0x4102042220901800,   0x840004108201004,    0x40008404010501,
@@ -221,6 +227,8 @@ public static class Constants
         0x2044008c30084820,   0x900848090311020,    0x400a244404040102,   0x4120300820880140,   0x2020004084884400,   0x47059850010820,     0xa90042128020100,    0x2011100892808000,
         0x120802118202420,    0x1224c0808401a005,   0x88004210841102,     0xe00000000840420,    0x900001441904110,    0x480040285025c201,   0x840080801082200,    0x2110810800948200,
     ];
+
+    public static ReadOnlySpan<Bitboard> BishopMagicNumbers => _bishopMagicNumbers;
 
     public const string InitialPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -266,7 +274,7 @@ public static class Constants
     public const string WhiteLongCastle = "e1c1";
     public const string BlackLongCastle = "e8c8";
 
-    public static ReadOnlySpan<int> EnPassantCaptureSquares =>
+    public static readonly int[] _enPassantCaptureSquares =
     [
         0, 0, 0, 0, 0, 0, 0, 0,     //  0-7
         0, 0, 0, 0, 0, 0, 0, 0,     //  8-15
@@ -292,6 +300,8 @@ public static class Constants
         (int)BoardSquare.g3 - 8,
         (int)BoardSquare.h3 - 8     //47 = h3
     ];
+
+    public static ReadOnlySpan<int> EnPassantCaptureSquares => _enPassantCaptureSquares;
 
 #pragma warning disable RCS1257 // Use enum field explicitly
     public const byte NoUpdateCastlingRight = 15;
@@ -356,7 +366,7 @@ public static class Constants
 
     public static readonly int SideLimit = Enum.GetValues<Piece>().Length / 2;
 
-    public static ReadOnlySpan<int> Rank =>
+    public static readonly int[] _rank =
     [
         7, 7, 7, 7, 7, 7, 7, 7,
         6, 6, 6, 6, 6, 6, 6, 6,
@@ -368,7 +378,9 @@ public static class Constants
         0, 0, 0, 0, 0, 0, 0, 0
     ];
 
-    public static ReadOnlySpan<int> File =>
+    public static ReadOnlySpan<int> Rank => _rank;
+
+    public static readonly int[] _file =
     [
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
@@ -379,6 +391,8 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7
     ];
+
+    public static ReadOnlySpan<int> File =>_file;
 
     public static ReadOnlySpan<byte> ByteFile =>
     [
@@ -392,7 +406,7 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
-    public static ReadOnlySpan<int> LightSquares =>
+    public static readonly int[] _lightSquares =
     [
         1, 0, 1, 0, 1, 0, 1, 0,
         0, 1, 0, 1, 0, 1, 0, 1,
@@ -404,7 +418,9 @@ public static class Constants
         0, 1, 0, 1, 0, 1, 0, 1,
     ];
 
-    public static ReadOnlySpan<int> DarkSquares =>
+    public static ReadOnlySpan<int> LightSquares => _lightSquares;
+
+    private static readonly int[] _darkSquares =
     [
         0, 1, 0, 1, 0, 1, 0, 1,
         1, 0, 1, 0, 1, 0, 1, 0,
@@ -415,6 +431,8 @@ public static class Constants
         0, 1, 0, 1, 0, 1, 0, 1,
         1, 0, 1, 0, 1, 0, 1, 0,
     ];
+
+    public static ReadOnlySpan<int> DarkSquares => _darkSquares;
 
     /// <summary>
     /// 8   1 0 1 0 1 0 1 0
@@ -486,7 +504,7 @@ public static class Constants
     /// </summary>
     public const Bitboard PawnSquares = 0xffffffffffff00;
 
-    public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
+    public static ReadOnlySpan<char> FileString => "abcdefgh";
 
     public const int AbsoluteMaxDepth = 255;
 

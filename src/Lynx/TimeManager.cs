@@ -11,7 +11,9 @@ public static class TimeManager
     /// <summary>
     /// Values from Stash, every attempt to further tune them failed
     /// </summary>
-    private static ReadOnlySpan<double> BestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
+    private static readonly double[] _bestMoveStabilityValues = [2.50, 1.20, 0.90, 0.80, 0.75];
+
+    private static ReadOnlySpan<double> BestMoveStabilityValues => _bestMoveStabilityValues;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

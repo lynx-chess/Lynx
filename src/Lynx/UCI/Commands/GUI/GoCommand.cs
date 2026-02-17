@@ -50,18 +50,18 @@ public sealed class GoCommand
 
     public const string Id = "go";
 
-    private static ReadOnlySpan<char> WtimeSpan => "wtime".AsSpan();
-    private static ReadOnlySpan<char> BtimeSpan => "btime".AsSpan();
-    private static ReadOnlySpan<char> WincSpan => "winc".AsSpan();
-    private static ReadOnlySpan<char> BincSpan => "binc".AsSpan();
-    private static ReadOnlySpan<char> MovestogoSpan => "movestogo".AsSpan();
-    private static ReadOnlySpan<char> MovetimeSpan => "movetime".AsSpan();
-    private static ReadOnlySpan<char> DepthSpan => "depth".AsSpan();
-    private static ReadOnlySpan<char> InfiniteSpan => "infinite".AsSpan();
-    private static ReadOnlySpan<char> PonderSpan => "ponder".AsSpan();
-    private static ReadOnlySpan<char> NodesSpan => "nodes".AsSpan();
-    private static ReadOnlySpan<char> MateSpan => "mate".AsSpan();
-    private static ReadOnlySpan<char> SearchmovesSpan => "searchmoves".AsSpan();
+    private static ReadOnlySpan<char> WtimeSpan => "wtime";
+    private static ReadOnlySpan<char> BtimeSpan => "btime";
+    private static ReadOnlySpan<char> WincSpan => "winc";
+    private static ReadOnlySpan<char> BincSpan => "binc";
+    private static ReadOnlySpan<char> MovestogoSpan => "movestogo";
+    private static ReadOnlySpan<char> MovetimeSpan => "movetime";
+    private static ReadOnlySpan<char> DepthSpan => "depth";
+    private static ReadOnlySpan<char> InfiniteSpan => "infinite";
+    private static ReadOnlySpan<char> PonderSpan => "ponder";
+    private static ReadOnlySpan<char> NodesSpan => "nodes";
+    private static ReadOnlySpan<char> MateSpan => "mate";
+    private static ReadOnlySpan<char> SearchmovesSpan => "searchmoves";
 
     public int WhiteTime { get; }
     public int BlackTime { get; }
