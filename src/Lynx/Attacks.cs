@@ -28,9 +28,23 @@ public static class Attacks
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
     /// </summary>
-    public static Bitboard[][] PawnAttacks { get; }
-    public static Bitboard[] KnightAttacks { get; }
-    public static Bitboard[] KingAttacks { get; }
+    public static Bitboard[][] PawnAttacks
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+    }
+
+    public static Bitboard[] KnightAttacks
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+    }
+
+    public static Bitboard[] KingAttacks
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+    }
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
     static Attacks()

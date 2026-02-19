@@ -53,7 +53,7 @@ public sealed partial class Engine
                 // Counter move history
                 return BaseMoveScore
                     + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + (int)ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
             }
 
             // History move or 0 if not found
