@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx;
 
@@ -15,7 +16,7 @@ public static class ZobristTable
     /// <summary>
     /// 64x12
     /// </summary>
-    private static readonly ulong[][] _table;
+    private static readonly ulong[] _table;
     private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -32,10 +33,10 @@ public static class ZobristTable
         _table = InitializeZobristTable();
         Initialize50mrTable();
 
-        _WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
-        _WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
-        _BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
-        _BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+        _WK_Hash = PieceHash((int)BoardSquare.a8, (int)Piece.p);
+        _WQ_Hash = PieceHash((int)BoardSquare.b8, (int)Piece.p);
+        _BK_Hash = PieceHash((int)BoardSquare.c8, (int)Piece.p);
+        _BQ_Hash = PieceHash((int)BoardSquare.d8, (int)Piece.p);
     }
 
 #pragma warning restore CA1810 // Initialize reference type static fields inline
@@ -46,7 +47,7 @@ public static class ZobristTable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece)
-        => _table[boardSquare][piece];
+        => Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_table), (boardSquare * 12) + piece);
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -64,7 +65,7 @@ public static class ZobristTable
 
         var file = enPassantSquare & 0x07;  // enPassantSquare % 8
 
-        return _table[file][(int)Piece.P];
+        return PieceHash(file, (int)Piece.P);
     }
 
     /// <summary>
@@ -73,7 +74,7 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong SideHash()
     {
-        return _table[(int)BoardSquare.h8][(int)Piece.p];
+        return PieceHash((int)BoardSquare.h8, (int)Piece.p);
     }
 
     /// <summary>
@@ -83,7 +84,7 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong SideHash(ulong side)
     {
-        return side * _table[(int)BoardSquare.h8][(int)Piece.p];
+        return side * PieceHash((int)BoardSquare.h8, (int)Piece.p);
     }
 
     /// <summary>
@@ -270,21 +271,20 @@ public static class ZobristTable
         return majorHash;
     }
 
-    private static ulong[][] InitializeZobristTable() => InitializeZobristTable(_random);
+    private static ulong[] InitializeZobristTable() => InitializeZobristTable(_random);
 
     /// <summary>
-    /// Initializes Zobrist table (long[64][12])
+    /// Initializes Zobrist table (long[64 x 12])
     /// </summary>
-    internal static ulong[][] InitializeZobristTable(LynxRandom random)
+    internal static ulong[] InitializeZobristTable(LynxRandom random)
     {
-        var zobristTable = new ulong[64][];
+        var zobristTable = GC.AllocateArray<ulong>(64 * 12, pinned: true);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
-            zobristTable[squareIndex] = new ulong[12];
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                zobristTable[squareIndex][pieceIndex] = random.NextUInt64();
+                zobristTable[(squareIndex * 12) + pieceIndex] = random.NextUInt64();
             }
         }
 

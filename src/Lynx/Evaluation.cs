@@ -522,7 +522,7 @@ public partial class Position
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Phase()
-    {
+    { 
         var gamePhase = IsIncrementalEval
             ? IncrementalPhaseAccumulator
             : PhaseFromScratch();
