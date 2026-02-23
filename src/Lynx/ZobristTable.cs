@@ -16,49 +16,44 @@ public static class ZobristTable
     /// <summary>
     /// 64x12
     /// </summary>
-    private static readonly ulong[] _table;
+    private static readonly ulong[] _pieceTable;
+
     private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
 
-#pragma warning disable IDE1006 // Naming Styles
-    private static readonly ulong _WK_Hash;
-    private static readonly ulong _WQ_Hash;
-    private static readonly ulong _BK_Hash;
-    private static readonly ulong _BQ_Hash;
     private static readonly ulong[] _castleHashes = GC.AllocateArray<ulong>(16, pinned: true);
-#pragma warning restore IDE1006 // Naming Styles
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
 
     static ZobristTable()
     {
-        _table = InitializeZobristTable();
+        _pieceTable = InitializeZobristTable();
         Initialize50mrTable();
 
-        _WK_Hash = PieceHash((int)BoardSquare.a8, (int)Piece.p);
-        _WQ_Hash = PieceHash((int)BoardSquare.b8, (int)Piece.p);
-        _BK_Hash = PieceHash((int)BoardSquare.c8, (int)Piece.p);
-        _BQ_Hash = PieceHash((int)BoardSquare.d8, (int)Piece.p);
+        ulong WK_Hash = PieceHash((int)BoardSquare.a8, (int)Piece.p);
+        ulong WQ_Hash = PieceHash((int)BoardSquare.b8, (int)Piece.p);
+        ulong BK_Hash = PieceHash((int)BoardSquare.c8, (int)Piece.p);
+        ulong BQ_Hash = PieceHash((int)BoardSquare.d8, (int)Piece.p);
 
         _castleHashes[(int)CastlingRights.None] = 0;
 
-        _castleHashes[(int)CastlingRights.WK] = _WK_Hash;
-        _castleHashes[(int)CastlingRights.WQ] = _WQ_Hash;
-        _castleHashes[(int)CastlingRights.BK] = _BK_Hash;
-        _castleHashes[(int)CastlingRights.BQ] = _BQ_Hash;
+        _castleHashes[(int)CastlingRights.WK] = WK_Hash;
+        _castleHashes[(int)CastlingRights.WQ] = WQ_Hash;
+        _castleHashes[(int)CastlingRights.BK] = BK_Hash;
+        _castleHashes[(int)CastlingRights.BQ] = BQ_Hash;
 
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ)] = _WK_Hash ^ _WQ_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK)] = _WK_Hash ^ _BK_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BQ)] = _WK_Hash ^ _BQ_Hash;
-        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK)] = _WQ_Hash ^ _BK_Hash;
-        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BQ)] = _WQ_Hash ^ _BQ_Hash;
-        _castleHashes[(int)(CastlingRights.BK | CastlingRights.BQ)] = _BK_Hash ^ _BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ)] = WK_Hash ^ WQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK)] = WK_Hash ^ BK_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BQ)] = WK_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK)] = WQ_Hash ^ BK_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BQ)] = WQ_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.BK | CastlingRights.BQ)] = BK_Hash ^ BQ_Hash;
 
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK)] = _WK_Hash ^ _WQ_Hash ^ _BK_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ)] = _WK_Hash ^ _WQ_Hash ^ _BQ_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ)] = _WK_Hash ^ _BK_Hash ^ _BQ_Hash;
-        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = _WQ_Hash ^ _BK_Hash ^ _BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK)] = WK_Hash ^ WQ_Hash ^ BK_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ BK_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WQ_Hash ^ BK_Hash ^ BQ_Hash;
 
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = _WK_Hash ^ _WQ_Hash ^ _BK_Hash ^ _BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash;
     }
 
 #pragma warning restore CA1810 // Initialize reference type static fields inline
@@ -69,7 +64,7 @@ public static class ZobristTable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece)
-        => Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_table), (boardSquare * 12) + piece);
+        => Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_pieceTable), (boardSquare * 12) + piece);
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -115,7 +110,12 @@ public static class ZobristTable
     /// <see cref="BoardSquare.c8"/> for <see cref="CastlingRights.BK"/>, <see cref="BoardSquare.d8"/> for <see cref="CastlingRights.BQ"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong CastleHash(byte castle) => _castleHashes[castle];
+    public static ulong CastleHash(byte castle)
+    {
+        Debug.Assert(castle <= _castleHashes.Length, $"Castle value {castle} is out of bounds for the castle hash table");
+
+        return _castleHashes[castle];
+    }
 
     /// <summary>
     /// Calculates from scratch the hash of a position
