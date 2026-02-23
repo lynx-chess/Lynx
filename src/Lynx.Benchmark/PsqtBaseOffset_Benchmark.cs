@@ -1,3 +1,49 @@
+/*
+ *
+ *
+ *  BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  AMD EPYC 7763 2.66GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 10.0.103
+ *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *
+ *  | Method                                | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |-------------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | RawIndexing_Baseline                  | 2.738 us | 0.0054 us | 0.0050 us |  1.00 |         - |          NA |
+ *  | RawIndexing_BaseOffsetOverload        | 2.734 us | 0.0028 us | 0.0026 us |  1.00 |         - |          NA |
+ *  | IncrementalPattern_Baseline           | 1.498 us | 0.0015 us | 0.0013 us |  0.55 |         - |          NA |
+ *  | IncrementalPattern_BaseOffsetOverload | 1.483 us | 0.0011 us | 0.0009 us |  0.54 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.32370/24H2/2024Update/HudsonValley) (Hyper-V)
+ *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 10.0.103
+ *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *
+ *  | Method                                | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |-------------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | RawIndexing_Baseline                  | 2.595 us | 0.0196 us | 0.0183 us |  1.00 |         - |          NA |
+ *  | RawIndexing_BaseOffsetOverload        | 2.597 us | 0.0125 us | 0.0111 us |  1.00 |         - |          NA |
+ *  | IncrementalPattern_Baseline           | 1.431 us | 0.0167 us | 0.0156 us |  0.55 |         - |          NA |
+ *  | IncrementalPattern_BaseOffsetOverload | 1.403 us | 0.0150 us | 0.0133 us |  0.54 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.4 (24G517) [Darwin 24.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 10.0.103
+ *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), Arm64 RyuJIT armv8.0-a
+ *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), Arm64 RyuJIT armv8.0-a
+ *
+ *  | Method                                | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |-------------------------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
+ *  | RawIndexing_Baseline                  | 2.236 us | 0.0770 us | 0.2221 us | 2.194 us |  1.01 |    0.14 |         - |          NA |
+ *  | RawIndexing_BaseOffsetOverload        | 2.188 us | 0.0963 us | 0.2793 us | 2.070 us |  0.99 |    0.16 |         - |          NA |
+ *  | IncrementalPattern_Baseline           | 1.201 us | 0.0835 us | 0.2396 us | 1.113 us |  0.54 |    0.12 |         - |          NA |
+ *  | IncrementalPattern_BaseOffsetOverload | 1.110 us | 0.0574 us | 0.1676 us | 1.040 us |  0.50 |    0.09 |         - |          NA |
+ *
+*/
+
 using BenchmarkDotNet.Attributes;
 using System.Runtime.CompilerServices;
 
