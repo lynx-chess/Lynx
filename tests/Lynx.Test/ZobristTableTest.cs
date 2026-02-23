@@ -139,7 +139,7 @@ public class ZobristTableTest
 
         if ((castle & (int)CastlingRights.WK) != default)
         {
-            combinedHash ^= zobristTable[(()BoardSquare.a8 * 12) + (int)Piece.p];        // a8
+            combinedHash ^= zobristTable[((int)BoardSquare.a8 * 12) + (int)Piece.p];        // a8
         }
 
         if ((castle & (int)CastlingRights.WQ) != default)
