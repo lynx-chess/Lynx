@@ -1,3 +1,79 @@
+/*
+ *
+ *  BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+ *  AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 10.0.103
+ *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *
+ *  | Method                  | Fen                  | Repetitions | Mean      | Error    | StdDev   | Ratio | Allocated | Alloc Ratio |
+ *  |------------------------ |--------------------- |------------ |----------:|---------:|---------:|------:|----------:|------------:|
+ *  | MakeMove_Original       | 8/p7/(...)w - - [32] | 400         |  87.59 us | 0.131 us | 0.123 us |  1.00 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | 8/p7/(...)w - - [32] | 400         |  87.48 us | 0.119 us | 0.105 us |  1.00 |         - |          NA |
+ *  |                         |                      |             |           |          |          |       |           |             |
+ *  | MakeMove_Original       | r3k2r(...)- 0 1 [68] | 400         | 668.70 us | 0.982 us | 0.820 us |  1.00 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | r3k2r(...)- 0 1 [68] | 400         | 653.67 us | 1.284 us | 1.138 us |  0.98 |         - |          NA |
+ *  |                         |                      |             |           |          |          |       |           |             |
+ *  | MakeMove_Original       | rnbqk(...)- 0 1 [56] | 400         | 257.62 us | 0.207 us | 0.172 us |  1.00 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | rnbqk(...)- 0 1 [56] | 400         | 255.49 us | 0.327 us | 0.306 us |  0.99 |         - |          NA |
+ *
+ *
+ *
+ *  BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.32370/24H2/2024Update/HudsonValley) (Hyper-V)
+ *  AMD EPYC 7763 2.44GHz, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 10.0.103
+ *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *
+ *  | Method                  | Fen                  | Repetitions | Mean      | Error    | StdDev   | Ratio | Allocated | Alloc Ratio |
+ *  |------------------------ |--------------------- |------------ |----------:|---------:|---------:|------:|----------:|------------:|
+ *  | MakeMove_Original       | 8/p7/(...)w - - [32] | 400         |  82.91 us | 0.141 us | 0.118 us |  1.00 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | 8/p7/(...)w - - [32] | 400         |  80.05 us | 0.129 us | 0.108 us |  0.97 |         - |          NA |
+ *  |                         |                      |             |           |          |          |       |           |             |
+ *  | MakeMove_Original       | r3k2r(...)- 0 1 [68] | 400         | 598.51 us | 1.076 us | 0.954 us |  1.00 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | r3k2r(...)- 0 1 [68] | 400         | 563.57 us | 0.662 us | 0.619 us |  0.94 |         - |          NA |
+ *  |                         |                      |             |           |          |          |       |           |             |
+ *  | MakeMove_Original       | rnbqk(...)- 0 1 [56] | 400         | 235.53 us | 0.275 us | 0.230 us |  1.00 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | rnbqk(...)- 0 1 [56] | 400         | 227.75 us | 0.271 us | 0.211 us |  0.97 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.4 (24G517) [Darwin 24.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 10.0.103
+ *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), Arm64 RyuJIT armv8.0-a
+ *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), Arm64 RyuJIT armv8.0-a
+ *
+ *  | Method                  | Fen                  | Repetitions | Mean      | Error     | StdDev    | Median    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |------------------------ |--------------------- |------------ |----------:|----------:|----------:|----------:|------:|--------:|----------:|------------:|
+ *  | MakeMove_Original       | 8/p7/(...)w - - [32] | 400         |  58.13 us |  1.993 us |  5.687 us |  56.41 us |  1.01 |    0.13 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | 8/p7/(...)w - - [32] | 400         |  61.40 us |  2.450 us |  7.147 us |  59.48 us |  1.07 |    0.16 |         - |          NA |
+ *  |                         |                      |             |           |           |           |           |       |         |           |             |
+ *  | MakeMove_Original       | r3k2r(...)- 0 1 [68] | 400         | 444.33 us | 22.306 us | 64.715 us | 422.90 us |  1.02 |    0.20 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | r3k2r(...)- 0 1 [68] | 400         | 428.49 us | 14.876 us | 43.393 us | 426.60 us |  0.98 |    0.16 |         - |          NA |
+ *  |                         |                      |             |           |           |           |           |       |         |           |             |
+ *  | MakeMove_Original       | rnbqk(...)- 0 1 [56] | 400         | 196.64 us |  9.635 us | 28.257 us | 192.78 us |  1.02 |    0.21 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | rnbqk(...)- 0 1 [56] | 400         | 165.61 us |  5.085 us | 14.915 us | 163.44 us |  0.86 |    0.14 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.4 (24G517) [Darwin 24.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 10.0.103
+ *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v3
+ *
+ *  | Method                  | Fen                  | Repetitions | Mean      | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |------------------------ |--------------------- |------------ |----------:|----------:|----------:|------:|--------:|----------:|------------:|
+ *  | MakeMove_Original       | 8/p7/(...)w - - [32] | 400         |  89.87 us |  1.780 us |  4.053 us |  1.00 |    0.06 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | 8/p7/(...)w - - [32] | 400         | 103.99 us |  4.698 us | 13.174 us |  1.16 |    0.16 |         - |          NA |
+ *  |                         |                      |             |           |           |           |       |         |           |             |
+ *  | MakeMove_Original       | r3k2r(...)- 0 1 [68] | 400         | 807.97 us | 30.013 us | 87.072 us |  1.01 |    0.15 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | r3k2r(...)- 0 1 [68] | 400         | 773.47 us | 17.289 us | 48.480 us |  0.97 |    0.12 |         - |          NA |
+ *  |                         |                      |             |           |           |           |       |         |           |             |
+ *  | MakeMove_Original       | rnbqk(...)- 0 1 [56] | 400         | 311.20 us |  9.761 us | 28.629 us |  1.01 |    0.13 |         - |          NA |
+ *  | MakeMove_UnsafeArrayRef | rnbqk(...)- 0 1 [56] | 400         | 262.69 us |  5.230 us |  7.829 us |  0.85 |    0.08 |         - |          NA |
+ *
+*/
+
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Runtime.CompilerServices;
