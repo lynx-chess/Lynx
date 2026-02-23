@@ -446,8 +446,11 @@ public partial class Position : IDisposable
                 (sameSideBucket, oppositeSideBucket) = (oppositeSideBucket, sameSideBucket);
             }
 
-            IncrementalEvalAccumulator -= PSQT(sameSideBucket, oppositeSideBucket, piece, sourceSquare);
-            IncrementalEvalAccumulator += PSQT(sameSideBucket, oppositeSideBucket, newPiece, targetSquare);
+            var sameSidePsqtBaseOffset = PSQTBaseOffset(sameSideBucket, oppositeSideBucket);
+            var oppositeSidePsqtBaseOffset = PSQTBaseOffset(oppositeSideBucket, sameSideBucket);
+
+            IncrementalEvalAccumulator -= PSQT(sameSidePsqtBaseOffset, piece, sourceSquare);
+            IncrementalEvalAccumulator += PSQT(sameSidePsqtBaseOffset, newPiece, targetSquare);
 
             IncrementalPhaseAccumulator += extraPhaseIfIncremental;
 
@@ -486,7 +489,7 @@ public partial class Position : IDisposable
                                 }
                             }
 
-                            IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                            IncrementalEvalAccumulator -= PSQT(oppositeSidePsqtBaseOffset, capturedPiece, capturedSquare);
 
                             IncrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         }
@@ -520,7 +523,7 @@ public partial class Position : IDisposable
                         _uniqueIdentifier ^= capturedPawnHash;
                         _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
-                        IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
+                        IncrementalEvalAccumulator -= PSQT(oppositeSidePsqtBaseOffset, capturedPiece, capturedSquare);
 
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;

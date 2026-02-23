@@ -126,4 +126,28 @@ public static class EvaluationPSQTs
 
         return ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ref int PSQT(int psqtBaseOffset, int piece, int square)
+    {
+        const int pieceOffset = 64;
+
+        var index = psqtBaseOffset
+            + (piece * pieceOffset)
+            + square;
+
+        Debug.Assert(index >= 0 && index < _packedPSQT.Length);
+
+        return ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PSQTBaseOffset(int friendBucket, int enemyBucket)
+    {
+        const int friendBucketOffset = PSQTBucketCount * 12 * 64;
+        const int enemyBucketOffset = 12 * 64;
+
+        return (friendBucket * friendBucketOffset)
+            + (enemyBucket * enemyBucketOffset);
+    }
 }
