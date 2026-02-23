@@ -23,6 +23,7 @@ public static class ZobristTable
     private static readonly ulong _WQ_Hash;
     private static readonly ulong _BK_Hash;
     private static readonly ulong _BQ_Hash;
+    private static readonly ulong[] _castleHashes = GC.AllocateArray<ulong>(16, pinned: true);
 #pragma warning restore IDE1006 // Naming Styles
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
@@ -36,6 +37,27 @@ public static class ZobristTable
         _WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
         _BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
         _BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+
+        _castleHashes[(int)CastlingRights.None] = 0;
+
+        _castleHashes[(int)CastlingRights.WK] = _WK_Hash;
+        _castleHashes[(int)CastlingRights.WQ] = _WQ_Hash;
+        _castleHashes[(int)CastlingRights.BK] = _BK_Hash;
+        _castleHashes[(int)CastlingRights.BQ] = _BQ_Hash;
+
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ)] = _WK_Hash ^ _WQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK)] = _WK_Hash ^ _BK_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BQ)] = _WK_Hash ^ _BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK)] = _WQ_Hash ^ _BK_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BQ)] = _WQ_Hash ^ _BQ_Hash;
+        _castleHashes[(int)(CastlingRights.BK | CastlingRights.BQ)] = _BK_Hash ^ _BQ_Hash;
+
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK)] = _WK_Hash ^ _WQ_Hash ^ _BK_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ)] = _WK_Hash ^ _WQ_Hash ^ _BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ)] = _WK_Hash ^ _BK_Hash ^ _BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = _WQ_Hash ^ _BK_Hash ^ _BQ_Hash;
+
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = _WK_Hash ^ _WQ_Hash ^ _BK_Hash ^ _BQ_Hash;
     }
 
 #pragma warning restore CA1810 // Initialize reference type static fields inline
@@ -92,35 +114,7 @@ public static class ZobristTable
     /// <see cref="BoardSquare.c8"/> for <see cref="CastlingRights.BK"/>, <see cref="BoardSquare.d8"/> for <see cref="CastlingRights.BQ"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong CastleHash(byte castle)
-    {
-        return castle switch
-        {
-            0 => 0,                                // -    | -
-
-            (byte)CastlingRights.WK => _WK_Hash,    // K    | -
-            (byte)CastlingRights.WQ => _WQ_Hash,    // Q    | -
-            (byte)CastlingRights.BK => _BK_Hash,    // -    | k
-            (byte)CastlingRights.BQ => _BQ_Hash,    // -    | q
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => _WK_Hash ^ _WQ_Hash,    // KQ   | -
-            (byte)CastlingRights.WK | (byte)CastlingRights.BK => _WK_Hash ^ _BK_Hash,    // K    | k
-            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => _WK_Hash ^ _BQ_Hash,    // K    | q
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WQ_Hash ^ _BK_Hash,    // Q    | k
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WQ_Hash ^ _BQ_Hash,    // Q    | q
-            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _BK_Hash ^ _BQ_Hash,    // -    | kq
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WK_Hash ^ _WQ_Hash ^ _BK_Hash,    // KQ   | k
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WK_Hash ^ _WQ_Hash ^ _BQ_Hash,    // KQ   | q
-            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WK_Hash ^ _BK_Hash ^ _BQ_Hash,    // K    | kq
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,    // Q    | kq
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
-                _WK_Hash ^ _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,
-
-            _ => throw new LynxException($"Unexpected castle encoded number: {castle}")
-        };
-    }
+    public static ulong CastleHash(byte castle) => _castleHashes[castle];
 
     /// <summary>
     /// Calculates from scratch the hash of a position
