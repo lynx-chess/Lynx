@@ -187,7 +187,7 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Pieces protected and attacked by pawns
 
-- Pieces capable of deliverying safe/unsafe checks
+- Pieces capable of delivering safe/unsafe checks
 
 - Eval scaling with pawn count and 50 moves rule
 
@@ -241,7 +241,7 @@ Lynx supports the usage of multiple threads for searching since [v1.8.0](https:/
 
 It can be configured using `Threads` UCI command or via `appsettings.json` configuration file. A change in `Threads` using UCI will only take place after a `ucinewgame` command is sent to the engine (same behavior as with `Hash` command).
 
-It's interesting to measure how much strength an engine gains when you allow it to use more cores (see Stockfish's [Threading efficiency and Elo gain](https://github.com/official-stockfish/Stockfish/wiki/Useful-data#threading-efficiency-and-elo-gain))
+It's interesting to measure how much strength an engine gains when you allow it to use more cores (see Stockfish [Threading efficiency and Elo gain](https://github.com/official-stockfish/Stockfish/wiki/Useful-data#threading-efficiency-and-elo-gain))
 
 This is how Lynx v1.8.0 scales with multiple threads (elo measured playing against itself N threads vs 1 using a balanced book, see links for details):
 
