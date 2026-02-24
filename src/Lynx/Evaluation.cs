@@ -358,7 +358,7 @@ public partial class Position
 
         AssertAttackPopulation(ref evaluationContext);
 
-        // Total king rings ttacks
+        // Total king rings attacks
         packedScore +=
             TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
             - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
@@ -907,12 +907,12 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int KingPawnShield(int squareIndex, Bitboard sameSidePawns, Bitboard oppositSidePawnAttacks)
+    private static int KingPawnShield(int squareIndex, Bitboard sameSidePawns, Bitboard oppositeSidePawnAttacks)
     {
         var kingShield = Attacks.KingAttacks[squareIndex] & sameSidePawns;
         var kingShieldCount = kingShield.CountBits();
 
-        var nonAttackedShieldCount = (kingShield & (~oppositSidePawnAttacks)).CountBits();
+        var nonAttackedShieldCount = (kingShield & (~oppositeSidePawnAttacks)).CountBits();
 
         return (KingShieldBonus * (kingShieldCount - nonAttackedShieldCount))
             + (KingShieldNonAttackedBonus * nonAttackedShieldCount);
@@ -1115,7 +1115,7 @@ public partial class Position
 
     /// <summary>
     /// If the pawn is in A or H files, the defending king reaches the corner/queening square or adjacent squares
-    /// and the bisop is of the opposite color of the queening square, it's a draw.
+    /// and the bishop is of the opposite color of the queening square, it's a draw.
     /// This method also takes into account the relative distance to the corner of both kings:
     /// if the defending one is closer enough, it's also a draw.
     /// </summary>
