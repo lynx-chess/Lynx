@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -49,22 +49,13 @@ public sealed partial class Engine
     /// [12][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short PieceToQuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private ref short PieceToQuietHistoryEntry(int piece, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
     {
         const int pieceOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
         const int startSquareAttackedOffset = 2;
 
-        var sourceSquare = move.SourceSquare();
-        var targetSquare = move.TargetSquare();
-        var oppositeSide = Utils.OppositeSide((int)position.Side);
-
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
-
-        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
-        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
-
-        var index = (move.Piece() * pieceOffset)
+        var index = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset)
             + (isStartSquareAttacked * startSquareAttackedOffset)
             + isTargetSquareAttacked;
@@ -76,20 +67,11 @@ public sealed partial class Engine
     /// [64][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short ButterflyQuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private ref short ButterflyQuietHistoryEntry(int sourceSquare, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
     {
         const int sourceSquareOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
         const int startSquareAttackedOffset = 2;
-
-        var sourceSquare = move.SourceSquare();
-        var targetSquare = move.TargetSquare();
-        var oppositeSide = Utils.OppositeSide((int)position.Side);
-
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
-
-        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
-        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
 
         var index = (sourceSquare * sourceSquareOffset)
             + (targetSquare * targetSquareOffset)
@@ -102,8 +84,15 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
     {
-        var pieceToHistory = PieceToQuietHistoryEntry(position, move, ref evaluationContext);
-        var butterflyHistory = ButterflyQuietHistoryEntry(position, move, ref evaluationContext);
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
+        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        var pieceToHistory = PieceToQuietHistoryEntry(move.Piece(), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+        var butterflyHistory = ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
 
         return (short)((pieceToHistory + butterflyHistory) / 2);
     }

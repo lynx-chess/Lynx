@@ -172,10 +172,16 @@ public sealed partial class Engine
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
-            ref var pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(position, move, ref evaluationContext);
+            var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
+            var sourceSquare = move.SourceSquare();
+            var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+            var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+            ref var pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(piece, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
             pieceToQuietHistoryEntry = (short)ScoreHistoryMove(pieceToQuietHistoryEntry, rawHistoryBonus);
 
-            ref var butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(position, move, ref evaluationContext);
+            ref var butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
             butterflyQuietHistoryEntry = (short)ScoreHistoryMove(butterflyQuietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
@@ -199,10 +205,14 @@ public sealed partial class Engine
 
                     // 🔍 Quiet history penalty / malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    var visitedMoveSourceSquare = visitedMove.SourceSquare();
+                    var visitedIsStartSquareAttacked = oppositeSideAttacks.GetBit(visitedMoveSourceSquare) ? 1 : 0;
+                    var visitedIsTargetSquareAttacked = oppositeSideAttacks.GetBit(visitedMoveTargetSquare) ? 1 : 0;
+
+                    pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, visitedIsStartSquareAttacked, visitedIsTargetSquareAttacked);
                     pieceToQuietHistoryEntry = (short)ScoreHistoryMove(pieceToQuietHistoryEntry, -rawHistoryMalus);
 
-                    butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(visitedMoveSourceSquare, visitedMoveTargetSquare, visitedIsStartSquareAttacked, visitedIsTargetSquareAttacked);
                     butterflyQuietHistoryEntry = (short)ScoreHistoryMove(butterflyQuietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)
