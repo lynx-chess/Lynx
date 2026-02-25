@@ -451,9 +451,7 @@ public sealed class UCIHandler
                     eval = -eval;   // White perspective
                 }
 
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
                 ++lineCounter;
                 if (lineCounter % 100 == 0)
