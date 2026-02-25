@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using static Lynx.EvaluationConstants;
@@ -346,6 +347,10 @@ public partial class Position : IDisposable
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
+        ref var pieceBitboardsRef = ref MemoryMarshal.GetArrayDataReference(_pieceBitboards);
+        ref var occupancyBitboardsRef = ref MemoryMarshal.GetArrayDataReference(_occupancyBitboards);
+        ref var boardRef = ref MemoryMarshal.GetArrayDataReference(_board);
+
         var gameState = new GameState(this);
 
         var oldSide = (int)_side;
@@ -365,13 +370,13 @@ public partial class Position : IDisposable
             extraPhaseIfIncremental = GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
         }
 
-        _pieceBitboards[piece].PopBit(sourceSquare);
-        _occupancyBitboards[oldSide].PopBit(sourceSquare);
-        _board[sourceSquare] = (int)Piece.None;
+        Unsafe.Add(ref pieceBitboardsRef, piece).PopBit(sourceSquare);
+        Unsafe.Add(ref occupancyBitboardsRef, oldSide).PopBit(sourceSquare);
+        Unsafe.Add(ref boardRef, sourceSquare) = (int)Piece.None;
 
-        _pieceBitboards[newPiece].SetBit(targetSquare);
-        _occupancyBitboards[oldSide].SetBit(targetSquare);
-        _board[targetSquare] = newPiece;
+        Unsafe.Add(ref pieceBitboardsRef, newPiece).SetBit(targetSquare);
+        Unsafe.Add(ref occupancyBitboardsRef, oldSide).SetBit(targetSquare);
+        Unsafe.Add(ref boardRef, targetSquare) = newPiece;
 
         var sourcePieceHash = ZobristTable.PieceHash(sourceSquare, piece);
         var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
@@ -436,8 +441,8 @@ public partial class Position : IDisposable
 
         if (IsIncrementalEval)
         {
-            var whiteKing = _pieceBitboards[(int)Piece.K].GetLS1BIndex();
-            var blackKing = _pieceBitboards[(int)Piece.k].GetLS1BIndex();
+            var whiteKing = Unsafe.Add(ref pieceBitboardsRef, (int)Piece.K).GetLS1BIndex();
+            var blackKing = Unsafe.Add(ref pieceBitboardsRef, (int)Piece.k).GetLS1BIndex();
             var whiteBucket = PSQTBucketLayout[whiteKing];
             var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
@@ -467,8 +472,8 @@ public partial class Position : IDisposable
                     {
                         capturedSquare = targetSquare;
 
-                        _pieceBitboards[capturedPiece].PopBit(capturedSquare);
-                        _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
+                        Unsafe.Add(ref pieceBitboardsRef, capturedPiece).PopBit(capturedSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, oppositeSide).PopBit(capturedSquare);
 
                         var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                         _uniqueIdentifier ^= capturedPieceHash;
@@ -514,7 +519,7 @@ public partial class Position : IDisposable
                     var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                     var rookIndex = (int)Piece.R + offset;
 
-                    _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).PopBit(rookSourceSquare);
 
                     var kingTargetSquare = Utils.KingShortCastleSquare(oldSide);
 
@@ -524,14 +529,14 @@ public partial class Position : IDisposable
                         // We need to revert the incorrect changes + apply the right ones
                         // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                         // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                        _pieceBitboards[newPiece].PopBit(targetSquare);
-                        _occupancyBitboards[oldSide].PopBit(targetSquare);
-                        _board[targetSquare] = (int)Piece.None;
+                        Unsafe.Add(ref pieceBitboardsRef, newPiece).PopBit(targetSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, oldSide).PopBit(targetSquare);
+                        Unsafe.Add(ref boardRef, targetSquare) = (int)Piece.None;
                         var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
 
-                        _pieceBitboards[newPiece].SetBit(kingTargetSquare);
-                        _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
-                        _board[kingTargetSquare] = newPiece;
+                        Unsafe.Add(ref pieceBitboardsRef, newPiece).SetBit(kingTargetSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, oldSide).SetBit(kingTargetSquare);
+                        Unsafe.Add(ref boardRef, kingTargetSquare) = newPiece;
                         var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
 
                         var hashFix = hashToRevert ^ hashToApply;
@@ -545,13 +550,13 @@ public partial class Position : IDisposable
                     // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                     if (rookSourceSquare != kingTargetSquare)
                     {
-                        _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
+                        Unsafe.Add(ref occupancyBitboardsRef, oldSide).PopBit(rookSourceSquare);
+                        Unsafe.Add(ref boardRef, rookSourceSquare) = (int)Piece.None;
                     }
 
-                    _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
-                    _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
-                    _board[rookTargetSquare] = rookIndex;
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).SetBit(rookTargetSquare);
+                    Unsafe.Add(ref occupancyBitboardsRef, oldSide).SetBit(rookTargetSquare);
+                    Unsafe.Add(ref boardRef, rookTargetSquare) = rookIndex;
 
                     var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
@@ -570,7 +575,7 @@ public partial class Position : IDisposable
                     var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                     var rookIndex = (int)Piece.R + offset;
 
-                    _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).PopBit(rookSourceSquare);
 
                     var kingTargetSquare = Utils.KingLongCastleSquare(oldSide);
 
@@ -580,14 +585,14 @@ public partial class Position : IDisposable
                         // We need to revert the incorrect changes + apply the right ones
                         // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                         // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                        _pieceBitboards[newPiece].PopBit(targetSquare);
-                        _occupancyBitboards[oldSide].PopBit(targetSquare);
-                        _board[targetSquare] = (int)Piece.None;
+                        Unsafe.Add(ref pieceBitboardsRef, newPiece).PopBit(targetSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, oldSide).PopBit(targetSquare);
+                        Unsafe.Add(ref boardRef, targetSquare) = (int)Piece.None;
                         var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
 
-                        _pieceBitboards[newPiece].SetBit(kingTargetSquare);
-                        _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
-                        _board[kingTargetSquare] = newPiece;
+                        Unsafe.Add(ref pieceBitboardsRef, newPiece).SetBit(kingTargetSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, oldSide).SetBit(kingTargetSquare);
+                        Unsafe.Add(ref boardRef, kingTargetSquare) = newPiece;
                         var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
 
                         var hashFix = hashToRevert ^ hashToApply;
@@ -601,13 +606,13 @@ public partial class Position : IDisposable
                     // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                     if (rookSourceSquare != kingTargetSquare)
                     {
-                        _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
+                        Unsafe.Add(ref occupancyBitboardsRef, oldSide).PopBit(rookSourceSquare);
+                        Unsafe.Add(ref boardRef, rookSourceSquare) = (int)Piece.None;
                     }
 
-                    _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
-                    _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
-                    _board[rookTargetSquare] = rookIndex;
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).SetBit(rookTargetSquare);
+                    Unsafe.Add(ref occupancyBitboardsRef, oldSide).SetBit(rookTargetSquare);
+                    Unsafe.Add(ref boardRef, rookTargetSquare) = rookIndex;
 
                     var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
@@ -624,11 +629,11 @@ public partial class Position : IDisposable
 
                     capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
                     capturedPiece = oppositePawnIndex;
-                    Utils.Assert(_pieceBitboards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
+                    Utils.Assert(Unsafe.Add(ref pieceBitboardsRef, oppositePawnIndex).GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
 
-                    _pieceBitboards[capturedPiece].PopBit(capturedSquare);
-                    _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
-                    _board[capturedSquare] = (int)Piece.None;
+                    Unsafe.Add(ref pieceBitboardsRef, capturedPiece).PopBit(capturedSquare);
+                    Unsafe.Add(ref occupancyBitboardsRef, oppositeSide).PopBit(capturedSquare);
+                    Unsafe.Add(ref boardRef, capturedSquare) = (int)Piece.None;
 
                     var capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                     _uniqueIdentifier ^= capturedPawnHash;
@@ -646,7 +651,7 @@ public partial class Position : IDisposable
         }
 
         _side = (Side)oppositeSide;
-        _occupancyBitboards[2] = _occupancyBitboards[1] | _occupancyBitboards[0];
+        Unsafe.Add(ref occupancyBitboardsRef, 2) = Unsafe.Add(ref occupancyBitboardsRef, 1) | Unsafe.Add(ref occupancyBitboardsRef, 0);
 
         // Updating castling rights
         _castle &= _castlingRightsUpdateConstants[sourceSquare];
@@ -670,6 +675,10 @@ public partial class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
+        ref var pieceBitboardsRef = ref MemoryMarshal.GetArrayDataReference(_pieceBitboards);
+        ref var occupancyBitboardsRef = ref MemoryMarshal.GetArrayDataReference(_occupancyBitboards);
+        ref var boardRef = ref MemoryMarshal.GetArrayDataReference(_board);
+
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
         _side = (Side)side;
@@ -686,9 +695,9 @@ public partial class Position : IDisposable
             newPiece = promotedPiece;
         }
 
-        _pieceBitboards[newPiece].PopBit(targetSquare);
-        _occupancyBitboards[side].PopBit(targetSquare);
-        _board[targetSquare] = (int)Piece.None;
+        Unsafe.Add(ref pieceBitboardsRef, newPiece).PopBit(targetSquare);
+        Unsafe.Add(ref occupancyBitboardsRef, side).PopBit(targetSquare);
+        Unsafe.Add(ref boardRef, targetSquare) = (int)Piece.None;
 
         // We purposely delay the sets here until after the switch
 
@@ -700,9 +709,9 @@ public partial class Position : IDisposable
 
                     if (capturedPiece != (int)Piece.None)
                     {
-                        _pieceBitboards[capturedPiece].SetBit(targetSquare);
-                        _occupancyBitboards[oppositeSide].SetBit(targetSquare);
-                        _board[targetSquare] = capturedPiece;
+                        Unsafe.Add(ref pieceBitboardsRef, capturedPiece).SetBit(targetSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, oppositeSide).SetBit(targetSquare);
+                        Unsafe.Add(ref boardRef, targetSquare) = capturedPiece;
                     }
 
                     break;
@@ -722,9 +731,9 @@ public partial class Position : IDisposable
                         // Since we set the king squares after the switch, we don't need the guard here
                         // if (kingTargetSquare != sourceSquare)
                         //{
-                        _pieceBitboards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitboards[side].PopBit(kingTargetSquare);
-                        _board[kingTargetSquare] = (int)Piece.None;
+                        Unsafe.Add(ref pieceBitboardsRef, newPiece).PopBit(kingTargetSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, side).PopBit(kingTargetSquare);
+                        Unsafe.Add(ref boardRef, kingTargetSquare) = (int)Piece.None;
                         //}
 
                         rookSourceSquare = targetSquare;
@@ -738,19 +747,19 @@ public partial class Position : IDisposable
                     var rookIndex = (int)Piece.R + offset;
 
                     // Popping before setting, because in DFRC they can be the same square
-                    _pieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                    _occupancyBitboards[side].PopBit(rookTargetSquare);
-                    _board[rookTargetSquare] = (int)Piece.None;
+                    Unsafe.Add(ref occupancyBitboardsRef, side).PopBit(rookTargetSquare);
+                    Unsafe.Add(ref boardRef, rookTargetSquare) = (int)Piece.None;
                     //}
 
-                    _pieceBitboards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitboards[side].SetBit(rookSourceSquare);
-                    _board[rookSourceSquare] = rookIndex;
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).SetBit(rookSourceSquare);
+                    Unsafe.Add(ref occupancyBitboardsRef, side).SetBit(rookSourceSquare);
+                    Unsafe.Add(ref boardRef, rookSourceSquare) = rookIndex;
 
                     break;
                 }
@@ -770,9 +779,9 @@ public partial class Position : IDisposable
                         //if (kingTargetSquare != sourceSquare)
                         //{
 
-                        _pieceBitboards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitboards[side].PopBit(kingTargetSquare);
-                        _board[kingTargetSquare] = (int)Piece.None;
+                        Unsafe.Add(ref pieceBitboardsRef, newPiece).PopBit(kingTargetSquare);
+                        Unsafe.Add(ref occupancyBitboardsRef, side).PopBit(kingTargetSquare);
+                        Unsafe.Add(ref boardRef, kingTargetSquare) = (int)Piece.None;
                         //}
 
                         rookSourceSquare = targetSquare;
@@ -786,19 +795,19 @@ public partial class Position : IDisposable
                     var rookIndex = (int)Piece.R + offset;
 
                     // Popping before setting, because in DFRC they can be the same square
-                    _pieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                    _occupancyBitboards[side].PopBit(rookTargetSquare);
-                    _board[rookTargetSquare] = (int)Piece.None;
+                    Unsafe.Add(ref occupancyBitboardsRef, side).PopBit(rookTargetSquare);
+                    Unsafe.Add(ref boardRef, rookTargetSquare) = (int)Piece.None;
                     //}
 
-                    _pieceBitboards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitboards[side].SetBit(rookSourceSquare);
-                    _board[rookSourceSquare] = rookIndex;
+                    Unsafe.Add(ref pieceBitboardsRef, rookIndex).SetBit(rookSourceSquare);
+                    Unsafe.Add(ref occupancyBitboardsRef, side).SetBit(rookSourceSquare);
+                    Unsafe.Add(ref boardRef, rookSourceSquare) = rookIndex;
 
                     break;
                 }
@@ -809,22 +818,22 @@ public partial class Position : IDisposable
                     var oppositePawnIndex = (int)Piece.p - offset;
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
 
-                    Utils.Assert(_occupancyBitboards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    Utils.Assert(Unsafe.Add(ref occupancyBitboardsRef, (int)Side.Both).GetBit(capturedPawnSquare) == default,
                         $"Expected empty {capturedPawnSquare}");
 
-                    _pieceBitboards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                    _occupancyBitboards[oppositeSide].SetBit(capturedPawnSquare);
-                    _board[capturedPawnSquare] = oppositePawnIndex;
+                    Unsafe.Add(ref pieceBitboardsRef, oppositePawnIndex).SetBit(capturedPawnSquare);
+                    Unsafe.Add(ref occupancyBitboardsRef, oppositeSide).SetBit(capturedPawnSquare);
+                    Unsafe.Add(ref boardRef, capturedPawnSquare) = oppositePawnIndex;
 
                     break;
                 }
         }
 
-        _pieceBitboards[piece].SetBit(sourceSquare);
-        _occupancyBitboards[side].SetBit(sourceSquare);
-        _board[sourceSquare] = piece;
+        Unsafe.Add(ref pieceBitboardsRef, piece).SetBit(sourceSquare);
+        Unsafe.Add(ref occupancyBitboardsRef, side).SetBit(sourceSquare);
+        Unsafe.Add(ref boardRef, sourceSquare) = piece;
 
-        _occupancyBitboards[2] = _occupancyBitboards[1] | _occupancyBitboards[0];
+        Unsafe.Add(ref occupancyBitboardsRef, 2) = Unsafe.Add(ref occupancyBitboardsRef, 1) | Unsafe.Add(ref occupancyBitboardsRef, 0);
 
         // Updating saved values
         _castle = gameState.Castle;
