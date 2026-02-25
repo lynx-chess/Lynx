@@ -62,7 +62,7 @@ public sealed partial class Engine
         }
 
         // Queen promotion
-        if ((promotedPiece + 2) % 6 == 0)
+        if (isPromotion && (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q))
         {
             if (isCapture)
             {
@@ -118,7 +118,7 @@ public sealed partial class Engine
         var isCapture = capturedPiece != (int)Piece.None;
 
         // Queen promotion
-        if ((promotedPiece + 2) % 6 == 0)
+        if (isPromotion && (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q))
         {
             if (isCapture)
             {
