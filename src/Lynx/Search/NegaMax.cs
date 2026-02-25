@@ -376,6 +376,16 @@ public sealed partial class Engine
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
+#pragma warning disable S3358 // Ternary operators should not be nested
+            var baseLMRReduction = depth > 0
+                ? (isCapture
+                    ? EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
+                    : EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter])
+                : 0;
+#pragma warning restore S3358 // Ternary operators should not be nested
+
+            var lmrDepth = Math.Max(0, depth - (baseLMRReduction / EvaluationConstants.LMRScaleFactor));
+
             // Fail-low pruning (moves with low scores) - prune less when improving
             // LMP, HP and FP can happen either before after MakeMove
             // PVS SEE pruning needs to happen before MakeMove in a make-unmake framework (it needs original position)
@@ -405,7 +415,7 @@ public sealed partial class Engine
                 // once it's considered that they don't have potential to raise alpha
                 var futilityValue = staticEval
                     + Configuration.EngineSettings.FP_Margin
-                    + (Configuration.EngineSettings.FP_DepthScalingFactor * depth)
+                    + (Configuration.EngineSettings.FP_DepthScalingFactor * lmrDepth)
                     + (isCapture ? 0 : quietHistory / Configuration.EngineSettings.FP_HistoryDivisor);
 
                 if (depth <= Configuration.EngineSettings.FP_MaxDepth
@@ -572,12 +582,12 @@ public sealed partial class Engine
                         {
                             if (isCapture)
                             {
-                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
+                                reduction = baseLMRReduction
                                     - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
-                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
+                                reduction = baseLMRReduction
                                     + Configuration.EngineSettings.LMR_Quiet    // Quiet LMR
                                     - (EvaluationConstants.LMRScaleFactor * quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet);
                             }
