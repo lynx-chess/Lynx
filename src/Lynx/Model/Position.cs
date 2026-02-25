@@ -729,7 +729,10 @@ public partial class Position : IDisposable
                     break;
                 }
             case SpecialMoveType.ShortCastle:
+            case SpecialMoveType.LongCastle:
                 {
+                    var isShortCastle = move.SpecialMoveFlag() == SpecialMoveType.ShortCastle;
+
                     int rookSourceSquare;
                     if (Configuration.EngineSettings.IsChess960)
                     {
@@ -739,54 +742,10 @@ public partial class Position : IDisposable
 
                         // However, the kings needs to be removed from the real target square, providing that's not also its source square
                         // We do it before the rook adjustments, to avoid wrongly emptying rook squares
-                        var kingTargetSquare = Utils.KingShortCastleSquare(side);
-                        // Since we set the king squares after the switch, we don't need the guard here
-                        // if (kingTargetSquare != sourceSquare)
-                        //{
-                        Bitboard(ref pieceBitboardsRef, newPiece).PopBit(kingTargetSquare);
-                        Bitboard(ref occupancyBitboardsRef, side).PopBit(kingTargetSquare);
-                        Square(ref boardRef, kingTargetSquare) = (int)Piece.None;
-                        //}
+                        var kingTargetSquare = isShortCastle
+                            ? Utils.KingShortCastleSquare(side)
+                            : Utils.KingLongCastleSquare(side);
 
-                        rookSourceSquare = targetSquare;
-                    }
-                    else
-                    {
-                        rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
-                    }
-
-                    var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    // Popping before setting, because in DFRC they can be the same square
-                    Bitboard(ref pieceBitboardsRef, rookIndex).PopBit(rookTargetSquare);
-
-                    // In DFRC the square where the rook ended could be occupied by the king before castling
-                    // Since we set the king squares after the switch, we don't need the guard here
-                    //if (rookTargetSquare != InitialKingSquares[side])
-                    //{
-                    Bitboard(ref occupancyBitboardsRef, side).PopBit(rookTargetSquare);
-                    Square(ref boardRef, rookTargetSquare) = (int)Piece.None;
-                    //}
-
-                    Bitboard(ref pieceBitboardsRef, rookIndex).SetBit(rookSourceSquare);
-                    Bitboard(ref occupancyBitboardsRef, side).SetBit(rookSourceSquare);
-                    Square(ref boardRef, rookSourceSquare) = rookIndex;
-
-                    break;
-                }
-            case SpecialMoveType.LongCastle:
-                {
-                    int rookSourceSquare;
-                    if (Configuration.EngineSettings.IsChess960)
-                    {
-                        // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                        // However, that target square can only be potentially occupied by the castling rook, so all the ops done over it
-                        // have already been undone by the rook ops above, or don't matter (removing the king from the target square, where it isn't anyway)
-
-                        // However, the kings needs to be removed from the real target square
-                        // We do it before the rook adjustments, to avoid wrongly emptying rook squares
-                        var kingTargetSquare = Utils.KingLongCastleSquare(side);
                         // Since we set the king squares after the switch, we don't need the guard here
                         //if (kingTargetSquare != sourceSquare)
                         //{
@@ -800,10 +759,14 @@ public partial class Position : IDisposable
                     }
                     else
                     {
-                        rookSourceSquare = Utils.LongCastleRookSourceSquare(side);
+                        rookSourceSquare = isShortCastle
+                            ? Utils.ShortCastleRookSourceSquare(side)
+                            : Utils.LongCastleRookSourceSquare(side);
                     }
 
-                    var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
+                    var rookTargetSquare = isShortCastle
+                        ? Utils.ShortCastleRookTargetSquare(side)
+                        : Utils.LongCastleRookTargetSquare(side);
                     var rookIndex = (int)Piece.R + offset;
 
                     // Popping before setting, because in DFRC they can be the same square
