@@ -123,7 +123,6 @@ public sealed class OptionCommand
 {
     public const string Id = "option";
 
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
     public static readonly ImmutableArray<string> AvailableOptions =
         [
             "option name UCI_Opponent type string",
@@ -137,7 +136,6 @@ public sealed class OptionCommand
             $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions.ToLowerString()}",
             .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : [],
         ];
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
     //"option name UCI_AnalyseMode type check",
     //"option name NalimovPath type string default C:/...",

@@ -718,9 +718,7 @@ public sealed partial class Engine
                 // Beta-cutoff - refutation found, no need to keep searching this line
                 if (score >= beta)
                 {
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
                     PrintMessage($"Pruning: {move} is enough");
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
                     var historyDepth = depth;
 
@@ -967,9 +965,7 @@ public sealed partial class Engine
                 // Beta-cutoff
                 if (score >= beta)
                 {
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
                     PrintMessage($"Pruning: {move} is enough to discard this line");
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
                     if (move.CapturedPiece() != (int)Piece.None)
                     {
