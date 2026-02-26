@@ -589,6 +589,7 @@ public partial class Position
         int packedBonus = 0;
 
         var rank = Constants.Rank[squareIndex];
+        var file = Constants.File[squareIndex];
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
         int pushSquare;
@@ -637,7 +638,7 @@ public partial class Position
             // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
-            packedBonus += PassedPawnBonus[bucket][rank]
+            packedBonus += PassedPawnBonus[bucket][file]
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
