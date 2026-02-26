@@ -28,6 +28,13 @@ else
 			RUNTIME=linux-arm64
 		else ifneq ($(filter arm%,$(UNAME_P)),)
 			RUNTIME=linux-arm
+		else ifneq ($(filter ppc64le%,$(UNAME_P)),)
+			RUNTIME=linux-ppc64le
+		else ifneq ($(filter riscv64%,$(UNAME_P)),)
+			RUNTIME=linux-riscv64
+		else ifneq ($(filter s390x%,$(UNAME_P)),)
+			RUNTIME=linux-s390x
+		else 
 		endif
 	else ifneq ($(filter arm%,$(UNAME_P)),)
 		RUNTIME=osx-arm64
