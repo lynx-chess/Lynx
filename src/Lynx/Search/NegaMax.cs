@@ -417,7 +417,10 @@ public sealed partial class Engine
                 // 🔍 PVS SEE pruning
                 if (isCapture)
                 {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
+                    var captureHistory = CaptureHistoryEntry(move);
+
+                    var threshold = (Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth)
+                        - (captureHistory / Configuration.EngineSettings.PVS_SEE_CaptureDivisor_Noisy);
 
                     if (!SEE.IsGoodCapture(position, move, threshold))
                     {
