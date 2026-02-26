@@ -88,7 +88,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(move);
+                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
@@ -144,7 +144,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(move);
+                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
@@ -257,7 +257,7 @@ public sealed partial class Engine
         var rawHistoryBonus = HistoryBonus[depth];
         var rawHistoryMalus = HistoryMalus[depth];
 
-        ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
+        ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(), move.TargetSquare(), move.CapturedPiece());
         captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
@@ -270,7 +270,7 @@ public sealed partial class Engine
 
             if (capturedPiece != (int)Piece.None)
             {
-                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
+                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove.Piece(), visitedMove.TargetSquare(), capturedPiece);
                 captureHistoryVisitedMove = (short)ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
             }
         }

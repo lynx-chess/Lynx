@@ -368,7 +368,8 @@ public sealed partial class Engine
 
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
             var piece = move.Piece();
-            var isCapture = move.CapturedPiece() != (int)Piece.None;
+            var capturedPiece = move.CapturedPiece();
+            var isCapture = capturedPiece != (int)Piece.None;
 
             int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
@@ -573,7 +574,7 @@ public sealed partial class Engine
                             if (isCapture)
                             {
                                 reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
-                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
+                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
