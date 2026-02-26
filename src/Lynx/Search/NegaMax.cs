@@ -504,6 +504,11 @@ public sealed partial class Engine
                 {
                     --singularDepthExtensions;
                 }
+                else if (cutnode)
+                {
+                    singularDepthExtensions -= 2;
+                }
+
 #pragma warning restore MA0071 // Avoid using redundant else
 
                 gameState = position.MakeMove(move);
