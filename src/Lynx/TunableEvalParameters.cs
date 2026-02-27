@@ -6044,6 +6044,16 @@ public static class EvaluationParams
 	public const int BishopInUnblockedLongDiagonalBonus = 786449;
 
 	/// <summary>
+	/// <see cref="Utils.Pack(17, 12)"/>
+	/// </summary>
+	public const int OpenFileKingSlidersSameFilePenalty = 786449;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(17, 12)"/>
+	/// </summary>
+	public const int SemiOpenFileKingSlidersSameFilePenalty = 786449;
+
+	/// <summary>
 	/// <see cref="Utils.Pack(-56, -40)"/>
 	/// </summary>
 	public const int PieceAttackedByPawnPenalty = -2621496;

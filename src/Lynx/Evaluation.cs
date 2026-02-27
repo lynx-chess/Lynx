@@ -885,19 +885,30 @@ public partial class Position
         var kingSideOffset = Utils.PieceOffset(pieceSide);
 
         // Opposite side rooks or queens on the board
-        if (_pieceBitboards[(int)Piece.r - kingSideOffset] + _pieceBitboards[(int)Piece.q - kingSideOffset] != 0)
+        var oppositeSideRooksOrQueens = _pieceBitboards[(int)Piece.r - kingSideOffset] | _pieceBitboards[(int)Piece.q - kingSideOffset];
+        if (oppositeSideRooksOrQueens != 0)
         {
-            var file = Masks.FileMask(squareIndex);
+            var fileMask = Masks.FileMask(squareIndex);
 
             // King on open file
-            if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & file) == 0)
+            if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & fileMask) == 0)
             {
                 packedBonus += OpenFileKingPenalty[bucket][Constants.File[squareIndex]];
+
+                if ((oppositeSideRooksOrQueens & fileMask) != 0)
+                {
+                    packedBonus += OpenFileKingSlidersSameFilePenalty;
+                }
             }
             // King on semi-open file
-            else if ((_pieceBitboards[(int)Piece.P + kingSideOffset] & file) == 0)
+            else if ((_pieceBitboards[(int)Piece.P + kingSideOffset] & fileMask) == 0)
             {
                 packedBonus += SemiOpenFileKingPenalty[bucket][Constants.File[squareIndex]];
+
+                if ((oppositeSideRooksOrQueens & fileMask) != 0)
+                {
+                    packedBonus += SemiOpenFileKingSlidersSameFilePenalty;
+                }
             }
         }
 
