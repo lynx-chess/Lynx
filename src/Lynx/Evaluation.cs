@@ -639,7 +639,7 @@ public partial class Position
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][file]
-                + PassedPawnEnemyBonus[oppositeSideBucket][rank]
+                + PassedPawnEnemyBonus[oppositeSideBucket][file]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
