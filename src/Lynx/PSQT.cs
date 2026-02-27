@@ -23,6 +23,18 @@ public static class EvaluationPSQTs
         0, 8, 9, 10, 11, 12, 13, 14,
         0, 1, 2, 3, 4, 5, 6, 7, //
     ];
+
+    public static ReadOnlySpan<int> PawnBucketLayout =>
+    [
+        0, 0, 0, 0, 0, 0, 0, 0,
+        5, 5, 6, 6, 7, 7, 8, 8,
+        5, 5, 6, 6, 7, 7, 8, 8,
+        4, 4, 5, 5, 5, 5, 6, 6,
+        4, 4, 5, 5, 5, 5, 6, 6,
+        1, 1, 2, 2, 2, 2, 3, 3,
+        1, 1, 2, 2, 2, 2, 3, 3,
+        0, 0, 0, 0, 0, 0, 0, 0, //
+    ];
 #pragma warning restore S4663 // Comments should not be empty
 
     /// <summary>

@@ -593,6 +593,7 @@ public partial class Position
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
         int pushSquare;
+        int pawnBucket;
 
         if (pieceIndex == (int)Piece.p)
         {
@@ -600,11 +601,13 @@ public partial class Position
             oppositeSide = (int)Side.White;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
             pushSquare = squareIndex + 8;
+            pawnBucket = PawnBucketLayout[squareIndex ^ 56];
         }
         else
         {
             passedPawnsMask = Masks.WhitePassedPawnMasks[squareIndex];
             pushSquare = squareIndex - 8;
+            pawnBucket = PawnBucketLayout[squareIndex];
         }
 
         var oppositeSidePawns = _pieceBitboards[(int)Piece.p - pieceIndex];
@@ -638,8 +641,8 @@ public partial class Position
             // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
-            packedBonus += PassedPawnBonus[bucket][file]
-                + PassedPawnEnemyBonus[oppositeSideBucket][rank]
+            packedBonus += PassedPawnBonus[bucket][pawnBucket]
+                + PassedPawnEnemyBonus[oppositeSideBucket][pawnBucket]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
