@@ -102,7 +102,7 @@ public static class PawnIslandsGenerator
             var squareIndex = pawns.GetLS1BIndex();
             pawns.ResetLS1B();
 
-            files[Constants.File[squareIndex]] = n;
+            files[Constants.File(squareIndex)] = n;
         }
 
         var islandCount = 0;

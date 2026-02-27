@@ -1235,14 +1235,14 @@ static void ManhattanDistance()
 {
     for (int sq1 = 0; sq1 < 64; ++sq1)
     {
-        var sq1Rank = Constants.Rank[sq1];
-        var sq1File = Constants.File[sq1];
+        var sq1Rank = Constants.Rank(sq1);
+        var sq1File = Constants.File(sq1);
 
         Console.Write("[");
         for (int sq2 = 0; sq2 < 64; ++sq2)
         {
-            var sq2Rank = Constants.Rank[sq2];
-            var sq2File = Constants.File[sq2];
+            var sq2Rank = Constants.Rank(sq2);
+            var sq2File = Constants.File(sq2);
 
             var distance = Math.Abs(sq1Rank - sq2Rank) + Math.Abs(sq1File - sq2File);
 

@@ -299,7 +299,7 @@ public static class MoveExtensions
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
                     ? (capturedPiece != (int)Model.Piece.None
-                        ? global::Lynx.Constants.FileString[global::Lynx.Constants.File[move.SourceSquare()]]  // exd5
+                        ? global::Lynx.Constants.FileString[global::Lynx.Constants.File(move.SourceSquare())]  // exd5
                         : "")    // d5
                     : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
                         + DisambiguateMove(move, position))
@@ -391,15 +391,15 @@ public static class MoveExtensions
         }
 
         int sourceSquare = move.SourceSquare();
-        var moveFile = Constants.File[sourceSquare];
+        var moveFile = Constants.File(sourceSquare);
 
-        var files = movesWithSameSimpleRepresentation.Select(m => Constants.File[m.SourceSquare()]);
+        var files = movesWithSameSimpleRepresentation.Select(m => Constants.File(m.SourceSquare()));
 
         if (files.Any(f => f == moveFile))
         {
-            var moveRank = Constants.Rank[sourceSquare];
+            var moveRank = Constants.Rank(sourceSquare);
 
-            var ranks = movesWithSameSimpleRepresentation.Select(m => Constants.Rank[m.SourceSquare()]);
+            var ranks = movesWithSameSimpleRepresentation.Select(m => Constants.Rank(m.SourceSquare()));
 
             if (ranks.Any(r => r == moveRank))
             {
