@@ -153,7 +153,7 @@ public class ConstantsTest
     {
         for (int sq = 0; sq < 64; ++sq)
         {
-            Assert.AreEqual((sq >> 3) + 1, 8 - Constants.Rank[sq]);
+            Assert.AreEqual((sq >> 3) + 1, 8 - Constants.Rank(sq));
         }
     }
 
