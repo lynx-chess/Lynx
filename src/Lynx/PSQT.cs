@@ -32,7 +32,7 @@ public static class EvaluationPSQTs
         5, 5, 6, 6, 6, 6, 5, 5,
         3, 3, 4, 4, 4, 4, 3, 3,
         1, 1, 2, 2, 2, 2, 1, 1,
-        1, 1, 2, 2, 2, 2, 1, 1,
+        11, 11, 12, 12, 12, 12, 11, 11,
         0, 0, 0, 0, 0, 0, 0, 0, //
     ];
 #pragma warning restore S4663 // Comments should not be empty
