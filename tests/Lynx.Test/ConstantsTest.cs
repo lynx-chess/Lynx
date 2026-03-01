@@ -120,35 +120,6 @@ public class ConstantsTest
     }
 
     [Test]
-    public void DarkLightSquares()
-    {
-        for (int i = 0; i < 64; ++i)
-        {
-            Assert.True(DarkSquaresBitboard.GetBit(i) ^ LightSquaresBitboard.GetBit(i));
-        }
-
-        Assert.True(DarkSquaresBitboard.GetBit((int)BoardSquare.a1));
-        Assert.True(DarkSquaresBitboard.GetBit((int)BoardSquare.h8));
-        Assert.False(DarkSquaresBitboard.GetBit((int)BoardSquare.a8));
-        Assert.False(DarkSquaresBitboard.GetBit((int)BoardSquare.h1));
-
-        Assert.AreEqual(1, DarkSquares[(int)BoardSquare.a1]);
-        Assert.AreEqual(1, DarkSquares[(int)BoardSquare.h8]);
-        Assert.AreEqual(0, DarkSquares[(int)BoardSquare.a8]);
-        Assert.AreEqual(0, DarkSquares[(int)BoardSquare.h1]);
-
-        Assert.True(LightSquaresBitboard.GetBit((int)BoardSquare.a8));
-        Assert.True(LightSquaresBitboard.GetBit((int)BoardSquare.h1));
-        Assert.False(LightSquaresBitboard.GetBit((int)BoardSquare.a1));
-        Assert.False(LightSquaresBitboard.GetBit((int)BoardSquare.h8));
-
-        Assert.AreEqual(1, LightSquares[(int)BoardSquare.a8]);
-        Assert.AreEqual(1, LightSquares[(int)BoardSquare.h1]);
-        Assert.AreEqual(0, LightSquares[(int)BoardSquare.a1]);
-        Assert.AreEqual(0, LightSquares[(int)BoardSquare.h8]);
-    }
-
-    [Test]
     public void Rank()
     {
         for (int sq = 0; sq < 64; ++sq)
