@@ -1133,22 +1133,22 @@ public partial class Position : IDisposable
             // Shredder-FEN style (always showing columns), no support for X-FEN style yet (showing KQkq when not-ambiguous)
             if ((_castle & (int)CastlingRights.WK) != default)
             {
-                char file = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
+                char file = (char)('A' + Constants.File(WhiteShortCastle.TargetSquare()));
                 sb.Append(file);
             }
             if ((_castle & (int)CastlingRights.WQ) != default)
             {
-                char file = (char)('A' + Constants.File[WhiteLongCastle.TargetSquare()]);
+                char file = (char)('A' + Constants.File(WhiteLongCastle.TargetSquare()));
                 sb.Append(file);
             }
             if ((_castle & (int)CastlingRights.BK) != default)
             {
-                char file = (char)('a' + Constants.File[BlackShortCastle.TargetSquare()]);
+                char file = (char)('a' + Constants.File(BlackShortCastle.TargetSquare()));
                 sb.Append(file);
             }
             if ((_castle & (int)CastlingRights.BQ) != default)
             {
-                char file = (char)('a' + Constants.File[BlackLongCastle.TargetSquare()]);
+                char file = (char)('a' + Constants.File(BlackLongCastle.TargetSquare()));
                 sb.Append(file);
             }
         }
@@ -1231,19 +1231,19 @@ public partial class Position : IDisposable
 
             if ((_castle & (int)CastlingRights.WK) != default)
             {
-                whiteKingSide = (char)('A' + Constants.File[WhiteShortCastle.TargetSquare()]);
+                whiteKingSide = (char)('A' + Constants.File(WhiteShortCastle.TargetSquare()));
             }
             if ((_castle & (int)CastlingRights.WQ) != default)
             {
-                whiteQueenside = (char)('A' + Constants.File[WhiteLongCastle.TargetSquare()]);
+                whiteQueenside = (char)('A' + Constants.File(WhiteLongCastle.TargetSquare()));
             }
             if ((_castle & (int)CastlingRights.BK) != default)
             {
-                blackKingside = (char)('a' + Constants.File[BlackShortCastle.TargetSquare()]);
+                blackKingside = (char)('a' + Constants.File(BlackShortCastle.TargetSquare()));
             }
             if ((_castle & (int)CastlingRights.BQ) != default)
             {
-                blackQueenside = (char)('a' + Constants.File[BlackLongCastle.TargetSquare()]);
+                blackQueenside = (char)('a' + Constants.File(BlackLongCastle.TargetSquare()));
             }
 
             Console.WriteLine($"    Castling:\t" +
@@ -1471,7 +1471,7 @@ public partial class Position : IDisposable
         {
             Debug.Assert(!_occupancyBitboards[(int)Side.Both].GetBit((int)_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
 
-            var rank = Constants.Rank[(int)_enPassant];
+            var rank = Constants.Rank((int)_enPassant);
             Debug.Assert(rank == 2 || rank == 5, failureMessage, $"Wrong en-passant rank for {_enPassant}");
 
             var pawnToCaptureSquare = Constants.EnPassantCaptureSquares[(int)_enPassant];
