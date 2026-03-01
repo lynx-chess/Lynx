@@ -28,12 +28,12 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("4k3/8/8/3b4/4N3/8/8/4K3 b - - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.b].GetBit(BoardSquare.d5));
-        Assert.True(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.e4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.d5));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
+        Assert.True(position.PieceBitboards[(int)Piece.b].GetBit(BoardSquare.d5));
+        Assert.True(position.PieceBitboards[(int)Piece.N].GetBit(BoardSquare.e4));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.e4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.d5));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d5));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
 
@@ -44,16 +44,16 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(captureMove);
 
         // Assert
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.b].GetBit(BoardSquare.d5));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.e4));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.b].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.b].GetBit(BoardSquare.d5));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.N].GetBit(BoardSquare.e4));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.b].GetBit(BoardSquare.e4));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e4));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.d5));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.d5));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.e4));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d5));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e4));
     }
 
     /// <summary>
@@ -75,12 +75,12 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("4k3/8/8/3B4/4n3/8/8/4K3 w - - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.B].GetBit(BoardSquare.d5));
-        Assert.True(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.e4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.d5));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
+        Assert.True(position.PieceBitboards[(int)Piece.B].GetBit(BoardSquare.d5));
+        Assert.True(position.PieceBitboards[(int)Piece.n].GetBit(BoardSquare.e4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.e4));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.d5));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d5));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var captureMove = moves.Single(m => m.CapturedPiece() != (int)Piece.None);
@@ -90,16 +90,16 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(captureMove);
 
         // Assert
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.B].GetBit(BoardSquare.d5));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.e4));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.B].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.B].GetBit(BoardSquare.d5));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.n].GetBit(BoardSquare.e4));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.B].GetBit(BoardSquare.e4));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e4));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.d5));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.d5));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.e4));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d5));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e4));
     }
 
     #endregion
@@ -125,12 +125,12 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
-        Assert.False(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.b8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
-        Assert.False(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8));
+        Assert.True(position.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b7));
+        Assert.False(position.PieceBitboards[(int)Piece.N].GetBit(BoardSquare.b8));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b7));
+        Assert.False(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b7));
+        Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
@@ -140,14 +140,14 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(promotionMove);
 
         // Assert
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.b8));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b7));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.N].GetBit(BoardSquare.b8));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b7));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b8));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b7));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8));
     }
 
     /// <summary>
@@ -169,12 +169,12 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("4k3/8/8/8/8/8/1p6/4K3 b - - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
-        Assert.False(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.b1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1));
+        Assert.True(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.b2));
+        Assert.False(position.PieceBitboards[(int)Piece.n].GetBit(BoardSquare.b1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b2));
+        Assert.False(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b2));
+        Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
@@ -184,14 +184,14 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(promotionMove);
 
         // Assert
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.b1));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.b2));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.n].GetBit(BoardSquare.b1));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b2));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b1));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b2));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1));
     }
 
     /// <summary>
@@ -213,14 +213,14 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("rk6/1P6/8/8/8/8/8/4K3 w - - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
-        Assert.False(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.a8));
-        Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
-        Assert.False(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
+        Assert.True(position.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b7));
+        Assert.False(position.PieceBitboards[(int)Piece.N].GetBit(BoardSquare.a8));
+        Assert.True(position.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.a8));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b7));
+        Assert.False(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b7));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a8));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
@@ -230,16 +230,16 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(promotionMove);
 
         // Assert
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.a8));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b7));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.N].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.a8));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b7));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a8));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b7));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a8));
     }
 
     /// <summary>
@@ -261,14 +261,14 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
-        Assert.False(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.a1));
-        Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
+        Assert.True(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.b2));
+        Assert.False(position.PieceBitboards[(int)Piece.n].GetBit(BoardSquare.a1));
+        Assert.True(position.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.a1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b2));
+        Assert.False(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a1));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b2));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a1));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
@@ -278,16 +278,16 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(promotionMove);
 
         // Assert
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.a1));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.b2));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.n].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.a1));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b2));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a1));
 
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b2));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a1));
     }
 
     #endregion
@@ -300,14 +300,14 @@ public class PositionMakeMoveTest
         // Arrange
         var position = new Position("4k3/8/8/8/2p5/8/1P6/4K3 w - - 0 1");
 
-        Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b2));
-        Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
-        Assert.False(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b2));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
+        Assert.True(position.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b2));
+        Assert.True(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c4));
+        Assert.False(position.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b4));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b2));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b2));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c4));
+        Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b4));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var enPassant = moves.Single(m => m.IsDoublePawnPush());
@@ -319,19 +319,19 @@ public class PositionMakeMoveTest
         // Assert
         Assert.AreEqual(BoardSquare.b3, newPosition.EnPassant);
 
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b2));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b3));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b4));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c4));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b2));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b3));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b4));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b2));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b3));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b2));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b3));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b3));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b4));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b2));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b3));
     }
 
     [Test]
@@ -340,14 +340,14 @@ public class PositionMakeMoveTest
         // Arrange
         var position = new Position("4k3/2p5/8/1P6/8/8/8/4K3 b - - 0 1");
 
-        Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c7));
-        Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
-        Assert.False(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c7));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b5));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c7));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
+        Assert.True(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c7));
+        Assert.True(position.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b5));
+        Assert.False(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c5));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c7));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b5));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c7));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b5));
+        Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c5));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var enPassant = moves.Single(m => m.IsDoublePawnPush());
@@ -359,19 +359,19 @@ public class PositionMakeMoveTest
         // Assert
         Assert.AreEqual(BoardSquare.c6, newPosition.EnPassant);
 
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c7));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c6));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c5));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b5));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c7));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c6));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c5));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c2));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b6));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c5));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c2));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b6));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c7));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c6));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b5));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c5));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c7));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c6));
     }
 
     #endregion
@@ -384,14 +384,14 @@ public class PositionMakeMoveTest
         // Arrange
         var position = new Position("4k3/8/8/1Pp5/8/8/8/4K3 w - c6 0 1");
 
-        Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
-        Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
-        Assert.False(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c6));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b5));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c5));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c6));
+        Assert.True(position.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b5));
+        Assert.True(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c5));
+        Assert.False(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c6));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b5));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c5));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b5));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c5));
+        Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c6));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var enPassant = moves.Single(m => m.IsEnPassant());
@@ -401,17 +401,17 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(enPassant);
 
         // Assert
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.c6));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.c6));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c5));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b5));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.c6));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b5));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c5));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.c6));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b5));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c5));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c6));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c6));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c5));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b5));
     }
 
     [Test]
@@ -420,13 +420,13 @@ public class PositionMakeMoveTest
         // Arrange
         var position = new Position("4k3/8/8/8/1Pp5/8/8/4K3 b - b3 0 1");
 
-        Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
-        Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
-        Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b3));
+        Assert.True(position.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b4));
+        Assert.True(position.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c4));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b4));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c4));
+        Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b3));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var enPassant = moves.Single(m => m.IsEnPassant());
@@ -436,17 +436,17 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(enPassant);
 
         // Assert
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b3));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.b3));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.p].GetBit(BoardSquare.c4));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.P].GetBit(BoardSquare.b4));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b3));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b4));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c4));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.b3));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.b4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.c4));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b3));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b3));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c4));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b4));
     }
 
     [TestCase(Constants.KillerTestPositionFEN)]
@@ -495,15 +495,15 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
-        Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
-        Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
+        Assert.True(position.PieceBitboards[(int)Piece.K].GetBit(BoardSquare.e1));
+        Assert.True(position.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.a1));
+        Assert.True(position.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.h1));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.e1));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a1));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.h1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h1));
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WQ);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
@@ -517,23 +517,23 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteKingShortCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteRookShortCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.K].GetBit(Constants.WhiteKingShortCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.R].GetBit(Constants.WhiteRookShortCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.K].GetBit(BoardSquare.e1));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.h1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteKingShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteRookShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(Constants.WhiteKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(Constants.WhiteRookShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.e1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.h1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteKingShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteRookShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.WhiteKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.WhiteRookShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h1));
 
         // Assert - Castling rights
         Assert.AreEqual(default(int), newPosition.Castle & (int)CastlingRights.WK);
@@ -547,15 +547,15 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
-        Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
-        Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
+        Assert.True(position.PieceBitboards[(int)Piece.K].GetBit(BoardSquare.e1));
+        Assert.True(position.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.a1));
+        Assert.True(position.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.h1));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.e1));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a1));
+        Assert.True(position.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.h1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a1));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h1));
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WQ);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
@@ -569,23 +569,23 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteKingLongCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteRookLongCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.K].GetBit(Constants.WhiteKingLongCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.R].GetBit(Constants.WhiteRookLongCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.h1));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.K].GetBit(BoardSquare.e1));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.R].GetBit(BoardSquare.a1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteKingLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteRookLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(Constants.WhiteKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(Constants.WhiteRookLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.h1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.e1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.White].GetBit(BoardSquare.a1));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteKingLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteRookLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.WhiteKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.WhiteRookLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e1));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a1));
 
         // Assert - Castling rights
         Assert.AreEqual(default(int), newPosition.Castle & (int)CastlingRights.WK);
@@ -599,15 +599,15 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
-        Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
-        Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
+        Assert.True(position.PieceBitboards[(int)Piece.k].GetBit(BoardSquare.e8));
+        Assert.True(position.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.a8));
+        Assert.True(position.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.h8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.e8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.h8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h8));
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WQ);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
@@ -621,23 +621,23 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackKingShortCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackRookShortCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.k].GetBit(Constants.BlackKingShortCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.r].GetBit(Constants.BlackRookShortCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.k].GetBit(BoardSquare.e8));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.h8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackKingShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackRookShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(Constants.BlackKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(Constants.BlackRookShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.e8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.h8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackKingShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackRookShortCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.BlackKingShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.BlackRookShortCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h8));
 
         // Assert - Castling rights
         Assert.AreEqual(default(int), newPosition.Castle & (int)CastlingRights.BK);
@@ -651,15 +651,15 @@ public class PositionMakeMoveTest
     {
         // Arrange
         var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-        Assert.True(position.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
-        Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
-        Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
-        Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
+        Assert.True(position.PieceBitboards[(int)Piece.k].GetBit(BoardSquare.e8));
+        Assert.True(position.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.a8));
+        Assert.True(position.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.h8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.e8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.h8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a8));
+        Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h8));
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.WQ);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
@@ -673,23 +673,23 @@ public class PositionMakeMoveTest
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackKingLongCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackRookLongCastleSquare));
-        Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
-        Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.k].GetBit(Constants.BlackKingLongCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.r].GetBit(Constants.BlackRookLongCastleSquare));
+        Assert.True(newPosition.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.h8));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.k].GetBit(BoardSquare.e8));
+        Assert.False(newPosition.PieceBitboards[(int)Piece.r].GetBit(BoardSquare.a8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackKingLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackRookLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(Constants.BlackKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(Constants.BlackRookLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.h8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.e8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Black].GetBit(BoardSquare.a8));
 
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackKingLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackRookLongCastleSquare));
-        Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
-        Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.BlackKingLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(Constants.BlackRookLongCastleSquare));
+        Assert.True(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.h8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.e8));
+        Assert.False(newPosition.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a8));
 
         // Assert - Castling rights
         Assert.AreEqual(default(int), newPosition.Castle & (int)CastlingRights.BK);

@@ -8,17 +8,17 @@ namespace Lynx.ConstantsGenerator;
 /// <summary>
 /// See layout 3 in https://tearth.dev/bitboard-viewer/
 /// </summary>
-public static class BitBoardsGenerator
+public static class BitboardsGenerator
 {
-    public static BitBoard NotAFile()
+    public static Bitboard NotAFile()
     {
-        BitBoard b = default;
+        Bitboard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitboardExtensions.SquareIndex(rank, file);
 
                 if (file > 0)
                 {
@@ -32,15 +32,15 @@ public static class BitBoardsGenerator
         return b;
     }
 
-    public static BitBoard NotHFile()
+    public static Bitboard NotHFile()
     {
-        BitBoard b = default;
+        Bitboard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitboardExtensions.SquareIndex(rank, file);
 
                 if (file < 7)
                 {
@@ -54,15 +54,15 @@ public static class BitBoardsGenerator
         return b;
     }
 
-    public static BitBoard NotABFiles()
+    public static Bitboard NotABFiles()
     {
-        BitBoard b = default;
+        Bitboard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitboardExtensions.SquareIndex(rank, file);
 
                 if (file > 1)
                 {
@@ -76,15 +76,15 @@ public static class BitBoardsGenerator
         return b;
     }
 
-    public static BitBoard NotHGFiles()
+    public static Bitboard NotHGFiles()
     {
-        BitBoard b = default;
+        Bitboard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitboardExtensions.SquareIndex(rank, file);
 
                 if (file < 6)
                 {

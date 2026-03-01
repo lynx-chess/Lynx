@@ -171,8 +171,8 @@ public class ChebyshevDistance_Benchmark : BaseBenchmark
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ChebyshevDistanceOnTheFly(int square1, int square2)
     {
-        var xDelta = Math.Abs(Lynx.Constants.File[square1] - Lynx.Constants.File[square2]);
-        var yDelta = Math.Abs(Lynx.Constants.Rank[square1] - Lynx.Constants.Rank[square2]);
+        var xDelta = Math.Abs(Lynx.Constants.File(square1) - Lynx.Constants.File(square2));
+        var yDelta = Math.Abs(Lynx.Constants.Rank(square1) - Lynx.Constants.Rank(square2));
 
         return xDelta >= yDelta
             ? xDelta

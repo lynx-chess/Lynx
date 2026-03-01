@@ -99,7 +99,7 @@ public class ZobristPositionHash_Benchmark : BaseBenchmark
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
+                if (position.PieceBitboards[pieceIndex].GetBit(squareIndex))
                 {
                     positionHash ^= ZobristTable.PieceHash(squareIndex, pieceIndex);
                 }
@@ -119,7 +119,7 @@ public class ZobristPositionHash_Benchmark : BaseBenchmark
 
         for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (bitboard != default)
             {

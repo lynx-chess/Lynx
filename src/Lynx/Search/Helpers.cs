@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -49,27 +49,52 @@ public sealed partial class Engine
     /// [12][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private ref short PieceToQuietHistoryEntry(int piece, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
     {
         const int pieceOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
         const int startSquareAttackedOffset = 2;
 
-        var sourceSquare = move.SourceSquare();
-        var targetSquare = move.TargetSquare();
-        var oppositeSide = Utils.OppositeSide((int)position.Side);
-
-        var oppsiteSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
-
-        var isStartSquareAttacked = oppsiteSideAttacks.GetBit(sourceSquare) ? 1 : 0;
-        var isTargetSquareAttacked = oppsiteSideAttacks.GetBit(targetSquare) ? 1 : 0;
-
-        var index = (move.Piece() * pieceOffset)
+        var index = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset)
             + (isStartSquareAttacked * startSquareAttackedOffset)
             + isTargetSquareAttacked;
 
-        return ref _quietHistory[index];
+        return ref _pieceToQuietHistory[index];
+    }
+
+    /// <summary>
+    /// [64][64][2][2]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ref short ButterflyQuietHistoryEntry(int sourceSquare, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
+    {
+        const int sourceSquareOffset = 64 * 2 * 2;
+        const int targetSquareOffset = 2 * 2;
+        const int startSquareAttackedOffset = 2;
+
+        var index = (sourceSquare * sourceSquareOffset)
+            + (targetSquare * targetSquareOffset)
+            + (isStartSquareAttacked * startSquareAttackedOffset)
+            + isTargetSquareAttacked;
+
+        return ref _butterflyQuietHistory[index];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    {
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
+        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        var pieceToHistory = PieceToQuietHistoryEntry(move.Piece(), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+        var butterflyHistory = ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+
+        return (short)((pieceToHistory + butterflyHistory) / 2);
     }
 
     /// <summary>
@@ -288,6 +313,60 @@ public sealed partial class Engine
         _moveNodeCount[move.Piece()][move.TargetSquare()] += nodesToAdd;
     }
 
+    /// <summary>
+    /// See HistoryAging_Vectorization_Benchmark.cs to justify this impl.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void AgeQuietHistory()
+    {
+        // Since history arrays are pinned arrays
+        // These are no-op pinning as it does not influence the GC compaction
+        // https://tooslowexception.com/pinned-object-heap-in-net-5/
+        fixed (short* histPtr = _pieceToQuietHistory)
+        {
+            for (int i = 0; i < PieceToQuietHistoryLength; i += 4)
+            {
+                short* start = histPtr + i;
+
+                short* h2 = start + 1;
+                short* h3 = start + 2;
+                short* h4 = start + 3;
+
+                int tmp1 = *start * 3;
+                int tmp2 = *h2 * 3;
+                int tmp3 = *h3 * 3;
+                int tmp4 = *h4 * 3;
+
+                *start = (short)(tmp1 / 4);
+                *h2 = (short)(tmp2 / 4);
+                *h3 = (short)(tmp3 / 4);
+                *h4 = (short)(tmp4 / 4);
+            }
+        }
+
+        fixed (short* histPtr = _butterflyQuietHistory)
+        {
+            for (int i = 0; i < ButterflyHistoryLength; i += 4)
+            {
+                short* start = histPtr + i;
+
+                short* h2 = start + 1;
+                short* h3 = start + 2;
+                short* h4 = start + 3;
+
+                int tmp1 = *start * 3;
+                int tmp2 = *h2 * 3;
+                int tmp3 = *h3 * 3;
+                int tmp4 = *h4 * 3;
+
+                *start = (short)(tmp1 / 4);
+                *h2 = (short)(tmp2 / 4);
+                *h3 = (short)(tmp3 / 4);
+                *h4 = (short)(tmp4 / 4);
+            }
+        }
+    }
+
     #region Debugging
 
 #pragma warning disable S125 // Sections of code should not be commented out
@@ -328,9 +407,8 @@ public sealed partial class Engine
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<BitBoard> attacks = stackalloc BitBoard[12];
-            Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-            var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(buffer);
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),

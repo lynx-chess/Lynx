@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx;
 
@@ -15,27 +16,44 @@ public static class ZobristTable
     /// <summary>
     /// 64x12
     /// </summary>
-    private static readonly ulong[][] _table;
+    private static readonly ulong[] _pieceTable;
+
     private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
 
-#pragma warning disable IDE1006 // Naming Styles
-    private static readonly ulong _WK_Hash;
-    private static readonly ulong _WQ_Hash;
-    private static readonly ulong _BK_Hash;
-    private static readonly ulong _BQ_Hash;
-#pragma warning restore IDE1006 // Naming Styles
+    private static readonly ulong[] _castleHashes = GC.AllocateArray<ulong>(16, pinned: true);
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
 
     static ZobristTable()
     {
-        _table = InitializeZobristTable();
+        _pieceTable = InitializeZobristTable();
         Initialize50mrTable();
 
-        _WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
-        _WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
-        _BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
-        _BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+        ulong WK_Hash = PieceHash((int)BoardSquare.a8, (int)Piece.p);
+        ulong WQ_Hash = PieceHash((int)BoardSquare.b8, (int)Piece.p);
+        ulong BK_Hash = PieceHash((int)BoardSquare.c8, (int)Piece.p);
+        ulong BQ_Hash = PieceHash((int)BoardSquare.d8, (int)Piece.p);
+
+        _castleHashes[(int)CastlingRights.None] = 0;
+
+        _castleHashes[(int)CastlingRights.WK] = WK_Hash;
+        _castleHashes[(int)CastlingRights.WQ] = WQ_Hash;
+        _castleHashes[(int)CastlingRights.BK] = BK_Hash;
+        _castleHashes[(int)CastlingRights.BQ] = BQ_Hash;
+
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ)] = WK_Hash ^ WQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK)] = WK_Hash ^ BK_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BQ)] = WK_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK)] = WQ_Hash ^ BK_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BQ)] = WQ_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.BK | CastlingRights.BQ)] = BK_Hash ^ BQ_Hash;
+
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK)] = WK_Hash ^ WQ_Hash ^ BK_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ BK_Hash ^ BQ_Hash;
+        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WQ_Hash ^ BK_Hash ^ BQ_Hash;
+
+        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash;
     }
 
 #pragma warning restore CA1810 // Initialize reference type static fields inline
@@ -46,7 +64,7 @@ public static class ZobristTable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece)
-        => _table[boardSquare][piece];
+        => Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_pieceTable), (boardSquare * 12) + piece);
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -64,7 +82,7 @@ public static class ZobristTable
 
         var file = enPassantSquare & 0x07;  // enPassantSquare % 8
 
-        return _table[file][(int)Piece.P];
+        return PieceHash(file, (int)Piece.P);
     }
 
     /// <summary>
@@ -73,17 +91,17 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong SideHash()
     {
-        return _table[(int)BoardSquare.h8][(int)Piece.p];
+        return PieceHash((int)BoardSquare.h8, (int)Piece.p);
     }
 
     /// <summary>
     /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>.
-    /// Differenciates white and black sides
+    /// Differentiates white and black sides
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong SideHash(ulong side)
     {
-        return side * _table[(int)BoardSquare.h8][(int)Piece.p];
+        return side * PieceHash((int)BoardSquare.h8, (int)Piece.p);
     }
 
     /// <summary>
@@ -94,32 +112,9 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong CastleHash(byte castle)
     {
-        return castle switch
-        {
-            0 => 0,                                // -    | -
+        Debug.Assert(castle <= _castleHashes.Length, $"Castle value {castle} is out of bounds for the castle hash table");
 
-            (byte)CastlingRights.WK => _WK_Hash,    // K    | -
-            (byte)CastlingRights.WQ => _WQ_Hash,    // Q    | -
-            (byte)CastlingRights.BK => _BK_Hash,    // -    | k
-            (byte)CastlingRights.BQ => _BQ_Hash,    // -    | q
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => _WK_Hash ^ _WQ_Hash,    // KQ   | -
-            (byte)CastlingRights.WK | (byte)CastlingRights.BK => _WK_Hash ^ _BK_Hash,    // K    | k
-            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => _WK_Hash ^ _BQ_Hash,    // K    | q
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WQ_Hash ^ _BK_Hash,    // Q    | k
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WQ_Hash ^ _BQ_Hash,    // Q    | q
-            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _BK_Hash ^ _BQ_Hash,    // -    | kq
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => _WK_Hash ^ _WQ_Hash ^ _BK_Hash,    // KQ   | k
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => _WK_Hash ^ _WQ_Hash ^ _BQ_Hash,    // KQ   | q
-            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WK_Hash ^ _BK_Hash ^ _BQ_Hash,    // K    | kq
-            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,    // Q    | kq
-
-            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
-                _WK_Hash ^ _WQ_Hash ^ _BK_Hash ^ _BQ_Hash,
-
-            _ => throw new LynxException($"Unexpected castle encoded number: {castle}")
-        };
+        return _castleHashes[castle];
     }
 
     /// <summary>
@@ -132,7 +127,7 @@ public static class ZobristTable
 
         for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (bitboard != default)
             {
@@ -170,7 +165,7 @@ public static class ZobristTable
     {
         ulong pawnKingHash = 0;
 
-        var whitePawns = position.PieceBitBoards[(int)Piece.P];
+        var whitePawns = position.PieceBitboards[(int)Piece.P];
         while (whitePawns != default)
         {
             whitePawns = whitePawns.WithoutLS1B(out var pieceSquareIndex);
@@ -178,7 +173,7 @@ public static class ZobristTable
             pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.P);
         }
 
-        var blackPawns = position.PieceBitBoards[(int)Piece.p];
+        var blackPawns = position.PieceBitboards[(int)Piece.p];
         while (blackPawns != default)
         {
             blackPawns = blackPawns.WithoutLS1B(out var pieceSquareIndex);
@@ -186,10 +181,10 @@ public static class ZobristTable
             pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.p);
         }
 
-        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        var whiteKing = position.PieceBitboards[(int)Piece.K].GetLS1BIndex();
         pawnKingHash ^= PieceHash(whiteKing, (int)Piece.K);
 
-        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        var blackKing = position.PieceBitboards[(int)Piece.k].GetLS1BIndex();
         pawnKingHash ^= PieceHash(blackKing, (int)Piece.k);
 
         return pawnKingHash;
@@ -205,7 +200,7 @@ public static class ZobristTable
 
         for (int pieceIndex = start; pieceIndex < end; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             while (bitboard != default)
             {
@@ -225,7 +220,7 @@ public static class ZobristTable
 
         for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.B; ++pieceIndex)
         {
-            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            var whiteBitboard = position.PieceBitboards[pieceIndex];
             while (whiteBitboard != default)
             {
                 whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
@@ -233,7 +228,7 @@ public static class ZobristTable
                 minorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
 
-            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            var blackBitboard = position.PieceBitboards[pieceIndex + 6];
             while (blackBitboard != default)
             {
                 blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
@@ -252,14 +247,14 @@ public static class ZobristTable
 
         for (int pieceIndex = (int)Piece.R; pieceIndex <= (int)Piece.Q; ++pieceIndex)
         {
-            var whiteBitboard = position.PieceBitBoards[pieceIndex];
+            var whiteBitboard = position.PieceBitboards[pieceIndex];
             while (whiteBitboard != default)
             {
                 whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
                 majorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
 
-            var blackBitboard = position.PieceBitBoards[pieceIndex + 6];
+            var blackBitboard = position.PieceBitboards[pieceIndex + 6];
             while (blackBitboard != default)
             {
                 blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
@@ -270,21 +265,20 @@ public static class ZobristTable
         return majorHash;
     }
 
-    private static ulong[][] InitializeZobristTable() => InitializeZobristTable(_random);
+    private static ulong[] InitializeZobristTable() => InitializeZobristTable(_random);
 
     /// <summary>
-    /// Initializes Zobrist table (long[64][12])
+    /// Initializes Zobrist table (long[64 x 12])
     /// </summary>
-    internal static ulong[][] InitializeZobristTable(LynxRandom random)
+    internal static ulong[] InitializeZobristTable(LynxRandom random)
     {
-        var zobristTable = new ulong[64][];
+        var zobristTable = GC.AllocateArray<ulong>(64 * 12, pinned: true);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
-            zobristTable[squareIndex] = new ulong[12];
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                zobristTable[squareIndex][pieceIndex] = random.NextUInt64();
+                zobristTable[(squareIndex * 12) + pieceIndex] = random.NextUInt64();
             }
         }
 

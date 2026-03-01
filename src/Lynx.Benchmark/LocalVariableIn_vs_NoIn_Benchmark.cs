@@ -61,7 +61,7 @@ public class LocalVariableIn_vs_NoIn_Benchmark : BaseBenchmark
 public static class BenchmarkLegacyMoveExtensions
 {
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
+    /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValuableVictimLeastValuableAttacker"/>
     /// </summary>
     /// <param name="position">The position that precedes a move</param>
     /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
@@ -83,14 +83,14 @@ public static class BenchmarkLegacyMoveExtensions
             var limit = (int)Piece.K + oppositeSideOffset;
             for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                if (position.PieceBitboards[pieceIndex].GetBit(targetSquare))
                 {
                     targetPiece = pieceIndex;
                     break;
                 }
             }
 
-            return EvaluationConstants.BadCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece][targetPiece];
+            return EvaluationConstants.BadCaptureMoveBaseScoreValue + EvaluationConstants.MostValuableVictimLeastValuableAttacker[sourcePiece][targetPiece];
         }
         else if (killerMoves is not null && plies is not null)
         {

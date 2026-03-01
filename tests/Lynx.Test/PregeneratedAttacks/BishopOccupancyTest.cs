@@ -33,6 +33,6 @@ public class BishopOccupancyTest
             attacks.PopBit(attackedSquare);
         }
 
-        Assert.AreEqual(default(BitBoard), attacks);
+        Assert.AreEqual(default(Bitboard), attacks);
     }
 }

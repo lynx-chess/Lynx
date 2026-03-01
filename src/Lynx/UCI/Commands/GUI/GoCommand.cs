@@ -76,9 +76,9 @@ public sealed class GoCommand
     public static int Nodes => throw new NotSupportedException();
     public static int Mate => throw new NotSupportedException();
 
-#pragma warning disable CA1002 // Do not expose generic lists
+#pragma warning disable CA1002, MA0016 // Do not expose generic lists
     public static List<string> SearchMoves => throw new NotSupportedException();
-#pragma warning restore CA1002 // Do not expose generic lists
+#pragma warning restore CA1002, MA0016 // Do not expose generic lists
 
     public GoCommand(string command)
     {

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <StaticAnalysisCodeType>Benchmark</StaticAnalysisCodeType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet"/>
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows"/>
+    <PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lynx\Lynx.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn),CA1822,CA1806,CS0618</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+</Project>

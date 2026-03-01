@@ -5,8 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftExtensionsVersion>10.0.1</MicrosoftExtensionsVersion>
-    <NLogVersion>6.0.6</NLogVersion>
+    <MicrosoftExtensionsVersion>10.0.3</MicrosoftExtensionsVersion>
     <BenchmarkDotnetVersion>0.15.8</BenchmarkDotnetVersion>
   </PropertyGroup>
 
@@ -16,37 +15,39 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="NLog" Version="$(NLogVersion)" />
-    <PackageVersion Include="NLog.Extensions.Logging" Version="$(NLogVersion)" />
-    <PackageVersion Include="NLog.Extensions.Version" Version="$(NLogVersion)" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.103" />
+    <PackageVersion Include="NLog" Version="6.1.0" />
+    <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.1" />
     <PackageVersion Include="Macross.Json.Extensions" Version="3.0.0" />
   </ItemGroup>
 
   <!-- Analyzers -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.StaticAnalysis" Version="9.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.StaticAnalysis" Version="10.3.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PerformanceSensitiveAnalyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1" />
     <PackageVersion Include="IDisposableAnalyzers" Version="4.0.8" />
+    <PackageVersion Include="Meziantou.Analyzer " Version="3.0.15" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.19.0.132793" />
   </ItemGroup>
 
   <!-- Tests -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageVersion Include="coverlet.collector" Version="8.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.1" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="NUnit" Version="4.4.0" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
+    <PackageVersion Include="NUnit" Version="4.5.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.1.0" />
   </ItemGroup>
 
   <!-- Benchmarks -->
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="$(BenchmarkDotnetVersion)" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="$(BenchmarkDotnetVersion)" />
-    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36525.3" />
+    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.3.36812.1" />
   </ItemGroup>
 
 </Project>

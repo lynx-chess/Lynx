@@ -225,7 +225,7 @@ public sealed class UCIHandler
                     {
                         var opponent = command[commandItems[4].Start.Value..].ToString();
 
-                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty));
+                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty, StringComparison.OrdinalIgnoreCase));
                     }
                     break;
                 }
@@ -390,7 +390,7 @@ public sealed class UCIHandler
 
             if (Bmi1.IsSupported)
             {
-                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for BitBoard LSB operations");
+                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for Bitboard LSB operations");
             }
 
             if (Bmi2.IsSupported)
@@ -417,7 +417,7 @@ public sealed class UCIHandler
 
         try
         {
-            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
+            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ', StringComparison.OrdinalIgnoreCase) + 1)..].Replace("\"", string.Empty, StringComparison.OrdinalIgnoreCase));
             if (!File.Exists(fullPath))
             {
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
@@ -440,7 +440,7 @@ public sealed class UCIHandler
                 }
 
                 var ourFen = position.FEN();
-                if (ourFen != fen)
+                if (!string.Equals(ourFen, fen, StringComparison.Ordinal))
                 {
                     _logger.Debug("Raw fen: {0}, parsed fen: {1}", fen, ourFen);
                 }

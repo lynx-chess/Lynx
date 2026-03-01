@@ -29,9 +29,9 @@ public class WDLTest
     [TestCase(0, 0)]
     [TestCase(EvaluationConstants.PositiveCheckmateDetectionLimit + 5, EvaluationConstants.PositiveCheckmateDetectionLimit + 5)]
     [TestCase(EvaluationConstants.NegativeCheckmateDetectionLimit - 5, EvaluationConstants.NegativeCheckmateDetectionLimit - 5)]
-    public void NormalizeScore(int score, int expectecNormalizedEval)
+    public void NormalizeScore(int score, int expectedNormalizedEval)
     {
-        Assert.AreEqual(expectecNormalizedEval, WDL.NormalizeScore(score));
+        Assert.AreEqual(expectedNormalizedEval, WDL.NormalizeScore(score));
     }
 
     [TestCase(1000)]

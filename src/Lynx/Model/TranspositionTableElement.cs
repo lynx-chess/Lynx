@@ -25,6 +25,7 @@ public enum NodeType : byte
 /// <summary>
 /// 10 bytes
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public struct TranspositionTableElement
 {
     private ushort _key;        // 2 bytes

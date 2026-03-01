@@ -66,9 +66,9 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 10;
+    public int BenchDepth { get; set; } = 13;
 
-    private int _transpositionTableSize = 256;
+    private int _transpositionTableSize = 32;
 
     /// <summary>
     /// In MB, clamped to [<see cref="Constants.AbsoluteMinTTSize"/>, <see cref="Constants.AbsoluteMaxTTSize"/>]
@@ -137,7 +137,7 @@ public sealed class EngineSettings
     #region Time management
 
     /// <summary>
-    /// Min milliseconds left after substracting <see cref="MoveOverhead"/>
+    /// Min milliseconds left after subtracting <see cref="MoveOverhead"/>
     /// from wtime/btime or movetime. This min value is used to avoid 0 or negative time left.
     /// Resulting milliseconds left are later used to calculate hard and soft time bounds
     /// </summary>
@@ -163,7 +163,7 @@ public sealed class EngineSettings
     public double NodeTmScale { get; set; } = 1.80;
 
     [SPSA<int>(enabled: false)]
-    public int ScoreStabiity_MinDepth { get; set; } = 7;
+    public int ScoreStability_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
     public int StopSearchOnMate_MaxSoftTimeBoundLimit { get; set; } = 10_000;
@@ -403,10 +403,10 @@ public sealed class EngineSettings
     public int FP_HistoryDivisor { get; set; } = 32;
 
     [SPSA<int>(enabled: false)]
-    public int HistoryPrunning_MaxDepth { get; set; } = 5;
+    public int HistoryPruning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -1506;
+    public int HistoryPruning_Margin { get; set; } = -1506;
 
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
@@ -488,6 +488,9 @@ public sealed class EngineSettings
 
     [SPSA<int>(enabled: false)]
     public int SE_LowDepthExtension { get; set; } = 9;
+
+    [SPSA<int>(0, 20, 2)]
+    public int SE_NoPV { get; set; } = 10;
 
     #endregion
 }

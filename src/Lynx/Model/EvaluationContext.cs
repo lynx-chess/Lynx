@@ -1,24 +1,45 @@
-﻿namespace Lynx.Model;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
+[StructLayout(LayoutKind.Sequential)]
 public ref struct EvaluationContext
 {
-    public Span<BitBoard> Attacks;
-    public Span<BitBoard> AttacksBySide;
+    private const int AttacksCount = 12;
+    private const int AttacksBySideCount = 2;
+
+    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount;
+
+    public Span<Bitboard> Attacks;
+    public Span<Bitboard> AttacksBySide;
 
     public int WhiteKingRingAttacks;
     public int BlackKingRingAttacks;
 
-    public EvaluationContext(Span<BitBoard> attacks, Span<BitBoard> attacksBySide)
+    public EvaluationContext(Span<Bitboard> buffer)
     {
-        Attacks = attacks;
-        AttacksBySide = attacksBySide;
+        Debug.Assert(buffer.Length == RequiredBufferSize);
 
-        Attacks.Clear();
-        AttacksBySide.Clear();
+        buffer.Clear();
+
+        Attacks = buffer[..AttacksCount];
+        AttacksBySide = buffer.Slice(AttacksCount, AttacksBySideCount);
     }
 
+    public void Reset()
+    {
+        Attacks.Clear();
+        AttacksBySide.Clear();
+
+        WhiteKingRingAttacks = 0;
+        BlackKingRingAttacks = 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void IncreaseKingRingAttacks(int side, int count)
     {
         if (side == (int)Side.White)

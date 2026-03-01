@@ -132,9 +132,9 @@ public sealed class OptionCommand
             $"option name Threads type spin default {Configuration.EngineSettings.Threads} min 1 max {Constants.MaxThreadCount}",
             $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
             $"option name Ponder type check default {Configuration.EngineSettings.IsPonder.ToLowerString()}",
-            $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions.ToLowerString()}",
             $"option name MoveOverhead type spin default {Configuration.EngineSettings.MoveOverhead} min 1 max {Constants.MaxMoveOverhead}",
-            .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : []
+            $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions.ToLowerString()}",
+            .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : [],
         ];
 
     //"option name UCI_AnalyseMode type check",

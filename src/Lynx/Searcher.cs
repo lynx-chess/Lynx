@@ -57,7 +57,7 @@ public sealed class Searcher : IDisposable
 #endif
 
         // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
-        // It might help performance though due to preventing that zeroing from happenning during search
+        // It might help performance though due to preventing that zeroing from happening during search
         // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
         _ttWrapper.Clear();
 
@@ -362,7 +362,7 @@ public sealed class Searcher : IDisposable
                     continue;
                 }
 
-                // Thread voting, original impl sligtly corrected based on by Heimdall's (based on Berserk's)
+                // Thread voting, original impl slightly corrected based on by Heimdall's (based on Berserk's)
                 if (extraResult.BestMove != default)
                 {
 #if MULTITHREAD_DEBUG
@@ -510,11 +510,11 @@ public sealed class Searcher : IDisposable
         }
 
         // We don't need to reset the main engine in case of hash update
-        // because it was alredy reset there, but whetever
+        // because it was already reset there, but whatever
         _mainEngine.NewGame();
 
         // We don't need to reset the extra engines in case of hash or threads update
-        // because they were alredy reset there, but whetever
+        // because they were already reset there, but whatever
         foreach (var engine in _extraEngines)
         {
             engine.NewGame();
@@ -561,7 +561,7 @@ public sealed class Searcher : IDisposable
             _ttWrapper = TranspositionTableFactory.Create();
 
             // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
-            // It might impact performance though, due to preventing that zeroing from happenning during search
+            // It might impact performance though, due to preventing that zeroing from happening during search
             // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
             _ttWrapper.Clear();
 
@@ -606,7 +606,7 @@ public sealed class Searcher : IDisposable
     }
 
     /// <summary>
-    /// Removes existing <see cref="_extraEngines"/> and allocates new ones baed on <see cref="_searchThreadsCount"/>
+    /// Removes existing <see cref="_extraEngines"/> and allocates new ones based on <see cref="_searchThreadsCount"/>
     /// </summary>
     private void AllocateExtraEngines()
     {

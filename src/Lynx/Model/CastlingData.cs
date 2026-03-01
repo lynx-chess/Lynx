@@ -1,7 +1,10 @@
-﻿namespace Lynx.Model;
+﻿using System.Runtime.InteropServices;
+
+namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly ref struct CastlingData
 {
     public const int DefaultValues = -1;

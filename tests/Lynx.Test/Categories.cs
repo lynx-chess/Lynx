@@ -21,7 +21,7 @@ public static class Categories
     public const string TooLong = "TooLongToBeRun";
 
     /// <summary>
-    /// Can't be run since no prunning is required
+    /// Can't be run since no pruning is required
     /// </summary>
     public const string NoPruning = "RequireNoPruning";
 

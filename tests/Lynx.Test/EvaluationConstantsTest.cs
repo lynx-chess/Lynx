@@ -146,9 +146,9 @@ public class EvaluationConstantsTest
         {
             for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
             {
-                if (MostValueableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
+                if (MostValuableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
                 {
-                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
+                    maxMVVLVAMoveValue = MostValuableVictimLeastValuableAttacker[s][t];
                 }
             }
         }
@@ -165,14 +165,14 @@ public class EvaluationConstantsTest
         {
             for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
             {
-                if (MostValueableVictimLeastValuableAttacker[s][t] < minMVVLVAMoveValue)
+                if (MostValuableVictimLeastValuableAttacker[s][t] < minMVVLVAMoveValue)
                 {
-                    minMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
+                    minMVVLVAMoveValue = MostValuableVictimLeastValuableAttacker[s][t];
                 }
 
-                if (MostValueableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
+                if (MostValuableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
                 {
-                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
+                    maxMVVLVAMoveValue = MostValuableVictimLeastValuableAttacker[s][t];
                 }
             }
         }
@@ -201,14 +201,14 @@ public class EvaluationConstantsTest
         {
             for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
             {
-                if (MostValueableVictimLeastValuableAttacker[s][t] < minMVVLVAMoveValue)
+                if (MostValuableVictimLeastValuableAttacker[s][t] < minMVVLVAMoveValue)
                 {
-                    minMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
+                    minMVVLVAMoveValue = MostValuableVictimLeastValuableAttacker[s][t];
                 }
 
-                if (MostValueableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
+                if (MostValuableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
                 {
-                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
+                    maxMVVLVAMoveValue = MostValuableVictimLeastValuableAttacker[s][t];
                 }
             }
         }
@@ -235,9 +235,9 @@ public class EvaluationConstantsTest
         {
             for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
             {
-                if (MostValueableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
+                if (MostValuableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
                 {
-                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
+                    maxMVVLVAMoveValue = MostValuableVictimLeastValuableAttacker[s][t];
                 }
             }
         }

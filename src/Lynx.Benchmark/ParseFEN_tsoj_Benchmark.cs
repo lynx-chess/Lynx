@@ -73,7 +73,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant, int HalfMoveClock);
+using ParseResult = (ulong[] PieceBitboards, ulong[] OccupancyBitboards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant, int HalfMoveClock);
 
 namespace Lynx.Benchmark;
 
@@ -110,8 +110,8 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
         {
             fen = fen.Trim();
 
-            var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
-            var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
+            var pieceBitboards = ArrayPool<Bitboard>.Shared.Rent(12);
+            var occupancyBitboards = ArrayPool<Bitboard>.Shared.Rent(3);
             var board = ArrayPool<int>.Shared.Rent(64);
             Array.Fill(board, (int)Piece.None);
 
@@ -123,7 +123,7 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
             try
             {
-                ParseBoard(fen, pieceBitBoards, occupancyBitBoards, board);
+                ParseBoard(fen, pieceBitboards, occupancyBitboards, board);
 
                 var unparsedStringAsSpan = fen[fen.IndexOf(' ')..];
                 Span<Range> parts = stackalloc Range[5];
@@ -138,7 +138,7 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
                 castle = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
 
-                (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
+                (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitboards, side);
 
                 if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
                 {
@@ -150,8 +150,8 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
                 //    _logger.Debug("No full move counter detected");
                 //}
 
-                if (pieceBitBoards[(int)Piece.K].CountBits() != 1
-                    || pieceBitBoards[(int)Piece.k].CountBits() != 1)
+                if (pieceBitboards[(int)Piece.K].CountBits() != 1
+                    || pieceBitboards[(int)Piece.k].CountBits() != 1)
                 {
                     throw new LynxException("Missing or extra kings");
                 }
@@ -166,12 +166,12 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
             return success
-                ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+                ? (pieceBitboards, occupancyBitboards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
                 : throw new LynxException($"Error parsing {fen.ToString()}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards, int[] board)
+        private static void ParseBoard(ReadOnlySpan<char> fen, Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards, int[] board)
         {
             var rankIndex = 0;
             var end = fen.IndexOf('/');
@@ -180,17 +180,17 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
             {
                 var match = fen[..end];
 
-                ParseBoardSection(pieceBitBoards, board, rankIndex, match);
+                ParseBoardSection(pieceBitboards, board, rankIndex, match);
 
                 fen = fen[(end + 1)..];
                 end = fen.IndexOf('/');
                 ++rankIndex;
             }
 
-            ParseBoardSection(pieceBitBoards, board, rankIndex, fen[..fen.IndexOf(' ')]);
-            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+            ParseBoardSection(pieceBitboards, board, rankIndex, fen[..fen.IndexOf(' ')]);
+            PopulateOccupancies(pieceBitboards, occupancyBitboards);
 
-            static void ParseBoardSection(BitBoard[] pieceBitBoards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
+            static void ParseBoardSection(Bitboard[] pieceBitboards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
             {
                 int fileIndex = 0;
 
@@ -217,8 +217,8 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
                     if (piece != Piece.None)
                     {
-                        var square = BitBoardExtensions.SquareIndex(rankIndex, fileIndex);
-                        pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(square);
+                        var square = BitboardExtensions.SquareIndex(rankIndex, fileIndex);
+                        pieceBitboards[(int)piece] = pieceBitboards[(int)piece].SetBit(square);
                         board[square] = (int)piece;
                         ++fileIndex;
                     }
@@ -230,15 +230,15 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
                 }
             }
 
-            static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+            static void PopulateOccupancies(Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards)
             {
                 for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
                 {
-                    occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-                    occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
+                    occupancyBitboards[(int)Side.White] |= pieceBitboards[piece];
+                    occupancyBitboards[(int)Side.Black] |= pieceBitboards[piece + 6];
                 }
 
-                occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
+                occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
             }
         }
 
@@ -275,7 +275,7 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, BitBoard[] PieceBitBoards, Side side)
+        private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, Bitboard[] PieceBitboards, Side side)
         {
             bool success = true;
             BoardSquare enPassant = BoardSquare.noSquare;
@@ -298,11 +298,11 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
                 var pawnSquare = (int)enPassant + pawnOffset;
 
-                var pawnBitBoard = side == Side.White
-                    ? PieceBitBoards[(int)Piece.p]
-                    : PieceBitBoards[(int)Piece.P];
+                var pawnBitboard = side == Side.White
+                    ? PieceBitboards[(int)Piece.p]
+                    : PieceBitboards[(int)Piece.P];
 
-                if (!pawnBitBoard.GetBit(pawnSquare))
+                if (!pawnBitboard.GetBit(pawnSquare))
                 {
                     success = false;
                     _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
@@ -327,8 +327,8 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
         {
             fen = fen.Trim();
 
-            var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
-            var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
+            var pieceBitboards = ArrayPool<Bitboard>.Shared.Rent(12);
+            var occupancyBitboards = ArrayPool<Bitboard>.Shared.Rent(3);
             var board = ArrayPool<int>.Shared.Rent(64);
             Array.Fill(board, (int)Piece.None);
 
@@ -340,7 +340,7 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
             try
             {
-                ParseBoard(fen, pieceBitBoards, occupancyBitBoards, board);
+                ParseBoard(fen, pieceBitboards, occupancyBitboards, board);
 
                 var unparsedStringAsSpan = fen[fen.IndexOf(' ')..];
                 Span<Range> parts = stackalloc Range[5];
@@ -355,7 +355,7 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
                 castle = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
 
-                (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
+                (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitboards, side);
 
                 if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
                 {
@@ -367,8 +367,8 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
                 //    _logger.Debug("No full move counter detected");
                 //}
 
-                if (pieceBitBoards[(int)Piece.K].CountBits() != 1
-                    || pieceBitBoards[(int)Piece.k].CountBits() != 1)
+                if (pieceBitboards[(int)Piece.K].CountBits() != 1
+                    || pieceBitboards[(int)Piece.k].CountBits() != 1)
                 {
                     throw new LynxException("Missing or extra kings");
                 }
@@ -383,12 +383,12 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
             return success
-                ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock)
+                ? (pieceBitboards, occupancyBitboards, board, side, castle, enPassant, halfMoveClock)
                 : throw new LynxException($"Error parsing {fen.ToString()}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards, int[] board)
+        private static void ParseBoard(ReadOnlySpan<char> fen, Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards, int[] board)
         {
             Span<char> transformedFen = stackalloc char[128];
             int index = 0;
@@ -420,7 +420,7 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
             {
                 for (int file = 0; file < 8; ++file)
                 {
-                    var squareIndex = BitBoardExtensions.SquareIndex(7 - rank, file);
+                    var squareIndex = BitboardExtensions.SquareIndex(7 - rank, file);
 
                     var piece = transformedFen[squareIndex] switch
                     {
@@ -443,23 +443,23 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
                     if (piece != Piece.None)
                     {
-                        pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(squareIndex);
+                        pieceBitboards[(int)piece] = pieceBitboards[(int)piece].SetBit(squareIndex);
                         board[squareIndex] = (int)piece;
                     }
                 }
             }
 
-            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+            PopulateOccupancies(pieceBitboards, occupancyBitboards);
 
-            static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+            static void PopulateOccupancies(Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards)
             {
                 for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
                 {
-                    occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-                    occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
+                    occupancyBitboards[(int)Side.White] |= pieceBitboards[piece];
+                    occupancyBitboards[(int)Side.Black] |= pieceBitboards[piece + 6];
                 }
 
-                occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
+                occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
             }
         }
 
@@ -496,7 +496,7 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, BitBoard[] PieceBitBoards, Side side)
+        private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, Bitboard[] PieceBitboards, Side side)
         {
             bool success = true;
             BoardSquare enPassant = BoardSquare.noSquare;
@@ -519,11 +519,11 @@ public class ParseFEN_tsoj_Benchmark : BaseBenchmark
 
                 var pawnSquare = (int)enPassant + pawnOffset;
 
-                var pawnBitBoard = side == Side.White
-                    ? PieceBitBoards[(int)Piece.p]
-                    : PieceBitBoards[(int)Piece.P];
+                var pawnBitboard = side == Side.White
+                    ? PieceBitboards[(int)Piece.p]
+                    : PieceBitboards[(int)Piece.P];
 
-                if (!pawnBitBoard.GetBit(pawnSquare))
+                if (!pawnBitboard.GetBit(pawnSquare))
                 {
                     success = false;
                     _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);

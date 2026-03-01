@@ -26,9 +26,8 @@ public sealed partial class Engine
 
         Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
@@ -374,7 +373,7 @@ public sealed partial class Engine
             int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
 
-            // If we prune while getting checmated, we risk not finding any move and having an empty PV
+            // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-low pruning (moves with low scores) - prune less when improving
@@ -396,8 +395,8 @@ public sealed partial class Engine
                 // 🔍 History pruning -  all quiet moves can be pruned
                 // once we find one with a history score too low
                 if (!isCapture
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && quietHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && depth < Configuration.EngineSettings.HistoryPruning_MaxDepth    // TODO use LMR depth
+                    && quietHistory < Configuration.EngineSettings.HistoryPruning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -463,6 +462,13 @@ public sealed partial class Engine
 
                 var verificationDepth = (depth - 1) / 2;    // TODO tune?
                 var singularBeta = ttEntry.Score - (depth * Configuration.EngineSettings.SE_DepthMultiplier);
+
+                // No longer PV - Potential author idea
+                if (ttPv && !pvNode)
+                {
+                    singularBeta -= Configuration.EngineSettings.SE_NoPV;
+                }
+
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
@@ -488,6 +494,7 @@ public sealed partial class Engine
                     }
                 }
                 // Multicut
+#pragma warning disable MA0071 // Avoid using redundant else
                 else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
                 {
                     return singularScore;
@@ -497,6 +504,7 @@ public sealed partial class Engine
                 {
                     --singularDepthExtensions;
                 }
+#pragma warning restore MA0071 // Avoid using redundant else
 
                 gameState = position.MakeMove(move);
             }
@@ -643,7 +651,7 @@ public sealed partial class Engine
                         var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
                         var shallower = score < bestScore + depth;
 
-                        if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
+                        if (deeper && !shallower && newDepth < Configuration.EngineSettings.MaxDepth)
                         {
                             ++newDepth;
                         }
@@ -788,9 +796,8 @@ public sealed partial class Engine
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {

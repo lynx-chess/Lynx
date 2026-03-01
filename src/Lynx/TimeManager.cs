@@ -55,7 +55,7 @@ public static class TimeManager
         }
         else if (goCommand.MoveTime > 0)
         {
-            softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
+            hardLimitTimeBound = goCommand.MoveTime;
             _logger.Info("Time to move: {0}ms", hardLimitTimeBound);
         }
         else if (goCommand.Depth > 0)
@@ -106,8 +106,8 @@ public static class TimeManager
         double bestMoveStabilityFactor = BestMoveStabilityValues[Math.Min(bestMoveStability, BestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
-        // ⌛ Score stability: if score improves, we spend less timespend in the search
-        if (depth >= Configuration.EngineSettings.ScoreStabiity_MinDepth)
+        // ⌛ Score stability: if score improves, we spend less time spent in the search
+        if (depth >= Configuration.EngineSettings.ScoreStability_MinDepth)
         {
             scoreStabilityFactor = CalculateScoreStability(scoreDelta);
             scale *= scoreStabilityFactor;

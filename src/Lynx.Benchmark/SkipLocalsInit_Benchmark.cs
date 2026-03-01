@@ -77,11 +77,11 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
     private static class SkipLocalsInit_AttackGenerator_Original
     {
         /// <summary>
-        /// BitBoard[isWhite, square]
+        /// Bitboard[isWhite, square]
         /// </summary>
-        public static BitBoard[][] InitializePawnAttacks()
+        public static Bitboard[][] InitializePawnAttacks()
         {
-            BitBoard[][] pawnAttacks = [new BitBoard[64], new BitBoard[64]];
+            Bitboard[][] pawnAttacks = [new Bitboard[64], new Bitboard[64]];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -92,9 +92,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return pawnAttacks;
         }
 
-        public static BitBoard[] InitializeKnightAttacks()
+        public static Bitboard[] InitializeKnightAttacks()
         {
-            BitBoard[] knightAttacks = new BitBoard[64];
+            Bitboard[] knightAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -104,9 +104,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return knightAttacks;
         }
 
-        public static BitBoard[] InitializeKingAttacks()
+        public static Bitboard[] InitializeKingAttacks()
         {
-            BitBoard[] kingAttacks = new BitBoard[64];
+            Bitboard[] kingAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -116,9 +116,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return kingAttacks;
         }
 
-        public static BitBoard[] InitializeBishopOccupancy()
+        public static Bitboard[] InitializeBishopOccupancy()
         {
-            BitBoard[] bishopAttacks = new BitBoard[64];
+            Bitboard[] bishopAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -128,9 +128,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return bishopAttacks;
         }
 
-        public static BitBoard[] InitializeRookOccupancy()
+        public static Bitboard[] InitializeRookOccupancy()
         {
-            BitBoard[] rookAttacks = new BitBoard[64];
+            Bitboard[] rookAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -143,11 +143,11 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// Returns bishop occupancy masks and attacks
         /// </summary>
-        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-        public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopMagicAttacks()
+        /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
+        public static (Bitboard[] BishopOccupancyMasks, Bitboard[,] BishopAttacks) InitializeBishopMagicAttacks()
         {
-            BitBoard[] occupancyMasks = new BitBoard[64];
-            BitBoard[,] attacks = new BitBoard[64, 512];
+            Bitboard[] occupancyMasks = new Bitboard[64];
+            Bitboard[,] attacks = new Bitboard[64, 512];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -173,11 +173,11 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// Returns rook occupancy masks and attacks
         /// </summary>
-        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-        public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookMagicAttacks()
+        /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
+        public static (Bitboard[] RookOccupancyMasks, Bitboard[,] RookAttacks) InitializeRookMagicAttacks()
         {
-            BitBoard[] occupancyMasks = new BitBoard[64];
-            BitBoard[,] attacks = new BitBoard[64, 4096];
+            Bitboard[] occupancyMasks = new Bitboard[64];
+            Bitboard[,] attacks = new Bitboard[64, 4096];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -200,16 +200,16 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return (occupancyMasks, attacks);
         }
 
-        public static BitBoard MaskPawnAttacks(int squareIndex, bool isWhite)
+        public static Bitboard MaskPawnAttacks(int squareIndex, bool isWhite)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             if (isWhite)
             {
@@ -218,7 +218,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 0 0
                  */
-                var right = bitBoard >> 7;
+                var right = bitboard >> 7;
                 if ((right & Constants.NotAFile) != default)
                 {
                     attacks |= right;
@@ -229,7 +229,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 0 0
                  */
-                var left = bitBoard >> 9;
+                var left = bitboard >> 9;
                 if ((left & Constants.NotHFile) != default)
                 {
                     attacks |= left;
@@ -242,7 +242,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 X 0 0 0
                  */
-                var left = bitBoard << 7;
+                var left = bitboard << 7;
                 if ((left & Constants.NotHFile) != default)
                 {
                     attacks |= left;
@@ -253,7 +253,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 X 0
                  */
-                var right = bitBoard << 9;
+                var right = bitboard << 9;
                 if ((right & Constants.NotAFile) != default)
                 {
                     attacks |= right;
@@ -263,16 +263,16 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard MaskKnightAttacks(int squareIndex)
+        public static Bitboard MaskKnightAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             /*
              * 0 X 0 0 0
@@ -281,7 +281,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            var attack = bitBoard >> 17;
+            var attack = bitboard >> 17;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -294,7 +294,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 15;
+            attack = bitboard >> 15;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -307,7 +307,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 X 0 0 0
              */
-            attack = bitBoard << 15;
+            attack = bitboard << 15;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -320,7 +320,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 X 0
              */
-            attack = bitBoard << 17;
+            attack = bitboard << 17;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -333,7 +333,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 10;
+            attack = bitboard >> 10;
             if ((attack & Constants.NotHGFiles) != default)
             {
                 attacks |= attack;
@@ -346,7 +346,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 6;
+            attack = bitboard >> 6;
             if ((attack & Constants.NotABFiles) != default)
             {
                 attacks |= attack;
@@ -359,7 +359,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * X 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard << 6;
+            attack = bitboard << 6;
             if ((attack & Constants.NotHGFiles) != default)
             {
                 attacks |= attack;
@@ -372,7 +372,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 X
              * 0 0 0 0 0
              */
-            attack = bitBoard << 10;
+            attack = bitboard << 10;
             if ((attack & Constants.NotABFiles) != default)
             {
                 attacks |= attack;
@@ -381,23 +381,23 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard MaskKingAttacks(int squareIndex)
+        public static Bitboard MaskKingAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             /*
              * X 0 0
              * 0 1 0
              * 0 0 0
              */
-            var attack = bitBoard >> 9;
+            var attack = bitboard >> 9;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -408,14 +408,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * 0 0 0
              */
-            attacks |= bitBoard >> 8;
+            attacks |= bitboard >> 8;
 
             /*
              * 0 0 X
              * 0 1 0
              * 0 0 0
              */
-            attack = bitBoard >> 7;
+            attack = bitboard >> 7;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -426,7 +426,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * X 1 0
              * 0 0 0
              */
-            attack = bitBoard >> 1;
+            attack = bitboard >> 1;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -437,7 +437,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 X
              * 0 0 0
              */
-            attack = bitBoard << 1;
+            attack = bitboard << 1;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -448,7 +448,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * X 0 0
              */
-            attack = bitBoard << 7;
+            attack = bitboard << 7;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -459,14 +459,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * 0 X 0
              */
-            attacks |= bitBoard << 8;
+            attacks |= bitboard << 8;
 
             /*
              * 0 0 0
              * 0 1 0
              * X 0 0
              */
-            attack = bitBoard << 9;
+            attack = bitboard << 9;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -480,10 +480,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a bishop is placed on a corner)
         /// </summary>
-        public static BitBoard MaskBishopOccupancy(int squareIndex)
+        public static Bitboard MaskBishopOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -501,7 +501,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 6 && file <= 6; ++rank, ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -513,7 +513,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 1 && file >= 1; --rank, --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -525,7 +525,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 1 && file <= 6; --rank, ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -537,7 +537,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 6 && file >= 1; ++rank, --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             return attacks;
@@ -548,10 +548,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a rook is placed on a corner)
         /// </summary>
-        public static BitBoard MaskRookOccupancy(int squareIndex)
+        public static Bitboard MaskRookOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -569,7 +569,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile + 1; file <= 6; ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             }
 
             /*
@@ -581,7 +581,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile - 1; file >= 1; --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             }
 
             /*
@@ -593,7 +593,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1; rank <= 6; ++rank)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             }
 
             /*
@@ -605,7 +605,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1; rank >= 1; --rank)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             }
 
             return attacks;
@@ -620,10 +620,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// </param>
         /// <param name="occupancyMask">Bishop or rook occupancy (<see cref="AttackGenerator.MaskBishopOccupancy(int)"/> and <see cref="AttackGenerator.MaskRookOccupancy(int)"/>)</param>
         /// <returns>An occupancy set for the given index</returns>
-        public static BitBoard SetBishopOrRookOccupancy(int index, BitBoard occupancyMask)
+        public static Bitboard SetBishopOrRookOccupancy(int index, Bitboard occupancyMask)
         {
             var bitsInMask = occupancyMask.CountBits();
-            var occupancy = new BitBoard();
+            var occupancy = new Bitboard();
 
             // Loop over the range of bits within attack mask
             for (int count = 0; count < bitsInMask; ++count)
@@ -643,10 +643,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return occupancy;
         }
 
-        public static BitBoard GenerateBishopAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
+        public static Bitboard GenerateBishopAttacksOnTheFly(int squareIndex, Bitboard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -664,7 +664,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 7 && file <= 7; ++rank, ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -682,7 +682,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 0 && file >= 0; --rank, --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -700,7 +700,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 0 && file <= 7; --rank, ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -718,7 +718,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 7 && file >= 0; ++rank, --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -730,10 +730,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard GenerateRookAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
+        public static Bitboard GenerateRookAttacksOnTheFly(int squareIndex, Bitboard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -751,7 +751,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile + 1; file <= 7; ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -769,7 +769,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile - 1; file >= 0; --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -787,7 +787,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1; rank <= 7; ++rank)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -805,7 +805,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1; rank >= 0; --rank)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -821,12 +821,12 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
     private static class SkipLocalsInit_AttackGenerator_SkipLocalsInit
     {
         /// <summary>
-        /// BitBoard[isWhite, square]
+        /// Bitboard[isWhite, square]
         /// </summary>
         [SkipLocalsInit]
-        public static BitBoard[,] InitializePawnAttacks()
+        public static Bitboard[,] InitializePawnAttacks()
         {
-            BitBoard[,] pawnAttacks = new BitBoard[2, 64];
+            Bitboard[,] pawnAttacks = new Bitboard[2, 64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -838,9 +838,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         }
 
         [SkipLocalsInit]
-        public static BitBoard[] InitializeKnightAttacks()
+        public static Bitboard[] InitializeKnightAttacks()
         {
-            BitBoard[] knightAttacks = new BitBoard[64];
+            Bitboard[] knightAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -851,9 +851,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         }
 
         [SkipLocalsInit]
-        public static BitBoard[] InitializeKingAttacks()
+        public static Bitboard[] InitializeKingAttacks()
         {
-            BitBoard[] kingAttacks = new BitBoard[64];
+            Bitboard[] kingAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -864,9 +864,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         }
 
         [SkipLocalsInit]
-        public static BitBoard[] InitializeBishopOccupancy()
+        public static Bitboard[] InitializeBishopOccupancy()
         {
-            BitBoard[] bishopAttacks = new BitBoard[64];
+            Bitboard[] bishopAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -877,9 +877,9 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         }
 
         [SkipLocalsInit]
-        public static BitBoard[] InitializeRookOccupancy()
+        public static Bitboard[] InitializeRookOccupancy()
         {
-            BitBoard[] rookAttacks = new BitBoard[64];
+            Bitboard[] rookAttacks = new Bitboard[64];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -892,12 +892,12 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// Returns bishop occupancy masks and attacks
         /// </summary>
-        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
+        /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
         [SkipLocalsInit]
-        public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopMagicAttacks()
+        public static (Bitboard[] BishopOccupancyMasks, Bitboard[,] BishopAttacks) InitializeBishopMagicAttacks()
         {
-            BitBoard[] occupancyMasks = new BitBoard[64];
-            BitBoard[,] attacks = new BitBoard[64, 512];
+            Bitboard[] occupancyMasks = new Bitboard[64];
+            Bitboard[,] attacks = new Bitboard[64, 512];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -923,12 +923,12 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// Returns rook occupancy masks and attacks
         /// </summary>
-        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
+        /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
         [SkipLocalsInit]
-        public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookMagicAttacks()
+        public static (Bitboard[] RookOccupancyMasks, Bitboard[,] RookAttacks) InitializeRookMagicAttacks()
         {
-            BitBoard[] occupancyMasks = new BitBoard[64];
-            BitBoard[,] attacks = new BitBoard[64, 4096];
+            Bitboard[] occupancyMasks = new Bitboard[64];
+            Bitboard[,] attacks = new Bitboard[64, 4096];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -951,16 +951,16 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return (occupancyMasks, attacks);
         }
 
-        public static BitBoard MaskPawnAttacks(int squareIndex, bool isWhite)
+        public static Bitboard MaskPawnAttacks(int squareIndex, bool isWhite)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             if (isWhite)
             {
@@ -969,7 +969,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 0 0
                  */
-                var right = bitBoard >> 7;
+                var right = bitboard >> 7;
                 if ((right & Constants.NotAFile) != default)
                 {
                     attacks |= right;
@@ -980,7 +980,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 0 0
                  */
-                var left = bitBoard >> 9;
+                var left = bitboard >> 9;
                 if ((left & Constants.NotHFile) != default)
                 {
                     attacks |= left;
@@ -993,7 +993,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 X 0 0 0
                  */
-                var left = bitBoard << 7;
+                var left = bitboard << 7;
                 if ((left & Constants.NotHFile) != default)
                 {
                     attacks |= left;
@@ -1004,7 +1004,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 X 0
                  */
-                var right = bitBoard << 9;
+                var right = bitboard << 9;
                 if ((right & Constants.NotAFile) != default)
                 {
                     attacks |= right;
@@ -1014,16 +1014,16 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard MaskKnightAttacks(int squareIndex)
+        public static Bitboard MaskKnightAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             /*
              * 0 X 0 0 0
@@ -1032,7 +1032,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            var attack = bitBoard >> 17;
+            var attack = bitboard >> 17;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1045,7 +1045,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 15;
+            attack = bitboard >> 15;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1058,7 +1058,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 X 0 0 0
              */
-            attack = bitBoard << 15;
+            attack = bitboard << 15;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1071,7 +1071,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 X 0
              */
-            attack = bitBoard << 17;
+            attack = bitboard << 17;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1084,7 +1084,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 10;
+            attack = bitboard >> 10;
             if ((attack & Constants.NotHGFiles) != default)
             {
                 attacks |= attack;
@@ -1097,7 +1097,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 6;
+            attack = bitboard >> 6;
             if ((attack & Constants.NotABFiles) != default)
             {
                 attacks |= attack;
@@ -1110,7 +1110,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * X 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard << 6;
+            attack = bitboard << 6;
             if ((attack & Constants.NotHGFiles) != default)
             {
                 attacks |= attack;
@@ -1123,7 +1123,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 X
              * 0 0 0 0 0
              */
-            attack = bitBoard << 10;
+            attack = bitboard << 10;
             if ((attack & Constants.NotABFiles) != default)
             {
                 attacks |= attack;
@@ -1132,23 +1132,23 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard MaskKingAttacks(int squareIndex)
+        public static Bitboard MaskKingAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             /*
              * X 0 0
              * 0 1 0
              * 0 0 0
              */
-            var attack = bitBoard >> 9;
+            var attack = bitboard >> 9;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1159,14 +1159,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * 0 0 0
              */
-            attacks |= bitBoard >> 8;
+            attacks |= bitboard >> 8;
 
             /*
              * 0 0 X
              * 0 1 0
              * 0 0 0
              */
-            attack = bitBoard >> 7;
+            attack = bitboard >> 7;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1177,7 +1177,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * X 1 0
              * 0 0 0
              */
-            attack = bitBoard >> 1;
+            attack = bitboard >> 1;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1188,7 +1188,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 X
              * 0 0 0
              */
-            attack = bitBoard << 1;
+            attack = bitboard << 1;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1199,7 +1199,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * X 0 0
              */
-            attack = bitBoard << 7;
+            attack = bitboard << 7;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1210,14 +1210,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * 0 X 0
              */
-            attacks |= bitBoard << 8;
+            attacks |= bitboard << 8;
 
             /*
              * 0 0 0
              * 0 1 0
              * X 0 0
              */
-            attack = bitBoard << 9;
+            attack = bitboard << 9;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1231,10 +1231,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a bishop is placed on a corner)
         /// </summary>
-        public static BitBoard MaskBishopOccupancy(int squareIndex)
+        public static Bitboard MaskBishopOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -1252,7 +1252,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 6 && file <= 6; ++rank, ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -1264,7 +1264,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 1 && file >= 1; --rank, --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -1276,7 +1276,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 1 && file <= 6; --rank, ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -1288,7 +1288,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 6 && file >= 1; ++rank, --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             return attacks;
@@ -1299,10 +1299,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a rook is placed on a corner)
         /// </summary>
-        public static BitBoard MaskRookOccupancy(int squareIndex)
+        public static Bitboard MaskRookOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -1320,7 +1320,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile + 1; file <= 6; ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             }
 
             /*
@@ -1332,7 +1332,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile - 1; file >= 1; --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             }
 
             /*
@@ -1344,7 +1344,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1; rank <= 6; ++rank)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             }
 
             /*
@@ -1356,7 +1356,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1; rank >= 1; --rank)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             }
 
             return attacks;
@@ -1371,10 +1371,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// </param>
         /// <param name="occupancyMask">Bishop or rook occupancy (<see cref="AttackGenerator.MaskBishopOccupancy(int)"/> and <see cref="AttackGenerator.MaskRookOccupancy(int)"/>)</param>
         /// <returns>An occupancy set for the given index</returns>
-        public static BitBoard SetBishopOrRookOccupancy(int index, BitBoard occupancyMask)
+        public static Bitboard SetBishopOrRookOccupancy(int index, Bitboard occupancyMask)
         {
             var bitsInMask = occupancyMask.CountBits();
-            var occupancy = new BitBoard();
+            var occupancy = new Bitboard();
 
             // Loop over the range of bits within attack mask
             for (int count = 0; count < bitsInMask; ++count)
@@ -1394,10 +1394,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return occupancy;
         }
 
-        public static BitBoard GenerateBishopAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
+        public static Bitboard GenerateBishopAttacksOnTheFly(int squareIndex, Bitboard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -1415,7 +1415,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 7 && file <= 7; ++rank, ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1433,7 +1433,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 0 && file >= 0; --rank, --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1451,7 +1451,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 0 && file <= 7; --rank, ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1469,7 +1469,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 7 && file >= 0; ++rank, --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1481,10 +1481,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard GenerateRookAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
+        public static Bitboard GenerateRookAttacksOnTheFly(int squareIndex, Bitboard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -1502,7 +1502,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile + 1; file <= 7; ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1520,7 +1520,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile - 1; file >= 0; --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1538,7 +1538,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1; rank <= 7; ++rank)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1556,7 +1556,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1; rank >= 0; --rank)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -1572,11 +1572,11 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
     private static class SkipLocalsInit_AttackGenerator_Other
     {
         /// <summary>
-        /// BitBoard[isWhite, square]
+        /// Bitboard[isWhite, square]
         /// </summary>
-        public static BitBoard[][] InitializePawnAttacks()
+        public static Bitboard[][] InitializePawnAttacks()
         {
-            BitBoard[][] pawnAttacks = [new BitBoard[64], new BitBoard[64]];
+            Bitboard[][] pawnAttacks = [new Bitboard[64], new Bitboard[64]];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -1587,22 +1587,22 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return pawnAttacks;
         }
 
-        public static BitBoard[] InitializeKnightAttacks()
+        public static Bitboard[] InitializeKnightAttacks()
         {
             return [.. Enumerable.Range(0, 64).Select(MaskKnightAttacks)];
         }
 
-        public static BitBoard[] InitializeKingAttacks()
+        public static Bitboard[] InitializeKingAttacks()
         {
             return [.. Enumerable.Range(0, 64).Select(MaskKingAttacks)];
         }
 
-        public static BitBoard[] InitializeBishopOccupancy()
+        public static Bitboard[] InitializeBishopOccupancy()
         {
             return [.. Enumerable.Range(0, 64).Select(MaskBishopOccupancy)];
         }
 
-        public static BitBoard[] InitializeRookOccupancy()
+        public static Bitboard[] InitializeRookOccupancy()
         {
             return [.. Enumerable.Range(0, 64).Select(MaskRookOccupancy)];
         }
@@ -1610,11 +1610,11 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// Returns bishop occupancy masks and attacks
         /// </summary>
-        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-        public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopMagicAttacks()
+        /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
+        public static (Bitboard[] BishopOccupancyMasks, Bitboard[,] BishopAttacks) InitializeBishopMagicAttacks()
         {
-            BitBoard[] occupancyMasks = new BitBoard[64];
-            BitBoard[,] attacks = new BitBoard[64, 512];
+            Bitboard[] occupancyMasks = new Bitboard[64];
+            Bitboard[,] attacks = new Bitboard[64, 512];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -1640,11 +1640,11 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// Returns rook occupancy masks and attacks
         /// </summary>
-        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-        public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookMagicAttacks()
+        /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
+        public static (Bitboard[] RookOccupancyMasks, Bitboard[,] RookAttacks) InitializeRookMagicAttacks()
         {
-            BitBoard[] occupancyMasks = new BitBoard[64];
-            BitBoard[,] attacks = new BitBoard[64, 4096];
+            Bitboard[] occupancyMasks = new Bitboard[64];
+            Bitboard[,] attacks = new Bitboard[64, 4096];
 
             for (int square = 0; square < 64; ++square)
             {
@@ -1667,16 +1667,16 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return (occupancyMasks, attacks);
         }
 
-        public static BitBoard MaskPawnAttacks(int squareIndex, bool isWhite)
+        public static Bitboard MaskPawnAttacks(int squareIndex, bool isWhite)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             if (isWhite)
             {
@@ -1685,7 +1685,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 0 0
                  */
-                var right = bitBoard >> 7;
+                var right = bitboard >> 7;
                 if ((right & Constants.NotAFile) != default)
                 {
                     attacks |= right;
@@ -1696,7 +1696,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 0 0
                  */
-                var left = bitBoard >> 9;
+                var left = bitboard >> 9;
                 if ((left & Constants.NotHFile) != default)
                 {
                     attacks |= left;
@@ -1709,7 +1709,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 X 0 0 0
                  */
-                var left = bitBoard << 7;
+                var left = bitboard << 7;
                 if ((left & Constants.NotHFile) != default)
                 {
                     attacks |= left;
@@ -1720,7 +1720,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
                  * 0 0 1 0 0
                  * 0 0 0 X 0
                  */
-                var right = bitBoard << 9;
+                var right = bitboard << 9;
                 if ((right & Constants.NotAFile) != default)
                 {
                     attacks |= right;
@@ -1730,16 +1730,16 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard MaskKnightAttacks(int squareIndex)
+        public static Bitboard MaskKnightAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             /*
              * 0 X 0 0 0
@@ -1748,7 +1748,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            var attack = bitBoard >> 17;
+            var attack = bitboard >> 17;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1761,7 +1761,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 15;
+            attack = bitboard >> 15;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1774,7 +1774,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 X 0 0 0
              */
-            attack = bitBoard << 15;
+            attack = bitboard << 15;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1787,7 +1787,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 X 0
              */
-            attack = bitBoard << 17;
+            attack = bitboard << 17;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1800,7 +1800,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 10;
+            attack = bitboard >> 10;
             if ((attack & Constants.NotHGFiles) != default)
             {
                 attacks |= attack;
@@ -1813,7 +1813,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard >> 6;
+            attack = bitboard >> 6;
             if ((attack & Constants.NotABFiles) != default)
             {
                 attacks |= attack;
@@ -1826,7 +1826,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * X 0 0 0 0
              * 0 0 0 0 0
              */
-            attack = bitBoard << 6;
+            attack = bitboard << 6;
             if ((attack & Constants.NotHGFiles) != default)
             {
                 attacks |= attack;
@@ -1839,7 +1839,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 0 0 0 X
              * 0 0 0 0 0
              */
-            attack = bitBoard << 10;
+            attack = bitboard << 10;
             if ((attack & Constants.NotABFiles) != default)
             {
                 attacks |= attack;
@@ -1848,23 +1848,23 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard MaskKingAttacks(int squareIndex)
+        public static Bitboard MaskKingAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             // Piece bitboard
-            BitBoard bitBoard = default;
+            Bitboard bitboard = default;
 
             // Set piece on board
-            bitBoard.SetBit(squareIndex);
+            bitboard.SetBit(squareIndex);
 
             /*
              * X 0 0
              * 0 1 0
              * 0 0 0
              */
-            var attack = bitBoard >> 9;
+            var attack = bitboard >> 9;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1875,14 +1875,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * 0 0 0
              */
-            attacks |= bitBoard >> 8;
+            attacks |= bitboard >> 8;
 
             /*
              * 0 0 X
              * 0 1 0
              * 0 0 0
              */
-            attack = bitBoard >> 7;
+            attack = bitboard >> 7;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1893,7 +1893,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * X 1 0
              * 0 0 0
              */
-            attack = bitBoard >> 1;
+            attack = bitboard >> 1;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1904,7 +1904,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 X
              * 0 0 0
              */
-            attack = bitBoard << 1;
+            attack = bitboard << 1;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1915,7 +1915,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * X 0 0
              */
-            attack = bitBoard << 7;
+            attack = bitboard << 7;
             if ((attack & Constants.NotHFile) != default)
             {
                 attacks |= attack;
@@ -1926,14 +1926,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              * 0 1 0
              * 0 X 0
              */
-            attacks |= bitBoard << 8;
+            attacks |= bitboard << 8;
 
             /*
              * 0 0 0
              * 0 1 0
              * X 0 0
              */
-            attack = bitBoard << 9;
+            attack = bitboard << 9;
             if ((attack & Constants.NotAFile) != default)
             {
                 attacks |= attack;
@@ -1947,10 +1947,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a bishop is placed on a corner)
         /// </summary>
-        public static BitBoard MaskBishopOccupancy(int squareIndex)
+        public static Bitboard MaskBishopOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -1968,7 +1968,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 6 && file <= 6; ++rank, ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -1980,7 +1980,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 1 && file >= 1; --rank, --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -1992,7 +1992,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 1 && file <= 6; --rank, ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             /*
@@ -2004,7 +2004,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 6 && file >= 1; ++rank, --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, file);
             }
 
             return attacks;
@@ -2015,10 +2015,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a rook is placed on a corner)
         /// </summary>
-        public static BitBoard MaskRookOccupancy(int squareIndex)
+        public static Bitboard MaskRookOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -2036,7 +2036,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile + 1; file <= 6; ++file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             }
 
             /*
@@ -2048,7 +2048,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile - 1; file >= 1; --file)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             }
 
             /*
@@ -2060,7 +2060,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1; rank <= 6; ++rank)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             }
 
             /*
@@ -2072,7 +2072,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1; rank >= 1; --rank)
             {
-                attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             }
 
             return attacks;
@@ -2087,10 +2087,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// </param>
         /// <param name="occupancyMask">Bishop or rook occupancy (<see cref="AttackGenerator.MaskBishopOccupancy(int)"/> and <see cref="AttackGenerator.MaskRookOccupancy(int)"/>)</param>
         /// <returns>An occupancy set for the given index</returns>
-        public static BitBoard SetBishopOrRookOccupancy(int index, BitBoard occupancyMask)
+        public static Bitboard SetBishopOrRookOccupancy(int index, Bitboard occupancyMask)
         {
             var bitsInMask = occupancyMask.CountBits();
-            var occupancy = new BitBoard();
+            var occupancy = new Bitboard();
 
             // Loop over the range of bits within attack mask
             for (int count = 0; count < bitsInMask; ++count)
@@ -2110,10 +2110,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return occupancy;
         }
 
-        public static BitBoard GenerateBishopAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
+        public static Bitboard GenerateBishopAttacksOnTheFly(int squareIndex, Bitboard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -2131,7 +2131,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 7 && file <= 7; ++rank, ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -2149,7 +2149,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 0 && file >= 0; --rank, --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -2167,7 +2167,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 0 && file <= 7; --rank, ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -2185,7 +2185,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 7 && file >= 0; ++rank, --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -2197,10 +2197,10 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
             return attacks;
         }
 
-        public static BitBoard GenerateRookAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
+        public static Bitboard GenerateRookAttacksOnTheFly(int squareIndex, Bitboard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = default;
+            Bitboard attacks = default;
 
             int rank, file;
 
@@ -2218,7 +2218,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile + 1; file <= 7; ++file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -2236,7 +2236,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (file = targetFile - 1; file >= 0; --file)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -2254,7 +2254,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank + 1; rank <= 7; ++rank)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)
@@ -2272,7 +2272,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
              */
             for (rank = targetRank - 1; rank >= 0; --rank)
             {
-                ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
+                ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
                 attacks |= square;
 
                 if ((square & occupiedSquares) != default)

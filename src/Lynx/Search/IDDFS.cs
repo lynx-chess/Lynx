@@ -21,11 +21,21 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
+    private const int PieceToQuietHistoryLength = 12 * 64 * 2 * 2;
+
+    private const int ButterflyHistoryLength = 64 * 64 * 2 * 2;
+
     /// <summary>
     /// 12 x 64 x 2 x 2
     /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly short[] _quietHistory = GC.AllocateArray<short>(12 * 64 * 2 * 2, pinned: true);
+    private readonly short[] _pieceToQuietHistory = GC.AllocateArray<short>(PieceToQuietHistoryLength, pinned: true);
+
+    /// <summary>
+    /// 64 x 64 x 2 x 2
+    /// source square x target square x source is attacked x target is attacked
+    /// </summary>
+    private readonly short[] _butterflyQuietHistory = GC.AllocateArray<short>(ButterflyHistoryLength, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
@@ -110,6 +120,8 @@ public sealed partial class Engine
             Array.Clear(_moveNodeCount[i]);
         }
 
+        AgeQuietHistory();
+
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
         int beta = EvaluationConstants.MaxEval;
@@ -137,8 +149,7 @@ public sealed partial class Engine
             }
 
             Array.Clear(_killerMoves);
-            // Not clearing _quietHistory on purpose
-            // Not clearing _captureHistory on purpose
+            // Not clearing quiet and capture histories here on purpose
 
             int mate = 0;
 
@@ -309,7 +320,7 @@ public sealed partial class Engine
         catch (Exception e) when (e is not LynxException)
         {
             _logger.Error(e,
-                "[#{EngineId}] Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n",
+                "[#{EngineId}] Depth {Depth}: unexpected error occurred during the search of position {Position}, best move will be returned\n",
                 _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
         }
         finally
@@ -448,9 +459,8 @@ public sealed partial class Engine
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
         {
@@ -597,9 +607,8 @@ public sealed partial class Engine
             }
         }
 
-        Span<BitBoard> attacks = stackalloc BitBoard[12];
-        Span<BitBoard> attacksBySide = stackalloc BitBoard[2];
-        var evaluationContext = new EvaluationContext(attacks, attacksBySide);
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);

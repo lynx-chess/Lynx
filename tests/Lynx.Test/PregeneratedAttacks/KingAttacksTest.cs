@@ -33,7 +33,7 @@ public class KingAttacksTest
         attacks = Attacks.KingAttacks[(int)kingSquare];
         ValidateAttacks(attackedSquares, attacks);
 
-        static void ValidateAttacks(BS[] attackedSquares, BitBoard attacks)
+        static void ValidateAttacks(BS[] attackedSquares, Bitboard attacks)
         {
             foreach (var attackedSquare in attackedSquares)
             {
@@ -41,7 +41,7 @@ public class KingAttacksTest
                 attacks.PopBit(attackedSquare);
             }
 
-            Assert.AreEqual(default(BitBoard), attacks);
+            Assert.AreEqual(default(Bitboard), attacks);
         }
     }
 }

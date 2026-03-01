@@ -23,7 +23,7 @@ public sealed partial class Engine
                     tablebaseResult.BestMove, score: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
-                    Depth = 666,                // In case some guis proritize the info command with biggest depth
+                    Depth = 666,                // In case some guis prioritize the info command with biggest depth
                     Time = Utils.CalculateUCITime(elapsedSeconds),
                     NodesPerSecond = 0,
                     HashfullPermill = _tt.HashfullPermillApprox(),
@@ -52,7 +52,7 @@ public sealed partial class Engine
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Unexpected error ocurred during the online tb probing\n{0}", e.StackTrace);
+            _logger.Error(e, "Unexpected error occurred during the online tb probing\n{0}", e.StackTrace);
 
             return null;
         }

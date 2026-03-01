@@ -26,7 +26,7 @@ public class BishopAttacksTest
     public void GenerateBishopAttacksOnTheFly(BS bishopSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
+        var occupancy = BitboardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = AttackGenerator.GenerateBishopAttacksOnTheFly((int)bishopSquare, occupancy);
@@ -34,7 +34,7 @@ public class BishopAttacksTest
         // Assert
         ValidateAttacks(attackedSquares, attacks);
 
-        static void ValidateAttacks(BS[] attackedSquares, BitBoard attacks)
+        static void ValidateAttacks(BS[] attackedSquares, Bitboard attacks)
         {
             foreach (var attackedSquare in attackedSquares)
             {
@@ -42,7 +42,7 @@ public class BishopAttacksTest
                 attacks.PopBit(attackedSquare);
             }
 
-            Assert.AreEqual(default(BitBoard), attacks);
+            Assert.AreEqual(default(Bitboard), attacks);
         }
     }
 
@@ -69,7 +69,7 @@ public class BishopAttacksTest
     public void GetBishopAttacks(BS bishopSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
+        var occupancy = BitboardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = Attacks.BishopAttacks((int)bishopSquare, occupancy);
@@ -82,6 +82,6 @@ public class BishopAttacksTest
             attacks.PopBit(attackedSquare);
         }
 
-        Assert.AreEqual(default(BitBoard), attacks);
+        Assert.AreEqual(default(Bitboard), attacks);
     }
 }

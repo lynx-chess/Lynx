@@ -48,7 +48,7 @@ public static class PawnIslandsGenerator
         for (byte n = byte.MinValue; n < byte.MaxValue; ++n)
         {
 #pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
-            BitBoard bitboard = 0;
+            Bitboard bitboard = 0;
 #pragma warning restore S3353 // Unchanged local variables should be "const"
 
             for (int file = 0; file < 8; ++file)
@@ -91,7 +91,7 @@ public static class PawnIslandsGenerator
         return (board & (1 << file)) != default;
     }
 
-    public static int IdentifyIslands(BitBoard pawns)
+    public static int IdentifyIslands(Bitboard pawns)
     {
         const int n = 1;
 
@@ -102,7 +102,7 @@ public static class PawnIslandsGenerator
             var squareIndex = pawns.GetLS1BIndex();
             pawns.ResetLS1B();
 
-            files[Constants.File[squareIndex]] = n;
+            files[Constants.File(squareIndex)] = n;
         }
 
         var islandCount = 0;
