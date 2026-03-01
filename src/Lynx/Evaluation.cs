@@ -496,8 +496,9 @@ public partial class Position
                     // Opposite color bishop endgame with pawns are even more drawish
                     if (whiteBishops > 0
                         && blackBishops > 0
-                        && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
-                            Constants.DarkSquares[blackBishops.GetLS1BIndex()])
+                        && BoardSquareExtensions.DifferentColor(
+                            whiteBishops.GetLS1BIndex(),
+                            blackBishops.GetLS1BIndex()))
                     {
                         eval >>= 1; // /2
                     }
@@ -704,7 +705,7 @@ public partial class Position
 
         // Bad bishop
         var sameColorPawns = sameSidePawns &
-            (Constants.DarkSquares[squareIndex] == 1
+            (BoardSquareExtensions.IsDarkSquare(squareIndex)
                 ? Constants.DarkSquaresBitboard
                 : Constants.LightSquaresBitboard);
 
