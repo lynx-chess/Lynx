@@ -228,10 +228,6 @@ public sealed partial class Engine
                             break;
                         }
 
-                        _trend = Math.Clamp(
-                            Game.CurrentPosition.Side == Side.White ? +bestScore : -bestScore,
-                            -64, 64);
-
                         if (bestScore > EvaluationConstants.CheckMateBaseEvaluation)
                         {
                             _logger.Warn(
@@ -257,6 +253,10 @@ public sealed partial class Engine
                         }
                     }
                 }
+
+                _trend = Math.Clamp(
+                    Game.CurrentPosition.Side == Side.White ? +bestScore : -bestScore,
+                    -64, 64);
 
                 //PrintPvTable(depth: depth);
                 ValidatePVTable();
