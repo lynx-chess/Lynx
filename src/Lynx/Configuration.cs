@@ -286,7 +286,7 @@ public sealed class EngineSettings
     public int NMP_Margin { get; set; } = +30;
 
     [SPSA<int>(enabled: false)]
-    public int NMP_BaseDepthReduction { get; set; } = 2;
+    public int NMP_BaseDepthReduction { get; set; } = 5;
 
 #pragma warning disable CA1805 // Do not initialize unnecessarily
     [SPSA<int>(enabled: false)]
@@ -294,7 +294,7 @@ public sealed class EngineSettings
 #pragma warning restore CA1805 // Do not initialize unnecessarily
 
     [SPSA<int>(enabled: false)]
-    public int NMP_DepthDivisor { get; set; } = 3;
+    public int NMP_DepthDivisor { get; set; } = 5;
 
     [SPSA<int>(50, 350, 15)]
     public int NMP_StaticEvalBetaDivisor { get; set; } = 82;
