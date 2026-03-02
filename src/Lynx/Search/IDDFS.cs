@@ -143,7 +143,10 @@ public sealed partial class Engine
         {
             if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
-                _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
+                if (!Configuration.EngineSettings.UCI_Minimal)
+                {
+                    _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
+                }
 
                 return onlyOneLegalMoveSearchResult;
             }
@@ -294,7 +297,11 @@ public sealed partial class Engine
 
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
-                _engineWriter.TryWrite(lastSearchResult);
+                if (!Configuration.EngineSettings.UCI_Minimal)
+                {
+                    _engineWriter.TryWrite(lastSearchResult);
+                }
+
             } while (StopSearchCondition(lastSearchResult?.BestMove, depth++, mate, bestScore, isPondering));
         }
         catch (OperationCanceledException)
