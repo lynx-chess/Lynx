@@ -288,6 +288,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "minimal":
+                {
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.UCI_Minimal = value;
+                    }
+                    break;
+                }
 
             default:
                 if (!SPSAAttributeHelpers.ParseUCIOption(command, commandItems, lowerCaseFirstWord, length))
