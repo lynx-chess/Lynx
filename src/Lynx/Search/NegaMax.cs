@@ -497,7 +497,9 @@ public sealed partial class Engine
 #pragma warning disable MA0071 // Avoid using redundant else
                 else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
                 {
-                    return singularScore;
+                    return Math.Abs(singularScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                        ? (singularScore + beta) / 2
+                        : singularScore;
                 }
                 // Negative extension
                 else if (ttEntry.Score >= beta)
