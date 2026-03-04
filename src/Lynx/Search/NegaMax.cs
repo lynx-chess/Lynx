@@ -764,7 +764,9 @@ public sealed partial class Engine
         if (!isVerifyingSE)
         {
             if (!(isInCheck
-                || (bestMove?.CapturedPiece() != null && bestMove?.CapturedPiece() != (int)Piece.None)
+                || (bestMove is not null
+                    && bestMove.Value.CapturedPiece() != (int)Piece.None
+                    && SEE.IsGoodCapture(position, bestMove.Value))
                 || bestMove?.IsPromotion() == true
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
                 || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
