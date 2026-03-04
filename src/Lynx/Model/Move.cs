@@ -121,6 +121,11 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeShortCastle(int sourceSquare, int targetSquare, int piece)
     {
+        if (targetSquare == CastlingData.DefaultValues)
+        {
+            return -1;
+        }
+
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
@@ -131,6 +136,11 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeLongCastle(int sourceSquare, int targetSquare, int piece)
     {
+        if (targetSquare == CastlingData.DefaultValues)
+        {
+            return -1;
+        }
+
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)

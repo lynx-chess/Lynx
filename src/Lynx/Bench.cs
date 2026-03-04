@@ -112,6 +112,8 @@ public partial class Engine
 
         "nqbnrkrb/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight
         "rqbbnknr/pppppppp/8/8/8/8/PPPPPPPP/NQBNRKRB w - - 0 1",     // Cornered/trapped bishop and knight - only one side
+
+        "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Kkq - 4 11",    // X-FEN sample position
     ];
 
     /// <summary>

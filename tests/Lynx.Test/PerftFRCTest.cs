@@ -125,6 +125,8 @@ public class PerftFRCTest : BaseTest
     [TestCase("4r1kr/8/pppppppp/8/8/PPPPPPPP/8/RK5R b HAhe - 0 1", 6, 93963364, Category = Categories.PerftFRCExhaustive, Explicit = true)]
     [TestCase("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b FDda - 0 1", 5, 8791662)]
     [TestCase("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b KQkq - 0 1", 5, 8791662)]
+    [TestCase("rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Gkq - 4 11", 5, 37095094)]
+    [TestCase("rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Hkq - 4 11", 5, 35222527)]
     public void LynxFRCTests(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
