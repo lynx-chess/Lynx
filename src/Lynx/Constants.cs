@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -356,29 +357,11 @@ public static class Constants
 
     public static readonly int SideLimit = Enum.GetValues<Piece>().Length / 2;
 
-    public static ReadOnlySpan<int> Rank =>
-    [
-        7, 7, 7, 7, 7, 7, 7, 7,
-        6, 6, 6, 6, 6, 6, 6, 6,
-        5, 5, 5, 5, 5, 5, 5, 5,
-        4, 4, 4, 4, 4, 4, 4, 4,
-        3, 3, 3, 3, 3, 3, 3, 3,
-        2, 2, 2, 2, 2, 2, 2, 2,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 0
-    ];
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int Rank(int square) => 7 - (square >> 3);
 
-    public static ReadOnlySpan<int> File =>
-    [
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7
-    ];
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int File(int square) => square & 7;
 
     public static ReadOnlySpan<byte> ByteFile =>
     [
@@ -390,30 +373,6 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7
-    ];
-
-    public static ReadOnlySpan<int> LightSquares =>
-    [
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-    ];
-
-    public static ReadOnlySpan<int> DarkSquares =>
-    [
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
     ];
 
     /// <summary>
