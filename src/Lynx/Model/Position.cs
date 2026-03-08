@@ -314,12 +314,12 @@ public partial class Position : IDisposable
             _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
         }
 
-        if ((_castle & (int)CastlingRights.WQ) != default)
+        if ((_castle & (int)CastlingRights.BK) != default)
         {
             _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
         }
 
-        if ((_castle & (int)CastlingRights.BK) != default)
+        if ((_castle & (int)CastlingRights.WQ) != default)
         {
             _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
         }
