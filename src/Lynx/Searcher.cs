@@ -652,7 +652,7 @@ public sealed class Searcher : IDisposable
         _ = EvaluationConstants.HistoryBonus[1];
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();
-        _ = MoveExtensions.UCIStringMemoized(0);
+        _ = MoveExtensions.UCIString(0);
     }
 
     private static void ForceGCCollection()

@@ -42,6 +42,8 @@ public static class MoveExtensions
     private const int PieceMask = 0xF_0000;
     private const int CapturedPieceMask = 0xF0_0000;
 
+    private const int UCIMask = 0xFFFF;
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
@@ -320,50 +322,37 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
-    [SkipLocalsInit]
+    private static readonly string[] _uciStrings = InitUCIStrings();
+
+    private static string[] InitUCIStrings()
+    {
+        var result = new string[ushort.MaxValue + 1];
+
+        for (int source = 0; source < 64; source++)
+        {
+            for (int target = 0; target < 64; target++)
+            {
+                int baseIndex = (source << SourceSquareOffset) | (target << TargetSquareOffset);
+                var baseStr = string.Concat(Constants.Coordinates[source], Constants.Coordinates[target]);
+                result[baseIndex] = baseStr;
+
+                for (int promotedPiece = (int)Model.Piece.N; promotedPiece < (int)Model.Piece.k; promotedPiece++)
+                {
+                    result[baseIndex | promotedPiece] = $"{baseStr}{Constants.AsciiPiecesLowercase[promotedPiece]}";
+                }
+            }
+        }
+
+        return result;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
-        // TODO memoize them with dict or even array?
-        Span<char> span = stackalloc char[5];
-
-        var source = Constants.CoordinatesCharArray[move.SourceSquare()];
-        var target = Constants.CoordinatesCharArray[move.TargetSquare()];
-
-        span[0] = source[0];
-        span[1] = source[1];
-        span[2] = target[0];
-        span[3] = target[1];
-
-        var promotedPiece = move.PromotedPiece();
-        if (promotedPiece != default)
-        {
-            span[4] = Constants.AsciiPiecesLowercase[promotedPiece];
-
-            return span.ToString();
-        }
-
-        return span[..^1].ToString();
-    }
-
-    private static readonly Dictionary<int, string> _uCIStringCache = new(4096);
-
-    /// <summary>
-    /// NOT thread-safe
-    /// </summary>
-    [SkipLocalsInit]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string UCIStringMemoized(this Move move)
-    {
-        if (_uCIStringCache.TryGetValue(move, out var uciString))
-        {
-            return uciString;
-        }
-
-        var str = move.UCIString();
-        _uCIStringCache[move] = str;
-
-        return str;
+        // We can't just cast to ShortMove (aka short), since moves with the highest bit of the second half set to 1
+        // would be interpreted as negative numbers, and therefore throwing an IndexOutOfRangeException when widened back to int for array indexing.
+        // By masking with 0xFFFF, we ensure that the move is always interpreted as an unsigned number.
+        return _uciStrings[move & UCIMask];
     }
 
     /// <summary>
