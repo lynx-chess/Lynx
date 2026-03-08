@@ -507,7 +507,7 @@ public sealed partial class Engine
                 }
                 else if (cutnode)
                 {
-                    singularDepthExtensions -= 2;
+                    singularDepthExtensions -= 1;
                 }
 
 #pragma warning restore MA0071 // Avoid using redundant else
