@@ -357,9 +357,15 @@ public static class Constants
 
     public static readonly int SideLimit = Enum.GetValues<Piece>().Length / 2;
 
+    /// <summary>
+    /// 0-7
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Rank(int square) => 7 - (square >> 3);
 
+    /// <summary>
+    /// 0-7
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int File(int square) => square & 7;
 

@@ -253,31 +253,81 @@ public partial class Position : IDisposable
         // Usual encoding for standard chess, King to target square
         if (!Configuration.EngineSettings.IsChess960)
         {
-            WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
-            WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
+            if ((_castle & (int)CastlingRights.WK) != default)
+            {
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
+            }
 
-            BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialBlackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
-            BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
+            if ((_castle & (int)CastlingRights.WQ) != default)
+            {
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
+            }
+
+            if ((_castle & (int)CastlingRights.BK) != default)
+            {
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialBlackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
+            }
+
+            if ((_castle & (int)CastlingRights.BQ) != default)
+            {
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
+            }
         }
         // KxR encoding for DFRC
         else
         {
-            WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
-            WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
+            if ((_castle & (int)CastlingRights.WK) != default)
+            {
+                Debug.Assert(whiteKingsideRook != CastlingData.DefaultValues);
 
-            BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
-            BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
+            }
+
+            if ((_castle & (int)CastlingRights.WQ) != default)
+            {
+                Debug.Assert(whiteQueensideRook != CastlingData.DefaultValues);
+
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
+            }
+
+            if ((_castle & (int)CastlingRights.BK) != default)
+            {
+                Debug.Assert(blackKingsideRook != CastlingData.DefaultValues);
+
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
+            }
+
+            if ((_castle & (int)CastlingRights.BQ) != default)
+            {
+                Debug.Assert(blackQueensideRook != CastlingData.DefaultValues);
+
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+            }
         }
 
 #if DEBUG
         _initialKingSquares[(int)Side.White] = whiteKingSquare;
         _initialKingSquares[(int)Side.Black] = blackKingSquare;
 
-        _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
-        _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
+        if ((_castle & (int)CastlingRights.WK) != default)
+        {
+            _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
+        }
 
-        _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
-        _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
+        if ((_castle & (int)CastlingRights.WQ) != default)
+        {
+            _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
+        }
+
+        if ((_castle & (int)CastlingRights.BK) != default)
+        {
+            _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
+        }
+
+        if ((_castle & (int)CastlingRights.BQ) != default)
+        {
+            _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
+        }
 #endif
 
         Validate();
