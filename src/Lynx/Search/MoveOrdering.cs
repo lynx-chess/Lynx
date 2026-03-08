@@ -62,7 +62,7 @@ public sealed partial class Engine
         }
 
         // Queen promotion
-        if ((promotedPiece + 2) % 6 == 0)
+        if (isPromotion && (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q))
         {
             if (isCapture)
             {
@@ -88,7 +88,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(move);
+                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
@@ -118,7 +118,7 @@ public sealed partial class Engine
         var isCapture = capturedPiece != (int)Piece.None;
 
         // Queen promotion
-        if ((promotedPiece + 2) % 6 == 0)
+        if (isPromotion && (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q))
         {
             if (isCapture)
             {
@@ -144,7 +144,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(move);
+                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
@@ -172,10 +172,16 @@ public sealed partial class Engine
             int rawHistoryBonus = HistoryBonus[depth];
             int rawHistoryMalus = HistoryMalus[depth];
 
-            ref var pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(position, move, ref evaluationContext);
+            var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
+            var sourceSquare = move.SourceSquare();
+            var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+            var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+            ref var pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(piece, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
             pieceToQuietHistoryEntry = (short)ScoreHistoryMove(pieceToQuietHistoryEntry, rawHistoryBonus);
 
-            ref var butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(position, move, ref evaluationContext);
+            ref var butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
             butterflyQuietHistoryEntry = (short)ScoreHistoryMove(butterflyQuietHistoryEntry, rawHistoryBonus);
 
             if (!isRoot)
@@ -199,10 +205,14 @@ public sealed partial class Engine
 
                     // 🔍 Quiet history penalty / malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    var visitedMoveSourceSquare = visitedMove.SourceSquare();
+                    var visitedIsStartSquareAttacked = oppositeSideAttacks.GetBit(visitedMoveSourceSquare) ? 1 : 0;
+                    var visitedIsTargetSquareAttacked = oppositeSideAttacks.GetBit(visitedMoveTargetSquare) ? 1 : 0;
+
+                    pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, visitedIsStartSquareAttacked, visitedIsTargetSquareAttacked);
                     pieceToQuietHistoryEntry = (short)ScoreHistoryMove(pieceToQuietHistoryEntry, -rawHistoryMalus);
 
-                    butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(position, visitedMove, ref evaluationContext);
+                    butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(visitedMoveSourceSquare, visitedMoveTargetSquare, visitedIsStartSquareAttacked, visitedIsTargetSquareAttacked);
                     butterflyQuietHistoryEntry = (short)ScoreHistoryMove(butterflyQuietHistoryEntry, -rawHistoryMalus);
 
                     if (!isRoot)
@@ -247,7 +257,7 @@ public sealed partial class Engine
         var rawHistoryBonus = HistoryBonus[depth];
         var rawHistoryMalus = HistoryMalus[depth];
 
-        ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
+        ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(), move.TargetSquare(), move.CapturedPiece());
         captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
@@ -260,7 +270,7 @@ public sealed partial class Engine
 
             if (capturedPiece != (int)Piece.None)
             {
-                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
+                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove.Piece(), visitedMove.TargetSquare(), capturedPiece);
                 captureHistoryVisitedMove = (short)ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
             }
         }

@@ -223,7 +223,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        var expectedEval = UnpackMG(IsolatedPawnPenalty[Constants.File[(int)BoardSquare.d3]]) - UnpackMG(PawnPhalanxBonus[1]);
+        var expectedEval = UnpackMG(IsolatedPawnPenalty[Constants.File((int)BoardSquare.d3)]) - UnpackMG(PawnPhalanxBonus[1]);
 
         Assert.AreEqual(expectedEval, evaluation);
     }
@@ -398,7 +398,7 @@ public class PositionTest
         int evaluation = AdditionalPieceEvaluation(position, Piece.P)
             - AdditionalPieceEvaluation(position, Piece.p);
 
-        var rank = Constants.Rank[(int)square];
+        var rank = Constants.Rank((int)square);
         var passedPawnsMask = Masks.WhitePassedPawnMasks[(int)square];
 
         if (position.Side == Side.Black)
@@ -429,7 +429,7 @@ public class PositionTest
         Assert.AreEqual(
             expectedEval
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            + UnpackMG(IsolatedPawnPenalty[Constants.File[(int)square]])
+            + UnpackMG(IsolatedPawnPenalty[Constants.File((int)square)])
             + UnpackMG(PassedPawnBonus[0][rank])
             + UnpackMG(PassedPawnEnemyBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])

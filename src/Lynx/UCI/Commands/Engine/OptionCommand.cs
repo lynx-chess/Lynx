@@ -123,7 +123,6 @@ public sealed class OptionCommand
 {
     public const string Id = "option";
 
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
     public static readonly ImmutableArray<string> AvailableOptions =
         [
             "option name UCI_Opponent type string",
@@ -134,10 +133,10 @@ public sealed class OptionCommand
             $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
             $"option name Ponder type check default {Configuration.EngineSettings.IsPonder.ToLowerString()}",
             $"option name MoveOverhead type spin default {Configuration.EngineSettings.MoveOverhead} min 1 max {Constants.MaxMoveOverhead}",
+            $"option name Minimal type check default {Configuration.EngineSettings.UCI_Minimal.ToLowerString()}",
             $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions.ToLowerString()}",
             .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : [],
         ];
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
     //"option name UCI_AnalyseMode type check",
     //"option name NalimovPath type string default C:/...",

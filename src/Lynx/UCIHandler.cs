@@ -288,6 +288,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "minimal":
+                {
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.UCI_Minimal = value;
+                    }
+                    break;
+                }
 
             default:
                 if (!SPSAAttributeHelpers.ParseUCIOption(command, commandItems, lowerCaseFirstWord, length))
@@ -451,9 +459,7 @@ public sealed class UCIHandler
                     eval = -eval;   // White perspective
                 }
 
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
                 ++lineCounter;
                 if (lineCounter % 100 == 0)

@@ -368,7 +368,8 @@ public sealed partial class Engine
 
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
             var piece = move.Piece();
-            var isCapture = move.CapturedPiece() != (int)Piece.None;
+            var capturedPiece = move.CapturedPiece();
+            var isCapture = capturedPiece != (int)Piece.None;
 
             int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
                 + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
@@ -578,7 +579,7 @@ public sealed partial class Engine
                             if (isCapture)
                             {
                                 reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
-                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
+                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
@@ -723,9 +724,7 @@ public sealed partial class Engine
                 // Beta-cutoff - refutation found, no need to keep searching this line
                 if (score >= beta)
                 {
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
                     PrintMessage($"Pruning: {move} is enough");
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
                     var historyDepth = depth;
 
@@ -771,7 +770,9 @@ public sealed partial class Engine
         if (!isVerifyingSE)
         {
             if (!(isInCheck
-                || (bestMove?.CapturedPiece() != null && bestMove?.CapturedPiece() != (int)Piece.None)
+                || (bestMove is not null
+                    && bestMove.Value.CapturedPiece() != (int)Piece.None
+                    && SEE.IsGoodCapture(position, bestMove.Value))
                 || bestMove?.IsPromotion() == true
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
                 || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
@@ -972,9 +973,7 @@ public sealed partial class Engine
                 // Beta-cutoff
                 if (score >= beta)
                 {
-#pragma warning disable MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
                     PrintMessage($"Pruning: {move} is enough to discard this line");
-#pragma warning restore MA0076 // Do not use implicit culture-sensitive ToString in interpolated strings
 
                     if (move.CapturedPiece() != (int)Piece.None)
                     {

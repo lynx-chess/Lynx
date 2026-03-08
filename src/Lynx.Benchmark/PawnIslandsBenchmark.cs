@@ -160,7 +160,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
             var squareIndex = pawns.GetLS1BIndex();
             pawns.ResetLS1B();
 
-            files[Constants.File[squareIndex]] = n;
+            files[Constants.File(squareIndex)] = n;
         }
 
         var islandCount = 0;
@@ -198,7 +198,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
         {
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
-            files[Constants.File[squareIndex]] = n;
+            files[Constants.File(squareIndex)] = n;
         }
 
         var islandCount = 0;
@@ -233,7 +233,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
             // Bitboard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitboard |= (1 << Constants.File[squareIndex]);
+            pawnFileBitboard |= (1 << Constants.File(squareIndex));
         }
 
         return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitboard];

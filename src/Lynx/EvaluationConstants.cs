@@ -80,7 +80,7 @@ public static class EvaluationConstants
         {
             KingRing[square] = Attacks.KingAttacks[square];
 
-            var rank = Constants.Rank[square];
+            var rank = Constants.Rank(square);
 
             if (rank == 0)
             {

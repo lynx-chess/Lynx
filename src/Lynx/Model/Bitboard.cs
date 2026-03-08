@@ -184,7 +184,7 @@ public static class BitboardExtensions
     public static Bitboard PawnPush(this Bitboard board, Side side)
     {
         return side == Side.White
-            ? board.ShiftUp() 
+            ? board.ShiftUp()
             : board.ShiftDown();
     }
 
@@ -192,7 +192,7 @@ public static class BitboardExtensions
     public static Bitboard PawnAttacks(this Bitboard board, Side side)
     {
         return side == Side.White
-            ? board.ShiftUpRightAndLeft() 
+            ? board.ShiftUpRightAndLeft()
             : board.ShiftDownRightAndLeft();
     }
 

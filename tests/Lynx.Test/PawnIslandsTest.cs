@@ -75,7 +75,7 @@ public class PawnIslandsTest
             pawns = pawns.WithoutLS1B(out var squareIndex);
 
             // Bitboard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitboard |= (1 << Constants.File[squareIndex]);
+            pawnFileBitboard |= (1 << Constants.File(squareIndex));
         }
 
         return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitboard];

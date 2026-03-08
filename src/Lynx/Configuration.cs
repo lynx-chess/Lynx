@@ -112,6 +112,8 @@ public sealed class EngineSettings
 
     public bool IsChess960 { get; set; }
 
+    public bool UCI_Minimal { get; set; }
+
     /// <summary>
     /// Real NPS aren't calculated until the last search command.
     /// This option enables the report of an NPS estimation by the main thread

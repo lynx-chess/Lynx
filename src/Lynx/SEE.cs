@@ -27,8 +27,8 @@ public static class SEE
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
         Debug.Assert(move.CapturedPiece() != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
-        Debug.Assert(move.PromotedPiece() == default, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
-        Debug.Assert(!move.IsEnPassant(), "Assert fail", $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
+        Debug.Assert(move.PromotedPiece() == default || move.CapturedPiece() != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves without captures");
+        Debug.Assert(!move.IsEnPassant() || move.CapturedPiece() != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle en-passant moves if they aren't marked as captures too");
 
         var sideToMove = position.Side;
 

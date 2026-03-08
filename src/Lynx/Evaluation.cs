@@ -496,8 +496,9 @@ public partial class Position
                     // Opposite color bishop endgame with pawns are even more drawish
                     if (whiteBishops > 0
                         && blackBishops > 0
-                        && Constants.DarkSquares[whiteBishops.GetLS1BIndex()] !=
-                            Constants.DarkSquares[blackBishops.GetLS1BIndex()])
+                        && BoardSquareExtensions.DifferentColor(
+                            whiteBishops.GetLS1BIndex(),
+                            blackBishops.GetLS1BIndex()))
                     {
                         eval >>= 1; // /2
                     }
@@ -588,7 +589,7 @@ public partial class Position
     {
         int packedBonus = 0;
 
-        var rank = Constants.Rank[squareIndex];
+        var rank = Constants.Rank(squareIndex);
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
         int pushSquare;
@@ -611,7 +612,7 @@ public partial class Position
         // Isolated pawn
         if ((_pieceBitboards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
-            packedBonus += IsolatedPawnPenalty[Constants.File[squareIndex]];
+            packedBonus += IsolatedPawnPenalty[Constants.File(squareIndex)];
         }
         // Backwards pawn
         else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
@@ -644,7 +645,7 @@ public partial class Position
         }
 
         // Pawn phalanx
-        if (Constants.File[squareIndex] != 7 && _pieceBitboards[pieceIndex].GetBit(squareIndex + 1))
+        if (Constants.File(squareIndex) != 7 && _pieceBitboards[pieceIndex].GetBit(squareIndex + 1))
         {
             packedBonus += PawnPhalanxBonus[rank];
         }
@@ -704,7 +705,7 @@ public partial class Position
 
         // Bad bishop
         var sameColorPawns = sameSidePawns &
-            (Constants.DarkSquares[squareIndex] == 1
+            (BoardSquareExtensions.IsDarkSquare(squareIndex)
                 ? Constants.DarkSquaresBitboard
                 : Constants.LightSquaresBitboard);
 
@@ -819,14 +820,14 @@ public partial class Position
         // Rook on open file
         if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & fileMask) == default)
         {
-            var file = Constants.File[squareIndex];
+            var file = Constants.File(squareIndex);
             packedBonus += OpenFileRookBonus[bucket][file];
             packedBonus += OpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
         // Rook on semi-open file
         else if ((sameSidePawns & fileMask) == default)
         {
-            var file = Constants.File[squareIndex];
+            var file = Constants.File(squareIndex);
             packedBonus += SemiOpenFileRookBonus[bucket][file];
             packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][file];
         }
@@ -834,7 +835,7 @@ public partial class Position
         // Connected rooks
         if ((attacks & _pieceBitboards[pieceIndex]).CountBits() >= 1)
         {
-            var rank = Constants.Rank[squareIndex];
+            var rank = Constants.Rank(squareIndex);
 
             if (pieceIndex == (int)Piece.r)
             {
@@ -892,12 +893,12 @@ public partial class Position
             // King on open file
             if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & file) == 0)
             {
-                packedBonus += OpenFileKingPenalty[bucket][Constants.File[squareIndex]];
+                packedBonus += OpenFileKingPenalty[bucket][Constants.File(squareIndex)];
             }
             // King on semi-open file
             else if ((_pieceBitboards[(int)Piece.P + kingSideOffset] & file) == 0)
             {
-                packedBonus += SemiOpenFileKingPenalty[bucket][Constants.File[squareIndex]];
+                packedBonus += SemiOpenFileKingPenalty[bucket][Constants.File(squareIndex)];
             }
         }
 
@@ -1059,7 +1060,7 @@ public partial class Position
 
             if ((passedPawnMask & theirPawns) == 0)
             {
-                var rank = isWhite ? Constants.Rank[safePush] : 7 - Constants.Rank[safePush];
+                var rank = isWhite ? Constants.Rank(safePush) : 7 - Constants.Rank(safePush);
                 packedBonus += PassedPawnPushBonus[rank];
             }
         }
