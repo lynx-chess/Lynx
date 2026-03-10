@@ -908,7 +908,7 @@ public sealed partial class Engine
         ref var movesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(Unsafe.Add(ref movesRef, i), ttBestMove);
+            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref movesRef, i), ttBestMove);
         }
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
