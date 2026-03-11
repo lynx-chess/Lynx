@@ -199,6 +199,9 @@ public partial class Position
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
 
+                // King ring attacks
+                pawnScore += PawnKingRingAttacksBonus * whitePawnKingRingAttacks;
+
                 // Bitboard copy that we 'empty'
                 var whitePawnsCopy = _pieceBitboards[(int)Piece.P];
                 while (whitePawnsCopy != default)
@@ -217,6 +220,9 @@ public partial class Position
 
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
+
+                // King ring attacks
+                pawnScore -= PawnKingRingAttacksBonus * blackPawnKingRingAttacks;
 
                 // Bitboard copy that we 'empty'
                 var blackPawnsCopy = _pieceBitboards[(int)Piece.p];

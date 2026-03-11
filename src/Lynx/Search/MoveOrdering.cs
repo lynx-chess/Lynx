@@ -70,7 +70,7 @@ public sealed partial class Engine
             }
 
             return PromotionMoveScoreValue
-                + (SEE.HasPositiveScore(Game.CurrentPosition, move)
+                + (SEE.HasPositiveScore(position, move)
                     ? GoodCaptureMoveBaseScoreValue
                     : BadCaptureMoveBaseScoreValue);
         }
@@ -79,16 +79,16 @@ public sealed partial class Engine
         {
             var piece = move.Piece();
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
-                $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
+                $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(position, move))
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
 
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(move);
+                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
@@ -105,7 +105,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMoveQSearch(Move move, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMoveQSearch(Position position, Move move, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -126,25 +126,25 @@ public sealed partial class Engine
             }
 
             return PromotionMoveScoreValue
-                + (SEE.HasPositiveScore(Game.CurrentPosition, move)
+                + (SEE.HasPositiveScore(position, move)
                     ? GoodCaptureMoveBaseScoreValue
                     : BadCaptureMoveBaseScoreValue);
         }
 
         if (isCapture)
         {
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(position, move))
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
 
             var piece = move.Piece();
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
-                $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
+                $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(move);
+                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
@@ -257,7 +257,7 @@ public sealed partial class Engine
         var rawHistoryBonus = HistoryBonus[depth];
         var rawHistoryMalus = HistoryMalus[depth];
 
-        ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
+        ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(), move.TargetSquare(), move.CapturedPiece());
         captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
@@ -270,7 +270,7 @@ public sealed partial class Engine
 
             if (capturedPiece != (int)Piece.None)
             {
-                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
+                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove.Piece(), visitedMove.TargetSquare(), capturedPiece);
                 captureHistoryVisitedMove = (short)ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
             }
         }

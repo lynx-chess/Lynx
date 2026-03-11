@@ -187,94 +187,147 @@ public partial class Position : IDisposable
         _castlingRightsUpdateConstants[whiteKingSquare] = Constants.WhiteKingCastlingRight;
         _castlingRightsUpdateConstants[blackKingSquare] = Constants.BlackKingCastlingRight;
 
-        var castlingData = parsedFEN.CastlingData;
-
-        var whiteKingsideRook = castlingData.WhiteKingsideRook;
-        if (whiteKingsideRook != CastlingData.DefaultValues)
-        {
-            _castlingRightsUpdateConstants[whiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
-        }
-
-        var whiteQueensideRook = castlingData.WhiteQueensideRook;
-        if (whiteQueensideRook != CastlingData.DefaultValues)
-        {
-            _castlingRightsUpdateConstants[whiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
-        }
-
-        var blackKingsideRook = castlingData.BlackKingsideRook;
-        if (blackKingsideRook != CastlingData.DefaultValues)
-        {
-            _castlingRightsUpdateConstants[blackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
-        }
-
-        var blackQueensideRook = castlingData.BlackQueensideRook;
-        if (blackQueensideRook != CastlingData.DefaultValues)
-        {
-            _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
-        }
-
         KingsideCastlingNonAttackedSquares[(int)Side.White] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingShortCastleSquare);
         KingsideCastlingNonAttackedSquares[(int)Side.Black] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingShortCastleSquare);
 
         QueensideCastlingNonAttackedSquares[(int)Side.White] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingSquare, Constants.WhiteKingLongCastleSquare);
         QueensideCastlingNonAttackedSquares[(int)Side.Black] = BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingSquare, Constants.BlackKingLongCastleSquare);
 
-        // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
-        var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
-            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookShortCastleSquare);
-        whiteKingsideFreeMask.PopBit(whiteKingSquare);
-        whiteKingsideFreeMask.PopBit(whiteKingsideRook);
+        var castlingData = parsedFEN.CastlingData;
 
-        var blackKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.Black]
-            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookShortCastleSquare);
-        blackKingsideFreeMask.PopBit(blackKingSquare);
-        blackKingsideFreeMask.PopBit(blackKingsideRook);
+        // Free masks could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
+        Array.Clear(KingsideCastlingFreeSquares, 0, 2);
 
-        KingsideCastlingFreeSquares[(int)Side.White] = whiteKingsideFreeMask;
-        KingsideCastlingFreeSquares[(int)Side.Black] = blackKingsideFreeMask;
+        var whiteKingsideRook = castlingData.WhiteKingsideRook;
+        if (whiteKingsideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[whiteKingsideRook] = Constants.WhiteKingSideRookCastlingRight;
 
-        // This could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
-        var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
-            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookLongCastleSquare);
-        whiteQueensideFreeMask.PopBit(whiteKingSquare);
-        whiteQueensideFreeMask.PopBit(whiteQueensideRook);
+            var whiteKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.White]
+                | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteKingsideRook, Constants.WhiteRookShortCastleSquare);
+            whiteKingsideFreeMask.PopBit(whiteKingSquare);
+            whiteKingsideFreeMask.PopBit(whiteKingsideRook);
 
-        var blackQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.Black]
-            | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookLongCastleSquare);
-        blackQueensideFreeMask.PopBit(blackKingSquare);
-        blackQueensideFreeMask.PopBit(blackQueensideRook);
+            KingsideCastlingFreeSquares[(int)Side.White] = whiteKingsideFreeMask;
+        }
 
-        QueensideCastlingFreeSquares[(int)Side.White] = whiteQueensideFreeMask;
-        QueensideCastlingFreeSquares[(int)Side.Black] = blackQueensideFreeMask;
+        var whiteQueensideRook = castlingData.WhiteQueensideRook;
+        if (whiteQueensideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[whiteQueensideRook] = Constants.WhiteQueenSideRookCastlingRight;
+
+            var whiteQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.White]
+                | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(whiteQueensideRook, Constants.WhiteRookLongCastleSquare);
+            whiteQueensideFreeMask.PopBit(whiteKingSquare);
+            whiteQueensideFreeMask.PopBit(whiteQueensideRook);
+
+            QueensideCastlingFreeSquares[(int)Side.White] = whiteQueensideFreeMask;
+        }
+
+        var blackKingsideRook = castlingData.BlackKingsideRook;
+        if (blackKingsideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[blackKingsideRook] = Constants.BlackKingSideRookCastlingRight;
+
+            var blackKingsideFreeMask = KingsideCastlingNonAttackedSquares[(int)Side.Black]
+                | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackKingsideRook, Constants.BlackRookShortCastleSquare);
+            blackKingsideFreeMask.PopBit(blackKingSquare);
+            blackKingsideFreeMask.PopBit(blackKingsideRook);
+
+            KingsideCastlingFreeSquares[(int)Side.Black] = blackKingsideFreeMask;
+        }
+
+        var blackQueensideRook = castlingData.BlackQueensideRook;
+        if (blackQueensideRook != CastlingData.DefaultValues)
+        {
+            _castlingRightsUpdateConstants[blackQueensideRook] = Constants.BlackQueenSideRookCastlingRight;
+
+            var blackQueensideFreeMask = QueensideCastlingNonAttackedSquares[(int)Side.Black]
+                | BitboardExtensions.MaskBetweenTwoSquaresSameRankInclusive(blackQueensideRook, Constants.BlackRookLongCastleSquare);
+            blackQueensideFreeMask.PopBit(blackKingSquare);
+            blackQueensideFreeMask.PopBit(blackQueensideRook);
+
+            QueensideCastlingFreeSquares[(int)Side.Black] = blackQueensideFreeMask;
+        }
 
         // Usual encoding for standard chess, King to target square
         if (!Configuration.EngineSettings.IsChess960)
         {
-            WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
-            WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
+            if ((_castle & (int)CastlingRights.WK) != default)
+            {
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
+            }
 
-            BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
-            BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
+            if ((_castle & (int)CastlingRights.WQ) != default)
+            {
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
+            }
+
+            if ((_castle & (int)CastlingRights.BK) != default)
+            {
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialBlackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
+            }
+
+            if ((_castle & (int)CastlingRights.BQ) != default)
+            {
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
+            }
         }
         // KxR encoding for DFRC
         else
         {
-            WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
-            WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
+            if ((_castle & (int)CastlingRights.WK) != default)
+            {
+                Debug.Assert(whiteKingsideRook != CastlingData.DefaultValues);
 
-            BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
-            BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
+            }
+
+            if ((_castle & (int)CastlingRights.WQ) != default)
+            {
+                Debug.Assert(whiteQueensideRook != CastlingData.DefaultValues);
+
+                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
+            }
+
+            if ((_castle & (int)CastlingRights.BK) != default)
+            {
+                Debug.Assert(blackKingsideRook != CastlingData.DefaultValues);
+
+                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
+            }
+
+            if ((_castle & (int)CastlingRights.BQ) != default)
+            {
+                Debug.Assert(blackQueensideRook != CastlingData.DefaultValues);
+
+                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+            }
         }
 
 #if DEBUG
         _initialKingSquares[(int)Side.White] = whiteKingSquare;
         _initialKingSquares[(int)Side.Black] = blackKingSquare;
 
-        _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
-        _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
+        if ((_castle & (int)CastlingRights.WK) != default)
+        {
+            _initialKingsideRookSquares[(int)Side.White] = whiteKingsideRook;
+        }
 
-        _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
-        _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
+        if ((_castle & (int)CastlingRights.BK) != default)
+        {
+            _initialKingsideRookSquares[(int)Side.Black] = blackKingsideRook;
+        }
+
+        if ((_castle & (int)CastlingRights.WQ) != default)
+        {
+            _initialQueensideRookSquares[(int)Side.White] = whiteQueensideRook;
+        }
+
+        if ((_castle & (int)CastlingRights.BQ) != default)
+        {
+            _initialQueensideRookSquares[(int)Side.Black] = blackQueensideRook;
+        }
 #endif
 
         Validate();

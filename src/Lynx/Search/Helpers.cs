@@ -101,14 +101,14 @@ public sealed partial class Engine
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short CaptureHistoryEntry(Move move)
+    private ref short CaptureHistoryEntry(int piece, int targetSquare, int capturedPiece)
     {
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
 
-        var index = (move.Piece() * pieceOffset)
-            + (move.TargetSquare() * targetSquareOffset)
-            + move.CapturedPiece();
+        var index = (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + capturedPiece;
 
         Debug.Assert(index < _captureHistory.Length);
 
