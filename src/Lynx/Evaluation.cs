@@ -106,20 +106,8 @@ public partial class Position
             // Not hit in pawnEvalTable table
             else
             {
-                var pawnScore = 0;
+                var pawnScore = PawnStructureEvaluation(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks, whiteKing, blackKing, whitePawnKingRingAttacks, blackPawnKingRingAttacks);
 
-                // White pawns
-
-                // King pawn shield bonus
-                pawnScore += KingPawnShield(whiteKing, whitePawns, blackPawnAttacks);
-
-                // Pieces protected by pawns bonus
-                pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
-
-                // King ring attacks
-                pawnScore += PawnKingRingAttacksBonus * whitePawnKingRingAttacks;
-
-                // Bitboard copy that we 'empty'
                 var whitePawnsCopy = whitePawns;
                 while (whitePawnsCopy != default)
                 {
@@ -128,18 +116,6 @@ public partial class Position
                     pawnScore += PawnAdditionalEvaluation(ref evaluationContext, whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
-                // Black pawns
-
-                // King pawn shield bonus
-                pawnScore -= KingPawnShield(blackKing, blackPawns, whitePawnAttacks);
-
-                // Pieces protected by pawns bonus
-                pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
-
-                // King ring attacks;
-                pawnScore -= PawnKingRingAttacksBonus * blackPawnKingRingAttacks;
-
-                // Bitboard copy that we 'empty'
                 var blackPawnsCopy = blackPawns;
                 while (blackPawnsCopy != default)
                 {
@@ -147,9 +123,6 @@ public partial class Position
 
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
-
-                // Pawn islands
-                pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -196,57 +169,36 @@ public partial class Position
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
-            // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
+            // pawnTable hit: We can reuse cached eval for pawn structure + each individual pawn additional evaluation
             if (entry.Key == _kingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
 
                 // White pawns
-                // No PieceProtectedByPawnBonus - included in pawn table | packedScore += PieceProtectedByPawnBonus[...]
-
-                // Bitboard copy that we 'empty'
                 var whitePawnsCopy = _pieceBitboards[(int)Piece.P];
                 while (whitePawnsCopy != default)
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, (int)Piece.P, pieceSquareIndex);
-
-                    // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
                 }
 
                 // Black pawns
-                // No PieceProtectedByPawnBonus - included in pawn table | packedScore -= PieceProtectedByPawnBonus .Length[...]
-
-                // Bitboard copy that we 'empty'
                 var blackPawnsCopy = _pieceBitboards[(int)Piece.p];
                 while (blackPawnsCopy != default)
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, (int)Piece.p, pieceSquareIndex);
-
-                    // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
                 }
             }
             // Not hit in pawnTable table
             else
             {
-                var pawnScore = 0;
-
-                // White pawns
-
-                // King pawn shield bonus
-                pawnScore += KingPawnShield(whiteKing, whitePawns, blackPawnAttacks);
-
-                // Pieces protected by pawns bonus
-                pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
-
-                // King ring attacks
-                pawnScore += PawnKingRingAttacksBonus * whitePawnKingRingAttacks;
+                var pawnScore = PawnStructureEvaluation(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks, whiteKing, blackKing, whitePawnKingRingAttacks, blackPawnKingRingAttacks);
 
                 // Bitboard copy that we 'empty'
-                var whitePawnsCopy = _pieceBitboards[(int)Piece.P];
+                var whitePawnsCopy = whitePawns;
                 while (whitePawnsCopy != default)
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
@@ -256,19 +208,7 @@ public partial class Position
                     pawnScore += PawnAdditionalEvaluation(ref evaluationContext, whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
-                // Black pawns
-
-                // King pawn shield bonus
-                pawnScore -= KingPawnShield(blackKing, blackPawns, whitePawnAttacks);
-
-                // Pieces protected by pawns bonus
-                pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
-
-                // King ring attacks
-                pawnScore -= PawnKingRingAttacksBonus * blackPawnKingRingAttacks;
-
-                // Bitboard copy that we 'empty'
-                var blackPawnsCopy = _pieceBitboards[(int)Piece.p];
+                var blackPawnsCopy = blackPawns;
                 while (blackPawnsCopy != default)
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
@@ -277,9 +217,6 @@ public partial class Position
 
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
-
-                // Pawn islands
-                pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -657,6 +594,36 @@ public partial class Position
         }
 
         return packedBonus;
+    }
+
+    /// <summary>
+    /// Pawn structure evaluations terms that we save in pawnEvalTable, besides <see cref="PawnAdditionalEvaluation"/>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int PawnStructureEvaluation(
+        ulong whitePawns, ulong blackPawns,
+        ulong whitePawnAttacks, ulong blackPawnAttacks,
+        int whiteKing, int blackKing,
+        int whitePawnKingRingAttacks, int blackPawnKingRingAttacks)
+    {
+        int pawnScore = 0;
+
+        // King pawn shield bonus
+        pawnScore += KingPawnShield(whiteKing, whitePawns, blackPawnAttacks);
+        pawnScore -= KingPawnShield(blackKing, blackPawns, whitePawnAttacks);
+
+        // Pieces protected by pawns bonus
+        pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
+        pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
+
+        // King ring attacks
+        pawnScore += PawnKingRingAttacksBonus * whitePawnKingRingAttacks;
+        pawnScore -= PawnKingRingAttacksBonus * blackPawnKingRingAttacks;
+
+        // Pawn islands
+        pawnScore += PawnIslands(whitePawns, blackPawns);
+
+        return pawnScore;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
