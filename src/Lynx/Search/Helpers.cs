@@ -173,10 +173,12 @@ public sealed partial class Engine
         Debug.Assert(ply2Index < _continuationHistory.Length);
 
         ref var contHist1 = ref _continuationHistory[ply1Index];
-        contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
-
         ref var constHist2 = ref _continuationHistory[ply2Index];
-        constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
+
+        int totalContHist = contHist1 + constHist2;
+
+        contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
+        constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
     }
 
     /// <summary>
