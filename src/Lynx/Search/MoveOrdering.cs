@@ -50,10 +50,14 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
+                var piece = move.Piece();
+                var targeSquare = move.TargetSquare();
+
                 // Counter move history
                 return BaseMoveScore
                     + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + ContinuationHistoryEntry(piece, targeSquare, ply - 1)
+                    + ContinuationHistoryEntry(piece, targeSquare, ply - 2);
             }
 
             // History move or 0 if not found
@@ -188,8 +192,12 @@ public sealed partial class Engine
             {
                 // 🔍 Continuation history
                 // - Counter move history (continuation history, ply - 1)
-                ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-                continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
+                ref var contHist1 = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
+                contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
+
+                // - Follow-up history (continuation history, ply - 2)
+                ref var constHist2 = ref ContinuationHistoryEntry(piece, targetSquare, ply - 2);
+                constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -218,8 +226,11 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                        continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                        ref var contHist1 = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
+                        contHist1 = (short)ScoreHistoryMove(contHist1, -rawHistoryMalus);
+
+                        ref var constHist2 = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 2);
+                        constHist2 = (short)ScoreHistoryMove(constHist2, -rawHistoryMalus);
                     }
                 }
             }
