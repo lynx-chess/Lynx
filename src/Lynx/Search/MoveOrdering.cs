@@ -192,12 +192,12 @@ public sealed partial class Engine
             {
                 // 🔍 Continuation history
                 // - Counter move history (continuation history, ply - 1)
-                ref var counterMoveHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-                counterMoveHistoryEntry = (short)ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
+                ref var contHist1 = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
+                contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
 
                 // - Follow-up history (continuation history, ply - 2)
-                ref var followUpHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 2);
-                followUpHistoryEntry = (short)ScoreHistoryMove(followUpHistoryEntry, rawHistoryBonus);
+                ref var constHist2 = ref ContinuationHistoryEntry(piece, targetSquare, ply - 2);
+                constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -226,11 +226,11 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        ref var counterMoveHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                        counterMoveHistoryEntry = (short)ScoreHistoryMove(counterMoveHistoryEntry, -rawHistoryMalus);
+                        ref var contHist1 = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
+                        contHist1 = (short)ScoreHistoryMove(contHist1, -rawHistoryMalus);
 
-                        ref var followUpHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 2);
-                        followUpHistoryEntry = (short)ScoreHistoryMove(followUpHistoryEntry, -rawHistoryMalus);
+                        ref var constHist2 = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 2);
+                        constHist2 = (short)ScoreHistoryMove(constHist2, -rawHistoryMalus);
                     }
                 }
             }
