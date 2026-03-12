@@ -50,10 +50,14 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
+                var piece = move.Piece();
+                var targeSquare = move.TargetSquare();
+
                 // Counter move history
                 return BaseMoveScore
                     + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + ContinuationHistoryEntry(piece, targeSquare, ply - 1)
+                    + ContinuationHistoryEntry(piece, targeSquare, ply - 2);
             }
 
             // History move or 0 if not found
@@ -188,8 +192,12 @@ public sealed partial class Engine
             {
                 // 🔍 Continuation history
                 // - Counter move history (continuation history, ply - 1)
-                ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-                continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
+                ref var counterMoveHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
+                counterMoveHistoryEntry = (short)ScoreHistoryMove(counterMoveHistoryEntry, rawHistoryBonus);
+
+                // - Follow-up history (continuation history, ply - 2)
+                ref var followUpHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 2);
+                followUpHistoryEntry = (short)ScoreHistoryMove(followUpHistoryEntry, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -218,8 +226,11 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                        continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                        ref var counterMoveHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
+                        counterMoveHistoryEntry = (short)ScoreHistoryMove(counterMoveHistoryEntry, -rawHistoryMalus);
+
+                        ref var followUpHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 2);
+                        followUpHistoryEntry = (short)ScoreHistoryMove(followUpHistoryEntry, -rawHistoryMalus);
                     }
                 }
             }

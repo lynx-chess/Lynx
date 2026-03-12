@@ -125,6 +125,7 @@ public sealed partial class Engine
         const int targetSquareOffset = 12 * 64;
         const int previousMovePieceOffset = 64;
 
+        // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
         var previousMove = Game.ReadMoveFromStack(ply);
 
         var index = (piece * pieceOffset)
