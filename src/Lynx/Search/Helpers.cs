@@ -116,27 +116,25 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// [12][64][12][64][ContinuationHistoryPlyCount]
+    /// [12][64][12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private ref short ContinuationHistoryEntry(int piece, int targetSquare, int ply)
     {
-        const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int previousMovePieceOffset = 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int previousMoveTargetSquareOffset = EvaluationConstants.ContinuationHistoryPlyCount;
+        const int pieceOffset = 64 * 12 * 64;
+        const int targetSquareOffset = 12 * 64;
+        const int previousMovePieceOffset = 64;
 
         var previousMove = Game.ReadMoveFromStack(ply);
 
         var index = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset)
             + (previousMove.Piece() * previousMovePieceOffset)
-            + (previousMove.TargetSquare() * previousMoveTargetSquareOffset);
+            + previousMove.TargetSquare();
 
         Debug.Assert(index < _continuationHistory.Length);
 
         return ref _continuationHistory[index];
-        //+ 0];
     }
 
     /// <summary>
