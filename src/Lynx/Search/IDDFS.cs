@@ -46,8 +46,6 @@ public sealed partial class Engine
     /// <summary>
     /// 12 x 64 x 12 x 64
     /// piece x target square x last piece x last target square x plies back
-    /// ply - 1 -> Counter-move history
-    /// ply - 2 -> Follow-up move history
     /// </summary>
     private readonly short[] _continuationHistory = GC.AllocateArray<short>(12 * 64 * 12 * 64, pinned: true);
 

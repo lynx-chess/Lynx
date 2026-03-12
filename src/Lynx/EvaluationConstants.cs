@@ -216,7 +216,7 @@ public static class EvaluationConstants
 
     #endregion
 
-    public const int ContinuationHistoryPlyCount = 2;
+    public const int ContinuationHistoryPlyCount = 4;
 }
 
 #pragma warning restore IDE1006 // Naming Styles
