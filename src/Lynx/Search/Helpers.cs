@@ -158,27 +158,37 @@ public sealed partial class Engine
         const int targetSquareOffset = 12 * 64;
         //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
 
+        int totalContHist = 0;
+
         var commonIndex = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset);
 
         // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
-        // Counter move history (continuation history, ply - 1)
-        var ply1Move = Game.ReadMoveFromStack(ply - 1);
-        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
-        Debug.Assert(ply1Index < _continuationHistory.Length);
+        if (ply >= 1)
+        {
+            // Counter move history (continuation history, ply - 1)
+            var ply1Move = Game.ReadMoveFromStack(ply - 1);
+            var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+            Debug.Assert(ply1Index < _continuationHistory.Length);
 
-        // Follow-up history (continuation history, ply - 2)
-        var ply2Move = Game.ReadMoveFromStack(ply - 2);
-        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
-        Debug.Assert(ply2Index < _continuationHistory.Length);
+            ref var contHist1 = ref _continuationHistory[ply1Index];
+            totalContHist += contHist1;
 
-        ref var contHist1 = ref _continuationHistory[ply1Index];
-        ref var constHist2 = ref _continuationHistory[ply2Index];
+            if (ply >= 2)
+            {
+                // Follow-up history (continuation history, ply - 2)
+                var ply2Move = Game.ReadMoveFromStack(ply - 2);
+                var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+                Debug.Assert(ply2Index < _continuationHistory.Length);
 
-        int totalContHist = contHist1 + constHist2;
+                ref var constHist2 = ref _continuationHistory[ply2Index];
+                totalContHist += constHist2;
 
-        contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
-        constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
+                constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
+            }
+
+            contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
+        }
     }
 
     /// <summary>
