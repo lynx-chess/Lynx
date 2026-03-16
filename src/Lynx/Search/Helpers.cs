@@ -189,7 +189,7 @@ public sealed partial class Engine
 
                 if (ply >= 4)
                 {
-                    // Continuation history, ply - 2
+                    // Continuation history, ply - 4
                     var ply4Move = Game.ReadMoveFromStack(ply - 4);
                     var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
                     Debug.Assert(ply4Index < _continuationHistory.Length);
