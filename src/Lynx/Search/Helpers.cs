@@ -128,23 +128,40 @@ public sealed partial class Engine
         var commonIndex = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset);
 
-        // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
-        // Counter move history (continuation history, ply - 1)
-        var ply1Move = Game.ReadMoveFromStack(ply - 1);
-        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
-        Debug.Assert(ply1Index < _continuationHistory.Length);
+        var totalContHist = 0;
 
-        // Follow-up history (continuation history, ply - 2)
-        var ply2Move = Game.ReadMoveFromStack(ply - 2);
-        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
-        Debug.Assert(ply2Index < _continuationHistory.Length);
+        if (ply >= 1)
+        {
+            // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
+            // Counter move history (continuation history, ply - 1)
+            var ply1Move = Game.ReadMoveFromStack(ply - 1);
+            var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+            Debug.Assert(ply1Index < _continuationHistory.Length);
 
-        // Ccontinuation history, ply - 4
-        var ply4Move = Game.ReadMoveFromStack(ply - 4);
-        var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
-        Debug.Assert(ply4Index < _continuationHistory.Length);
+            totalContHist += _continuationHistory[ply1Index];
 
-        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index] + _continuationHistory[ply4Index];
+            if (ply >= 2)
+            {
+                // Follow-up history (continuation history, ply - 2)
+                var ply2Move = Game.ReadMoveFromStack(ply - 2);
+                var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+                Debug.Assert(ply2Index < _continuationHistory.Length);
+
+                totalContHist += _continuationHistory[ply2Index];
+
+                if (ply >= 4)
+                {
+                    // Continuation history, ply - 4
+                    var ply4Move = Game.ReadMoveFromStack(ply - 4);
+                    var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
+                    Debug.Assert(ply4Index < _continuationHistory.Length);
+
+                    totalContHist += _continuationHistory[ply4Index];
+                }
+            }
+        }
+
+        return totalContHist;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
