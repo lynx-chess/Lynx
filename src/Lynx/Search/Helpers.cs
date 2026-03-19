@@ -188,8 +188,8 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int QuietHistories(Position position, Move move, int ply, ref EvaluationContext evaluationContext)
     {
-        return QuietHistoryEntry(position, move, ref evaluationContext) 
-            + 2 * ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply);
+        return QuietHistoryEntry(position, move, ref evaluationContext)
+            + (ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply) / 2);
     }
 
     /// <summary>
