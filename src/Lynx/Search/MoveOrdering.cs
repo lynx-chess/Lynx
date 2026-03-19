@@ -61,7 +61,8 @@ public sealed partial class Engine
 
             // History move or 0 if not found
             return BaseMoveScore
-                + QuietHistoryEntry(position, move, ref evaluationContext);
+                + QuietHistoryEntry(position, move, ref evaluationContext)
+                + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply);
         }
 
         // Queen promotion
