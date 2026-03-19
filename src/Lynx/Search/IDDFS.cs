@@ -45,7 +45,7 @@ public sealed partial class Engine
 
     /// <summary>
     /// 12 x 64 x 12 x 64
-    /// piece x target square x last piece x last target square x plies back
+    /// piece x target square x previous piece x previous target square
     /// ply - 1 -> Counter-move history
     /// ply - 2 -> Follow-up move history
     /// </summary>
