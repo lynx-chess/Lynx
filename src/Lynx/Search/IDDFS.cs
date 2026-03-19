@@ -44,12 +44,12 @@ public sealed partial class Engine
     private readonly short[] _captureHistory = GC.AllocateArray<short>(12 * 64 * 12, pinned: true);
 
     /// <summary>
-    /// 12 x 64 x 12 x 64
-    /// piece x target square x previous piece x previous target square
+    /// 12 x 64 x 2 x 2 x 12 x 64 
+    /// piece x target square x source square is attacked x target square is attacked x previous piece x previous target square
     /// ply - 1 -> Counter-move history
     /// ply - 2 -> Follow-up move history
     /// </summary>
-    private readonly short[] _continuationHistory = GC.AllocateArray<short>(12 * 64 * 12 * 64, pinned: true);
+    private readonly short[] _continuationHistory = GC.AllocateArray<short>(12 * 64 * 12 * 64 * 2 * 2, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2

@@ -82,16 +82,14 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private short QuietHistoryEntry(Position position, int piece, int sourceSquare, int targetSquare, ref EvaluationContext evaluationContext)
     {
-        var sourceSquare = move.SourceSquare();
-        var targetSquare = move.TargetSquare();
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
 
-        var pieceToHistory = PieceToQuietHistoryEntry(move.Piece(), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+        var pieceToHistory = PieceToQuietHistoryEntry(piece, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
         var butterflyHistory = ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
 
         return (short)((pieceToHistory + butterflyHistory) / 2);
@@ -115,33 +113,6 @@ public sealed partial class Engine
         return ref _captureHistory[index];
     }
 
-    /// <summary>
-    /// [12][64][12][64]
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
-    {
-        const int pieceOffset = 64 * 12 * 64;
-        const int targetSquareOffset = 12 * 64;
-        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
-
-        var commonIndex = (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset);
-
-        // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
-        // Counter move history (continuation history, ply - 1)
-        var ply1Move = Game.ReadMoveFromStack(ply - 1);
-        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
-        Debug.Assert(ply1Index < _continuationHistory.Length);
-
-        // Follow-up history (continuation history, ply - 2)
-        var ply2Move = Game.ReadMoveFromStack(ply - 2);
-        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
-        Debug.Assert(ply2Index < _continuationHistory.Length);
-
-        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ContinuationHistoryPreviousMoveIndex(Move previousMove)
     {
@@ -152,14 +123,23 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateContinuationHistory(int piece, int targetSquare, int ply, int rawHistoryBonus)
+    private void UpdateContinuationHistory(Position position, int piece, int sourceSquare, int targetSquare, int ply, int rawHistoryBonus, ref EvaluationContext evaluationContext)
     {
-        const int pieceOffset = 64 * 12 * 64;
-        const int targetSquareOffset = 12 * 64;
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
+        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        const int pieceOffset = 64 * 2 * 2 * 12 * 64;
+        const int targetSquareOffset = 2 * 2 * 12 * 64;
+        const int sourceSquareAttackedOffset = 2 * 12 * 64;
+        const int targetSquareAttackedOffset = 12 * 64;
         //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
 
         var commonIndex = (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset);
+            + (targetSquare * targetSquareOffset)
+            + (isStartSquareAttacked * sourceSquareAttackedOffset)
+            + (isTargetSquareAttacked * targetSquareAttackedOffset);
 
         // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
         if (ply >= 1)
@@ -183,6 +163,50 @@ public sealed partial class Engine
                 constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int QuietHistories(Position position, Move move, int ply, ref EvaluationContext evaluationContext)
+    {
+        var piece = move.Piece();
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
+        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        // 🔍 Quiet history with threats, [12][64][2][2]
+        var pieceToHistory = PieceToQuietHistoryEntry(piece, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+        var butterflyHistory = ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+
+        var quietHistory = (short)((pieceToHistory + butterflyHistory) / 2);
+
+        // 🔍 Continuation history with threats, [12][64][2][2][12][64]
+        const int pieceOffset = 64 * 2 * 2 * 12 * 64;
+        const int targetSquareOffset = 2 * 2 * 12 * 64;
+        const int sourceSquareAttackedOffset = 2 * 12 * 64;
+        const int targetSquareAttackedOffset = 12 * 64;
+        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
+
+        var commonIndex = (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + (isStartSquareAttacked * sourceSquareAttackedOffset)
+            + (isTargetSquareAttacked * targetSquareAttackedOffset);
+
+        // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
+        // Counter move history (continuation history, ply - 1)
+        var ply1Move = Game.ReadMoveFromStack(ply - 1);
+        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+        Debug.Assert(ply1Index < _continuationHistory.Length);
+
+        // Follow-up history (continuation history, ply - 2)
+        var ply2Move = Game.ReadMoveFromStack(ply - 2);
+        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+        Debug.Assert(ply2Index < _continuationHistory.Length);
+
+        return quietHistory + _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
     }
 
     /// <summary>

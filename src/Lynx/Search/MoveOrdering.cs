@@ -50,18 +50,14 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
-                var piece = move.Piece();
-                var targetSquare = move.TargetSquare();
-
                 // Counter move history
                 return BaseMoveScore
-                    + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(piece, targetSquare, ply);
+                    + QuietHistories(position, move, ply, ref evaluationContext);
             }
 
             // History move or 0 if not found
             return BaseMoveScore
-                + QuietHistoryEntry(position, move, ref evaluationContext);
+                + QuietHistoryEntry(position, move.Piece(), move.SourceSquare(), move.TargetSquare(), ref evaluationContext);
         }
 
         // Queen promotion
@@ -190,7 +186,7 @@ public sealed partial class Engine
             if (!isRoot)
             {
                 // 🔍 Continuation history
-                UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
+                UpdateContinuationHistory(position, piece, sourceSquare, targetSquare, ply, rawHistoryBonus, ref evaluationContext);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -203,10 +199,10 @@ public sealed partial class Engine
                 {
                     var visitedMovePiece = visitedMove.Piece();
                     var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                    var visitedMoveSourceSquare = visitedMove.SourceSquare();
 
                     // 🔍 Quiet history penalty / malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    var visitedMoveSourceSquare = visitedMove.SourceSquare();
                     var visitedIsStartSquareAttacked = oppositeSideAttacks.GetBit(visitedMoveSourceSquare) ? 1 : 0;
                     var visitedIsTargetSquareAttacked = oppositeSideAttacks.GetBit(visitedMoveTargetSquare) ? 1 : 0;
 
@@ -219,7 +215,7 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        UpdateContinuationHistory(visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
+                        UpdateContinuationHistory(position, visitedMovePiece, visitedMoveSourceSquare, visitedMoveTargetSquare, ply, -rawHistoryMalus, ref evaluationContext);
                     }
                 }
             }

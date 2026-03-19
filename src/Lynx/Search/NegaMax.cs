@@ -372,8 +372,7 @@ public sealed partial class Engine
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
-            int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
-                + ContinuationHistoryEntry(piece, targetSquare, ply);
+            int quietHistory = QuietHistories(position, move, ply, ref evaluationContext);
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -678,7 +677,7 @@ public sealed partial class Engine
                             ? EvaluationConstants.HistoryBonus[depth]
                             : -EvaluationConstants.HistoryMalus[depth];
 
-                        UpdateContinuationHistory(piece, targetSquare, ply, historyBonus);
+                        UpdateContinuationHistory(position, piece, move.SourceSquare(), targetSquare, ply, historyBonus, ref evaluationContext);
                     }
                 }
 
