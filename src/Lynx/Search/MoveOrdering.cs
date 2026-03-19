@@ -50,13 +50,9 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
-                var piece = move.Piece();
-                var targetSquare = move.TargetSquare();
-
                 // Counter move history
                 return BaseMoveScore
-                    + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(piece, targetSquare, ply);
+                    + QuietHistories(position, move, ply, ref evaluationContext);
             }
 
             // History move or 0 if not found
