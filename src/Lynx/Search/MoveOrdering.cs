@@ -42,27 +42,15 @@ public sealed partial class Engine
                 return SecondKillerMoveValue;
             }
 
-            if (ply >= 1)
+            // Countermove
+            if (CounterMove(ply - 1) == move)
             {
-                // Countermove
-                if (CounterMove(ply - 1) == move)
-                {
-                    return CounterMoveValue;
-                }
-
-                var piece = move.Piece();
-                var targetSquare = move.TargetSquare();
-
-                // Counter move history
-                return BaseMoveScore
-                    + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(piece, targetSquare, ply);
+                return CounterMoveValue;
             }
 
-            // History move or 0 if not found
+            // Histories
             return BaseMoveScore
-                + QuietHistoryEntry(position, move, ref evaluationContext)
-                + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply);
+                + QuietHistories(position, move, ply, ref evaluationContext);
         }
 
         // Queen promotion
