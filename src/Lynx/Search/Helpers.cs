@@ -152,11 +152,16 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateContinuationHistory(int piece, int targetSquare, int ply, int rawHistoryBonus)
+    private void UpdateContinuationHistory(Position position, int move, int ply, int rawHistoryBonus, ref EvaluationContext evaluationContext)
     {
         const int pieceOffset = 64 * 12 * 64;
         const int targetSquareOffset = 12 * 64;
         //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
+
+        var piece = move.Piece();
+        var targetSquare = move.TargetSquare();
+
+        int totalContHist = QuietHistoryEntry(position, move, ref evaluationContext) / 2;
 
         var commonIndex = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset);
@@ -170,7 +175,7 @@ public sealed partial class Engine
             Debug.Assert(ply1Index < _continuationHistory.Length);
 
             ref var contHist1 = ref _continuationHistory[ply1Index];
-            contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
+            totalContHist += contHist1;
 
             if (ply >= 2)
             {
@@ -180,8 +185,12 @@ public sealed partial class Engine
                 Debug.Assert(ply2Index < _continuationHistory.Length);
 
                 ref var constHist2 = ref _continuationHistory[ply2Index];
-                constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
+                totalContHist += constHist2;
+
+                constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
             }
+
+            contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
         }
     }
 

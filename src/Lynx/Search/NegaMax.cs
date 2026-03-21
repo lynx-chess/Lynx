@@ -678,7 +678,7 @@ public sealed partial class Engine
                             ? EvaluationConstants.HistoryBonus[depth]
                             : -EvaluationConstants.HistoryMalus[depth];
 
-                        UpdateContinuationHistory(piece, targetSquare, ply, historyBonus);
+                        UpdateContinuationHistory(position, move, ply, historyBonus, ref evaluationContext);
                     }
                 }
 

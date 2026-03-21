@@ -190,7 +190,7 @@ public sealed partial class Engine
             if (!isRoot)
             {
                 // 🔍 Continuation history
-                UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
+                UpdateContinuationHistory(position, move, ply, rawHistoryBonus, ref evaluationContext);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -219,7 +219,7 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        UpdateContinuationHistory(visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
+                        UpdateContinuationHistory(position, visitedMove, ply, -rawHistoryMalus, ref evaluationContext);
                     }
                 }
             }
@@ -281,8 +281,18 @@ public sealed partial class Engine
     /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ScoreHistoryMove(int score, int rawHistoryBonus)
+    private static int ScoreHistoryMove(int previousHistory, int rawHistoryBonus)
     {
-        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
+        return previousHistory + rawHistoryBonus - (previousHistory * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
+    }
+
+    /// <summary>
+    /// Soft caps history score
+    /// Idea of using the total continuation history from Plentychess
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static short ScoreContinuationHistoryMove(int rawBonus, short previousContinuationHistoryEntry, int totalContinuationHistory)
+    {
+        return (short)(previousContinuationHistoryEntry + rawBonus - (totalContinuationHistory * Math.Abs(rawBonus) / Configuration.EngineSettings.History_MaxMoveValue));
     }
 }
