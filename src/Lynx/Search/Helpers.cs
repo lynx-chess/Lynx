@@ -161,7 +161,7 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
-        int totalContHist = QuietHistoryEntry(position, move, ref evaluationContext) / 2;
+        var quietHistory = QuietHistoryEntry(position, move, ref evaluationContext) / 2;
 
         var commonIndex = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset);
@@ -175,7 +175,6 @@ public sealed partial class Engine
             Debug.Assert(ply1Index < _continuationHistory.Length);
 
             ref var contHist1 = ref _continuationHistory[ply1Index];
-            totalContHist += contHist1;
 
             if (ply >= 2)
             {
@@ -185,12 +184,11 @@ public sealed partial class Engine
                 Debug.Assert(ply2Index < _continuationHistory.Length);
 
                 ref var constHist2 = ref _continuationHistory[ply2Index];
-                totalContHist += constHist2;
 
-                constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
+                constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
             }
 
-            contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
+            contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
         }
     }
 
