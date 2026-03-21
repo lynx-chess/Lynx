@@ -185,10 +185,10 @@ public sealed partial class Engine
 
                 ref var constHist2 = ref _continuationHistory[ply2Index];
 
-                constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
+                constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, quietHistory);
             }
 
-            contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
+            contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, quietHistory);
         }
     }
 

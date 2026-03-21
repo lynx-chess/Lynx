@@ -285,4 +285,14 @@ public sealed partial class Engine
     {
         return previousHistory + rawHistoryBonus - (previousHistory * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
     }
+
+    /// <summary>
+    /// Soft caps history score
+    /// Idea of using the total continuation history from Plentychess
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static short ScoreContinuationHistoryMove(int rawBonus, short previousContinuationHistoryEntry, int totalContinuationHistory)
+    {
+        return (short)(previousContinuationHistoryEntry + rawBonus - (totalContinuationHistory * Math.Abs(rawBonus) / Configuration.EngineSettings.History_MaxMoveValue));
+    }
 }
