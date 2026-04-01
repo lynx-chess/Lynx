@@ -483,6 +483,11 @@ public static class Constants
     /// <summary>
     /// 64 x 64
     /// </summary>
+    public static readonly Bitboard[][] RaysBetween;
+
+    /// <summary>
+    /// 64 x 64
+    /// </summary>
     public static readonly int[][] ChebyshevDistance =
     [
         [0, 1, 2, 3, 4, 5, 6, 7, 1, 1, 2, 3, 4, 5, 6, 7, 2, 2, 2, 3, 4, 5, 6, 7, 3, 3, 3, 3, 4, 5, 6, 7, 4, 4, 4, 4, 4, 5, 6, 7, 5, 5, 5, 5, 5, 5, 6, 7, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -641,6 +646,37 @@ public static class Constants
     public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
+
+#pragma warning disable CA1810 // Initialize reference type static fields inline
+    static Constants()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
+    {
+        RaysBetween = new Bitboard[64][];
+
+        for (int square1 = 0; square1 < 64; ++square1)
+        {
+            RaysBetween[square1] = new Bitboard[64];
+
+            for(var square2 = 0; square2 < 64; ++square2)
+            {
+                var occupancy = 1UL << square1 | 1UL << square2;
+
+                int file1 = File(square1);
+                int file2 = File(square2);
+                int rank1 = Rank(square1);
+                int rank2 = Rank(square2);
+
+                if (file1 == file2 || rank1 == rank2)
+                {
+                    RaysBetween[square1][square2] = Attacks.RookAttacks(square1, occupancy) & Attacks.RookAttacks(square2, occupancy);
+                }
+                else if(file1 - rank1 == file2 - rank2)
+                {
+                    RaysBetween[square1][square2] = Attacks.BishopAttacks(square1, occupancy) & Attacks.BishopAttacks(square2, occupancy);
+                }
+            }
+        }
+    }
 }
 
 #pragma warning restore IDE0055

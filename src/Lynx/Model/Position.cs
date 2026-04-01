@@ -1012,6 +1012,16 @@ public partial class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, Span<Bitboard> attacksBySide)
+    {
+        var attacks = attacksBySide[(int)attackingSide];
+
+        Debug.Assert(attacks != 0);
+
+        return (attacks & squaresBitboard) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, ref EvaluationContext evaluationContext)
     {
         var attacks = evaluationContext.AttacksBySide[(int)attackingSide];

@@ -78,6 +78,188 @@ public static class MoveGenerator
         return movePool[..localIndex];
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move GenerateFullTTMove(ShortMove ttMove, Position position, Span<Bitboard> attacksBySide)
+    {
+        if (ttMove == 0)
+        {
+            return 0;
+        }
+
+        // Extract short move info
+        int intTTMove = ttMove;
+
+        var sourceSquare = intTTMove.SourceSquare();
+        var targetSquare = intTTMove.TargetSquare();
+        var promotedPiece = intTTMove.PromotedPiece();
+
+        // Create full move candidate
+        var piece = position.Board[sourceSquare];
+        var capturedPiece = position.Board[targetSquare];
+
+        var pieceSide = Utils.PieceSide(piece);
+
+        if (pieceSide != position.Side
+            || (capturedPiece != (int)Piece.None
+                && pieceSide == Utils.PieceSide(capturedPiece)
+                && (!Configuration.EngineSettings.IsChess960
+                    || (ttMove != (ShortMove)position.WhiteShortCastle
+                        && ttMove != (ShortMove)position.WhiteLongCastle
+                        && ttMove != (ShortMove)position.BlackShortCastle
+                        && ttMove != (ShortMove)position.BlackLongCastle))))
+        {
+            // Wrong side
+            return 0;
+        }
+
+        switch (piece)
+        {
+            case (int)Piece.N:
+            case (int)Piece.n:
+                {
+                    // We can save the rays check, since it'll always be 0 for knights
+                    return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
+                }
+            case (int)Piece.B:
+            case (int)Piece.R:
+            case (int)Piece.Q:
+            case (int)Piece.b:
+            case (int)Piece.r:
+            case (int)Piece.q:
+                {
+                    var occupancy = position.OccupancyBitboards[(int)Side.Both];
+
+                    if ((occupancy & Constants.RaysBetween[sourceSquare][targetSquare]) != 0)
+                    {
+                        // Jumping over pieces
+                        return 0;
+                    }
+
+                    return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
+                }
+            case (int)Piece.K:
+                {
+                    var occupancy = position.OccupancyBitboards[(int)Side.Both];
+
+                    if (ttMove == (ShortMove)position.WhiteShortCastle)
+                    {
+                        return (position.Castle & (int)CastlingRights.WK) != 0
+                                && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                                && !Position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, attacksBySide)
+                            ? position.WhiteShortCastle
+                            : 0;
+                    }
+
+                    if (ttMove == (ShortMove)position.WhiteLongCastle)
+                    {
+                        return (position.Castle & (int)CastlingRights.WQ) != 0
+                                && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                                && !Position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, attacksBySide)
+                            ? position.WhiteLongCastle
+                            : 0;
+                    }
+
+                    if (capturedPiece <= (int)Piece.K)
+                    {
+                        // We can't capture our own pieces
+                        return 0;
+                    }
+
+                    // We don't care if capturedPiece is None or not
+                    return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
+                }
+            case (int)Piece.k:
+                {
+                    var occupancy = position.OccupancyBitboards[(int)Side.Both];
+
+                    if (ttMove == (ShortMove)position.BlackShortCastle)
+                    {
+                        return (position.Castle & (int)CastlingRights.BK) != 0
+                                && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                                && !Position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, attacksBySide)
+                            ? position.BlackShortCastle
+                            : 0;
+                    }
+
+                    if (ttMove == (ShortMove)position.BlackLongCastle)
+                    {
+                        return (position.Castle & (int)CastlingRights.BQ) != 0
+                                && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                                && !Position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, attacksBySide)
+                            ? position.BlackLongCastle
+                            : 0;
+                    }
+
+                    if (capturedPiece >= (int)Piece.p && capturedPiece != (int)Piece.None)
+                    {
+                        // We can't capture our own pieces
+                        return 0;
+                    }
+
+                    // We don't care if capturedPiece is None or not
+                    return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
+                }
+            case (int)Piece.P:
+            case (int)Piece.p:
+                {
+                    var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
+                    var singlePushSquare = sourceSquare + pawnPush;
+
+                    // Single pawn push
+                    if (targetSquare == singlePushSquare)
+                    {
+                        if (position.Board[targetSquare] != (int)Piece.None)
+                        {
+                            return 0;
+                        }
+
+                        return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece);
+                    }
+
+                    // Double pawn push
+                    var doublePushSquare = singlePushSquare + pawnPush;
+                    if (targetSquare == doublePushSquare)
+                    {
+                        if (position.Board[targetSquare] != (int)Piece.None || position.Board[singlePushSquare] != (int)Piece.None)
+                        {
+                            return 0;
+                        }
+
+                        return MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
+                    }
+
+                    // En passant
+                    if (targetSquare == (int)position.EnPassant)
+                    {
+                        var pieceOffset = Utils.PieceOffset((int)position.Side);
+                        return MoveExtensions.EncodeEnPassant(sourceSquare, targetSquare, piece, (int)Piece.p - pieceOffset);
+                    }
+
+                    // Capture
+                    if (capturedPiece == (int)Piece.None)
+                    {
+                        // If the pawn moves files, it needs to be capture
+                        return 0;
+                    }
+
+                    var move = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
+
+                    return promotedPiece == (int)Piece.None
+                        ? move
+                        : MoveExtensions.EncodePromotionFromPawnMove(move, promotedPiece);
+                }
+            case (int)Piece.None:
+            case (int)Piece.Unknown:
+                {
+                    // Invalid TT move
+                    return 0;
+                }
+        }
+
+
+        return 0;
+    }
+
     /// <summary>
     /// Generates all pseudo-legal quiet moves from <paramref name="position"/>.
     /// Complements <see cref="GenerateAllCaptures(Position, ref EvaluationContext, Span{int})"/>.
@@ -202,8 +384,8 @@ public static class MoveGenerator
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
-                var targetRank = (targetSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)
+                var targetRank = targetSquare >> 3;
+                if (targetRank == 0 || targetRank == 7)
                 {
                     // Capture with promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
@@ -331,8 +513,8 @@ public static class MoveGenerator
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
-                var targetRank = (targetSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)
+                var targetRank = targetSquare >> 3;
+                if (targetRank == 0 || targetRank == 7)
                 {
                     // Capture with promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
@@ -669,8 +851,8 @@ public static class MoveGenerator
 
                 var pawnCapture = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
 
-                var targetRank = (targetSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Capture with promotion
+                var targetRank = targetSquare >> 3;
+                if (targetRank == 0 || targetRank == 7)  // Capture with promotion
                 {
                     // If any of the promotions that capture the same piece isn't valid, it means that the pawn move unveils a discovered check, or that the capture doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions capturing the same piece will be valid either
@@ -815,5 +997,202 @@ public static class MoveGenerator
         position.UnmakeMove(move, gameState);
 
         return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsPseudoLegal(Position position, Move move, ref EvaluationContext evaluationContext)
+    {
+        var side = (int)position.Side;
+        var piece = move.Piece();
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+
+        if (!IsPieceFromSide(piece, side)
+            || position.Board[sourceSquare] != piece
+            || sourceSquare == targetSquare)
+        {
+            return false;
+        }
+
+        var specialMove = move.SpecialMoveFlag();
+        if (specialMove == SpecialMoveType.ShortCastle || specialMove == SpecialMoveType.LongCastle)
+        {
+            return IsPseudoLegalCastlingMove(position, move, ref evaluationContext);
+        }
+
+        if (specialMove == SpecialMoveType.EnPassant)
+        {
+            if (!IsPseudoLegalPawnMove(position, move, allowOnlyEnPassant: true))
+            {
+                return false;
+            }
+
+            var pawnPush = +8 - (side * 16);
+            var capturedSquare = targetSquare - pawnPush;
+
+            return (BoardSquare)targetSquare == position.EnPassant
+                && position.Board[targetSquare] == (int)Piece.None
+                && IsOpponentPiece(position.Board[capturedSquare], side);
+        }
+
+        var targetPiece = position.Board[targetSquare];
+        if (targetPiece != (int)Piece.None && IsPieceFromSide(targetPiece, side))
+        {
+            return false;
+        }
+
+        if (move.CapturedPiece() == (int)Piece.None
+            && targetPiece != (int)Piece.None)
+        {
+            return false;
+        }
+
+        if (move.CapturedPiece() != (int)Piece.None
+            && !IsOpponentPiece(targetPiece, side))
+        {
+            return false;
+        }
+
+        return piece switch
+        {
+            (int)Piece.P or (int)Piece.p => IsPseudoLegalPawnMove(position, move, allowOnlyEnPassant: false),
+            _ => IsPseudoLegalPieceMove(position, move),
+        };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsPseudoLegalPieceMove(Position position, Move move)
+    {
+        var piece = move.Piece();
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var occupancy = position.OccupancyBitboards[(int)Side.Both];
+
+        return (_pieceAttacks[piece](sourceSquare, occupancy) & (1UL << targetSquare)) != 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsPseudoLegalPawnMove(Position position, Move move, bool allowOnlyEnPassant)
+    {
+        var side = (int)position.Side;
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var pawnPush = +8 - (side * 16);
+
+        var occupancy = position.OccupancyBitboards[(int)Side.Both];
+        var oppositeSide = Utils.OppositeSide(side);
+        var oppositeSidePieces = position.OccupancyBitboards[oppositeSide];
+
+        var sourceRank = sourceSquare >> 3;
+        var targetRank = targetSquare >> 3;
+        var isPromotion = move.IsPromotion();
+
+        if (isPromotion)
+        {
+            if (targetRank != 0 && targetRank != 7)
+            {
+                return false;
+            }
+
+            var promotedPiece = move.PromotedPiece();
+            if (!IsPieceFromSide(promotedPiece, side)
+                || promotedPiece == (int)Piece.P || promotedPiece == (int)Piece.p
+                || promotedPiece == (int)Piece.K || promotedPiece == (int)Piece.k)
+            {
+                return false;
+            }
+        }
+        else if (targetRank == 0 || targetRank == 7)
+        {
+            return false;
+        }
+
+        var attackMask = Attacks.PawnAttacks[side][sourceSquare];
+        if (((attackMask >> targetSquare) & 1UL) != 0)
+        {
+            if (allowOnlyEnPassant)
+            {
+                return (BoardSquare)targetSquare == position.EnPassant;
+            }
+
+            return (oppositeSidePieces & (1UL << targetSquare)) != 0;
+        }
+
+        if (allowOnlyEnPassant)
+        {
+            return false;
+        }
+
+        if (targetSquare == sourceSquare + pawnPush)
+        {
+            return !occupancy.GetBit(targetSquare);
+        }
+
+        if (targetSquare == sourceSquare + (2 * pawnPush)
+            && (sourceRank == 2 || sourceRank == 7)
+            && !occupancy.GetBit(sourceSquare + pawnPush)
+            && !occupancy.GetBit(targetSquare))
+        {
+            return move.IsDoublePawnPush();
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsPseudoLegalCastlingMove(Position position, Move move, ref EvaluationContext evaluationContext)
+    {
+        var side = position.Side;
+        var castlingRights = position.Castle;
+        var occupancy = position.OccupancyBitboards[(int)Side.Both];
+
+        if (side == Side.White)
+        {
+            if (move == position.WhiteShortCastle)
+            {
+                return (castlingRights & (int)CastlingRights.WK) != default
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                    && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext);
+            }
+
+            if (move == position.WhiteLongCastle)
+            {
+                return (castlingRights & (int)CastlingRights.WQ) != default
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                    && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, ref evaluationContext);
+            }
+        }
+        else
+        {
+            if (move == position.BlackShortCastle)
+            {
+                return (castlingRights & (int)CastlingRights.BK) != default
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext);
+            }
+
+            if (move == position.BlackLongCastle)
+            {
+                return (castlingRights & (int)CastlingRights.BQ) != default
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, ref evaluationContext);
+            }
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsPieceFromSide(int piece, int side)
+    {
+        return side == (int)Side.White
+            ? piece is >= (int)Piece.P and <= (int)Piece.K
+            : piece is >= (int)Piece.p and <= (int)Piece.k;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool IsOpponentPiece(int piece, int side)
+    {
+        return piece != (int)Piece.None && !IsPieceFromSide(piece, side);
     }
 }
