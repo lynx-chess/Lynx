@@ -50,10 +50,13 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
+                var piece = move.Piece();
+                var targetSquare = move.TargetSquare();
+
                 // Counter move history
                 return BaseMoveScore
                     + QuietHistoryEntry(position, move, ref evaluationContext)
-                    + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                    + ContinuationHistoryEntry(piece, targetSquare, ply);
             }
 
             // History move or 0 if not found
@@ -187,9 +190,7 @@ public sealed partial class Engine
             if (!isRoot)
             {
                 // 🔍 Continuation history
-                // - Counter move history (continuation history, ply - 1)
-                ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-                continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
+                UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -218,8 +219,7 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                        continuationHistoryEntry = (short)ScoreHistoryMove(continuationHistoryEntry, -rawHistoryMalus);
+                        UpdateContinuationHistory(visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
                     }
                 }
             }
