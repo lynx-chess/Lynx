@@ -507,7 +507,7 @@ public sealed partial class Engine
                 DepthReached = 0,
                 Nodes = 0,
                 Time = 0,
-                NodesPerSecond = 0
+                NodesPerSecond = 0,
             };
 
             return true;
@@ -538,7 +538,7 @@ public sealed partial class Engine
             DepthReached = maxDepthReached,
             Nodes = _nodes,
             Time = Utils.CalculateUCITime(elapsedSeconds),
-            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds)
+            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds),
         };
     }
 
@@ -655,7 +655,7 @@ public sealed partial class Engine
 #endif
                 move, singleMoveEval, 0, [move])
             {
-                DepthReached = 0
+                DepthReached = 0,
             };
         }
 

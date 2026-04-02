@@ -141,7 +141,7 @@ public static class FENParser
                     'q' => Piece.q,
                     'k' => Piece.k,
 
-                    _ => Piece.None
+                    _ => Piece.None,
                 };
 
                 if (piece != Piece.None)
@@ -167,7 +167,7 @@ public static class FENParser
         {
             'w' or 'W' => Side.White,
             'b' or 'B' => Side.Black,
-            _ => throw new LynxException($"Unrecognized side: {side}")
+            _ => throw new LynxException($"Unrecognized side: {side}"),
         };
     }
 
@@ -192,7 +192,7 @@ public static class FENParser
                 'k' => (byte)CastlingRights.BK,
                 'q' => (byte)CastlingRights.BQ,
                 '-' => castlingRights,
-                _ => throw new LynxException($"Unrecognized castling char: {castlingChars[i]}")
+                _ => throw new LynxException($"Unrecognized castling char: {castlingChars[i]}"),
             };
         }
 

@@ -347,6 +347,7 @@ public sealed class Searcher : IDisposable
         var totalNodes = finalSearchResult?.Nodes ?? 0;
         var finalTime = finalSearchResult?.Time ?? 0;
 
+#pragma warning disable MA0079 // Forward the CancellationToken using .WithCancellation()
         await foreach (var task in Task.WhenEach(tasks))
         {
             var extraResult = await task;
@@ -404,7 +405,7 @@ public sealed class Searcher : IDisposable
 
                                 => extraResult,
 
-                        _ => finalSearchResult
+                        _ => finalSearchResult,
                     };
 
 #if MULTITHREAD_DEBUG
@@ -432,6 +433,7 @@ public sealed class Searcher : IDisposable
                 }
             }
         }
+#pragma warning restore MA0079 // Forward the CancellationToken using .WithCancellation()
 
         if (finalSearchResult is not null)
         {

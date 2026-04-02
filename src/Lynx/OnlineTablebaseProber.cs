@@ -34,18 +34,18 @@ public static class OnlineTablebaseProber
 #pragma warning disable IDISP004 // Don't ignore created IDisposable
         new PolicyHttpMessageHandler(_retryPolicy)
         {
-            InnerHandler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(15) }
+            InnerHandler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(15) },
         })
 #pragma warning restore IDISP004 // Don't ignore created IDisposable
     {
-        BaseAddress = new("http://tablebase.lichess.ovh/")
+        BaseAddress = new("http://tablebase.lichess.ovh/"),
     };
 
     private readonly static JsonSerializerOptions _serializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         Converters = { new JsonStringEnumMemberConverter() },
-        TypeInfoResolver = SourceGenerationContext.Default
+        TypeInfoResolver = SourceGenerationContext.Default,
     };
 
     public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
@@ -391,7 +391,7 @@ public static class OnlineTablebaseProber
                     : result.DistanceToMate.HasValue
                         ? -EvaluationConstants.CheckMateBaseEvaluation + (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value))
                         : -EvaluationConstants.CheckMateBaseEvaluation + 49,
-            _ => NoResult
+            _ => NoResult,
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
