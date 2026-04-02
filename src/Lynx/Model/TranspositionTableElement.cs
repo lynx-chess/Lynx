@@ -19,7 +19,7 @@ public enum NodeType : byte
     /// <summary>
     /// LowerBound
     /// </summary>
-    Beta
+    Beta,
 }
 
 /// <summary>

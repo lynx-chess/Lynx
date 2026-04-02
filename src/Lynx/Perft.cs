@@ -112,7 +112,7 @@ public static class Perft
             < 1_000 => $"{Math.Round(milliseconds)} ms",
             < 60_000 => $"{0.001 * milliseconds:F} s",
             < 3_600_000 => $"{Math.Floor(milliseconds / 60_000)} min {Math.Round(0.001 * (milliseconds % 60_000))} s",
-            _ => $"{Math.Floor(milliseconds / 3_600_000)} h {Math.Round((milliseconds % 3_600_000) / 60_000)} min"
+            _ => $"{Math.Floor(milliseconds / 3_600_000)} h {Math.Round((milliseconds % 3_600_000) / 60_000)} min",
         };
     }
 }

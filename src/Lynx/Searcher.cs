@@ -404,7 +404,7 @@ public sealed class Searcher : IDisposable
 
                                 => extraResult,
 
-                        _ => finalSearchResult
+                        _ => finalSearchResult,
                     };
 
 #if MULTITHREAD_DEBUG

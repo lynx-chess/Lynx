@@ -11,7 +11,7 @@ public enum SpecialMoveType
     DoublePawnPush = 1,
     EnPassant = 2,
     ShortCastle = 3,
-    LongCastle = 4
+    LongCastle = 4,
 }
 
 /// <summary>
@@ -289,7 +289,7 @@ public static class MoveExtensions
 
                 + (capturedPiece == (int)Model.Piece.None ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
-                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
+                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
@@ -317,7 +317,7 @@ public static class MoveExtensions
                         + DisambiguateMove(move, position))
                 + (capturedPiece == (int)Model.Piece.None ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
-                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
+                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
     }

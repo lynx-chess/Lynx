@@ -163,7 +163,7 @@ public sealed partial class Engine : IDisposable
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove, cancellationToken),
-                Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken))
+                Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken)),
             };
 
         var resultList = await Task.WhenAll(tasks);
