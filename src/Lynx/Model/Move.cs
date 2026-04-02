@@ -215,11 +215,13 @@ public static class MoveExtensions
                 }
 
                 Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
+#pragma warning disable MA0031 // Optimize Enumerable.Count() usage
                 Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4
                     || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 12
                     || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8,
                     "Assert fail", "There will be either 4 or 8 moves that are a promotion");
                 Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
+#pragma warning restore MA0031 // Optimize Enumerable.Count() usage
             }
         }
 
@@ -273,7 +275,7 @@ public static class MoveExtensions
         var piece = move.Piece();
         var capturedPiece = move.CapturedPiece();
 
-#pragma warning disable S3358 // Ternary operators should not be nested
+#pragma warning disable S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
         return move.SpecialMoveFlag() switch
         {
             SpecialMoveType.ShortCastle => "O-O",
@@ -289,7 +291,7 @@ public static class MoveExtensions
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
         };
-#pragma warning restore S3358 // Ternary operators should not be nested
+#pragma warning restore S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
     }
 
     /// <summary>
@@ -301,7 +303,7 @@ public static class MoveExtensions
         var piece = move.Piece();
         var capturedPiece = move.CapturedPiece();
 
-#pragma warning disable S3358 // Ternary operators should not be nested
+#pragma warning disable S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
         return move.SpecialMoveFlag() switch
         {
             SpecialMoveType.ShortCastle => "O-O",
@@ -317,7 +319,7 @@ public static class MoveExtensions
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
         };
-#pragma warning restore S3358 // Ternary operators should not be nested
+#pragma warning restore S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
     }
 
     private static readonly string[] _uciStrings = InitUCIStrings();
