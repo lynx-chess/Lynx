@@ -317,11 +317,6 @@ public sealed partial class Engine
 
                     Span<Move> captures = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
                     var pseudoLegalCaptures = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, captures);
-                    if (pseudoLegalCaptures.Length == 0)
-                    {
-                        // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
-                        return staticEval;
-                    }
 
                     Span<int> captureScores = stackalloc int[pseudoLegalCaptures.Length];
 
