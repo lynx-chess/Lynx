@@ -370,7 +370,7 @@ public sealed partial class Engine
 
                         if (probCutScore >= probcutBeta)
                         {
-                            probCutScore = -NegaMax(probcutDepth - 1, ply + 1, -probcutBeta, -probcutBeta + 1, !cutnode, cancellationToken, isVerifyingSE);
+                            probCutScore = -NegaMax(probcutDepth, ply + 1, -probcutBeta, -probcutBeta + 1, !cutnode, cancellationToken, isVerifyingSE);
                         }
 
                         position.UnmakeMove(move, gameState);
