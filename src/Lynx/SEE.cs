@@ -200,7 +200,8 @@ public static class SEE
         {
             return 0;
         }
-        else if (move.IsEnPassant())
+
+        if (move.IsEnPassant())
         {
             return PieceValues[(int)Piece.P];
         }

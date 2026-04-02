@@ -203,25 +203,23 @@ public static class MoveExtensions
                     move = candidateMove;
                     return true;
                 }
-                else
+
+                var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
+                var candidatePromotedPiece = candidateMove.PromotedPiece();
+
+                if (candidatePromotedPiece == promotedPiece
+                    || candidatePromotedPiece == promotedPiece - 6)
                 {
-                    var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
-                    var candidatePromotedPiece = candidateMove.PromotedPiece();
-
-                    if (candidatePromotedPiece == promotedPiece
-                        || candidatePromotedPiece == promotedPiece - 6)
-                    {
-                        move = candidateMove;
-                        return true;
-                    }
-
-                    Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
-                    Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4
-                        || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 12
-                        || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8,
-                        "Assert fail", "There will be either 4 or 8 moves that are a promotion");
-                    Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
+                    move = candidateMove;
+                    return true;
                 }
+
+                Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
+                Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4
+                    || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 12
+                    || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8,
+                    "Assert fail", "There will be either 4 or 8 moves that are a promotion");
+                Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
             }
         }
 
@@ -371,6 +369,7 @@ public static class MoveExtensions
 
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
 
+#pragma warning disable MA0029 // Combine LINQ methods
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
             .Where(m =>
@@ -383,6 +382,7 @@ public static class MoveExtensions
                 return isLegal;
             })
             .ToArray();
+#pragma warning restore MA0029 // Combine LINQ methods
 
         if (movesWithSameSimpleRepresentation.Length == 0)
         {
