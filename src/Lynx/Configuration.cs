@@ -494,6 +494,15 @@ public sealed class EngineSettings
     [SPSA<int>(0, 20, 2)]
     public int SE_NoPV { get; set; } = 10;
 
+    [SPSA<int>(enabled: false)]
+    public int Probcut_MinDepth { get; set; } = 7;
+
+    [SPSA<int>(100, 300, 20)]
+    public int Probcut_BetaMargin { get; set; } = 200;
+
+    [SPSA<int>(1, 5, 1)]
+    public int Probcut_DepthOffset { get; set; } = 3;
+
     #endregion
 }
 

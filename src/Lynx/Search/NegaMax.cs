@@ -302,6 +302,92 @@ public sealed partial class Engine
                             : beta;
                     }
                 }
+
+                // 🔍 Probcut - we seek a beta cutoff with reduced effort, by attempting a QSearch + reduced depth search on captures and see if that beats beta by a decent margin
+                var probcutBeta = beta + Configuration.EngineSettings.Probcut_BetaMargin;
+                var probcutDepth = Math.Max(depth - Configuration.EngineSettings.Probcut_DepthOffset, 1);
+
+                if (depth >= Configuration.EngineSettings.Probcut_MinDepth
+                    && beta > EvaluationConstants.NegativeCheckmateDetectionLimit
+                    && beta < EvaluationConstants.PositiveCheckmateDetectionLimit
+                    && (!ttEntryHasBestMove || ttMoveIsCapture)
+                    && !(ttHit && ttEntry.Depth >= probcutDepth && ttScore < probcutBeta))
+                {
+                    var seeThreshold = (probcutBeta - staticEval) * 15 / 16;
+
+                    Span<Move> captures = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+                    var pseudoLegalCaptures = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, captures);
+                    if (pseudoLegalCaptures.Length == 0)
+                    {
+                        // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
+                        return staticEval;
+                    }
+
+                    Span<int> captureScores = stackalloc int[pseudoLegalCaptures.Length];
+
+                    ref var captureScoresRef = ref MemoryMarshal.GetReference(captureScores);
+                    ref var capturesRef = ref MemoryMarshal.GetReference(pseudoLegalCaptures);
+                    for (int i = 0; i < pseudoLegalCaptures.Length; ++i)
+                    {
+                        Unsafe.Add(ref captureScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref capturesRef, i), ttEntry.BestMove);
+                    }
+
+                    for (int moveIndex = 0; moveIndex < pseudoLegalCaptures.Length; ++moveIndex)
+                    {
+                        // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+                        // There's no need to sort all the moves since most of them don't get checked anyway
+                        // So just find the first unsearched one with the best score and try it
+                        for (int j = moveIndex + 1; j < pseudoLegalCaptures.Length; j++)
+                        {
+                            ref var moveI = ref Unsafe.Add(ref capturesRef, moveIndex);
+                            ref var moveJ = ref Unsafe.Add(ref capturesRef, j);
+                            ref var scoreI = ref Unsafe.Add(ref captureScoresRef, moveIndex);
+                            ref var scoreJ = ref Unsafe.Add(ref captureScoresRef, j);
+
+                            if (scoreJ > scoreI)
+                            {
+                                (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
+                            }
+                        }
+
+                        // Value copies
+                        var move = Unsafe.Add(ref capturesRef, moveIndex);
+                        var moveScore = Unsafe.Add(ref captureScoresRef, moveIndex);
+
+                        // TODO pass threshold to ScoreMoveQSearch and use move score here
+                        if (!SEE.IsGoodCapture(position, move, seeThreshold))
+                        {
+                            continue;
+                        }
+
+                        var gameState = position.MakeMove(move);
+                        if (!position.WasProduceByAValidMove())
+                        {
+                            position.UnmakeMove(move, gameState);
+                            continue;
+                        }
+
+                        ++_nodes;
+
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
+                        int probCutScore = -QuiescenceSearch(ply + 1, -probcutBeta, -probcutBeta + 1, pvNode, cancellationToken);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
+
+                        if (probCutScore >= probcutBeta)
+                        {
+                            probCutScore = -NegaMax(probcutDepth - 1, ply + 1, -probcutBeta, -probcutBeta + 1, !cutnode, cancellationToken, isVerifyingSE);
+                        }
+
+                        position.UnmakeMove(move, gameState);
+
+                        if (probCutScore >= probcutBeta)
+                        {
+                            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, probcutDepth, ply, probCutScore, NodeType.Beta, ttPv, move);
+
+                            return probCutScore;
+                        }
+                    }
+                }
             }
         }
         else
