@@ -324,7 +324,7 @@ public sealed partial class Engine
                     ref var capturesRef = ref MemoryMarshal.GetReference(pseudoLegalCaptures);
                     for (int i = 0; i < pseudoLegalCaptures.Length; ++i)
                     {
-                        Unsafe.Add(ref captureScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref capturesRef, i), ttEntry.BestMove);
+                        Unsafe.Add(ref captureScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref capturesRef, i), seeThreshold, ttEntry.BestMove);
                     }
 
                     for (int moveIndex = 0; moveIndex < pseudoLegalCaptures.Length; ++moveIndex)
@@ -349,8 +349,8 @@ public sealed partial class Engine
                         var move = Unsafe.Add(ref capturesRef, moveIndex);
                         var moveScore = Unsafe.Add(ref captureScoresRef, moveIndex);
 
-                        // TODO pass threshold to ScoreMoveQSearch and use move score here
-                        if (!SEE.IsGoodCapture(position, move, seeThreshold))
+                        // Only good captures based on custom threshold
+                        if (moveScore >= EvaluationConstants.GoodCaptureMoveBaseScoreValue)
                         {
                             continue;
                         }

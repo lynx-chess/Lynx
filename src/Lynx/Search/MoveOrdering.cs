@@ -108,7 +108,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMoveQSearch(Position position, Move move, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMoveQSearch(Position position, Move move, int seeCaptureThreshold = 0, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -136,7 +136,7 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(position, move))
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(position, move, seeCaptureThreshold))
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
 
