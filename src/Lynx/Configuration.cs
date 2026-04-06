@@ -503,6 +503,9 @@ public sealed class EngineSettings
     [SPSA<int>(1, 5, 1)]
     public int Probcut_DepthOffset { get; set; } = 3;
 
+    [SPSA<int>(0, 200, 20)]
+    public int Probcut_SEEThreshold { get; set; } = 100;
+
     #endregion
 }
 

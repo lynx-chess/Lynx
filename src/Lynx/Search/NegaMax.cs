@@ -313,7 +313,7 @@ public sealed partial class Engine
                     && (!ttEntryHasBestMove || ttMoveIsCapture)
                     && !(ttHit && ttEntry.Depth >= probcutDepth && ttScore < probcutBeta))
                 {
-                    var seeThreshold = (probcutBeta - staticEval) * 15 / 16;
+                    var seeThreshold = Configuration.EngineSettings.Probcut_SEEThreshold;
 
                     Span<Move> captures = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
                     var pseudoLegalCaptures = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, captures);
