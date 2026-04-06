@@ -162,14 +162,12 @@ public static class Utils
                 ? halfMovesWithoutCaptureOrPawnMove
                 : 0;
         }
-        else
-        {
-            var pieceToMove = moveToPlay.Piece();
 
-            return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
-                ? 0
-                : halfMovesWithoutCaptureOrPawnMove + 1;
-        }
+        var pieceToMove = moveToPlay.Piece();
+
+        return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
+            ? 0
+            : halfMovesWithoutCaptureOrPawnMove + 1;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
