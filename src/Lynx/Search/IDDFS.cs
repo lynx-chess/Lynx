@@ -77,7 +77,7 @@ public sealed partial class Engine
 
     /// <summary>
     /// <see cref="Constants.MaterialCorrHistoryHashSize"/> x 2
-    /// Major hash x side to move
+    /// Material hash x side to move
     /// </summary>
     private readonly short[] _materialCorrHistory = GC.AllocateArray<short>(Constants.MaterialCorrHistoryHashSize * 2, pinned: true);
 
