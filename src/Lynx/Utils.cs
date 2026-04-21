@@ -256,6 +256,18 @@ public static class Utils
         return ((1 << piece) & MajorPieceMask) != 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong Murmur3(ulong n)
+    {
+        n ^= n >> 33;
+        n *= 0xff51afd7ed558ccdUL;
+        n ^= n >> 33;
+        n *= 0xc4ceb9fe1a85ec53UL;
+        n ^= n >> 33;
+
+        return n;
+    }
+
     /// <summary>
     /// Recommended in https://learn.microsoft.com/en-us/dotnet/api/system.boolean.tostring
     /// </summary>

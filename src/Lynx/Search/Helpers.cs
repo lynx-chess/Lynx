@@ -268,6 +268,15 @@ public sealed partial class Engine
         ref var majorCorrHistEntry = ref _majorCorrHistory[majorCorrHistIndex];
         majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
 
+        // Material correction history
+        var materialHash = position.MaterialHash();
+        var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
+        var materialCorrHistIndex = (2 * materialIndex) + side;
+        Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
+
+        ref var materialCorrHistEntry = ref _materialCorrHistory[materialCorrHistIndex];
+        materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -342,12 +351,21 @@ public sealed partial class Engine
 
         var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
 
+        // Material correction history
+        var materialHash = position.MaterialHash();
+        var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
+        var materialCorrHistIndex = (2 * materialIndex) + side;
+        Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
+
+        var materialCorrHist = _materialCorrHistory[materialCorrHistIndex];
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
             + (nonPawnNoSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM)
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
-            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major);
+            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
+            + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material);
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);

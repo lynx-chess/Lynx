@@ -1097,6 +1097,30 @@ public partial class Position : IDisposable
 
     #endregion
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong MaterialHash()
+    {
+        ulong hash = 0;
+
+        var pieces = _pieceBitboards;
+
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand - CountBits always returns a positive value
+        hash |= (ulong)pieces[(int)Piece.P].CountBits();
+        hash |= (ulong)pieces[(int)Piece.N].CountBits() << 6;
+        hash |= (ulong)pieces[(int)Piece.B].CountBits() << 12;
+        hash |= (ulong)pieces[(int)Piece.R].CountBits() << 18;
+        hash |= (ulong)pieces[(int)Piece.Q].CountBits() << 24;
+
+        hash |= (ulong)pieces[(int)Piece.p].CountBits() << 30;
+        hash |= (ulong)pieces[(int)Piece.n].CountBits() << 36;
+        hash |= (ulong)pieces[(int)Piece.b].CountBits() << 42;
+        hash |= (ulong)pieces[(int)Piece.r].CountBits() << 48;
+        hash |= (ulong)pieces[(int)Piece.q].CountBits() << 54;
+#pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
+
+        return Utils.Murmur3(hash);
+    }
+
     public int CountPieces() => _pieceBitboards.Sum(b => b.CountBits());
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
