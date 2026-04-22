@@ -366,6 +366,7 @@ public sealed partial class Engine
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material);
+
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
