@@ -269,7 +269,7 @@ public sealed partial class Engine
         majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
 
         // Material correction history
-        var materialHash = position.MaterialHash();
+        var materialHash = position.MaterialHash;
         var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
         var materialCorrHistIndex = (2 * materialIndex) + side;
         Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
@@ -352,7 +352,7 @@ public sealed partial class Engine
         var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
 
         // Material correction history
-        var materialHash = position.MaterialHash();
+        var materialHash = position.MaterialHash;
         var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
         var materialCorrHistIndex = (2 * materialIndex) + side;
         Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
