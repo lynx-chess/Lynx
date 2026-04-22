@@ -204,7 +204,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
+    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth, int ply)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -277,6 +277,27 @@ public sealed partial class Engine
         ref var materialCorrHistEntry = ref _materialCorrHistory[materialCorrHistIndex];
         materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
 
+        // Continuation correction history
+        if (ply >= 2)
+        {
+            var ply1Move = Game.ReadMoveFromStack(ply - 1);
+            var ply2Move = Game.ReadMoveFromStack(ply - 2);
+
+            const int pieceOffset = 64 * 12 * 64;
+            const int targetSquareOffset = 12 * 64;
+            const int previousMovePieceOffset = 64;
+
+            var continuationCorrHistIndex = (ply1Move.Piece() * pieceOffset)
+                + (ply1Move.TargetSquare() * targetSquareOffset)
+                + (ply2Move.Piece() * previousMovePieceOffset)
+                + ply2Move.TargetSquare();
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[materialCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -297,7 +318,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CorrectStaticEvaluation(Position position, int staticEvaluation)
+    private int CorrectStaticEvaluation(Position position, int staticEvaluation, int ply)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -359,13 +380,36 @@ public sealed partial class Engine
 
         var materialCorrHist = _materialCorrHistory[materialCorrHistIndex];
 
+        // Continuation correction history
+        int continuationCorrHist = 0;
+        if (ply >= 2)
+        {
+            var ply1Move = Game.ReadMoveFromStack(ply - 1);
+            var ply2Move = Game.ReadMoveFromStack(ply - 2);
+
+
+            const int pieceOffset = 64 * 12 * 64;
+            const int targetSquareOffset = 12 * 64;
+            const int previousMovePieceOffset = 64;
+
+            var continuationCorrHistIndex = (ply1Move.Piece() * pieceOffset)
+                + (ply1Move.TargetSquare() * targetSquareOffset)
+                + (ply2Move.Piece() * previousMovePieceOffset)
+                + ply2Move.TargetSquare();
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
             + (nonPawnNoSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM)
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
-            + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material);
+            + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
+            + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
