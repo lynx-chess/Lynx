@@ -76,6 +76,12 @@ public sealed partial class Engine
     private readonly short[] _majorCorrHistory = GC.AllocateArray<short>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
 
     /// <summary>
+    /// <see cref="Constants.MaterialCorrHistoryHashSize"/> x 2
+    /// Material hash x side to move
+    /// </summary>
+    private readonly short[] _materialCorrHistory = GC.AllocateArray<short>(Constants.MaterialCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
     /// 12 x 64
     /// piece x target square
     /// </summary>

@@ -87,6 +87,7 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_nonPawnCorrHistory);
         Array.Clear(_minorCorrHistory);
         Array.Clear(_majorCorrHistory);
+        Array.Clear(_materialCorrHistory);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
