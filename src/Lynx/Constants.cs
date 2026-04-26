@@ -641,6 +641,7 @@ public static class Constants
     public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
 
     public const int MaterialCorrHistoryHashSize = 16_384;
+
     public const int MaterialCorrHistoryHashMask = MaterialCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";

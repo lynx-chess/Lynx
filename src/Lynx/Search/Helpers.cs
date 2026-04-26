@@ -351,7 +351,7 @@ public sealed partial class Engine
 
         var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
 
-        // Material correction history
+        // Material correction history - Caissa author original idea
         var materialHash = position.MaterialHash();
         var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
         var materialCorrHistIndex = (2 * materialIndex) + side;
@@ -366,6 +366,7 @@ public sealed partial class Engine
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material);
+
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
