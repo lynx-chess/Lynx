@@ -20,7 +20,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
     public MultiArrayTranspositionTable()
     {
-        _logger.Debug("Allocating Multi-Array TT");
+        _logger.Warn("Allocating Multi-Array TT");
         var sw = Stopwatch.StartNew();
 
         SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
@@ -39,7 +39,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
         if (_ttArrayCount > 1)
         {
-            _logger.Info("Multi-Array TT arrays:\t{0}", _ttArrayCount);
+            _logger.Warn("Multi-Array TT arrays:\t{0}", _ttArrayCount);
         }
 
         if (_ttArrayCount > Constants.MaxTTArrayLength)
@@ -48,6 +48,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
             throw new ArgumentException($"Invalid TT Hash size: {ttLengthGB} GB, {Length} values (> {Constants.MaxTTArrayLength})");
         }
 
+        _logger.Warn("{ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB)", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
         _tt = GC.AllocateArray<TranspositionTableElement[]>(_ttArrayCount, pinned: true);
         for (int i = 0; i < (int)fullArrayCount; ++i)
         {
@@ -56,10 +57,11 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
         if (itemsLeft != 0)
         {
+            _logger.Warn("1 array of size {ArraySize} ({ArraySizeMB} MB)", itemsLeft, itemsLeft * TranspositionTableElement.Size / 1024 / 1024);
             _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>((int)itemsLeft, pinned: true);
         }
 
-        _logger.Info("Multi-Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Warn("Multi-Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -244,7 +246,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         else
         {
             _logger.Warn("Multi-Array TT used, but single TT array expected for TT Hash size of {RequestedHashSize} GB and {TTLength} values. Max values are {TTArraySizeGBs} GB, {MaxTTArrayLength} items",
-                (ttLengthMB * ttEntrySize / 1024).ToString("F2"),ttLength, Constants.TTArraySizeGBs.ToString("F2"), Constants.MaxTTArrayLength);
+                (ttLengthMB * ttEntrySize / 1024).ToString("F2"), ttLength, Constants.TTArraySizeGBs.ToString("F2"), Constants.MaxTTArrayLength);
         }
 
         _logger.Info("Hash value:\t{0} MB", size);

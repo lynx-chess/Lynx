@@ -28,7 +28,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         var ttLength = CalculateLength(SizeMBs);
         _tt = GC.AllocateArray<TranspositionTableElement>((int)ttLength, pinned: true);
 
-        _logger.Info("Single Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Warn("Single Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -151,10 +151,10 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
             throw new ArgumentException($"Invalid TT Hash size: {ttLengthMB} MB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
-        _logger.Info("Hash value:\t{0} MB", sizeMBs);
-        _logger.Info("TT memory:\t{0} MB", (ttLengthMB * ttEntrySize).ToString("F"));
-        _logger.Info("TT length:\t{0} items", ttLength);
-        _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
+        _logger.Warn("Hash value:\t{0} MB", sizeMBs);
+        _logger.Warn("TT memory:\t{0} MB", (ttLengthMB * ttEntrySize).ToString("F"));
+        _logger.Warn("TT length:\t{0} items", ttLength);
+        _logger.Warn("TT entry:\t{0} bytes", ttEntrySize);
 
         return ttLength;
     }
