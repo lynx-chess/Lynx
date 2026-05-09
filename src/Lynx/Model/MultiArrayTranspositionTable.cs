@@ -53,13 +53,50 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         _tt = GC.AllocateArray<TranspositionTableElement[]>(_ttArrayCount, pinned: true);
         for (int i = 0; i < (int)fullArrayCount; ++i)
         {
-            _tt[i] = GC.AllocateArray<TranspositionTableElement>(Constants.MaxTTArrayLength, pinned: true);
+            try
+            {
+                _tt[i] = GC.AllocateArray<TranspositionTableElement>(Constants.MaxTTArrayLength, pinned: true);
+            }
+            catch (OutOfMemoryException e)
+            {
+                _logger.Warn("Out of memory exception when allocating TT array {ArrayIndex} of size {ArraySize} ({ArraySizeMB} MB)", i + 1, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
+
+                itemsLeft = 0;
+
+                if (i > 0)
+                {
+                    _ttArrayCount = i;
+                    fullArrayCount = (ulong)i;
+                    _tt[i] = [];
+                    _logger.Warn(e, "Using only {ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB)", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
+                }
+                else
+                {
+                    throw;
+                }
+
+                // Otherwise UpdateHash 
+
+                break;
+            }
         }
 
         if (itemsLeft != 0)
         {
             _logger.Info("1 array of size {ArraySize} ({ArraySizeMB} MB)", itemsLeft, itemsLeft * TranspositionTableElement.Size / 1024 / 1024);
-            _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>((int)itemsLeft, pinned: true);
+
+            try
+            {
+                _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>((int)itemsLeft, pinned: true);
+            }
+            catch (OutOfMemoryException e)
+            {
+                _logger.Warn("Out of memory exception when allocating remaining items TT array of size {ArraySize} ({ArraySizeMB} MB)", itemsLeft, itemsLeft * TranspositionTableElement.Size / 1024 / 1024);
+
+                _tt[_ttArrayCount - 1] = [];
+                --_ttArrayCount;
+                _logger.Warn(e, "Using only {ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB)", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
+            }
         }
 
         _logger.Info("Multi-Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
