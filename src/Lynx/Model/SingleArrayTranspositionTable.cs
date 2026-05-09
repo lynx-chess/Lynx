@@ -154,10 +154,10 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
             throw new ConfigurationException($"Invalid TT Hash size: {ttLengthMB} MB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
-        _logger.Warn("Hash value:\t{0} MB", sizeMBs);
-        _logger.Warn("TT memory:\t{0} MB", (ttLengthMB * ttEntrySize).ToString("F"));
-        _logger.Warn("TT length:\t{0} items", ttLength);
-        _logger.Warn("TT entry:\t{0} bytes", ttEntrySize);
+        _logger.Info("Hash value:\t{0} MB", sizeMBs);
+        _logger.Info("TT memory:\t{0} MB", (ttLengthMB * ttEntrySize).ToString("F"));
+        _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return ttLength;
     }
