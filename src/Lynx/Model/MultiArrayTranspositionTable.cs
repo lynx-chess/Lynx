@@ -24,6 +24,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         _logger.Info("Allocating Multi-Array TT");
         var sw = Stopwatch.StartNew();
 
+        var oldSizeMBs = SizeMBs;
         SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
 
         Length = CalculateLength(SizeMBs);
@@ -68,14 +69,14 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
                     _ttArrayCount = i;
                     fullArrayCount = (ulong)i;
                     _tt[i] = [];
-                    _logger.Warn(e, "Using only {ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB)", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
+                    SizeMBs = (int)(fullArrayCount * (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024ul / 1024ul);
+                    _logger.Warn(e, "Using only {ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB each) - {TotalSizeMB} MB total", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024, SizeMBs);
                 }
                 else
                 {
-                    throw;
+                    SizeMBs = oldSizeMBs;
+                    throw;  // This will cause Searcher.UpdateHash to fail, keeping the old TT
                 }
-
-                // Otherwise UpdateHash 
 
                 break;
             }
@@ -95,7 +96,8 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
                 _tt[_ttArrayCount - 1] = [];
                 --_ttArrayCount;
-                _logger.Warn(e, "Using only {ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB)", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
+                SizeMBs = (int)(fullArrayCount * (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024ul / 1024ul);
+                _logger.Warn(e, "Using only {ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB each) - {TotalSizeMB} MB total", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024, SizeMBs);
             }
         }
 
