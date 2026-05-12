@@ -25,13 +25,13 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         var sw = Stopwatch.StartNew();
 
         SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        var ttLength = CalculateLength(SizeMBs);
 
         bool exceptionThrown = false;
         while (SizeMBs > Constants.AbsoluteMinTTSize)
         {
             try
             {
-                var ttLength = CalculateLength(SizeMBs);
                 _tt = GC.AllocateArray<TranspositionTableElement>((int)ttLength, pinned: true);
                 break;
             }
@@ -41,6 +41,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
                 _logger.Warn(e, "Out of memory exception when allocating TT array of size {ArraySize} ({ArraySizeMB} MB)", ttLength, SizeMBs);
 
                 SizeMBs /= 2;
+                ttLength = CalculateLength(SizeMBs);
             }
         }
 
