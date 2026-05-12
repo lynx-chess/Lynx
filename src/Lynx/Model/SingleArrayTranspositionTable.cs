@@ -26,8 +26,28 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
 
         SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
 
-        var ttLength = CalculateLength(SizeMBs);
-        _tt = GC.AllocateArray<TranspositionTableElement>((int)ttLength, pinned: true);
+        bool exceptionThrown = false;
+        while (SizeMBs > Constants.AbsoluteMinTTSize)
+        {
+            try
+            {
+                var ttLength = CalculateLength(SizeMBs);
+                _tt = GC.AllocateArray<TranspositionTableElement>((int)ttLength, pinned: true);
+                break;
+            }
+            catch (OutOfMemoryException e)
+            {
+                exceptionThrown = true;
+                _logger.Warn(e, "Out of memory exception when allocating TT array of size {ArraySize} ({ArraySizeMB} MB)", ttLength, SizeMBs);
+
+                SizeMBs /= 2;
+            }
+        }
+
+        if (exceptionThrown)
+        {
+            _logger.Warn("Using only TT array of size {ArraySize} ({ArraySizeMB} MB)", ttLength, SizeMBs);
+        }
 
         _logger.Info("Single Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
@@ -93,7 +113,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
             : (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
     }
 
-    #pragma warning disable S4144 // Methods should not have identical implementations
+#pragma warning disable S4144 // Methods should not have identical implementations
 
     /// <summary>
     /// Get a reference to a transposition table entry for the given position
@@ -115,7 +135,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         return ref _tt[ttIndex];
     }
 
-    #pragma warning restore S4144 // Methods should not have identical implementations
+#pragma warning restore S4144 // Methods should not have identical implementations
 
     /// <summary>
     /// Exact transposition table occupancy per mill (0-1000)
