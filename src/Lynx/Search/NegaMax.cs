@@ -777,7 +777,7 @@ public sealed partial class Engine
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
                 || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
             {
-                UpdateCorrectionHistory(position, bestScore - staticEval, depth, ply);
+                UpdateCorrectionHistory(Game, position, bestScore - staticEval, depth, ply);
             }
 
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);

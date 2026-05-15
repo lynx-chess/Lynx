@@ -204,7 +204,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth, int ply)
+    private void UpdateCorrectionHistory(Game game, Position position, int evaluationDelta, int depth, int ply)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -278,23 +278,15 @@ public sealed partial class Engine
         materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
 
         // Continuation correction history
-        if (ply >= 2)
+        var previousMoveHash = Game.PreviousMoveHash(1);
+        if (previousMoveHash != 0)
         {
-            var ply1Move = Game.ReadMoveFromStack(ply - 1);
-            var ply2Move = Game.ReadMoveFromStack(ply - 2);
-
-            const int pieceOffset = 64 * 12 * 64;
-            const int targetSquareOffset = 12 * 64;
-            const int previousMovePieceOffset = 64;
-
-            var continuationCorrHistIndex = (ply1Move.Piece() * pieceOffset)
-                + (ply1Move.TargetSquare() * targetSquareOffset)
-                + (ply2Move.Piece() * previousMovePieceOffset)
-                + ply2Move.TargetSquare();
+            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            ref var continuationCorrHist = ref _continuationCorrHistory[materialCorrHistIndex];
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
@@ -380,22 +372,13 @@ public sealed partial class Engine
 
         var materialCorrHist = _materialCorrHistory[materialCorrHistIndex];
 
-        // Continuation correction history
+        // Continuation correction history - Motor author original idea
         int continuationCorrHist = 0;
-        if (ply >= 2)
+        var previousMoveHash = Game.PreviousMoveHash(1);
+        if (previousMoveHash != 0)
         {
-            var ply1Move = Game.ReadMoveFromStack(ply - 1);
-            var ply2Move = Game.ReadMoveFromStack(ply - 2);
-
-
-            const int pieceOffset = 64 * 12 * 64;
-            const int targetSquareOffset = 12 * 64;
-            const int previousMovePieceOffset = 64;
-
-            var continuationCorrHistIndex = (ply1Move.Piece() * pieceOffset)
-                + (ply1Move.TargetSquare() * targetSquareOffset)
-                + (ply2Move.Piece() * previousMovePieceOffset)
-                + ply2Move.TargetSquare();
+            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
