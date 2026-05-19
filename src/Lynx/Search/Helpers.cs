@@ -179,8 +179,8 @@ public sealed partial class Engine
                 var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
                 Debug.Assert(ply2Index < _continuationHistory.Length);
 
-                ref var constHist2 = ref _continuationHistory[ply2Index];
-                constHist2 = (short)ScoreHistoryMove(constHist2, rawHistoryBonus);
+                ref var contHist2 = ref _continuationHistory[ply2Index];
+                contHist2 = (short)ScoreHistoryMove(contHist2, rawHistoryBonus);
             }
         }
     }
