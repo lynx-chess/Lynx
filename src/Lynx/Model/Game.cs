@@ -268,6 +268,17 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong PreviousMoveHash(int nMovesAgo)
+    {
+        if (_positionHashHistoryPointer >= nMovesAgo)
+        {
+            return _positionHashHistory[_positionHashHistoryPointer - nMovesAgo];
+        }
+
+        return 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
         var gameState = CurrentPosition.MakeMove(moveToPlay);
