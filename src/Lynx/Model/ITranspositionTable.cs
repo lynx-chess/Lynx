@@ -106,7 +106,7 @@ public interface ITranspositionTable
         ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, null);
+        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null);
     }
 
     /// <summary>
@@ -151,6 +151,7 @@ public interface ITranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static int RecalculateMateScores(int score, int ply)
     {
+#pragma warning disable MA0071 // Avoid using redundant else
         if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
             return score - ply;
@@ -159,6 +160,7 @@ public interface ITranspositionTable
         {
             return score + ply;
         }
+#pragma warning restore MA0071 // Avoid using redundant else
 
         return score;
     }

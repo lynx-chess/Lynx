@@ -320,10 +320,12 @@ public sealed class Searcher : IDisposable
 
         SearchResult? finalSearchResult = null;
 
+#pragma warning disable MA0040 // Forward the CancellationToken parameter to methods that take one
         var tasks = _extraEngines
             .Select(engine =>
                 Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
             .ToArray();
+#pragma warning restore MA0040 // Forward the CancellationToken parameter to methods that take one
 
 #if MULTITHREAD_DEBUG
         _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -561,6 +563,11 @@ public sealed class Searcher : IDisposable
             _engineWriter.TryWrite($"info string Resizing TT ({_ttWrapper.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
             _ttWrapper = TranspositionTableFactory.Create();
+
+            if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
+            {
+                _engineWriter.TryWrite($"info string Using only {_ttWrapper.SizeMBs} MB for TT (instead of {Configuration.EngineSettings.TranspositionTableSize} MB) due to an issue during allocation");
+            }
 
             // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
             // It might impact performance though, due to preventing that zeroing from happening during search
