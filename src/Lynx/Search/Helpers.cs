@@ -290,6 +290,18 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
+        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
+        if (previousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -385,6 +397,18 @@ public sealed partial class Engine
             continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
+        int continuationCorrHist2 = 0;
+        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
+        if (previousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
@@ -392,7 +416,8 @@ public sealed partial class Engine
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
-            + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation);
+            + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation)
+            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
