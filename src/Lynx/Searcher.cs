@@ -320,10 +320,12 @@ public sealed class Searcher : IDisposable
 
         SearchResult? finalSearchResult = null;
 
+#pragma warning disable MA0040 // Forward the CancellationToken parameter to methods that take one
         var tasks = _extraEngines
             .Select(engine =>
                 Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
             .ToArray();
+#pragma warning restore MA0040 // Forward the CancellationToken parameter to methods that take one
 
 #if MULTITHREAD_DEBUG
         _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);

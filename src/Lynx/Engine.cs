@@ -161,11 +161,13 @@ public sealed partial class Engine : IDisposable
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         var cancellationToken = jointCts.Token;
+#pragma warning disable MA0040 // Forward the CancellationToken parameter to methods that take one
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove, cancellationToken),
                 Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken)),
             };
+#pragma warning restore MA0040 // Forward the CancellationToken parameter to methods that take one
 
         var resultList = await Task.WhenAll(tasks);
         var searchResult = resultList[1];
