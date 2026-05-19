@@ -172,6 +172,8 @@ public sealed class Game : IDisposable
     public bool Update50movesRule(Move moveToPlay)
     {
         var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
+
+#pragma warning disable MA0071 // Avoid using redundant else
         if (isCapture)
         {
             if (HalfMovesWithoutCaptureOrPawnMove < 100)
@@ -203,6 +205,7 @@ public sealed class Game : IDisposable
 
             return true;
         }
+#pragma warning restore MA0071 // Avoid using redundant else
     }
 
     /// <summary>
