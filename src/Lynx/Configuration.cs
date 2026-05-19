@@ -477,7 +477,13 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(50, 250, 15)]
-    public int CorrHistoryWeight_Continuation { get; set; } = 100;
+    public int CorrHistoryWeight_Continuation1 { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(50, 250, 15)]
+    public int CorrHistoryWeight_Continuation2 { get; set; } = 100;
 
     [SPSA<int>(enabled: false)]
     public int TT_50MR_Start { get; set; } = 20;

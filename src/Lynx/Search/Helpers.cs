@@ -416,8 +416,8 @@ public sealed partial class Engine
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
-            + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation)
-            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation);
+            + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
+            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
