@@ -81,3 +81,6 @@ dotnet_diagnostic.CS8618.severity = error
 dotnet_diagnostic.IDE0079.severity = none
 # File scoped namespaces
 csharp_style_namespace_declarations = file_scoped:warning
+
+# MA0193: Use an overload with a MidpointRounding argument
+dotnet_diagnostic.MA0193.severity = none
