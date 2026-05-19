@@ -139,7 +139,12 @@ public sealed partial class Engine
         var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
         Debug.Assert(ply2Index < _continuationHistory.Length);
 
-        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
+        // Continuation history, ply - 4
+        var ply4Move = Game.ReadMoveFromStack(ply - 4);
+        var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
+        Debug.Assert(ply4Index < _continuationHistory.Length);
+
+        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index] + _continuationHistory[ply4Index];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -181,6 +186,17 @@ public sealed partial class Engine
 
                 ref var contHist2 = ref _continuationHistory[ply2Index];
                 contHist2 = (short)ScoreHistoryMove(contHist2, rawHistoryBonus);
+
+                if (ply >= 4)
+                {
+                    // Follow-up history (continuation history, ply - 4)
+                    var ply4Move = Game.ReadMoveFromStack(ply - 4);
+                    var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
+                    Debug.Assert(ply4Index < _continuationHistory.Length);
+
+                    ref var contHist4 = ref _continuationHistory[ply4Index];
+                    contHist4 = (short)ScoreHistoryMove(contHist4, rawHistoryBonus);
+                }
             }
         }
     }
