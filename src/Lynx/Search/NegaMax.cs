@@ -177,7 +177,7 @@ public sealed partial class Engine
                 Debug.Assert(ttEntry.Score != EvaluationConstants.NoScore || ttEntry.NodeType == NodeType.Unknown);
 
                 rawStaticEval = ttEntry.StaticEval;
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval, ply);
+                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
                 phase = position.Phase();
                 position.CalculateThreats(ref evaluationContext);
             }
@@ -185,7 +185,7 @@ public sealed partial class Engine
             {
                 (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext);
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
-                staticEval = CorrectStaticEvaluation(position, rawStaticEval, ply);
+                staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
 
             stack.StaticEval = staticEval;
@@ -307,7 +307,7 @@ public sealed partial class Engine
         else
         {
             (rawStaticEval, _) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext);
-            staticEval = CorrectStaticEvaluation(position, rawStaticEval, ply);
+            staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
             if (!ttHit)
             {
@@ -777,7 +777,7 @@ public sealed partial class Engine
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
                 || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
             {
-                UpdateCorrectionHistory(Game, position, bestScore - staticEval, depth, ply);
+                UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
 
             _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
@@ -853,7 +853,7 @@ public sealed partial class Engine
 
         Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
-        var staticEval = CorrectStaticEvaluation(position, rawStaticEval, ply);
+        var staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
         ref var stack = ref Game.Stack(ply);
         stack.StaticEval = staticEval;

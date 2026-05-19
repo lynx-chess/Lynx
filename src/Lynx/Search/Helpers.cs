@@ -204,7 +204,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateCorrectionHistory(Game game, Position position, int evaluationDelta, int depth, int ply)
+    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -322,7 +322,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CorrectStaticEvaluation(Position position, int staticEvaluation, int ply)
+    private int CorrectStaticEvaluation(Position position, int staticEvaluation)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
