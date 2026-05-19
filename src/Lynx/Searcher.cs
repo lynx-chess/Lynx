@@ -564,6 +564,11 @@ public sealed class Searcher : IDisposable
 
             _ttWrapper = TranspositionTableFactory.Create();
 
+            if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
+            {
+                _engineWriter.TryWrite($"info string Using only {_ttWrapper.SizeMBs} MB for TT (instead of {Configuration.EngineSettings.TranspositionTableSize} MB) due to an issue during allocation");
+            }
+
             // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
             // It might impact performance though, due to preventing that zeroing from happening during search
             // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
