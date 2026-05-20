@@ -144,7 +144,7 @@ public sealed partial class Engine
         var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
         Debug.Assert(ply4Index < _continuationHistory.Length);
 
-        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index] + _continuationHistory[ply4Index];
+        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index] + (_continuationHistory[ply4Index] / 4);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
