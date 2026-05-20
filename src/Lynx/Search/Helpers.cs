@@ -139,12 +139,19 @@ public sealed partial class Engine
         var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
         Debug.Assert(ply2Index < _continuationHistory.Length);
 
-        // Continuation history, ply - 4
-        var ply4Move = Game.ReadMoveFromStack(ply - 4);
-        var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
-        Debug.Assert(ply4Index < _continuationHistory.Length);
+        var contHist = _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
 
-        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index] + _continuationHistory[ply4Index];
+        if (ply >= 4)
+        {
+            // Continuation history, ply - 4
+            var ply4Move = Game.ReadMoveFromStack(ply - 4);
+            var ply4Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply4Move);
+            Debug.Assert(ply4Index < _continuationHistory.Length);
+
+            contHist += _continuationHistory[ply4Index];
+        }
+
+        return contHist;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
