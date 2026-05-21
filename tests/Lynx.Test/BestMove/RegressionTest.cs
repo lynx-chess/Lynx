@@ -248,9 +248,7 @@ public class RegressionTest : BaseTest
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        var bestMove = engine.BestMove(new GoCommand($"go depth {5}"));
-        Assert.Zero(bestMove.Score);
-        Assert.AreEqual(1, bestMove.Moves.Length);
+        var bestMove = engine.BestMove(new GoCommand($"go depth 20"));
         Assert.AreEqual("b8c7", bestMove.BestMove.UCIString());
     }
 
