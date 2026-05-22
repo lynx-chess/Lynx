@@ -540,7 +540,7 @@ public sealed partial class Engine
 
             int score = 0;
 
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition(ref evaluationContext)))
+            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition(ref evaluationContext)))
             {
                 score = 0;
 

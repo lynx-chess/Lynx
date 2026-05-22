@@ -212,9 +212,11 @@ public sealed class Game : IDisposable
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsThreefoldRepetition()
+    public bool IsThreefoldRepetition(int ply)
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
+
+        var twofoldRepetitionDetected = false;
 
         // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 earlier and finish HalfMovesWithoutCaptureOrPawnMove earlier
         var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
@@ -222,7 +224,12 @@ public sealed class Game : IDisposable
         {
             if (currentHash == _positionHashHistory[i])
             {
-                return true;
+                if (ply > 0 || twofoldRepetitionDetected)
+                {
+                    return true;
+                }
+
+                twofoldRepetitionDetected = true;
             }
         }
 
