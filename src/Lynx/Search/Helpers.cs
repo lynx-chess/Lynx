@@ -204,7 +204,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
+    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth, ref EvaluationContext evaluationContext)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -302,6 +302,23 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
+        // Threats correction history
+        var oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
+        if (oppositeSideThreats == 0)
+        {
+            position.CalculateThreats(ref evaluationContext);
+            oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
+        }
+
+        var threatenedPieces = oppositeSideThreats & position.OccupancyBitboards[side];
+        var threatsHash = Utils.Murmur3(threatenedPieces);
+        var threatsCorrHistIndex = (int)(threatsHash & Constants.ThreatsCorrHistoryHashMask);
+
+        Debug.Assert(threatsCorrHistIndex < _threatsCorrHistory.Length);
+
+        ref var threatsCorrHist = ref _threatsCorrHistory[threatsCorrHistIndex];
+        threatsCorrHist = UpdateCorrectionHistory(threatsCorrHist, scaledBonus, weight);
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -322,7 +339,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CorrectStaticEvaluation(Position position, int staticEvaluation)
+    private int CorrectStaticEvaluation(Position position, int staticEvaluation, ref EvaluationContext evaluationContext)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -409,6 +426,21 @@ public sealed partial class Engine
             continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
+        // Threats correction history - Motor author original idea
+        var oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
+        if (oppositeSideThreats == 0)
+        {
+            position.CalculateThreats(ref evaluationContext);
+            oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
+        }
+
+        var threatenedPieces = oppositeSideThreats & position.OccupancyBitboards[side];
+        var threatsHash = Utils.Murmur3(threatenedPieces);
+        var threatsCorrHistIndex = (int)(threatsHash & Constants.ThreatsCorrHistoryHashMask);
+        Debug.Assert(threatsCorrHistIndex < _threatsCorrHistory.Length);
+
+        var threatsCorrHist = _threatsCorrHistory[threatsCorrHistIndex];
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
@@ -417,7 +449,8 @@ public sealed partial class Engine
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
             + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
-            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2);
+            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
+            + (threatsCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Threats);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
