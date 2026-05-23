@@ -278,28 +278,19 @@ public sealed partial class Engine
         materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
 
         // Continuation correction history
-        var previousMoveHash = Game.PreviousMoveHash(1);
-        if (previousMoveHash != 0)
+        for (int i = 1; i <= 3; ++i)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
-            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+            var previousMoveHash = Game.PreviousMoveHash(i);
+            if (previousMoveHash != 0)
+            {
+                var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+                var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
-            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+                Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
-            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
-        }
-
-        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
-        if (previousPreviousMoveHash != 0)
-        {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
-            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
-
-            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
-
-            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
-            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+                ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+                continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+            }
         }
 
         // Common update logic
@@ -386,6 +377,9 @@ public sealed partial class Engine
 
         // Continuation correction history - Motor author original idea
         int continuationCorrHist = 0;
+        int continuationCorrHist2 = 0;
+        int continuationCorrHist3 = 0;
+
         var previousMoveHash = Game.PreviousMoveHash(1);
         if (previousMoveHash != 0)
         {
@@ -397,7 +391,6 @@ public sealed partial class Engine
             continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        int continuationCorrHist2 = 0;
         var previousPreviousMoveHash = Game.PreviousMoveHash(2);
         if (previousPreviousMoveHash != 0)
         {
@@ -409,6 +402,17 @@ public sealed partial class Engine
             continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
+        var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(3);
+        if (previousPreviousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist3 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
@@ -417,7 +421,8 @@ public sealed partial class Engine
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
             + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
-            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2);
+            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
+            + (continuationCorrHist3 * Configuration.EngineSettings.CorrHistoryWeight_Continuation3);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
