@@ -302,6 +302,18 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
+        var previous4MoveHash = Game.PreviousMoveHash(4);
+        if (previous4MoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previous4MoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -386,6 +398,9 @@ public sealed partial class Engine
 
         // Continuation correction history - Motor author original idea
         int continuationCorrHist = 0;
+        int continuationCorrHist2 = 0;
+        int continuationCorrHist4 = 0;
+
         var previousMoveHash = Game.PreviousMoveHash(1);
         if (previousMoveHash != 0)
         {
@@ -397,7 +412,6 @@ public sealed partial class Engine
             continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        int continuationCorrHist2 = 0;
         var previousPreviousMoveHash = Game.PreviousMoveHash(2);
         if (previousPreviousMoveHash != 0)
         {
@@ -409,6 +423,17 @@ public sealed partial class Engine
             continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
+        var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(4);
+        if (previousPreviousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
@@ -417,7 +442,8 @@ public sealed partial class Engine
             + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
             + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
-            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2);
+            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
+            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
