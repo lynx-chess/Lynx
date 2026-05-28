@@ -91,7 +91,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(position, move, ref evaluationContext);
+                + CaptureHistoryEntry(Utils.OppositeSide((int)position.Side), move, ref evaluationContext);
         }
 
         if (isPromotion)
@@ -147,7 +147,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(position, move, ref evaluationContext);
+                + CaptureHistoryEntry(Utils.OppositeSide((int)position.Side), move, ref evaluationContext);
         }
 
         if (isPromotion)
@@ -253,12 +253,12 @@ public sealed partial class Engine
     /// Capture history
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(Position position, int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, ref EvaluationContext evaluationContext)
+    private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int side, int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, ref EvaluationContext evaluationContext)
     {
         var rawHistoryBonus = HistoryBonus[depth];
         var rawHistoryMalus = HistoryMalus[depth];
 
-        ref var captureHistoryEntry = ref CaptureHistoryEntry(position, move, ref evaluationContext);
+        ref var captureHistoryEntry = ref CaptureHistoryEntry(side, move, ref evaluationContext);
         captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
@@ -271,7 +271,7 @@ public sealed partial class Engine
 
             if (capturedPiece != (int)Piece.None)
             {
-                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(position, visitedMove, ref evaluationContext);
+                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(side, visitedMove, ref evaluationContext);
                 captureHistoryVisitedMove = (short)ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
             }
         }

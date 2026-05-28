@@ -580,7 +580,7 @@ public sealed partial class Engine
                             if (isCapture)
                             {
                                 reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
-                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(position, move, ref evaluationContext) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
+                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry((int)position.Side, move, ref evaluationContext) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
@@ -741,7 +741,7 @@ public sealed partial class Engine
 
                     if (isCapture)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, historyDepth, visitedMoves, visitedMovesCounter, move, ref evaluationContext);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(Utils.OppositeSide((int)position.Side), historyDepth, visitedMoves, visitedMovesCounter, move, ref evaluationContext);
                     }
                     else
                     {
@@ -983,7 +983,7 @@ public sealed partial class Engine
 
                     if (move.CapturedPiece() != (int)Piece.None)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, 3, visitedMoves, visitedMovesCounter, move, ref evaluationContext);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(Utils.OppositeSide((int)position.Side), 3, visitedMoves, visitedMovesCounter, move, ref evaluationContext);
                     }
 
                     nodeType = NodeType.Beta;
