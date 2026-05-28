@@ -38,10 +38,10 @@ public sealed partial class Engine
     private readonly short[] _butterflyQuietHistory = GC.AllocateArray<short>(ButterflyHistoryLength, pinned: true);
 
     /// <summary>
-    /// 12 x 64 x 12,
-    /// piece x target square x captured piece
+    /// 12 x 64 x 12 x 2 x 2
+    /// piece x target square x captured piece  x source is attacked x target is attacked
     /// </summary>
-    private readonly short[] _captureHistory = GC.AllocateArray<short>(12 * 64 * 12, pinned: true);
+    private readonly short[] _captureHistory = GC.AllocateArray<short>(12 * 64 * 12 * 2 * 2, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12 x 64

@@ -580,7 +580,7 @@ public sealed partial class Engine
                             if (isCapture)
                             {
                                 reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
-                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
+                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(position, move, ref evaluationContext) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
@@ -741,7 +741,7 @@ public sealed partial class Engine
 
                     if (isCapture)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, historyDepth, visitedMoves, visitedMovesCounter, move, ref evaluationContext);
                     }
                     else
                     {
@@ -896,6 +896,12 @@ public sealed partial class Engine
             return staticEval;
         }
 
+        if (ttHit)
+        {
+            // Populating threats for capture history, used for scoring moves
+            position.CalculateThreats(ref evaluationContext);
+        }
+
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         int bestScore = standPat;
@@ -908,7 +914,7 @@ public sealed partial class Engine
         ref var movesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref movesRef, i), ttBestMove);
+            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref movesRef, i), ref evaluationContext, ttBestMove);
         }
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
@@ -977,7 +983,7 @@ public sealed partial class Engine
 
                     if (move.CapturedPiece() != (int)Piece.None)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, 3, visitedMoves, visitedMovesCounter, move, ref evaluationContext);
                     }
 
                     nodeType = NodeType.Beta;

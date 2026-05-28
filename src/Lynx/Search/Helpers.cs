@@ -99,17 +99,32 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// [12][64][12]
+    /// [12][64][12][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short CaptureHistoryEntry(int piece, int targetSquare, int capturedPiece)
+    private ref short CaptureHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
     {
-        const int pieceOffset = 64 * 12;
-        const int targetSquareOffset = 12;
+        const int pieceOffset = 64 * 12 * 2 * 2;
+        const int targetSquareOffset = 12 * 2 * 2;
+        const int capturedPieceOffset = 2 * 2;
+        const int startSquareAttackedOffset = 2;
+
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var capturedPiece = move.CapturedPiece();
+        var piece = move.Piece();
+
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+        Debug.Assert(oppositeSideAttacks != 0);
+
+        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
 
         var index = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset)
-            + capturedPiece;
+            + (capturedPiece * capturedPieceOffset)
+            + (isStartSquareAttacked * startSquareAttackedOffset)
+            + isTargetSquareAttacked;
 
         Debug.Assert(index < _captureHistory.Length);
 
