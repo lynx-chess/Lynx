@@ -622,6 +622,7 @@ public sealed partial class Engine
 
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
+        position.CalculateThreats(ref evaluationContext);
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
