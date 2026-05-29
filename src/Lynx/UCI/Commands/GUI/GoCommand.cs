@@ -87,7 +87,7 @@ public sealed class GoCommand
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-#pragma warning disable S127 // "for" loop stop conditions should be invariant
+#pragma warning disable S127, MA0071 // "for" loop stop conditions should be invariant, avoid redundant else
         for (int i = 1; i < rangesLength; i++)
         {
             var key = commandAsSpan[ranges[i]];
@@ -232,7 +232,7 @@ public sealed class GoCommand
                 _logger.Warn("{0} not supported in go command, attempting to continue command parsing", key.ToString());
             }
         }
-#pragma warning restore S127 // "for" loop stop conditions should be invariant
+#pragma warning restore S127, MA0071 // "for" loop stop conditions should be invariant, avoid redundant else
     }
 
     public static string Init() => Id;
