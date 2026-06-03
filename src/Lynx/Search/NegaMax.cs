@@ -655,7 +655,8 @@ public sealed partial class Engine
                         // It should produce more cutoffs and therefore be faster.
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
-                        var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
+                        var deeper = !cutnode
+                            && score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
                         var shallower = score < bestScore + depth;
 
                         if (deeper && !shallower && newDepth < Configuration.EngineSettings.MaxDepth)
