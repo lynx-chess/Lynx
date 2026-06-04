@@ -476,7 +476,7 @@ public sealed partial class Engine
 
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
-                if(singularBeta >= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                if(singularBeta <= EvaluationConstants.NegativeCheckmateDetectionLimit)
                 {
                     singularBeta = EvaluationConstants.MinEval;
                 }
