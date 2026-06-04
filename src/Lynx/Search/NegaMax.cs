@@ -476,6 +476,11 @@ public sealed partial class Engine
 
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
+                if(singularBeta >= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                {
+                    singularBeta = EvaluationConstants.MinEval;
+                }
+
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 
                 // Singular extension
