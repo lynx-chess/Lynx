@@ -231,7 +231,10 @@ public sealed partial class Engine
                     if (ttCorrectedStaticEval - rfpThreshold >= beta)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
+                        return (Math.Abs(ttCorrectedStaticEval) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            && Math.Abs(beta) < EvaluationConstants.PositiveCheckmateDetectionLimit)
+                            ? (ttCorrectedStaticEval + beta) / 2
+                            : ttCorrectedStaticEval;
 #pragma warning restore S3949 // Calculations should not overflow
                     }
 
