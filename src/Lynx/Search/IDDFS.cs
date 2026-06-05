@@ -203,20 +203,13 @@ public sealed partial class Engine
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
-                        // Prevent alpha/beta from landing inside the mate band:
-                        // scores in (PositiveCheckmateDetectionLimit, CheckMateBaseEvaluation) or
-                        // (-CheckMateBaseEvaluation, NegativeCheckmateDetectionLimit) are reserved for
-                        // real checkmate evaluations relative to a ply. Aspiration window bounds sitting
-                        // there cause boundary scores (e.g. beta=26001) to enter TT mate-score adjustment
-                        // and produce wildly incorrect mate distances.
-                        if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit
-                            && beta <= EvaluationConstants.CheckMateBaseEvaluation)
+                        // Alpha and beta values close to checkmate scores due to window widening can cause false mate reporting (very high/low mate values) after being saved in TT
+                        if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit)
                         {
                             beta = EvaluationConstants.MaxEval;
                         }
 
-                        if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit
-                            && alpha >= -EvaluationConstants.CheckMateBaseEvaluation)
+                        if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit)
                         {
                             alpha = EvaluationConstants.MinEval;
                         }

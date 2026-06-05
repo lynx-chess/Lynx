@@ -476,7 +476,7 @@ public sealed partial class Engine
 
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
-
+                // Guarding against TT score values close to checkmate scores (caused by aspiration windows limits), which can cause false mate reporting (very high/low mate values)
                 if (singularBeta <= EvaluationConstants.NegativeCheckmateDetectionLimit)
                 {
                     singularBeta = EvaluationConstants.MinEval;
