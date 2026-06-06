@@ -1,4 +1,4 @@
-﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -475,6 +475,12 @@ public sealed partial class Engine
                 }
 
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
+
+                // Guarding against TT score values close to checkmate scores (caused by aspiration windows limits), which can cause false mate reporting (very high/low mate values)
+                if (singularBeta <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                {
+                    singularBeta = EvaluationConstants.MinEval;
+                }
 
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 

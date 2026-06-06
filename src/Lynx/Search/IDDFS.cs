@@ -203,6 +203,17 @@ public sealed partial class Engine
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
+                        // Alpha and beta values close to checkmate scores due to window widening can cause false mate reporting (very high/low mate values) after being saved in TT
+                        if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            beta = EvaluationConstants.MaxEval;
+                        }
+
+                        if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                        {
+                            alpha = EvaluationConstants.MinEval;
+                        }
+
                         if (_logger.IsEnabled(logLevel))
                         {
                             _logger.Log(logLevel,
