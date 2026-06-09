@@ -540,12 +540,12 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                firstLegalMove, score, 0, [firstLegalMove])
+                firstLegalMove, score, 1, [firstLegalMove])
             {
-                DepthReached = 0,
-                Nodes = 0,
-                Time = 0,
-                NodesPerSecond = 0,
+                DepthReached = 1,
+                Nodes = 1,
+                Time = 1,
+                NodesPerSecond = 1,
             };
 
             return true;
