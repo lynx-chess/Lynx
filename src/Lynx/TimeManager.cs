@@ -70,8 +70,15 @@ public static class TimeManager
         }
         else if (goCommand.Nodes > 0)
         {
-            maxNodes = goCommand.Nodes;
-            _logger.Info("Soft nodes search (nodes {0})", maxNodes);
+            if (Configuration.EngineSettings.SoftNodes)
+            {
+                maxNodes = goCommand.Nodes;
+                _logger.Info("Soft nodes search (nodes {0})", maxNodes);
+            }
+            else
+            {
+                _logger.Warn("Only soft nodes are supported, please enable SoftNodes via UCI or configuration before sending 'go nodes' commands");
+            }
         }
         else
         {
