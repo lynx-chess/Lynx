@@ -427,7 +427,7 @@ public sealed class UCIHandler
         }
     }
 
-    private async ValueTask HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
+    private async Task HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
     {
         var isFRC = Configuration.EngineSettings.IsChess960;
 
@@ -554,7 +554,7 @@ public sealed class UCIHandler
 
     #endregion
 
-    private async Task SendCommand(string command, CancellationToken cancellationToken)
+    private async ValueTask SendCommand(string command, CancellationToken cancellationToken)
     {
         await _engineToUci.Writer.WriteAsync(command, cancellationToken);
     }
