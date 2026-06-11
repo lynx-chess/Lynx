@@ -296,6 +296,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "softnodes":
+                {
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftNodes = value;
+                    }
+                    break;
+                }
 
             default:
                 if (!SPSAAttributeHelpers.ParseUCIOption(command, commandItems, lowerCaseFirstWord, length))

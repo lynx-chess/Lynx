@@ -149,7 +149,8 @@ public sealed partial class Engine
 
         try
         {
-            if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (!isPondering && _searchConstraints.MaxDepth == SearchConstraints.DefaultMaxDepth && _searchConstraints.MaxNodes == SearchConstraints.DefaultMaxNodes
+                && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 if (!Configuration.EngineSettings.UCI_Minimal)
                 {
@@ -434,15 +435,30 @@ public sealed partial class Engine
         }
 
         var maxDepth = _searchConstraints.MaxDepth;
-        if (maxDepth > 0)
+        if (maxDepth != SearchConstraints.DefaultMaxDepth)
         {
             var shouldContinue = depth + 1 <= maxDepth;
 
             if (!shouldContinue)
             {
                 _logger.Log(logLevel,
-                    "[#{EngineId}] Depth {Depth}: stopping, max. depth reached",
+                    "[#{EngineId}] Depth {Depth}: stopping, max. go command depth reached",
                     _id, depth);
+            }
+
+            return shouldContinue;
+        }
+
+        var maxNodes = _searchConstraints.MaxNodes;
+        if (maxNodes != SearchConstraints.DefaultMaxNodes)
+        {
+            var shouldContinue = _nodes <= maxNodes;
+
+            if (!shouldContinue)
+            {
+                _logger.Log(logLevel,
+                    "[#{EngineId}] Nodes {Nodes}: stopping, go command nodes reached",
+                    _id, _nodes);
             }
 
             return shouldContinue;

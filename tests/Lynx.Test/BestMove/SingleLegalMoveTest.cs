@@ -30,7 +30,6 @@ public class SingleLegalMoveTest : BaseTest
     public void SingleMove(string fen)
     {
         // Arrange
-        const int depth = 61;
         Move? singleMove = null;
         var pos = new Position(fen);
         foreach (var move in MoveGenerator.GenerateAllMoves(pos))
@@ -45,10 +44,9 @@ public class SingleLegalMoveTest : BaseTest
             pos.UnmakeMove(move, state);
         }
 
-        Assert.LessOrEqual(depth, Configuration.EngineSettings.MaxDepth);
-
         // Act
-        var result = SearchBestMove(fen, depth);
+        var engine = GetEngine(fen);
+        var result = engine.BestMove(new("go wtime 1000000 btime 1000000"));
 
         Assert.AreEqual(singleMove, result.BestMove);
         Assert.AreEqual(singleMove, result.Moves.Single());
