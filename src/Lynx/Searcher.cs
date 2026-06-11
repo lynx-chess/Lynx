@@ -3,6 +3,8 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -660,10 +662,12 @@ public sealed class Searcher : IDisposable
                 position.CalculateThreats(ref evaluationContext);
 
                 var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+                ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
 
-                while (true)
+                // Accounting for positions without legal moves
+                for (int i = 0; i < pseudoLegalMoves.Length * 4; i++)
                 {
-                    var randomMove = moves[Random.Shared.Next(0, pseudoLegalMoves.Length)];
+                    var randomMove = Unsafe.Add(ref pseudoLegalMovesRef, Random.Shared.Next(0, pseudoLegalMoves.Length));
                     var gameState = position.MakeMove(randomMove);
 
                     if (position.WasProduceByAValidMove())
@@ -675,17 +679,27 @@ public sealed class Searcher : IDisposable
                 }
             }
 
-            return position.FEN();
+            // Discarding terminal positions
+            var hasAnyLegalMoves = false;
+            var finalPositionPseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+            for (int i = 0; i < finalPositionPseudoLegalMoves.Length; i++)
+            {
+                var move = finalPositionPseudoLegalMoves[i];
+
+                var gameState = position.MakeMove(move);
+                hasAnyLegalMoves = position.WasProduceByAValidMove();
+                position.UnmakeMove(move, gameState);
+
+                if (hasAnyLegalMoves)
+                {
+                    break;
+                }
+            }
+
+            return hasAnyLegalMoves
+                ? position.FEN()
+                : GenerateDatagenStartpos();
         }
-
-        //var rand = new Random(genFensCommand.Seed);
-        //for (var i = 0; i < genFensCommand.Count; i++)
-        //{
-
-        //}
-
-
-
     }
 
     /// <summary>
