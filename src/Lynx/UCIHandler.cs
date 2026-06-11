@@ -120,6 +120,9 @@ public sealed class UCIHandler
                 case "wf_spsa":
                     await HandleWeatherFactorySPSA(cancellationToken);
                     break;
+                case "genfens":
+                    HandleGenFens(rawCommand);
+                    break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
                     break;
@@ -550,6 +553,12 @@ public sealed class UCIHandler
         var tunableValues = SPSAAttributeHelpers.GenerateWeatherFactoryStrings();
 
         await SendCommand(new JsonObject(tunableValues).ToString(), cancellationToken);
+    }
+
+    private void HandleGenFens(string rawCommand)
+    {
+        var genFensCommand = new GenFensCommand(rawCommand);
+        _searcher.GenFens(genFensCommand);
     }
 
     #endregion

@@ -614,6 +614,80 @@ public sealed class Searcher : IDisposable
         await engine.PrintBenchResults(results);
     }
 
+    public void GenFens(GenFensCommand genFensCommand)
+    {
+        _logger.Info("{Positions} requested, with seed {Seed} for book {Book}, extra params {Extra}", genFensCommand.Count, genFensCommand.Seed, genFensCommand.Book, genFensCommand.Extra);
+
+        if (!string.Equals(genFensCommand.Book, GenFensCommand.NoBook, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.Warn("GenFens with book option is not supported, ignoring book and generating random positions anyway");
+        }
+
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
+
+        var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
+        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
+
+        var positionsToGenerate = genFensCommand.Count;
+        while (positionsToGenerate > 0)
+        {
+            var startposFEN = GenerateDatagenStartpos();
+
+            AdjustPosition($"position fen {startposFEN}");
+            var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+
+            if (searchResult is null || searchResult.Score > maxAllowedEval)
+            {
+                continue;
+            }
+
+            _engineWriter.TryWrite($"info string genfens {startposFEN}");
+            --positionsToGenerate;
+        }
+
+        static string GenerateDatagenStartpos()
+        {
+            using var position = new Position(Constants.InitialPositionFEN);
+
+            var movesCount = 8 + (Random.Shared.Next() % 2);
+
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            Span<Bitboard> evalContextBuffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(evalContextBuffer);
+
+            for (int halfMoveIndex = 0; halfMoveIndex < movesCount; halfMoveIndex++)
+            {
+                position.CalculateThreats(ref evaluationContext);
+
+                var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+
+                while (true)
+                {
+                    var randomMove = moves[Random.Shared.Next(0, pseudoLegalMoves.Length)];
+                    var gameState = position.MakeMove(randomMove);
+
+                    if (position.WasProduceByAValidMove())
+                    {
+                        break;
+                    }
+
+                    position.UnmakeMove(randomMove, gameState);
+                }
+            }
+
+            return position.FEN();
+        }
+
+        //var rand = new Random(genFensCommand.Seed);
+        //for (var i = 0; i < genFensCommand.Count; i++)
+        //{
+
+        //}
+
+
+
+    }
+
     /// <summary>
     /// Removes existing <see cref="_extraEngines"/> and allocates new ones based on <see cref="_searchThreadsCount"/>
     /// </summary>
