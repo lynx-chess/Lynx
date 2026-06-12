@@ -86,3 +86,5 @@ csharp_style_namespace_declarations = file_scoped:warning
 dotnet_diagnostic.MA0193.severity = none
 # MA0037: Remove empty statement 
 dotnet_diagnostic.MA0037.severity = warning
+# CA5394: Do not use insecure randomness
+dotnet_diagnostic.CA5394.severity = none
