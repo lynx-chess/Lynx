@@ -70,15 +70,19 @@ public static class TimeManager
         }
         else if (goCommand.Nodes > 0)
         {
-            if (Configuration.EngineSettings.SoftNodes)
+            if (!Configuration.EngineSettings.SoftNodes)
             {
-                maxNodes = goCommand.Nodes;
-                _logger.Info("Soft nodes search (nodes {0})", maxNodes);
+                _logger.Warn("Nodes will be treated as soft nodes, since hard nodes aren't supported. Please enable SoftNodes via UCI (or configuration) before sending 'go nodes' commands to avoid this warning");
             }
-            else
-            {
-                _logger.Warn("Only soft nodes are supported, please enable SoftNodes via UCI or configuration before sending 'go nodes' commands");
-            }
+
+            maxNodes = goCommand.Nodes;
+
+            // This limit makes up for the lack of hard nodes, to avoid 'hangs' in search explosions
+            hardLimitTimeBound = (int)Math.Max(
+                (ulong)Configuration.EngineSettings.Datagen_GenFens_MinHardTimeBound,
+                3 * goCommand.Nodes * 1000 / Configuration.EngineSettings.Estimated_NPS);
+
+            _logger.Warn("Soft nodes search (nodes {0}, hard time bound {1}ms)", maxNodes, hardLimitTimeBound);
         }
         else
         {
