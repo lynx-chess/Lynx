@@ -540,10 +540,10 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                firstLegalMove, score, 1, [firstLegalMove])
+                firstLegalMove, score, targetDepth: 1, [firstLegalMove])
             {
                 DepthReached = 1,
-                Nodes = 1,
+                Nodes = 0,
                 Time = 1,
                 NodesPerSecond = 1,
             };
@@ -692,9 +692,9 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                move, singleMoveEval, 0, [move])
+                move, singleMoveEval, targetDepth: 1, [move])
             {
-                DepthReached = 0,
+                DepthReached = 1,
             };
         }
 
