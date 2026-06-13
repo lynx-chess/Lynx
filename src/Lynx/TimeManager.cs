@@ -82,7 +82,7 @@ public static class TimeManager
                 (ulong)Configuration.EngineSettings.Datagen_GenFens_MinHardTimeBound,
                 3 * goCommand.Nodes * 1000 / Configuration.EngineSettings.Estimated_NPS);
 
-            _logger.Warn("Soft nodes search (nodes {0}, hard time bound {1}ms)", maxNodes, hardLimitTimeBound);
+            _logger.Info("Soft nodes search (nodes {0}, hard time bound {1}ms)", maxNodes, hardLimitTimeBound);
         }
         else
         {
