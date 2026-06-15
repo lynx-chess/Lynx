@@ -33,7 +33,8 @@ public static class FENParser
         bool success;
         Side side;
         byte castlingRights = 0;
-        int halfMoveClock = 0/*, fullMoveCounter = 1*/;
+        int halfMoveClock = 0;
+        int fullMoveCounter = 1;
         BoardSquare enPassant = BoardSquare.noSquare;
         CastlingData castlingData;
 
@@ -63,10 +64,10 @@ public static class FENParser
                 _logger.Debug("No half move clock detected");
             }
 
-            //if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
-            //{
-            //    _logger.Debug("No full move counter detected");
-            //}
+            if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
+            {
+               _logger.Debug("No full move counter detected");
+            }
 
             if (pieceBitboards[(int)Piece.K].CountBits() != 1
                 || pieceBitboards[(int)Piece.k].CountBits() != 1)
@@ -86,7 +87,7 @@ public static class FENParser
         return success
             ? new(pieceBitboards, occupancyBitboards, board, side, castlingRights, enPassant,
                 castlingData,
-                halfMoveClock/*, fullMoveCounter*/)
+                halfMoveClock, fullMoveCounter)
             : throw new LynxException($"Error parsing {fen}");
     }
 
