@@ -1517,7 +1517,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
             bool success;
             Side side;
             byte castlingRights = 0;
-            int halfMoveClock = 0
+            int halfMoveClock = 0;
             int fullMoveCounter = 1;
             BoardSquare enPassant = BoardSquare.noSquare;
             CastlingData castlingData;
