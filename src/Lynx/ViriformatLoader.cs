@@ -12,13 +12,8 @@ public static class ViriformatLoader
     public static (Game game, List<short> moveScores) LoadFile(string path)
     {
         using var fs = File.OpenRead(path);
-        return Load(fs);
-    }
 
-    // Load a single game from stream. Returns Game and parallel list of per-move scores.
-    public static (Game game, List<short> moveScores) Load(Stream s)
-    {
-        var all = LoadAll(s);
+        var all = LoadAll(fs);
         if (all.Count == 0)
         {
             throw new InvalidDataException("No games found in stream");
