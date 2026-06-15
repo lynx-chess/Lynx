@@ -1,6 +1,7 @@
 using Lynx.Model;
 using NLog;
 using System.Buffers.Binary;
+using System.Diagnostics;
 
 namespace Lynx;
 
@@ -26,6 +27,8 @@ public static class ViriformatLoader
     public static List<(Game game, List<short> moveScores)> LoadAll(Stream s)
     {
         var results = new List<(Game game, List<short> moveScores)>();
+
+        var sw = Stopwatch.StartNew();
 
         ulong gameCount = 0;
 
@@ -109,9 +112,11 @@ public static class ViriformatLoader
             // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
             ++gameCount;
 
-            if (gameCount % 1000 == 0)
+            const int SampleRate = 10_000;
+            if (gameCount % SampleRate == 0)
             {
-                _logger.Warn("Loaded {0} games", gameCount);
+                var ms = sw.ElapsedMilliseconds;
+                _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, gameCount, 1000 * gameCount / (ulong)ms);
             }
 
             results.Add((game, scores));
