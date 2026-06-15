@@ -1,7 +1,6 @@
 ﻿using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Threading.Channels;
-using Lynx.Import;
 
 namespace Lynx.Cli;
 
