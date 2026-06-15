@@ -13,6 +13,9 @@ public static class ViriformatLoader
     {
         using var fs = File.OpenRead(path);
 
+        using var fens = new StreamWriter(path + ".epd", append: false);
+
+        var destinationPath = path + ".fen";
         var sw = Stopwatch.StartNew();
 
         ulong gameCount = 0;
@@ -40,7 +43,13 @@ public static class ViriformatLoader
             }
 
             var fen = PackedBoardToFEN(boardBufArr);
+            var gameResult = "*";
+
             using var game = new Game(fen);
+
+            var initialFEN = game.CurrentPosition.FEN(game.HalfMovesWithoutCaptureOrPawnMove);
+            fens.WriteLine(initialFEN);
+
             var scores = new List<short>(64); // pre-size to reduce growth overhead
 
             var pairBufArr = new byte[4];
@@ -95,6 +104,10 @@ public static class ViriformatLoader
                 }
 
                 game.MakeMove(move!.Value);
+
+                var newFEN = game.CurrentPosition.FEN(game.HalfMovesWithoutCaptureOrPawnMove);
+                fens.WriteLine($"{newFEN}; {eval}; [{gameResult}]");
+
                 scores.Add(eval);
             }
 
@@ -108,6 +121,8 @@ public static class ViriformatLoader
                 _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, gameCount, 1000 * gameCount / (ulong)ms);
             }
         }
+
+        _logger.Warn("Loaded {0} games from {1} in {2}s", gameCount, path, sw.Elapsed.TotalSeconds);
     }
 
     // Minimal conversion from PackedBoard bytes -> FEN string. This is a limited port of viriformat.marlinformat.unpack
