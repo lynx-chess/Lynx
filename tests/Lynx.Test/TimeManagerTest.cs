@@ -14,9 +14,11 @@ public class TimeManagerTest
         Configuration.EngineSettings.SoftNodes = false;
 
         var game = new Game(Constants.InitialPositionFEN);
+        const int nodes = 666;
 
-        var restrictions = TimeManager.CalculateTimeManagement(game, new UCI.Commands.GUI.GoCommand("go nodes 1000"));
-        Assert.AreEqual(SearchConstraints.DefaultMaxNodes, restrictions.MaxNodes);
+        var restrictions = TimeManager.CalculateTimeManagement(game, new UCI.Commands.GUI.GoCommand($"go nodes {nodes}"));
+        Assert.AreEqual(nodes, restrictions.MaxNodes);
+        Assert.AreEqual(Configuration.EngineSettings.Datagen_GenFens_MinHardTimeBound, restrictions.HardLimitTimeBound);
     }
 
     [Test]
@@ -29,5 +31,6 @@ public class TimeManagerTest
 
         var restrictions = TimeManager.CalculateTimeManagement(game, new UCI.Commands.GUI.GoCommand($"go nodes {nodes}"));
         Assert.AreEqual(nodes, restrictions.MaxNodes);
+        Assert.AreEqual(Configuration.EngineSettings.Datagen_GenFens_MinHardTimeBound, restrictions.HardLimitTimeBound);
     }
 }
