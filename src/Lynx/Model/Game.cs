@@ -300,6 +300,11 @@ public sealed class Game : IDisposable
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay);
+
+            if(CurrentPosition.Side == Side.White)
+            {
+                ++FullMoves;
+            }
         }
         else
         {
