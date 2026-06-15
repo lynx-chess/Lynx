@@ -1237,7 +1237,12 @@ public partial class Position : IDisposable
 
         sb.Append(' ');
 
-        sb.Append(_enPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)_enPassant]);
+        sb.Append(
+            (_enPassant == BoardSquare.noSquare
+                || (Attacks.PawnAttacks[Utils.OppositeSide((int)_side)][(int)_enPassant]
+                    & _pieceBitboards[(int)Piece.P + Utils.PieceOffset((int)_side)]) == 0)
+            ? "-"
+            : Constants.Coordinates[(int)_enPassant]);
 
         sb.Append(' ').Append(halfMovesWithoutCaptureOrPawnMove).Append(' ').Append(fullMoveClock);
 

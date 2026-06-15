@@ -23,6 +23,55 @@ public class PositionTest
         Assert.AreEqual(fen, newPosition.FEN());
     }
 
+
+    [Test]
+    public void FEN_EnPassantWhite()
+    {
+        var position = new Position("rnbqkb1r/p1pp1pp1/1p4np/8/P2P1p2/8/1PP1PPPP/RNBQKB1R w KQkq - 1 3");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e2e4");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.True(result.Contains("e3"));
+    }
+
+    [Test]
+    public void FEN_EnPassantBlack()
+    {
+        var position = new Position("rnbqk1nr/1p2p1bp/p2p4/3P1p2/8/P2B1P2/RP2N1PP/1NBQ1RK1 b kq - 0 8");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e7e5");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.True(result.Contains("e6"));
+    }
+
+    [Test]
+    public void FEN_NotEnPassantWhite()
+    {
+        var position = new Position("rnbqk1nr/pp1pbpp1/7p/1Pp1p3/N7/8/P1PPPPPP/R1BQKBNR w KQkq - 0 1");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e2e4");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.False(result.Contains("e3"));
+    }
+
+    [Test]
+    public void FEN_NotEnPassantBlack()
+    {
+        var position = new Position("r1bqkb1r/ppp1pp1p/2n5/3p2P1/3P2n1/4PN2/PPP1KP2/RNBQ1B1R b kq - 0 1");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e7e5");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.False(result.Contains("e6"));
+    }
+
     [TestCase(Constants.InitialPositionFEN)]
     [TestCase(Constants.TrickyTestPositionFEN)]
     [TestCase(Constants.TrickyTestPositionReversedFEN)]
