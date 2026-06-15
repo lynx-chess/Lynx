@@ -1,6 +1,7 @@
 ﻿using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Threading.Channels;
+using Lynx.Import;
 
 namespace Lynx.Cli;
 
@@ -32,6 +33,28 @@ public static class Runner
 
         try
         {
+            // CLI arg: --load-viriformat <path>
+            if (args is not null && args.Length >= 2)
+            {
+                for (int i = 0; i < args.Length - 1; ++i)
+                {
+                    if (args[i] == "--load-viriformat")
+                    {
+                        var path = args[i + 1];
+                        try
+                        {
+                            var (game, scores) = ViriformatLoader.LoadFile(path);
+                            // Set into searcher
+                            searcher.SetInitialGame(game);
+                            _logger.Info("Loaded viriformat file {0} with {1} move scores", path, scores.Count);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error(e, "Error loading viriformat file {0}", path);
+                        }
+                    }
+                }
+            }
             Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetLynxVersion()} by {IdCommand.EngineAuthor}");
             await Task.WhenAny(tasks);
         }

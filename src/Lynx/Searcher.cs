@@ -66,6 +66,14 @@ public sealed class Searcher : IDisposable
         ForceGCCollection();
     }
 
+    /// <summary>
+    /// Test/loader helper: replace the main engine's game with a preloaded one.
+    /// </summary>
+    public void SetInitialGame(Game game)
+    {
+        _mainEngine.SetGame(game);
+    }
+
     public async Task Run(CancellationToken cancellationToken)
     {
         try
