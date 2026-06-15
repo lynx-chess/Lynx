@@ -27,6 +27,8 @@ public static class ViriformatLoader
     {
         var results = new List<(Game game, List<short> moveScores)>();
 
+        ulong gameCount = 0;
+
         while (true)
         {
             // Attempt to read the PackedBoard (32 bytes). If EOF, stop.
@@ -54,8 +56,6 @@ public static class ViriformatLoader
             var scores = new List<short>();
 
             var pairBufArr = new byte[4];
-
-            ulong gameCount = 0;
 
             while (true)
             {
@@ -106,12 +106,12 @@ public static class ViriformatLoader
                 scores.Add(eval);
             }
 
-            //_logger.Debug("Loaded game from startpos {0} with {1} move scores", fen, scores.Count);
+            // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
             ++gameCount;
 
             if (gameCount % 1000 == 0)
             {
-                _logger.Info("Loaded {0} games", gameCount);
+                _logger.Warn("Loaded {0} games", gameCount);
             }
 
             results.Add((game, scores));
