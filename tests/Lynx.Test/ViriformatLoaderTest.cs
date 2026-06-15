@@ -1,4 +1,3 @@
-using Lynx.Import;
 using Lynx.Model;
 using NUnit.Framework;
 

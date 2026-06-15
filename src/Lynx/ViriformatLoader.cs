@@ -2,7 +2,7 @@ using Lynx.Model;
 using NLog;
 using System.Buffers.Binary;
 
-namespace Lynx.Import;
+namespace Lynx;
 
 public static class ViriformatLoader
 {
@@ -59,6 +59,9 @@ public static class ViriformatLoader
             var scores = new List<short>();
 
             var pairBufArr = new byte[4];
+
+            ulong gameCount = 0;
+
             while (true)
             {
                 int read = 0;
@@ -80,8 +83,8 @@ public static class ViriformatLoader
                     throw new InvalidDataException("Unexpected EOF while reading move+score pair");
                 }
 
-                ushort rawMove = BinaryPrimitives.ReadUInt16LittleEndian(pairBufArr.AsSpan(0,2));
-                short eval = BinaryPrimitives.ReadInt16LittleEndian(pairBufArr.AsSpan(2,2));
+                ushort rawMove = BinaryPrimitives.ReadUInt16LittleEndian(pairBufArr.AsSpan(0, 2));
+                short eval = BinaryPrimitives.ReadInt16LittleEndian(pairBufArr.AsSpan(2, 2));
 
                 if (rawMove == 0 && eval == 0)
                 {
@@ -108,7 +111,13 @@ public static class ViriformatLoader
                 scores.Add(eval);
             }
 
-            _logger.Info("Loaded game from startpos {0} with {1} move scores", fen, scores.Count);
+            //_logger.Debug("Loaded game from startpos {0} with {1} move scores", fen, scores.Count);
+            ++gameCount;
+
+            if (gameCount % 1000 == 0)
+            {
+                _logger.Info("Loaded {0} games", gameCount);
+            }
 
             results.Add((game, scores));
         }

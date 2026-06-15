@@ -1,5 +1,4 @@
-﻿using Lynx.Import;
-using Lynx.Model;
+﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
