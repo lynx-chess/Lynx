@@ -312,8 +312,8 @@ public static class ViriformatLoader
         bool isCastle = (raw & 0x8000) != 0 && (raw & 0x4000) == 0;
 
         // Convert viriformat square indices (A1=0..H8=63) to Lynx indexing (a8=0..h1=63)
-        int fromLynx = (7 - (from / 8)) * 8 + (from % 8);
-        int toLynx = (7 - (to / 8)) * 8 + (to % 8);
+        int fromLynx = from ^ 56;
+        int toLynx = to ^ 56;
         var fromStr = Constants.Coordinates[fromLynx];
         var toStr = Constants.Coordinates[toLynx];
 
