@@ -1,4 +1,5 @@
-﻿using Lynx.Model;
+﻿using Lynx.Import;
+using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -122,6 +123,9 @@ public sealed class UCIHandler
                     break;
                 case "genfens":
                     HandleGenFens(rawCommand);
+                    break;
+                case "load-viriformat":
+                    HandleLoadViriformat(rawCommand);
                     break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
@@ -559,6 +563,23 @@ public sealed class UCIHandler
     {
         var genFensCommand = new GenFensCommand(rawCommand);
         _searcher.GenFens(genFensCommand);
+    }
+
+    private void HandleLoadViriformat(string rawCommand)
+    {
+        var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var path = items.Length > 1 ? items[1] : string.Empty;
+
+        try
+        {
+            var (game, scores) = ViriformatLoader.LoadFile(path);
+            _searcher.SetInitialGame(game);
+            _logger.Info("Loaded viriformat file {0} with {1} move scores", path, scores.Count);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Error loading viriformat file {0}", path);
+        }
     }
 
     #endregion
