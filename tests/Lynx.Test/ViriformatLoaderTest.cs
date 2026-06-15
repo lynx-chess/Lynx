@@ -149,6 +149,40 @@ public class ViriformatLoaderTest
     }
 
     [Test]
+    public void EnPassant_Capture_Verified()
+    {
+        // White pawn on e5 (vir 36), black pawn on d5 (35), kings at e1(4)/e8(60)
+        var pieces = new (int, int, bool)[] { (36, 0, false), (35, 0, true), (4, 5, false), (60, 5, true) };
+
+        // stm_ep should be d6 (vir index 43)
+        var buf = BuildPackedBoardBytes(pieces.Select(t => (t.Item1, t.Item2, t.Item3)).ToArray(), stmBlack: false, ep: 43);
+
+        using var ms = new MemoryStream();
+        ms.Write(buf);
+
+        // En-passant: from e5 (36) to d6 (43) with EP flag 0x4000
+        ushort raw = (ushort)(36 | (43 << 6) | 0x4000);
+        AppendMove(ms, raw, 0);
+        AppendMove(ms, 0, 0);
+
+        ms.Position = 0;
+        var (game, scores) = ViriformatLoader.Load(ms);
+
+        // Compute lynx indices for vir squares
+        static int VirToLynx(int vir) => (7 - (vir / 8)) * 8 + (vir % 8);
+        int landing = VirToLynx(43); // d6 landing square
+        int captured = VirToLynx(35); // original black pawn on d5 should be gone
+
+        var pos = game.CurrentPosition;
+
+        // White pawn should be on landing square
+        Assert.AreEqual((int)Lynx.Model.Piece.P, pos.Board[landing]);
+
+        // Captured square should no longer contain a black pawn
+        Assert.AreNotEqual((int)Lynx.Model.Piece.p, pos.Board[captured]);
+    }
+
+    [Test]
     public void Promotion_Capture_Move_Applied()
     {
         // White pawn on g7 (vir 54), black rook on h8 (vir 63), kings at e1(4)/e8(60)

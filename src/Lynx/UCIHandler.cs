@@ -573,8 +573,6 @@ public sealed class UCIHandler
         try
         {
             var (game, scores) = ViriformatLoader.LoadFile(path);
-            _searcher.SetInitialGame(game);
-            _logger.Info("Loaded viriformat file {0} with {1} move scores", path, scores.Count);
         }
         catch (Exception e)
         {

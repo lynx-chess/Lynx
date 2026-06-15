@@ -18,66 +18,102 @@ public static class ViriformatLoader
     // Load a single game from stream. Returns Game and parallel list of per-move scores.
     public static (Game game, List<short> moveScores) Load(Stream s)
     {
-        // Read the PackedBoard (32 bytes)
-        var boardBufArr = new byte[32];
-        if (s.Read(boardBufArr, 0, boardBufArr.Length) != boardBufArr.Length)
+        var all = LoadAll(s);
+        if (all.Count == 0)
         {
-            throw new InvalidDataException("Unexpected EOF while reading PackedBoard");
+            throw new InvalidDataException("No games found in stream");
         }
 
-        // Parse minimal fields to produce a FEN using a helper below
-        var fen = PackedBoardToFEN(boardBufArr);
+        return all[0];
+    }
 
-        var game = new Game(fen);
-        var scores = new List<short>();
+    // Load all games from a stream. Each game is encoded as PackedBoard + (u16+i16)* terminated by a zero pair.
+    public static List<(Game game, List<short> moveScores)> LoadAll(Stream s)
+    {
+        var results = new List<(Game game, List<short> moveScores)>();
 
-        // Read moves until null terminator (u16 + i16 pairs). Each pair is 4 bytes little-endian.
-        var pairBufArr = new byte[4];
         while (true)
         {
-            int read = s.Read(pairBufArr, 0, 4);
-            if (read == 0)
+            // Attempt to read the PackedBoard (32 bytes). If EOF, stop.
+            var boardBufArr = new byte[32];
+            int firstRead = 0;
+            while (firstRead < boardBufArr.Length)
             {
-                break; // EOF
+                int r = s.Read(boardBufArr, firstRead, boardBufArr.Length - firstRead);
+                if (r == 0) break;
+                firstRead += r;
             }
 
-            if (read != 4)
+            if (firstRead == 0)
             {
-                throw new InvalidDataException("Unexpected EOF while reading move+score pair");
+                break; // no more games
             }
 
-            ushort rawMove = BinaryPrimitives.ReadUInt16LittleEndian(pairBufArr.AsSpan(0,2));
-            short eval = BinaryPrimitives.ReadInt16LittleEndian(pairBufArr.AsSpan(2,2));
-
-            // Null terminator: both bytes zero
-            if (rawMove == 0 && eval == 0)
+            if (firstRead != boardBufArr.Length)
             {
-                break;
+                throw new InvalidDataException("Unexpected EOF while reading PackedBoard");
             }
 
-            // Convert rawMove (viriformat u16) into UCI string, then to Lynx Move
-            var uci = ViriformatMoveToUci(rawMove);
+            var fen = PackedBoardToFEN(boardBufArr);
+            var game = new Game(fen);
+            var scores = new List<short>();
 
-            // Apply move via Game.ParsePositionCommand route: faster to generate current move list and TryParseFromUCIString
-            // We'll generate all moves and find matching move
-            var movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            Span<Move> moveListSpan = movePool;
-            var bufferArr = new Bitboard[EvaluationContext.RequiredBufferSize];
-            Span<Bitboard> buffer = bufferArr;
-            var evalCtx = new EvaluationContext(buffer);
-            var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, moveListSpan);
-
-            if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
+            var pairBufArr = new byte[4];
+            while (true)
             {
-                _logger.Warn("Unable to parse move {0} in current position", uci);
-                break;
+                int read = 0;
+                while (read < 4)
+                {
+                    int r = s.Read(pairBufArr, read, 4 - read);
+                    if (r == 0) break;
+                    read += r;
+                }
+
+                if (read == 0)
+                {
+                    // EOF reached while reading moves — treat as end of last game
+                    break;
+                }
+
+                if (read != 4)
+                {
+                    throw new InvalidDataException("Unexpected EOF while reading move+score pair");
+                }
+
+                ushort rawMove = BinaryPrimitives.ReadUInt16LittleEndian(pairBufArr.AsSpan(0,2));
+                short eval = BinaryPrimitives.ReadInt16LittleEndian(pairBufArr.AsSpan(2,2));
+
+                if (rawMove == 0 && eval == 0)
+                {
+                    // end of this game
+                    break;
+                }
+
+                var uci = ViriformatMoveToUci(rawMove);
+
+                var movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+                Span<Move> moveListSpan = movePool;
+                var bufferArr = new Bitboard[EvaluationContext.RequiredBufferSize];
+                Span<Bitboard> buffer = bufferArr;
+                var evalCtx = new EvaluationContext(buffer);
+                var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, moveListSpan);
+
+                if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
+                {
+                    _logger.Warn("Unable to parse move {0} in current position", uci);
+                    break;
+                }
+
+                game.MakeMove(move!.Value);
+                scores.Add(eval);
             }
 
-            game.MakeMove(move!.Value);
-            scores.Add(eval);
+            _logger.Info("Loaded game from startpos {0} with {1} move scores", fen, scores.Count);
+
+            results.Add((game, scores));
         }
 
-        return (game, scores);
+        return results;
     }
 
     // Minimal conversion from PackedBoard bytes -> FEN string. This is a limited port of viriformat.marlinformat.unpack
@@ -235,7 +271,6 @@ public static class ViriformatLoader
         var castling = castlingSb.Length == 0 ? "-" : castlingSb.ToString();
 
         string fen = $"{sb} {side} {castling} {epStr} {halfmove} {fullmove}";
-        _logger.Debug("Built FEN: {0}", fen);
         return fen;
     }
 
@@ -298,7 +333,13 @@ public static class ViriformatLoader
             return string.Concat(fromStr, toCastle);
         }
 
-        // Normal or en-passant: UCI is simply from+to
+        if (isEp)
+        {
+            // En-passant move: UCI is still from+to (landing square). Make explicit handling for clarity.
+            return string.Concat(fromStr, toStr);
+        }
+
+        // Normal: UCI is from+to
         return string.Concat(fromStr, toStr);
     }
 }
