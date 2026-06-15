@@ -1255,7 +1255,7 @@ public partial class Position : IDisposable
     /// Combines <see cref="_pieceBitboards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
     /// into a human-friendly representation
     /// </summary>
-    public void Print(int halfMovesWithoutCaptureOrPawnMove = -1)
+    public void Print(int halfMovesWithoutCaptureOrPawnMove = -1, int fullMoves = 1)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator + Environment.NewLine);
@@ -1340,7 +1340,7 @@ public partial class Position : IDisposable
             Console.WriteLine($"    Half-moves:\t{halfMovesWithoutCaptureOrPawnMove}");
         }
 
-        Console.WriteLine($"    FEN:\t{FEN()}");
+        Console.WriteLine($"    FEN:\t{FEN(halfMovesWithoutCaptureOrPawnMove, fullMoves)}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
 
         Console.WriteLine(separator);
