@@ -571,7 +571,7 @@ public sealed class UCIHandler
 
         try
         {
-            var (game, scores) = ViriformatLoader.LoadFile(path);
+            ViriformatLoader.LoadFile(path);
         }
         catch (Exception e)
         {

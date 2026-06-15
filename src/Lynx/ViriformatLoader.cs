@@ -9,24 +9,9 @@ public static class ViriformatLoader
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    // Public API: load from path
-    public static (Game game, List<short> moveScores) LoadFile(string path)
+    public static void LoadFile(string path)
     {
         using var fs = File.OpenRead(path);
-
-        var all = LoadAll(fs);
-        if (all.Count == 0)
-        {
-            throw new InvalidDataException("No games found in stream");
-        }
-
-        return all[0];
-    }
-
-    // Load all games from a stream. Each game is encoded as PackedBoard + (u16+i16)* terminated by a zero pair.
-    public static List<(Game game, List<short> moveScores)> LoadAll(Stream s)
-    {
-        var results = new List<(Game game, List<short> moveScores)>();
 
         var sw = Stopwatch.StartNew();
 
@@ -39,7 +24,7 @@ public static class ViriformatLoader
             int firstRead = 0;
             while (firstRead < boardBufArr.Length)
             {
-                int r = s.Read(boardBufArr, firstRead, boardBufArr.Length - firstRead);
+                int r = fs.Read(boardBufArr, firstRead, boardBufArr.Length - firstRead);
                 if (r == 0) break;
                 firstRead += r;
             }
@@ -55,7 +40,7 @@ public static class ViriformatLoader
             }
 
             var fen = PackedBoardToFEN(boardBufArr);
-            var game = new Game(fen);
+            using var game = new Game(fen);
             var scores = new List<short>(64); // pre-size to reduce growth overhead
 
             var pairBufArr = new byte[4];
@@ -72,7 +57,7 @@ public static class ViriformatLoader
                 int read = 0;
                 while (read < 4)
                 {
-                    int r = s.Read(pairBufArr, read, 4 - read);
+                    int r = fs.Read(pairBufArr, read, 4 - read);
                     if (r == 0) break;
                     read += r;
                 }
@@ -122,11 +107,7 @@ public static class ViriformatLoader
                 var ms = sw.ElapsedMilliseconds;
                 _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, gameCount, 1000 * gameCount / (ulong)ms);
             }
-
-            results.Add((game, scores));
         }
-
-        return results;
     }
 
     // Minimal conversion from PackedBoard bytes -> FEN string. This is a limited port of viriformat.marlinformat.unpack
