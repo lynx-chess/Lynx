@@ -29,11 +29,32 @@ public class ViriformatLoaderMultiGameTest
         var streamBytes = b1.Concat(new byte[4]).Concat(b2).Concat(new byte[4]).ToArray();
 
         using var ms = new MemoryStream(streamBytes);
-        var all = ViriformatLoader.LoadAll(ms);
-
-        Assert.AreEqual(2, all.Count);
-        Assert.IsTrue(all[0].game.FEN == all[1].game.FEN);
-        Assert.AreEqual(0, all[0].moveScores.Count);
-        Assert.AreEqual(0, all[1].moveScores.Count);
+        // write to temp file and invoke loader which writes out an .epd file
+        var tmp = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp);
+            var epd = File.ReadAllText(tmp + ".epd");
+            // split games by blank line
+            var games = epd.Split(new string[] { "\r\n\r\n", "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(2, games.Length);
+            // each game's first non-empty line contains initial FEN
+            string firstFen = games[0].Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)[0];
+            string secondFen = games[1].Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)[0];
+            Assert.IsTrue(firstFen.StartsWith("4k3/") && secondFen.StartsWith("4k3/"));
+            // No move-score lines after initial line for both games
+            foreach (var g in games)
+            {
+                var lines = g.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                // only one line (initial) expected
+                Assert.AreEqual(1, lines.Length);
+            }
+        }
+        finally
+        {
+            try { File.Delete(tmp); } catch { }
+            try { File.Delete(tmp + ".epd"); } catch { }
+        }
     }
 }

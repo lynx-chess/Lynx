@@ -43,12 +43,20 @@ public static class ViriformatLoader
             }
 
             var fen = PackedBoardToFEN(boardBufArr);
-            var gameResult = "*";
+
+            // Parse initial position eval (i16le at bytes 28..29) and WDL (byte at 30)
+            var (initialPositionScore, wdlByte) = ParseEvalAndWDL(boardBufArr);
+
+            // Map WDL byte to a human-readable game result. Unknown/default -> "*"
+            string gameResult = MapWdlToResult(wdlByte);
 
             using var game = new Game(fen);
+            var initialFEN = game.FEN;
 
-            var initialFEN = game.CurrentPosition.FEN(game.HalfMovesWithoutCaptureOrPawnMove);
-            fens.WriteLine(initialFEN);
+            if(initialPositionScore != 0)
+            {
+                fens.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
+            }
 
             var scores = new List<short>(64); // pre-size to reduce growth overhead
 
@@ -103,13 +111,15 @@ public static class ViriformatLoader
                     break;
                 }
 
-                game.MakeMove(move!.Value);
-
-                var newFEN = game.CurrentPosition.FEN(game.HalfMovesWithoutCaptureOrPawnMove);
+                var newFEN = game.FEN;
                 fens.WriteLine($"{newFEN}; {eval}; [{gameResult}]");
+
+                game.MakeMove(move!.Value);
 
                 scores.Add(eval);
             }
+
+            fens.WriteLine();
 
             // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
             ++gameCount;
@@ -123,6 +133,25 @@ public static class ViriformatLoader
         }
 
         _logger.Warn("Loaded {0} games from {1} in {2}s", gameCount, path, sw.Elapsed.TotalSeconds);
+    }
+
+    internal static (short score, byte wdl) ParseEvalAndWDL(ReadOnlySpan<byte> packed)
+    {
+        short score = BinaryPrimitives.ReadInt16LittleEndian(packed.Slice(28, 2));
+        byte wdl = packed[30];
+        return (score, wdl);
+    }
+
+    // Map viriformat WDL byte to a result string per spec (0=black win,1=draw,2=white win)
+    internal static string MapWdlToResult(byte wdlByte)
+    {
+        return wdlByte switch
+        {
+            0 => "0.0",
+            1 => "0.5",
+            2 => "1.0",
+            _ => "*",
+        };
     }
 
     // Minimal conversion from PackedBoard bytes -> FEN string. This is a limited port of viriformat.marlinformat.unpack

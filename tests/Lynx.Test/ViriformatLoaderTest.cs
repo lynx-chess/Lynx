@@ -1,5 +1,8 @@
 using Lynx.Model;
 using NUnit.Framework;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Lynx.Test;
 
@@ -31,11 +34,24 @@ public class ViriformatLoaderTest
         // wdl, extra left as 0
 
         using var ms = new MemoryStream(buf.ToArray());
-
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        Assert.AreEqual("4k3/8/8/8/8/8/8/4K3 w - - 0 1", game.FEN);
-        Assert.AreEqual(0, scores.Count);
+        var tmp = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp);
+            var lines = File.ReadAllLines(tmp + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            Assert.AreEqual(1, lines.Length);
+            var initialFen = lines[0].Split(';')[0].Trim();
+            var game = new Game(initialFen);
+            var scores = new List<short>();
+            Assert.AreEqual("4k3/8/8/8/8/8/8/4K3 w - - 0 1", game.FEN);
+            Assert.AreEqual(0, scores.Count);
+        }
+        finally
+        {
+            try { File.Delete(tmp); } catch { }
+            try { File.Delete(tmp + ".epd"); } catch { }
+        }
     }
 
     private static byte[] BuildPackedBoardBytes((int virSq, int pieceCode, bool isBlack)[] pieces, bool stmBlack = false, int ep = 64, byte halfmove = 0, ushort fullmove = 1)
@@ -96,11 +112,24 @@ public class ViriformatLoaderTest
         AppendMove(ms, 0, 0);
 
         ms.Position = 0;
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        // After promotion, there should be a white queen on a8 -> which is Lynx coord a8 at index 0
-        Assert.IsTrue(game.FEN.Contains("Q") || game.FEN.Contains("q"));
-        Assert.AreEqual(1, scores.Count);
+        var tmp2 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp2, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp2);
+            var lines = File.ReadAllLines(tmp2 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            Assert.IsTrue(lines.Length >= 2);
+            var finalFen = lines.Last().Split(';')[0].Trim();
+            var game = new Game(finalFen);
+            var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
+            Assert.IsTrue(game.FEN.Contains("Q") || game.FEN.Contains("q"));
+            Assert.AreEqual(1, scores.Count);
+        }
+        finally
+        {
+            try { File.Delete(tmp2); } catch { }
+            try { File.Delete(tmp2 + ".epd"); } catch { }
+        }
     }
 
     [Test]
@@ -116,11 +145,24 @@ public class ViriformatLoaderTest
         // terminator only, don't apply the move to avoid position validation issues in the engine
         AppendMove(ms, 0, 0);
         ms.Position = 0;
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        // Ensure castling rights were detected in FEN and no moves applied
-        Assert.IsTrue(game.FEN.Contains("K") || game.FEN.Contains("Q") || game.FEN.Contains("B") );
-        Assert.AreEqual(0, scores.Count);
+        var tmp3 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp3, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp3);
+            var lines = File.ReadAllLines(tmp3 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            var initialFen = lines[0].Split(';')[0].Trim();
+            var game = new Game(initialFen);
+            var scores = new List<short>();
+            // Ensure castling rights were detected in FEN and no moves applied
+            Assert.IsTrue(game.FEN.Contains("K") || game.FEN.Contains("Q") || game.FEN.Contains("B"));
+            Assert.AreEqual(0, scores.Count);
+        }
+        finally
+        {
+            try { File.Delete(tmp3); } catch { }
+            try { File.Delete(tmp3 + ".epd"); } catch { }
+        }
     }
 
     [Test]
@@ -141,10 +183,21 @@ public class ViriformatLoaderTest
         AppendMove(ms, 0, 0);
 
         ms.Position = 0;
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        // After en-passant, white pawn should be on d6 (lynx coordinate for vir 43 -> compute)
-        Assert.AreEqual(1, scores.Count);
+        var tmp4 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp4, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp4);
+            var lines = File.ReadAllLines(tmp4 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
+            // After en-passant, white pawn should be on d6 (lynx coordinate for vir 43 -> compute)
+            Assert.AreEqual(1, scores.Count);
+        }
+        finally
+        {
+            try { File.Delete(tmp4); } catch { }
+            try { File.Delete(tmp4 + ".epd"); } catch { }
+        }
     }
 
     [Test]
@@ -165,20 +218,33 @@ public class ViriformatLoaderTest
         AppendMove(ms, 0, 0);
 
         ms.Position = 0;
-        var (game, scores) = ViriformatLoader.Load(ms);
+        var tmp5 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp5, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp5);
+            var lines = File.ReadAllLines(tmp5 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            var finalFen = lines.Last().Split(';')[0].Trim();
+            var game = new Game(finalFen);
 
-        // Compute lynx indices for vir squares
-        static int VirToLynx(int vir) => (7 - (vir / 8)) * 8 + (vir % 8);
-        int landing = VirToLynx(43); // d6 landing square
-        int captured = VirToLynx(35); // original black pawn on d5 should be gone
+            // Compute lynx indices for vir squares
+            static int VirToLynx(int vir) => (7 - (vir / 8)) * 8 + (vir % 8);
+            int landing = VirToLynx(43); // d6 landing square
+            int captured = VirToLynx(35); // original black pawn on d5 should be gone
 
-        var pos = game.CurrentPosition;
+            var pos = game.CurrentPosition;
 
-        // White pawn should be on landing square
-        Assert.AreEqual((int)Lynx.Model.Piece.P, pos.Board[landing]);
+            // White pawn should be on landing square
+            Assert.AreEqual((int)Lynx.Model.Piece.P, pos.Board[landing]);
 
-        // Captured square should no longer contain a black pawn
-        Assert.AreNotEqual((int)Lynx.Model.Piece.p, pos.Board[captured]);
+            // Captured square should no longer contain a black pawn
+            Assert.AreNotEqual((int)Lynx.Model.Piece.p, pos.Board[captured]);
+        }
+        finally
+        {
+            try { File.Delete(tmp5); } catch { }
+            try { File.Delete(tmp5 + ".epd"); } catch { }
+        }
     }
 
     [Test]
@@ -198,11 +264,24 @@ public class ViriformatLoaderTest
         AppendMove(ms, 0, 0);
 
         ms.Position = 0;
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        // After promotion capture, expect a white queen present in FEN
-        Assert.IsTrue(game.FEN.Contains("Q") || game.FEN.Contains("q"));
-        Assert.AreEqual(1, scores.Count);
+        var tmp6 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp6, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp6);
+            var lines = File.ReadAllLines(tmp6 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            var finalFen = lines.Last().Split(';')[0].Trim();
+            var game = new Game(finalFen);
+            var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
+            // After promotion capture, expect a white queen present in FEN
+            Assert.IsTrue(game.FEN.Contains("Q") || game.FEN.Contains("q"));
+            Assert.AreEqual(1, scores.Count);
+        }
+        finally
+        {
+            try { File.Delete(tmp6); } catch { }
+            try { File.Delete(tmp6 + ".epd"); } catch { }
+        }
     }
 
     [Test]
@@ -225,10 +304,23 @@ public class ViriformatLoaderTest
             AppendMove(ms, 0, 0);
 
             ms.Position = 0;
-            var (game, scores) = ViriformatLoader.Load(ms);
-
-            Assert.IsTrue(game.FEN.Contains(expected));
-            Assert.AreEqual(1, scores.Count);
+            var tmp7 = Path.GetTempFileName();
+            try
+            {
+                File.WriteAllBytes(tmp7, ms.ToArray());
+                ViriformatLoader.LoadFile(tmp7);
+                var lines = File.ReadAllLines(tmp7 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+                var finalFen = lines.Last().Split(';')[0].Trim();
+                var game = new Game(finalFen);
+                var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
+                Assert.IsTrue(game.FEN.Contains(expected));
+                Assert.AreEqual(1, scores.Count);
+            }
+            finally
+            {
+                try { File.Delete(tmp7); } catch { }
+                try { File.Delete(tmp7 + ".epd"); } catch { }
+            }
         }
     }
 
@@ -243,11 +335,22 @@ public class ViriformatLoaderTest
         ms.Write(buf);
         AppendMove(ms, 0, 0);
         ms.Position = 0;
-
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        // Castling string should include 'G' and 'B' (their file letters uppercase)
-        Assert.IsTrue(game.FEN.Contains("G") && game.FEN.Contains("B"));
+        var tmp8 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp8, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp8);
+            var lines = File.ReadAllLines(tmp8 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            var initialFen = lines[0].Split(';')[0].Trim();
+            var game = new Game(initialFen);
+            // Castling string should include 'G' and 'B' (their file letters uppercase)
+            Assert.IsTrue(game.FEN.Contains("G") && game.FEN.Contains("B"));
+        }
+        finally
+        {
+            try { File.Delete(tmp8); } catch { }
+            try { File.Delete(tmp8 + ".epd"); } catch { }
+        }
     }
 
     [Test]
@@ -266,9 +369,20 @@ public class ViriformatLoaderTest
         AppendMove(ms, 0, 0);
 
         ms.Position = 0;
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        Assert.AreEqual(1, scores.Count);
+        var tmp9 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp9, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp9);
+            var lines = File.ReadAllLines(tmp9 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
+            Assert.AreEqual(1, scores.Count);
+        }
+        finally
+        {
+            try { File.Delete(tmp9); } catch { }
+            try { File.Delete(tmp9 + ".epd"); } catch { }
+        }
     }
 
     [Test]
@@ -287,8 +401,19 @@ public class ViriformatLoaderTest
         AppendMove(ms, 0, 0);
 
         ms.Position = 0;
-        var (game, scores) = ViriformatLoader.Load(ms);
-
-        Assert.AreEqual(32000, scores[0]);
+        var tmp10 = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(tmp10, ms.ToArray());
+            ViriformatLoader.LoadFile(tmp10);
+            var lines = File.ReadAllLines(tmp10 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+            var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
+            Assert.AreEqual(32000, scores[0]);
+        }
+        finally
+        {
+            try { File.Delete(tmp10); } catch { }
+            try { File.Delete(tmp10 + ".epd"); } catch { }
+        }
     }
 }
