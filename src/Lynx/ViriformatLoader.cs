@@ -56,9 +56,16 @@ public static class ViriformatLoader
 
             var fen = PackedBoardToFEN(boardBufArr);
             var game = new Game(fen);
-            var scores = new List<short>();
+            var scores = new List<short>(64); // pre-size to reduce growth overhead
 
             var pairBufArr = new byte[4];
+
+            // Allocate reusable buffers per game to avoid per-move allocations
+            var movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            Span<Move> moveListSpan = movePool;
+            var bufferArr = new Bitboard[EvaluationContext.RequiredBufferSize];
+            Span<Bitboard> buffer = bufferArr;
+            var evalCtx = new EvaluationContext(buffer);
 
             while (true)
             {
@@ -92,11 +99,8 @@ public static class ViriformatLoader
 
                 var uci = ViriformatMoveToUci(rawMove);
 
-                var movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-                Span<Move> moveListSpan = movePool;
-                var bufferArr = new Bitboard[EvaluationContext.RequiredBufferSize];
-                Span<Bitboard> buffer = bufferArr;
-                var evalCtx = new EvaluationContext(buffer);
+                // Reset evaluation context before generating moves (we reuse the same buffer)
+                evalCtx.Reset();
                 var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, moveListSpan);
 
                 if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
