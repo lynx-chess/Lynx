@@ -26,9 +26,9 @@ public class ViriformatLoaderTest
         // stm_ep: turn=white (0), ep = 64 (no ep)
         buf[24] = 64;
         // halfmove
-        buf[25] = 0;
-        // fullmove = 1
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(buf[26..28], 1);
+        buf[25] = 33;
+        // fullmove = 66
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(buf[26..28], 66);
         // eval (i16) 0
         System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(buf[28..30], 0);
         // wdl, extra left as 0
@@ -44,7 +44,7 @@ public class ViriformatLoaderTest
             var initialFen = lines[0].Split(';')[0].Trim();
             var game = new Game(initialFen);
             var scores = new List<short>();
-            Assert.AreEqual("4k3/8/8/8/8/8/8/4K3 w - - 0 1", game.FEN);
+            Assert.AreEqual("4k3/8/8/8/8/8/8/4K3 w - - 33 66", game.FEN);
             Assert.AreEqual(0, scores.Count);
         }
         finally
@@ -54,7 +54,7 @@ public class ViriformatLoaderTest
         }
     }
 
-    private static byte[] BuildPackedBoardBytes((int virSq, int pieceCode, bool isBlack)[] pieces, bool stmBlack = false, int ep = 64, byte halfmove = 0, ushort fullmove = 1)
+    private static byte[] BuildPackedBoardBytes((int virSq, int pieceCode, bool isBlack)[] pieces, bool stmBlack = false, int ep = 64, byte halfmove = 0, ushort fullmove = 66)
     {
         Span<byte> buf = stackalloc byte[32];
 

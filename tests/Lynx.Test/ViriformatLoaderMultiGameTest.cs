@@ -17,8 +17,8 @@ public class ViriformatLoaderMultiGameTest
             BinaryPrimitives.WriteUInt64LittleEndian(buf.AsSpan(0,8), occupancy);
             buf[8] = (byte)(((5 | (1 << 3)) << 4) | 5);
             buf[24] = 64;
-            buf[25] = 0;
-            BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(26,2), 1);
+            buf[25] = 33;       
+            BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(26,2), 66);
             return buf;
         }
 

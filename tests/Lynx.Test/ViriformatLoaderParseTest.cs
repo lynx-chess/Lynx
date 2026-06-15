@@ -17,9 +17,9 @@ public class ViriformatLoaderParseTest
         // stm_ep = no ep, white to move
         buf[24] = 64;
         // halfmove
-        buf[25] = 0;
-        // fullmove = 1
-        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(26, 2), 1);
+        buf[25] = 33;
+        // fullmove = 66
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(26, 2), 66);
         // eval
         BinaryPrimitives.WriteInt16LittleEndian(buf.AsSpan(28, 2), (short)eval);
         // wdl
