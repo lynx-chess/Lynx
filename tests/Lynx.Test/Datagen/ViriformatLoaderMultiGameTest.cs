@@ -12,7 +12,7 @@ public class ViriformatLoaderMultiGameTest
     public void LoadAll_MultipleGamesInStream()
     {
         // Build two minimal PackedBoard games: both only kings in default places
-        byte[] BuildSimpleBoard()
+        static byte[] BuildSimpleBoard()
         {
             var buf = new byte[32];
             ulong occupancy = (1UL << 4) | (1UL << 60);
@@ -36,19 +36,19 @@ public class ViriformatLoaderMultiGameTest
         try
         {
             File.WriteAllBytes(tmp, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp);
+            ViriformatLoader.LoadFile(tmp, ViriformatFilter.Unrestricted);
             var epd = File.ReadAllText(tmp + ".epd");
             // split games by blank line
-            var games = epd.Split(new string[] { "\r\n\r\n", "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var games = epd.Split(["\r\n\r\n", "\n\n"], StringSplitOptions.RemoveEmptyEntries);
             Assert.AreEqual(2, games.Length);
             // each game's first non-empty line contains initial FEN
-            string firstFen = games[0].Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)[0];
-            string secondFen = games[1].Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)[0];
+            string firstFen = games[0].Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries)[0];
+            string secondFen = games[1].Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries)[0];
             Assert.IsTrue(firstFen.StartsWith("4k3/") && secondFen.StartsWith("4k3/"));
             // No move-score lines after initial line for both games
             foreach (var g in games)
             {
-                var lines = g.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                var lines = g.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
                 // only one line (initial) expected
                 Assert.AreEqual(1, lines.Length);
             }

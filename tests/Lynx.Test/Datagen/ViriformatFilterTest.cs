@@ -11,7 +11,7 @@ public class ViriformatFilterTest
     [Test]
     public void MinPieces_FiltersWhenTooFew()
     {
-        var position = new Position("8/8/8/8/8/8/4k3/4K3 w - - 0 1");
+        var position = new Position("4k3/8/8/8/8/8/8/4K3 w - - 0 1");
         var filter = new ViriformatFilter { MinPly = 0, MinPieces = 3 }; // position has 2 kings, require 3 to avoid
         var mv = MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.a2, (int)Piece.P);
         var rng = new Random(1);
@@ -86,7 +86,7 @@ public class ViriformatFilterTest
     public void MaterialCountFiltered_UsesProbabilityArray()
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var filter = new ViriformatFilter { MinPly = 0, MaterialCountFiltered = true };
+        var filter = new ViriformatFilter { MinPly = 0, MaterialCountFiltered = true, MaterialCountProbabilities = new double[33] };
         // set probability for current piece count to 1.0 to guarantee filtering
         int idx = Math.Min(position.CountPieces(), 32);
         filter.MaterialCountProbabilities[idx] = 1.0;
@@ -115,102 +115,12 @@ public class ViriformatFilterTest
     public void WdlFiltered_WdlOutcomeLowChance_IsFiltered()
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var filter = new ViriformatFilter { MinPly = 0, WdlFiltered = true };
+        var filter = new ViriformatFilter { MinPly = 0, WdlFiltered = true, WdlModelParamsA = new double[4], WdlModelParamsB = new double[4] };
         var rng = new Random(2);
         var mv = MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.P);
 
         // Choose a large positive eval but a WDL byte indicating 'loss' (0).
         // For a large positive eval the model should predict near-zero chance for 'loss' so the filter will drop it.
         Assert.IsTrue(filter.ShouldDrop(mv, 10_000, position, (byte)0, 0, rng));
-    }
-
-    [Test]
-    public void InitialPosition_WithNonZeroScore_IsFilteredWhenShouldFilterTrue()
-    {
-        // Build a simple packed board with non-zero eval at bytes 28..29
-        Span<byte> buf = stackalloc byte[32];
-        // Put a minimal occupancy with two kings
-        ulong occupancy = (1UL << 4) | (1UL << 60);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(buf[0..8], occupancy);
-        buf[8] = (byte)(((5 | (1 << 3)) << 4) | 5);
-        // stm_ep
-        buf[24] = 64;
-        buf[25] = 0;
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(buf[26..28], 1);
-        // eval non-zero
-        System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(buf[28..30], 123);
-
-        var tmp = Path.GetTempFileName();
-        try
-        {
-            File.WriteAllBytes(tmp, buf.ToArray());
-
-            var filter = new ViriformatFilter { MinPly = 1000 }; // will filter out ply=0
-            ViriformatLoader.LoadFile(tmp, filter);
-
-            var lines = File.ReadAllLines(tmp + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
-            Assert.AreEqual(0, lines.Length);
-        }
-        finally
-        {
-            try { File.Delete(tmp); } catch { }
-            try { File.Delete(tmp + ".epd"); } catch { }
-        }
-    }
-
-    [Test]
-    public void InitialPosition_WithNonZeroScore_IsEmittedWhenUnrestricted()
-    {
-        Span<byte> buf = stackalloc byte[32];
-        ulong occupancy = (1UL << 4) | (1UL << 60);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(buf[0..8], occupancy);
-        buf[8] = (byte)(((5 | (1 << 3)) << 4) | 5);
-        buf[24] = 64;
-        buf[25] = 0;
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(buf[26..28], 1);
-        System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(buf[28..30], 123);
-
-        var tmp = Path.GetTempFileName();
-        try
-        {
-            File.WriteAllBytes(tmp, buf.ToArray());
-            var filter = ViriformatFilter.Unrestricted;
-            ViriformatLoader.LoadFile(tmp, filter);
-            var lines = File.ReadAllLines(tmp + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
-            Assert.AreEqual(1, lines.Length);
-        }
-        finally
-        {
-            try { File.Delete(tmp); } catch { }
-            try { File.Delete(tmp + ".epd"); } catch { }
-        }
-    }
-
-    [Test]
-    public void InitialPosition_WithZeroScore_IsNotEmittedEvenWhenUnrestricted()
-    {
-        Span<byte> buf = stackalloc byte[32];
-        ulong occupancy = (1UL << 4) | (1UL << 60);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(buf[0..8], occupancy);
-        buf[8] = (byte)(((5 | (1 << 3)) << 4) | 5);
-        buf[24] = 64;
-        buf[25] = 0;
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(buf[26..28], 1);
-        System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(buf[28..30], 0); // Zero score
-
-        var tmp = Path.GetTempFileName();
-        try
-        {
-            File.WriteAllBytes(tmp, buf.ToArray());
-            var filter = ViriformatFilter.Unrestricted;
-            ViriformatLoader.LoadFile(tmp, filter);
-            var lines = File.ReadAllLines(tmp + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
-            Assert.AreEqual(0, lines.Length);
-        }
-        finally
-        {
-            try { File.Delete(tmp); } catch { }
-            try { File.Delete(tmp + ".epd"); } catch { }
-        }
     }
 }

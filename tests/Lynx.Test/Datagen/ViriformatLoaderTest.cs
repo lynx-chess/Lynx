@@ -37,7 +37,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp);
+            ViriformatLoader.LoadFile(tmp, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             Assert.AreEqual(1, lines.Length);
             var initialFen = lines[0].Split(';')[0].Trim();
@@ -115,7 +115,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp2, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp2);
+            ViriformatLoader.LoadFile(tmp2, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp2 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             Assert.IsTrue(lines.Length >= 2);
             var finalFen = lines.Last().Split(';')[0].Trim();
@@ -148,7 +148,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp3, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp3);
+            ViriformatLoader.LoadFile(tmp3, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp3 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             var initialFen = lines[0].Split(';')[0].Trim();
             var game = new Game(initialFen);
@@ -186,7 +186,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp4, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp4);
+            ViriformatLoader.LoadFile(tmp4, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp4 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
             // After en-passant, white pawn should be on d6 (lynx coordinate for vir 43 -> compute)
@@ -221,7 +221,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp5, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp5);
+            ViriformatLoader.LoadFile(tmp5, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp5 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             var finalFen = lines.Last().Split(';')[0].Trim();
             var game = new Game(finalFen);
@@ -267,7 +267,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp6, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp6);
+            ViriformatLoader.LoadFile(tmp6, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp6 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             var finalFen = lines.Last().Split(';')[0].Trim();
             var game = new Game(finalFen);
@@ -307,7 +307,7 @@ public class ViriformatLoaderTest
             try
             {
                 File.WriteAllBytes(tmp7, ms.ToArray());
-                ViriformatLoader.LoadFile(tmp7);
+                ViriformatLoader.LoadFile(tmp7, ViriformatFilter.Unrestricted);
                 var lines = File.ReadAllLines(tmp7 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
                 var finalFen = lines.Last().Split(';')[0].Trim();
                 var game = new Game(finalFen);
@@ -338,7 +338,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp8, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp8);
+            ViriformatLoader.LoadFile(tmp8, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp8 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             var initialFen = lines[0].Split(';')[0].Trim();
             var game = new Game(initialFen);
@@ -372,7 +372,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp9, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp9);
+            ViriformatLoader.LoadFile(tmp9, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp9 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
             Assert.AreEqual(1, scores.Count);
@@ -404,7 +404,7 @@ public class ViriformatLoaderTest
         try
         {
             File.WriteAllBytes(tmp10, ms.ToArray());
-            ViriformatLoader.LoadFile(tmp10);
+            ViriformatLoader.LoadFile(tmp10, ViriformatFilter.Unrestricted);
             var lines = File.ReadAllLines(tmp10 + ".epd").Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
             var scores = lines.Skip(1).Select(l => short.Parse(l.Split(';')[1].Trim())).ToList();
             Assert.AreEqual(32000, scores[0]);
