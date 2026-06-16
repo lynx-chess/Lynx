@@ -20,18 +20,17 @@ public static class ViriformatLoader
 
         ulong gameCount = 0;
 
+        // Reusable buffers to avoid per-game allocations
+        byte[] boardBufArr = new byte[32];
+        byte[] pairBufArr = new byte[4];
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+        var evalCtx = new EvaluationContext(buffer);
+
         while (true)
         {
-            // Attempt to read the PackedBoard (32 bytes). If EOF, stop.
-            var boardBufArr = new byte[32];
-            int firstRead = 0;
-            while (firstRead < boardBufArr.Length)
-            {
-                int r = fs.Read(boardBufArr, firstRead, boardBufArr.Length - firstRead);
-                if (r == 0) break;
-                firstRead += r;
-            }
-
+            int firstRead = ReadFull(fs, boardBufArr);
             if (firstRead == 0)
             {
                 break; // no more games
@@ -53,31 +52,16 @@ public static class ViriformatLoader
             using var game = new Game(fen);
             var initialFEN = game.FEN;
 
-            if(initialPositionScore != 0)
+            if (initialPositionScore != 0)
             {
                 fens.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
             }
 
-            var scores = new List<short>(64); // pre-size to reduce growth overhead
-
-            var pairBufArr = new byte[4];
-
-            // Allocate reusable buffers per game to avoid per-move allocations
-            var movePool = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            Span<Move> moveListSpan = movePool;
-            var bufferArr = new Bitboard[EvaluationContext.RequiredBufferSize];
-            Span<Bitboard> buffer = bufferArr;
-            var evalCtx = new EvaluationContext(buffer);
+            evalCtx.Reset();
 
             while (true)
             {
-                int read = 0;
-                while (read < 4)
-                {
-                    int r = fs.Read(pairBufArr, read, 4 - read);
-                    if (r == 0) break;
-                    read += r;
-                }
+                int read = ReadFull(fs, pairBufArr);
 
                 if (read == 0)
                 {
@@ -103,7 +87,7 @@ public static class ViriformatLoader
 
                 // Reset evaluation context before generating moves (we reuse the same buffer)
                 evalCtx.Reset();
-                var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, moveListSpan);
+                var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
                 {
@@ -115,8 +99,6 @@ public static class ViriformatLoader
                 fens.WriteLine($"{newFEN}; {eval}; [{gameResult}]");
 
                 game.MakeMove(move!.Value);
-
-                scores.Add(eval);
             }
 
             fens.WriteLine();
@@ -133,6 +115,22 @@ public static class ViriformatLoader
         }
 
         _logger.Warn("Loaded {0} games from {1} in {2}s", gameCount, path, sw.Elapsed.TotalSeconds);
+    }
+
+    private static int ReadFull(Stream fs, byte[] buffer)
+    {
+        int offset = 0;
+        while (offset < buffer.Length)
+        {
+            int r = fs.Read(buffer, offset, buffer.Length - offset);
+            if (r == 0)
+            {
+                break;
+            }
+
+            offset += r;
+        }
+        return offset;
     }
 
     internal static (short score, byte wdl) ParseEvalAndWDL(ReadOnlySpan<byte> packed)
@@ -158,20 +156,25 @@ public static class ViriformatLoader
     private static string PackedBoardToFEN(ReadOnlySpan<byte> packed)
     {
         // Layout per viriformat: occupancy u64le (8), pieces U4Array32 (16), stm_ep_square (1), halfmove (1), fullmove u16le (2), eval i16le (2), wdl (1), extra (1)
-        ulong occupancy = BinaryPrimitives.ReadUInt64LittleEndian(packed[0..8]);
-        var pieces = packed.Slice(8, 16).ToArray();
+        ulong occupancy = BinaryPrimitives.ReadUInt64LittleEndian(packed[..8]);
+        ReadOnlySpan<byte> pieces = packed.Slice(8, 16);
 
         byte stm_ep = packed[24];
         byte halfmove = packed[25];
         ushort fullmove = BinaryPrimitives.ReadUInt16LittleEndian(packed[26..28]);
 
-        // Build board array of 64 chars '.' or piece char
-        char[] sq = Enumerable.Repeat('.', 64).ToArray();
+        // Use stack-allocated board char buffer to avoid heap allocation
+        Span<char> sq = stackalloc char[64];
+        for (int i = 0; i < 64; ++i)
+        {
+            sq[i] = '.';
+        }
 
-        // Track castling information following marlin semantics
-        bool[] seenKing = new bool[2]; // 0 = white, 1 = black
-        int?[] whiteRookQueen = new int?[2]; // [0]=white queenside rook square, [1]=white kingside
-        int?[] blackRookQueen = new int?[2];
+        // Track castling info with sentinel -1
+        bool seenWhiteKing = false;
+        bool seenBlackKing = false;
+        int whiteRookQueen0 = -1, whiteRookQueen1 = -1;
+        int blackRookQueen0 = -1, blackRookQueen1 = -1;
 
         int pieceIdx = 0;
         for (int virSq = 0; virSq < 64; ++virSq)
@@ -189,7 +192,7 @@ public static class ViriformatLoader
             // Map viriformat square (A1=0..H8=63) to Lynx index (a8=0..h1=63)
             int virRank = virSq / 8;
             int virFile = virSq % 8;
-            int lynxIndex = (7 - virRank) * 8 + virFile;
+            int lynxIndex = ((7 - virRank) * 8) + virFile;
 
             char pc = PieceCodeToChar(pieceCode, colour != 0);
             sq[lynxIndex] = pc;
@@ -202,35 +205,52 @@ public static class ViriformatLoader
                 if (colour == 0)
                 {
                     // white: if king already seen on iteration, this rook is kingside, else queenside
-                    if (seenKing[0])
-                        whiteRookQueen[1] = lynxIndex;
+                    if (seenWhiteKing)
+                    {
+                        whiteRookQueen1 = lynxIndex;
+                    }
                     else
-                        whiteRookQueen[0] = lynxIndex;
+                    {
+                        whiteRookQueen0 = lynxIndex;
+                    }
                 }
                 else
                 {
-                    if (seenKing[1])
-                        blackRookQueen[1] = lynxIndex;
+                    if (seenBlackKing)
+                    {
+                        blackRookQueen1 = lynxIndex;
+                    }
                     else
-                        blackRookQueen[0] = lynxIndex;
+                    {
+                        blackRookQueen0 = lynxIndex;
+                    }
                 }
             }
 
             // Detect king seen
-            if (pc == 'K') seenKing[0] = true;
-            if (pc == 'k') seenKing[1] = true;
+            if (pc == 'K')
+            {
+                seenWhiteKing = true;
+            }
+            if (pc == 'k')
+            {
+                seenBlackKing = true;
+            }
         }
 
         // Build FEN ranks from a8 to h1; Lynx expects a8 first
-        var sb = new System.Text.StringBuilder();
+        var sb = new System.Text.StringBuilder(80);
         for (int rank = 0; rank < 8; ++rank)
         {
             int empty = 0;
             for (int file = 0; file < 8; ++file)
             {
-                int sqIndex = rank * 8 + file;
+                int sqIndex = (rank * 8) + file;
                 char c = sq[sqIndex];
-                if (c == '.') { ++empty; }
+                if (c == '.')
+                {
+                    ++empty;
+                }
                 else
                 {
                     if (empty != 0) { sb.Append(empty); empty = 0; }
@@ -255,55 +275,71 @@ public static class ViriformatLoader
         {
             int virRank = ep / 8;
             int virFile = ep % 8;
-            int lynxEp = (7 - virRank) * 8 + virFile;
+            int lynxEp = ((7 - virRank) * 8) + virFile;
             epStr = lynxEp >= 0 && lynxEp < 64 ? Constants.Coordinates[lynxEp] : "-";
         }
 
         // Build castling string. Prefer standard KQkq when rooks are on initial squares and kings on initial squares.
-        var castlingSb = new System.Text.StringBuilder();
+        var castlingSb = new System.Text.StringBuilder(4);
 
-        int whiteKingSquare = Array.IndexOf(sq, 'K');
+        int whiteKingSquare = sq.IndexOf('K');
         bool whiteStandard = whiteKingSquare == Constants.InitialWhiteKingSquare;
-        int blackKingSquare = Array.IndexOf(sq, 'k');
+        int blackKingSquare = sq.IndexOf('k');
         bool blackStandard = blackKingSquare == Constants.InitialBlackKingSquare;
 
         // White kingside
-        if (whiteRookQueen[1].HasValue)
+        if (whiteRookQueen1 != -1)
         {
-            int rs = whiteRookQueen[1]!.Value;
+            int rs = whiteRookQueen1;
             if (whiteStandard && rs == Constants.InitialWhiteKingsideRookSquare)
+            {
                 castlingSb.Append('K');
+            }
             else
+            {
                 castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs]![0]));
+            }
         }
         // White queenside
-        if (whiteRookQueen[0].HasValue)
+        if (whiteRookQueen0 != -1)
         {
-            int rs = whiteRookQueen[0]!.Value;
+            int rs = whiteRookQueen0;
             if (whiteStandard && rs == Constants.InitialWhiteQueensideRookSquare)
+            {
                 castlingSb.Append('Q');
+            }
             else
+            {
                 castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs]![0]));
+            }
         }
 
         // Black kingside
-        if (blackRookQueen[1].HasValue)
+        if (blackRookQueen1 != -1)
         {
-            int rs = blackRookQueen[1]!.Value;
+            int rs = blackRookQueen1;
             if (blackStandard && rs == Constants.InitialBlackKingsideRookSquare)
+            {
                 castlingSb.Append('k');
+            }
             else
+            {
                 castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs]![0]));
+            }
         }
 
         // Black queenside
-        if (blackRookQueen[0].HasValue)
+        if (blackRookQueen0 != -1)
         {
-            int rs = blackRookQueen[0]!.Value;
+            int rs = blackRookQueen0;
             if (blackStandard && rs == Constants.InitialBlackQueensideRookSquare)
+            {
                 castlingSb.Append('q');
+            }
             else
+            {
                 castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs]![0]));
+            }
         }
 
         var castling = castlingSb.Length == 0 ? "-" : castlingSb.ToString();
