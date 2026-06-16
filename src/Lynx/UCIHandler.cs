@@ -567,7 +567,7 @@ public sealed class UCIHandler
         _searcher.GenFens(genFensCommand);
     }
 
-    private static void HandleLoadViriformat(string rawCommand)
+    private void HandleLoadViriformat(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var path = items.Length > 1 ? items[1] : string.Empty;
@@ -579,6 +579,8 @@ public sealed class UCIHandler
 
         if (!string.IsNullOrWhiteSpace(filterFile))
         {
+            _logger.Info("Loading Viriformat filter from {0}", filterFile);
+
             var config = new ConfigurationBuilder()
                 .AddJsonFile(filterFile, optional: false, reloadOnChange: false)
                 .AddEnvironmentVariables()

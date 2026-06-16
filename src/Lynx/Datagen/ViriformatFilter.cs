@@ -134,17 +134,7 @@ public class ViriformatFilter
 
         if (FilterTactical)
         {
-            // approximate tactical: capture or promotion or gives check
             if (mv.CapturedPiece() != (int)Piece.None || mv.IsPromotion())
-            {
-                return true;
-            }
-
-            // detect check by making/unmaking the move
-            var state = position.MakeMove(mv);
-            bool givesCheck = position.IsInCheck();
-            position.UnmakeMove(mv, state);
-            if (givesCheck)
             {
                 return true;
             }
