@@ -1,9 +1,11 @@
-using Lynx.Model;
+using Lynx.Datagen;
 using NUnit.Framework;
 using System.Buffers.Binary;
 
-namespace Lynx.Test;
+namespace Lynx.Test.Datagen;
 
+[Explicit]
+[Category(Categories.Datagen)]
 public class ViriformatLoaderMultiGameTest
 {
     [Test]

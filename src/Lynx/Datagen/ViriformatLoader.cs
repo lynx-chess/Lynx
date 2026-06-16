@@ -3,116 +3,160 @@ using NLog;
 using System.Buffers.Binary;
 using System.Diagnostics;
 
-namespace Lynx;
+namespace Lynx.Datagen;
 
 public static class ViriformatLoader
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static void LoadFile(string path)
+#pragma warning disable MA0008 // Add StructLayoutAttribute
+    private record struct Stats
     {
-        using var fs = File.OpenRead(path);
+        public int GameCount;
 
-        using var fens = new StreamWriter(path + ".epd", append: false);
+        public int PositonsCount;
 
-        var destinationPath = path + ".fen";
+        public int FilteredPositionsCount;
+
+        public readonly void Print(string path, double elapsedMilliseconds)
+        {
+            _logger.Warn("Source file: {Path}", path);
+            _logger.Warn("Total games: {GameCount}", GameCount);
+            _logger.Warn("Total positions: {PositonsCount}", PositonsCount);
+            _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", FilteredPositionsCount, (100 * FilteredPositionsCount / (double)PositonsCount).ToString("F2"));
+            _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
+        }
+    }
+#pragma warning restore MA0008 // Add StructLayoutAttribute
+
+    public static void LoadFile(string path, ViriformatFilter? filter = null)
+    {
+        var stats = new Stats();
         var sw = Stopwatch.StartNew();
 
-        ulong gameCount = 0;
-
-        // Reusable buffers to avoid per-game allocations
-        byte[] boardBufArr = new byte[32];
-        byte[] pairBufArr = new byte[4];
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evalCtx = new EvaluationContext(buffer);
-
-        while (true)
+        try
         {
-            int firstRead = ReadFull(fs, boardBufArr);
-            if (firstRead == 0)
-            {
-                break; // no more games
-            }
+            using var sourceFile = File.OpenRead(path);
+            using var outputFile = new StreamWriter(path + ".epd", append: false);
 
-            if (firstRead != boardBufArr.Length)
-            {
-                throw new InvalidDataException("Unexpected EOF while reading PackedBoard");
-            }
+            var destinationPath = path + ".fen";
 
-            var fen = PackedBoardToFEN(boardBufArr);
+            // Reusable buffers to avoid per-game allocations
+            byte[] boardBufArr = new byte[32];
+            byte[] pairBufArr = new byte[4];
+            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            // Parse initial position eval (i16le at bytes 28..29) and WDL (byte at 30)
-            var (initialPositionScore, wdlByte) = ParseEvalAndWDL(boardBufArr);
-
-            // Map WDL byte to a human-readable game result. Unknown/default -> "*"
-            string gameResult = MapWdlToResult(wdlByte);
-
-            using var game = new Game(fen);
-            var initialFEN = game.FEN;
-
-            if (initialPositionScore != 0)
-            {
-                fens.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
-            }
+            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+            var evalCtx = new EvaluationContext(buffer);
 
             while (true)
             {
-                int read = ReadFull(fs, pairBufArr);
-
-                if (read == 0)
+                int firstRead = ReadFull(sourceFile, boardBufArr);
+                if (firstRead == 0)
                 {
-                    // EOF reached while reading moves — treat as end of last game
-                    break;
+                    break; // no more games
                 }
 
-                if (read != 4)
+                if (firstRead != boardBufArr.Length)
                 {
-                    throw new InvalidDataException("Unexpected EOF while reading move+score pair");
+                    throw new InvalidDataException("Unexpected EOF while reading PackedBoard");
                 }
 
-                ushort rawMove = BinaryPrimitives.ReadUInt16LittleEndian(pairBufArr.AsSpan(0, 2));
-                short eval = BinaryPrimitives.ReadInt16LittleEndian(pairBufArr.AsSpan(2, 2));
+                var fen = PackedBoardToFEN(boardBufArr);
 
-                if (rawMove == 0 && eval == 0)
+                // Parse initial position eval (i16le at bytes 28..29) and WDL (byte at 30)
+                var (initialPositionScore, wdlByte) = ParseEvalAndWDL(boardBufArr);
+
+                // Map WDL byte to a human-readable game result. Unknown/default -> "*"
+                string gameResult = MapWdlToResult(wdlByte);
+
+                using var game = new Game(fen);
+                var rng = new Random();
+                int ply = 0;
+                var initialFEN = game.FEN;
+
+                if (initialPositionScore != 0)
                 {
-                    // end of this game
-                    break;
+                    ++stats.PositonsCount;
+                    outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
                 }
 
-                var uci = ViriformatMoveToUci(rawMove);
-
-                // Reset evaluation context before generating moves (we reuse the same buffer)
-                evalCtx.Reset();
-                var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, movePool);
-
-                if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
+                while (true)
                 {
-                    _logger.Warn("Unable to parse move {0} in current position", uci);
-                    break;
+                    int read = ReadFull(sourceFile, pairBufArr);
+
+                    if (read == 0)
+                    {
+                        // EOF reached while reading moves — treat as end of last game
+                        break;
+                    }
+
+                    if (read != 4)
+                    {
+                        throw new InvalidDataException("Unexpected EOF while reading move+score pair");
+                    }
+
+                    ushort rawMove = BinaryPrimitives.ReadUInt16LittleEndian(pairBufArr.AsSpan(0, 2));
+                    short eval = BinaryPrimitives.ReadInt16LittleEndian(pairBufArr.AsSpan(2, 2));
+
+                    if (rawMove == 0 && eval == 0)
+                    {
+                        // end of this game
+                        break;
+                    }
+
+                    var uci = ViriformatMoveToUci(rawMove);
+
+                    // Reset evaluation context before generating moves (we reuse the same buffer)
+                    evalCtx.Reset();
+                    var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, movePool);
+
+                    if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
+                    {
+                        _logger.Warn("Unable to parse move {0} in current position", uci);
+                        break;
+                    }
+
+                    var newFEN = game.FEN;
+
+                    // Apply filter if provided. Filter examines the position before the move (the eval belongs to this position).
+                    bool filteredOut = false;
+                    if (filter is not null)
+                    {
+                        filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng);
+                    }
+
+                    if (!filteredOut)
+                    {
+                        outputFile.WriteLine($"{newFEN}; {eval}; [{gameResult}]");
+                        ++stats.FilteredPositionsCount;
+                    }
+
+                    game.MakeMove(move!.Value);
+                    ++stats.PositonsCount;
+                    ++ply;
                 }
 
-                var newFEN = game.FEN;
-                fens.WriteLine($"{newFEN}; {eval}; [{gameResult}]");
+                // Empty line between games
+                outputFile.WriteLine();
 
-                game.MakeMove(move!.Value);
-            }
+                // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
+                ++stats.GameCount;
 
-            fens.WriteLine();
-
-            // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
-            ++gameCount;
-
-            const int SampleRate = 10_000;
-            if (gameCount % SampleRate == 0)
-            {
-                var ms = sw.ElapsedMilliseconds;
-                _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, gameCount, 1000 * gameCount / (ulong)ms);
+                const int SampleRate = 10_000;
+                if (stats.GameCount % SampleRate == 0)
+                {
+                    var ms = sw.ElapsedMilliseconds;
+                    _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * (ulong)stats.GameCount / (ulong)ms);
+                }
             }
         }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Error while loading games from {0}", path);
+        }
 
-        _logger.Warn("Loaded {0} games from {1} in {2}s", gameCount, path, sw.Elapsed.TotalSeconds);
+        stats.Print(path, sw.ElapsedMilliseconds);
     }
 
     private static int ReadFull(Stream fs, byte[] buffer)
@@ -133,8 +177,9 @@ public static class ViriformatLoader
 
     internal static (short score, byte wdl) ParseEvalAndWDL(ReadOnlySpan<byte> packed)
     {
-        short score = BinaryPrimitives.ReadInt16LittleEndian(packed.Slice(28, 2));
+        short score = BinaryPrimitives.ReadInt16LittleEndian(packed[28..30]);
         byte wdl = packed[30];
+
         return (score, wdl);
     }
 
@@ -155,7 +200,7 @@ public static class ViriformatLoader
     {
         // Layout per viriformat: occupancy u64le (8), pieces U4Array32 (16), stm_ep_square (1), halfmove (1), fullmove u16le (2), eval i16le (2), wdl (1), extra (1)
         ulong occupancy = BinaryPrimitives.ReadUInt64LittleEndian(packed[..8]);
-        ReadOnlySpan<byte> pieces = packed.Slice(8, 16);
+        ReadOnlySpan<byte> pieces = packed[8..24];
 
         byte stm_ep = packed[24];
         byte halfmove = packed[25];
@@ -393,9 +438,11 @@ public static class ViriformatLoader
 
             bool kingside = to > from;
 
+#pragma warning disable S3358 // Ternary operators should not be nested
             int target = kingside
                 ? (isWhite ? Constants.WhiteKingShortCastleSquare : Constants.BlackKingShortCastleSquare)
                 : (isWhite ? Constants.WhiteKingLongCastleSquare : Constants.BlackKingLongCastleSquare);
+#pragma warning restore S3358 // Ternary operators should not be nested
 
             var toCastle = Constants.Coordinates[target];
             return string.Concat(fromStr, toCastle);

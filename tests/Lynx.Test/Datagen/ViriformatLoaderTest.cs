@@ -1,13 +1,12 @@
+using Lynx.Datagen;
 using Lynx.Model;
 using NUnit.Framework;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 
-namespace Lynx.Test;
+namespace Lynx.Test.Datagen;
 
 [Explicit]
 [NonParallelizable]
+[Category(Categories.Datagen)]
 public class ViriformatLoaderTest
 {
     [Test]

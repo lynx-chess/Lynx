@@ -1,6 +1,8 @@
-﻿using Lynx.Model;
+﻿using Lynx.Datagen;
+using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
+using Microsoft.Extensions.Configuration;
 using NLog;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
@@ -125,6 +127,7 @@ public sealed class UCIHandler
                     break;
                 case "load-viriformat":
                     HandleLoadViriformat(rawCommand);
+                    HandleQuit();
                     break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
@@ -564,19 +567,28 @@ public sealed class UCIHandler
         _searcher.GenFens(genFensCommand);
     }
 
-    private void HandleLoadViriformat(string rawCommand)
+    private static void HandleLoadViriformat(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var path = items.Length > 1 ? items[1] : string.Empty;
+        var filterFile = items.Length > 2 && string.Equals(items[2], "--filter-file", StringComparison.OrdinalIgnoreCase)
+            ? items[3]
+            : string.Empty;
 
-        try
+        var filter = ViriformatFilter.Unrestricted;
+
+        if (!string.IsNullOrWhiteSpace(filterFile))
         {
-            ViriformatLoader.LoadFile(path);
+            var config = new ConfigurationBuilder()
+                .AddJsonFile(filterFile, optional: false, reloadOnChange: false)
+                .AddEnvironmentVariables()
+                .Build();
+
+            filter = new ViriformatFilter();
+            config.Bind(filter);
         }
-        catch (Exception e)
-        {
-            _logger.Error(e, "Error loading viriformat file {0}", path);
-        }
+
+        ViriformatLoader.LoadFile(path, filter);
     }
 
     #endregion

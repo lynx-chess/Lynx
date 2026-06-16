@@ -276,6 +276,18 @@ public static class Utils
         return b.ToString().ToLowerInvariant();
     }
 
+    internal static string TimeToString(double milliseconds)
+    {
+        return milliseconds switch
+        {
+            < 1 => $"{milliseconds:F} ms",
+            < 1_000 => $"{Math.Round(milliseconds)} ms",
+            < 60_000 => $"{0.001 * milliseconds:F} s",
+            < 3_600_000 => $"{Math.Floor(milliseconds / 60_000)} min {Math.Round(0.001 * (milliseconds % 60_000))} s",
+            _ => $"{Math.Floor(milliseconds / 3_600_000)} h {Math.Round((milliseconds % 3_600_000) / 60_000)} min",
+        };
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {

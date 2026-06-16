@@ -1,9 +1,11 @@
+using Lynx.Datagen;
 using NUnit.Framework;
 using System.Buffers.Binary;
-using System.IO;
 
-namespace Lynx.Test;
+namespace Lynx.Test.Datagen;
 
+[Explicit]
+[Category(Categories.Datagen)]
 public class ViriformatLoaderParseTest
 {
     private static byte[] BuildPackedBoard(int eval = 0, byte wdl = 0)
@@ -32,7 +34,7 @@ public class ViriformatLoaderParseTest
     public void ParseEvalAndWDL_ReturnsScoreAndWdlByte()
     {
         var buf = BuildPackedBoard(eval: 1234, wdl: 2);
-        var (score, wdl) = Lynx.ViriformatLoader.ParseEvalAndWDL(buf);
+        var (score, wdl) = ViriformatLoader.ParseEvalAndWDL(buf);
         Assert.AreEqual(1234, score);
         Assert.AreEqual(2, wdl);
     }
@@ -40,9 +42,9 @@ public class ViriformatLoaderParseTest
     [Test]
     public void MapWdlToResult_MatchesSpec()
     {
-        Assert.AreEqual("0.0", Lynx.ViriformatLoader.MapWdlToResult(0));
-        Assert.AreEqual("0.5", Lynx.ViriformatLoader.MapWdlToResult(1));
-        Assert.AreEqual("1.0", Lynx.ViriformatLoader.MapWdlToResult(2));
-        Assert.AreEqual("*", Lynx.ViriformatLoader.MapWdlToResult(99));
+        Assert.AreEqual("0.0", ViriformatLoader.MapWdlToResult(0));
+        Assert.AreEqual("0.5", ViriformatLoader.MapWdlToResult(1));
+        Assert.AreEqual("1.0", ViriformatLoader.MapWdlToResult(2));
+        Assert.AreEqual("*", ViriformatLoader.MapWdlToResult(99));
     }
 }

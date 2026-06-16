@@ -2,8 +2,10 @@ using Lynx.Cli;
 using NUnit.Framework;
 using System.Buffers.Binary;
 
-namespace Lynx.Test;
+namespace Lynx.Test.Datagen;
 
+[Explicit]
+[Category(Categories.Datagen)]
 public class ViriformatCliIntegrationTest
 {
     [Test]
