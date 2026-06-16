@@ -2,7 +2,7 @@
   "MinPly": 0,
   "MinPieces": 0,
   "MaxEval": 20000,
-  "FilterTactical": false,
+  "FilterTactical": true,
   "FilterCheck": true,
   "FilterCastling": false,
   "MaxEvalIncorrectness": 4294967295,
