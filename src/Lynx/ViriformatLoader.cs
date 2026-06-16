@@ -57,8 +57,6 @@ public static class ViriformatLoader
                 fens.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
             }
 
-            evalCtx.Reset();
-
             while (true)
             {
                 int read = ReadFull(fs, pairBufArr);
@@ -163,12 +161,8 @@ public static class ViriformatLoader
         byte halfmove = packed[25];
         ushort fullmove = BinaryPrimitives.ReadUInt16LittleEndian(packed[26..28]);
 
-        // Use stack-allocated board char buffer to avoid heap allocation
         Span<char> sq = stackalloc char[64];
-        for (int i = 0; i < 64; ++i)
-        {
-            sq[i] = '.';
-        }
+        sq.Fill('.');
 
         // Track castling info with sentinel -1
         bool seenWhiteKing = false;
