@@ -139,7 +139,10 @@ public static class ViriformatLoader
                 }
 
                 // Empty line between games
-                outputFile.WriteLine();
+                if(Configuration.EngineSettings.Datagen_EmptyLineBetweenGames)
+                {
+                    outputFile.WriteLine();
+                }
 
                 // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
                 ++stats.GameCount;
