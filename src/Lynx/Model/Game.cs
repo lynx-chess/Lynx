@@ -28,11 +28,13 @@ public sealed class Game : IDisposable
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
+    public int FullMoves { get; set; } = 1;
+
     public Position CurrentPosition { get; }
 
     public Position PositionBeforeLastSearch { get; }
 
-    public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove);
+    public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove, FullMoves);
 
     private Game()
     {
@@ -122,6 +124,7 @@ public sealed class Game : IDisposable
 
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+        FullMoves = parsedFen.FullMoveCounter;
 
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
@@ -297,6 +300,11 @@ public sealed class Game : IDisposable
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay);
+
+            if(CurrentPosition.Side == Side.White)
+            {
+                ++FullMoves;
+            }
         }
         else
         {
