@@ -71,8 +71,9 @@ public static class ViriformatLoader
                 string gameResult = MapWdlToResult(wdlByte);
 
                 using var game = new Game(fen);
+
                 var rng = new Random();
-                int ply = 0;
+                var ply = game.Ply;
                 var initialFEN = game.FEN;
 
                 if (initialPositionScore != 0)
