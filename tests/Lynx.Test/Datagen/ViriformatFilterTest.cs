@@ -11,7 +11,7 @@ public class ViriformatFilterTest
     [Test]
     public void MinPieces_FiltersWhenTooFew()
     {
-        var position = new Position("8/8/8/8/8/8/4k3/4K3 w - - 0 1");
+        var position = new Position("4k3/8/8/8/8/8/8/4K3 w - - 0 1");
         var filter = new ViriformatFilter { MinPly = 0, MinPieces = 3 }; // position has 2 kings, require 3 to avoid
         var mv = MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.a2, (int)Piece.P);
         var rng = new Random(1);
@@ -86,7 +86,7 @@ public class ViriformatFilterTest
     public void MaterialCountFiltered_UsesProbabilityArray()
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var filter = new ViriformatFilter { MinPly = 0, MaterialCountFiltered = true };
+        var filter = new ViriformatFilter { MinPly = 0, MaterialCountFiltered = true, MaterialCountProbabilities = new double[33] };
         // set probability for current piece count to 1.0 to guarantee filtering
         int idx = Math.Min(position.CountPieces(), 32);
         filter.MaterialCountProbabilities[idx] = 1.0;
@@ -115,7 +115,7 @@ public class ViriformatFilterTest
     public void WdlFiltered_WdlOutcomeLowChance_IsFiltered()
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var filter = new ViriformatFilter { MinPly = 0, WdlFiltered = true };
+        var filter = new ViriformatFilter { MinPly = 0, WdlFiltered = true, WdlModelParamsA = new double[4], WdlModelParamsB = new double[4] };
         var rng = new Random(2);
         var mv = MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.P);
 

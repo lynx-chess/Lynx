@@ -4,6 +4,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using Microsoft.Extensions.Configuration;
 using NLog;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json;
@@ -125,8 +126,8 @@ public sealed class UCIHandler
                 case "genfens":
                     HandleGenFens(rawCommand);
                     break;
-                case "load-viriformat":
-                    HandleLoadViriformat(rawCommand);
+                case "vftoepd":
+                    HandleVFtoEPD(rawCommand);
                     HandleQuit();
                     break;
                 default:
@@ -567,7 +568,11 @@ public sealed class UCIHandler
         _searcher.GenFens(genFensCommand);
     }
 
-    private void HandleLoadViriformat(string rawCommand)
+    [UnconditionalSuppressMessage(
+        "Trimming",
+        "IL2026",       // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+        Justification = "Trimming doesn't make this fail, but it's development feature anyway")]
+    private void HandleVFtoEPD(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var path = items.Length > 1 ? items[1] : string.Empty;
@@ -587,7 +592,10 @@ public sealed class UCIHandler
                 .Build();
 
             filter = new ViriformatFilter();
+
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             config.Bind(filter);
+            #pragma warning restore IL2026
         }
 
         ViriformatLoader.LoadFile(path, filter);
