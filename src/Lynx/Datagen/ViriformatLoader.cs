@@ -50,6 +50,8 @@ public static class ViriformatLoader
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evalCtx = new EvaluationContext(buffer);
 
+            (string FEN, short eval)[] validPositionsPerGame = new (string FEN, short eval)[Constants.MaxNumberMovesInAGame];
+
             while (true)
             {
                 int firstRead = ReadFull(sourceFile, boardBufArr);
@@ -62,6 +64,8 @@ public static class ViriformatLoader
                 {
                     throw new InvalidDataException("Unexpected EOF while reading PackedBoard");
                 }
+
+                Array.Clear(validPositionsPerGame);
 
                 var fen = PackedBoardToFEN(boardBufArr);
 
@@ -82,6 +86,8 @@ public static class ViriformatLoader
                     ++stats.PositonsCount;
                     outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
                 }
+
+                int positionsPerGame = 0;
 
                 while (true)
                 {
@@ -130,17 +136,33 @@ public static class ViriformatLoader
 
                     if (!filteredOut)
                     {
-                        outputFile.WriteLine($"{newFEN}; {eval}; [{gameResult}]");
-                        ++stats.FilteredPositionsCount;
+                        validPositionsPerGame[positionsPerGame] = (newFEN, eval);
+                        ++positionsPerGame;
                     }
 
                     game.MakeMove(move!.Value);
+
                     ++stats.PositonsCount;
                     ++ply;
                 }
 
+                var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame];
+
+                if (filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
+                {
+                    Random.Shared.Shuffle(validPositionsPerGame);
+                    selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..filter.MaxPositionsPerGame];
+                }
+
+                foreach (var (selectedFEN, selectedEval) in selectedPositionsPerGame)
+                {
+                    outputFile.WriteLine($"{selectedFEN}; {selectedEval}; [{gameResult}]");
+                }
+
+                stats.FilteredPositionsCount += (ulong)selectedPositionsPerGame.Length;
+
                 // Empty line between games
-                if(Configuration.EngineSettings.Datagen_EmptyLineBetweenGames)
+                if (Configuration.EngineSettings.Datagen_EmptyLineBetweenGames)
                 {
                     outputFile.WriteLine();
                 }

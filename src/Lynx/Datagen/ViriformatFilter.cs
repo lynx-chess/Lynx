@@ -32,6 +32,10 @@ public class ViriformatFilter
 
     public double RandomFenSkipProbability { get; set; }
 
+    public bool LimitPositionsPerGame { get; set; }
+
+    public int MaxPositionsPerGame { get; set; }
+
     public bool MaterialCountFiltered { get; set; }
 
     /// <summary>
@@ -74,6 +78,8 @@ public class ViriformatFilter
         MaxEvalIncorrectness = uint.MaxValue,
         RandomFenSkipping = false,
         RandomFenSkipProbability = 0.0,
+        LimitPositionsPerGame = false,
+        MaxPositionsPerGame = 0,
         WdlFiltered = false,
         WdlModelParamsA = [],
         WdlModelParamsB = [],
