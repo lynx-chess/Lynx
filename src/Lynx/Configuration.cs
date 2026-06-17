@@ -530,6 +530,8 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
 
+    public bool Datagen_EmptyLineBetweenGames { get; set; }
+
     /// <summary>
     /// Conservative estimation of the number of nodes per second that can be searched by the engine
     /// </summary>
