@@ -8,6 +8,8 @@
   "MaxEvalIncorrectness": 4294967295,
   "RandomFenSkipping": false,
   "RandomFenSkipProbability": 0.0,
+  "LimitPositionsPerGame": true,
+  "MaxPositionsPerGame": 40,
   "MaterialCountFiltered": false,
   "WdlFiltered": false
 }
