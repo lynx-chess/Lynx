@@ -12,11 +12,11 @@ public static class ViriformatLoader
 #pragma warning disable MA0008 // Add StructLayoutAttribute
     private record struct Stats
     {
-        public int GameCount;
+        public ulong GameCount;
 
-        public int PositonsCount;
+        public ulong PositonsCount;
 
-        public int FilteredPositionsCount;
+        public ulong FilteredPositionsCount;
 
         public readonly void Print(string path, double elapsedMilliseconds)
         {
