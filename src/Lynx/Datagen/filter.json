@@ -6,8 +6,8 @@
   "FilterCheck": true,
   "FilterCastling": false,
   "MaxEvalIncorrectness": 4294967295,
-  "RandomFenSkipping": false,
-  "RandomFenSkipProbability": 0.0,
+  "RandomFenSkipping": true,
+  "RandomFenSkipProbability": 0.5,
   "MaterialCountFiltered": false,
   "WdlFiltered": false
 }
