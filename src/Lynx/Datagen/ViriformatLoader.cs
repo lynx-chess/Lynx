@@ -67,7 +67,7 @@ public static class ViriformatLoader
 
                 Array.Clear(validPositionsPerGame);
 
-                var fen = PackedBoardToFEN(boardBufArr);
+                var parsedFEN = PackedBoardToFEN(boardBufArr);
 
                 // Parse initial position eval (i16le at bytes 28..29) and WDL (byte at 30)
                 var (initialPositionScore, wdlByte) = ParseEvalAndWDL(boardBufArr);
@@ -75,7 +75,7 @@ public static class ViriformatLoader
                 // Map WDL byte to a human-readable game result. Unknown/default -> "*"
                 string gameResult = MapWdlToResult(wdlByte);
 
-                using var game = new Game(fen);
+                using var game = new Game(parsedFEN);
 
                 var rng = new Random();
                 var ply = game.Ply;
@@ -122,10 +122,10 @@ public static class ViriformatLoader
                     if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
                     {
                         _logger.Warn("Unable to parse move {0} in current position", uci);
-                        break;
+                        throw new InvalidDataException($"Unable to parse move ({uci}) in current position ({game.FEN})");
                     }
 
-                    var newFEN = game.FEN;
+                    var fen = game.FEN;
 
                     // Apply filter if provided. Filter examines the position before the move (the eval belongs to this position).
                     bool filteredOut = false;
@@ -136,7 +136,7 @@ public static class ViriformatLoader
 
                     if (!filteredOut)
                     {
-                        validPositionsPerGame[positionsPerGame] = (newFEN, eval);
+                        validPositionsPerGame[positionsPerGame] = (fen, eval);
                         ++positionsPerGame;
                     }
 
@@ -150,8 +150,8 @@ public static class ViriformatLoader
 
                 if (filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
                 {
-                    Random.Shared.Shuffle(validPositionsPerGame);
-                    selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..filter.MaxPositionsPerGame];
+                    Random.Shared.Shuffle(selectedPositionsPerGame);
+                    selectedPositionsPerGame = selectedPositionsPerGame[..filter.MaxPositionsPerGame];
                 }
 
                 foreach (var (selectedFEN, selectedEval) in selectedPositionsPerGame)
