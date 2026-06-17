@@ -140,7 +140,7 @@ public static class ViriformatLoader
                 }
 
                 // Empty line between games
-                if(Configuration.EngineSettings.Datagen_EmptyLineBetweenGames)
+                if(Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
                 {
                     outputFile.WriteLine();
                 }
