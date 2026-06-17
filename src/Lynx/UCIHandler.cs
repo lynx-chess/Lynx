@@ -126,8 +126,8 @@ public sealed class UCIHandler
                 case "genfens":
                     HandleGenFens(rawCommand);
                     break;
-                case "load-viriformat":
-                    HandleLoadViriformat(rawCommand);
+                case "vftoepd":
+                    HandleVFtoEPD(rawCommand);
                     HandleQuit();
                     break;
                 default:
@@ -572,7 +572,7 @@ public sealed class UCIHandler
         "Trimming",
         "IL2026",       // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         Justification = "Trimming doesn't make this fail, but it's development feature anyway")]
-    private void HandleLoadViriformat(string rawCommand)
+    private void HandleVFtoEPD(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var path = items.Length > 1 ? items[1] : string.Empty;
