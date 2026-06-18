@@ -638,7 +638,7 @@ public sealed class Searcher : IDisposable
             engine.AdjustPosition($"position fen {startposFEN}");
             var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
-            if (searchResult is null || searchResult.Score > maxAllowedEval)
+            if (searchResult is null || Math.Abs(searchResult.Score) > maxAllowedEval)
             {
                 continue;
             }
