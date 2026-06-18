@@ -3,7 +3,8 @@
 EXE=
 
 RUNTIME=
-OUTPUT_DIR=artifacts/Lynx/
+PUBLISH_DIR=artifacts/Lynx/
+OUTPUT_DIR=
 
 ifeq ($(OS),Windows_NT)
 	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
@@ -41,7 +42,7 @@ ifndef RUNTIME
 endif
 
 ifdef EXE
-	OUTPUT_DIR=./
+	OUTPUT_DIR=../../
 endif
 
 build:
@@ -51,7 +52,7 @@ test:
 	dotnet test -c Release  & dotnet test -c Release --filter "TestCategory=Configuration" & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
 
 publish:
-	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:ExecutableName=$(EXE) -o ${OUTPUT_DIR}
+	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:ExecutableName=$(EXE) -o ${PUBLISH_DIR} /p:FinalDestination=${OUTPUT_DIR} --tl:off
 
 run:
 	dotnet run --project src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME}
