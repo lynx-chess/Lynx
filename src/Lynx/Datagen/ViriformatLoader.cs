@@ -162,7 +162,7 @@ public static class ViriformatLoader
                 stats.FilteredPositionsCount += (ulong)selectedPositionsPerGame.Length;
 
                 // Empty line between games
-                if (Configuration.EngineSettings.Datagen_EmptyLineBetweenGames)
+                if(Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
                 {
                     outputFile.WriteLine();
                 }
