@@ -88,11 +88,12 @@ public static class ViriformatLoader
                 var ply = game.Ply;
                 var initialFEN = game.FEN;
 
-                if (initialPositionScore != 0)
-                {
-                    ++stats.PositonsCount;
-                    outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
-                }
+                // This doesn't actually happen with OB datagen, plus we'd be adding the position twice
+                // if (initialPositionScore != 0)
+                // {
+                //     ++stats.PositonsCount;
+                //     outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
+                // }
 
                 int positionsPerGame = 0;
 
@@ -138,7 +139,7 @@ public static class ViriformatLoader
                     bool filteredOut = false;
                     if (filter is not null)
                     {
-                        filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng);
+                        filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, firstGameMove: stats.PositonsCount == 0);
                     }
 
                     if (!filteredOut)
