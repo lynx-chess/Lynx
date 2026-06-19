@@ -18,6 +18,10 @@ public static class ViriformatLoader
 
         public ulong FilteredPositionsCount;
 
+        public int ShortestGameMoveCount;
+
+        public int LongestGameMoveCount;
+
         public readonly void Print(string path, double elapsedMilliseconds)
         {
             _logger.Warn("Source file: {Path}", path);
@@ -25,6 +29,7 @@ public static class ViriformatLoader
             _logger.Warn("Total positions: {PositonsCount}", PositonsCount);
             _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", FilteredPositionsCount, (100 * FilteredPositionsCount / (double)PositonsCount).ToString("F2"));
             _logger.Warn("Positions/game: {PositonsPerGameCount}", GameCount > 0 ? (ulong)Math.Round(FilteredPositionsCount / (double)GameCount) : 0);
+            _logger.Warn("Shortest game: {ShortestGameMoves} moves, longest game: {LongestGameMoves} moves", ShortestGameMoveCount, LongestGameMoveCount);
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
         }
     }
@@ -33,6 +38,8 @@ public static class ViriformatLoader
     public static void LoadFile(string path, ViriformatFilter? filter = null)
     {
         var stats = new Stats();
+        stats.ShortestGameMoveCount = int.MaxValue;
+
         var sw = Stopwatch.StartNew();
 
         try
@@ -160,6 +167,22 @@ public static class ViriformatLoader
                 }
 
                 stats.FilteredPositionsCount += (ulong)selectedPositionsPerGame.Length;
+
+                var totalMoves = game.FullMoves;
+                if(totalMoves < stats.ShortestGameMoveCount)
+                {
+                    stats.ShortestGameMoveCount = totalMoves;
+
+                    if(totalMoves <= 5)
+                    {
+                        _logger.Warn(initialFEN + " -> " + game.FEN);
+                    }
+                }
+
+                if(totalMoves > stats.LongestGameMoveCount)
+                {
+                    stats.LongestGameMoveCount = totalMoves;
+                }
 
                 // Empty line between games
                 if (Configuration.EngineSettings.Datagen_EmptyLineBetweenGames)
