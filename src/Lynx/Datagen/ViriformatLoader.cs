@@ -2,6 +2,7 @@ using Lynx.Model;
 using NLog;
 using System.Buffers.Binary;
 using System.Diagnostics;
+using PositionTuple = (string FEN, short Eval, int Phase);
 
 namespace Lynx.Datagen;
 
@@ -57,7 +58,7 @@ public static class ViriformatLoader
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evalCtx = new EvaluationContext(buffer);
 
-            (string FEN, short eval)[] validPositionsPerGame = new (string FEN, short eval)[Constants.MaxNumberMovesInAGame];
+            PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
 
             while (true)
             {
@@ -143,7 +144,7 @@ public static class ViriformatLoader
 
                     if (!filteredOut)
                     {
-                        validPositionsPerGame[positionsPerGame] = (fen, eval);
+                        validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
                         ++positionsPerGame;
                     }
 
@@ -153,15 +154,50 @@ public static class ViriformatLoader
                     ++ply;
                 }
 
-                var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame];
+                var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
 
                 if (filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
                 {
-                    Random.Shared.Shuffle(selectedPositionsPerGame);
-                    selectedPositionsPerGame = selectedPositionsPerGame[..filter.MaxPositionsPerGame];
+                    // Group positions by phase, and shuffle them
+                    var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
+                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
+                    {
+                        // Can only happen in the first group, with promotions when all the pieces are on the board
+                        if(group.Key >= positionsByPhaseShuffled.Length)
+                        {
+                            positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+                        }
+                        
+                        var positions = group.ToArray();
+                        Random.Shared.Shuffle(positions);
+                        positionsByPhaseShuffled[group.Key] = positions;
+                    }
+
+                    selectedPositionsPerGame = new PositionTuple[filter.MaxPositionsPerGame];
+
+                    int selectedPositionsCount = 0;
+                    int positionIndexPerPhase = 1;
+                    while (selectedPositionsCount < filter.MaxPositionsPerGame)
+                    {
+                        foreach (var group in positionsByPhaseShuffled)
+                        {
+                            if (group is not null && group.Length >= positionIndexPerPhase)
+                            {
+                                selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
+                                selectedPositionsCount++;
+
+                                if (selectedPositionsCount == filter.MaxPositionsPerGame)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        positionIndexPerPhase++;
+                    }
                 }
 
-                foreach (var (selectedFEN, selectedEval) in selectedPositionsPerGame)
+                foreach (var (selectedFEN, selectedEval, phase) in selectedPositionsPerGame)
                 {
                     outputFile.WriteLine($"{selectedFEN}; {selectedEval}; [{gameResult}]");
                 }
@@ -169,23 +205,23 @@ public static class ViriformatLoader
                 stats.FilteredPositionsCount += (ulong)selectedPositionsPerGame.Length;
 
                 var totalMoves = game.FullMoves;
-                if(totalMoves < stats.ShortestGameMoveCount)
+                if (totalMoves < stats.ShortestGameMoveCount)
                 {
                     stats.ShortestGameMoveCount = totalMoves;
 
-                    if(totalMoves <= 5)
+                    if (totalMoves <= 5)
                     {
                         _logger.Warn(initialFEN + " -> " + game.FEN);
                     }
                 }
 
-                if(totalMoves > stats.LongestGameMoveCount)
+                if (totalMoves > stats.LongestGameMoveCount)
                 {
                     stats.LongestGameMoveCount = totalMoves;
                 }
 
                 // Empty line between games
-                if(Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
+                if (Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
                 {
                     outputFile.WriteLine();
                 }
