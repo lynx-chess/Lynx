@@ -3,8 +3,6 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -647,58 +645,89 @@ public sealed class Searcher : IDisposable
             --positionsToGenerate;
         }
 
-        static string GenerateDatagenStartpos()
+        string GenerateDatagenStartpos()
         {
-            using var position = new Position(Constants.InitialPositionFEN);
+            using var game = new Game(Constants.InitialPositionFEN);
+            var position = game.CurrentPosition;
 
             var movesCount = 8 + (Random.Shared.Next() % 2);
 
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            Span<Bitboard> evalContextBuffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(evalContextBuffer);
-
-            for (int halfMoveIndex = 0; halfMoveIndex < movesCount; halfMoveIndex++)
+            bool success = false;
+            while (!success)
             {
-                position.CalculateThreats(ref evaluationContext);
-
-                var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
-                ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
-
-                // Accounting for positions without legal moves
-                for (int i = 0; i < pseudoLegalMoves.Length * 4; i++)
+                success = true;
+                for (int halfMoveIndex = 0; halfMoveIndex < movesCount; halfMoveIndex++)
                 {
-                    var randomMove = Unsafe.Add(ref pseudoLegalMovesRef, Random.Shared.Next(0, pseudoLegalMoves.Length));
-                    var gameState = position.MakeMove(randomMove);
+                    var randomMove = PickRandomMove(position);
 
-                    if (position.WasProduceByAValidMove())
+                    if (randomMove == 0)
                     {
+                        _logger.Warn("We found ourselves in {Position}, restarting startpos search", game.FEN);
+                        // Terminal position reached, let's just start over
+                        success = false;
                         break;
                     }
 
-                    position.UnmakeMove(randomMove, gameState);
+                    position.MakeMove(randomMove);
+                    game.Update50movesRule(randomMove);
+                    game.AddToPositionHashHistory(position.UniqueIdentifier);
+
+                    if (!position.WasProduceByAValidMove())
+                    {
+                        throw new LynxException("Error in datagens implementation");
+                    }
                 }
             }
 
-            // Discarding terminal positions
-            var hasAnyLegalMoves = false;
-            var finalPositionPseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
-            for (int i = 0; i < finalPositionPseudoLegalMoves.Length; i++)
+            return game.FEN;
+        }
+
+        static int PickRandomMove(Position position)
+        {
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            Span<Move> legalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            Span<Bitboard> evalContextBuffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(evalContextBuffer);
+
+            position.CalculateThreats(ref evaluationContext);
+            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+
+            // Filter out pseudolegal but not-legal moves
+            int legalMovesCount = 0;
+            foreach (var pseudoLegalMove in pseudoLegalMoves)
             {
-                var move = finalPositionPseudoLegalMoves[i];
+                var gameState = position.MakeMove(pseudoLegalMove);
 
-                var gameState = position.MakeMove(move);
-                hasAnyLegalMoves = position.WasProduceByAValidMove();
-                position.UnmakeMove(move, gameState);
-
-                if (hasAnyLegalMoves)
+                if (position.WasProduceByAValidMove())
                 {
-                    break;
+                    legalMoves[legalMovesCount++] = pseudoLegalMove;
+                }
+
+                position.UnmakeMove(pseudoLegalMove, gameState);
+            }
+
+            legalMoves = legalMoves[..legalMovesCount];
+
+            // Shuffle legal moves
+            Random.Shared.Shuffle(legalMoves);
+
+            // Pick one legal move that doesn't lead to a terminal position
+            foreach (var randomMove in legalMoves)
+            {
+                var gameState = position.MakeMove(randomMove);
+
+                position.CalculateThreats(ref evaluationContext);
+                var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+
+                position.UnmakeMove(randomMove, gameState);
+
+                if (nextPositionHasAnyLegalMoves)
+                {
+                    return randomMove;
                 }
             }
 
-            return hasAnyLegalMoves
-                ? position.FEN()
-                : GenerateDatagenStartpos();
+            return 0;
         }
     }
 
