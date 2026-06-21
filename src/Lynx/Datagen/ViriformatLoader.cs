@@ -155,6 +155,7 @@ public static class ViriformatLoader
                 }
 
                 var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
+                int selectedPositionsCount = selectedPositionsPerGame.Length;
 
                 if (filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
                 {
@@ -163,11 +164,11 @@ public static class ViriformatLoader
                     foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
                     {
                         // Can only happen in the first group, with promotions when all the pieces are on the board
-                        if(group.Key >= positionsByPhaseShuffled.Length)
+                        if (group.Key >= positionsByPhaseShuffled.Length)
                         {
                             positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
                         }
-                        
+
                         var positions = group.ToArray();
                         Random.Shared.Shuffle(positions);
                         positionsByPhaseShuffled[group.Key] = positions;
@@ -175,26 +176,22 @@ public static class ViriformatLoader
 
                     selectedPositionsPerGame = new PositionTuple[filter.MaxPositionsPerGame];
 
-                    int selectedPositionsCount = 0;
-                    int positionIndexPerPhase = 1;
-                    while (selectedPositionsCount < filter.MaxPositionsPerGame)
+                    selectedPositionsCount = 0;
+                    foreach (var group in positionsByPhaseShuffled)
                     {
-                        foreach (var group in positionsByPhaseShuffled)
+                        if (group is not null && group.Length >= 1)
                         {
-                            if (group is not null && group.Length >= positionIndexPerPhase)
-                            {
-                                selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
-                                selectedPositionsCount++;
+                            selectedPositionsPerGame[selectedPositionsCount] = group[0];
+                            selectedPositionsCount++;
 
-                                if (selectedPositionsCount == filter.MaxPositionsPerGame)
-                                {
-                                    break;
-                                }
+                            if (selectedPositionsCount == filter.MaxPositionsPerGame)
+                            {
+                                break;
                             }
                         }
-
-                        positionIndexPerPhase++;
                     }
+
+                    selectedPositionsPerGame = selectedPositionsPerGame[..selectedPositionsCount];
                 }
 
                 foreach (var (selectedFEN, selectedEval, phase) in selectedPositionsPerGame)
