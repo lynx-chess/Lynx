@@ -177,18 +177,24 @@ public static class ViriformatLoader
                     selectedPositionsPerGame = new PositionTuple[filter.MaxPositionsPerGame];
 
                     selectedPositionsCount = 0;
-                    foreach (var group in positionsByPhaseShuffled)
+                    int positionIndexPerPhase = 1;
+                    while (selectedPositionsCount < filter.MaxPositionsPerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
                     {
-                        if (group is not null && group.Length >= 1)
+                        foreach (var group in positionsByPhaseShuffled)
                         {
-                            selectedPositionsPerGame[selectedPositionsCount] = group[0];
-                            selectedPositionsCount++;
-
-                            if (selectedPositionsCount == filter.MaxPositionsPerGame)
+                            if (group is not null && group.Length >= positionIndexPerPhase)
                             {
-                                break;
+                                selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
+                                selectedPositionsCount++;
+
+                                if (selectedPositionsCount == filter.MaxPositionsPerGame)
+                                {
+                                    break;
+                                }
                             }
                         }
+
+                        positionIndexPerPhase++;
                     }
 
                     selectedPositionsPerGame = selectedPositionsPerGame[..selectedPositionsCount];
