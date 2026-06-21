@@ -157,7 +157,8 @@ public static class ViriformatLoader
                 var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
                 int selectedPositionsCount = selectedPositionsPerGame.Length;
 
-                if (filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
+                if ((filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
+                    || filter?.LimitPositionsPerPhasePerGame == true)
                 {
                     // Group positions by phase, and shuffle them
                     var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
