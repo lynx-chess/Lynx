@@ -77,7 +77,7 @@ public class ViriformatFilter
         FilterCastling = false,
         MaxEvalIncorrectness = uint.MaxValue,
         LimitPositionsPerGame = false,
-        MaxPositionsPerGame = = int.MaxValue,
+        MaxPositionsPerGame = int.MaxValue,
         RandomFenSkipping = false,
         RandomFenSkipProbability = 0.0,
         WdlFiltered = false,
