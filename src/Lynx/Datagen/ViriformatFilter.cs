@@ -30,7 +30,7 @@ public class ViriformatFilter
 
     public bool LimitPositionsPerGame { get; set; }
 
-    public int MaxPositionsPerGame { get; set; }
+    public int MaxPositionsPerGame { get; set; } = int.MaxValue;
 
     public bool RandomFenSkipping { get; set; }
 
@@ -77,7 +77,7 @@ public class ViriformatFilter
         FilterCastling = false,
         MaxEvalIncorrectness = uint.MaxValue,
         LimitPositionsPerGame = false,
-        MaxPositionsPerGame = 0,
+        MaxPositionsPerGame = = int.MaxValue,
         RandomFenSkipping = false,
         RandomFenSkipProbability = 0.0,
         WdlFiltered = false,
