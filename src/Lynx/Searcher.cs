@@ -628,10 +628,12 @@ public sealed class Searcher : IDisposable
         var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
         var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
 
+        var rnd = new Random(genFensCommand.Seed);
+
         var positionsToGenerate = genFensCommand.Count;
         while (positionsToGenerate > 0)
         {
-            var startposFEN = GenerateDatagenStartpos();
+            var startposFEN = GenerateDatagenStartpos(rnd);
 
             engine.AdjustPosition($"position fen {startposFEN}");
             var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
@@ -645,11 +647,12 @@ public sealed class Searcher : IDisposable
             --positionsToGenerate;
         }
 
-        string GenerateDatagenStartpos()
+        string GenerateDatagenStartpos(Random rnd)
         {
             using var game = new Game(Constants.InitialPositionFEN);
             var position = game.CurrentPosition;
 
+            // We purposedly use the shared one here, since it isn't critical
             var movesCount = 8 + (Random.Shared.Next() % 2);
 
             bool success = false;
@@ -658,7 +661,7 @@ public sealed class Searcher : IDisposable
                 success = true;
                 for (int halfMoveIndex = 0; halfMoveIndex < movesCount; halfMoveIndex++)
                 {
-                    var randomMove = PickRandomMove(position);
+                    var randomMove = PickRandomMove(position, rnd);
 
                     if (randomMove == 0)
                     {
@@ -682,7 +685,7 @@ public sealed class Searcher : IDisposable
             return game.FEN;
         }
 
-        static int PickRandomMove(Position position)
+        static int PickRandomMove(Position position, Random rnd)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             Span<Move> legalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
@@ -709,7 +712,7 @@ public sealed class Searcher : IDisposable
             legalMoves = legalMoves[..legalMovesCount];
 
             // Shuffle legal moves
-            Random.Shared.Shuffle(legalMoves);
+            rnd.Shuffle(legalMoves);
 
             // Pick one legal move that doesn't lead to a terminal position
             foreach (var randomMove in legalMoves)
