@@ -28,7 +28,7 @@ public static class ViriformatLoader
             _logger.Warn("Source file: {Path}", path);
             _logger.Warn("Total games: {GameCount}", GameCount);
             _logger.Warn("Total positions: {PositonsCount}", PositonsCount);
-            _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", FilteredPositionsCount, (100 * FilteredPositionsCount / (double)PositonsCount).ToString("F2"));
+            _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", FilteredPositionsCount, PositonsCount > 0 ? (100 * FilteredPositionsCount / (double)PositonsCount).ToString("F2") : "0");
             _logger.Warn("Positions/game: {PositonsPerGameCount}", GameCount > 0 ? (ulong)Math.Round(FilteredPositionsCount / (double)GameCount) : 0);
             _logger.Warn("Shortest game: {ShortestGameMoves} moves, longest game: {LongestGameMoves} moves", ShortestGameMoveCount, LongestGameMoveCount);
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
