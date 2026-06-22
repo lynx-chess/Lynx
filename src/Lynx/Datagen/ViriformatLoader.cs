@@ -163,11 +163,11 @@ public static class ViriformatLoader
                     foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
                     {
                         // Can only happen in the first group, with promotions when all the pieces are on the board
-                        if(group.Key >= positionsByPhaseShuffled.Length)
+                        if (group.Key >= positionsByPhaseShuffled.Length)
                         {
                             positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
                         }
-                        
+
                         var positions = group.ToArray();
                         Random.Shared.Shuffle(positions);
                         positionsByPhaseShuffled[group.Key] = positions;
