@@ -62,7 +62,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -155,7 +155,7 @@ jobs:
     - name: Install NuGet
       uses: nuget/setup-nuget@v4
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         token: ${{ secrets.GH_RELEASE }}
 
