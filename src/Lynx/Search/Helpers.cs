@@ -441,14 +441,6 @@ public sealed partial class Engine
             continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        // Threats correction history - Motor author original idea
-        var oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
-        if (oppositeSideThreats == 0)
-        {
-            position.CalculateThreats(ref evaluationContext);
-            oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
-        }
-
         var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(4);
         if (previousPreviousPreviousMoveHash != 0)
         {
@@ -460,6 +452,14 @@ public sealed partial class Engine
             continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
+        // Threats correction history - Motor author original idea
+        var oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
+        if (oppositeSideThreats == 0)
+        {
+            position.CalculateThreats(ref evaluationContext);
+            oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
+        }
+        
         var threatenedPieces = oppositeSideThreats & position.OccupancyBitboards[side];
         var threatsHash = Utils.Murmur3(threatenedPieces);
         var threatsCorrHistIndex = (int)(threatsHash & Constants.ThreatsCorrHistoryHashMask);
