@@ -173,7 +173,11 @@ public static class ViriformatLoader
 
                             for (int i = 0; i < positionsByPhaseShuffled.Length; ++i)
                             {
-                                Array.Copy(positionsByPhaseShuffled[i], newPositionsByPhaseShuffled[i], positionsByPhaseShuffled[i].Length);
+                                if (positionsByPhaseShuffled[i] is not null)
+                                {
+                                    newPositionsByPhaseShuffled[i] = new PositionTuple[positionsByPhaseShuffled[i].Length];
+                                    Array.Copy(positionsByPhaseShuffled[i], newPositionsByPhaseShuffled[i], positionsByPhaseShuffled[i].Length);
+                                }
                             }
 
                             positionsByPhaseShuffled = newPositionsByPhaseShuffled;
