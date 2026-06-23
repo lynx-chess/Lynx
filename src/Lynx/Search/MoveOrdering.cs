@@ -176,6 +176,7 @@ public sealed partial class Engine
             int rawHistoryMalus = HistoryMalus[depth];
 
             var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+            Debug.Assert(oppositeSideAttacks != 0);
 
             var sourceSquare = move.SourceSquare();
             var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;

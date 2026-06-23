@@ -17,7 +17,8 @@ public static class TimeManager
 
     public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
     {
-        int maxDepth = -1;
+        int maxDepth = SearchConstraints.DefaultMaxDepth;
+        ulong maxNodes = SearchConstraints.DefaultMaxNodes;
         int hardLimitTimeBound = SearchConstraints.DefaultHardLimitTimeBound;
         int softLimitTimeBound = SearchConstraints.DefaultSoftLimitTimeBound;
 
@@ -67,13 +68,29 @@ public static class TimeManager
             maxDepth = Configuration.EngineSettings.MaxDepth;
             _logger.Info("Infinite search (depth {0})", maxDepth);
         }
+        else if (goCommand.Nodes > 0)
+        {
+            if (!Configuration.EngineSettings.SoftNodes)
+            {
+                _logger.Warn("Nodes will be treated as soft nodes, since hard nodes aren't supported. Please enable SoftNodes via UCI (or configuration) before sending 'go nodes' commands to avoid this warning");
+            }
+
+            maxNodes = goCommand.Nodes;
+
+            // This limit makes up for the lack of hard nodes, to avoid 'hangs' in search explosions
+            hardLimitTimeBound = (int)Math.Max(
+                (ulong)Configuration.EngineSettings.Datagen_GenFens_MinHardTimeBound,
+                3 * goCommand.Nodes * 1000 / Configuration.EngineSettings.Estimated_NPS);
+
+            _logger.Info("Soft nodes search (nodes {0}, hard time bound {1}ms)", maxNodes, hardLimitTimeBound);
+        }
         else
         {
             maxDepth = Engine.DefaultMaxDepth;
             _logger.Warn("Unexpected or unsupported go command");
         }
 
-        return new(hardLimitTimeBound, softLimitTimeBound, maxDepth);
+        return new(hardLimitTimeBound, softLimitTimeBound, maxDepth, maxNodes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

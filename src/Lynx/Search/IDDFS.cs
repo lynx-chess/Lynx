@@ -154,7 +154,8 @@ public sealed partial class Engine
 
         try
         {
-            if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (!isPondering && _searchConstraints.MaxDepth == SearchConstraints.DefaultMaxDepth && _searchConstraints.MaxNodes == SearchConstraints.DefaultMaxNodes
+                && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 if (!Configuration.EngineSettings.UCI_Minimal)
                 {
@@ -207,6 +208,17 @@ public sealed partial class Engine
                     {
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
+
+                        // Alpha and beta values close to checkmate scores due to window widening can cause false mate reporting (very high/low mate values) after being saved in TT
+                        if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            beta = EvaluationConstants.MaxEval;
+                        }
+
+                        if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                        {
+                            alpha = EvaluationConstants.MinEval;
+                        }
 
                         if (_logger.IsEnabled(logLevel))
                         {
@@ -428,15 +440,30 @@ public sealed partial class Engine
         }
 
         var maxDepth = _searchConstraints.MaxDepth;
-        if (maxDepth > 0)
+        if (maxDepth != SearchConstraints.DefaultMaxDepth)
         {
             var shouldContinue = depth + 1 <= maxDepth;
 
             if (!shouldContinue)
             {
                 _logger.Log(logLevel,
-                    "[#{EngineId}] Depth {Depth}: stopping, max. depth reached",
+                    "[#{EngineId}] Depth {Depth}: stopping, max. go command depth reached",
                     _id, depth);
+            }
+
+            return shouldContinue;
+        }
+
+        var maxNodes = _searchConstraints.MaxNodes;
+        if (maxNodes != SearchConstraints.DefaultMaxNodes)
+        {
+            var shouldContinue = _nodes <= maxNodes;
+
+            if (!shouldContinue)
+            {
+                _logger.Log(logLevel,
+                    "[#{EngineId}] Nodes {Nodes}: stopping, go command nodes reached",
+                    _id, _nodes);
             }
 
             return shouldContinue;
@@ -471,7 +498,7 @@ public sealed partial class Engine
 
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
+    private unsafe bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
         bool onlyOneLegalMove = false;
 
@@ -518,12 +545,12 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                firstLegalMove, score, 0, [firstLegalMove])
+                firstLegalMove, score, targetDepth: 1, [firstLegalMove])
             {
-                DepthReached = 0,
+                DepthReached = 1,
                 Nodes = 0,
-                Time = 0,
-                NodesPerSecond = 0,
+                Time = 1,
+                NodesPerSecond = 1,
             };
 
             return true;
@@ -627,6 +654,7 @@ public sealed partial class Engine
 
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
+        position.CalculateThreats(ref evaluationContext);
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
@@ -669,9 +697,9 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                move, singleMoveEval, 0, [move])
+                move, singleMoveEval, targetDepth: 1, [move])
             {
-                DepthReached = 0,
+                DepthReached = 1,
             };
         }
 

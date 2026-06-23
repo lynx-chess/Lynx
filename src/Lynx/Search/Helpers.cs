@@ -87,6 +87,7 @@ public sealed partial class Engine
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+        Debug.Assert(oppositeSideAttacks != 0);
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
@@ -302,6 +303,18 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
+        var previous4MoveHash = Game.PreviousMoveHash(4);
+        if (previous4MoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previous4MoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
         // Threats correction history
         var oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
         if (oppositeSideThreats == 0)
@@ -403,6 +416,9 @@ public sealed partial class Engine
 
         // Continuation correction history - Motor author original idea
         int continuationCorrHist = 0;
+        int continuationCorrHist2 = 0;
+        int continuationCorrHist4 = 0;
+
         var previousMoveHash = Game.PreviousMoveHash(1);
         if (previousMoveHash != 0)
         {
@@ -414,7 +430,6 @@ public sealed partial class Engine
             continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        int continuationCorrHist2 = 0;
         var previousPreviousMoveHash = Game.PreviousMoveHash(2);
         if (previousPreviousMoveHash != 0)
         {
@@ -434,6 +449,17 @@ public sealed partial class Engine
             oppositeSideThreats = evaluationContext.AttacksBySide[oppositeSide];
         }
 
+        var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(4);
+        if (previousPreviousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
         var threatenedPieces = oppositeSideThreats & position.OccupancyBitboards[side];
         var threatsHash = Utils.Murmur3(threatenedPieces);
         var threatsCorrHistIndex = (int)(threatsHash & Constants.ThreatsCorrHistoryHashMask);
@@ -450,6 +476,7 @@ public sealed partial class Engine
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
             + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
             + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
+            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4)
             + (threatsCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Threats);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));

@@ -114,6 +114,8 @@ public sealed class EngineSettings
 
     public bool UCI_Minimal { get; set; }
 
+    public bool SoftNodes { get; set; }
+
     /// <summary>
     /// Real NPS aren't calculated until the last search command.
     /// This option enables the report of an NPS estimation by the main thread
@@ -489,6 +491,12 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
     /// </summary>
     [SPSA<int>(50, 250, 15)]
+    public int CorrHistoryWeight_Continuation4 { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(50, 250, 15)]
     public int CorrHistoryWeight_Threats { get; set; } = 100;
 
     [SPSA<int>(enabled: false)]
@@ -517,6 +525,23 @@ public sealed class EngineSettings
 
     [SPSA<int>(0, 20, 2)]
     public int SE_NoPV { get; set; } = 10;
+
+    #endregion
+
+    #region Datagen
+
+    public int Datagen_GenFens_Depth { get; set; } = 10;
+
+    public int Datagen_GenFens_MaxEval { get; set; } = 1000;
+
+    public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
+
+    public bool Datagen_VFtoEPD_EmptyLineBetweenGames { get; set; }
+
+    /// <summary>
+    /// Conservative estimation of the number of nodes per second that can be searched by the engine
+    /// </summary>
+    public ulong Estimated_NPS { get; set; } = 500_000;
 
     #endregion
 }

@@ -3,6 +3,8 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -93,7 +95,7 @@ public sealed class Searcher : IDisposable
         }
     }
 
-    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove);
+    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove, _mainEngine.Game.FullMoves);
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
@@ -612,6 +614,92 @@ public sealed class Searcher : IDisposable
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
+    }
+
+    public void GenFens(GenFensCommand genFensCommand)
+    {
+        _logger.Info("{Positions} requested, with seed {Seed} for book {Book}, extra params {Extra}", genFensCommand.Count, genFensCommand.Seed, genFensCommand.Book, genFensCommand.Extra);
+
+        if (!string.Equals(genFensCommand.Book, GenFensCommand.NoBook, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.Warn("GenFens with book option is not supported, ignoring book and generating random positions anyway");
+        }
+
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
+
+        var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
+        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
+
+        var positionsToGenerate = genFensCommand.Count;
+        while (positionsToGenerate > 0)
+        {
+            var startposFEN = GenerateDatagenStartpos();
+
+            engine.AdjustPosition($"position fen {startposFEN}");
+            var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+
+            if (searchResult is null || Math.Abs(searchResult.Score) > maxAllowedEval)
+            {
+                continue;
+            }
+
+            _engineWriter.TryWrite($"info string genfens {startposFEN}");
+            --positionsToGenerate;
+        }
+
+        static string GenerateDatagenStartpos()
+        {
+            using var position = new Position(Constants.InitialPositionFEN);
+
+            var movesCount = 8 + (Random.Shared.Next() % 2);
+
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            Span<Bitboard> evalContextBuffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+            var evaluationContext = new EvaluationContext(evalContextBuffer);
+
+            for (int halfMoveIndex = 0; halfMoveIndex < movesCount; halfMoveIndex++)
+            {
+                position.CalculateThreats(ref evaluationContext);
+
+                var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+                ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
+
+                // Accounting for positions without legal moves
+                for (int i = 0; i < pseudoLegalMoves.Length * 4; i++)
+                {
+                    var randomMove = Unsafe.Add(ref pseudoLegalMovesRef, Random.Shared.Next(0, pseudoLegalMoves.Length));
+                    var gameState = position.MakeMove(randomMove);
+
+                    if (position.WasProduceByAValidMove())
+                    {
+                        break;
+                    }
+
+                    position.UnmakeMove(randomMove, gameState);
+                }
+            }
+
+            // Discarding terminal positions
+            var hasAnyLegalMoves = false;
+            var finalPositionPseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+            for (int i = 0; i < finalPositionPseudoLegalMoves.Length; i++)
+            {
+                var move = finalPositionPseudoLegalMoves[i];
+
+                var gameState = position.MakeMove(move);
+                hasAnyLegalMoves = position.WasProduceByAValidMove();
+                position.UnmakeMove(move, gameState);
+
+                if (hasAnyLegalMoves)
+                {
+                    break;
+                }
+            }
+
+            return hasAnyLegalMoves
+                ? position.FEN()
+                : GenerateDatagenStartpos();
+        }
     }
 
     /// <summary>
