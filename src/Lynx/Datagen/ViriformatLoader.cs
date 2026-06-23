@@ -165,7 +165,11 @@ public static class ViriformatLoader
                 {
                     // Group positions by phase, and shuffle them
                     var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
-                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderBy(t => t.Key))
+                    var ascendingOrDescending = stats.GameCount % 2 == 0
+                        ? 1     // Ascending
+                        : -1;   // Descending
+
+                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderBy(t => t.Key * ascendingOrDescending))
                     {
                         if (group.Key >= positionsByPhaseShuffled.Length)
                         {
