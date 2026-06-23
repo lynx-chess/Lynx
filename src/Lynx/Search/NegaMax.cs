@@ -209,6 +209,29 @@ public sealed partial class Engine
                 ttCorrectedStaticEval = ttScore;
             }
 
+            // Quiet move ordering bonus
+            var previousMoveStack = Game.Stack(ply - 1);
+            var previousMove = previousMoveStack.Move;
+            if (!parentWasNullMove && previousMove.CapturedPiece() == (int)Piece.None)
+            {
+                var bonus = Math.Clamp((-10 * previousMoveStack.StaticEval) + staticEval, -100, 200);
+
+                Debug.Assert(evaluationContext.AttacksBySide[(int)position.Side] != 0);
+                var sameSideAttacks = evaluationContext.AttacksBySide[(int)position.Side];
+
+                var piece = previousMove.Piece();
+                var sourceSquare = previousMove.SourceSquare();
+                var targetSquare = previousMove.TargetSquare();
+                var isStartSquareAttacked = sameSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+                var isTargetSquareAttacked = sameSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+                ref var pieceToQuietHistoryEntry = ref PieceToQuietHistoryEntry(piece, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+                pieceToQuietHistoryEntry = (short)ScoreHistoryMove(pieceToQuietHistoryEntry, bonus);
+
+                //ref var butterflyQuietHistoryEntry = ref ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+                //butterflyQuietHistoryEntry = (short)ScoreHistoryMove(butterflyQuietHistoryEntry, bonus);
+            }
+
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (!pvNode)
             {
