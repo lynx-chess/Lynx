@@ -90,6 +90,7 @@ public static class ViriformatLoader
                 var rng = new Random();
                 var ply = game.Ply;
                 var initialFEN = game.FEN;
+                var isFirstGameMove = true;
 
                 // This never happens in OB datagen .pgns
                 //if (initialPositionScore != 0)
@@ -142,7 +143,7 @@ public static class ViriformatLoader
                     bool filteredOut = false;
                     if (filter is not null)
                     {
-                        filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng);
+                        filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
                     }
 
                     if (!filteredOut)
@@ -153,6 +154,7 @@ public static class ViriformatLoader
 
                     game.MakeMove(move!.Value);
 
+                    isFirstGameMove = false;
                     ++stats.PositonsCount;
                     ++ply;
                 }

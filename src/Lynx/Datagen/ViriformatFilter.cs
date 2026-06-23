@@ -20,6 +20,8 @@ public class ViriformatFilter
 
     public int MinPieces { get; set; } = 4;
 
+    public uint MaxInitialEval { get; set; } = 500;
+
     public uint MaxEval { get; set; } = 20_000;
 
     public bool FilterTactical { get; set; } = true;
@@ -77,6 +79,7 @@ public class ViriformatFilter
     {
         MinPly = 0,
         MinPieces = 0,
+        MaxInitialEval = uint.MaxValue,
         MaxEval = uint.MaxValue,
         FilterTactical = false,
         FilterCheck = false,
@@ -129,9 +132,14 @@ public class ViriformatFilter
         };
     }
 
-    public bool ShouldDrop(Move mv, int eval, Position position, byte wdlPacked, int ply, Random rng)
+    public bool ShouldDrop(Move mv, int eval, Position position, byte wdlPacked, int ply, Random rng, bool firstGameMove = false)
     {
         if (ply < MinPly)
+        {
+            return true;
+        }
+
+        if(firstGameMove && Math.Abs(eval) >= MaxInitialEval)
         {
             return true;
         }
