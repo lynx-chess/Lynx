@@ -165,12 +165,18 @@ public static class ViriformatLoader
                 {
                     // Group positions by phase, and shuffle them
                     var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
-                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
+                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderBy(t => t.Key))
                     {
-                        // Can only happen in the first group, with promotions when all the pieces are on the board
                         if (group.Key >= positionsByPhaseShuffled.Length)
                         {
-                            positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+                            var newPositionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+
+                            for (int i = 0; i < positionsByPhaseShuffled.Length; ++i)
+                            {
+                                Array.Copy(positionsByPhaseShuffled[i], newPositionsByPhaseShuffled[i], positionsByPhaseShuffled[i].Length);
+                            }
+
+                            positionsByPhaseShuffled = newPositionsByPhaseShuffled;
                         }
 
                         var positions = group.ToArray();
