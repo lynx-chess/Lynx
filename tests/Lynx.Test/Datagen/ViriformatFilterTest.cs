@@ -159,6 +159,7 @@ public class ViriformatFilterTest
     }
 
     [Test]
+    [Ignore("Not handling these type of positions, since OB datagen pgns don't have initial eval")]
     public void InitialPosition_WithNonZeroScore_IsEmittedWhenUnrestricted()
     {
         Span<byte> buf = stackalloc byte[32];

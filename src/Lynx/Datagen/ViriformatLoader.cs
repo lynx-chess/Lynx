@@ -91,11 +91,12 @@ public static class ViriformatLoader
                 var ply = game.Ply;
                 var initialFEN = game.FEN;
 
-                if (initialPositionScore != 0)
-                {
-                    ++stats.PositonsCount;
-                    outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
-                }
+                // This never happens in OB datagen .pgns
+                //if (initialPositionScore != 0)
+                //{
+                //    ++stats.PositonsCount;
+                //    outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
+                //}
 
                 int positionsPerGame = 0;
 
