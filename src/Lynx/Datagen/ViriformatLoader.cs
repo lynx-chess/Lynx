@@ -38,8 +38,10 @@ public static class ViriformatLoader
 
     public static void LoadFile(string path, ViriformatFilter? filter = null)
     {
-        var stats = new Stats();
-        stats.ShortestGameMoveCount = int.MaxValue;
+        var stats = new Stats
+        {
+            ShortestGameMoveCount = int.MaxValue,
+        };
 
         var sw = Stopwatch.StartNew();
 
@@ -155,8 +157,10 @@ public static class ViriformatLoader
                 }
 
                 var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
+                int selectedPositionsCount = selectedPositionsPerGame.Length;
 
                 if (filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
+                //()|| filter?.LimitPositionsPerPhasePerGame == true)   // If we also want to limit positions per phase in short games
                 {
                     // Group positions by phase, and shuffle them
                     var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
@@ -175,9 +179,9 @@ public static class ViriformatLoader
 
                     selectedPositionsPerGame = new PositionTuple[filter.MaxPositionsPerGame];
 
-                    int selectedPositionsCount = 0;
+                    selectedPositionsCount = 0;
                     int positionIndexPerPhase = 1;
-                    while (selectedPositionsCount < filter.MaxPositionsPerGame)
+                    while (selectedPositionsCount < filter.MaxPositionsPerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
                     {
                         foreach (var group in positionsByPhaseShuffled)
                         {
@@ -195,6 +199,8 @@ public static class ViriformatLoader
 
                         positionIndexPerPhase++;
                     }
+
+                    selectedPositionsPerGame = selectedPositionsPerGame[..selectedPositionsCount];
                 }
 
                 foreach (var (selectedFEN, selectedEval, phase) in selectedPositionsPerGame)

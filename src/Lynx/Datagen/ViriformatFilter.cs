@@ -7,6 +7,8 @@ namespace Lynx.Datagen;
 /// </summary>
 public class ViriformatFilter
 {
+    private const int MaxNumberOfPositionsPerGame = Constants.MaxNumberMovesInAGame * 2;
+
     private enum FilterWDL
     {
         Loss = 0,
@@ -30,7 +32,11 @@ public class ViriformatFilter
 
     public bool LimitPositionsPerGame { get; set; }
 
-    public int MaxPositionsPerGame { get; set; } = int.MaxValue;
+    public int MaxPositionsPerGame { get; set; } = MaxNumberOfPositionsPerGame;
+
+    public bool LimitPositionsPerPhasePerGame { get; set; }
+
+    public int MaxPositionsPerPhasePerGame { get; set; } = MaxNumberOfPositionsPerGame;
 
     public bool RandomFenSkipping { get; set; }
 
@@ -77,7 +83,9 @@ public class ViriformatFilter
         FilterCastling = false,
         MaxEvalIncorrectness = uint.MaxValue,
         LimitPositionsPerGame = false,
-        MaxPositionsPerGame = int.MaxValue,
+        MaxPositionsPerGame = MaxNumberOfPositionsPerGame,
+        LimitPositionsPerPhasePerGame = false,
+        MaxPositionsPerPhasePerGame = MaxNumberOfPositionsPerGame,
         RandomFenSkipping = false,
         RandomFenSkipProbability = 0.0,
         WdlFiltered = false,
