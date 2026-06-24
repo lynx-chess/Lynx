@@ -27,6 +27,10 @@ public static class ViriformatLoader
 
         public ulong GamesAdjudicatedAsWinsCount;
 
+        public ulong PositionsSavedByDrawAdjudicationCount;
+
+        public ulong PositionsSavedByWinAdjudicationCount;
+
         public readonly void Print(string path, double elapsedMilliseconds)
         {
             _logger.Warn("Source file: {Path}", path);
@@ -38,12 +42,12 @@ public static class ViriformatLoader
 
             if (GamesAdjudicatedAsDrawsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"));
+                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
             }
 
             if (GamesAdjudicatedAsWinsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"));
+                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
             }
 
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
@@ -118,6 +122,8 @@ public static class ViriformatLoader
 
                 var positionsToTakePerGame = filter?.MaxPositionsPerGame ?? ViriformatFilter.MaxNumberOfPositionsPerGame;
                 bool skipGame = false;
+                bool isAdjudicatedAsADraw = false;
+                bool isAdjudicatedAsAWin = false;
 
                 int drawAdjudicationScoreCount = 0;
                 int winAdjudicationScoreCount = 0;
@@ -158,66 +164,82 @@ public static class ViriformatLoader
                         throw new InvalidDataException($"Unable to parse move ({uci}) in current position ({game.FEN})");
                     }
 
-                    if (filter is not null && !skipGame)
+                    if (filter is not null)
                     {
-                        var fen = game.FEN;
-
-                        // Draw adjufication filter
-                        if (filter.DrawAdjudication)
+                        if(!skipGame)
                         {
-                            if (Math.Abs(eval) < filter.DrawAdjudication_Score)
+                            var fen = game.FEN;
+
+                            // Draw adjufication filter
+                            if (filter.DrawAdjudication)
                             {
-                                ++drawAdjudicationScoreCount;
-                                if (drawAdjudicationScoreCount >= 2 * filter.DrawAdjudication_MoveCount
-                                    && ply >= 2 * filter.DrawAdjudication_MoveNumber)
+                                if (Math.Abs(eval) < filter.DrawAdjudication_Score)
                                 {
-                                    skipGame = true;
-                                    ++stats.GamesAdjudicatedAsDrawsCount;
+                                    ++drawAdjudicationScoreCount;
+                                    if (drawAdjudicationScoreCount >= 2 * filter.DrawAdjudication_MoveCount
+                                        && ply >= 2 * filter.DrawAdjudication_MoveNumber)
+                                    {
+                                        skipGame = true;
+                                        isAdjudicatedAsADraw = true;
+                                        ++stats.GamesAdjudicatedAsDrawsCount;
+                                    }
+                                }
+                                else
+                                {
+                                    drawAdjudicationScoreCount = 0;
                                 }
                             }
-                            else
-                            {
-                                drawAdjudicationScoreCount = 0;
-                            }
-                        }
 
-                        // Win adjudication filter
-                        if (filter.WinAdjudication)
-                        {
-                            if (Math.Abs(eval) >= filter.WinAdjudication_Score)
+                            // Win adjudication filter
+                            if (filter.WinAdjudication)
                             {
-                                ++winAdjudicationScoreCount;
-                                if (winAdjudicationScoreCount >= 2 * filter.WinAdjudication_MoveCount)
+                                if (Math.Abs(eval) >= filter.WinAdjudication_Score)
                                 {
-                                    // We include the final position before the adjudication
-                                    outputFile.WriteLine($"{fen}; {eval}; [{gameResult}]");
-                                    --positionsToTakePerGame;
+                                    ++winAdjudicationScoreCount;
+                                    if (winAdjudicationScoreCount >= 2 * filter.WinAdjudication_MoveCount)
+                                    {
+                                        // We include the final position before the adjudication
+                                        outputFile.WriteLine($"{fen}; {eval}; [{gameResult}]");
+                                        --positionsToTakePerGame;
 
-                                    skipGame = true;
-                                    ++stats.GamesAdjudicatedAsWinsCount;
+                                        skipGame = true;
+                                        isAdjudicatedAsAWin = true;
+                                        ++stats.GamesAdjudicatedAsWinsCount;
+                                    }
+                                }
+                                else
+                                {
+                                    winAdjudicationScoreCount = 0;
                                 }
                             }
-                            else
+
+                            // We recheck to avoid including a position twice in adjudicated games
+                            if (!skipGame)
                             {
-                                winAdjudicationScoreCount = 0;
+                                // Generic filter
+                                var filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
+                                if (!filteredOut)
+                                {
+                                    validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
+                                    ++positionsPerGame;
+                                }
+                                // Max initial eval filter
+                                else if (isFirstGameMove && Math.Abs(eval) > filter.MaxInitialEval)
+                                {
+                                    skipGame = true;
+                                    Debug.Assert(positionsPerGame == 0);
+                                }
                             }
                         }
-
-                        // We recheck to avoid including a position twice in adjudicated games
-                        if (!skipGame)
+                        else
                         {
-                            // Generic filter
-                            var filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
-                            if (!filteredOut)
+                            if (isAdjudicatedAsADraw)
                             {
-                                validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
-                                ++positionsPerGame;
+                                ++stats.PositionsSavedByDrawAdjudicationCount;
                             }
-                            // Max initial eval filter
-                            else if (isFirstGameMove && Math.Abs(eval) > filter.MaxInitialEval)
+                            else if (isAdjudicatedAsAWin)
                             {
-                                skipGame = true;
-                                Debug.Assert(positionsPerGame == 0);
+                                ++stats.PositionsSavedByWinAdjudicationCount;
                             }
                         }
                     }
