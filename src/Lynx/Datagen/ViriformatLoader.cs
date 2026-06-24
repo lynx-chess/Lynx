@@ -263,7 +263,7 @@ public static class ViriformatLoader
                                 selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
                                 selectedPositionsCount++;
 
-                                if (selectedPositionsCount == positionsToTakePerGame
+                                if (selectedPositionsCount == positionsToTakePerGame)
                                 {
                                     break;
                                 }
