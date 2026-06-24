@@ -42,12 +42,12 @@ public static class ViriformatLoader
 
             if (GamesAdjudicatedAsDrawsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
+                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} potential positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
             }
 
             if (GamesAdjudicatedAsWinsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
+                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} potential positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
             }
 
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
