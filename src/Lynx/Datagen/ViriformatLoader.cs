@@ -90,6 +90,7 @@ public static class ViriformatLoader
                 var rng = new Random();
                 var ply = game.Ply;
                 var initialFEN = game.FEN;
+                var isFirstGameMove = true;
 
                 // This never happens in OB datagen .pgns
                 //if (initialPositionScore != 0)
@@ -99,6 +100,7 @@ public static class ViriformatLoader
                 //}
 
                 int positionsPerGame = 0;
+                bool skipGame = false;
 
                 while (true)
                 {
@@ -136,23 +138,31 @@ public static class ViriformatLoader
                         throw new InvalidDataException($"Unable to parse move ({uci}) in current position ({game.FEN})");
                     }
 
-                    var fen = game.FEN;
-
-                    // Apply filter if provided. Filter examines the position before the move (the eval belongs to this position).
-                    bool filteredOut = false;
-                    if (filter is not null)
+                    if (!skipGame)
                     {
-                        filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng);
-                    }
+                        var fen = game.FEN;
 
-                    if (!filteredOut)
-                    {
-                        validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
-                        ++positionsPerGame;
+                        // Apply filter if provided. Filter examines the position before the move (the eval belongs to this position).
+                        bool filteredOut = false;
+                        if (filter is not null)
+                        {
+                            filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
+                        }
+
+                        if (!filteredOut)
+                        {
+                            validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
+                            ++positionsPerGame;
+                        }
+                        else if (isFirstGameMove && Math.Abs(eval) > filter?.MaxInitialEval)
+                        {
+                            skipGame = true;
+                        }
                     }
 
                     game.MakeMove(move!.Value);
 
+                    isFirstGameMove = false;
                     ++stats.PositonsCount;
                     ++ply;
                 }

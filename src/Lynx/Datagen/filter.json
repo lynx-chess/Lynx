@@ -1,6 +1,7 @@
 {
   "MinPly": 0,
   "MinPieces": 4,
+  "MaxInitialEval": 20000,
   "MaxEval": 20000,
   "FilterTactical": true,
   "FilterCheck": true,
