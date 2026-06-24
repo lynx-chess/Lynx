@@ -38,12 +38,12 @@ public static class ViriformatLoader
 
             if (GamesAdjudicatedAsDrawsCount != 0)
             {
-                _logger.Warn("Moves adjudicated as a draw: {DrawsAdj}", GamesAdjudicatedAsDrawsCount);
+                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"));
             }
 
             if (GamesAdjudicatedAsWinsCount != 0)
             {
-                _logger.Warn("Moves adjudicated as a win: {WinsAdj}", GamesAdjudicatedAsWinsCount);
+                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"));
             }
 
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
@@ -115,6 +115,8 @@ public static class ViriformatLoader
                 //}
 
                 int positionsPerGame = 0;
+
+                var positionsToTakePerGame = filter?.MaxPositionsPerGame ?? ViriformatFilter.MaxNumberOfPositionsPerGame;
                 bool skipGame = false;
 
                 int drawAdjudicationScoreCount = 0;
@@ -160,19 +162,6 @@ public static class ViriformatLoader
                     {
                         var fen = game.FEN;
 
-                        // Generic filter
-                        bool filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
-                        if (!filteredOut)
-                        {
-                            validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
-                            ++positionsPerGame;
-                        }
-                        // Max initial eval filter
-                        else if (isFirstGameMove && Math.Abs(eval) > filter.MaxInitialEval)
-                        {
-                            skipGame = true;
-                        }
-
                         // Draw adjufication filter
                         if (filter.DrawAdjudication)
                         {
@@ -195,12 +184,15 @@ public static class ViriformatLoader
                         // Win adjudication filter
                         if (filter.WinAdjudication)
                         {
-
                             if (Math.Abs(eval) >= filter.WinAdjudication_Score)
                             {
                                 ++winAdjudicationScoreCount;
                                 if (winAdjudicationScoreCount >= 2 * filter.WinAdjudication_MoveCount)
                                 {
+                                    // We include the final position before the adjudication
+                                    outputFile.WriteLine($"{fen}; {eval}; [{gameResult}]");
+                                    --positionsToTakePerGame;
+
                                     skipGame = true;
                                     ++stats.GamesAdjudicatedAsWinsCount;
                                 }
@@ -208,6 +200,24 @@ public static class ViriformatLoader
                             else
                             {
                                 winAdjudicationScoreCount = 0;
+                            }
+                        }
+
+                        // We recheck to avoid including a position twice in adjudicated games
+                        if (!skipGame)
+                        {
+                            // Generic filter
+                            var filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
+                            if (!filteredOut)
+                            {
+                                validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
+                                ++positionsPerGame;
+                            }
+                            // Max initial eval filter
+                            else if (isFirstGameMove && Math.Abs(eval) > filter.MaxInitialEval)
+                            {
+                                skipGame = true;
+                                Debug.Assert(positionsPerGame == 0);
                             }
                         }
                     }
@@ -222,7 +232,7 @@ public static class ViriformatLoader
                 var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
                 int selectedPositionsCount = selectedPositionsPerGame.Length;
 
-                if (filter?.LimitPositionsPerGame == true && positionsPerGame > filter.MaxPositionsPerGame)
+                if (filter?.LimitPositionsPerGame == true && positionsPerGame > positionsToTakePerGame)
                 //()|| filter?.LimitPositionsPerPhasePerGame == true)   // If we also want to limit positions per phase in short games
                 {
                     // Group positions by phase, and shuffle them
@@ -240,11 +250,11 @@ public static class ViriformatLoader
                         positionsByPhaseShuffled[group.Key] = positions;
                     }
 
-                    selectedPositionsPerGame = new PositionTuple[filter.MaxPositionsPerGame];
+                    selectedPositionsPerGame = new PositionTuple[positionsToTakePerGame];
 
                     selectedPositionsCount = 0;
                     int positionIndexPerPhase = 1;
-                    while (selectedPositionsCount < filter.MaxPositionsPerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
+                    while (selectedPositionsCount < positionsToTakePerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
                     {
                         foreach (var group in positionsByPhaseShuffled)
                         {
@@ -253,7 +263,7 @@ public static class ViriformatLoader
                                 selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
                                 selectedPositionsCount++;
 
-                                if (selectedPositionsCount == filter.MaxPositionsPerGame)
+                                if (selectedPositionsCount == positionsToTakePerGame
                                 {
                                     break;
                                 }
