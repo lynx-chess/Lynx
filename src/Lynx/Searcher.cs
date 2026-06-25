@@ -671,9 +671,7 @@ public sealed class Searcher : IDisposable
                         break;
                     }
 
-                    position.MakeMove(randomMove);
-                    game.Update50movesRule(randomMove);
-                    game.AddToPositionHashHistory(position.UniqueIdentifier);
+                    game.MakeMove(randomMove);
 
                     if (!position.WasProduceByAValidMove())
                     {
