@@ -649,7 +649,8 @@ public sealed class Searcher : IDisposable
 
         static string GenerateDatagenStartpos()
         {
-            using var position = new Position(Constants.InitialPositionFEN);
+            using var game = new Game(Constants.InitialPositionFEN);
+            var position = game.CurrentPosition;
 
             var movesCount = 8 + (Random.Shared.Next() % 2);
 
@@ -668,14 +669,17 @@ public sealed class Searcher : IDisposable
                 for (int i = 0; i < pseudoLegalMoves.Length * 4; i++)
                 {
                     var randomMove = Unsafe.Add(ref pseudoLegalMovesRef, Random.Shared.Next(0, pseudoLegalMoves.Length));
-                    var gameState = position.MakeMove(randomMove);
 
-                    if (position.WasProduceByAValidMove())
+                    var gameState = position.MakeMove(randomMove);
+                    var isLegal = position.WasProduceByAValidMove();
+                    position.UnmakeMove(randomMove, gameState);
+
+                    if (isLegal)
                     {
+                        // Using game to make sure half and full move counters are updated
+                        game.MakeMove(randomMove);
                         break;
                     }
-
-                    position.UnmakeMove(randomMove, gameState);
                 }
             }
 
@@ -697,7 +701,7 @@ public sealed class Searcher : IDisposable
             }
 
             return hasAnyLegalMoves
-                ? position.FEN()
+                ? game.FEN
                 : GenerateDatagenStartpos();
         }
     }
