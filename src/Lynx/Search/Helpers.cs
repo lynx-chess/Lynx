@@ -456,7 +456,7 @@ public sealed partial class Engine
             var lastMoveIndex = (ShortMove)previousMove;
             var lastMoveCorrHistIndex = lastMoveIndex & Constants.LastMoveCorrHistoryHashMask;
 
-            Debug.Assert(lastMoveCorrHistIndex < _continuationCorrHistory.Length);
+            Debug.Assert(lastMoveCorrHistIndex < _lastMoveCorrHistory.Length);
 
             lastMoveCorrHist = _lastMoveCorrHistory[lastMoveCorrHistIndex];
         }
