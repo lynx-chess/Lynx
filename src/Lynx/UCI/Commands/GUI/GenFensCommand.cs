@@ -6,7 +6,7 @@ public record class GenFensCommand
 
     public uint Count { get; init; }
 
-    public ulong Seed { get; init; }
+    public int Seed { get; init; }
 
     public string Book { get; init; } = string.Empty;
 
@@ -16,12 +16,12 @@ public record class GenFensCommand
     {
         var items = rawcommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        if (items.Length >= 2 && uint.TryParse(items[1], out uint count))
+        if (items.Length >= 2 && uint.TryParse(items[1], out var count))
         {
             Count = count;
         }
 
-        if (items.Length >= 4 && ulong.TryParse(items[3], out ulong seed))
+        if (items.Length >= 4 && int.TryParse(items[3], out var seed))
         {
             Seed = seed;
         }
