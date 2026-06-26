@@ -499,6 +499,12 @@ public sealed class EngineSettings
     [SPSA<int>(50, 250, 15)]
     public int CorrHistoryWeight_LastMove { get; set; } = 100;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(50, 250, 15)]
+    public int CorrHistoryWeight_PreviousToLastMove { get; set; } = 100;
+
     [SPSA<int>(enabled: false)]
     public int TT_50MR_Start { get; set; } = 20;
 

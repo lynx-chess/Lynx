@@ -92,6 +92,11 @@ public sealed partial class Engine
     private readonly short[] _lastMoveCorrHistory = GC.AllocateArray<short>(Constants.LastMoveCorrHistoryHashSize, pinned: true);
 
     /// <summary>
+    /// <see cref="Constants.PreviousToLastMoveCorrHistoryHashSize"/>
+    /// </summary>
+    private readonly short[] _previousToLastMoveCorrHistory = GC.AllocateArray<short>(Constants.PreviousToLastMoveCorrHistoryHashSize, pinned: true);
+
+    /// <summary>
     /// 12 x 64
     /// piece x target square
     /// </summary>

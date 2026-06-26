@@ -328,6 +328,19 @@ public sealed partial class Engine
             lastMoveCorrHist = UpdateCorrectionHistory(lastMoveCorrHist, scaledBonus, weight);
         }
 
+        // Previoys to last move correction history
+        var previousToLastMove = Game.ReadMoveFromStack(ply - 2);
+        if (previousToLastMove != 0)
+        {
+            var previousToLastMoveIndex = (ShortMove)previousToLastMove;
+            var previousToLastMoveCorrHistIndex = previousToLastMoveIndex & Constants.PreviousToLastMoveCorrHistoryHashMask;
+
+            Debug.Assert(previousToLastMoveCorrHistIndex < _previousToLastMoveCorrHistory.Length);
+
+            ref var previousToLastMoveCorrHist = ref _previousToLastMoveCorrHistory[previousToLastMoveCorrHistIndex];
+            previousToLastMoveCorrHist = UpdateCorrectionHistory(previousToLastMoveCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -461,6 +474,19 @@ public sealed partial class Engine
             lastMoveCorrHist = _lastMoveCorrHistory[lastMoveCorrHistIndex];
         }
 
+        // Previous to last move correction history
+        int previousToLastMoveCorrHist = 0;
+        var previousToLastMove = Game.ReadMoveFromStack(ply - 2);
+        if (previousToLastMove != 0)
+        {
+            var previousToLastMoveIndex = (ShortMove)previousToLastMove;
+            var previousToLastMoveCorrHistIndex = previousToLastMoveIndex & Constants.PreviousToLastMoveCorrHistoryHashMask;
+
+            Debug.Assert(previousToLastMoveCorrHistIndex < _previousToLastMoveCorrHistory.Length);
+
+            previousToLastMoveCorrHist = _lastMoveCorrHistory[previousToLastMoveCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
@@ -471,7 +497,8 @@ public sealed partial class Engine
             + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
             + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
             + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4)
-            + (lastMoveCorrHist * Configuration.EngineSettings.CorrHistoryWeight_LastMove);
+            + (lastMoveCorrHist * Configuration.EngineSettings.CorrHistoryWeight_LastMove)
+            + (previousToLastMoveCorrHist * Configuration.EngineSettings.CorrHistoryWeight_PreviousToLastMove);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
