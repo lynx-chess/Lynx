@@ -7,6 +7,8 @@ namespace Lynx.Datagen;
 /// </summary>
 public class ViriformatFilter
 {
+    public const int MaxNumberOfPositionsPerGame = Constants.MaxNumberMovesInAGame * 2;
+
     private enum FilterWDL
     {
         Loss = 0,
@@ -14,9 +16,11 @@ public class ViriformatFilter
         Win = 2,
     }
 
-    public int MinPly { get; set; } = 16;
+    public int MinPly { get; set; }
 
     public int MinPieces { get; set; } = 4;
+
+    public uint MaxInitialEval { get; set; } = 1_000;
 
     public uint MaxEval { get; set; } = 20_000;
 
@@ -27,6 +31,28 @@ public class ViriformatFilter
     public bool FilterCastling { get; set; }
 
     public uint MaxEvalIncorrectness { get; set; } = uint.MaxValue;
+
+    public bool LimitPositionsPerGame { get; set; }
+
+    public int MaxPositionsPerGame { get; set; } = MaxNumberOfPositionsPerGame;
+
+    public bool LimitPositionsPerPhasePerGame { get; set; }
+
+    public int MaxPositionsPerPhasePerGame { get; set; } = MaxNumberOfPositionsPerGame;
+
+    public bool DrawAdjudication { get; set; }
+
+    public uint DrawAdjudication_Score { get; set; } = uint.MaxValue;
+
+    public int DrawAdjudication_MoveCount { get; set; } = Constants.MaxNumberMovesInAGame;
+
+    public int DrawAdjudication_MoveNumber { get; set; } = Constants.MaxNumberMovesInAGame;
+
+    public bool WinAdjudication { get; set; }
+
+    public uint WinAdjudication_Score { get; set; } = uint.MaxValue;
+
+    public int WinAdjudication_MoveCount { get; set; } = Constants.MaxNumberMovesInAGame;
 
     public bool RandomFenSkipping { get; set; }
 
@@ -67,11 +93,23 @@ public class ViriformatFilter
     {
         MinPly = 0,
         MinPieces = 0,
+        MaxInitialEval = uint.MaxValue,
         MaxEval = uint.MaxValue,
         FilterTactical = false,
         FilterCheck = false,
         FilterCastling = false,
         MaxEvalIncorrectness = uint.MaxValue,
+        LimitPositionsPerGame = false,
+        MaxPositionsPerGame = MaxNumberOfPositionsPerGame,
+        LimitPositionsPerPhasePerGame = false,
+        MaxPositionsPerPhasePerGame = MaxNumberOfPositionsPerGame,
+        DrawAdjudication = false,
+        DrawAdjudication_Score = 0,
+        DrawAdjudication_MoveCount = Constants.MaxNumberMovesInAGame,
+        DrawAdjudication_MoveNumber = Constants.MaxNumberMovesInAGame,
+        WinAdjudication = false,
+        WinAdjudication_Score = uint.MaxValue,
+        WinAdjudication_MoveCount = Constants.MaxNumberMovesInAGame,
         RandomFenSkipping = false,
         RandomFenSkipProbability = 0.0,
         WdlFiltered = false,
@@ -115,9 +153,14 @@ public class ViriformatFilter
         };
     }
 
-    public bool ShouldDrop(Move mv, int eval, Position position, byte wdlPacked, int ply, Random rng)
+    public bool ShouldDrop(Move mv, int eval, Position position, byte wdlPacked, int ply, Random rng, bool firstGameMove = false)
     {
         if (ply < MinPly)
+        {
+            return true;
+        }
+
+        if(firstGameMove && Math.Abs(eval) > MaxInitialEval)
         {
             return true;
         }

@@ -2,6 +2,7 @@ using Lynx.Model;
 using NLog;
 using System.Buffers.Binary;
 using System.Diagnostics;
+using PositionTuple = (string FEN, short Eval, int Phase);
 
 namespace Lynx.Datagen;
 
@@ -18,6 +19,18 @@ public static class ViriformatLoader
 
         public ulong FilteredPositionsCount;
 
+        public int ShortestGameMoveCount;
+
+        public int LongestGameMoveCount;
+
+        public ulong GamesAdjudicatedAsDrawsCount;
+
+        public ulong GamesAdjudicatedAsWinsCount;
+
+        public ulong PositionsSavedByDrawAdjudicationCount;
+
+        public ulong PositionsSavedByWinAdjudicationCount;
+
         public readonly void Print(string path, double elapsedMilliseconds)
         {
             _logger.Warn("Source file: {Path}", path);
@@ -25,6 +38,18 @@ public static class ViriformatLoader
             _logger.Warn("Total positions: {PositonsCount}", PositonsCount);
             _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", FilteredPositionsCount, PositonsCount > 0 ? (100 * FilteredPositionsCount / (double)PositonsCount).ToString("F2") : "0");
             _logger.Warn("Positions/game: {PositonsPerGameCount}", GameCount > 0 ? (ulong)Math.Round(FilteredPositionsCount / (double)GameCount) : 0);
+            _logger.Warn("Shortest game: {ShortestGameMoves} moves, longest game: {LongestGameMoves} moves", ShortestGameMoveCount, LongestGameMoveCount);
+
+            if (GamesAdjudicatedAsDrawsCount != 0)
+            {
+                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} potential positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
+            }
+
+            if (GamesAdjudicatedAsWinsCount != 0)
+            {
+                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} potential positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
+            }
+
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
         }
     }
@@ -32,7 +57,11 @@ public static class ViriformatLoader
 
     public static void LoadFile(string path, ViriformatFilter? filter = null)
     {
-        var stats = new Stats();
+        var stats = new Stats
+        {
+            ShortestGameMoveCount = int.MaxValue,
+        };
+
         var sw = Stopwatch.StartNew();
 
         try
@@ -50,6 +79,8 @@ public static class ViriformatLoader
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evalCtx = new EvaluationContext(buffer);
 
+            PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
+
             while (true)
             {
                 int firstRead = ReadFull(sourceFile, boardBufArr);
@@ -63,7 +94,9 @@ public static class ViriformatLoader
                     throw new InvalidDataException("Unexpected EOF while reading PackedBoard");
                 }
 
-                var fen = PackedBoardToFEN(boardBufArr);
+                Array.Clear(validPositionsPerGame);
+
+                var parsedFEN = PackedBoardToFEN(boardBufArr);
 
                 // Parse initial position eval (i16le at bytes 28..29) and WDL (byte at 30)
                 var (initialPositionScore, wdlByte) = ParseEvalAndWDL(boardBufArr);
@@ -71,17 +104,29 @@ public static class ViriformatLoader
                 // Map WDL byte to a human-readable game result. Unknown/default -> "*"
                 string gameResult = MapWdlToResult(wdlByte);
 
-                using var game = new Game(fen);
+                using var game = new Game(parsedFEN);
 
                 var rng = new Random();
                 var ply = game.Ply;
                 var initialFEN = game.FEN;
+                var isFirstGameMove = true;
 
-                if (initialPositionScore != 0)
-                {
-                    ++stats.PositonsCount;
-                    outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
-                }
+                // This never happens in OB datagen .pgns
+                //if (initialPositionScore != 0)
+                //{
+                //    ++stats.PositonsCount;
+                //    outputFile.WriteLine($"{initialFEN}; {initialPositionScore}; [{gameResult}]");
+                //}
+
+                int positionsPerGame = 0;
+
+                var positionsToTakePerGame = filter?.MaxPositionsPerGame ?? ViriformatFilter.MaxNumberOfPositionsPerGame;
+                bool skipGame = false;
+                bool isAdjudicatedAsADraw = false;
+                bool isAdjudicatedAsAWin = false;
+
+                int drawAdjudicationScoreCount = 0;
+                int winAdjudicationScoreCount = 0;
 
                 while (true)
                 {
@@ -116,31 +161,168 @@ public static class ViriformatLoader
                     if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
                     {
                         _logger.Warn("Unable to parse move {0} in current position", uci);
-                        break;
+                        throw new InvalidDataException($"Unable to parse move ({uci}) in current position ({game.FEN})");
                     }
 
-                    var newFEN = game.FEN;
-
-                    // Apply filter if provided. Filter examines the position before the move (the eval belongs to this position).
-                    bool filteredOut = false;
                     if (filter is not null)
                     {
-                        filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng);
-                    }
+                        if(!skipGame)
+                        {
+                            var fen = game.FEN;
 
-                    if (!filteredOut)
-                    {
-                        outputFile.WriteLine($"{newFEN}; {eval}; [{gameResult}]");
-                        ++stats.FilteredPositionsCount;
+                            // Draw adjufication filter
+                            if (filter.DrawAdjudication)
+                            {
+                                if (Math.Abs(eval) < filter.DrawAdjudication_Score)
+                                {
+                                    ++drawAdjudicationScoreCount;
+                                    if (drawAdjudicationScoreCount >= 2 * filter.DrawAdjudication_MoveCount
+                                        && ply >= 2 * filter.DrawAdjudication_MoveNumber)
+                                    {
+                                        skipGame = true;
+                                        isAdjudicatedAsADraw = true;
+                                        ++stats.GamesAdjudicatedAsDrawsCount;
+                                    }
+                                }
+                                else
+                                {
+                                    drawAdjudicationScoreCount = 0;
+                                }
+                            }
+
+                            // Win adjudication filter
+                            if (filter.WinAdjudication)
+                            {
+                                if (Math.Abs(eval) >= filter.WinAdjudication_Score)
+                                {
+                                    ++winAdjudicationScoreCount;
+                                    if (winAdjudicationScoreCount >= 2 * filter.WinAdjudication_MoveCount)
+                                    {
+                                        // We include the final position before the adjudication
+                                        outputFile.WriteLine($"{fen}; {eval}; [{gameResult}]");
+                                        --positionsToTakePerGame;
+
+                                        skipGame = true;
+                                        isAdjudicatedAsAWin = true;
+                                        ++stats.GamesAdjudicatedAsWinsCount;
+                                    }
+                                }
+                                else
+                                {
+                                    winAdjudicationScoreCount = 0;
+                                }
+                            }
+
+                            // We recheck to avoid including a position twice in adjudicated games
+                            if (!skipGame)
+                            {
+                                // Generic filter
+                                var filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
+                                if (!filteredOut)
+                                {
+                                    validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
+                                    ++positionsPerGame;
+                                }
+                                // Max initial eval filter
+                                else if (isFirstGameMove && Math.Abs(eval) > filter.MaxInitialEval)
+                                {
+                                    skipGame = true;
+                                    Debug.Assert(positionsPerGame == 0);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (isAdjudicatedAsADraw)
+                            {
+                                ++stats.PositionsSavedByDrawAdjudicationCount;
+                            }
+                            else if (isAdjudicatedAsAWin)
+                            {
+                                ++stats.PositionsSavedByWinAdjudicationCount;
+                            }
+                        }
                     }
 
                     game.MakeMove(move!.Value);
+
+                    isFirstGameMove = false;
                     ++stats.PositonsCount;
                     ++ply;
                 }
 
+                var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
+                int selectedPositionsCount = selectedPositionsPerGame.Length;
+
+                if (filter?.LimitPositionsPerGame == true && positionsPerGame > positionsToTakePerGame)
+                //()|| filter?.LimitPositionsPerPhasePerGame == true)   // If we also want to limit positions per phase in short games
+                {
+                    // Group positions by phase, and shuffle them
+                    var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
+                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
+                    {
+                        // Can only happen in the first group, with promotions when all the pieces are on the board
+                        if (group.Key >= positionsByPhaseShuffled.Length)
+                        {
+                            positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+                        }
+
+                        var positions = group.ToArray();
+                        Random.Shared.Shuffle(positions);
+                        positionsByPhaseShuffled[group.Key] = positions;
+                    }
+
+                    selectedPositionsPerGame = new PositionTuple[positionsToTakePerGame];
+
+                    selectedPositionsCount = 0;
+                    int positionIndexPerPhase = 1;
+                    while (selectedPositionsCount < positionsToTakePerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
+                    {
+                        foreach (var group in positionsByPhaseShuffled)
+                        {
+                            if (group is not null && group.Length >= positionIndexPerPhase)
+                            {
+                                selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
+                                selectedPositionsCount++;
+
+                                if (selectedPositionsCount == positionsToTakePerGame)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        positionIndexPerPhase++;
+                    }
+
+                    selectedPositionsPerGame = selectedPositionsPerGame[..selectedPositionsCount];
+                }
+
+                foreach (var (selectedFEN, selectedEval, phase) in selectedPositionsPerGame)
+                {
+                    outputFile.WriteLine($"{selectedFEN}; {selectedEval}; [{gameResult}]");
+                }
+
+                stats.FilteredPositionsCount += (ulong)selectedPositionsPerGame.Length;
+
+                var totalMoves = game.FullMoves;
+                if (totalMoves < stats.ShortestGameMoveCount)
+                {
+                    stats.ShortestGameMoveCount = totalMoves;
+
+                    if (totalMoves <= 5)
+                    {
+                        _logger.Warn(initialFEN + " -> " + game.FEN);
+                    }
+                }
+
+                if (totalMoves > stats.LongestGameMoveCount)
+                {
+                    stats.LongestGameMoveCount = totalMoves;
+                }
+
                 // Empty line between games
-                if(Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
+                if (Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
                 {
                     outputFile.WriteLine();
                 }
