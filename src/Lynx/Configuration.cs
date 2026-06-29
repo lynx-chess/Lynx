@@ -524,9 +524,23 @@ public sealed class EngineSettings
 
     #region Datagen
 
+    public int Datagen_GenFens_RandomHalfMoveCount { get; set; } = 8;
+
     public int Datagen_GenFens_Depth { get; set; } = 10;
 
     public int Datagen_GenFens_MaxEval { get; set; } = 1000;
+
+    public bool Datagen_GenFens_UsePieceProbabilities { get; set; } = true;
+
+    public int Datagen_GenFens_PieceProbabilities_Pawns { get; set; } = 40;
+
+    public int Datagen_GenFens_PieceProbabilities_Knights { get; set; } = 60;
+
+    public int Datagen_GenFens_PieceProbabilities_Bishops { get; set; } = 80;
+
+    public int Datagen_GenFens_PieceProbabilities_Rooks { get; set; } = 85;
+
+    public int Datagen_GenFens_PieceProbabilities_Queen { get; set; } = 95;
 
     public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
 
