@@ -1572,7 +1572,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 ? new(pieceBitboards, occupancyBitboards, board, side, castlingRights, enPassant,
                     castlingData,
                     halfMoveClock, fullMoveCounter)
-                : throw new LynxException($"Error parsing {fen.ToString()}");
+                : throw new LynxException($"Error parsing {fen}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
