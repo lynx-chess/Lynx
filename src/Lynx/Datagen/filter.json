@@ -1,5 +1,5 @@
 {
-  "MinPly": 0,
+  "MinPly": 16,
   "MinPieces": 4,
   "MaxInitialEval": 20000,
   "MaxEval": 20000,
