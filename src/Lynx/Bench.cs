@@ -141,6 +141,8 @@ public partial class Engine
             var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
             totalSeconds += elapsedSeconds;
             totalNodes += result.Nodes;
+
+            _tt.BumpAge();
         }
 
         _engineWriter.TryWrite($"Total time: {Utils.CalculateUCITime(totalSeconds)}");
