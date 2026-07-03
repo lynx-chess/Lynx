@@ -81,11 +81,15 @@ public interface ITranspositionTable
 
         var wasPvInt = wasPv ? 1 : 0;
 
+        // This calculation allows to account for the circular buffer, i.e. with Age being back to 0 and entry.Age being 29, delta is +3 instead of -3
+        // Comparing ageDelta > 0 is equivalent to Age != entry.Age, but it also allows more detailed comparisons
+        var ageDelta = (Age - entry.Age + TranspositionTableElement.MaxAge + 1) & TranspositionTableElement.MaxAge;
+
         bool shouldReplace =
-            entry.Key != newKey                 // Different key: collision or no actual entry
-            || nodeType == NodeType.Exact       // Entering PV data
-            || Age != entry.Age                 // Different age
-            || depth                            // Higher depth
+            entry.Key != newKey                                                         // Different key: collision or no actual entry
+            || nodeType == NodeType.Exact                                               // Entering PV data
+            || ageDelta > Configuration.EngineSettings.TTReplacement_AgeOffset          // High age diff
+            || depth                                                                    // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
                     + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
                 >= entry.Depth;
