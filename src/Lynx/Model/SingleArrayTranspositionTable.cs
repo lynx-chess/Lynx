@@ -7,17 +7,19 @@ using System.Runtime.Intrinsics.X86;
 namespace Lynx.Model;
 
 /// <summary>
-/// Single array transposition table implementation (from main branch)
+/// Single array transposition table implementation
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly struct SingleArrayTranspositionTable : ITranspositionTable
+public struct SingleArrayTranspositionTable : ITranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    public int Age { get; set; }
 
     private readonly TranspositionTableElement[] _tt = [];
     public int SizeMBs { get; }
 
-    public ulong Length => (ulong)_tt.Length;
+    public readonly ulong Length => (ulong)_tt.Length;
 
     public SingleArrayTranspositionTable()
     {
@@ -56,7 +58,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     /// <summary>
     /// Multithreaded clearing of the transposition table
     /// </summary>
-    public void Clear()
+    public readonly void Clear()
     {
         var threadCount = Configuration.EngineSettings.Threads;
 
@@ -82,7 +84,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    public readonly void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         if (Sse.IsSupported)
         {
@@ -120,7 +122,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     /// Get a reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ref TranspositionTableElement ITranspositionTable.GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    readonly ref TranspositionTableElement ITranspositionTable.GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[ttIndex];
@@ -130,7 +132,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     /// Get a readonly reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    ref readonly TranspositionTableElement ITranspositionTable.GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    readonly ref readonly TranspositionTableElement ITranspositionTable.GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[ttIndex];
@@ -141,7 +143,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     /// <summary>
     /// Exact transposition table occupancy per mill (0-1000)
     /// </summary>
-    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)Length));
+    public readonly int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)Length));
 
     /// <summary>
     /// Orders of magnitude faster than <see cref="HashfullPermill"/>
@@ -199,10 +201,10 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal ref TranspositionTableElement Get(int index) => ref _tt[index];
+    internal readonly ref TranspositionTableElement Get(int index) => ref _tt[index];
 
     [Conditional("DEBUG")]
-    private void Stats()
+    private readonly void Stats()
     {
         ulong items = 0;
         for (int i = 0; i < _tt.Length; ++i)

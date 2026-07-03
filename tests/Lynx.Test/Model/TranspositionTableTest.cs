@@ -88,7 +88,7 @@ public class TranspositionTableTests
         for (int index = 0; index < (int)tt.Length; ++index)
         {
             ref var ttEntry = ref ((SingleArrayTranspositionTable)tt).Get(index);
-            ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6);
+            ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6, 7);
         }
 
         tt.Clear();
@@ -104,6 +104,7 @@ public class TranspositionTableTests
             Assert.AreEqual(false, ttEntry.WasPv);
             Assert.AreEqual(0, ttEntry.Move);
             Assert.AreEqual(0, ttEntry.Key);
+            Assert.AreEqual(0, ttEntry.Age);
         }
     }
 

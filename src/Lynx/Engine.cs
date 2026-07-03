@@ -30,13 +30,26 @@ public sealed partial class Engine : IDisposable
 
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
-#pragma warning disable EPS09 // Pass an argument for an 'in' parameter explicitly
-    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, TranspositionTableFactory.Create()) { }
-#pragma warning restore EPS09 // Pass an argument for an 'in' parameter explicitly
+    public Engine(ChannelWriter<object> engineWriter)
+    {
+        _id = 0;
+        _engineWriter = engineWriter;
+        _tt = TranspositionTableFactory.Create();
 
-#pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in ITranspositionTable tt)
-#pragma warning restore RCS1163 // Unused parameter
+        AverageDepth = 0;
+        Game = new Game(Constants.InitialPositionFEN);
+
+        // Update ResetEngine() after any changes here
+        _moveNodeCount = new ulong[12][];
+        for (int i = 0; i < _moveNodeCount.Length; ++i)
+        {
+            _moveNodeCount[i] = new ulong[64];
+        }
+
+        _logger.Debug("Engine {0} initialized", _id);
+    }
+
+    public Engine(int id, ChannelWriter<object> engineWriter, ref ITranspositionTable tt)
     {
         _id = id;
         _engineWriter = engineWriter;

@@ -9,6 +9,8 @@ namespace Lynx.Model;
 public interface ITranspositionTable
 //public readonly struct ITranspositionTable
 {
+    int Age { get; protected set; }
+
     /// <summary>
     /// Size of the transposition table in MB
     /// </summary>
@@ -18,6 +20,12 @@ public interface ITranspositionTable
     /// Length of the transposition table (total number of entries)
     /// </summary>
     ulong Length { get; }
+
+    void BumpAge()
+    {
+        // Circular buffer
+        Age = (Age + 1) & TranspositionTableElement.AgeMask;
+    }
 
     /// <summary>
     /// Checks the transposition table and, if there's an eval value that can be deducted from it
@@ -76,6 +84,7 @@ public interface ITranspositionTable
         bool shouldReplace =
             entry.Key != newKey                 // Different key: collision or no actual entry
             || nodeType == NodeType.Exact       // Entering PV data
+            || Age != entry.Age                 // Different age
             || depth                            // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
                     + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
@@ -90,7 +99,7 @@ public interface ITranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, Age);
     }
 
     /// <summary>
@@ -106,7 +115,7 @@ public interface ITranspositionTable
         ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null);
+        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, Age);
     }
 
     /// <summary>
