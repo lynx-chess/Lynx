@@ -6,21 +6,21 @@ namespace Lynx.Model;
 /// <summary>
 /// A pointer to this (TranspositionTableBucket*) can be casted to a TranspositionTableElement* and indexed from 0 to <see cref="Constants.TranspositionTableElementsPerBucket"/> - 1 to access each entry.
 /// </summary>
-[StructLayout(LayoutKind.Explicit, Size = 32)]
+[StructLayout(LayoutKind.Explicit, Size = 10)]
 public unsafe struct TranspositionTableBucket
 {
 #pragma warning disable S1144, RCS1213 // Unused private types or members should be removed
     [FieldOffset(0)]
     private TranspositionTableElement _ttEntry0;
 
-    [FieldOffset(10)]
-    private TranspositionTableElement _ttEntry1;
+    //[FieldOffset(10)]
+    //private TranspositionTableElement _ttEntry1;
 
-    [FieldOffset(20)]
-    private TranspositionTableElement _ttEntry2;
+    //[FieldOffset(20)]
+    //private TranspositionTableElement _ttEntry2;
 
-    [FieldOffset(30)]
-    private fixed byte _padding[2];
+    //[FieldOffset(30)]
+    //private fixed byte _padding[2];
 #pragma warning restore S1144 // Unused private types or members should be removed
 
     /// <summary>
