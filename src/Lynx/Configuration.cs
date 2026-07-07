@@ -422,7 +422,7 @@ public sealed class EngineSettings
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
 
     [SPSA<int>(enabled: false)]
-    public int TTReplacement_AgeOffset { get; set; } = 8;
+    public int TTReplacement_AgeOffset { get; set; } = 0;
 
     [SPSA<int>(-100, -10, 10)]
     public int PVS_SEE_Threshold_Quiet { get; set; } = -46;
