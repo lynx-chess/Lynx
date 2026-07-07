@@ -17,7 +17,7 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
     public int Age { get; set; }
 
     private readonly int _ttArrayCount;
-    private readonly TranspositionTableElement[][] _tt = [];
+    private readonly TranspositionTableBucket[][] _tt = [];
 
     public int SizeMBs { get; }
 
@@ -55,12 +55,12 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
         }
 
         _logger.Info("{ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB)", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
-        _tt = GC.AllocateArray<TranspositionTableElement[]>(_ttArrayCount, pinned: true);
+        _tt = GC.AllocateArray<TranspositionTableBucket[]>(_ttArrayCount, pinned: true);
         for (int i = 0; i < (int)fullArrayCount; ++i)
         {
             try
             {
-                _tt[i] = GC.AllocateArray<TranspositionTableElement>(Constants.MaxTTArrayLength, pinned: true);
+                _tt[i] = GC.AllocateArray<TranspositionTableBucket>(Constants.MaxTTArrayLength, pinned: true);
             }
             catch (OutOfMemoryException e)
             {
@@ -92,7 +92,7 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
 
             try
             {
-                _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>((int)itemsLeft, pinned: true);
+                _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableBucket>((int)itemsLeft, pinned: true);
             }
             catch (OutOfMemoryException e)
             {
@@ -194,7 +194,7 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
                 // Since _tt is a pinned array
                 // This is no-op pinning as it does not influence the GC compaction
                 // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _tt[ttIndex])
+                fixed (TranspositionTableBucket* ttPtr = _tt[ttIndex])
                 {
                     Sse.Prefetch0(ttPtr + entryIndex);
                 }
@@ -234,7 +234,7 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
     /// Get a reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    readonly ref TranspositionTableElement ITranspositionTable.GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    readonly ref TranspositionTableBucket ITranspositionTable.GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[ttIndex][entryIndex];
@@ -244,7 +244,7 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
     /// Get a readonly reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    readonly ref readonly TranspositionTableElement ITranspositionTable.GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    readonly ref readonly TranspositionTableBucket ITranspositionTable.GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[ttIndex][entryIndex];
@@ -266,9 +266,22 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
 
         for (int i = 0; i < 1_000; ++i)
         {
-            if (_tt[0][i].Key != default)
+            unsafe
             {
-                ++items;
+                fixed (TranspositionTableBucket* ttPtr = _tt[i])
+                {
+                    var bucketPtr = ttPtr + i;
+                    var bucket = (TranspositionTableElement*)bucketPtr;
+
+                    for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                    {
+                        TranspositionTableElement entry = bucket[j];
+                        if (entry.Key != default)
+                        {
+                            ++items;
+                        }
+                    }
+                }
             }
         }
 
@@ -311,9 +324,22 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
         {
             for (int j = 0; j < _tt[i].Length; ++j)
             {
-                if (_tt[i][j].Key != default)
+                unsafe
                 {
-                    ++items;
+                    fixed (TranspositionTableBucket* ttPtr = _tt[i])
+                    {
+                        var bucketPtr = ttPtr + i;
+                        var bucket = (TranspositionTableElement*)bucketPtr;
+
+                        for (int k = 0; k < Constants.TranspositionTableElementsPerBucket; ++k)
+                        {
+                            TranspositionTableElement entry = bucket[k];
+                            if (entry.Key != default)
+                            {
+                                ++items;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -322,7 +348,7 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal readonly ref TranspositionTableElement Get(int index) => ref _tt[0][index];
+    internal readonly ref TranspositionTableBucket Get(int index) => ref _tt[0][index];
 
     [Conditional("DEBUG")]
     private readonly void Stats()
@@ -332,9 +358,22 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
         {
             for (int j = 0; j < _tt[i].Length; ++j)
             {
-                if (_tt[i][j].Key != default)
+                unsafe
                 {
-                    ++items;
+                    fixed (TranspositionTableBucket* ttPtr = _tt[i])
+                    {
+                        var bucketPtr = ttPtr + i;
+                        var bucket = (TranspositionTableElement*)bucketPtr;
+
+                        for (int k = 0; k < Constants.TranspositionTableElementsPerBucket; ++k)
+                        {
+                            TranspositionTableElement entry = bucket[k];
+                            if (entry.Key != default)
+                            {
+                                ++items;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -343,22 +382,22 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
             (long)Length * Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
     }
 
-    [Conditional("DEBUG")]
-    private readonly void Print()
-    {
-        Console.WriteLine("Transposition table content:");
-        for (int i = 0; i < _tt.Length; ++i)
-        {
-            for (int j = 0; j < _tt[i].Length; ++j)
-            {
-                if (_tt[i][j].Key != default)
-                {
-                    var entry = _tt[i][j];
-                    Console.WriteLine($"Array {i}, item {j} (total item index: {(i * Constants.MaxTTArrayLength) + j}): "
-                    + $"Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {entry.Type}");
-                }
-            }
-        }
-        Console.WriteLine("");
-    }
+    //[Conditional("DEBUG")]
+    //private readonly void Print()
+    //{
+    //    Console.WriteLine("Transposition table content:");
+    //    for (int i = 0; i < _tt.Length; ++i)
+    //    {
+    //        for (int j = 0; j < _tt[i].Length; ++j)
+    //        {
+    //            if (_tt[i][j].Key != default)
+    //            {
+    //                var entry = _tt[i][j];
+    //                Console.WriteLine($"Array {i}, item {j} (total item index: {(i * Constants.MaxTTArrayLength) + j}): "
+    //                + $"Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {entry.Type}");
+    //            }
+    //        }
+    //    }
+    //    Console.WriteLine("");
+    //}
 }

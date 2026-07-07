@@ -54,7 +54,7 @@ public struct TranspositionTableElement
     private const int NodeTypeMask = 0x6;
 
     /// <summary>
-    /// Max age, 32
+    /// Max age, 31
     /// </summary>
     public const int MaxAge = 0b11111;
 

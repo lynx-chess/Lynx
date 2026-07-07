@@ -16,7 +16,7 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
 
     public int Age { get; set; }
 
-    private readonly TranspositionTableElement[] _tt = [];
+    private readonly TranspositionTableBucket[] _tt = [];
     public int SizeMBs { get; }
 
     public readonly ulong Length => (ulong)_tt.Length;
@@ -34,7 +34,7 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
         {
             try
             {
-                _tt = GC.AllocateArray<TranspositionTableElement>((int)ttLength, pinned: true);
+                _tt = GC.AllocateArray<TranspositionTableBucket>((int)ttLength, pinned: true);
                 break;
             }
             catch (OutOfMemoryException e)
@@ -95,7 +95,7 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
                 // Since _tt is a pinned array
                 // This is no-op pinning as it does not influence the GC compaction
                 // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _tt)
+                fixed (TranspositionTableBucket* ttPtr = _tt)
                 {
                     Sse.Prefetch0(ttPtr + index);
                 }
@@ -122,7 +122,7 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
     /// Get a reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    readonly ref TranspositionTableElement ITranspositionTable.GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    readonly ref TranspositionTableBucket ITranspositionTable.GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[ttIndex];
@@ -132,7 +132,7 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
     /// Get a readonly reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    readonly ref readonly TranspositionTableElement ITranspositionTable.GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    readonly ref readonly TranspositionTableBucket ITranspositionTable.GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[ttIndex];
@@ -154,22 +154,36 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
 
         for (int i = 0; i < 1_000; ++i)
         {
-            if (_tt[i].Key != default)
+            unsafe
             {
-                ++items;
+                fixed (TranspositionTableBucket* ttPtr = _tt)
+                {
+                    var bucketPtr = ttPtr + i;
+                    var bucket = (TranspositionTableElement*)bucketPtr;
+
+                    for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                    {
+                        TranspositionTableElement entry = bucket[j];
+                        if (entry.Key != default)
+                        {
+                            ++items;
+                        }
+                    }
+                }
             }
         }
 
         //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
-        return items;
+        return items / Constants.TranspositionTableElementsPerBucket;
     }
 
     internal static ulong CalculateLength(int sizeMBs)
     {
         var ttEntrySize = TranspositionTableElement.Size;
+        var ttBucketSize = TranspositionTableBucket.Size;
 
         ulong sizeBytes = (ulong)sizeMBs * 1024ul * 1024ul;
-        ulong ttLength = sizeBytes / ttEntrySize;
+        ulong ttLength = sizeBytes / ttBucketSize;
         var ttLengthMB = (double)ttLength / 1024 / 1024;
 
         if (ttLength > (ulong)Array.MaxLength)
@@ -180,6 +194,7 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
         _logger.Info("Hash value:\t{0} MB", sizeMBs);
         _logger.Info("TT memory:\t{0} MB", (ttLengthMB * ttEntrySize).ToString("F"));
         _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT bucket:\t{0} bytes", ttBucketSize);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return ttLength;
@@ -191,9 +206,22 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
         ulong items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            if (_tt[i].Key != default)
+            unsafe
             {
-                ++items;
+                fixed (TranspositionTableBucket* ttPtr = _tt)
+                {
+                    var bucketPtr = ttPtr + i;
+                    var bucket = (TranspositionTableElement*)bucketPtr;
+
+                    for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                    {
+                        TranspositionTableElement entry = bucket[j];
+                        if (entry.Key != default)
+                        {
+                            ++items;
+                        }
+                    }
+                }
             }
         }
 
@@ -201,35 +229,48 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal readonly ref TranspositionTableElement Get(int index) => ref _tt[index];
+    internal readonly ref TranspositionTableBucket Get(int index) => ref _tt[index];
 
     [Conditional("DEBUG")]
     private readonly void Stats()
     {
-        ulong items = 0;
+        int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            if (_tt[i].Key != default)
+            unsafe
             {
-                ++items;
+                fixed (TranspositionTableBucket* ttPtr = _tt)
+                {
+                    var bucketPtr = ttPtr + i;
+                    var bucket = (TranspositionTableElement*)bucketPtr;
+
+                    for (int j = 0; j < Constants.TranspositionTableElementsPerBucket; ++j)
+                    {
+                        TranspositionTableElement entry = bucket[j];
+                        if (entry.Key != default)
+                        {
+                            ++items;
+                        }
+                    }
+                }
             }
         }
-        _logger.Info("Single Array TT Occupancy:\t{0}% ({1}MB)",
+        _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
             100 * PopulatedItemsCount() / (ulong)_tt.Length,
-            (ulong)_tt.Length * (ulong)Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
+            _tt.Length * Marshal.SizeOf<TranspositionTableBucket>() / 1024 / 1024);
     }
 
-    [Conditional("DEBUG")]
-    private readonly void Print()
-    {
-        Console.WriteLine("Single Array Transposition table content:");
-        for (int i = 0; i < _tt.Length; ++i)
-        {
-            if (_tt[i].Key != default)
-            {
-                Console.WriteLine($"{i}: Key = {_tt[i].Key}, Depth: {_tt[i].Depth}, Score: {_tt[i].Score}, Move: {(_tt[i].Move != 0 ? ((Move)_tt[i].Move).UCIString() : "-")} {_tt[i].Type}");
-            }
-        }
-        Console.WriteLine("");
-    }
+    //[Conditional("DEBUG")]
+    //private readonly void Print()
+    //{
+    //    Console.WriteLine("Single Array Transposition table content:");
+    //    for (int i = 0; i < _tt.Length; ++i)
+    //    {
+    //        if (_tt[i].Key != default)
+    //        {
+    //            Console.WriteLine($"{i}: Key = {_tt[i].Key}, Depth: {_tt[i].Depth}, Score: {_tt[i].Score}, Move: {(_tt[i].Move != 0 ? ((Move)_tt[i].Move).UCIString() : "-")} {_tt[i].Type}");
+    //        }
+    //    }
+    //    Console.WriteLine("");
+    //}
 }

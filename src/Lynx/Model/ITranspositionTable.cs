@@ -39,23 +39,37 @@ public interface ITranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result)
     {
-        ref readonly var entry = ref GetTTEntryReadonly(position, halfMovesWithoutCaptureOrPawnMove);
+        ref readonly var bucketEntry = ref GetTTEntryReadonly(position, halfMovesWithoutCaptureOrPawnMove);
 
-        var key = GenerateTTKey(position.UniqueIdentifier);
-
-        if (key != entry.Key)
+        unsafe
         {
-            result = default;
-            return false;
+            fixed (TranspositionTableBucket* bucketPointer = &bucketEntry)
+            {
+                var bucket = (TranspositionTableElement*)bucketPointer;
+                var key = GenerateTTKey(position.UniqueIdentifier);
+
+
+                // We simply take the first entry
+                for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
+                {
+                    ref var entry = ref bucket[i];
+
+                    if (key == entry.Key)
+                    {
+                        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+
+                        result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
+
+                        return true;
+                    }
+                }
+            }
         }
 
-        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
-
-        result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
-
-        return true;
+        result = default;
+        return false;
     }
 
     /// <summary>
@@ -75,35 +89,102 @@ public interface ITranspositionTable
     {
         Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overridden");
 
-        ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
+        //var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
 
-        var newKey = GenerateTTKey(position.UniqueIdentifier);
+        ref TranspositionTableBucket bucketEntry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 
-        var wasPvInt = wasPv ? 1 : 0;
-
-        // This calculation allows to account for the circular buffer, i.e. with Age being back to 0 and entry.Age being 29, delta is +3 instead of -3
-        // Comparing ageDelta > 0 is equivalent to Age != entry.Age, but it also allows more detailed comparisons
-        var ageDelta = (Age - entry.Age + TranspositionTableElement.MaxAge + 1) & TranspositionTableElement.MaxAge;
-
-        bool shouldReplace =
-            entry.Key != newKey                                                         // Different key: collision or no actual entry
-            || nodeType == NodeType.Exact                                               // Entering PV data
-            || ageDelta > Configuration.EngineSettings.TTReplacement_AgeOffset          // High age diff
-            || depth                                                                    // Higher depth
-                    + Configuration.EngineSettings.TTReplacement_DepthOffset
-                    + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
-                >= entry.Depth;
-
-        if (!shouldReplace)
+        unsafe
         {
-            return;
+            fixed (TranspositionTableBucket* bucketPointer = &bucketEntry)
+            {
+                var bucket = (TranspositionTableElement*)bucketPointer;
+
+                ref TranspositionTableElement entry = ref bucket[0];
+
+                var newKey = GenerateTTKey(position.UniqueIdentifier);
+
+#if DEBUG
+                int bucketIndex = 0;
+#endif
+
+                if (entry.Key != newKey
+                    && entry.Type != NodeType.Unknown)  // TODO remove?
+                {
+                    int minValue = CalculateBucketEntryWeight(entry, Age);
+
+                    for (int i = 1; i < Constants.TranspositionTableElementsPerBucket; ++i)
+                    {
+                        ref var candidateEntry = ref bucket[i];
+
+                        // Bucket policy to discard very old entries
+
+                        // Always take an empty entry, or one that corresponds to the same position
+                        if (candidateEntry.Key == newKey
+                            || candidateEntry.Type == NodeType.Unknown) // TODO remove?
+                        {
+                            entry = ref candidateEntry;
+
+#if DEBUG
+                            bucketIndex = i;
+#endif
+
+                            break;
+                        }
+
+                        // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
+                        var value = CalculateBucketEntryWeight(candidateEntry, Age);
+
+                        if (value < minValue)
+                        {
+                            minValue = value;
+                            entry = ref candidateEntry;
+
+#if DEBUG
+                            bucketIndex = i;
+#endif
+                        }
+                    }
+                }
+
+                var wasPvInt = wasPv ? 1 : 0;
+
+                // This calculation allows to account for the circular buffer, i.e. with Age being back to 0 and entry.Age being 29, delta is +3 instead of -3
+                // Comparing ageDelta > 0 is equivalent to Age != entry.Age, but it also allows more detailed comparisons
+                var ageDelta = (Age - entry.Age + TranspositionTableElement.MaxAge + 1) & TranspositionTableElement.MaxAge;
+
+                bool shouldReplace =
+                    entry.Key != newKey                                                         // Different key: collision or no actual entry
+                    || nodeType == NodeType.Exact                                               // Entering PV data
+                    || ageDelta > Configuration.EngineSettings.TTReplacement_AgeOffset          // High age diff
+                    || depth                                                                    // Higher depth
+                            + Configuration.EngineSettings.TTReplacement_DepthOffset
+                            + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
+                        >= entry.Depth;
+
+                if (!shouldReplace)
+                {
+                    return;
+                }
+
+                // We want to store the distance to the checkmate position relative to the current node, independently from the root
+                // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
+                var recalculatedScore = RecalculateMateScores(score, -ply);
+
+                entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, Age);
+
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                static int CalculateBucketEntryWeight(TranspositionTableElement entry, int ttAge)
+                {
+                    // This calculation allows to account for the circular buffer, i.e. with Age being back to 0 and entry.Age being 29, delta is +3 instead of -3
+                    // Comparing ageDelta > 0 is equivalent to Age != entry.Age, but it also allows more detailed comparisons
+                    var ageDelta = (ttAge - entry.Age + TranspositionTableElement.MaxAge + 1) & TranspositionTableElement.MaxAge;
+
+                    // depth - age formula from SP
+                    return entry.Depth - (2 * ageDelta);
+                }
+            }
         }
-
-        // We want to store the distance to the checkmate position relative to the current node, independently from the root
-        // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var recalculatedScore = RecalculateMateScores(score, -ply);
-
-        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, Age);
     }
 
     /// <summary>
@@ -116,10 +197,19 @@ public interface ITranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
-        ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
+        ref var bucketEntry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 
-        // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, Age);
+        unsafe
+        {
+            fixed (TranspositionTableBucket* bucketPointer = &bucketEntry)
+            {
+                var bucket = (TranspositionTableElement*)bucketPointer;
+                ref TranspositionTableElement firstEntry = ref bucket[0];
+
+                // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
+                firstEntry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, Age);
+            }
+        }
     }
 
     /// <summary>
@@ -142,12 +232,12 @@ public interface ITranspositionTable
     /// <summary>
     /// Get a reference to a transposition table entry for the given position
     /// </summary>
-    protected ref TranspositionTableElement GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove);
+    protected ref TranspositionTableBucket GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove);
 
     /// <summary>
     /// Get a readonly reference to a transposition table entry for the given position
     /// </summary>
-    protected ref readonly TranspositionTableElement GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove);
+    protected ref readonly TranspositionTableBucket GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove);
 
     /// <summary>
     /// Use lowest 16 bits of the position unique identifier as the key
