@@ -46,7 +46,7 @@ public struct TranspositionTableElement
     /// 0000 0110              0x6           NodeType (0-3)
     /// 1111 1000              0xF8          Age (0-32)
     /// </summary>
-    private byte _type_WasPv;
+    private byte _type_WasPv;   // 1 byte
 
     private const int WasPvMask = 0x1;
 
