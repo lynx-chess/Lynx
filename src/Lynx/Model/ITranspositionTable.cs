@@ -107,8 +107,7 @@ public interface ITranspositionTable
                 int bucketIndex = 0;
 #endif
 
-                if (entry.Key != newKey)
-                    //&& entry.Type != NodeType.Unknown)  // TODO remove?
+                if (entry.Key != newKey && entry.Key != 0)
                 {
                     int minValue = CalculateBucketEntryWeight(entry, Age);
 
