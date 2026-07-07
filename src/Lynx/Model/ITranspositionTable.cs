@@ -107,8 +107,8 @@ public interface ITranspositionTable
                 int bucketIndex = 0;
 #endif
 
-                if (entry.Key != newKey
-                    && entry.Type != NodeType.Unknown)  // TODO remove?
+                if (entry.Key != newKey)
+                    //&& entry.Type != NodeType.Unknown)  // TODO remove?
                 {
                     int minValue = CalculateBucketEntryWeight(entry, Age);
 
@@ -119,8 +119,7 @@ public interface ITranspositionTable
                         // Bucket policy to discard very old entries
 
                         // Always take an empty entry, or one that corresponds to the same position
-                        if (candidateEntry.Key == newKey
-                            || candidateEntry.Type == NodeType.Unknown) // TODO remove?
+                        if (candidateEntry.Key == newKey || candidateEntry.Key == 0)
                         {
                             entry = ref candidateEntry;
 
