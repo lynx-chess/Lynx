@@ -123,11 +123,13 @@ public struct TranspositionTableElement
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update(ushort key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move)
     {
-        _key = key;
         _score = (short)score;
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
         _type_WasPv = (byte)(wasPv | ((int)nodeType << NodeTypeOffset));
-        _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+        _move = move is null && _key == key
+            ? Move
+            : ((ShortMove?)move ?? 0);
+        _key = key;
     }
 }
