@@ -48,7 +48,6 @@ public interface ITranspositionTable
                 var bucket = (TranspositionTableElement*)bucketPointer;
                 var key = GenerateTTKey(position.UniqueIdentifier);
 
-
                 // We simply take the first entry
                 for (int i = 0; i < Constants.TranspositionTableElementsPerBucket; ++i)
                 {
@@ -129,7 +128,7 @@ public interface ITranspositionTable
                             break;
                         }
 
-                        // Otherwise, take the entry with the lowest weight (calculated based on depth and age)
+                        // Otherwise, take the entry with the lowest weight (calculated based on depth and age), aka the 'worst' entry
                         var value = CalculateBucketEntryWeight(candidateEntry, Age);
 
                         if (value < minValue)
