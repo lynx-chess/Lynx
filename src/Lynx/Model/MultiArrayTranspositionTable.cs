@@ -16,6 +16,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
     private readonly int _ttArrayCount;
     private readonly TranspositionTableElement[][] _tt = [];
+    public int RequestedSizeMBs { get; }
     public int SizeMBs { get; }
     public ulong Length { get; }
 
@@ -25,7 +26,8 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         var sw = Stopwatch.StartNew();
 
         var oldSizeMBs = SizeMBs;
-        SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        RequestedSizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        SizeMBs = RequestedSizeMBs;
 
         Length = CalculateLength(SizeMBs);
 
@@ -70,6 +72,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
                     fullArrayCount = (ulong)i;
                     _tt[i] = [];
                     SizeMBs = (int)(fullArrayCount * (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024ul / 1024ul);
+                    Length = CalculateLength(SizeMBs);
                     _logger.Warn("Using only {ArrayCount} TT array(s) of size {ArraySize} ({ArraySizeMB} MB each) - {TotalSizeMB} MB total", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024, SizeMBs);
                 }
                 else
@@ -97,6 +100,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
                 _tt[_ttArrayCount - 1] = [];
                 --_ttArrayCount;
                 SizeMBs = (int)(fullArrayCount * (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024ul / 1024ul);
+                Length = CalculateLength(SizeMBs);
                 _logger.Warn(e, "Using only {ArrayCount} TT array(s) of size {ArraySize} ({ArraySizeMB} MB each) - {TotalSizeMB} MB total", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024, SizeMBs);
             }
         }
