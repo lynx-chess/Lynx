@@ -15,6 +15,7 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly TranspositionTableElement[] _tt = [];
+    public int RequestedSizeMBs { get; }
     public int SizeMBs { get; }
 
     public ulong Length => (ulong)_tt.Length;
@@ -24,7 +25,8 @@ public readonly struct SingleArrayTranspositionTable : ITranspositionTable
         _logger.Debug("Allocating Single Array TT");
         var sw = Stopwatch.StartNew();
 
-        SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        RequestedSizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        SizeMBs = RequestedSizeMBs;
         var ttLength = CalculateLength(SizeMBs);
 
         bool exceptionThrown = false;

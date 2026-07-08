@@ -16,6 +16,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
     private readonly int _ttArrayCount;
     private readonly TranspositionTableElement[][] _tt = [];
+    public int RequestedSizeMBs { get; }
     public int SizeMBs { get; }
     public ulong Length { get; }
 
@@ -25,7 +26,8 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         var sw = Stopwatch.StartNew();
 
         var oldSizeMBs = SizeMBs;
-        SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        RequestedSizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        SizeMBs = RequestedSizeMBs;
 
         Length = CalculateLength(SizeMBs);
 
