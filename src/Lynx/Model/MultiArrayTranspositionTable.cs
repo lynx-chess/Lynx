@@ -91,6 +91,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
             try
             {
+                throw new OutOfMemoryException("Test exception");
                 _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>((int)itemsLeft, pinned: true);
             }
             catch (OutOfMemoryException e)
