@@ -85,7 +85,7 @@ public static class MemoryExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetChunkLength(nint remaining)
     {
-        return remaining > Array.MaxLength ? Array.MaxLength : (int)remaining;
+        return remaining > Settings.ArrayMaxLength ? Settings.ArrayMaxLength : (int)remaining;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -972,7 +972,7 @@ public static class MemoryExtensions
         BigSpan<T> destination = buffer.AsBigSpan();
         bool sourceIsScratch = false;
 
-        for (nint width = Array.MaxLength; width < span._length;)
+        for (nint width = Settings.ArrayMaxLength; width < span._length;)
         {
             MergePass(source, destination, width, comparer);
             BigSpan<T> previousSource = source;
@@ -999,7 +999,7 @@ public static class MemoryExtensions
         BigSpan<T> destination = buffer.AsBigSpan();
         bool sourceIsScratch = false;
 
-        for (nint width = Array.MaxLength; width < span._length;)
+        for (nint width = Settings.ArrayMaxLength; width < span._length;)
         {
             MergePass(source, destination, width, comparison);
             BigSpan<T> previousSource = source;

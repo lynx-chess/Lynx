@@ -48,7 +48,7 @@ public sealed partial class BigArray<T> : IEnumerable<T>
     {
         if ((nuint)length > (nuint)MaxLength) ThrowHelpers.ThrowOutOfRange(nameof(length));
 
-        if (length <= Array.MaxLength) _storage = new ElementChunk1<T>[length];
+        if (length <= Settings.ArrayMaxLength) _storage = new ElementChunk1<T>[length];
         else _storage = CreateBigArraySlow(length);
         _length = length;
     }
@@ -64,7 +64,7 @@ public sealed partial class BigArray<T> : IEnumerable<T>
     {
         if ((nuint)length > (nuint)MaxLength) ThrowHelpers.ThrowOutOfRange(nameof(length));
 
-        Array storage = length <= Array.MaxLength
+        Array storage = length <= Settings.ArrayMaxLength
             ? uninitialized
                 ? GC.AllocateUninitializedArray<ElementChunk1<T>>((int)length, pinned)
                 : GC.AllocateArray<ElementChunk1<T>>((int)length, pinned)
