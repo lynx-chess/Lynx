@@ -20,7 +20,7 @@ public sealed class Searcher : IDisposable
     private int _searchThreadsCount;
     private Engine _mainEngine;
     private Engine[] _extraEngines = [];
-    private ITranspositionTable _ttWrapper;
+    private TranspositionTable _ttWrapper;
 
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
@@ -40,7 +40,7 @@ public sealed class Searcher : IDisposable
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        _ttWrapper = TranspositionTableFactory.Create();
+        _ttWrapper = new();
         _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
@@ -562,7 +562,7 @@ public sealed class Searcher : IDisposable
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
             _engineWriter.TryWrite($"info string Resizing TT ({_ttWrapper.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
-            _ttWrapper = TranspositionTableFactory.Create();
+            _ttWrapper = new();
 
             if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
             {

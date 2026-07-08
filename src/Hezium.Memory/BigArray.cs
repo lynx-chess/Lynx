@@ -13,6 +13,20 @@ namespace Hezium.Memory;
 [DebuggerDisplay("IsEmpty = {IsEmpty}, Length = {(long)Length}")]
 public sealed partial class BigArray<T> : IEnumerable<T>
 {
+    /// <summary>
+    /// Returns a reference to the element at index 0 of the array, or a null reference if the array is empty.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref T GetPinnableReference()
+    {
+        if (_length == 0)
+        {
+            return ref Unsafe.NullRef<T>();
+        }
+
+        return ref MemoryExtensions.GetBigArrayDataReference(this);
+    }
+
     internal readonly Array _storage;
     internal readonly nint _length;
 

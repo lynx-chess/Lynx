@@ -1,3 +1,4 @@
+using Hezium.Memory;
 using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -14,7 +15,7 @@ public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly TranspositionTableElement[] _tt = [];
+    private readonly BigArray<TranspositionTableElement> _tt = [];
     public int SizeMBs { get; }
 
     public ulong Length => (ulong)_tt.Length;
@@ -32,7 +33,7 @@ public readonly struct TranspositionTable
         {
             try
             {
-                _tt = GC.AllocateArray<TranspositionTableElement>((int)ttLength, pinned: true);
+                _tt = GC.AllocateBigArray<TranspositionTableElement>((int)ttLength, pinned: true);
                 break;
             }
             catch (OutOfMemoryException e)
@@ -148,25 +149,32 @@ public readonly struct TranspositionTable
     /// </summary>
     public void Clear()
     {
-        var threadCount = Configuration.EngineSettings.Threads;
-
-        _logger.Debug("Zeroing Single Array TT using {ThreadCount} thread(s)", threadCount);
         var sw = Stopwatch.StartNew();
+        _tt.Clear();
 
-        var tt = _tt;
-        var ttLength = tt.Length;
-        var sizePerThread = ttLength / threadCount;
+        // TODO
 
-        // Instead of just doing Array.Clear(_tt):
-        Parallel.For(0, threadCount, i =>
-        {
-            var start = i * sizePerThread;
-            var length = (i == threadCount - 1)
-                ? ttLength - start
-                : sizePerThread;
+        //var threadCount = Configuration.EngineSettings.Threads;
 
-            Array.Clear(tt, start, length);
-        });
+        //_logger.Debug("Zeroing Single Array TT using {ThreadCount} thread(s)", threadCount);
+        //var sw = Stopwatch.StartNew();
+
+        //var tt = _tt;
+        //var ttLength = tt.Length;
+        //var sizePerThread = ttLength / threadCount;
+
+        //// Instead of just doing Array.Clear(_tt):
+        //Parallel.For(0, threadCount, i =>
+        //{
+        //    var start = i * sizePerThread;
+        //    var length = (i == threadCount - 1)
+        //        ? ttLength - start
+        //        : sizePerThread;
+
+        //    Array.Clear(tt, start, length);  // TODO
+
+        //    tt.Clear();
+        //});
 
         _logger.Info("Single Array TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
@@ -213,7 +221,7 @@ public readonly struct TranspositionTable
     private ref TranspositionTableElement GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return ref _tt[ttIndex];
+        return ref _tt[(nint)ttIndex];
     }
 
     /// <summary>
@@ -223,7 +231,7 @@ public readonly struct TranspositionTable
     private ref readonly TranspositionTableElement GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return ref _tt[ttIndex];
+        return ref _tt[(nint)ttIndex];
     }
 
     /// <summary>
