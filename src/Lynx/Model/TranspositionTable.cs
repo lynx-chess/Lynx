@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics.X86;
 namespace Lynx.Model;
 
 /// <summary>
-/// Single array transposition table implementation (from main branch)
+/// Transposition table based on Hezium.Memory.BigArray
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct TranspositionTable
@@ -16,7 +16,9 @@ public readonly struct TranspositionTable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly BigArray<TranspositionTableElement> _tt = [];
+
     public int RequestedSizeMBs { get; }
+
     public int SizeMBs { get; }
 
     public ulong Length => (ulong)_tt.Length;
@@ -151,34 +153,28 @@ public readonly struct TranspositionTable
     /// </summary>
     public void Clear()
     {
+        var threadCount = Configuration.EngineSettings.Threads;
+
+        _logger.Debug("Zeroing TT using {ThreadCount} thread(s)", threadCount);
         var sw = Stopwatch.StartNew();
-        _tt.Clear();
 
-        // TODO
+        var tt = _tt;
+        var ttLength = tt.Length;
+        var sizePerThread = ttLength / threadCount;
 
-        //var threadCount = Configuration.EngineSettings.Threads;
+        // Instead of just doing _tt.Clear():
+        Parallel.For(0, threadCount, i =>
+        {
+            var start = i * sizePerThread;
+            var length = (i == threadCount - 1)
+                ? ttLength - start
+                : sizePerThread;
 
-        //_logger.Debug("Zeroing Single Array TT using {ThreadCount} thread(s)", threadCount);
-        //var sw = Stopwatch.StartNew();
+            var span = tt.AsSpan(start, (int)length);
+            span.Clear();
+        });
 
-        //var tt = _tt;
-        //var ttLength = tt.Length;
-        //var sizePerThread = ttLength / threadCount;
-
-        //// Instead of just doing Array.Clear(_tt):
-        //Parallel.For(0, threadCount, i =>
-        //{
-        //    var start = i * sizePerThread;
-        //    var length = (i == threadCount - 1)
-        //        ? ttLength - start
-        //        : sizePerThread;
-
-        //    Array.Clear(tt, start, length);  // TODO
-
-        //    tt.Clear();
-        //});
-
-        _logger.Info("Single Array TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -270,7 +266,7 @@ public readonly struct TranspositionTable
     /// <summary>
     /// Exact transposition table occupancy per mill (0-1000)
     /// </summary>
-    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)Length));
+    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)_tt.Length));
 
     /// <summary>
     /// Orders of magnitude faster than <see cref="HashfullPermill"/>
@@ -341,7 +337,7 @@ public readonly struct TranspositionTable
                 ++items;
             }
         }
-        _logger.Info("Single Array TT Occupancy:\t{0}% ({1}MB)",
+        _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
             100 * PopulatedItemsCount() / (ulong)_tt.Length,
             (ulong)_tt.Length * (ulong)Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
     }
@@ -349,7 +345,7 @@ public readonly struct TranspositionTable
     [Conditional("DEBUG")]
     private readonly void Print()
     {
-        Console.WriteLine("Single Array Transposition table content:");
+        Console.WriteLine("Transposition table content:");
         for (int i = 0; i < _tt.Length; ++i)
         {
             if (_tt[i].Key != default)
