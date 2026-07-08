@@ -245,7 +245,7 @@ public readonly struct TranspositionTable
     /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static int RecalculateMateScores(int score, int ply)
+    internal static int RecalculateMateScores(int score, int ply)
     {
 #pragma warning disable MA0071 // Avoid using redundant else
         if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
