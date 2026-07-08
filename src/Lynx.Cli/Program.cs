@@ -20,8 +20,6 @@ var config = new ConfigurationBuilder()
 config.GetSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
 config.GetSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
 
-Hezium.Memory.Settings.ArrayMaxLength = 1_677_721;  // 16 MB
-
 if (Configuration.GeneralSettings.EnableLogging)
 {
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
