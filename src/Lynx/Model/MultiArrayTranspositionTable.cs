@@ -14,7 +14,6 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly int _ttArrayCount;
     private readonly TranspositionTableElement[][] _tt = [];
     public int RequestedSizeMBs { get; }
     public int SizeMBs { get; }
@@ -36,24 +35,26 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         Debug.Assert(fullArrayCount <= int.MaxValue);
         Debug.Assert(itemsLeft <= int.MaxValue);
 
-        _ttArrayCount = (int)fullArrayCount
+        var ttArrayCount = (int)fullArrayCount
             + (itemsLeft == 0
                 ? 0
                 : 1);
 
-        if (_ttArrayCount > 1)
+        if (ttArrayCount > 1)
         {
-            _logger.Info("Multi-Array TT arrays:\t{0}", _ttArrayCount);
+            _logger.Info("Multi-Array TT arrays:\t{0} ({1} x {2} MB{3})", ttArrayCount, fullArrayCount,
+                (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024,
+                itemsLeft == 0 ? "" : $" + 1 x {itemsLeft * TranspositionTableElement.Size / 1024 / 1024} MB");
         }
 
-        if (_ttArrayCount > Constants.MaxTTArrayLength)
+        if (ttArrayCount > Constants.MaxTTArrayLength)
         {
             var ttLengthGB = (double)Length / 1024 / 1024 / 1024;
             throw new ConfigurationException($"Invalid TT Hash size: {ttLengthGB} GB, {Length} values (> {Constants.MaxTTArrayLength})");
         }
 
         _logger.Info("{ArrayCount} array(s) of size {ArraySize} ({ArraySizeMB} MB)", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024);
-        _tt = GC.AllocateArray<TranspositionTableElement[]>(_ttArrayCount, pinned: true);
+        _tt = GC.AllocateArray<TranspositionTableElement[]>(ttArrayCount, pinned: true);
         for (int i = 0; i < (int)fullArrayCount; ++i)
         {
             try
@@ -68,9 +69,8 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
                 if (i > 0)
                 {
-                    _ttArrayCount = i;
                     fullArrayCount = (ulong)i;
-                    _tt[i] = [];
+                    _tt = _tt[..i];
                     SizeMBs = (int)(fullArrayCount * (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024ul / 1024ul);
                     Length = CalculateLength(SizeMBs);
                     _logger.Warn("Using only {ArrayCount} TT array(s) of size {ArraySize} ({ArraySizeMB} MB each) - {TotalSizeMB} MB total", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024, SizeMBs);
@@ -91,14 +91,13 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
 
             try
             {
-                _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>((int)itemsLeft, pinned: true);
+                _tt[^1] = GC.AllocateArray<TranspositionTableElement>((int)itemsLeft, pinned: true);
             }
             catch (OutOfMemoryException e)
             {
                 _logger.Warn("Out of memory exception when allocating remaining items TT array of size {ArraySize} ({ArraySizeMB} MB)", itemsLeft, itemsLeft * TranspositionTableElement.Size / 1024 / 1024);
 
-                _tt[_ttArrayCount - 1] = [];
-                --_ttArrayCount;
+                _tt = _tt[..^1];
                 SizeMBs = (int)(fullArrayCount * (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024ul / 1024ul);
                 Length = CalculateLength(SizeMBs);
                 _logger.Warn(e, "Using only {ArrayCount} TT array(s) of size {ArraySize} ({ArraySizeMB} MB each) - {TotalSizeMB} MB total", fullArrayCount, Constants.MaxTTArrayLength, (ulong)Constants.MaxTTArrayLength * TranspositionTableElement.Size / 1024 / 1024, SizeMBs);
@@ -113,7 +112,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
     /// </summary>
     public void Clear()
     {
-        var threadsPerTTArray = Configuration.EngineSettings.Threads / _ttArrayCount;
+        var threadsPerTTArray = Configuration.EngineSettings.Threads / _tt.Length;
 
         var sw = Stopwatch.StartNew();
 
@@ -132,12 +131,12 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
     private void ParallelTTArrayZeroing(int threadsPerTTArray)
     {
         _logger.Info("Multi-Array TT zeroing using {ZeroingThreadCount} (out of {TotalThreadCount}) thread(s), using {PerTTThreadCount} thread per TT array",
-            _ttArrayCount * threadsPerTTArray, Configuration.EngineSettings.Threads, threadsPerTTArray);
+            _tt.Length * threadsPerTTArray, Configuration.EngineSettings.Threads, threadsPerTTArray);
 
         var localTTRef = _tt;
 
         // Instead of just doing foreach (var tt in _tt)
-        Parallel.For(0, _ttArrayCount, ttArrayIndex =>
+        Parallel.For(0, _tt.Length, ttArrayIndex =>
         {
             var tt = localTTRef[ttArrayIndex];
 
@@ -186,7 +185,7 @@ public readonly struct MultiArrayTranspositionTable : ITranspositionTable
         if (Sse.IsSupported)
         {
             (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-            Debug.Assert(ttIndex < _ttArrayCount);
+            Debug.Assert(ttIndex < _tt.Length);
             Debug.Assert(entryIndex < _tt[ttIndex].Length);
 
             unsafe
