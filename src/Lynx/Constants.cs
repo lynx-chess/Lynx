@@ -328,9 +328,9 @@ public static class Constants
     ];
 
     /// <summary>
-    /// ~20 GB
+    /// 16 MB
     /// </summary>
-    public static readonly int MaxTTArrayLength = Array.MaxLength;
+    public static readonly int MaxTTArrayLength = 1_677_721;
 
     public static double TTArraySizeGBs => (double)MaxTTArrayLength * TranspositionTableElement.Size / (1024 * 1024 * 1024);
 
