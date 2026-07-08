@@ -297,12 +297,12 @@ public readonly struct TranspositionTable
 
         if (ttLength > (ulong)Array.MaxLength)
         {
-            _logger.Info("Requested large hash size: {RequestedHashSize} GB, {TTLength} values (> {TTArraySizeGBs} GB, {MaxTTArrayLength} items, what would fit in a normal array)",
-                (ttLengthMB / 1024).ToString("F2"), ttLength, Constants.TTArraySizeGBs.ToString("F2"), Constants.MaxTTArrayLength);
+            _logger.Info("Requested large hash size: {RequestedHashSize} GB, {TTLength} values (> {TTArraySizeGBs} GB, {ArrayMaxLength} items, what would fit in a normal array)",
+                (ttLengthMB / 1024).ToString("F2"), ttLength, ((double)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024 * 1024)).ToString("F2"), Array.MaxLength);
         }
 
         _logger.Info("Hash value:\t{0} MB", sizeMBs);
-        _logger.Info("TT memory:\t{0} MB", (ttLengthMB).ToString("F"));
+        _logger.Info("TT memory:\t{0} MB", ttLengthMB.ToString("F"));
         _logger.Info("TT length:\t{0} items", ttLength);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
