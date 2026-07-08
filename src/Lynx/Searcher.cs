@@ -557,7 +557,8 @@ public sealed class Searcher : IDisposable
 
     public bool UpdateHash()
     {
-        if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
+        if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize
+            && _ttWrapper.RequestedSizeMBs != Configuration.EngineSettings.TranspositionTableSize)
         {
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
             _engineWriter.TryWrite($"info string Resizing TT ({_ttWrapper.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
