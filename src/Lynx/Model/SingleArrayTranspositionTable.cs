@@ -17,6 +17,9 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
     public int Age { get; set; }
 
     private readonly TranspositionTableBucket[] _tt = [];
+
+    public int RequestedSizeMBs { get; }
+
     public int SizeMBs { get; }
 
     public readonly ulong Length => (ulong)_tt.Length;
@@ -26,7 +29,8 @@ public struct SingleArrayTranspositionTable : ITranspositionTable
         _logger.Debug("Allocating Single Array TT");
         var sw = Stopwatch.StartNew();
 
-        SizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        RequestedSizeMBs = Configuration.EngineSettings.TranspositionTableSize;
+        SizeMBs = RequestedSizeMBs;
         var ttLength = CalculateLength(SizeMBs);
 
         bool exceptionThrown = false;

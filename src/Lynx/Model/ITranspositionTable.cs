@@ -12,6 +12,11 @@ public interface ITranspositionTable
     int Age { get; protected set; }
 
     /// <summary>
+    /// Request size of the transposition table in MB
+    /// </summary>
+    int RequestedSizeMBs { get; }
+
+    /// <summary>
     /// Size of the transposition table in MB
     /// </summary>
     int SizeMBs { get; }
