@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
@@ -22,6 +23,12 @@ public unsafe struct TranspositionTableBucket
     [FieldOffset(30)]
     private fixed byte _padding[2];
 #pragma warning restore S1144 // Unused private types or members should be removed
+
+    static TranspositionTableBucket()
+    {
+        Debug.Assert(TranspositionTableElement.Size == 10);
+        Debug.Assert(Size == 32);
+    }
 
     /// <summary>
     /// Struct size in bytes

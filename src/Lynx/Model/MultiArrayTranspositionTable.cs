@@ -269,11 +269,13 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
     {
         int items = 0;
 
+        var tt = _tt[0];
+
         for (int i = 0; i < 1_000; ++i)
         {
             unsafe
             {
-                fixed (TranspositionTableBucket* ttPtr = _tt[i])
+                fixed (TranspositionTableBucket* ttPtr = tt)
                 {
                     var bucketPtr = ttPtr + i;
                     var bucket = (TranspositionTableElement*)bucketPtr;
@@ -291,7 +293,7 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
         }
 
         //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
-        return items;
+        return items / Constants.TranspositionTableElementsPerBucket;
     }
 
     internal static ulong CalculateLength(int size)
@@ -329,13 +331,15 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
         ulong items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            for (int j = 0; j < _tt[i].Length; ++j)
+            var tt = _tt[i];
+
+            for (int j = 0; j < tt.Length; ++j)
             {
                 unsafe
                 {
-                    fixed (TranspositionTableBucket* ttPtr = _tt[i])
+                    fixed (TranspositionTableBucket* ttPtr = tt)
                     {
-                        var bucketPtr = ttPtr + i;
+                        var bucketPtr = ttPtr + j;
                         var bucket = (TranspositionTableElement*)bucketPtr;
 
                         for (int k = 0; k < Constants.TranspositionTableElementsPerBucket; ++k)
@@ -363,13 +367,15 @@ public struct MultiArrayTranspositionTable : ITranspositionTable
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            for (int j = 0; j < _tt[i].Length; ++j)
+            var tt = _tt[i];
+
+            for (int j = 0; j < tt.Length; ++j)
             {
                 unsafe
                 {
-                    fixed (TranspositionTableBucket* ttPtr = _tt[i])
+                    fixed (TranspositionTableBucket* ttPtr = tt)
                     {
-                        var bucketPtr = ttPtr + i;
+                        var bucketPtr = ttPtr + j;
                         var bucket = (TranspositionTableElement*)bucketPtr;
 
                         for (int k = 0; k < Constants.TranspositionTableElementsPerBucket; ++k)
