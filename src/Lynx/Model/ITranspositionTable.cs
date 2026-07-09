@@ -183,7 +183,7 @@ public interface ITranspositionTable
                     var ageDelta = (ttAge - entry.Age + TranspositionTableElement.MaxAge + 1) & TranspositionTableElement.MaxAge;
 
                     // depth - age formula from SP
-                    return entry.Depth - (2 * ageDelta);
+                    return entry.Depth - (ageDelta * ageDelta / 4);
                 }
             }
         }
