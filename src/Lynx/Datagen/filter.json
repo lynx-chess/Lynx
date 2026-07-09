@@ -8,7 +8,7 @@
   "FilterCastling": false,
   "MaxEvalIncorrectness": 4294967295,
   "LimitPositionsPerGame": true,
-  "MaxPositionsPerGame": 40,
+  "MaxPositionsPerGame": 20,
   "LimitPositionsPerPhasePerGame": false,
   "MaxPositionsPerPhasePerGame": 4096,
   "DrawAdjudication": false,
