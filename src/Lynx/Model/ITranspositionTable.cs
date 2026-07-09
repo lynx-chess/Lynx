@@ -29,7 +29,7 @@ public interface ITranspositionTable
     void BumpAge()
     {
         // Circular buffer
-        Age = (Age + 1) % TranspositionTableElement.MaxAge;
+        Age = (Age + 1) & TranspositionTableElement.MaxAge;
     }
 
     /// <summary>
