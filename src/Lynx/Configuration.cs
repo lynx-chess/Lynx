@@ -530,6 +530,12 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
 
+    public int Datagen_GenFens_NoBook_BaseMoves { get; set; } = 8;
+
+    public int Datagen_GenFens_Book_MinMoves { get; set; } = 1;
+
+    public int Datagen_GenFens_Book_MaxMoves { get; set; } = 4;
+
     public bool Datagen_VFtoEPD_EmptyLineBetweenGames { get; set; }
 
     /// <summary>
