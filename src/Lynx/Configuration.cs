@@ -524,7 +524,7 @@ public sealed class EngineSettings
 
     #region Datagen
 
-    public int Datagen_GenFens_Depth { get; set; } = 10;
+    public int Datagen_GenFens_VerificationDepth { get; set; } = 15;
 
     public int Datagen_GenFens_MaxEval { get; set; } = 1000;
 

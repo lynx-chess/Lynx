@@ -627,7 +627,7 @@ public sealed class Searcher : IDisposable
         using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
 
         var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
-        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
+        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_VerificationDepth, SearchConstraints.DefaultMaxNodes);
 
         var rnd = new Random(genFensCommand.Seed);
 
