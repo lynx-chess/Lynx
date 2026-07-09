@@ -87,24 +87,40 @@ public class TranspositionTableTests
 
         for (int index = 0; index < (int)tt.Length; ++index)
         {
-            ref var ttEntry = ref ((SingleArrayTranspositionTable)tt).Get(index);
-            ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6, 7);
+            ref var ttBucket = ref ((SingleArrayTranspositionTable)tt).Get(index);
+            unsafe
+            {
+                fixed (TranspositionTableBucket* bucketPointer = &ttBucket)
+                {
+                    var ttEntry = ((TranspositionTableElement*)bucketPointer)[0];
+                    ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6, 7);
+                }
+            }
         }
 
         tt.Clear();
 
         for (int index = 0; index < (int)tt.Length; ++index)
         {
-            var ttEntry = ((SingleArrayTranspositionTable)tt).Get(index);
+            ref var ttBucket = ref ((SingleArrayTranspositionTable)tt).Get(index);
 
-            Assert.AreEqual(0, ttEntry.Score);
-            Assert.AreEqual(0, ttEntry.StaticEval);
-            Assert.AreEqual(0, ttEntry.Depth);
-            Assert.AreEqual(NodeType.Unknown, ttEntry.Type);
-            Assert.AreEqual(false, ttEntry.WasPv);
-            Assert.AreEqual(0, ttEntry.Move);
-            Assert.AreEqual(0, ttEntry.Key);
-            Assert.AreEqual(0, ttEntry.Age);
+            unsafe
+            {
+                fixed (TranspositionTableBucket* bucketPointer = &ttBucket)
+                {
+                    var ttEntry = ((TranspositionTableElement*)bucketPointer)[0];
+                    ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6, 7);
+
+                    Assert.AreEqual(0, ttEntry.Score);
+                    Assert.AreEqual(0, ttEntry.StaticEval);
+                    Assert.AreEqual(0, ttEntry.Depth);
+                    Assert.AreEqual(NodeType.Unknown, ttEntry.Type);
+                    Assert.AreEqual(false, ttEntry.WasPv);
+                    Assert.AreEqual(0, ttEntry.Move);
+                    Assert.AreEqual(0, ttEntry.Key);
+                    Assert.AreEqual(0, ttEntry.Age);
+                }
+            }
         }
     }
 
