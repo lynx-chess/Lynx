@@ -681,7 +681,7 @@ public sealed class Searcher : IDisposable
                 }
             }
 
-            return game.FEN;
+            return game.CurrentPosition.FEN();
         }
 
         static int PickRandomMove(Position position, Random rnd)
