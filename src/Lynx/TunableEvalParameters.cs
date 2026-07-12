@@ -1,4 +1,4 @@
-﻿// 2026-7-10 14:12:37  6
+﻿﻿// 2026-7-10 14:12:37  6
 
 using static Lynx.Utils;
 
@@ -6019,9 +6019,9 @@ public static class EvaluationParams
 	public const int KingShieldBonus = -327699;
 
 	/// <summary>
-	/// <see cref="Utils.Pack(23, -0)"/>
+	/// <see cref="Utils.Pack(16, 0)"/>
 	/// </summary>
-	public const int KingShieldNonAttackedBonus = 23;
+	public const int KingShieldNonAttackedBonus = 16;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(31, 53)"/>
@@ -6074,9 +6074,9 @@ public static class EvaluationParams
 	public const int QueenKingRingAttacksBonus = 393220;
 
 	/// <summary>
-	/// <see cref="Utils.Pack(18, 17)"/>
+	/// <see cref="Utils.Pack(19, 16)"/>
 	/// </summary>
-	public const int PawnPushThreatBonus = 1114130;
+	public const int PawnPushThreatBonus = 1048595;
 
 	public static readonly int[] PassedPawnPushBonus =
 	[
