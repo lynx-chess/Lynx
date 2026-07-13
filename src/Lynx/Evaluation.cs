@@ -445,6 +445,16 @@ public partial class Position
                     {
                         eval >>= 1; // /2
                     }
+
+                    var whiteKnigts = _pieceBitboards[(int)Piece.N];
+                    var blackKnights = _pieceBitboards[(int)Piece.n];
+
+                    // Knight vs Knight endgame
+                    if (whiteKnigts > 0
+                        && blackKnights > 0)
+                    {
+                        eval >>= 1; // /2
+                    }
                 }
             }
         }
