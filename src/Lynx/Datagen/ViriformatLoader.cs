@@ -15,9 +15,11 @@ public static class ViriformatLoader
     {
         public ulong GameCount;
 
-        public ulong PositonsCount;
+        public ulong SelectedGamesCount;
 
-        public ulong FilteredPositionsCount;
+        public ulong PositionsCount;
+
+        public ulong SelectedPositionsCount;
 
         public int ShortestGameMoveCount;
 
@@ -35,19 +37,20 @@ public static class ViriformatLoader
         {
             _logger.Warn("Source file: {Path}", path);
             _logger.Warn("Total games: {GameCount}", GameCount);
-            _logger.Warn("Total positions: {PositonsCount}", PositonsCount);
-            _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", FilteredPositionsCount, PositonsCount > 0 ? (100 * FilteredPositionsCount / (double)PositonsCount).ToString("F2") : "0");
-            _logger.Warn("Positions/game: {PositonsPerGameCount}", GameCount > 0 ? (ulong)Math.Round(FilteredPositionsCount / (double)GameCount) : 0);
+            _logger.Warn("Total positions: {PositonsCount}", PositionsCount);
+            _logger.Warn("Games after filtering: {PositonsCount} ({SelectedGamesCountPercentage}%)", SelectedGamesCount, GameCount > 0 ? (100 * SelectedGamesCount / (double)GameCount).ToString("F2") : "0");
+            _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", SelectedPositionsCount, PositionsCount > 0 ? (100 * SelectedPositionsCount / (double)PositionsCount).ToString("F2") : "0");
+            _logger.Warn("Positions/game: {PositonsPerGameCount}", SelectedGamesCount > 0 ? (ulong)Math.Round(SelectedPositionsCount / (double)SelectedGamesCount) : 0);
             _logger.Warn("Shortest game: {ShortestGameMoves} moves, longest game: {LongestGameMoves} moves", ShortestGameMoveCount, LongestGameMoveCount);
 
             if (GamesAdjudicatedAsDrawsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} potential positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
+                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} potential positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / SelectedGamesCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
             }
 
             if (GamesAdjudicatedAsWinsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} potential positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
+                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} potential positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / SelectedGamesCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
             }
 
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
@@ -247,9 +250,19 @@ public static class ViriformatLoader
                     game.MakeMove(move!.Value);
 
                     isFirstGameMove = false;
-                    ++stats.PositonsCount;
+                    ++stats.PositionsCount;
                     ++ply;
                 }
+
+                // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
+                ++stats.GameCount;
+
+                if (ply < filter?.MinGamePly)
+                {
+                    continue;
+                }
+
+                ++stats.SelectedGamesCount;
 
                 var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
                 int selectedPositionsCount = selectedPositionsPerGame.Length;
@@ -305,7 +318,7 @@ public static class ViriformatLoader
                     outputFile.WriteLine($"{selectedFEN}; {selectedEval}; [{gameResult}]");
                 }
 
-                stats.FilteredPositionsCount += (ulong)selectedPositionsPerGame.Length;
+                stats.SelectedPositionsCount += (ulong)selectedPositionsPerGame.Length;
 
                 var totalMoves = game.FullMoves;
                 if (totalMoves < stats.ShortestGameMoveCount)
@@ -329,14 +342,11 @@ public static class ViriformatLoader
                     outputFile.WriteLine();
                 }
 
-                // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
-                ++stats.GameCount;
-
                 const int SampleRate = 10_000;
                 if (stats.GameCount % SampleRate == 0)
                 {
                     var ms = sw.ElapsedMilliseconds;
-                    _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * (ulong)stats.GameCount / (ulong)ms);
+                    _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * stats.GameCount / (ulong)ms);
                 }
             }
         }

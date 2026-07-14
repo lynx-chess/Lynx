@@ -1,5 +1,6 @@
 {
   "MinPly": 20,
+  "MinGamePly": 30,
   "MinPieces": 7,
   "MaxInitialEval": 20000,
   "MaxEval": 20000,

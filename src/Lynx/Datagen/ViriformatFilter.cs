@@ -25,6 +25,11 @@ public class ViriformatFilter
     /// </summary>
     public uint MaxInitialEval { get; set; } = 1_000;
 
+    /// <summary>
+    /// Minimum ply (half-moves) for a game to be considered
+    /// </summary>
+    public int MinGamePly { get; set; }
+
     public uint MaxEval { get; set; } = 20_000;
 
     public bool FilterTactical { get; set; } = true;
@@ -112,6 +117,7 @@ public class ViriformatFilter
     public static ViriformatFilter Unrestricted => new()
     {
         MinPly = 0,
+        MinGamePly = 0,
         MinPieces = 0,
         MaxInitialEval = uint.MaxValue,
         MaxEval = uint.MaxValue,
