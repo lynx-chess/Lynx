@@ -127,9 +127,9 @@ public struct TranspositionTableElement
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
         _type_WasPv = (byte)(wasPv | ((int)nodeType << NodeTypeOffset));
-        _move = move is null && _key == key
-            ? Move
-            : ((ShortMove?)move ?? 0);
+        _move = move is not null
+            ? (ShortMove)move
+            : (_key == key ? _move : (ShortMove)MoveExtensions.NullMove);
         _key = key;
     }
 }
