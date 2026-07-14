@@ -328,13 +328,6 @@ public static class Constants
     ];
 
     /// <summary>
-    /// ~20 GB
-    /// </summary>
-    public static readonly int MaxTTArrayLength = Array.MaxLength;
-
-    public static double TTArraySizeGBs => (double)MaxTTArrayLength * TranspositionTableElement.Size / (1024 * 1024 * 1024);
-
-    /// <summary>
     /// ~2048 TB theoretical limit, max validated size is 256 GB
     /// </summary>
     public const int AbsoluteMaxTTSize = int.MaxValue;
