@@ -3,7 +3,7 @@
 namespace Lynx.Datagen;
 
 /// <summary>
-/// Implementation based on viriformat filtering
+/// Implementation initially based on viriformat filtering
 /// </summary>
 public class ViriformatFilter
 {
@@ -20,6 +20,9 @@ public class ViriformatFilter
 
     public int MinPieces { get; set; } = 4;
 
+    /// <summary>
+    /// Maximum initial (first move) evaluation for a game to be considered
+    /// </summary>
     public uint MaxInitialEval { get; set; } = 1_000;
 
     public uint MaxEval { get; set; } = 20_000;
@@ -32,12 +35,29 @@ public class ViriformatFilter
 
     public uint MaxEvalIncorrectness { get; set; } = uint.MaxValue;
 
+    /// <summary>
+    /// If true, limits the number of positions per game
+    /// </summary>
     public bool LimitPositionsPerGame { get; set; }
 
+    /// <summary>
+    /// Maximum number of positions to keep per game after filtering. If LimitPositionsPerGame is false, this value is ignored.
+    /// </summary>
     public int MaxPositionsPerGame { get; set; } = MaxNumberOfPositionsPerGame;
 
+    /// <summary>
+    /// Discard games with less than this number of positions after filtering
+    /// </summary>
+    public int MinPositionsPerGame { get; set; }
+
+    /// <summary>
+    /// If true, limits the number of positions per phase per game
+    /// </summary>
     public bool LimitPositionsPerPhasePerGame { get; set; }
 
+    /// <summary>
+    /// Maximum number of positions to keep per phase per game. If LimitPositionsPerPhasePerGame is false, this value is ignored.
+    /// </summary>
     public int MaxPositionsPerPhasePerGame { get; set; } = MaxNumberOfPositionsPerGame;
 
     public bool DrawAdjudication { get; set; }
@@ -160,7 +180,7 @@ public class ViriformatFilter
             return true;
         }
 
-        if(firstGameMove && Math.Abs(eval) > MaxInitialEval)
+        if (firstGameMove && Math.Abs(eval) > MaxInitialEval)
         {
             return true;
         }
