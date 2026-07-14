@@ -18,17 +18,17 @@ public class ViriformatFilter
 
     public int MinPly { get; set; }
 
+    /// <summary>
+    /// Minimum ply (half-moves) for a game to be considered
+    /// </summary>
+    public int MinGamePly { get; set; }
+
     public int MinPieces { get; set; } = 4;
 
     /// <summary>
     /// Maximum initial (first move) evaluation for a game to be considered
     /// </summary>
     public uint MaxInitialEval { get; set; } = 1_000;
-
-    /// <summary>
-    /// Minimum ply (half-moves) for a game to be considered
-    /// </summary>
-    public int MinGamePly { get; set; }
 
     public uint MaxEval { get; set; } = 20_000;
 
