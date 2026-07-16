@@ -681,6 +681,7 @@ public sealed class Searcher : IDisposable
                 }
             }
 
+            // Using game.FEN here would return half and full move counters, which.. for some reason appears to be bad for datagen
             return game.CurrentPosition.FEN();
         }
 
