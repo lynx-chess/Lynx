@@ -106,7 +106,7 @@ public static class ViriformatLoader
 
                 using var game = new Game(parsedFEN);
 
-                var rng = new Random();
+                var rng = new Random(sourceFile.GetHashCode());
                 var ply = game.Ply;
                 var initialFEN = game.FEN;
                 var isFirstGameMove = true;
@@ -276,6 +276,7 @@ public static class ViriformatLoader
 
                     selectedPositionsCount = 0;
                     int positionIndexPerPhase = 1;
+#pragma warning disable RCS1239 // Use 'for' statement instead of 'while' statement
                     while (selectedPositionsCount < positionsToTakePerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
                     {
                         foreach (var group in positionsByPhaseShuffled)
@@ -294,6 +295,7 @@ public static class ViriformatLoader
 
                         positionIndexPerPhase++;
                     }
+#pragma warning restore RCS1239 // Use 'for' statement instead of 'while' statement
 
                     selectedPositionsPerGame = selectedPositionsPerGame[..selectedPositionsCount];
                 }
