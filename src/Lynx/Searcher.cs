@@ -681,7 +681,8 @@ public sealed class Searcher : IDisposable
                 }
             }
 
-            return game.FEN;
+            // Using game.FEN here would return half and full move counters, which.. for some reason appears to be bad for datagen
+            return game.CurrentPosition.FEN();
         }
 
         static int PickRandomMove(Position position, Random rnd)
