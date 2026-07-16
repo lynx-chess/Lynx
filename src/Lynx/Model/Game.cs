@@ -30,7 +30,7 @@ public sealed class Game : IDisposable
 
     public int FullMoves { get; set; } = 1;
 
-    public int Ply => ((FullMoves - 1) * 2) + CurrentPosition.Side == Side.Black ? 1 : 0;
+    public int Ply => ((FullMoves - 1) * 2) + (CurrentPosition.Side == Side.Black ? 1 : 0);
 
     public Position CurrentPosition { get; }
 
