@@ -526,7 +526,7 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_Depth { get; set; } = 10;
 
-    public int Datagen_GenFens_MaxEval { get; set; } = 1000;
+    public int Datagen_GenFens_MaxEval { get; set; } = 1500;
 
     public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
 
