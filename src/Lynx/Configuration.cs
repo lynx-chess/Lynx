@@ -530,7 +530,7 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_MaxEval { get; set; } = 1500;
 
-    public bool Datagen_GenFens_UsePieceProbabilities { get; set; } = false;
+    public bool Datagen_GenFens_UsePieceProbabilities { get; set; }
 
     public int Datagen_GenFens_PieceProbabilities_Pawns { get; set; } = 40;
 
