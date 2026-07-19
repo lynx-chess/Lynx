@@ -654,7 +654,7 @@ public sealed class Searcher : IDisposable
             var position = game.CurrentPosition;
 
             // We purposedly use the shared one here, since it isn't critical
-            var movesCount = 8 + (Random.Shared.Next() % 2);
+            var movesCount = Configuration.EngineSettings.Datagen_GenFens_RandomHalfMoveCount + (Random.Shared.Next() % 2);
 
             bool success = false;
             while (!success)
@@ -697,6 +697,8 @@ public sealed class Searcher : IDisposable
 
             // Filter out pseudolegal but not-legal moves
             int legalMovesCount = 0;
+            Span<int> movesByPiece = stackalloc int[12];
+            movesByPiece.Clear();
             foreach (var pseudoLegalMove in pseudoLegalMoves)
             {
                 var gameState = position.MakeMove(pseudoLegalMove);
@@ -704,6 +706,7 @@ public sealed class Searcher : IDisposable
                 if (position.WasProduceByAValidMove())
                 {
                     legalMoves[legalMovesCount++] = pseudoLegalMove;
+                    movesByPiece[pseudoLegalMove.Piece() % 6]++;
                 }
 
                 position.UnmakeMove(pseudoLegalMove, gameState);
@@ -714,19 +717,92 @@ public sealed class Searcher : IDisposable
             // Shuffle legal moves
             rnd.Shuffle(legalMoves);
 
-            // Pick one legal move that doesn't lead to a terminal position
-            foreach (var randomMove in legalMoves)
+            if (!Configuration.EngineSettings.Datagen_GenFens_UsePieceProbabilities)
             {
-                var gameState = position.MakeMove(randomMove);
-
-                position.CalculateThreats(ref evaluationContext);
-                var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
-
-                position.UnmakeMove(randomMove, gameState);
-
-                if (nextPositionHasAnyLegalMoves)
+                // Pick one legal move that doesn't lead to a terminal position
+                foreach (var randomMove in legalMoves)
                 {
-                    return randomMove;
+                    var gameState = position.MakeMove(randomMove);
+
+                    position.CalculateThreats(ref evaluationContext);
+                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+
+                    position.UnmakeMove(randomMove, gameState);
+
+                    if (nextPositionHasAnyLegalMoves)
+                    {
+                        return randomMove;
+                    }
+                }
+            }
+            else
+            {
+                var piecesToVisit = 0;
+                foreach (var pieceCount in movesByPiece)
+                {
+                    if (pieceCount != 0)
+                    {
+                        ++piecesToVisit;
+                    }
+                }
+
+                int piecesVisited = 0;
+
+                // We first try all pieces, before discarding the position (by returning 0)
+                while (piecesVisited != piecesToVisit)
+                {
+                    // Choose the piece for each move
+                    int pieceToUse = (int)Piece.K;
+
+                    var n = rnd.Next(0, 100);
+                    if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Pawns)
+                    {
+                        pieceToUse = (int)Piece.P;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Knights)
+                    {
+                        pieceToUse = (int)Piece.N;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Bishops)
+                    {
+                        pieceToUse = (int)Piece.B;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Rooks)
+                    {
+                        pieceToUse = (int)Piece.R;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Queen)
+                    {
+                        pieceToUse = (int)Piece.Q;
+                    }
+
+                    if (movesByPiece[pieceToUse] != 0)
+                    {
+                        ++piecesVisited;
+                        movesByPiece[pieceToUse] = 0;
+                    }
+
+                    // Pick one legal move that doesn't lead to a terminal position and that matches pieceToUse
+                    foreach (var randomMove in legalMoves)
+                    {
+                        var piece = randomMove.Piece();
+                        if (piece != pieceToUse && piece != (pieceToUse + 6))
+                        {
+                            continue;
+                        }
+
+                        var gameState = position.MakeMove(randomMove);
+
+                        position.CalculateThreats(ref evaluationContext);
+                        var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+
+                        position.UnmakeMove(randomMove, gameState);
+
+                        if (nextPositionHasAnyLegalMoves)
+                        {
+                            return randomMove;
+                        }
+                    }
                 }
             }
 
