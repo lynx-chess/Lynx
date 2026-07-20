@@ -619,9 +619,24 @@ public sealed class Searcher : IDisposable
     {
         _logger.Info("{Positions} requested, with seed {Seed} for book {Book}, extra params {Extra}", genFensCommand.Count, genFensCommand.Seed, genFensCommand.Book, genFensCommand.Extra);
 
-        if (!string.Equals(genFensCommand.Book, GenFensCommand.NoBook, StringComparison.OrdinalIgnoreCase))
+        bool generateFromBook = !string.Equals(genFensCommand.Book, GenFensCommand.NoBook, StringComparison.OrdinalIgnoreCase);
+        int lineCount = 0;
+
+        IEnumerable<string> bookLines = [];
+        string bookPath = string.Empty;
+
+        if (generateFromBook)
         {
-            _logger.Warn("GenFens with book option is not supported, ignoring book and generating random positions anyway");
+            bookPath = Path.Combine(Directory.GetCurrentDirectory(), genFensCommand.Book);
+
+            if (!File.Exists(bookPath))
+            {
+                _logger.Error("Book file {Book} not found", bookPath);
+                return;
+            }
+
+            bookLines = File.ReadLines(bookPath);
+            lineCount = bookLines.Count();
         }
 
         using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
@@ -634,7 +649,24 @@ public sealed class Searcher : IDisposable
         var positionsToGenerate = genFensCommand.Count;
         while (positionsToGenerate > 0)
         {
-            var startposFEN = GenerateDatagenStartpos(rnd);
+            string sourceFEN = Constants.InitialPositionFEN;
+            int randomMovesCount;
+
+            if (generateFromBook)
+            {
+                sourceFEN = bookLines.ElementAt(rnd.Next(0, lineCount - 1));
+
+                var minMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MinMoves;
+                var maxMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MaxMoves;
+                randomMovesCount = Random.Shared.Next(minMoves, maxMoves + 1);
+            }
+            else
+            {
+                var baseMoves = Configuration.EngineSettings.Datagen_GenFens_NoBook_BaseMoves;
+                randomMovesCount = baseMoves + (Random.Shared.Next() % 2);
+            }
+
+            var startposFEN = GenerateDatagenStartpos(rnd, sourceFEN, randomMovesCount);
 
             engine.AdjustPosition($"position fen {startposFEN}");
             var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
@@ -648,13 +680,13 @@ public sealed class Searcher : IDisposable
             --positionsToGenerate;
         }
 
-        string GenerateDatagenStartpos(Random rnd)
+        string GenerateDatagenStartpos(Random rnd, string fen, int moveCount)
         {
-            using var game = new Game(Constants.InitialPositionFEN);
+            using var game = new Game(fen);
             var position = game.CurrentPosition;
 
             // We purposedly use the shared one here, since it isn't critical
-            var movesCount = Configuration.EngineSettings.Datagen_GenFens_RandomHalfMoveCount + (Random.Shared.Next() % 2);
+            var movesCount = moveCount;
 
             bool success = false;
             while (!success)
