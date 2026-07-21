@@ -334,6 +334,10 @@ public partial class Position
         {
             gamePhase = MaxPhase;
         }
+        else if (gamePhase <= 1)    // We apply phase 0 to eg with 1 minor piece
+        {
+            gamePhase = 0;
+        }
 
         int endGamePhase = MaxPhase - gamePhase;
 
