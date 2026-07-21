@@ -528,7 +528,7 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_Depth { get; set; } = 10;
 
-    public int Datagen_GenFens_MaxEval { get; set; } = 1500;
+    public int Datagen_GenFens_MaxEval { get; set; } = 500;
 
     public bool Datagen_GenFens_UsePieceProbabilities { get; set; }
 
