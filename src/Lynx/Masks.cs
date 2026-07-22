@@ -23,6 +23,21 @@ public static class Masks
     public static Bitboard[] RankMasks { get; } = new Bitboard[64];
 
     /// <summary>
+    /// B|W
+    /// Seventh mask for white
+    /// 8  0 0 0 0 0 0 0 0
+    /// 7  1 1 1 1 1 1 1 1
+    /// 6  0 0 0 0 0 0 0 0
+    /// 5  0 0 0 0 0 0 0 0
+    /// 4  0 0 0 0 0 0 0 0
+    /// 3  0 0 0 0 0 0 0 0
+    /// 2  0 0 0 0 0 0 0 0
+    /// 1  0 0 0 0 0 0 0 0
+    ///    a b c d e f g h
+    /// </summary>
+    public static Bitboard[] SeventhRankMasks { get; } = [65280UL, 71776119061217280UL];
+
+    /// <summary>
     /// Isolated mask for square g2 (same for g3, g4, etc.)
     /// 8  0 0 0 0 0 1 0 1
     /// 7  0 0 0 0 0 1 0 1
