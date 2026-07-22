@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -776,6 +777,17 @@ public partial class Position
         evaluationContext.Attacks[(int)Piece.R + Utils.PieceOffset(pieceSide)] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
+        var rank = Constants.Rank(squareIndex);
+        var seventhRank = 1;
+        var eightRank = 0;
+
+        if (pieceIndex == (int)Piece.r)
+        {
+            rank = 7 - rank;
+            seventhRank = 6;
+            eightRank = 7;
+        }
+
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
         var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
@@ -808,14 +820,20 @@ public partial class Position
         // Connected rooks
         if ((attacks & _pieceBitboards[pieceIndex]).CountBits() >= 1)
         {
-            var rank = Constants.Rank(squareIndex);
-
-            if (pieceIndex == (int)Piece.r)
-            {
-                rank = 7 - rank;
-            }
-
             packedBonus += ConnectedRooksBonus[rank];
+        }
+
+        // Rook on 7th rank - only if king is on 8th rank and the rook is attacking opponent pawns
+        var oppositeSideOffset = 6 * pieceSide;
+        var oppositeKingRank = Constants.Rank(oppositeSideKingSquare);
+
+        var oppositeSidePawns = PieceBitboards[(int)Piece.P + oppositeSideOffset];
+
+        if (rank == seventhRank
+            && (oppositeKingRank == eightRank
+            || (attacks & oppositeSidePawns & Masks.SeventhRankMasks[1 - pieceSide]) != 0))
+        {
+            packedBonus += RookSeventhRankBonus;
         }
 
         return packedBonus;
