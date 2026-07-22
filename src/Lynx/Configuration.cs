@@ -524,7 +524,7 @@ public sealed class EngineSettings
 
     #region Datagen
 
-    public int Datagen_GenFens_RandomHalfMoveCount { get; set; } = 8;
+    public int Datagen_GenFens_RandomHalfMoveCount { get; set; } = 10;
 
     public int Datagen_GenFens_Depth { get; set; } = 10;
 
