@@ -22,6 +22,10 @@ public static class Masks
     /// </summary>
     public static Bitboard[] RankMasks { get; } = new Bitboard[64];
 
+    public const Bitboard WhiteSeventhRankMask = 65280UL;
+
+    public const Bitboard BlackSeventhRankMask = 71776119061217280UL;
+
     /// <summary>
     /// B|W
     /// Seventh mask for white
@@ -35,7 +39,7 @@ public static class Masks
     /// 1  0 0 0 0 0 0 0 0
     ///    a b c d e f g h
     /// </summary>
-    public static Bitboard[] SeventhRankMasks { get; } = [65280UL, 71776119061217280UL];
+    public static Bitboard[] SeventhRankMasks { get; } = [BlackSeventhRankMask, WhiteSeventhRankMask];
 
     /// <summary>
     /// Isolated mask for square g2 (same for g3, g4, etc.)
