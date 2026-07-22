@@ -20,7 +20,7 @@ public sealed class Searcher : IDisposable
     private int _searchThreadsCount;
     private Engine _mainEngine;
     private Engine[] _extraEngines = [];
-    private TranspositionTable _ttWrapper;  // TODO rename
+    private TranspositionTable _tt;
 
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
@@ -40,8 +40,8 @@ public sealed class Searcher : IDisposable
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        _ttWrapper = new();
-        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+        _tt = new();
+        _mainEngine = new Engine(MainEngineId, _engineWriter, in _tt);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
 
@@ -59,7 +59,7 @@ public sealed class Searcher : IDisposable
         // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
         // It might help performance though due to preventing that zeroing from happening during search
         // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
-        _ttWrapper.Clear();
+        _tt.Clear();
 
         ForceGCCollection();
     }
@@ -527,7 +527,7 @@ public sealed class Searcher : IDisposable
         // During the first run, TT is cleared at the end of the constructor
         if (!_firstRun && !hashUpdated)
         {
-            _ttWrapper.Clear();
+            _tt.Clear();
         }
         _firstRun = false;
 
@@ -557,28 +557,28 @@ public sealed class Searcher : IDisposable
 
     public bool UpdateHash()
     {
-        if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize
-            && _ttWrapper.RequestedSizeMBs != Configuration.EngineSettings.TranspositionTableSize)
+        if (_tt.SizeMBs != Configuration.EngineSettings.TranspositionTableSize
+            && _tt.RequestedSizeMBs != Configuration.EngineSettings.TranspositionTableSize)
         {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
-            _engineWriter.TryWrite($"info string Resizing TT ({_ttWrapper.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _tt.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
+            _engineWriter.TryWrite($"info string Resizing TT ({_tt.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
-            _ttWrapper = new();
+            _tt = new();
 
-            if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
+            if (_tt.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
             {
-                _engineWriter.TryWrite($"info string Using only {_ttWrapper.SizeMBs} MB for TT (instead of {Configuration.EngineSettings.TranspositionTableSize} MB) due to an issue during allocation");
+                _engineWriter.TryWrite($"info string Using only {_tt.SizeMBs} MB for TT (instead of {Configuration.EngineSettings.TranspositionTableSize} MB) due to an issue during allocation");
             }
 
             // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
             // It might impact performance though, due to preventing that zeroing from happening during search
             // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
-            _ttWrapper.Clear();
+            _tt.Clear();
 
 #pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _mainEngine.Dispose();
 #pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+            _mainEngine = new Engine(MainEngineId, _engineWriter, in _tt);
 
             // We need extra engines to know about the new TT
             AllocateExtraEngines();
@@ -600,7 +600,7 @@ public sealed class Searcher : IDisposable
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -609,7 +609,7 @@ public sealed class Searcher : IDisposable
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        using var engine = new Engine(-1, _engineWriter, in _ttWrapper);
+        using var engine = new Engine(-1, _engineWriter, in _tt);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
@@ -639,7 +639,7 @@ public sealed class Searcher : IDisposable
             lineCount = bookLines.Count();
         }
 
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
 
         var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
         var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
@@ -871,7 +871,7 @@ public sealed class Searcher : IDisposable
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
-                    in _ttWrapper);
+                    in _tt);
             }
         }
         else
@@ -911,7 +911,7 @@ public sealed class Searcher : IDisposable
         Parallel.For(0, warmupCount, i =>
         {
             var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-            using var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
+            using var engine = new Engine(-i, silentEngineWriter, in _tt);
 
             engine.Warmup();
         });
