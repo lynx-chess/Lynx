@@ -390,7 +390,7 @@ public partial class Position : IDisposable
 
     #region Move making
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public GameState MakeMove(Move move)
     {
         Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
@@ -720,7 +720,7 @@ public partial class Position : IDisposable
         return gameState;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
         var oppositeSide = (int)_side;
