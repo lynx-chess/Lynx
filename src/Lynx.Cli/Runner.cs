@@ -21,10 +21,35 @@ public static class Runner
         var writer = new Writer(engineChannel);
         var listener = new Listener(uciHandler);
 
+        // 1. Create a TaskCompletionSource to bridge the Thread to a Task
+        var searchTaskCompletionSource = new TaskCompletionSource();
+
+        // 2. Define a massive 32MB stack (32 * 1024 * 1024 bytes)
+        int maxStackSize = 32 * 1024 * 1024;
+
+        // 3. Create the thread
+        var searchThread = new Thread(async () =>
+        {
+            try
+            {
+                await searcher.Run(cancellationToken);
+                searchTaskCompletionSource.SetResult();
+            }
+            catch (Exception ex)
+            {
+                searchTaskCompletionSource.SetException(ex);
+            }
+        }, maxStackSize)
+        {
+            IsBackground = true
+        };
+
+        searchThread.Start();
+
         var tasks = new List<Task>
         {
             Task.Run(() => writer.Run(cancellationToken)),
-            Task.Run(() => searcher.Run(cancellationToken)),
+            searchTaskCompletionSource.Task, // <--- Using the custom thread task here
             Task.Run(() => listener.Run(cancellationToken, args)),
             uciChannel.Reader.Completion,
             engineChannel.Reader.Completion
