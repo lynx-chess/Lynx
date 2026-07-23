@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -778,14 +777,9 @@ public partial class Position
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         var rank = Constants.Rank(squareIndex);
-        var seventhRank = 1;
-        var eightRank = 0;
-
         if (pieceIndex == (int)Piece.r)
         {
             rank = 7 - rank;
-            seventhRank = 6;
-            eightRank = 7;
         }
 
         // Mobility
@@ -828,6 +822,9 @@ public partial class Position
         var oppositeKingRank = Constants.Rank(oppositeSideKingSquare);
 
         var oppositeSidePawns = PieceBitboards[(int)Piece.P + oppositeSideOffset];
+
+        const int seventhRank = 6;
+        const int eightRank = 7;
 
         if (rank == seventhRank
             && (oppositeKingRank == eightRank
