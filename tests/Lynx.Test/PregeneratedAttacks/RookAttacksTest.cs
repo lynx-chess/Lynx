@@ -26,7 +26,7 @@ public class RookAttacksTest
     public void GenerateRookAttacksOnTheFly(BS rookSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupiedBoard = BitBoardExtensions.Initialize(occupiedSquares);
+        var occupiedBoard = BitboardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)rookSquare, occupiedBoard);
@@ -38,7 +38,7 @@ public class RookAttacksTest
             attacks.PopBit(attackedSquare);
         }
 
-        Assert.AreEqual(default(BitBoard), attacks);
+        Assert.AreEqual(default(Bitboard), attacks);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class RookAttacksTest
     public void GetRookAttacks(BS rookSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
+        var occupancy = BitboardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = Attacks.RookAttacks((int)rookSquare, occupancy);
@@ -73,7 +73,7 @@ public class RookAttacksTest
         // Assert
         ValidateAttacks(attackedSquares, attacks);
 
-        static void ValidateAttacks(BS[] attackedSquares, BitBoard attacks)
+        static void ValidateAttacks(BS[] attackedSquares, Bitboard attacks)
         {
             // Assert
             foreach (var attackedSquare in attackedSquares)
@@ -82,7 +82,7 @@ public class RookAttacksTest
                 attacks.PopBit(attackedSquare);
             }
 
-            Assert.AreEqual(default(BitBoard), attacks);
+            Assert.AreEqual(default(Bitboard), attacks);
         }
     }
 }

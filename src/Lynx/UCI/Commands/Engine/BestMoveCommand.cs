@@ -28,9 +28,9 @@ public sealed class BestMoveCommand
 
     public override string ToString()
     {
-        return $"bestmove {_move.UCIStringMemoized()}" +
+        return $"bestmove {_move.UCIString()}" +
             (_moveToPonder.HasValue
-                ? $" ponder {_moveToPonder!.Value.UCIStringMemoized()}"
+                ? $" ponder {_moveToPonder!.Value.UCIString()}"
                 : string.Empty);
     }
 }

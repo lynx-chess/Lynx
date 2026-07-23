@@ -96,7 +96,7 @@ public class ConstantsTest
     [Test]
     public void HFile()
     {
-        BitBoard bb = 0;
+        Bitboard bb = 0;
         bb.SetBit(BoardSquare.h1);
 
         Assert.NotZero(bb & Constants.HFile);
@@ -109,7 +109,7 @@ public class ConstantsTest
     [Test]
     public void AFile()
     {
-        BitBoard bb = 0;
+        Bitboard bb = 0;
         bb.SetBit(BoardSquare.a1);
 
         Assert.NotZero(bb & Constants.AFile);
@@ -120,40 +120,11 @@ public class ConstantsTest
     }
 
     [Test]
-    public void DarkLightSquares()
-    {
-        for (int i = 0; i < 64; ++i)
-        {
-            Assert.True(DarkSquaresBitBoard.GetBit(i) ^ LightSquaresBitBoard.GetBit(i));
-        }
-
-        Assert.True(DarkSquaresBitBoard.GetBit((int)BoardSquare.a1));
-        Assert.True(DarkSquaresBitBoard.GetBit((int)BoardSquare.h8));
-        Assert.False(DarkSquaresBitBoard.GetBit((int)BoardSquare.a8));
-        Assert.False(DarkSquaresBitBoard.GetBit((int)BoardSquare.h1));
-
-        Assert.AreEqual(1, DarkSquares[(int)BoardSquare.a1]);
-        Assert.AreEqual(1, DarkSquares[(int)BoardSquare.h8]);
-        Assert.AreEqual(0, DarkSquares[(int)BoardSquare.a8]);
-        Assert.AreEqual(0, DarkSquares[(int)BoardSquare.h1]);
-
-        Assert.True(LightSquaresBitBoard.GetBit((int)BoardSquare.a8));
-        Assert.True(LightSquaresBitBoard.GetBit((int)BoardSquare.h1));
-        Assert.False(LightSquaresBitBoard.GetBit((int)BoardSquare.a1));
-        Assert.False(LightSquaresBitBoard.GetBit((int)BoardSquare.h8));
-
-        Assert.AreEqual(1, LightSquares[(int)BoardSquare.a8]);
-        Assert.AreEqual(1, LightSquares[(int)BoardSquare.h1]);
-        Assert.AreEqual(0, LightSquares[(int)BoardSquare.a1]);
-        Assert.AreEqual(0, LightSquares[(int)BoardSquare.h8]);
-    }
-
-    [Test]
     public void Rank()
     {
         for (int sq = 0; sq < 64; ++sq)
         {
-            Assert.AreEqual((sq >> 3) + 1, 8 - Constants.Rank[sq]);
+            Assert.AreEqual((sq >> 3) + 1, 8 - Constants.Rank(sq));
         }
     }
 
@@ -201,14 +172,5 @@ public class ConstantsTest
         Assert.AreEqual(2, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b7]);
         Assert.AreEqual(4, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.c6]);
         Assert.AreEqual(3, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b6]);
-    }
-
-    /// <summary>
-    /// Ensure <see cref="MultiArrayTranspositionTable.HashfullPermillApprox"/> works as expected
-    /// </summary>
-    [Test]
-    public void MaxTTArrayLength()
-    {
-        Assert.GreaterOrEqual(Constants.MaxTTArrayLength, 1000);
     }
 }

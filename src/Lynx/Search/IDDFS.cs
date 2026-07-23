@@ -21,13 +21,21 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
-    private const int QuietHistoryLength = 12 * 64 * 2 * 2;
+    private const int PieceToQuietHistoryLength = 12 * 64 * 2 * 2;
+
+    private const int ButterflyHistoryLength = 64 * 64 * 2 * 2;
 
     /// <summary>
     /// 12 x 64 x 2 x 2
     /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly short[] _quietHistory = GC.AllocateArray<short>(QuietHistoryLength, pinned: true);
+    private readonly short[] _pieceToQuietHistory = GC.AllocateArray<short>(PieceToQuietHistoryLength, pinned: true);
+
+    /// <summary>
+    /// 64 x 64 x 2 x 2
+    /// source square x target square x source is attacked x target is attacked
+    /// </summary>
+    private readonly short[] _butterflyQuietHistory = GC.AllocateArray<short>(ButterflyHistoryLength, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12,
@@ -36,12 +44,12 @@ public sealed partial class Engine
     private readonly short[] _captureHistory = GC.AllocateArray<short>(12 * 64 * 12, pinned: true);
 
     /// <summary>
-    /// 12 x 64 x 12 x 64 x <see cref="EvaluationConstants.ContinuationHistoryPlyCount"/>
-    /// piece x target square x last piece x last target square x plies back
-    /// ply 0 -> Continuation move history
-    /// ply 1 -> Follow-up move history
+    /// 12 x 64 x 12 x 64
+    /// piece x target square x previous piece x previous target square
+    /// ply - 1 -> Counter-move history
+    /// ply - 2 -> Follow-up move history
     /// </summary>
-    private readonly short[] _continuationHistory = GC.AllocateArray<short>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
+    private readonly short[] _continuationHistory = GC.AllocateArray<short>(12 * 64 * 12 * 64, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
@@ -66,6 +74,17 @@ public sealed partial class Engine
     /// Major hash x side to move
     /// </summary>
     private readonly short[] _majorCorrHistory = GC.AllocateArray<short>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.MaterialCorrHistoryHashSize"/> x 2
+    /// Material hash x side to move
+    /// </summary>
+    private readonly short[] _materialCorrHistory = GC.AllocateArray<short>(Constants.MaterialCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.ContinuationCorrHistoryHashSize"/>
+    /// </summary>
+    private readonly short[] _continuationCorrHistory = GC.AllocateArray<short>(Constants.ContinuationCorrHistoryHashSize, pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -130,16 +149,19 @@ public sealed partial class Engine
 
         try
         {
-            if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (!isPondering && _searchConstraints.MaxDepth == SearchConstraints.DefaultMaxDepth && _searchConstraints.MaxNodes == SearchConstraints.DefaultMaxNodes
+                && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
-                _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
+                if (!Configuration.EngineSettings.UCI_Minimal)
+                {
+                    _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
+                }
 
                 return onlyOneLegalMoveSearchResult;
             }
 
             Array.Clear(_killerMoves);
-            // Not clearing _quietHistory on purpose
-            // Not clearing _captureHistory on purpose
+            // Not clearing quiet and capture histories here on purpose
 
             int mate = 0;
 
@@ -181,6 +203,17 @@ public sealed partial class Engine
                     {
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
+
+                        // Alpha and beta values close to checkmate scores due to window widening can cause false mate reporting (very high/low mate values) after being saved in TT
+                        if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            beta = EvaluationConstants.MaxEval;
+                        }
+
+                        if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                        {
+                            alpha = EvaluationConstants.MinEval;
+                        }
 
                         if (_logger.IsEnabled(logLevel))
                         {
@@ -258,8 +291,8 @@ public sealed partial class Engine
                 if (lastSearchResultCandidate.BestMove == default)
                 {
                     _logger.Warn(
-                        "[#{EngineId}] Depth {Depth}: search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
-                        _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore, mate);
+                        "[#{EngineId}] Depth {Depth}: search didn't produce a best move for position {Position} after {Time}ms. Score {Score} (mate in {Mate}?) detected",
+                        _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), _stopWatch.ElapsedMilliseconds, bestScore, mate);
 
                     _bestMoveStability = 0;
                     _scoreDelta = 0;
@@ -280,7 +313,11 @@ public sealed partial class Engine
 
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
-                _engineWriter.TryWrite(lastSearchResult);
+                if (!Configuration.EngineSettings.UCI_Minimal)
+                {
+                    _engineWriter.TryWrite(lastSearchResult);
+                }
+
             } while (StopSearchCondition(lastSearchResult?.BestMove, depth++, mate, bestScore, isPondering));
         }
         catch (OperationCanceledException)
@@ -308,7 +345,7 @@ public sealed partial class Engine
         catch (Exception e) when (e is not LynxException)
         {
             _logger.Error(e,
-                "[#{EngineId}] Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n",
+                "[#{EngineId}] Depth {Depth}: unexpected error occurred during the search of position {Position}, best move will be returned\n",
                 _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
         }
         finally
@@ -398,15 +435,30 @@ public sealed partial class Engine
         }
 
         var maxDepth = _searchConstraints.MaxDepth;
-        if (maxDepth > 0)
+        if (maxDepth != SearchConstraints.DefaultMaxDepth)
         {
             var shouldContinue = depth + 1 <= maxDepth;
 
             if (!shouldContinue)
             {
                 _logger.Log(logLevel,
-                    "[#{EngineId}] Depth {Depth}: stopping, max. depth reached",
+                    "[#{EngineId}] Depth {Depth}: stopping, max. go command depth reached",
                     _id, depth);
+            }
+
+            return shouldContinue;
+        }
+
+        var maxNodes = _searchConstraints.MaxNodes;
+        if (maxNodes != SearchConstraints.DefaultMaxNodes)
+        {
+            var shouldContinue = _nodes <= maxNodes;
+
+            if (!shouldContinue)
+            {
+                _logger.Log(logLevel,
+                    "[#{EngineId}] Nodes {Nodes}: stopping, go command nodes reached",
+                    _id, _nodes);
             }
 
             return shouldContinue;
@@ -441,13 +493,13 @@ public sealed partial class Engine
 
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
+    private unsafe bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
@@ -488,12 +540,12 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                firstLegalMove, score, 0, [firstLegalMove])
+                firstLegalMove, score, targetDepth: 1, [firstLegalMove])
             {
-                DepthReached = 0,
+                DepthReached = 1,
                 Nodes = 0,
-                Time = 0,
-                NodesPerSecond = 0
+                Time = 1,
+                NodesPerSecond = 1,
             };
 
             return true;
@@ -524,7 +576,7 @@ public sealed partial class Engine
             DepthReached = maxDepthReached,
             Nodes = _nodes,
             Time = Utils.CalculateUCITime(elapsedSeconds),
-            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds)
+            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds),
         };
     }
 
@@ -595,8 +647,9 @@ public sealed partial class Engine
             }
         }
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
+        position.CalculateThreats(ref evaluationContext);
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
@@ -639,9 +692,9 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                move, singleMoveEval, 0, [move])
+                move, singleMoveEval, targetDepth: 1, [move])
             {
-                DepthReached = 0
+                DepthReached = 1,
             };
         }
 

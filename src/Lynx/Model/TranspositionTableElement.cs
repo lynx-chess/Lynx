@@ -19,12 +19,13 @@ public enum NodeType : byte
     /// <summary>
     /// LowerBound
     /// </summary>
-    Beta
+    Beta,
 }
 
 /// <summary>
 /// 10 bytes
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public struct TranspositionTableElement
 {
     private ushort _key;        // 2 bytes
@@ -43,7 +44,7 @@ public struct TranspositionTableElement
     /// 0000 0001              0x1           Was PV (0-1)
     /// 0000 0110              0x6           NodeType (0-3)
     /// </summary>
-    private byte _type_WasPv;
+    private byte _type_WasPv;   // 1 byte
 
     private const int NodeTypeOffset = 1;
 

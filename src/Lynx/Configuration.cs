@@ -66,9 +66,9 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 10;
+    public int BenchDepth { get; set; } = 13;
 
-    private int _transpositionTableSize = 256;
+    private int _transpositionTableSize = 32;
 
     /// <summary>
     /// In MB, clamped to [<see cref="Constants.AbsoluteMinTTSize"/>, <see cref="Constants.AbsoluteMaxTTSize"/>]
@@ -112,6 +112,10 @@ public sealed class EngineSettings
 
     public bool IsChess960 { get; set; }
 
+    public bool UCI_Minimal { get; set; }
+
+    public bool SoftNodes { get; set; }
+
     /// <summary>
     /// Real NPS aren't calculated until the last search command.
     /// This option enables the report of an NPS estimation by the main thread
@@ -137,7 +141,7 @@ public sealed class EngineSettings
     #region Time management
 
     /// <summary>
-    /// Min milliseconds left after substracting <see cref="MoveOverhead"/>
+    /// Min milliseconds left after subtracting <see cref="MoveOverhead"/>
     /// from wtime/btime or movetime. This min value is used to avoid 0 or negative time left.
     /// Resulting milliseconds left are later used to calculate hard and soft time bounds
     /// </summary>
@@ -163,7 +167,7 @@ public sealed class EngineSettings
     public double NodeTmScale { get; set; } = 1.80;
 
     [SPSA<int>(enabled: false)]
-    public int ScoreStabiity_MinDepth { get; set; } = 7;
+    public int ScoreStability_MinDepth { get; set; } = 7;
 
     [SPSA<int>(enabled: false)]
     public int StopSearchOnMate_MaxSoftTimeBoundLimit { get; set; } = 10_000;
@@ -403,10 +407,10 @@ public sealed class EngineSettings
     public int FP_HistoryDivisor { get; set; } = 32;
 
     [SPSA<int>(enabled: false)]
-    public int HistoryPrunning_MaxDepth { get; set; } = 5;
+    public int HistoryPruning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -1506;
+    public int HistoryPruning_Margin { get; set; } = -1506;
 
     [SPSA<int>(enabled: false)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
@@ -465,6 +469,30 @@ public sealed class EngineSettings
     [SPSA<int>(50, 250, 15)]
     public int CorrHistoryWeight_Major { get; set; } = 179;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(50, 250, 15)]
+    public int CorrHistoryWeight_Material { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(50, 250, 15)]
+    public int CorrHistoryWeight_Continuation1 { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(50, 250, 15)]
+    public int CorrHistoryWeight_Continuation2 { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.CorrHistScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(50, 250, 15)]
+    public int CorrHistoryWeight_Continuation4 { get; set; } = 100;
+
     [SPSA<int>(enabled: false)]
     public int TT_50MR_Start { get; set; } = 20;
 
@@ -491,6 +519,43 @@ public sealed class EngineSettings
 
     [SPSA<int>(0, 20, 2)]
     public int SE_NoPV { get; set; } = 10;
+
+    #endregion
+
+    #region Datagen
+
+    public int Datagen_GenFens_RandomHalfMoveCount { get; set; } = 8;
+
+    public int Datagen_GenFens_Depth { get; set; } = 10;
+
+    public int Datagen_GenFens_MaxEval { get; set; } = 1000;
+
+    public bool Datagen_GenFens_UsePieceProbabilities { get; set; }
+
+    public int Datagen_GenFens_PieceProbabilities_Pawns { get; set; } = 40;
+
+    public int Datagen_GenFens_PieceProbabilities_Knights { get; set; } = 60;
+
+    public int Datagen_GenFens_PieceProbabilities_Bishops { get; set; } = 80;
+
+    public int Datagen_GenFens_PieceProbabilities_Rooks { get; set; } = 85;
+
+    public int Datagen_GenFens_PieceProbabilities_Queen { get; set; } = 95;
+
+    public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
+
+    public int Datagen_GenFens_NoBook_BaseMoves { get; set; } = 8;
+
+    public int Datagen_GenFens_Book_MinMoves { get; set; } = 1;
+
+    public int Datagen_GenFens_Book_MaxMoves { get; set; } = 4;
+
+    public bool Datagen_VFtoEPD_EmptyLineBetweenGames { get; set; }
+
+    /// <summary>
+    /// Conservative estimation of the number of nodes per second that can be searched by the engine
+    /// </summary>
+    public ulong Estimated_NPS { get; set; } = 500_000;
 
     #endregion
 }

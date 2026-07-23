@@ -8,8 +8,8 @@
  *
  *  | Method                             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |----------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | IsSquaredAttacked_PassBitBoards    | 1.420 us | 0.0077 us | 0.0072 us |  1.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 1.453 us | 0.0089 us | 0.0083 us |  1.02 |         - |          NA |
+ *  | IsSquaredAttacked_PassBitboards    | 1.420 us | 0.0077 us | 0.0072 us |  1.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitboard | 1.453 us | 0.0089 us | 0.0083 us |  1.02 |         - |          NA |
  *  | IsSquareAttacked_Position          | 1.530 us | 0.0120 us | 0.0112 us |  1.08 |         - |          NA |
  *
  *
@@ -21,8 +21,8 @@
  *
  *  | Method                             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |----------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | IsSquaredAttacked_PassBitBoards    | 1.457 us | 0.0053 us | 0.0044 us |  1.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 1.447 us | 0.0097 us | 0.0086 us |  0.99 |         - |          NA |
+ *  | IsSquaredAttacked_PassBitboards    | 1.457 us | 0.0053 us | 0.0044 us |  1.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitboard | 1.447 us | 0.0097 us | 0.0086 us |  0.99 |         - |          NA |
  *  | IsSquareAttacked_Position          | 1.464 us | 0.0038 us | 0.0036 us |  1.01 |         - |          NA |
  *
  *
@@ -34,8 +34,8 @@
  *
  *  | Method                             | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |----------------------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
- *  | IsSquaredAttacked_PassBitBoards    | 2.120 us | 0.0408 us | 0.1110 us | 2.087 us |  1.00 |    0.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 2.126 us | 0.0346 us | 0.0425 us | 2.120 us |  0.99 |    0.05 |         - |          NA |
+ *  | IsSquaredAttacked_PassBitboards    | 2.120 us | 0.0408 us | 0.1110 us | 2.087 us |  1.00 |    0.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitboard | 2.126 us | 0.0346 us | 0.0425 us | 2.120 us |  0.99 |    0.05 |         - |          NA |
  *  | IsSquareAttacked_Position          | 1.989 us | 0.0394 us | 0.0498 us | 1.984 us |  0.93 |    0.06 |         - |          NA |
  *
  *  --------------------------------------------------------------------------------------------------------------------------------
@@ -48,8 +48,8 @@
  *
  *  | Method                            | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |---------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | IsSquareInCheck_PassBitBoards     | 1.573 us | 0.0059 us | 0.0053 us |  1.00 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard | 1.670 us | 0.0070 us | 0.0065 us |  1.06 |         - |          NA |
+ *  | IsSquareInCheck_PassBitboards     | 1.573 us | 0.0059 us | 0.0053 us |  1.00 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitboard | 1.670 us | 0.0070 us | 0.0065 us |  1.06 |         - |          NA |
  *  | IsSquareInCheck_Position          | 1.553 us | 0.0088 us | 0.0082 us |  0.99 |         - |          NA |
  *
  *
@@ -61,8 +61,8 @@
  *
  *  | Method                            | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |---------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | IsSquareInCheck_PassBitBoards     | 1.555 us | 0.0089 us | 0.0079 us |  1.00 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard | 1.644 us | 0.0028 us | 0.0025 us |  1.06 |         - |          NA |
+ *  | IsSquareInCheck_PassBitboards     | 1.555 us | 0.0089 us | 0.0079 us |  1.00 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitboard | 1.644 us | 0.0028 us | 0.0025 us |  1.06 |         - |          NA |
  *  | IsSquareInCheck_Position          | 1.550 us | 0.0017 us | 0.0016 us |  1.00 |         - |          NA |
  *
  *
@@ -74,8 +74,8 @@
  *
  *  | Method                            | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |---------------------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
- *  | IsSquareInCheck_PassBitBoards     | 2.459 us | 0.1088 us | 0.3067 us | 2.321 us |  1.00 |    0.00 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard | 2.965 us | 0.1559 us | 0.4596 us | 2.891 us |  1.23 |    0.24 |         - |          NA |
+ *  | IsSquareInCheck_PassBitboards     | 2.459 us | 0.1088 us | 0.3067 us | 2.321 us |  1.00 |    0.00 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitboard | 2.965 us | 0.1559 us | 0.4596 us | 2.891 us |  1.23 |    0.24 |         - |          NA |
  *  | IsSquareInCheck_Position          | 2.378 us | 0.0473 us | 0.1220 us | 2.349 us |  0.98 |    0.13 |         - |          NA |
  *
  */
@@ -86,7 +86,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
-public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
+public class IsSquareAttacked_PassBitboard_Benchmark : BaseBenchmark
 {
     private readonly Position[] _positions =
     [
@@ -99,14 +99,14 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
     ];
 
     [Benchmark(Baseline = true)]
-    public bool IsSquaredAttacked_PassBitBoards()
+    public bool IsSquaredAttacked_PassBitboards()
     {
         var b = false;
         foreach (var position in _positions)
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassingArray.IsSquareAttacked(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
+                if (Attacks_PassingArray.IsSquareAttacked(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
                 {
                     b = true;
                 }
@@ -117,14 +117,14 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [Benchmark]
-    public bool IsSquareAttacked_PassPieceBitBoard()
+    public bool IsSquareAttacked_PassPieceBitboard()
     {
         var b = false;
         foreach (var position in _positions)
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassBitBoard.IsSquareAttacked(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
+                if (Attacks_PassBitboard.IsSquareAttacked(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
                 {
                     b = true;
                 }
@@ -153,7 +153,7 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
     }
 }
 
-public class IsSquareInCheck_PassBitBoard_Benchmark : BaseBenchmark
+public class IsSquareInCheck_PassBitboard_Benchmark : BaseBenchmark
 {
     private readonly Position[] _positions =
     [
@@ -166,14 +166,14 @@ public class IsSquareInCheck_PassBitBoard_Benchmark : BaseBenchmark
     ];
 
     [Benchmark(Baseline = true)]
-    public bool IsSquareInCheck_PassBitBoards()
+    public bool IsSquareInCheck_PassBitboards()
     {
         var b = false;
         foreach (var position in _positions)
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassingArray.IsSquareInCheck(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
+                if (Attacks_PassingArray.IsSquareInCheck(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
                 {
                     b = true;
                 }
@@ -184,14 +184,14 @@ public class IsSquareInCheck_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [Benchmark]
-    public bool IsSquareInCheck_PassPieceBitBoard()
+    public bool IsSquareInCheck_PassPieceBitboard()
     {
         var b = false;
         foreach (var position in _positions)
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassBitBoard.IsSquareInCheck(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
+                if (Attacks_PassBitboard.IsSquareInCheck(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
                 {
                     b = true;
                 }
@@ -223,7 +223,7 @@ public class IsSquareInCheck_PassBitBoard_Benchmark : BaseBenchmark
 file static class Attacks_PassingArray
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -241,7 +241,7 @@ file static class Attacks_PassingArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -258,7 +258,7 @@ file static class Attacks_PassingArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset, BitBoard[] pieces)
+    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset, Bitboard[] pieces)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
@@ -266,43 +266,43 @@ file static class Attacks_PassingArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
+    private static bool IsSquareAttackedByKnights(int squareIndex, int offset, Bitboard[] piecePosition)
     {
         return (Attacks.KnightAttacks[squareIndex] & piecePosition[(int)Piece.N + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKing(int squareIndex, int offset, BitBoard[] piecePosition)
+    private static bool IsSquareAttackedByKing(int squareIndex, int offset, Bitboard[] piecePosition)
     {
         return (Attacks.KingAttacks[squareIndex] & piecePosition[(int)Piece.K + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard bishopAttacks)
+    private static bool IsSquareAttackedByBishops(int squareIndex, int offset, Bitboard[] piecePosition, Bitboard[] occupancy, out Bitboard bishopAttacks)
     {
         bishopAttacks = Attacks.BishopAttacks(squareIndex, occupancy[(int)Side.Both]);
         return (bishopAttacks & piecePosition[(int)Piece.B + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard rookAttacks)
+    private static bool IsSquareAttackedByRooks(int squareIndex, int offset, Bitboard[] piecePosition, Bitboard[] occupancy, out Bitboard rookAttacks)
     {
         rookAttacks = Attacks.RookAttacks(squareIndex, occupancy[(int)Side.Both]);
         return (rookAttacks & piecePosition[(int)Piece.R + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard[] piecePosition)
+    private static bool IsSquareAttackedByQueens(int offset, Bitboard bishopAttacks, Bitboard rookAttacks, Bitboard[] piecePosition)
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
         return (queenAttacks & piecePosition[(int)Piece.Q + offset]) != default;
     }
 }
 
-file static class Attacks_PassBitBoard
+file static class Attacks_PassBitboard
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -321,7 +321,7 @@ file static class Attacks_PassBitBoard
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -339,43 +339,43 @@ file static class Attacks_PassBitBoard
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, BitBoard pawnBitBoard)
+    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, Bitboard pawnBitboard)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitBoard) != default;
+        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKnights(int squareIndex, BitBoard knightBitBoard)
+    private static bool IsSquareAttackedByKnights(int squareIndex, Bitboard knightBitboard)
     {
-        return (Attacks.KnightAttacks[squareIndex] & knightBitBoard) != default;
+        return (Attacks.KnightAttacks[squareIndex] & knightBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKing(int squareIndex, BitBoard kingBitBoard)
+    private static bool IsSquareAttackedByKing(int squareIndex, Bitboard kingBitboard)
     {
-        return (Attacks.KingAttacks[squareIndex] & kingBitBoard) != default;
+        return (Attacks.KingAttacks[squareIndex] & kingBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByBishops(int squareIndex, BitBoard bishopBitBoard, BitBoard occupancy, out BitBoard bishopAttacks)
+    private static bool IsSquareAttackedByBishops(int squareIndex, Bitboard bishopBitboard, Bitboard occupancy, out Bitboard bishopAttacks)
     {
         bishopAttacks = Attacks.BishopAttacks(squareIndex, occupancy);
-        return (bishopAttacks & bishopBitBoard) != default;
+        return (bishopAttacks & bishopBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByRooks(int squareIndex, BitBoard rookBitBoard, BitBoard occupancy, out BitBoard rookAttacks)
+    private static bool IsSquareAttackedByRooks(int squareIndex, Bitboard rookBitboard, Bitboard occupancy, out Bitboard rookAttacks)
     {
         rookAttacks = Attacks.RookAttacks(squareIndex, occupancy);
-        return (rookAttacks & rookBitBoard) != default;
+        return (rookAttacks & rookBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByQueens(BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard queenBitBoard)
+    private static bool IsSquareAttackedByQueens(Bitboard bishopAttacks, Bitboard rookAttacks, Bitboard queenBitboard)
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-        return (queenAttacks & queenBitBoard) != default;
+        return (queenAttacks & queenBitboard) != default;
     }
 }

@@ -7,7 +7,7 @@ namespace Lynx.Test;
 public class FENParserTest
 {
     [Test]
-    public void PieceBitBoards_InitialPosition()
+    public void PieceBitboards_InitialPosition()
     {
         // Arrange
 
@@ -19,94 +19,94 @@ public class FENParserTest
 
         // Act
         var result = FENParser.ParseFEN(fen);
-        BitBoard[] pieceBitBoards = result.PieceBitBoards;
+        Bitboard[] pieceBitboards = result.PieceBitboards;
 
         // Assert
 
-        var whitePawns = pieceBitBoards[(int)Piece.P];
+        var whitePawns = pieceBitboards[(int)Piece.P];
         Assert.AreEqual(0b1111_1111UL << (6 * 8), whitePawns);
-        var blackPawns = pieceBitBoards[(int)Piece.p];
+        var blackPawns = pieceBitboards[(int)Piece.p];
         Assert.AreEqual(0b1111_1111UL << (1 * 8), blackPawns);
 
-        var whiteRooks = pieceBitBoards[(int)Piece.R];
+        var whiteRooks = pieceBitboards[(int)Piece.R];
         Assert.AreEqual(0b1000_0001UL << (7 * 8), whiteRooks);
-        var blackRooks = pieceBitBoards[(int)Piece.r];
+        var blackRooks = pieceBitboards[(int)Piece.r];
         Assert.AreEqual(0b1000_0001UL << (0 * 8), blackRooks);
 
-        var whiteKnights = pieceBitBoards[(int)Piece.N];
+        var whiteKnights = pieceBitboards[(int)Piece.N];
         Assert.AreEqual(0b0100_0010UL << (7 * 8), whiteKnights);
-        var blackKnights = pieceBitBoards[(int)Piece.n];
+        var blackKnights = pieceBitboards[(int)Piece.n];
         Assert.AreEqual(0b0100_0010UL << (0 * 8), blackKnights);
 
-        var whiteBishops = pieceBitBoards[(int)Piece.B];
+        var whiteBishops = pieceBitboards[(int)Piece.B];
         Assert.AreEqual(0b0010_0100UL << (7 * 8), whiteBishops);
-        var blackBishops = pieceBitBoards[(int)Piece.b];
+        var blackBishops = pieceBitboards[(int)Piece.b];
         Assert.AreEqual(0b0010_0100UL << (0 * 8), blackBishops);
 
-        var whiteQueen = pieceBitBoards[(int)Piece.Q];
+        var whiteQueen = pieceBitboards[(int)Piece.Q];
         Assert.AreEqual(0b0000_1000UL << (int)BoardSquare.a1, whiteQueen);
-        var blackQueen = pieceBitBoards[(int)Piece.q];
+        var blackQueen = pieceBitboards[(int)Piece.q];
         Assert.AreEqual(0b0000_1000UL << (0 * 8), blackQueen);
 
-        var whiteKing = pieceBitBoards[(int)Piece.K];
+        var whiteKing = pieceBitboards[(int)Piece.K];
         Assert.AreEqual(0b0001_0000UL << (7 * 8), whiteKing);
-        var blackKing = pieceBitBoards[(int)Piece.k];
+        var blackKing = pieceBitboards[(int)Piece.k];
         Assert.AreEqual(0b0001_0000UL << (0 * 8), blackKing);
     }
 
     [Test]
-    public void PieceBitBoards()
+    public void PieceBitboards()
     {
         // Arrange
         const string fen = Constants.TrickyTestPositionFEN;
 
         // Act
         var result = FENParser.ParseFEN(fen);
-        BitBoard[] pieceBitBoards = result.PieceBitBoards;
+        Bitboard[] pieceBitboards = result.PieceBitboards;
 
         // Assert
 
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.a7));
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b4));
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c7));
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.d7));
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.e6));
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.f7));
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.g6));
-        Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.h3));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.a7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.b4));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.c7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.d7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.e6));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.f7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.g6));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.h3));
 
-        Assert.True(pieceBitBoards[(int)Piece.r].GetBit(Constants.InitialBlackQueensideRookSquare));
-        Assert.True(pieceBitBoards[(int)Piece.r].GetBit(Constants.InitialBlackKingsideRookSquare));
+        Assert.True(pieceBitboards[(int)Piece.r].GetBit(Constants.InitialBlackQueensideRookSquare));
+        Assert.True(pieceBitboards[(int)Piece.r].GetBit(Constants.InitialBlackKingsideRookSquare));
 
-        Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquare.b6));
-        Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquare.f6));
+        Assert.True(pieceBitboards[(int)Piece.n].GetBit(BoardSquare.b6));
+        Assert.True(pieceBitboards[(int)Piece.n].GetBit(BoardSquare.f6));
 
-        Assert.True(pieceBitBoards[(int)Piece.b].GetBit(BoardSquare.a6));
-        Assert.True(pieceBitBoards[(int)Piece.b].GetBit(BoardSquare.g7));
+        Assert.True(pieceBitboards[(int)Piece.b].GetBit(BoardSquare.a6));
+        Assert.True(pieceBitboards[(int)Piece.b].GetBit(BoardSquare.g7));
 
-        Assert.True(pieceBitBoards[(int)Piece.q].GetBit(BoardSquare.e7));
-        Assert.True(pieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
+        Assert.True(pieceBitboards[(int)Piece.q].GetBit(BoardSquare.e7));
+        Assert.True(pieceBitboards[(int)Piece.k].GetBit(BoardSquare.e8));
 
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.a2));
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b2));
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.c2));
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.d5));
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.e4));
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.f2));
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.g2));
-        Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.h2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.a2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.b2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.c2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.d5));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.e4));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.f2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.g2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.h2));
 
-        Assert.True(pieceBitBoards[(int)Piece.R].GetBit(Constants.InitialWhiteQueensideRookSquare));
-        Assert.True(pieceBitBoards[(int)Piece.R].GetBit(Constants.InitialWhiteKingsideRookSquare));
+        Assert.True(pieceBitboards[(int)Piece.R].GetBit(Constants.InitialWhiteQueensideRookSquare));
+        Assert.True(pieceBitboards[(int)Piece.R].GetBit(Constants.InitialWhiteKingsideRookSquare));
 
-        Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquare.c3));
-        Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquare.e5));
+        Assert.True(pieceBitboards[(int)Piece.N].GetBit(BoardSquare.c3));
+        Assert.True(pieceBitboards[(int)Piece.N].GetBit(BoardSquare.e5));
 
-        Assert.True(pieceBitBoards[(int)Piece.B].GetBit(BoardSquare.d2));
-        Assert.True(pieceBitBoards[(int)Piece.B].GetBit(BoardSquare.e2));
+        Assert.True(pieceBitboards[(int)Piece.B].GetBit(BoardSquare.d2));
+        Assert.True(pieceBitboards[(int)Piece.B].GetBit(BoardSquare.e2));
 
-        Assert.True(pieceBitBoards[(int)Piece.Q].GetBit(BoardSquare.f3));
-        Assert.True(pieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
+        Assert.True(pieceBitboards[(int)Piece.Q].GetBit(BoardSquare.f3));
+        Assert.True(pieceBitboards[(int)Piece.K].GetBit(BoardSquare.e1));
     }
 
     [TestCase("K1k5/8/8/8/8/8/8/8 w - - 0 1")]
@@ -114,7 +114,7 @@ public class FENParserTest
     [TestCase(Constants.TrickyTestPositionFEN)]
     [TestCase(Constants.KillerTestPositionFEN)]
     [TestCase(Constants.CmkTestPositionFEN)]
-    public void OccupancyBitBoards(string fen)
+    public void OccupancyBitboards(string fen)
     {
         // Arrange
         // Make sure a previous Fen doesn't change anything
@@ -123,34 +123,34 @@ public class FENParserTest
 
         // Act
         var result = FENParser.ParseFEN(fen);
-        BitBoard[] pieceBitBoards = result.PieceBitBoards;
-        BitBoard[] occupancyBitBoards = result.OccupancyBitBoards;
+        Bitboard[] pieceBitboards = result.PieceBitboards;
+        Bitboard[] occupancyBitboards = result.OccupancyBitboards;
 
         // Assert
 
         var expectedWhiteOccupancy = 0UL;
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.P];
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.N];
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.B];
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.R];
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.Q];
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.K];
+        expectedWhiteOccupancy |= pieceBitboards[(int)Piece.P];
+        expectedWhiteOccupancy |= pieceBitboards[(int)Piece.N];
+        expectedWhiteOccupancy |= pieceBitboards[(int)Piece.B];
+        expectedWhiteOccupancy |= pieceBitboards[(int)Piece.R];
+        expectedWhiteOccupancy |= pieceBitboards[(int)Piece.Q];
+        expectedWhiteOccupancy |= pieceBitboards[(int)Piece.K];
 
-        Assert.AreEqual(expectedWhiteOccupancy, occupancyBitBoards[(int)Side.White]);
+        Assert.AreEqual(expectedWhiteOccupancy, occupancyBitboards[(int)Side.White]);
 
         var expectedBlackOccupancy = 0UL;
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.p];
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.n];
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.b];
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.r];
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.q];
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.k];
+        expectedBlackOccupancy |= pieceBitboards[(int)Piece.p];
+        expectedBlackOccupancy |= pieceBitboards[(int)Piece.n];
+        expectedBlackOccupancy |= pieceBitboards[(int)Piece.b];
+        expectedBlackOccupancy |= pieceBitboards[(int)Piece.r];
+        expectedBlackOccupancy |= pieceBitboards[(int)Piece.q];
+        expectedBlackOccupancy |= pieceBitboards[(int)Piece.k];
 
-        Assert.AreEqual(expectedBlackOccupancy, occupancyBitBoards[(int)Side.Black]);
+        Assert.AreEqual(expectedBlackOccupancy, occupancyBitboards[(int)Side.Black]);
 
         var expectedCombinedOccupancy = expectedWhiteOccupancy | expectedBlackOccupancy;
 
-        Assert.AreEqual(expectedCombinedOccupancy, occupancyBitBoards[(int)Side.Both]);
+        Assert.AreEqual(expectedCombinedOccupancy, occupancyBitboards[(int)Side.Both]);
     }
 
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Side.White)]

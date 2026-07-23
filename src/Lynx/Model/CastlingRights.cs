@@ -16,5 +16,5 @@ public enum CastlingRights : byte
 #pragma warning restore S4022 // Enumerations should have "Int32" storage
 {
     None = 0,   // RCS1135
-    WK = 1, WQ = 2, BK = 4, BQ = 8
+    WK = 1, WQ = 2, BK = 4, BQ = 8,
 }

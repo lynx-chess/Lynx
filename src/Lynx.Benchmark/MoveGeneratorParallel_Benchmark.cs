@@ -175,22 +175,22 @@ file static class CustomMoveGenerator
 
     #region Other stuff
 
-    private static readonly Func<int, BitBoard, ulong>[] _pieceLocalAttacks =
+    private static readonly Func<int, Bitboard, ulong>[] _pieceLocalAttacks =
     [
 #pragma warning disable IDE0350 // Use implicitly typed lambda
-        (int origin, BitBoard _) => LocalAttacks.PawnAttacks[(int)Side.White][origin],
-        (int origin, BitBoard _) => LocalAttacks.KnightLocalAttacks[origin],
+        (int origin, Bitboard _) => LocalAttacks.PawnAttacks[(int)Side.White][origin],
+        (int origin, Bitboard _) => LocalAttacks.KnightLocalAttacks[origin],
         LocalAttacks.BishopLocalAttacks,
         LocalAttacks.RookLocalAttacks,
         LocalAttacks.QueenLocalAttacks,
-        (int origin, BitBoard _) => LocalAttacks.KingLocalAttacks[origin],
+        (int origin, Bitboard _) => LocalAttacks.KingLocalAttacks[origin],
 
-        (int origin, BitBoard _) => LocalAttacks.PawnAttacks[(int)Side.Black][origin],
-        (int origin, BitBoard _) => LocalAttacks.KnightLocalAttacks[origin],
+        (int origin, Bitboard _) => LocalAttacks.PawnAttacks[(int)Side.Black][origin],
+        (int origin, Bitboard _) => LocalAttacks.KnightLocalAttacks[origin],
         LocalAttacks.BishopLocalAttacks,
         LocalAttacks.RookLocalAttacks,
         LocalAttacks.QueenLocalAttacks,
-        (int origin, BitBoard _) => LocalAttacks.KingLocalAttacks[origin],
+        (int origin, Bitboard _) => LocalAttacks.KingLocalAttacks[origin],
 #pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
@@ -202,7 +202,7 @@ file static class CustomMoveGenerator
         var piece = (int)Piece.P + offset;
         var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
         int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
-        var bitboard = position.PieceBitBoards[piece];
+        var bitboard = position.PieceBitboards[piece];
 
         while (bitboard != default)
         {
@@ -218,7 +218,7 @@ file static class CustomMoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            if (!position.OccupancyBitboards[2].GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare / 8) + 1;
@@ -239,7 +239,7 @@ file static class CustomMoveGenerator
                 if (!capturesOnly)
                 {
                     var doublePushSquare = sourceSquare + (2 * pawnPush);
-                    if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
+                    if (!position.OccupancyBitboards[2].GetBit(doublePushSquare)
                         && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                     {
                         yield return MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
@@ -251,13 +251,13 @@ file static class CustomMoveGenerator
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
-            // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
+            // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece);
             }
 
             // Captures
-            ulong attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+            ulong attackedSquares = attacks & position.OccupancyBitboards[oppositeSide];
             while (attackedSquares != default)
             {
                 targetSquare = attackedSquares.GetLS1BIndex();
@@ -285,7 +285,7 @@ file static class CustomMoveGenerator
         var piece = (int)Piece.K + offset;
         var oppositeSide = (Side)Utils.OppositeSide(position.Side);
 
-        int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
+        int sourceSquare = position.PieceBitboards[piece].GetLS1BIndex(); // There's for sure only one
 
         // Castles
         if (position.Castle != default)
@@ -293,8 +293,8 @@ file static class CustomMoveGenerator
             if (position.Side == Side.White)
             {
                 if (((position.Castle & (int)CastlingRights.WK) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g1)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
@@ -303,9 +303,9 @@ file static class CustomMoveGenerator
                 }
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
@@ -316,8 +316,8 @@ file static class CustomMoveGenerator
             else
             {
                 if (((position.Castle & (int)CastlingRights.BK) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g8)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
@@ -326,9 +326,9 @@ file static class CustomMoveGenerator
                 }
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
@@ -342,7 +342,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IEnumerable<Move> GeneratePieceMoves(int piece, Position position, bool capturesOnly = false)
     {
-        var bitboard = position.PieceBitBoards[piece];
+        var bitboard = position.PieceBitboards[piece];
         int sourceSquare, targetSquare;
 
         while (bitboard != default)
@@ -350,15 +350,15 @@ file static class CustomMoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            ulong LocalAttacks = _pieceLocalAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
-                & ~position.OccupancyBitBoards[(int)position.Side];
+            ulong LocalAttacks = _pieceLocalAttacks[piece](sourceSquare, position.OccupancyBitboards[(int)Side.Both])
+                & ~position.OccupancyBitboards[(int)position.Side];
 
             while (LocalAttacks != default)
             {
                 targetSquare = LocalAttacks.GetLS1BIndex();
                 LocalAttacks.ResetLS1B();
 
-                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                if (position.OccupancyBitboards[(int)Side.Both].GetBit(targetSquare))
                 {
                     yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, 1);
                 }
@@ -415,20 +415,20 @@ file static class CustomMoveGenerator
 
 file static class LocalAttacks
 {
-    private static readonly BitBoard[] _bishopOccupancyMasks;
-    private static readonly BitBoard[] _rookOccupancyMasks;
+    private static readonly Bitboard[] _bishopOccupancyMasks;
+    private static readonly Bitboard[] _rookOccupancyMasks;
 
     /// <summary>
     /// [64 (Squares), 512 (Occupancies)]
-    /// Use <see cref="BishopLocalAttacks(int, BitBoard)"/>
+    /// Use <see cref="BishopLocalAttacks(int, Bitboard)"/>
     /// </summary>
-    private static readonly BitBoard[][] _bishopLocalAttacks;
+    private static readonly Bitboard[][] _bishopLocalAttacks;
 
     /// <summary>
     /// [64 (Squares), 4096 (Occupancies)]
-    /// Use <see cref="RookLocalAttacks(int, BitBoard)"/>
+    /// Use <see cref="RookLocalAttacks(int, Bitboard)"/>
     /// </summary>
-    private static readonly BitBoard[][] _rookLocalAttacks;
+    private static readonly Bitboard[][] _rookLocalAttacks;
 
     private static readonly ulong[] _pextLocalAttacks;
     private static readonly ulong[] _pextBishopOffset;
@@ -437,9 +437,9 @@ file static class LocalAttacks
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
     /// </summary>
-    public static BitBoard[][] PawnAttacks { get; }
-    public static BitBoard[] KnightLocalAttacks { get; }
-    public static BitBoard[] KingLocalAttacks { get; }
+    public static Bitboard[][] PawnAttacks { get; }
+    public static Bitboard[] KnightLocalAttacks { get; }
+    public static Bitboard[] KingLocalAttacks { get; }
 
     static LocalAttacks()
     {
@@ -467,7 +467,7 @@ file static class LocalAttacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard BishopLocalAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard BishopLocalAttacks(int squareIndex, Bitboard occupancy)
     {
         return Bmi2.X64.IsSupported
             ? _pextLocalAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
@@ -479,7 +479,7 @@ file static class LocalAttacks
     /// </summary>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard MagicNumbersBishopLocalAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard MagicNumbersBishopLocalAttacks(int squareIndex, Bitboard occupancy)
     {
         var occ = occupancy & _bishopOccupancyMasks[squareIndex];
         occ *= Constants.BishopMagicNumbers[squareIndex];
@@ -493,14 +493,14 @@ file static class LocalAttacks
     /// </summary>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard RookLocalAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard RookLocalAttacks(int squareIndex, Bitboard occupancy)
     {
         return Bmi2.IsSupported
             ? _pextLocalAttacks[_pextRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])]
             : MagicNumbersRookLocalAttacks(squareIndex, occupancy);
     }
 
-    public static BitBoard MagicNumbersRookLocalAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard MagicNumbersRookLocalAttacks(int squareIndex, Bitboard occupancy)
     {
         var occ = occupancy & _rookOccupancyMasks[squareIndex];
         occ *= Constants.RookMagicNumbers[squareIndex];
@@ -511,11 +511,11 @@ file static class LocalAttacks
 
     /// <summary>
     /// Get Queen LocalAttacks assuming current board occupancy
-    /// Use <see cref="QueenLocalAttacks(BitBoard, BitBoard)"/> if rook and bishop LocalAttacks are already calculated
+    /// Use <see cref="QueenLocalAttacks(Bitboard, Bitboard)"/> if rook and bishop LocalAttacks are already calculated
     /// </summary>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenLocalAttacks(int squareIndex, BitBoard occupancy)
+    public static Bitboard QueenLocalAttacks(int squareIndex, Bitboard occupancy)
     {
         return QueenLocalAttacks(
             RookLocalAttacks(squareIndex, occupancy),
@@ -526,17 +526,17 @@ file static class LocalAttacks
     /// Get Queen LocalAttacks having rook and bishop LocalAttacks pre-calculated
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenLocalAttacks(BitBoard rookLocalAttacks, BitBoard bishopLocalAttacks)
+    public static Bitboard QueenLocalAttacks(Bitboard rookLocalAttacks, Bitboard bishopLocalAttacks)
     {
         return rookLocalAttacks | bishopLocalAttacks;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsSquareAttackedBySide(int squaredIndex, Position position, Side sideToMove) =>
-        IsSquareAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
+        IsSquareAttacked(squaredIndex, sideToMove, position.PieceBitboards, position.OccupancyBitboards);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -555,7 +555,7 @@ file static class LocalAttacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -573,44 +573,44 @@ file static class LocalAttacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, BitBoard pawnBitBoard)
+    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, Bitboard pawnBitboard)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitBoard) != default;
+        return (PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKnights(int squareIndex, BitBoard knightBitBoard)
+    private static bool IsSquareAttackedByKnights(int squareIndex, Bitboard knightBitboard)
     {
-        return (KnightLocalAttacks[squareIndex] & knightBitBoard) != default;
+        return (KnightLocalAttacks[squareIndex] & knightBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKing(int squareIndex, BitBoard kingBitBoard)
+    private static bool IsSquareAttackedByKing(int squareIndex, Bitboard kingBitboard)
     {
-        return (KingLocalAttacks[squareIndex] & kingBitBoard) != default;
+        return (KingLocalAttacks[squareIndex] & kingBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByBishops(int squareIndex, BitBoard bishopBitBoard, BitBoard occupancy, out BitBoard bishopLocalAttacks)
+    private static bool IsSquareAttackedByBishops(int squareIndex, Bitboard bishopBitboard, Bitboard occupancy, out Bitboard bishopLocalAttacks)
     {
         bishopLocalAttacks = BishopLocalAttacks(squareIndex, occupancy);
-        return (bishopLocalAttacks & bishopBitBoard) != default;
+        return (bishopLocalAttacks & bishopBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByRooks(int squareIndex, BitBoard rookBitBoard, BitBoard occupancy, out BitBoard rookLocalAttacks)
+    private static bool IsSquareAttackedByRooks(int squareIndex, Bitboard rookBitboard, Bitboard occupancy, out Bitboard rookLocalAttacks)
     {
         rookLocalAttacks = RookLocalAttacks(squareIndex, occupancy);
-        return (rookLocalAttacks & rookBitBoard) != default;
+        return (rookLocalAttacks & rookBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByQueens(BitBoard bishopLocalAttacks, BitBoard rookLocalAttacks, BitBoard queenBitBoard)
+    private static bool IsSquareAttackedByQueens(Bitboard bishopLocalAttacks, Bitboard rookLocalAttacks, Bitboard queenBitboard)
     {
         var queenLocalAttacks = QueenLocalAttacks(rookLocalAttacks, bishopLocalAttacks);
-        return (queenLocalAttacks & queenBitBoard) != default;
+        return (queenLocalAttacks & queenBitboard) != default;
     }
 
     /// <summary>

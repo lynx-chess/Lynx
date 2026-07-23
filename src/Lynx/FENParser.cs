@@ -23,23 +23,24 @@ public static class FENParser
         fen = fen.Trim();
 
         // Arrays will be be returned as part of Position cleanup
-        var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
-        Array.Clear(pieceBitBoards, 0, 12);
-        var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
-        Array.Clear(occupancyBitBoards, 0, 3);
+        var pieceBitboards = ArrayPool<Bitboard>.Shared.Rent(12);
+        Array.Clear(pieceBitboards, 0, 12);
+        var occupancyBitboards = ArrayPool<Bitboard>.Shared.Rent(3);
+        Array.Clear(occupancyBitboards, 0, 3);
         var board = ArrayPool<int>.Shared.Rent(64);
         Array.Fill(board, (int)Piece.None);
 
         bool success;
         Side side;
         byte castlingRights = 0;
-        int halfMoveClock = 0/*, fullMoveCounter = 1*/;
+        int halfMoveClock = 0;
+        int fullMoveCounter = 1;
         BoardSquare enPassant = BoardSquare.noSquare;
         CastlingData castlingData;
 
         try
         {
-            ParseBoard(fen, pieceBitBoards, occupancyBitBoards, board);
+            ParseBoard(fen, pieceBitboards, occupancyBitboards, board);
 
             var unparsedStringAsSpan = fen[fen.IndexOf(' ')..];
             Span<Range> parts = stackalloc Range[5];
@@ -53,23 +54,23 @@ public static class FENParser
             side = ParseSide(unparsedStringAsSpan[parts[0]]);
 
             castlingData = !Configuration.EngineSettings.IsChess960
-                    ? ParseStandardChessCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitBoards, out castlingRights)
-                    : ParseDFRCCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitBoards, out castlingRights);
+                    ? ParseStandardChessCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitboards, out castlingRights)
+                    : ParseDFRCCastlingRights(unparsedStringAsSpan[parts[1]], pieceBitboards, out castlingRights);
 
-            (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
+            (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitboards, side);
 
             if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
             {
                 _logger.Debug("No half move clock detected");
             }
 
-            //if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
-            //{
-            //    _logger.Debug("No full move counter detected");
-            //}
+            if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
+            {
+               _logger.Debug("No full move counter detected");
+            }
 
-            if (pieceBitBoards[(int)Piece.K].CountBits() != 1
-                || pieceBitBoards[(int)Piece.k].CountBits() != 1)
+            if (pieceBitboards[(int)Piece.K].CountBits() != 1
+                || pieceBitboards[(int)Piece.k].CountBits() != 1)
             {
                 throw new LynxException("Missing or extra kings");
             }
@@ -84,14 +85,14 @@ public static class FENParser
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? new(pieceBitBoards, occupancyBitBoards, board, side, castlingRights, enPassant,
+            ? new(pieceBitboards, occupancyBitboards, board, side, castlingRights, enPassant,
                 castlingData,
-                halfMoveClock/*, fullMoveCounter*/)
+                halfMoveClock, fullMoveCounter)
             : throw new LynxException($"Error parsing {fen}");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards, int[] board)
+    private static void ParseBoard(ReadOnlySpan<char> fen, Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards, int[] board)
     {
         var rankIndex = 0;
         var end = fen.IndexOf('/');
@@ -100,26 +101,26 @@ public static class FENParser
         {
             var match = fen[..end];
 
-            ParseBoardSection(pieceBitBoards, board, rankIndex, match);
+            ParseBoardSection(pieceBitboards, board, rankIndex, match);
 
             fen = fen[(end + 1)..];
             end = fen.IndexOf('/');
             ++rankIndex;
         }
 
-        ParseBoardSection(pieceBitBoards, board, rankIndex, fen[..fen.IndexOf(' ')]);
+        ParseBoardSection(pieceBitboards, board, rankIndex, fen[..fen.IndexOf(' ')]);
 
         // Populate occupancies
         for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
         {
-            occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-            occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
+            occupancyBitboards[(int)Side.White] |= pieceBitboards[piece];
+            occupancyBitboards[(int)Side.Black] |= pieceBitboards[piece + 6];
         }
 
-        occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
+        occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ParseBoardSection(BitBoard[] pieceBitBoards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
+        static void ParseBoardSection(Bitboard[] pieceBitboards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
         {
             int fileIndex = 0;
 
@@ -141,13 +142,13 @@ public static class FENParser
                     'q' => Piece.q,
                     'k' => Piece.k,
 
-                    _ => Piece.None
+                    _ => Piece.None,
                 };
 
                 if (piece != Piece.None)
                 {
-                    var square = BitBoardExtensions.SquareIndex(rankIndex, fileIndex);
-                    pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(square);
+                    var square = BitboardExtensions.SquareIndex(rankIndex, fileIndex);
+                    pieceBitboards[(int)piece] = pieceBitboards[(int)piece].SetBit(square);
                     board[square] = (int)piece;
                     ++fileIndex;
                 }
@@ -167,12 +168,12 @@ public static class FENParser
         {
             'w' or 'W' => Side.White,
             'b' or 'B' => Side.Black,
-            _ => throw new LynxException($"Unrecognized side: {side}")
+            _ => throw new LynxException($"Unrecognized side: {side}"),
         };
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static CastlingData ParseStandardChessCastlingRights(ReadOnlySpan<char> castlingChars, ReadOnlySpan<BitBoard> pieceBitboards, out byte castlingRights)
+    private static CastlingData ParseStandardChessCastlingRights(ReadOnlySpan<char> castlingChars, ReadOnlySpan<Bitboard> pieceBitboards, out byte castlingRights)
     {
         if (castlingChars.ContainsAny(_DFRCCastlingRightsChars))
         {
@@ -192,7 +193,7 @@ public static class FENParser
                 'k' => (byte)CastlingRights.BK,
                 'q' => (byte)CastlingRights.BQ,
                 '-' => castlingRights,
-                _ => throw new LynxException($"Unrecognized castling char: {castlingChars[i]}")
+                _ => throw new LynxException($"Unrecognized castling char: {castlingChars[i]}"),
             };
         }
 
@@ -202,7 +203,7 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static CastlingData ParseDFRCCastlingRights(ReadOnlySpan<char> castlingChars, ReadOnlySpan<BitBoard> pieceBitboards, out byte castlingRights)
+    private static CastlingData ParseDFRCCastlingRights(ReadOnlySpan<char> castlingChars, ReadOnlySpan<Bitboard> pieceBitboards, out byte castlingRights)
     {
         // X-FEN uses KQkq notation when not ambiguous, with the letters referring to "the outermost rook of the affected side"
 
@@ -318,7 +319,7 @@ public static class FENParser
                     {
                         if (ch >= 'A' && ch <= 'H')
                         {
-                            var square = BitBoardExtensions.SquareIndex(rank: 7, file: ch - 'A');
+                            var square = BitboardExtensions.SquareIndex(rank: 7, file: ch - 'A');
 
                             if (square < whiteKing)
                             {
@@ -341,7 +342,7 @@ public static class FENParser
                         }
                         else if (ch >= 'a' && ch <= 'h')
                         {
-                            var square = BitBoardExtensions.SquareIndex(rank: 0, file: ch - 'a');
+                            var square = BitboardExtensions.SquareIndex(rank: 0, file: ch - 'a');
 
                             if (square < blackKing)
                             {
@@ -372,7 +373,7 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, BitBoard[] PieceBitBoards, Side side)
+    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, Bitboard[] PieceBitboards, Side side)
     {
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;
@@ -388,9 +389,9 @@ public static class FENParser
                 var pawnOffset = ((int)side << 4) - 8; // side == Side.White ? +8 : -8
                 var pawnSquare = (int)enPassant + pawnOffset;
 
-                var pawnBitBoard = PieceBitBoards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide((int)side))];
+                var pawnBitboard = PieceBitboards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide((int)side))];
 
-                if (!pawnBitBoard.GetBit(pawnSquare))
+                if (!pawnBitboard.GetBit(pawnSquare))
                 {
                     success = false;
                     enPassant = BoardSquare.noSquare;
@@ -441,7 +442,7 @@ public static class FENParser
                 return false;
             }
 
-            square = (BoardSquare)BitBoardExtensions.SquareIndex(8 - rank, file);
+            square = (BoardSquare)BitboardExtensions.SquareIndex(8 - rank, file);
             return true;
         }
     }

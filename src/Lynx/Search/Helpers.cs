@@ -49,41 +49,67 @@ public sealed partial class Engine
     /// [12][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private ref short PieceToQuietHistoryEntry(int piece, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
     {
         const int pieceOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
         const int startSquareAttackedOffset = 2;
 
-        var sourceSquare = move.SourceSquare();
-        var targetSquare = move.TargetSquare();
-        var oppositeSide = Utils.OppositeSide((int)position.Side);
-
-        var oppsiteSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
-
-        var isStartSquareAttacked = oppsiteSideAttacks.GetBit(sourceSquare) ? 1 : 0;
-        var isTargetSquareAttacked = oppsiteSideAttacks.GetBit(targetSquare) ? 1 : 0;
-
-        var index = (move.Piece() * pieceOffset)
+        var index = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset)
             + (isStartSquareAttacked * startSquareAttackedOffset)
             + isTargetSquareAttacked;
 
-        return ref _quietHistory[index];
+        return ref _pieceToQuietHistory[index];
+    }
+
+    /// <summary>
+    /// [64][64][2][2]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ref short ButterflyQuietHistoryEntry(int sourceSquare, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
+    {
+        const int sourceSquareOffset = 64 * 2 * 2;
+        const int targetSquareOffset = 2 * 2;
+        const int startSquareAttackedOffset = 2;
+
+        var index = (sourceSquare * sourceSquareOffset)
+            + (targetSquare * targetSquareOffset)
+            + (isStartSquareAttacked * startSquareAttackedOffset)
+            + isTargetSquareAttacked;
+
+        return ref _butterflyQuietHistory[index];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    {
+        var sourceSquare = move.SourceSquare();
+        var targetSquare = move.TargetSquare();
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+        Debug.Assert(oppositeSideAttacks != 0);
+
+        var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
+        var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
+
+        var pieceToHistory = PieceToQuietHistoryEntry(move.Piece(), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+        var butterflyHistory = ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+
+        return (short)((pieceToHistory + butterflyHistory) / 2);
     }
 
     /// <summary>
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short CaptureHistoryEntry(Move move)
+    private ref short CaptureHistoryEntry(int piece, int targetSquare, int capturedPiece)
     {
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
 
-        var index = (move.Piece() * pieceOffset)
-            + (move.TargetSquare() * targetSquareOffset)
-            + move.CapturedPiece();
+        var index = (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + capturedPiece;
 
         Debug.Assert(index < _captureHistory.Length);
 
@@ -91,27 +117,73 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// [12][64][12][64][ContinuationHistoryPlyCount]
+    /// [12][64][12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short ContinuationHistoryEntry(int piece, int targetSquare, int ply)
+    private int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
     {
-        const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int previousMovePieceOffset = 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int previousMoveTargetSquareOffset = EvaluationConstants.ContinuationHistoryPlyCount;
+        const int pieceOffset = 64 * 12 * 64;
+        const int targetSquareOffset = 12 * 64;
+        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
 
-        var previousMove = Game.ReadMoveFromStack(ply);
+        var commonIndex = (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset);
 
-        var index = (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset)
-            + (previousMove.Piece() * previousMovePieceOffset)
-            + (previousMove.TargetSquare() * previousMoveTargetSquareOffset);
+        // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
+        // Counter move history (continuation history, ply - 1)
+        var ply1Move = Game.ReadMoveFromStack(ply - 1);
+        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+        Debug.Assert(ply1Index < _continuationHistory.Length);
 
-        Debug.Assert(index < _continuationHistory.Length);
+        // Follow-up history (continuation history, ply - 2)
+        var ply2Move = Game.ReadMoveFromStack(ply - 2);
+        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+        Debug.Assert(ply2Index < _continuationHistory.Length);
 
-        return ref _continuationHistory[index];
-        //+ 0];
+        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ContinuationHistoryPreviousMoveIndex(Move previousMove)
+    {
+        const int previousMovePieceOffset = 64;
+
+        return (previousMove.Piece() * previousMovePieceOffset)
+            + previousMove.TargetSquare();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void UpdateContinuationHistory(int piece, int targetSquare, int ply, int rawHistoryBonus)
+    {
+        const int pieceOffset = 64 * 12 * 64;
+        const int targetSquareOffset = 12 * 64;
+        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
+
+        var commonIndex = (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset);
+
+        // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
+        if (ply >= 1)
+        {
+            // Counter move history (continuation history, ply - 1)
+            var ply1Move = Game.ReadMoveFromStack(ply - 1);
+            var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+            Debug.Assert(ply1Index < _continuationHistory.Length);
+
+            ref var contHist1 = ref _continuationHistory[ply1Index];
+            contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
+
+            if (ply >= 2)
+            {
+                // Follow-up history (continuation history, ply - 2)
+                var ply2Move = Game.ReadMoveFromStack(ply - 2);
+                var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+                Debug.Assert(ply2Index < _continuationHistory.Length);
+
+                ref var contHist2 = ref _continuationHistory[ply2Index];
+                contHist2 = (short)ScoreHistoryMove(contHist2, rawHistoryBonus);
+            }
+        }
     }
 
     /// <summary>
@@ -197,6 +269,52 @@ public sealed partial class Engine
         ref var majorCorrHistEntry = ref _majorCorrHistory[majorCorrHistIndex];
         majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
 
+        // Material correction history
+        var materialHash = position.MaterialHash();
+        var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
+        var materialCorrHistIndex = (2 * materialIndex) + side;
+        Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
+
+        ref var materialCorrHistEntry = ref _materialCorrHistory[materialCorrHistIndex];
+        materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
+
+        // Continuation correction history
+        var previousMoveHash = Game.PreviousMoveHash(1);
+        if (previousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
+        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
+        if (previousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
+        var previous4MoveHash = Game.PreviousMoveHash(4);
+        if (previous4MoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previous4MoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -271,12 +389,63 @@ public sealed partial class Engine
 
         var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
 
+        // Material correction history - Caissa author original idea
+        var materialHash = position.MaterialHash();
+        var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
+        var materialCorrHistIndex = (2 * materialIndex) + side;
+        Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
+
+        var materialCorrHist = _materialCorrHistory[materialCorrHistIndex];
+
+        // Continuation correction history - Motor author original idea
+        int continuationCorrHist = 0;
+        int continuationCorrHist2 = 0;
+        int continuationCorrHist4 = 0;
+
+        var previousMoveHash = Game.PreviousMoveHash(1);
+        if (previousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
+        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
+        if (previousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
+        var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(4);
+        if (previousPreviousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
             + (nonPawnNoSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM)
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
-            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major);
+            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
+            + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
+            + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
+            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
+            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4);
+
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
@@ -294,12 +463,34 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void AgeQuietHistory()
     {
-        // Since _quietHistory is a pinned array
-        // This is no-op pinning as it does not influence the GC compaction
+        // Since history arrays are pinned arrays
+        // These are no-op pinning as it does not influence the GC compaction
         // https://tooslowexception.com/pinned-object-heap-in-net-5/
-        fixed (short* histPtr = _quietHistory)
+        fixed (short* histPtr = _pieceToQuietHistory)
         {
-            for (int i = 0; i < QuietHistoryLength; i += 4)
+            for (int i = 0; i < PieceToQuietHistoryLength; i += 4)
+            {
+                short* start = histPtr + i;
+
+                short* h2 = start + 1;
+                short* h3 = start + 2;
+                short* h4 = start + 3;
+
+                int tmp1 = *start * 3;
+                int tmp2 = *h2 * 3;
+                int tmp3 = *h3 * 3;
+                int tmp4 = *h4 * 3;
+
+                *start = (short)(tmp1 / 4);
+                *h2 = (short)(tmp2 / 4);
+                *h3 = (short)(tmp3 / 4);
+                *h4 = (short)(tmp4 / 4);
+            }
+        }
+
+        fixed (short* histPtr = _butterflyQuietHistory)
+        {
+            for (int i = 0; i < ButterflyHistoryLength; i += 4)
             {
                 short* start = histPtr + i;
 
@@ -360,7 +551,7 @@ public sealed partial class Engine
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
 
             if (!MoveExtensions.TryParseFromUCIString(

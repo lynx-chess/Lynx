@@ -11,7 +11,7 @@ public enum SpecialMoveType
     DoublePawnPush = 1,
     EnPassant = 2,
     ShortCastle = 3,
-    LongCastle = 4
+    LongCastle = 4,
 }
 
 /// <summary>
@@ -41,6 +41,8 @@ public static class MoveExtensions
     private const int TargetSquareMask = 0xFC00;
     private const int PieceMask = 0xF_0000;
     private const int CapturedPieceMask = 0xF0_0000;
+
+    private const int UCIMask = 0xFFFF;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -121,6 +123,11 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeShortCastle(int sourceSquare, int targetSquare, int piece)
     {
+        if (targetSquare == CastlingData.DefaultValues)
+        {
+            return -1;
+        }
+
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
@@ -131,6 +138,11 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeLongCastle(int sourceSquare, int targetSquare, int piece)
     {
+        if (targetSquare == CastlingData.DefaultValues)
+        {
+            return -1;
+        }
+
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
@@ -191,25 +203,23 @@ public static class MoveExtensions
                     move = candidateMove;
                     return true;
                 }
-                else
+
+                var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
+                var candidatePromotedPiece = candidateMove.PromotedPiece();
+
+                if (candidatePromotedPiece == promotedPiece
+                    || candidatePromotedPiece == promotedPiece - 6)
                 {
-                    var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
-                    var candidatePromotedPiece = candidateMove.PromotedPiece();
-
-                    if (candidatePromotedPiece == promotedPiece
-                        || candidatePromotedPiece == promotedPiece - 6)
-                    {
-                        move = candidateMove;
-                        return true;
-                    }
-
-                    Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
-                    Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4
-                        || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 12
-                        || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8,
-                        "Assert fail", "There will be either 4 or 8 moves that are a promotion");
-                    Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
+                    move = candidateMove;
+                    return true;
                 }
+
+                Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
+#pragma warning disable MA0031 // Optimize Enumerable.Count() usage
+                Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) % 4 == 0,
+                    "Assert fail", "There should be 0 or a multiple of 4 that are a promotion");
+                Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
+#pragma warning restore MA0031 // Optimize Enumerable.Count() usage
             }
         }
 
@@ -263,7 +273,7 @@ public static class MoveExtensions
         var piece = move.Piece();
         var capturedPiece = move.CapturedPiece();
 
-#pragma warning disable S3358 // Ternary operators should not be nested
+#pragma warning disable S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
         return move.SpecialMoveFlag() switch
         {
             SpecialMoveType.ShortCastle => "O-O",
@@ -277,9 +287,9 @@ public static class MoveExtensions
 
                 + (capturedPiece == (int)Model.Piece.None ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
-                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
+                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
         };
-#pragma warning restore S3358 // Ternary operators should not be nested
+#pragma warning restore S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
     }
 
     /// <summary>
@@ -291,7 +301,7 @@ public static class MoveExtensions
         var piece = move.Piece();
         var capturedPiece = move.CapturedPiece();
 
-#pragma warning disable S3358 // Ternary operators should not be nested
+#pragma warning disable S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
         return move.SpecialMoveFlag() switch
         {
             SpecialMoveType.ShortCastle => "O-O",
@@ -299,61 +309,48 @@ public static class MoveExtensions
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
                     ? (capturedPiece != (int)Model.Piece.None
-                        ? global::Lynx.Constants.FileString[global::Lynx.Constants.File[move.SourceSquare()]]  // exd5
+                        ? global::Lynx.Constants.FileString[global::Lynx.Constants.File(move.SourceSquare())]  // exd5
                         : "")    // d5
                     : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
                         + DisambiguateMove(move, position))
                 + (capturedPiece == (int)Model.Piece.None ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
-                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
+                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
         };
-#pragma warning restore S3358 // Ternary operators should not be nested
+#pragma warning restore S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
     }
 
-    [SkipLocalsInit]
+    private static readonly string[] _uciStrings = InitUCIStrings();
+
+    private static string[] InitUCIStrings()
+    {
+        var result = new string[ushort.MaxValue + 1];
+
+        for (int source = 0; source < 64; source++)
+        {
+            for (int target = 0; target < 64; target++)
+            {
+                int baseIndex = (source << SourceSquareOffset) | (target << TargetSquareOffset);
+                var baseStr = string.Concat(Constants.Coordinates[source], Constants.Coordinates[target]);
+                result[baseIndex] = baseStr;
+
+                for (int promotedPiece = (int)Model.Piece.N; promotedPiece < (int)Model.Piece.k; promotedPiece++)
+                {
+                    result[baseIndex | promotedPiece] = $"{baseStr}{Constants.AsciiPiecesLowercase[promotedPiece]}";
+                }
+            }
+        }
+
+        return result;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
-        // TODO memoize them with dict or even array?
-        Span<char> span = stackalloc char[5];
-
-        var source = Constants.CoordinatesCharArray[move.SourceSquare()];
-        var target = Constants.CoordinatesCharArray[move.TargetSquare()];
-
-        span[0] = source[0];
-        span[1] = source[1];
-        span[2] = target[0];
-        span[3] = target[1];
-
-        var promotedPiece = move.PromotedPiece();
-        if (promotedPiece != default)
-        {
-            span[4] = Constants.AsciiPiecesLowercase[promotedPiece];
-
-            return span.ToString();
-        }
-
-        return span[..^1].ToString();
-    }
-
-    private static readonly Dictionary<int, string> _uCIStringCache = new(4096);
-
-    /// <summary>
-    /// NOT thread-safe
-    /// </summary>
-    [SkipLocalsInit]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string UCIStringMemoized(this Move move)
-    {
-        if (_uCIStringCache.TryGetValue(move, out var uciString))
-        {
-            return uciString;
-        }
-
-        var str = move.UCIString();
-        _uCIStringCache[move] = str;
-
-        return str;
+        // We can't just cast to ShortMove (aka short), since moves with the highest bit of the second half set to 1
+        // would be interpreted as negative numbers, and therefore throwing an IndexOutOfRangeException when widened back to int for array indexing.
+        // By masking with 0xFFFF, we ensure that the move is always interpreted as an unsigned number.
+        return _uciStrings[move & UCIMask];
     }
 
     /// <summary>
@@ -367,11 +364,12 @@ public static class MoveExtensions
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
 
+#pragma warning disable MA0029 // Combine LINQ methods
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
             .Where(m =>
@@ -384,6 +382,7 @@ public static class MoveExtensions
                 return isLegal;
             })
             .ToArray();
+#pragma warning restore MA0029 // Combine LINQ methods
 
         if (movesWithSameSimpleRepresentation.Length == 0)
         {
@@ -391,15 +390,15 @@ public static class MoveExtensions
         }
 
         int sourceSquare = move.SourceSquare();
-        var moveFile = Constants.File[sourceSquare];
+        var moveFile = Constants.File(sourceSquare);
 
-        var files = movesWithSameSimpleRepresentation.Select(m => Constants.File[m.SourceSquare()]);
+        var files = movesWithSameSimpleRepresentation.Select(m => Constants.File(m.SourceSquare()));
 
         if (files.Any(f => f == moveFile))
         {
-            var moveRank = Constants.Rank[sourceSquare];
+            var moveRank = Constants.Rank(sourceSquare);
 
-            var ranks = movesWithSameSimpleRepresentation.Select(m => Constants.Rank[m.SourceSquare()]);
+            var ranks = movesWithSameSimpleRepresentation.Select(m => Constants.Rank(m.SourceSquare()));
 
             if (ranks.Any(r => r == moveRank))
             {

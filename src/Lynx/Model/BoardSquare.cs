@@ -1,4 +1,6 @@
-﻿namespace Lynx.Model;
+﻿using System.Runtime.CompilerServices;
+
+namespace Lynx.Model;
 
 /// <summary>
 /// Big-Endian Rank-File Mapping
@@ -23,14 +25,21 @@ public enum BoardSquare
     a3, b3, c3, d3, e3, f3, g3, h3,
     a2, b2, c2, d2, e2, f2, g2, h2,
     a1, b1, c1, d1, e1, f1, g1, h1,
-    noSquare = -1
+    noSquare = -1,
 }
 
 public static class BoardSquareExtensions
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsDarkSquare(int squareIndex)
+    {
+        return ((Constants.DarkSquaresBitboard >> squareIndex) & 1) != 0;
+    }
+
     /// <summary>
     /// https://www.chessprogramming.org/Color_of_a_Square
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool DifferentColor(int squareIndex1, int squareIndex2)
     {
         return ((9 * (squareIndex1 ^ squareIndex2)) & 8) != 0;
@@ -39,6 +48,7 @@ public static class BoardSquareExtensions
     /// <summary>
     /// https://www.chessprogramming.org/Color_of_a_Square
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool SameColor(int squareIndex1, int squareIndex2)
     {
         return ((9 * (squareIndex1 ^ squareIndex2)) & 8) == 0;

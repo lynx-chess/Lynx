@@ -44,14 +44,14 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
 
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            var bitboard = position.PieceBitBoards[piece];
+            var bitboard = position.PieceBitboards[piece];
 
             while (bitboard != default)
             {
                 var sourceSquare = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                ulong attacks = _pieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
+                ulong attacks = _pieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitboards[(int)Side.Both]);
 
                 sum += attacks;
             }
@@ -69,14 +69,14 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
 
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            var bitboard = position.PieceBitBoards[piece];
+            var bitboard = position.PieceBitboards[piece];
 
             while (bitboard != default)
             {
                 var sourceSquare = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                ulong attacks = _pieceAttacksArray[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
+                ulong attacks = _pieceAttacksArray[piece](sourceSquare, position.OccupancyBitboards[(int)Side.Both]);
 
                 sum += attacks;
             }
@@ -86,33 +86,33 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
     }
 
 #pragma warning disable IDE0350 // Use implicitly typed lambda
-    private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray =
+    private static readonly Func<int, Bitboard, ulong>[] _pieceAttacksArray =
     [
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
-        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
-        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+        (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
-        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
-        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+        (int origin, Bitboard _) => Attacks.KingAttacks[origin],
     ];
 
-    private static readonly Dictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new()
+    private static readonly Dictionary<int, Func<int, Bitboard, ulong>> _pieceAttacksDictionary = new()
     {
-        [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
-        [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+        [(int)Piece.P] = (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+        [(int)Piece.p] = (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
 
-        [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin],
-        [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+        [(int)Piece.K] = (int origin, Bitboard _) => Attacks.KingAttacks[origin],
+        [(int)Piece.k] = (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-        [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        [(int)Piece.N] = (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
+        [(int)Piece.n] = (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
 
         [(int)Piece.B] = Attacks.BishopAttacks,
         [(int)Piece.b] = Attacks.BishopAttacks,

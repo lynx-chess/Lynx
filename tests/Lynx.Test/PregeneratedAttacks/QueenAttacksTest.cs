@@ -61,7 +61,7 @@ public class QueenAttacksTest
     public void GetQueenAttacks(BS bishopSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
+        var occupancy = BitboardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = Attacks.QueenAttacks((int)bishopSquare, occupancy);
@@ -77,7 +77,7 @@ public class QueenAttacksTest
         // Assert
         ValidateAttacks(attackedSquares, attacks);
 
-        static void ValidateAttacks(BS[] attackedSquares, BitBoard attacks)
+        static void ValidateAttacks(BS[] attackedSquares, Bitboard attacks)
         {
             foreach (var attackedSquare in attackedSquares)
             {
@@ -85,7 +85,7 @@ public class QueenAttacksTest
                 attacks.PopBit(attackedSquare);
             }
 
-            Assert.AreEqual(default(BitBoard), attacks);
+            Assert.AreEqual(default(Bitboard), attacks);
         }
     }
 }

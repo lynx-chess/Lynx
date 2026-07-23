@@ -19,7 +19,7 @@ public enum TablebaseEvaluationCategory : byte
     MaybeWin,
     [EnumMember(Value = "maybe-loss")]
     MaybeLoss,
-    Cancelled = byte.MaxValue
+    Cancelled = byte.MaxValue,
 }
 
 public record class TablebaseEvaluation
@@ -40,9 +40,9 @@ public record class TablebaseEvaluation
     [JsonPropertyName("stalemate")]
     public bool IsStalemate { get; init; }
 
-#pragma warning disable CA1002 // Do not expose generic lists
+#pragma warning disable CA1002, MA0016 // Do not expose generic lists
     public List<TablebaseEvalMove>? Moves { get; init; }
-#pragma warning restore CA1002 // Do not expose generic lists
+#pragma warning restore CA1002, MA0016 // Do not expose generic lists
 }
 
 public record class TablebaseEvalMove

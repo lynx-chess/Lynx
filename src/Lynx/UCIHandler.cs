@@ -1,7 +1,10 @@
-﻿using Lynx.Model;
+﻿using Lynx.Datagen;
+using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
+using Microsoft.Extensions.Configuration;
 using NLog;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json;
@@ -120,6 +123,13 @@ public sealed class UCIHandler
                 case "wf_spsa":
                     await HandleWeatherFactorySPSA(cancellationToken);
                     break;
+                case "genfens":
+                    HandleGenFens(rawCommand);
+                    break;
+                case "vftoepd":
+                    HandleVFtoEPD(rawCommand);
+                    HandleQuit();
+                    break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
                     break;
@@ -225,7 +235,7 @@ public sealed class UCIHandler
                     {
                         var opponent = command[commandItems[4].Start.Value..].ToString();
 
-                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty));
+                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty, StringComparison.OrdinalIgnoreCase));
                     }
                     break;
                 }
@@ -285,6 +295,22 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.MoveOverhead = value;
+                    }
+                    break;
+                }
+            case "minimal":
+                {
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.UCI_Minimal = value;
+                    }
+                    break;
+                }
+            case "softnodes":
+                {
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftNodes = value;
                     }
                     break;
                 }
@@ -390,7 +416,7 @@ public sealed class UCIHandler
 
             if (Bmi1.IsSupported)
             {
-                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for BitBoard LSB operations");
+                await _engineToUci.Writer.WriteAsync("BMI1 supported, ExtractLowestSetBit will be used for Bitboard LSB operations");
             }
 
             if (Bmi2.IsSupported)
@@ -411,13 +437,13 @@ public sealed class UCIHandler
         }
     }
 
-    private async ValueTask HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
+    private async Task HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
     {
         var isFRC = Configuration.EngineSettings.IsChess960;
 
         try
         {
-            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
+            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ', StringComparison.OrdinalIgnoreCase) + 1)..].Replace("\"", string.Empty, StringComparison.OrdinalIgnoreCase));
             if (!File.Exists(fullPath))
             {
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
@@ -440,7 +466,7 @@ public sealed class UCIHandler
                 }
 
                 var ourFen = position.FEN();
-                if (ourFen != fen)
+                if (!string.Equals(ourFen, fen, StringComparison.Ordinal))
                 {
                     _logger.Debug("Raw fen: {0}, parsed fen: {1}", fen, ourFen);
                 }
@@ -536,9 +562,48 @@ public sealed class UCIHandler
         await SendCommand(new JsonObject(tunableValues).ToString(), cancellationToken);
     }
 
+    private void HandleGenFens(string rawCommand)
+    {
+        var genFensCommand = new GenFensCommand(rawCommand);
+        _searcher.GenFens(genFensCommand);
+    }
+
+    [UnconditionalSuppressMessage(
+        "Trimming",
+        "IL2026",       // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+        Justification = "Trimming doesn't make this fail, but it's development feature anyway")]
+    private void HandleVFtoEPD(string rawCommand)
+    {
+        var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var path = items.Length > 1 ? items[1] : string.Empty;
+        var filterFile = items.Length > 2 && string.Equals(items[2], "--filter-file", StringComparison.OrdinalIgnoreCase)
+            ? items[3]
+            : string.Empty;
+
+        var filter = ViriformatFilter.Unrestricted;
+
+        if (!string.IsNullOrWhiteSpace(filterFile))
+        {
+            _logger.Info("Loading Viriformat filter from {0}", filterFile);
+
+            var config = new ConfigurationBuilder()
+                .AddJsonFile(filterFile, optional: false, reloadOnChange: false)
+                .AddEnvironmentVariables()
+                .Build();
+
+            filter = new ViriformatFilter();
+
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+            config.Bind(filter);
+            #pragma warning restore IL2026
+        }
+
+        ViriformatLoader.LoadFile(path, filter);
+    }
+
     #endregion
 
-    private async Task SendCommand(string command, CancellationToken cancellationToken)
+    private async ValueTask SendCommand(string command, CancellationToken cancellationToken)
     {
         await _engineToUci.Writer.WriteAsync(command, cancellationToken);
     }

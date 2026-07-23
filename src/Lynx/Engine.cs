@@ -13,7 +13,7 @@ public sealed partial class Engine : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly int _id;
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly ITranspositionTable _tt;
+    private readonly TranspositionTable _tt;
     private SearchConstraints _searchConstraints;
 
     private bool _disposedValue;
@@ -31,11 +31,11 @@ public sealed partial class Engine : IDisposable
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
 #pragma warning disable EPS09 // Pass an argument for an 'in' parameter explicitly
-    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, TranspositionTableFactory.Create()) { }
+    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
 #pragma warning restore EPS09 // Pass an argument for an 'in' parameter explicitly
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in ITranspositionTable tt)
+    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
@@ -75,7 +75,8 @@ public sealed partial class Engine : IDisposable
             Array.Clear(_moveNodeCount[i]);
         }
 
-        Array.Clear(_quietHistory);
+        Array.Clear(_pieceToQuietHistory);
+        Array.Clear(_butterflyQuietHistory);
         Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
@@ -86,6 +87,8 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_nonPawnCorrHistory);
         Array.Clear(_minorCorrHistory);
         Array.Clear(_majorCorrHistory);
+        Array.Clear(_materialCorrHistory);
+        Array.Clear(_continuationCorrHistory);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
@@ -159,11 +162,13 @@ public sealed partial class Engine : IDisposable
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         var cancellationToken = jointCts.Token;
+#pragma warning disable MA0040 // Forward the CancellationToken parameter to methods that take one
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove, cancellationToken),
-                Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken))
+                Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken)),
             };
+#pragma warning restore MA0040 // Forward the CancellationToken parameter to methods that take one
 
         var resultList = await Task.WhenAll(tasks);
         var searchResult = resultList[1];
@@ -211,7 +216,7 @@ public sealed partial class Engine : IDisposable
         }
         catch (Exception e)
         {
-            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.FEN);
             return null;
         }
         finally

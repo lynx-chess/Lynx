@@ -1,4 +1,5 @@
 ﻿using Lynx.UCI.Commands.Engine;
+using System.Diagnostics;
 
 namespace Lynx.Model;
 
@@ -55,6 +56,9 @@ public sealed class SearchResult
 
     public override string ToString()
     {
+        Debug.Assert(Depth >= 1, "Depth cannot be less than 1");
+        Debug.Assert(DepthReached >= 1, "Seldepth cannot be less than 1");
+
         var sb = ObjectPools.StringBuilderPool.Get();
         sb.EnsureCapacity(128 + (Moves.Length * 5));
 
@@ -103,7 +107,7 @@ public sealed class SearchResult
         sb.Append(" pv ");
         foreach (var move in Moves)
         {
-            sb.Append(move.UCIStringMemoized()).Append(' ');
+            sb.Append(move.UCIString()).Append(' ');
         }
 
         // Remove the trailing space

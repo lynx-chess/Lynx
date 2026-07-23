@@ -297,9 +297,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
     {
         public ulong UniqueIdentifier { get; private set; }
 
-        public BitBoard[] PieceBitBoards { get; }
+        public Bitboard[] PieceBitboards { get; }
 
-        public BitBoard[] OccupancyBitBoards { get; }
+        public Bitboard[] OccupancyBitboards { get; }
 
         public int[] Board { get; }
 
@@ -315,8 +315,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
         public MakeMovePosition(ParseFENResult parsedFEN)
         {
-            PieceBitBoards = parsedFEN.PieceBitBoards;
-            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+            PieceBitboards = parsedFEN.PieceBitboards;
+            OccupancyBitboards = parsedFEN.OccupancyBitboards;
             Board = parsedFEN.Board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
@@ -332,11 +332,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         public MakeMovePosition(MakeMovePosition position)
         {
             UniqueIdentifier = position.UniqueIdentifier;
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+            PieceBitboards = new Bitboard[12];
+            Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+            OccupancyBitboards = new Bitboard[3];
+            Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
             Board = new int[64];
             Array.Copy(position.Board, Board, position.Board.Length);
@@ -354,11 +354,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         public MakeMovePosition(MakeMovePosition position, bool nullMove)
         {
             UniqueIdentifier = position.UniqueIdentifier;
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+            PieceBitboards = new Bitboard[12];
+            Array.Copy(position.PieceBitboards, PieceBitboards, position.PieceBitboards.Length);
 
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+            OccupancyBitboards = new Bitboard[3];
+            Array.Copy(position.OccupancyBitboards, OccupancyBitboards, position.OccupancyBitboards.Length);
 
             Board = new int[64];
             Array.Copy(position.Board, Board, position.Board.Length);
@@ -392,11 +392,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
             EnPassant = BoardSquare.noSquare;
 
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+            PieceBitboards[piece].PopBit(sourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+            PieceBitboards[newPiece].SetBit(targetSquare);
+            OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.SideHash()
@@ -413,10 +413,10 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                    Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                    PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 }
                 else
@@ -424,15 +424,15 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     var limit = (int)Piece.K + oppositeSideOffset;
                     for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                        if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                         {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                            PieceBitboards[pieceIndex].PopBit(targetSquare);
                             UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
                             break;
                         }
                     }
 
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(targetSquare);
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -449,11 +449,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -465,11 +465,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -477,7 +477,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
 
             Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+            OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
             // Updating castling rights
             Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -508,11 +508,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 newPiece = promotedPiece;
             }
 
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+            PieceBitboards[piece].PopBit(sourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+            PieceBitboards[newPiece].SetBit(targetSquare);
+            OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.SideHash()
@@ -530,10 +530,10 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                    Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                    PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                     capturedPiece = oppositePawnIndex;
                 }
@@ -542,16 +542,16 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     var limit = (int)Piece.K + oppositeSideOffset;
                     for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                        if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                         {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                            PieceBitboards[pieceIndex].PopBit(targetSquare);
                             UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
                             capturedPiece = pieceIndex;
                             break;
                         }
                     }
 
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(targetSquare);
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -568,11 +568,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -584,11 +584,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -596,7 +596,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
 
             Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+            OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
             // Updating castling rights
             Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -629,11 +629,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 newPiece = promotedPiece;
             }
 
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+            PieceBitboards[piece].PopBit(sourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+            PieceBitboards[newPiece].SetBit(targetSquare);
+            OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.SideHash()
@@ -651,10 +651,10 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                    Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                    PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                     capturedPiece = oppositePawnIndex;
                 }
@@ -663,16 +663,16 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     var limit = (int)Piece.K + oppositeSideOffset;
                     for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                        if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                         {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                            PieceBitboards[pieceIndex].PopBit(targetSquare);
                             UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
                             capturedPiece = pieceIndex;
                             break;
                         }
                     }
 
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(targetSquare);
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -689,11 +689,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -705,11 +705,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -717,7 +717,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
 
             Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+            OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
             // Updating castling rights
             Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -750,11 +750,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 newPiece = promotedPiece;
             }
 
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+            PieceBitboards[piece].PopBit(sourceSquare);
+            OccupancyBitboards[(int)Side].PopBit(sourceSquare);
 
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+            PieceBitboards[newPiece].SetBit(targetSquare);
+            OccupancyBitboards[(int)Side].SetBit(targetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.SideHash()
@@ -772,10 +772,10 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                    Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                    PieceBitboards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(capturedPawnSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                     capturedPiece = oppositePawnIndex;
                 }
@@ -784,16 +784,16 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     var limit = (int)Piece.K + oppositeSideOffset;
                     for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                        if (PieceBitboards[pieceIndex].GetBit(targetSquare))
                         {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                            PieceBitboards[pieceIndex].PopBit(targetSquare);
                             UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
                             capturedPiece = pieceIndex;
                             break;
                         }
                     }
 
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(targetSquare);
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -810,11 +810,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -826,11 +826,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+                PieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+                PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -838,7 +838,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
 
             Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+            OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
             // Updating castling rights
             Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -869,11 +869,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 newPiece = promotedPiece;
             }
 
-            PieceBitBoards[newPiece].PopBit(targetSquare);
-            OccupancyBitBoards[(int)Side].PopBit(targetSquare);
+            PieceBitboards[newPiece].PopBit(targetSquare);
+            OccupancyBitboards[(int)Side].PopBit(targetSquare);
 
-            PieceBitBoards[piece].SetBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
+            PieceBitboards[piece].SetBit(sourceSquare);
+            OccupancyBitboards[(int)Side].SetBit(sourceSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.SideHash()
@@ -891,19 +891,19 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    Utils.Assert(OccupancyBitboards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
                         $"Expected empty {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+                    PieceBitboards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].SetBit(capturedPawnSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 }
                 else
                 {
-                    PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
+                    PieceBitboards[gameState.CapturedPiece].SetBit(targetSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, gameState.CapturedPiece);
 
-                    OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                    OccupancyBitboards[oppositeSide].SetBit(targetSquare);
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -917,11 +917,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+                PieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+                PieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -933,18 +933,18 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+                PieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+                PieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                     ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
             }
 
-            OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+            OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
             // Updating castling rights
             Castle = gameState.Castle;
@@ -970,11 +970,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 newPiece = promotedPiece;
             }
 
-            PieceBitBoards[newPiece].PopBit(targetSquare);
-            OccupancyBitBoards[(int)Side].PopBit(targetSquare);
+            PieceBitboards[newPiece].PopBit(targetSquare);
+            OccupancyBitboards[(int)Side].PopBit(targetSquare);
 
-            PieceBitBoards[piece].SetBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
+            PieceBitboards[piece].SetBit(sourceSquare);
+            OccupancyBitboards[(int)Side].SetBit(sourceSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.SideHash()
@@ -992,19 +992,19 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    Utils.Assert(OccupancyBitboards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
                         $"Expected empty {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+                    PieceBitboards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].SetBit(capturedPawnSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 }
                 else
                 {
-                    PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
+                    PieceBitboards[gameState.CapturedPiece].SetBit(targetSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, gameState.CapturedPiece);
 
-                    OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                    OccupancyBitboards[oppositeSide].SetBit(targetSquare);
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -1018,11 +1018,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+                PieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+                PieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -1034,18 +1034,18 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+                PieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+                PieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                     ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
             }
 
-            OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+            OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
             // Updating castling rights
             Castle = gameState.Castle;
@@ -1071,11 +1071,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 newPiece = promotedPiece;
             }
 
-            PieceBitBoards[newPiece].PopBit(targetSquare);
-            OccupancyBitBoards[(int)Side].PopBit(targetSquare);
+            PieceBitboards[newPiece].PopBit(targetSquare);
+            OccupancyBitboards[(int)Side].PopBit(targetSquare);
 
-            PieceBitBoards[piece].SetBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
+            PieceBitboards[piece].SetBit(sourceSquare);
+            OccupancyBitboards[(int)Side].SetBit(sourceSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.SideHash()
@@ -1093,19 +1093,19 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    Utils.Assert(OccupancyBitboards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
                         $"Expected empty {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+                    PieceBitboards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].SetBit(capturedPawnSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 }
                 else
                 {
-                    PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
+                    PieceBitboards[gameState.CapturedPiece].SetBit(targetSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, gameState.CapturedPiece);
 
-                    OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                    OccupancyBitboards[oppositeSide].SetBit(targetSquare);
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -1119,11 +1119,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+                PieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+                PieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -1135,18 +1135,18 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
                 var rookIndex = (int)Piece.R + offset;
 
-                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+                PieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitboards[(int)Side].SetBit(rookSourceSquare);
 
-                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+                PieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitboards[(int)Side].PopBit(rookTargetSquare);
 
                 UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                     ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
             }
 
-            OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+            OccupancyBitboards[(int)Side.Both] = OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black];
 
             // Updating castling rights
             Castle = gameState.Castle;
@@ -1183,14 +1183,14 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal readonly bool IsValid()
         {
-            var kingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)];
-            var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
+            var kingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset(Side)];
+            var kingSquare = kingBitboard == default ? -1 : kingBitboard.GetLS1BIndex();
 
-            var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
-            var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
+            var oppositeKingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
+            var oppositeKingSquare = oppositeKingBitboard == default ? -1 : oppositeKingBitboard.GetLS1BIndex();
 
             return kingSquare >= 0 && oppositeKingSquare >= 0
-                && !MakeMoveAttacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+                && !MakeMoveAttacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitboards, OccupancyBitboards);
         }
 
         /// <summary>
@@ -1201,10 +1201,10 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool WasProduceByAValidMove()
         {
-            var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
-            var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
+            var oppositeKingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
+            var oppositeKingSquare = oppositeKingBitboard == default ? -1 : oppositeKingBitboard.GetLS1BIndex();
 
-            return oppositeKingSquare >= 0 && !MakeMoveAttacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+            return oppositeKingSquare >= 0 && !MakeMoveAttacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitboards, OccupancyBitboards);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1335,7 +1335,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             {
                 for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
                 {
-                    if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
+                    if (position.PieceBitboards[pieceIndex].GetBit(squareIndex))
                     {
                         positionHash ^= PieceHash(squareIndex, pieceIndex);
                     }
@@ -1380,22 +1380,22 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// Indexed by <see cref="Piece"/>.
         /// Checks are not considered
         /// </summary>
-        private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
+        private static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
         [
 #pragma warning disable IDE0350 // Use implicitly typed lambda
-            (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White][origin],
-            (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
+            (int origin, Bitboard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White][origin],
+            (int origin, Bitboard _) => MakeMoveAttacks.KnightAttacks[origin],
             MakeMoveAttacks.BishopAttacks,
             MakeMoveAttacks.RookAttacks,
             MakeMoveAttacks.QueenAttacks,
-            (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
+            (int origin, Bitboard _) => MakeMoveAttacks.KingAttacks[origin],
 
-            (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.Black][origin],
-            (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
+            (int origin, Bitboard _) => MakeMoveAttacks.PawnAttacks[(int)Side.Black][origin],
+            (int origin, Bitboard _) => MakeMoveAttacks.KnightAttacks[origin],
             MakeMoveAttacks.BishopAttacks,
             MakeMoveAttacks.RookAttacks,
             MakeMoveAttacks.QueenAttacks,
-            (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
+            (int origin, Bitboard _) => MakeMoveAttacks.KingAttacks[origin],
 #pragma warning restore IDE0350 // Use implicitly typed lambda
         ];
 
@@ -1437,7 +1437,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             var piece = (int)Piece.P + offset;
             var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
             int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
-            var bitboard = position.PieceBitBoards[piece];
+            var bitboard = position.PieceBitboards[piece];
 
             while (bitboard != default)
             {
@@ -1456,7 +1456,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
                 // Pawn pushes
                 var singlePushSquare = sourceSquare + pawnPush;
-                if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+                if (!position.OccupancyBitboards[2].GetBit(singlePushSquare))
                 {
                     // Single pawn push
                     var targetRank = (singlePushSquare / 8) + 1;
@@ -1477,7 +1477,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     if (!capturesOnly)
                     {
                         var doublePushSquare = sourceSquare + (2 * pawnPush);
-                        if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
+                        if (!position.OccupancyBitboards[2].GetBit(doublePushSquare)
                             && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                         {
                             movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
@@ -1489,13 +1489,13 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
                 // En passant
                 if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
-                // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
+                // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
                     movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece);
                 }
 
                 // Captures
-                var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+                var attackedSquares = attacks & position.OccupancyBitboards[oppositeSide];
                 while (attackedSquares != default)
                 {
                     targetSquare = attackedSquares.GetLS1BIndex();
@@ -1527,7 +1527,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             var piece = (int)Piece.K + offset;
             var oppositeSide = (Side)Utils.OppositeSide(position.Side);
 
-            int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
+            int sourceSquare = position.PieceBitboards[piece].GetLS1BIndex(); // There's for sure only one
 
             // Castles
             if (position.Castle != default)
@@ -1536,8 +1536,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 {
                     bool ise1Attacked = MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
                     if (((position.Castle & (int)CastlingRights.WK) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g1)
                         && !ise1Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
@@ -1546,9 +1546,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1)
                         && !ise1Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
@@ -1560,8 +1560,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 {
                     bool ise8Attacked = MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide);
                     if (((position.Castle & (int)CastlingRights.BK) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g8)
                         && !ise8Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
@@ -1570,9 +1570,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8)
                         && !ise8Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
@@ -1590,7 +1590,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void GeneratePieceMoves(ref int localIndex, Move[] movePool, int piece, MakeMovePosition position, bool capturesOnly = false)
         {
-            var bitboard = position.PieceBitBoards[piece];
+            var bitboard = position.PieceBitboards[piece];
             int sourceSquare, targetSquare;
 
             while (bitboard != default)
@@ -1598,15 +1598,15 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 sourceSquare = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
-                    & ~position.OccupancyBitBoards[(int)position.Side];
+                var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitboards[(int)Side.Both])
+                    & ~position.OccupancyBitboards[(int)position.Side];
 
                 while (attacks != default)
                 {
                     targetSquare = attacks.GetLS1BIndex();
                     attacks.ResetLS1B();
 
-                    if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                    if (position.OccupancyBitboards[(int)Side.Both].GetBit(targetSquare))
                     {
                         movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, 1);
                     }
@@ -1621,27 +1621,27 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
     public static class MakeMoveAttacks
     {
-        private static readonly BitBoard[] _bishopOccupancyMasks;
-        private static readonly BitBoard[] _rookOccupancyMasks;
+        private static readonly Bitboard[] _bishopOccupancyMasks;
+        private static readonly Bitboard[] _rookOccupancyMasks;
 
         /// <summary>
         /// [64 (Squares), 512 (Occupancies)]
-        /// Use <see cref="BishopAttacks(int, BitBoard)"/>
+        /// Use <see cref="BishopAttacks(int, Bitboard)"/>
         /// </summary>
-        private static readonly BitBoard[][] _bishopAttacks;
+        private static readonly Bitboard[][] _bishopAttacks;
 
         /// <summary>
         /// [64 (Squares), 4096 (Occupancies)]
-        /// Use <see cref="RookAttacks(int, BitBoard)"/>
+        /// Use <see cref="RookAttacks(int, Bitboard)"/>
         /// </summary>
-        private static readonly BitBoard[][] _rookAttacks;
+        private static readonly Bitboard[][] _rookAttacks;
 
         /// <summary>
         /// [2 (B|W), 64 (Squares)]
         /// </summary>
-        public static BitBoard[][] PawnAttacks { get; }
-        public static BitBoard[] KnightAttacks { get; }
-        public static BitBoard[] KingAttacks { get; }
+        public static Bitboard[][] PawnAttacks { get; }
+        public static Bitboard[] KnightAttacks { get; }
+        public static Bitboard[] KingAttacks { get; }
 
         static MakeMoveAttacks()
         {
@@ -1658,7 +1658,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// </summary>
         /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
+        public static Bitboard BishopAttacks(int squareIndex, Bitboard occupancy)
         {
             var occ = occupancy & _bishopOccupancyMasks[squareIndex];
             occ *= Constants.BishopMagicNumbers[squareIndex];
@@ -1672,7 +1672,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// </summary>
         /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
+        public static Bitboard RookAttacks(int squareIndex, Bitboard occupancy)
         {
             var occ = occupancy & _rookOccupancyMasks[squareIndex];
             occ *= Constants.RookMagicNumbers[squareIndex];
@@ -1683,11 +1683,11 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
         /// <summary>
         /// Get Queen attacks assuming current board occupancy
-        /// Use <see cref="QueenAttacks(BitBoard, BitBoard)"/> if rook and bishop attacks are already calculated
+        /// Use <see cref="QueenAttacks(Bitboard, Bitboard)"/> if rook and bishop attacks are already calculated
         /// </summary>
         /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard QueenAttacks(int squareIndex, BitBoard occupancy)
+        public static Bitboard QueenAttacks(int squareIndex, Bitboard occupancy)
         {
             return QueenAttacks(
                 RookAttacks(squareIndex, occupancy),
@@ -1698,17 +1698,17 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// Get Queen attacks having rook and bishop attacks pre-calculated
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks)
+        public static Bitboard QueenAttacks(Bitboard rookAttacks, Bitboard bishopAttacks)
         {
             return rookAttacks | bishopAttacks;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSquaredAttackedBySide(int squaredIndex, MakeMovePosition position, Side sideToMove) =>
-            IsSquaredAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
+            IsSquaredAttacked(squaredIndex, sideToMove, position.PieceBitboards, position.OccupancyBitboards);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+        public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
         {
             Utils.Assert(sideToMove != Side.Both);
 
@@ -1725,7 +1725,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsSquareInCheck(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+        public static bool IsSquareInCheck(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
         {
             Utils.Assert(sideToMove != Side.Both);
 
@@ -1741,7 +1741,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, BitBoard[] pieces)
+        private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, Bitboard[] pieces)
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
@@ -1749,33 +1749,33 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
+        private static bool IsSquareAttackedByKnights(int squareIndex, int offset, Bitboard[] piecePosition)
         {
             return (KnightAttacks[squareIndex] & piecePosition[(int)Piece.N + offset]) != default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSquareAttackedByKing(int squareIndex, int offset, BitBoard[] piecePosition)
+        private static bool IsSquareAttackedByKing(int squareIndex, int offset, Bitboard[] piecePosition)
         {
             return (KingAttacks[squareIndex] & piecePosition[(int)Piece.K + offset]) != default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard bishopAttacks)
+        private static bool IsSquareAttackedByBishops(int squareIndex, int offset, Bitboard[] piecePosition, Bitboard[] occupancy, out Bitboard bishopAttacks)
         {
             bishopAttacks = BishopAttacks(squareIndex, occupancy[(int)Side.Both]);
             return (bishopAttacks & piecePosition[(int)Piece.B + offset]) != default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard rookAttacks)
+        private static bool IsSquareAttackedByRooks(int squareIndex, int offset, Bitboard[] piecePosition, Bitboard[] occupancy, out Bitboard rookAttacks)
         {
             rookAttacks = RookAttacks(squareIndex, occupancy[(int)Side.Both]);
             return (rookAttacks & piecePosition[(int)Piece.R + offset]) != default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard[] piecePosition)
+        private static bool IsSquareAttackedByQueens(int offset, Bitboard bishopAttacks, Bitboard rookAttacks, Bitboard[] piecePosition)
         {
             var queenAttacks = QueenAttacks(rookAttacks, bishopAttacks);
             return (queenAttacks & piecePosition[(int)Piece.Q + offset]) != default;

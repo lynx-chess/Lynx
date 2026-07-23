@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Reflection;
 using System.Text.Json;
@@ -85,17 +86,19 @@ internal sealed class SPSAAttribute<T> : Attribute
         return $"{property.Name,-35} {"int",-5} {val,-5} {MinValue,-5} {MaxValue,-5} {Step,-5} {$"{percentage:F2}%",-8}{Configuration.EngineSettings.SPSA_OB_R_end,-5}";
     }
 
+    [UnconditionalSuppressMessage(
+        "Trimming",
+        "IL2026",       // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+        Justification = "Trimming doesn't make this fail, but it's development feature anyway")]
     public KeyValuePair<string, JsonNode?> ToWeatherFactoryString(PropertyInfo property)
     {
         T val = GetPropertyValue(property);
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         return KeyValuePair.Create(
             property.Name,
             JsonSerializer.SerializeToNode(
                 new WeatherFactoryOutput<T>(val, MinValue, MaxValue, Step),
                 _jsonSerializerOptions));
-#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
     }
 }
 

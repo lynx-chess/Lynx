@@ -32,9 +32,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="NLog.Extensions.Logging" />
   </ItemGroup>
 
@@ -59,11 +56,22 @@
     <Message Text="⚠️ $(RuntimeIdentifier) nuget packages aren't available in nuget.org." Importance="high" />
   </Target>
 
-  <Target Name="Rename" AfterTargets="Publish" Condition="'$(ExecutableName)' != '' and '$(ExecutableName)' != '$(AssemblyName)'">
+  <Target Name="RenameExe" AfterTargets="Publish" Condition="'$(ExecutableName)'!='' and '$(ExecutableName)'!='$(AssemblyName)'">
     <Message Text="Attempting to rename executable file from $(PublishDir)/$(AssemblyName) to $(PublishDir)/$(ExecutableName)" Importance="high" />
     <Move SourceFiles="$(PublishDir)/$(AssemblyName)" DestinationFiles="$(PublishDir)/$(ExecutableName)" ContinueOnError="true" />
     <Message Text="Attempting to rename executable file from $(PublishDir)\$(AssemblyName).exe to $(PublishDir)/$(ExecutableName).exe" Importance="high" />
     <Move SourceFiles="$(PublishDir)/$(AssemblyName).exe" DestinationFiles="$(PublishDir)/$(ExecutableName).exe" ContinueOnError="true" />
+  </Target>
+
+  <Target Name="MovePublishOutput" AfterTargets="RenameExe" Condition="'$(FinalDestination)' != ''">
+    <!-- Inside the target so that it's evaluated right before Copy,
+      enumerating the files generated during the build -->
+    <ItemGroup>
+      <FilesToMove Include="$(PublishDir)/**/*.*" />
+    </ItemGroup>
+    
+    <Message Text="Moving the content of $(PublishDir) to $(FinalDestination)" Importance="high" />
+    <Copy SourceFiles="@(FilesToMove)" DestinationFolder="$(FinalDestination)" ContinueOnError="true" />
   </Target>
 
 </Project>

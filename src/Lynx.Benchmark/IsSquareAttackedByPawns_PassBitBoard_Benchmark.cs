@@ -7,8 +7,8 @@
  *
  *  | Method                                    | Mean     | Error   | StdDev  | Ratio | Allocated | Alloc Ratio |
  *  |------------------------------------------ |---------:|--------:|--------:|------:|----------:|------------:|
- *  | IsSquaredAttackedByPawns_PassBitBoards    | 538.3 ns | 5.07 ns | 4.74 ns |  1.00 |         - |          NA |
- *  | IsSquaredAttackedByPawns_PassPawnBitBoard | 501.8 ns | 0.79 ns | 0.62 ns |  0.93 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassBitboards    | 538.3 ns | 5.07 ns | 4.74 ns |  1.00 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassPawnBitboard | 501.8 ns | 0.79 ns | 0.62 ns |  0.93 |         - |          NA |
  *
  *
  *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2227) (Hyper-V)
@@ -19,8 +19,8 @@
  *
  *  | Method                                    | Mean     | Error   | StdDev  | Ratio | Allocated | Alloc Ratio |
  *  |------------------------------------------ |---------:|--------:|--------:|------:|----------:|------------:|
- *  | IsSquaredAttackedByPawns_PassBitBoards    | 503.7 ns | 1.63 ns | 1.45 ns |  1.00 |         - |          NA |
- *  | IsSquaredAttackedByPawns_PassPawnBitBoard | 501.9 ns | 0.56 ns | 0.53 ns |  1.00 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassBitboards    | 503.7 ns | 1.63 ns | 1.45 ns |  1.00 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassPawnBitboard | 501.9 ns | 0.56 ns | 0.53 ns |  1.00 |         - |          NA |
  *
  *
  *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
@@ -31,8 +31,8 @@
  *
  *  | Method                                    | Mean     | Error   | StdDev  | Ratio | Allocated | Alloc Ratio |
  *  |------------------------------------------ |---------:|--------:|--------:|------:|----------:|------------:|
- *  | IsSquaredAttackedByPawns_PassBitBoards    | 802.2 ns | 5.70 ns | 4.45 ns |  1.00 |         - |          NA |
- *  | IsSquaredAttackedByPawns_PassPawnBitBoard | 729.2 ns | 9.26 ns | 8.21 ns |  0.91 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassBitboards    | 802.2 ns | 5.70 ns | 4.45 ns |  1.00 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassPawnBitboard | 729.2 ns | 9.26 ns | 8.21 ns |  0.91 |         - |          NA |
  */
 
 using BenchmarkDotNet.Attributes;
@@ -41,7 +41,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
-public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
+public class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchmark
 {
     private readonly Position[] _positions =
     [
@@ -54,7 +54,7 @@ public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
     ];
 
     [Benchmark(Baseline = true)]
-    public bool IsSquaredAttackedByPawns_PassBitBoards()
+    public bool IsSquaredAttackedByPawns_PassBitboards()
     {
         var b = false;
         foreach (var position in _positions)
@@ -64,7 +64,7 @@ public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
                 var sideToMoveInt = (int)position.Side;
                 var offset = Utils.PieceOffset(sideToMoveInt);
 
-                if (IsSquaredAttackedByPawns_PassBitBoards(squareIndex, sideToMoveInt, offset, position.PieceBitBoards))
+                if (IsSquaredAttackedByPawns_PassBitboards(squareIndex, sideToMoveInt, offset, position.PieceBitboards))
                 {
                     b = true;
                 }
@@ -75,7 +75,7 @@ public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [Benchmark]
-    public bool IsSquaredAttackedByPawns_PassPawnBitBoard()
+    public bool IsSquaredAttackedByPawns_PassPawnBitboard()
     {
         var b = false;
         foreach (var position in _positions)
@@ -85,7 +85,7 @@ public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
                 var sideToMoveInt = (int)position.Side;
                 var offset = Utils.PieceOffset(sideToMoveInt);
 
-                if (IsSquaredAttackedByPawns_PassPawnBitBoard(squareIndex, sideToMoveInt, position.PieceBitBoards[offset]))
+                if (IsSquaredAttackedByPawns_PassPawnBitboard(squareIndex, sideToMoveInt, position.PieceBitboards[offset]))
                 {
                     b = true;
                 }
@@ -96,7 +96,7 @@ public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquaredAttackedByPawns_PassBitBoards(int squareIndex, int sideToMove, int offset, BitBoard[] pieces)
+    private static bool IsSquaredAttackedByPawns_PassBitboards(int squareIndex, int sideToMove, int offset, Bitboard[] pieces)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
@@ -104,10 +104,10 @@ public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquaredAttackedByPawns_PassPawnBitBoard(int squareIndex, int sideToMove, BitBoard pawnBitBoard)
+    private static bool IsSquaredAttackedByPawns_PassPawnBitboard(int squareIndex, int sideToMove, Bitboard pawnBitboard)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitBoard) != default;
+        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitboard) != default;
     }
 }

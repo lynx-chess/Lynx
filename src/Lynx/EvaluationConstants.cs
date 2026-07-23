@@ -19,7 +19,7 @@ public static class EvaluationConstants
     public static ReadOnlySpan<int> GamePhaseByPiece =>
     [
         0, 1, 1, 2, 4, 0,
-        0, 1, 1, 2, 4, 0
+        0, 1, 1, 2, 4, 0,
     ];
 
     public const int MaxPhase = 24;
@@ -32,7 +32,7 @@ public static class EvaluationConstants
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     public static readonly int[] HistoryMalus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
-    public static readonly BitBoard[] KingRing = new BitBoard[64];
+    public static readonly Bitboard[] KingRing = new Bitboard[64];
 
     public const int LMRScaleFactor = 100;
 
@@ -80,7 +80,7 @@ public static class EvaluationConstants
         {
             KingRing[square] = Attacks.KingAttacks[square];
 
-            var rank = Constants.Rank[square];
+            var rank = Constants.Rank(square);
 
             if (rank == 0)
             {
@@ -106,7 +106,7 @@ public static class EvaluationConstants
     ///      Queen              101    201    301    401    501    0
     ///       King              100    200    300    400    500    0
     /// </summary>
-    public static readonly int[][] MostValueableVictimLeastValuableAttacker =
+    public static readonly int[][] MostValuableVictimLeastValuableAttacker =
     [         //    P     N     B     R      Q  K    p    n      b    r      q          k
         /* P */ [   0,    0,    0,    0,     0, 0,  1500, 4000, 4500, 5500, 11500 ], // 0],
         /* N */ [   0,    0,    0,    0,     0, 0,  1400, 3900, 4400, 5400, 11400 ], // 0],
@@ -126,7 +126,7 @@ public static class EvaluationConstants
     [
         1000, 3500, 4000, 5000, 11000, 0,
         1000, 3500, 4000, 5000, 11000, 0,
-        0
+        0,
     ];
 
     /// <summary>
@@ -216,7 +216,7 @@ public static class EvaluationConstants
 
     #endregion
 
-    public const int ContinuationHistoryPlyCount = 1;
+    public const int ContinuationHistoryPlyCount = 2;
 }
 
 #pragma warning restore IDE1006 // Naming Styles

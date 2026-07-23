@@ -112,7 +112,7 @@ public class GetBit_Benchmark : BaseBenchmark
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             for (int sq = 0; sq < 64; ++sq)
             {
@@ -132,7 +132,7 @@ public class GetBit_Benchmark : BaseBenchmark
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var bitboard = position.PieceBitBoards[pieceIndex];
+            var bitboard = position.PieceBitboards[pieceIndex];
 
             for (int sq = 0; sq < 64; ++sq)
             {
@@ -145,16 +145,16 @@ public class GetBit_Benchmark : BaseBenchmark
     }
 }
 
-internal static class BitBoardExtensions_GetBit_Benchmark
+internal static class BitboardExtensions_GetBit_Benchmark
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool GetBit_Original(this BitBoard board, int squareIndex)
+    public static bool GetBit_Original(this Bitboard board, int squareIndex)
     {
         return (board & (1UL << squareIndex)) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool GetBit_Branchless(this BitBoard board, int squareIndex)
+    public static bool GetBit_Branchless(this Bitboard board, int squareIndex)
     {
         var value = (byte)(board & (1UL << squareIndex));
 

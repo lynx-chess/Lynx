@@ -75,7 +75,7 @@ public class PawnAttacks_MultiDimensionalInitialization_Benchmark : BaseBenchmar
     [ArgumentsSource(nameof(Data))]
     public void InitializePawnAttacks_Sequential(int data)
     {
-        BitBoard[,] pawnAttacks = new BitBoard[2, data];
+        Bitboard[,] pawnAttacks = new Bitboard[2, data];
 
         for (int square = 0; square < data; ++square)
         {
@@ -91,7 +91,7 @@ public class PawnAttacks_MultiDimensionalInitialization_Benchmark : BaseBenchmar
     [ArgumentsSource(nameof(Data))]
     public void InitializePawnAttacks_Parallel(int data)
     {
-        BitBoard[,] pawnAttacks = new BitBoard[2, data];
+        Bitboard[,] pawnAttacks = new Bitboard[2, data];
 
         Parallel.For(0, data, (square) =>
         {
@@ -107,7 +107,7 @@ public class PawnAttacks_MultiDimensionalInitialization_Benchmark : BaseBenchmar
     [ArgumentsSource(nameof(Data))]
     public void InitializePawnAttacks_Parallel_2(int data)
     {
-        BitBoard[,] pawnAttacks = new BitBoard[2, data];
+        Bitboard[,] pawnAttacks = new Bitboard[2, data];
 
         Parallel.For(0, 2, (n) =>
             Parallel.For(0, data, (square) =>
@@ -121,7 +121,7 @@ public class PawnAttacks_MultiDimensionalInitialization_Benchmark : BaseBenchmar
     [ArgumentsSource(nameof(Data))]
     public void InitializePawnAttacks_Parallel_3(int data)
     {
-        BitBoard[,] pawnAttacks = new BitBoard[2, data];
+        Bitboard[,] pawnAttacks = new Bitboard[2, data];
 
         Parallel.For(0, data, (square) =>
             Parallel.For(0, 2, (n) =>

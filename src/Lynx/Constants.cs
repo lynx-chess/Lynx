@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -19,7 +20,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard FullBoard = ulong.MaxValue;
+    public const Bitboard FullBoard = ulong.MaxValue;
 
     /// <summary>
     /// 8   1 0 0 0 0 0 0 0
@@ -32,7 +33,7 @@ public static class Constants
     /// 1   1 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard AFile = 0x101010101010101;
+    public const Bitboard AFile = 0x101010101010101;
 
     /// <summary>
     /// 8   0 1 1 1 1 1 1 1
@@ -45,7 +46,7 @@ public static class Constants
     /// 1   0 1 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotAFile = 0xFEFEFEFEFEFEFEFE;
+    public const Bitboard NotAFile = 0xFEFEFEFEFEFEFEFE;
 
     /// <summary>
     /// 8   0 0 0 0 0 0 0 1
@@ -58,7 +59,7 @@ public static class Constants
     /// 1   0 0 0 0 0 0 0 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard HFile = 0x8080808080808080;
+    public const Bitboard HFile = 0x8080808080808080;
 
     /// <summary>
     /// 8   1 1 1 1 1 1 1 0
@@ -71,7 +72,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 1 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotHFile = 0x7F7F7F7F7F7F7F7F;
+    public const Bitboard NotHFile = 0x7F7F7F7F7F7F7F7F;
 
     /// <summary>
     /// 8   1 1 1 1 1 1 0 0
@@ -84,7 +85,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotHGFiles = 0x3F3F3F3F3F3F3F3F;
+    public const Bitboard NotHGFiles = 0x3F3F3F3F3F3F3F3F;
 
     /// <summary>
     /// 8   0 0 1 1 1 1 1 1
@@ -97,9 +98,9 @@ public static class Constants
     /// 1   0 0 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
+    public const Bitboard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
-    public const BitBoard Corners = 0x8100000000000081;
+    public const Bitboard Corners = 0x8100000000000081;
 
     public static readonly string[] Coordinates =
     [
@@ -110,7 +111,7 @@ public static class Constants
         "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
         "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
         "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
     ];
 
     public static readonly char[][] CoordinatesCharArray =
@@ -122,7 +123,7 @@ public static class Constants
         ['a','4'], ['b','4'], ['c','4'], ['d','4'], ['e','4'], ['f','4'], ['g','4'], ['h','4'],
         ['a','3'], ['b','3'], ['c','3'], ['d','3'], ['e','3'], ['f','3'], ['g','3'], ['h','3'],
         ['a','2'], ['b','2'], ['c','2'], ['d','2'], ['e','2'], ['f','2'], ['g','2'], ['h','2'],
-        ['a','1'], ['b','1'], ['c','1'], ['d','1'], ['e','1'], ['f','1'], ['g','1'], ['h','1']
+        ['a','1'], ['b','1'], ['c','1'], ['d','1'], ['e','1'], ['f','1'], ['g','1'], ['h','1'],
     ];
 
     /// <summary>
@@ -143,7 +144,7 @@ public static class Constants
     [
         "♙", "♘", "♗", "♖", "♕", "♔",   // White
         "♟︎", "♞", "♝", "♜", "♛", "♚",   // Black
-        "-"
+        "-",
     ];
 
     /// <summary>
@@ -195,10 +196,10 @@ public static class Constants
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
-        12, 11, 11, 11, 11, 11, 11, 12
+        12, 11, 11, 11, 11, 11, 11, 12,
     ];
 
-    public static ReadOnlySpan<BitBoard> RookMagicNumbers =>
+    public static ReadOnlySpan<Bitboard> RookMagicNumbers =>
     [
         0x8080104000208000,   0xa240004020021004,   0x880200080081000,    0x2080058010010800,   0x1001001020408008,   0x4200011042000884,   0x6001c020002c805,    0x2000100802a0044,
         0x20800020804000,     0x5000c00020005000,   0x801000802002,       0x8005001001002208,   0x2000412000820,      0x23000218140100,     0x100a002600081401,   0x2520800060800100,
@@ -210,7 +211,7 @@ public static class Constants
         0x8096800102104025,   0x8004204204110082,   0xd042200011000843,   0x422208c0900f001,    0x61001002080005,     0x4002001028218422,   0x2040104088020104,   0x300108b104064082,
     ];
 
-    public static ReadOnlySpan<BitBoard> BishopMagicNumbers =>
+    public static ReadOnlySpan<Bitboard> BishopMagicNumbers =>
     [
         0x10440804a02200,     0x2002241404004050,   0x808008c10800204,    0x8204848201002,      0x8411104001420404,   0x422080208050010,    0x8002020120880e44,   0x3084800880800,
         0x1904210042080,      0x1004103018888888,   0x20264802404a0000,   0x21042402800002,     0x8400840420400002,   0x4102042220901800,   0x840004108201004,    0x40008404010501,
@@ -290,7 +291,7 @@ public static class Constants
         (int)BoardSquare.e3 - 8,
         (int)BoardSquare.f3 - 8,
         (int)BoardSquare.g3 - 8,
-        (int)BoardSquare.h3 - 8     //47 = h3
+        (int)BoardSquare.h3 - 8,     //47 = h3
     ];
 
 #pragma warning disable RCS1257 // Use enum field explicitly
@@ -323,15 +324,8 @@ public static class Constants
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15,
-        13, 15, 15, 15, 12, 15, 15, 14
+        13, 15, 15, 15, 12, 15, 15, 14,
     ];
-
-    /// <summary>
-    /// ~20 GB
-    /// </summary>
-    public static readonly int MaxTTArrayLength = Array.MaxLength;
-
-    public static double TTArraySizeGBs => (double)MaxTTArrayLength * TranspositionTableElement.Size / (1024 * 1024 * 1024);
 
     /// <summary>
     /// ~2048 TB theoretical limit, max validated size is 256 GB
@@ -356,29 +350,17 @@ public static class Constants
 
     public static readonly int SideLimit = Enum.GetValues<Piece>().Length / 2;
 
-    public static ReadOnlySpan<int> Rank =>
-    [
-        7, 7, 7, 7, 7, 7, 7, 7,
-        6, 6, 6, 6, 6, 6, 6, 6,
-        5, 5, 5, 5, 5, 5, 5, 5,
-        4, 4, 4, 4, 4, 4, 4, 4,
-        3, 3, 3, 3, 3, 3, 3, 3,
-        2, 2, 2, 2, 2, 2, 2, 2,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 0
-    ];
+    /// <summary>
+    /// 0-7
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int Rank(int square) => 7 - (square >> 3);
 
-    public static ReadOnlySpan<int> File =>
-    [
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7
-    ];
+    /// <summary>
+    /// 0-7
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int File(int square) => square & 7;
 
     public static ReadOnlySpan<byte> ByteFile =>
     [
@@ -389,31 +371,7 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7
-    ];
-
-    public static ReadOnlySpan<int> LightSquares =>
-    [
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-    ];
-
-    public static ReadOnlySpan<int> DarkSquares =>
-    [
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 2, 3, 4, 5, 6, 7,
     ];
 
     /// <summary>
@@ -427,7 +385,7 @@ public static class Constants
     /// 1   0 1 0 1 0 1 0 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard LightSquaresBitBoard = 0xAA55AA55AA55AA55UL;
+    public const Bitboard LightSquaresBitboard = 0xAA55AA55AA55AA55UL;
 
     /// <summary>
     /// 8   0 1 0 1 0 1 0 1
@@ -440,7 +398,7 @@ public static class Constants
     /// 1   1 0 1 0 1 0 1 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard DarkSquaresBitBoard = 0x55AA55AA55AA55AAUL;
+    public const Bitboard DarkSquaresBitboard = 0x55AA55AA55AA55AAUL;
 
     /// <summary>
     /// 8   0 0 1 1 1 1 0 0
@@ -453,12 +411,12 @@ public static class Constants
     /// 1   0 0 1 1 1 1 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
+    public const Bitboard CentralFiles = 0x3c3c3c3c3c3c3c3c;
 
     /// <summary>
     /// e4, d4, e5, d5
     /// </summary>
-    public const BitBoard CentralSquares = 0x1818000000;
+    public const Bitboard CentralSquares = 0x1818000000;
 
     /// <summary>
     /// 8   0 0 0 0 0 0 0 0
@@ -471,7 +429,7 @@ public static class Constants
     /// 1   0 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotAorH = 0x7e7e7e7e7e7e00;
+    public const Bitboard NotAorH = 0x7e7e7e7e7e7e00;
 
     /// <summary>
     /// 8   0 0 0 0 0 0 0 0
@@ -484,7 +442,7 @@ public static class Constants
     /// 1   0 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard PawnSquares = 0xffffffffffff00;
+    public const Bitboard PawnSquares = 0xffffffffffff00;
 
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
@@ -583,7 +541,7 @@ public static class Constants
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 4, 3, 2, 2, 2, 2, 2, 3, 4, 3, 2, 1, 1, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3],
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 5, 4, 3, 3, 3, 3, 3, 3, 5, 4, 3, 2, 2, 2, 2, 2, 5, 4, 3, 2, 1, 1, 1, 2, 5, 4, 3, 2, 1, 0, 1, 2],
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 6, 5, 4, 4, 4, 4, 4, 4, 6, 5, 4, 3, 3, 3, 3, 3, 6, 5, 4, 3, 2, 2, 2, 2, 6, 5, 4, 3, 2, 1, 1, 1, 6, 5, 4, 3, 2, 1, 0, 1],
-        [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 7, 6, 5, 5, 5, 5, 5, 5, 7, 6, 5, 4, 4, 4, 4, 4, 7, 6, 5, 4, 3, 3, 3, 3, 7, 6, 5, 4, 3, 2, 2, 2, 7, 6, 5, 4, 3, 2, 1, 1, 7, 6, 5, 4, 3, 2, 1, 0]
+        [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 7, 6, 5, 5, 5, 5, 5, 5, 7, 6, 5, 4, 4, 4, 4, 4, 7, 6, 5, 4, 3, 3, 3, 3, 7, 6, 5, 4, 3, 2, 2, 2, 7, 6, 5, 4, 3, 2, 1, 1, 7, 6, 5, 4, 3, 2, 1, 0],
     ];
 
     /// <summary>
@@ -674,6 +632,12 @@ public static class Constants
 
     public const int MajorCorrHistoryHashSize = 16_384;
     public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
+
+    public const int MaterialCorrHistoryHashSize = 2_048;
+    public const int MaterialCorrHistoryHashMask = MaterialCorrHistoryHashSize - 1;
+
+    public const int ContinuationCorrHistoryHashSize = 16_384;
+    public const int ContinuationCorrHistoryHashMask = ContinuationCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
 }

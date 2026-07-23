@@ -60,9 +60,9 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitBoards.Length; i++)
+        for (int i = 0; i < position.PieceBitboards.Length; i++)
         {
-            ulong bb = position.PieceBitBoards[i];
+            ulong bb = position.PieceBitboards[i];
 
             while (bb == default)
             {
@@ -83,12 +83,12 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitBoards.Length; i += 4)
+        for (int i = 0; i < position.PieceBitboards.Length; i += 4)
         {
-            ulong bb1 = position.PieceBitBoards[i];
-            ulong bb2 = position.PieceBitBoards[i + 1];
-            ulong bb3 = position.PieceBitBoards[i + 2];
-            ulong bb4 = position.PieceBitBoards[i + 3];
+            ulong bb1 = position.PieceBitboards[i];
+            ulong bb2 = position.PieceBitboards[i + 1];
+            ulong bb3 = position.PieceBitboards[i + 2];
+            ulong bb4 = position.PieceBitboards[i + 3];
 
             while (bb1 == default)
             {
@@ -133,9 +133,9 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitBoards.Length; i++)
+        for (int i = 0; i < position.PieceBitboards.Length; i++)
         {
-            ulong bb = position.PieceBitBoards[i];
+            ulong bb = position.PieceBitboards[i];
 
             while (bb == default)
             {
@@ -156,12 +156,12 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitBoards.Length; i += 4)
+        for (int i = 0; i < position.PieceBitboards.Length; i += 4)
         {
-            ulong bb1 = position.PieceBitBoards[i];
-            ulong bb2 = position.PieceBitBoards[i + 1];
-            ulong bb3 = position.PieceBitBoards[i + 2];
-            ulong bb4 = position.PieceBitBoards[i + 3];
+            ulong bb1 = position.PieceBitboards[i];
+            ulong bb2 = position.PieceBitboards[i + 1];
+            ulong bb3 = position.PieceBitboards[i + 2];
+            ulong bb4 = position.PieceBitboards[i + 3];
 
             while (bb1 == default)
             {
@@ -209,7 +209,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
         var limit = (int)Piece.k - offset;
         for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
         {
-            if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+            if (position.PieceBitboards[pieceIndex].GetBit(targetSquare))
             {
                 targetPiece = pieceIndex;
                 break;
@@ -224,15 +224,15 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
     /// </summary>
     private static int PieceAt(Position position, int targetSquare)
     {
-        var bit = BitBoardExtensions.SquareBit(targetSquare);
+        var bit = BitboardExtensions.SquareBit(targetSquare);
 
         Side color;
 
-        if ((position.OccupancyBitBoards[(int)Side.Black] & bit) != default)
+        if ((position.OccupancyBitboards[(int)Side.Black] & bit) != default)
         {
             color = Side.Black;
         }
-        else if ((position.OccupancyBitBoards[(int)Side.White] & bit) != default)
+        else if ((position.OccupancyBitboards[(int)Side.White] & bit) != default)
         {
             color = Side.White;
         }
@@ -245,7 +245,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         for (int pieceIndex = offset; pieceIndex < 6 + offset; ++pieceIndex)
         {
-            if (!(position.PieceBitBoards[pieceIndex] & bit).Empty())
+            if (!(position.PieceBitboards[pieceIndex] & bit).Empty())
             {
                 return pieceIndex;
             }

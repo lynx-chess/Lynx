@@ -10,7 +10,7 @@ public static class OccupancyGenerator
         {
             for (var file = 0; file < 8; ++file)
             {
-                int square = BitBoardExtensions.SquareIndex(rank, file);
+                int square = BitboardExtensions.SquareIndex(rank, file);
 
                 var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
                 Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -26,7 +26,7 @@ public static class OccupancyGenerator
         {
             for (var file = 0; file < 8; ++file)
             {
-                int square = BitBoardExtensions.SquareIndex(rank, file);
+                int square = BitboardExtensions.SquareIndex(rank, file);
 
                 var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
                 Console.Write($"{bishopOccupancy.CountBits()}, ");

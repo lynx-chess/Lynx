@@ -173,7 +173,7 @@ public class GenerateCastlingMovesTest
     {
         int index = 0;
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);

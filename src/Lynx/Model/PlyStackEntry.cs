@@ -1,5 +1,8 @@
-﻿namespace Lynx.Model;
+﻿using System.Runtime.InteropServices;
 
+namespace Lynx.Model;
+
+[StructLayout(LayoutKind.Sequential)]
 public struct PlyStackEntry
 {
     public int StaticEval { get; set; }

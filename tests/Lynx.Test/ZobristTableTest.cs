@@ -15,7 +15,7 @@ public class ZobristTableTest
         {
             for (int j = 0; j < 1; ++j)
             {
-                var hash = zobristTable[i][j];
+                var hash = zobristTable[(i * 12) + j];
 
                 var n = random.NextUInt64();
 
@@ -41,7 +41,7 @@ public class ZobristTableTest
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                Assert.AreEqual(zobristTable[squareIndex][pieceIndex], anotherZobristTable[squareIndex][pieceIndex]);
+                Assert.AreEqual(zobristTable[(squareIndex * 12) + pieceIndex], anotherZobristTable[squareIndex * 12 + pieceIndex]);
             }
         }
     }
@@ -56,7 +56,7 @@ public class ZobristTableTest
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                Assert.AreEqual(zobristTable[squareIndex][pieceIndex], ZobristTable.PieceHash(squareIndex, pieceIndex));
+                Assert.AreEqual(zobristTable[(squareIndex * 12) + pieceIndex], ZobristTable.PieceHash(squareIndex, pieceIndex));
             }
         }
     }
@@ -72,7 +72,7 @@ public class ZobristTableTest
         foreach (var enPassantSquare in enPassantSquares)
         {
             var file = enPassantSquare % 8;
-            Assert.AreEqual(zobristTable[file][(int)Piece.P], ZobristTable.EnPassantHash(enPassantSquare));
+            Assert.AreEqual(zobristTable[(file * 12) + (int)Piece.P], ZobristTable.EnPassantHash(enPassantSquare));
         }
 
         Assert.AreEqual(16, enPassantSquares.Count());
@@ -84,7 +84,7 @@ public class ZobristTableTest
         var random = new LynxRandom(int.MaxValue);
         var zobristTable = ZobristTable.InitializeZobristTable(random);
 
-        Assert.AreEqual(zobristTable[(int)BoardSquare.h8][(int)Piece.p], ZobristTable.SideHash());
+        Assert.AreEqual(zobristTable[((int)BoardSquare.h8 * 12) + (int)Piece.p], ZobristTable.SideHash());
     }
 
     [TestCase(Constants.TrickyTestPositionReversedFEN)]
@@ -133,28 +133,28 @@ public class ZobristTableTest
         Assert.AreEqual(originalHash, currentHash);
     }
 
-    private static ulong CalculateCastleHash(byte castle, ulong[][] zobristTable)
+    private static ulong CalculateCastleHash(byte castle, ulong[] zobristTable)
     {
         ulong combinedHash = 0;
 
         if ((castle & (int)CastlingRights.WK) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.a8][(int)Piece.p];        // a8
+            combinedHash ^= zobristTable[((int)BoardSquare.a8 * 12) + (int)Piece.p];        // a8
         }
 
         if ((castle & (int)CastlingRights.WQ) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.b8][(int)Piece.p];        // b8
+            combinedHash ^= zobristTable[((int)BoardSquare.b8 * 12) + (int)Piece.p];        // b8
         }
 
         if ((castle & (int)CastlingRights.BK) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.c8][(int)Piece.p];        // c8
+            combinedHash ^= zobristTable[((int)BoardSquare.c8 * 12) + (int)Piece.p];        // c8
         }
 
         if ((castle & (int)CastlingRights.BQ) != default)
         {
-            combinedHash ^= zobristTable[(int)BoardSquare.d8][(int)Piece.p];        // d8
+            combinedHash ^= zobristTable[((int)BoardSquare.d8 * 12) + (int)Piece.p];        // d8
         }
 
         return combinedHash;
@@ -168,7 +168,7 @@ public class ZobristTableTest
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
+                if (position.PieceBitboards[pieceIndex].GetBit(squareIndex))
                 {
                     positionHash ^= ZobristTable.PieceHash(squareIndex, pieceIndex);
                 }

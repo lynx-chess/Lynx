@@ -1,4 +1,4 @@
-﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -19,14 +19,14 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
+    private unsafe int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
         bool parentWasNullMove = false, bool isVerifyingSE = false)
     {
         var position = Game.CurrentPosition;
 
         Debug.Assert(depth >= 0 || !position.IsInCheck(), "Assertion failed", "Current check extension impl won't work otherwise");
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
@@ -231,7 +231,10 @@ public sealed partial class Engine
                     if (ttCorrectedStaticEval - rfpThreshold >= beta)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
+                        return (Math.Abs(ttCorrectedStaticEval) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            && Math.Abs(beta) < EvaluationConstants.PositiveCheckmateDetectionLimit)
+                            ? (ttCorrectedStaticEval + beta) / 2
+                            : ttCorrectedStaticEval;
 #pragma warning restore S3949 // Calculations should not overflow
                     }
 
@@ -285,11 +288,6 @@ public sealed partial class Engine
                         + Math.Min(
                             Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
                             staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
-
-                    // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                    //var nmpReduction = Math.Min(
-                    //    depth,
-                    //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                     var gameState = position.MakeNullMove();
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
@@ -368,12 +366,14 @@ public sealed partial class Engine
 
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
             var piece = move.Piece();
-            var isCapture = move.CapturedPiece() != (int)Piece.None;
+            var capturedPiece = move.CapturedPiece();
+            var isCapture = capturedPiece != (int)Piece.None;
+            var targetSquare = move.TargetSquare();
 
             int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
-                + ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
+                + ContinuationHistoryEntry(piece, targetSquare, ply);
 
-            // If we prune while getting checmated, we risk not finding any move and having an empty PV
+            // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-low pruning (moves with low scores) - prune less when improving
@@ -387,7 +387,7 @@ public sealed partial class Engine
             {
                 // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                 // after searching the first few given by the move ordering algorithm
-                if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                if (visitedMovesCounter >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
                 {
                     break;
                 }
@@ -395,8 +395,8 @@ public sealed partial class Engine
                 // 🔍 History pruning -  all quiet moves can be pruned
                 // once we find one with a history score too low
                 if (!isCapture
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && quietHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && depth < Configuration.EngineSettings.HistoryPruning_MaxDepth    // TODO use LMR depth
+                    && quietHistory < Configuration.EngineSettings.HistoryPruning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -471,6 +471,12 @@ public sealed partial class Engine
 
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
+                // Guarding against TT score values close to checkmate scores (caused by aspiration windows limits), which can cause false mate reporting (very high/low mate values)
+                if (singularBeta <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                {
+                    singularBeta = EvaluationConstants.MinEval;
+                }
+
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 
                 // Singular extension
@@ -494,6 +500,7 @@ public sealed partial class Engine
                     }
                 }
                 // Multicut
+#pragma warning disable MA0071 // Avoid using redundant else
                 else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
                 {
                     return singularScore;
@@ -503,6 +510,12 @@ public sealed partial class Engine
                 {
                     --singularDepthExtensions;
                 }
+                else if (cutnode)
+                {
+                    singularDepthExtensions -= 2;
+                }
+
+#pragma warning restore MA0071 // Avoid using redundant else
 
                 gameState = position.MakeMove(move);
             }
@@ -531,7 +544,7 @@ public sealed partial class Engine
 
             int score = 0;
 
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition(ref evaluationContext)))
+            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition(ref evaluationContext)))
             {
                 score = 0;
 
@@ -571,7 +584,7 @@ public sealed partial class Engine
                             if (isCapture)
                             {
                                 reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
-                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
+                                    - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
@@ -649,7 +662,7 @@ public sealed partial class Engine
                         var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
                         var shallower = score < bestScore + depth;
 
-                        if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
+                        if (deeper && !shallower && newDepth < Configuration.EngineSettings.MaxDepth)
                         {
                             ++newDepth;
                         }
@@ -669,8 +682,7 @@ public sealed partial class Engine
                             ? EvaluationConstants.HistoryBonus[depth]
                             : -EvaluationConstants.HistoryMalus[depth];
 
-                        ref var contHist = ref ContinuationHistoryEntry(piece, move.TargetSquare(), ply - 1);
-                        contHist = (short)ScoreHistoryMove(contHist, historyBonus);
+                        UpdateContinuationHistory(piece, targetSquare, ply, historyBonus);
                     }
                 }
 
@@ -762,7 +774,9 @@ public sealed partial class Engine
         if (!isVerifyingSE)
         {
             if (!(isInCheck
-                || (bestMove?.CapturedPiece() != null && bestMove?.CapturedPiece() != (int)Piece.None)
+                || (bestMove is not null
+                    && bestMove.Value.CapturedPiece() != (int)Piece.None
+                    && SEE.IsGoodCapture(position, bestMove.Value))
                 || bestMove?.IsPromotion() == true
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
                 || (nodeType == NodeType.Alpha && bestScore >= staticEval)))
@@ -788,13 +802,13 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
+    public unsafe int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
@@ -898,7 +912,7 @@ public sealed partial class Engine
         ref var movesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(Unsafe.Add(ref movesRef, i), ttBestMove);
+            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref movesRef, i), ttBestMove);
         }
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];

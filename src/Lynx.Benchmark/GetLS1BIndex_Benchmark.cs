@@ -56,12 +56,12 @@ public class GetLS1BIndex_Benchmark : BaseBenchmark
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitBoards)
+        foreach (var bitboard in position.PieceBitboards)
         {
             counter += Original_GetLS1BIndex_Impl(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitBoards)
+        foreach (var bitboard in position.OccupancyBitboards)
         {
             counter += Original_GetLS1BIndex_Impl(bitboard);
         }
@@ -75,12 +75,12 @@ public class GetLS1BIndex_Benchmark : BaseBenchmark
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitBoards)
+        foreach (var bitboard in position.PieceBitboards)
         {
             counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitBoards)
+        foreach (var bitboard in position.OccupancyBitboards)
         {
             counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }

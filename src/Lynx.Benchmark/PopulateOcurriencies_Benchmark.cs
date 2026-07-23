@@ -49,40 +49,40 @@ public class PopulateOcurriencies_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Positions))]
-    public BitBoard[] TwoLoops(Position position) => PopulateOccupancies_TwoLoops(position.PieceBitBoards, position.OccupancyBitBoards);
+    public Bitboard[] TwoLoops(Position position) => PopulateOccupancies_TwoLoops(position.PieceBitboards, position.OccupancyBitboards);
 
     [Benchmark]
     [ArgumentsSource(nameof(Positions))]
-    public BitBoard[] OneLoop(Position position) => PopulateOccupancies_OneLoop(position.PieceBitBoards, position.OccupancyBitBoards);
+    public Bitboard[] OneLoop(Position position) => PopulateOccupancies_OneLoop(position.PieceBitboards, position.OccupancyBitboards);
 
-    private static BitBoard[] PopulateOccupancies_TwoLoops(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+    private static Bitboard[] PopulateOccupancies_TwoLoops(Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards)
     {
         var limit = (int)Piece.K;
         for (int piece = (int)Piece.P; piece <= limit; ++piece)
         {
-            occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
+            occupancyBitboards[(int)Side.White] |= pieceBitboards[piece];
         }
 
         limit = (int)Piece.k;
         for (int piece = (int)Piece.p; piece <= limit; ++piece)
         {
-            occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece];
+            occupancyBitboards[(int)Side.Black] |= pieceBitboards[piece];
         }
 
-        occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
+        occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
 
-        return occupancyBitBoards;
+        return occupancyBitboards;
     }
 
-    private static BitBoard[] PopulateOccupancies_OneLoop(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+    private static Bitboard[] PopulateOccupancies_OneLoop(Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards)
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            occupancyBitBoards[1 - (piece / 6)] |= pieceBitBoards[piece];
+            occupancyBitboards[1 - (piece / 6)] |= pieceBitboards[piece];
         }
 
-        occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
+        occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
 
-        return occupancyBitBoards;
+        return occupancyBitboards;
     }
 }

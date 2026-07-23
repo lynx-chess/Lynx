@@ -70,7 +70,7 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     [Benchmark(Baseline = true)]
     public int Original()
     {
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var position in _positions)
@@ -84,7 +84,7 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     [Benchmark]
     public int Reference()
     {
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var position in _positions)
@@ -98,7 +98,7 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     [Benchmark]
     public int UnsafeAdd()
     {
-        Span<BitBoard> buffer = stackalloc BitBoard[EvaluationContext.RequiredBufferSize];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
         foreach (var position in _positions)
@@ -112,20 +112,20 @@ public class CalculateThreats_Benchmark : BaseBenchmark
 
 class Position_CalculateThreats_Benchmark
 {
-    private readonly ulong[] _pieceBitBoards;
-    private readonly ulong[] _occupancyBitBoards;
+    private readonly ulong[] _pieceBitboards;
+    private readonly ulong[] _occupancyBitboards;
 
 #pragma warning disable RCS1085 // Use auto-implemented property
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards => _pieceBitBoards;
+    public Bitboard[] PieceBitboards => _pieceBitboards;
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards => _occupancyBitBoards;
+    public Bitboard[] OccupancyBitboards => _occupancyBitboards;
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
@@ -139,18 +139,18 @@ class Position_CalculateThreats_Benchmark
 
     public Position_CalculateThreats_Benchmark(ParseFENResult parsedFEN)
     {
-        _pieceBitBoards = parsedFEN.PieceBitBoards;
-        _occupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        _pieceBitboards = parsedFEN.PieceBitboards;
+        _occupancyBitboards = parsedFEN.OccupancyBitboards;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EvaluationContext CalculateThreats_Original(ref EvaluationContext evaluationContext)
     {
-        var occupancy = OccupancyBitBoards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
-            var board = PieceBitBoards[pieceIndex];
+            var board = PieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
@@ -164,7 +164,7 @@ class Position_CalculateThreats_Benchmark
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var board = PieceBitBoards[pieceIndex];
+            var board = PieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
@@ -182,13 +182,13 @@ class Position_CalculateThreats_Benchmark
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EvaluationContext CalculateThreats_Reference(ref EvaluationContext evaluationContext)
     {
-        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var occupancy = _occupancyBitboards[(int)Side.Both];
         ref var attacksByWhite = ref evaluationContext.AttacksBySide[(int)Side.White];
         ref var attacksByBlack = ref evaluationContext.AttacksBySide[(int)Side.Black];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
-            var board = _pieceBitBoards[pieceIndex];
+            var board = _pieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
@@ -203,7 +203,7 @@ class Position_CalculateThreats_Benchmark
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var board = _pieceBitBoards[pieceIndex];
+            var board = _pieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
@@ -222,14 +222,14 @@ class Position_CalculateThreats_Benchmark
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void CalculateThreats_UnsafeAdd(ref EvaluationContext evaluationContext)
     {
-        var occupancy = _occupancyBitBoards[(int)Side.Both];
+        var occupancy = _occupancyBitboards[(int)Side.Both];
 
         ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
         ref var attacksBySideRef = ref MemoryMarshal.GetReference(evaluationContext.AttacksBySide);
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
-            var board = _pieceBitBoards[pieceIndex];
+            var board = _pieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
@@ -244,7 +244,7 @@ class Position_CalculateThreats_Benchmark
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var board = _pieceBitBoards[pieceIndex];
+            var board = _pieceBitboards[pieceIndex];
             var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);

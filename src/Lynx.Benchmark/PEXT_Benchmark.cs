@@ -53,8 +53,8 @@ public class PEXTBenchmark_Benchmark : BaseBenchmark
 
         for (int i = 0; i < 64; ++i)
         {
-            result |= MagicNumbersRookAttacks(i, _position.OccupancyBitBoards[0]);
-            result |= MagicNumbersBishopAttacks(i, _position.OccupancyBitBoards[0]);
+            result |= MagicNumbersRookAttacks(i, _position.OccupancyBitboards[0]);
+            result |= MagicNumbersBishopAttacks(i, _position.OccupancyBitboards[0]);
         }
 
         return result;
@@ -67,18 +67,18 @@ public class PEXTBenchmark_Benchmark : BaseBenchmark
 
         for (int i = 0; i < 64; ++i)
         {
-            result |= PEXTRookAttacks(i, _position.OccupancyBitBoards[0]);
-            result |= PEXTBishopAttacks(i, _position.OccupancyBitBoards[0]);
+            result |= PEXTRookAttacks(i, _position.OccupancyBitboards[0]);
+            result |= PEXTBishopAttacks(i, _position.OccupancyBitboards[0]);
         }
 
         return result;
     }
 
-    private static BitBoard MagicNumbersRookAttacks(int squareIndex, BitBoard occupancy) => Attacks.MagicNumbersRookAttacks(squareIndex, occupancy);
+    private static Bitboard MagicNumbersRookAttacks(int squareIndex, Bitboard occupancy) => Attacks.MagicNumbersRookAttacks(squareIndex, occupancy);
 
-    private static BitBoard PEXTRookAttacks(int squareIndex, BitBoard occupancy) => Attacks.RookAttacks(squareIndex, occupancy);
+    private static Bitboard PEXTRookAttacks(int squareIndex, Bitboard occupancy) => Attacks.RookAttacks(squareIndex, occupancy);
 
-    private static BitBoard MagicNumbersBishopAttacks(int squareIndex, BitBoard occupancy) => Attacks.MagicNumbersBishopAttacks(squareIndex, occupancy);
+    private static Bitboard MagicNumbersBishopAttacks(int squareIndex, Bitboard occupancy) => Attacks.MagicNumbersBishopAttacks(squareIndex, occupancy);
 
-    private static BitBoard PEXTBishopAttacks(int squareIndex, BitBoard occupancy) => Attacks.BishopAttacks(squareIndex, occupancy);
+    private static Bitboard PEXTBishopAttacks(int squareIndex, Bitboard occupancy) => Attacks.BishopAttacks(squareIndex, occupancy);
 }
