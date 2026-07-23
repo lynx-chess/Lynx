@@ -828,7 +828,7 @@ public partial class Position
 
         if (rank == seventhRank
             && (oppositeKingRank == eightRank
-            || (attacks & oppositeSidePawns & Masks.SeventhRankMasks[1 - pieceSide]) != 0))
+            || (oppositeSidePawns & Masks.SeventhRankMasks[1 - pieceSide]) != 0))
         {
             packedBonus += RookSeventhRankBonus;
         }
