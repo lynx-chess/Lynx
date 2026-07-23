@@ -392,7 +392,13 @@ public sealed partial class Engine
             {
                 // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                 // after searching the first few given by the move ordering algorithm
-                if (visitedMovesCounter >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                var lmpMargin = Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1));
+                if (!isCapture)
+                {
+                    lmpMargin += quietHistory / Configuration.EngineSettings.LMP_QuietHistoryDivisor;
+                }
+
+                if (visitedMovesCounter >= lmpMargin)
                 {
                     break;
                 }
