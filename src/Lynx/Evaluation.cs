@@ -317,6 +317,9 @@ public partial class Position
             packedScore -= BishopPairBonus;
         }
 
+        // Rook on 7th rank bonus
+        packedScore += RookOn7thRankBonus(ref evaluationContext, whiteKing, blackKing);
+
         // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & _occupancyBitboards[(int)Side.White] /* & (~whitePawns) */).CountBits()
@@ -809,7 +812,6 @@ public partial class Position
         if ((attacks & _pieceBitboards[pieceIndex]).CountBits() >= 1)
         {
             var rank = Constants.Rank(squareIndex);
-
             if (pieceIndex == (int)Piece.r)
             {
                 rank = 7 - rank;
@@ -1129,5 +1131,37 @@ public partial class Position
         var bishopSquare = _pieceBitboards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
 
         return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int RookOn7thRankBonus(ref EvaluationContext evaluationContext, int whiteKing, int blackKing)
+    {
+        int packedBonus = 0;
+
+        var whiteRooks = _pieceBitboards[(int)Piece.R];
+        const int whiteEighthRank = 0;
+
+        var unAttackedWhiteRooksOn7thRank = whiteRooks & Masks.WhiteSeventhRankMask & (~evaluationContext.AttacksBySide[(int)Side.Black] | evaluationContext.AttacksBySide[(int)Side.White]);
+
+        if (unAttackedWhiteRooksOn7thRank != 0
+            && (whiteEighthRank == Constants.Rank(blackKing)))
+            //|| ((evaluationContext.Attacks[(int)Piece.R] & PieceBitboards[(int)Piece.p] & Masks.WhiteSeventhRankMask) != 0)))
+        {
+            packedBonus += RookSeventhRankBonus;
+        }
+
+        var blackRooks = _pieceBitboards[(int)Piece.r];
+        const int blackEighthRank = 7;
+
+        var unAttackedBlackRooksOn7thRank = blackRooks & Masks.BlackSeventhRankMask & (~evaluationContext.AttacksBySide[(int)Side.White] | evaluationContext.AttacksBySide[(int)Side.Black]);
+
+        if (unAttackedBlackRooksOn7thRank != 0
+            && (blackEighthRank == Constants.Rank(whiteKing)))
+            //|| ((evaluationContext.Attacks[(int)Piece.r] & PieceBitboards[(int)Piece.P] & Masks.BlackSeventhRankMask) != 0)))
+        {
+            packedBonus -= RookSeventhRankBonus;
+        }
+
+        return packedBonus;
     }
 }
