@@ -205,9 +205,13 @@ public readonly struct TranspositionTable
     {
         var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
 
+#if X86_64
         return Bmi2.X64.IsSupported
             ? Bmi2.X64.MultiplyNoFlags(key, (ulong)_tt.Length)
             : (key % (ulong)_tt.Length);
+#else
+        return (key % (ulong)_tt.Length);
+#endif
     }
 
 #pragma warning disable S4144 // Methods should not have identical implementations
