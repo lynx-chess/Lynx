@@ -1141,11 +1141,11 @@ public partial class Position
         var whiteRooks = _pieceBitboards[(int)Piece.R];
         const int whiteEighthRank = 0;
 
-        var whiteRooksOn7thRank = whiteRooks & Masks.WhiteSeventhRankMask;  // & ~evaluationContext.AttacksBySide[(int)Side.Black];
+        var unAttackedWhiteRooksOn7thRank = whiteRooks & Masks.WhiteSeventhRankMask & (~evaluationContext.AttacksBySide[(int)Side.Black] | evaluationContext.AttacksBySide[(int)Side.White]);
 
-        if (whiteRooksOn7thRank != 0
-            && (whiteEighthRank == Constants.Rank(blackKing)
-            || ((evaluationContext.Attacks[(int)Piece.R] & PieceBitboards[(int)Piece.p]) != 0)))
+        if (unAttackedWhiteRooksOn7thRank != 0
+            && (whiteEighthRank == Constants.Rank(blackKing)))
+            //|| ((evaluationContext.Attacks[(int)Piece.R] & PieceBitboards[(int)Piece.p] & Masks.WhiteSeventhRankMask) != 0)))
         {
             packedBonus += RookSeventhRankBonus;
         }
@@ -1153,11 +1153,11 @@ public partial class Position
         var blackRooks = _pieceBitboards[(int)Piece.r];
         const int blackEighthRank = 7;
 
-        var blackRooksOn7thRank = blackRooks & Masks.BlackSeventhRankMask; // & ~evaluationContext.AttacksBySide[(int)Side.White];
+        var unAttackedBlackRooksOn7thRank = blackRooks & Masks.BlackSeventhRankMask & (~evaluationContext.AttacksBySide[(int)Side.White] | evaluationContext.AttacksBySide[(int)Side.Black]);
 
-        if (blackRooksOn7thRank != 0
-            && (blackEighthRank == Constants.Rank(whiteKing)
-            || ((evaluationContext.Attacks[(int)Piece.r] & PieceBitboards[(int)Piece.P]) != 0)))
+        if (unAttackedBlackRooksOn7thRank != 0
+            && (blackEighthRank == Constants.Rank(whiteKing)))
+            //|| ((evaluationContext.Attacks[(int)Piece.r] & PieceBitboards[(int)Piece.P] & Masks.BlackSeventhRankMask) != 0)))
         {
             packedBonus -= RookSeventhRankBonus;
         }
