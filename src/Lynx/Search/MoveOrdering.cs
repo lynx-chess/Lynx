@@ -107,7 +107,7 @@ public sealed partial class Engine
     /// <summary>
     /// Returns the score evaluation of a move
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     internal int ScoreMoveQSearch(Position position, Move move, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
