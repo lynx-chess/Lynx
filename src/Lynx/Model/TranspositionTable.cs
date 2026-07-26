@@ -25,7 +25,7 @@ public readonly struct TranspositionTable
 
     public TranspositionTable()
     {
-        _logger.Debug("Allocating Single Array TT");
+        _logger.Debug("Allocating TT");
         var sw = Stopwatch.StartNew();
 
         RequestedSizeMBs = Configuration.EngineSettings.TranspositionTableSize;
@@ -55,7 +55,7 @@ public readonly struct TranspositionTable
             _logger.Warn("Using only TT array of size {ArraySize} ({ArraySizeMB} MB)", ttLength, SizeMBs);
         }
 
-        _logger.Info("Single Array TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Info("TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -174,7 +174,7 @@ public readonly struct TranspositionTable
             span.Clear();
         });
 
-        _logger.Info("TT clearing/zeroing time:\t{0} ms", sw.ElapsedMilliseconds);
+        _logger.Info("TT clearing/zeroing time using {0} threads:\t{1} ms", threadCount, sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
