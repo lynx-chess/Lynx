@@ -658,12 +658,15 @@ public sealed class Searcher : IDisposable
 
                 var minMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MinMoves;
                 var maxMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MaxMoves;
+                
                 randomMovesCount = Random.Shared.Next(minMoves, maxMoves + 1);
             }
             else
             {
-                var baseMoves = Configuration.EngineSettings.Datagen_GenFens_NoBook_BaseMoves;
-                randomMovesCount = baseMoves + (Random.Shared.Next() % 2);
+                var minMoves = Configuration.EngineSettings.Datagen_GenFens_NoBook_MinMoves;
+                var maxMoves = Configuration.EngineSettings.Datagen_GenFens_NoBook_MaxMoves;
+
+                randomMovesCount = Random.Shared.Next(minMoves, maxMoves + 1);
             }
 
             var startposFEN = GenerateDatagenStartpos(rnd, sourceFEN, randomMovesCount);

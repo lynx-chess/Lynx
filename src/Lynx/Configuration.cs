@@ -524,8 +524,6 @@ public sealed class EngineSettings
 
     #region Datagen
 
-    public int Datagen_GenFens_RandomHalfMoveCount { get; set; } = 8;
-
     public int Datagen_GenFens_Depth { get; set; } = 10;
 
     public int Datagen_GenFens_MaxEval { get; set; } = 1000;
@@ -544,7 +542,9 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
 
-    public int Datagen_GenFens_NoBook_BaseMoves { get; set; } = 8;
+    public int Datagen_GenFens_NoBook_MinMoves { get; set; } = 6;
+
+    public int Datagen_GenFens_NoBook_MaxMoves { get; set; } = 11;
 
     public int Datagen_GenFens_Book_MinMoves { get; set; } = 1;
 
