@@ -542,9 +542,9 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
 
-    public int Datagen_GenFens_NoBook_MinMoves { get; set; } = 6;
+    public int Datagen_GenFens_NoBook_MinMoves { get; set; } = 7;
 
-    public int Datagen_GenFens_NoBook_MaxMoves { get; set; } = 11;
+    public int Datagen_GenFens_NoBook_MaxMoves { get; set; } = 10;
 
     public int Datagen_GenFens_Book_MinMoves { get; set; } = 1;
 
