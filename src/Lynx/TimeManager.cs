@@ -75,12 +75,15 @@ public static class TimeManager
                 _logger.Warn("Nodes will be treated as soft nodes, since hard nodes aren't supported. Please enable SoftNodes via UCI (or configuration) before sending 'go nodes' commands to avoid this warning");
             }
 
-            maxNodes = goCommand.Nodes;
+            var fudgingAmount = Configuration.EngineSettings.SoftNodeFudging;
+            var extraNodes = Random.Shared.Next(-fudgingAmount, +fudgingAmount);
+
+            maxNodes = goCommand.Nodes + (ulong)extraNodes;
 
             // This limit makes up for the lack of hard nodes, to avoid 'hangs' in search explosions
             hardLimitTimeBound = (int)Math.Max(
                 (ulong)Configuration.EngineSettings.Datagen_GenFens_MinHardTimeBound,
-                3 * goCommand.Nodes * 1000 / Configuration.EngineSettings.Estimated_NPS);
+                3 * maxNodes * 1000 / Configuration.EngineSettings.Estimated_NPS);
 
             _logger.Info("Soft nodes search (nodes {0}, hard time bound {1}ms)", maxNodes, hardLimitTimeBound);
         }
