@@ -19,9 +19,9 @@ public class GoCommandTest
         Assert.AreEqual(50, goCommand.MovesToGo);
         Assert.AreEqual(60, goCommand.Depth);
         Assert.AreEqual(70, goCommand.MoveTime);
+        Assert.AreEqual(90, goCommand.Nodes);
         Assert.True(goCommand.Ponder);
         _ = Assert.Throws<NotSupportedException>(() => _ = GoCommand.Mate);
-        _ = Assert.Throws<NotSupportedException>(() => _ = GoCommand.Nodes);
         _ = Assert.Throws<NotSupportedException>(() => _ = GoCommand.SearchMoves);
     }
 

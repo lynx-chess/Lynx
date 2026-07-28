@@ -15,7 +15,7 @@ public static class SEE
     [
         100, 450, 450, 650, 1250, 0,
         100, 450, 450, 650, 1250, 0,
-        0
+        0,
     ];
 
     #pragma warning restore IDE0055
@@ -200,7 +200,8 @@ public static class SEE
         {
             return 0;
         }
-        else if (move.IsEnPassant())
+
+        if (move.IsEnPassant())
         {
             return PieceValues[(int)Piece.P];
         }

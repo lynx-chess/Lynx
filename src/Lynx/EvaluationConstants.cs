@@ -19,7 +19,7 @@ public static class EvaluationConstants
     public static ReadOnlySpan<int> GamePhaseByPiece =>
     [
         0, 1, 1, 2, 4, 0,
-        0, 1, 1, 2, 4, 0
+        0, 1, 1, 2, 4, 0,
     ];
 
     public const int MaxPhase = 24;
@@ -126,7 +126,7 @@ public static class EvaluationConstants
     [
         1000, 3500, 4000, 5000, 11000, 0,
         1000, 3500, 4000, 5000, 11000, 0,
-        0
+        0,
     ];
 
     /// <summary>

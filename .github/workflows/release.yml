@@ -62,18 +62,18 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -153,9 +153,9 @@ jobs:
         sudo apt-get update && sudo apt-get install -y hub
 
     - name: Install NuGet
-      uses: nuget/setup-nuget@v3
+      uses: nuget/setup-nuget@v4
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         token: ${{ secrets.GH_RELEASE }}
 

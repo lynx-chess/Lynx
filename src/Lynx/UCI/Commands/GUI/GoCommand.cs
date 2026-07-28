@@ -72,8 +72,8 @@ public sealed class GoCommand
     public int MoveTime { get; }
     public bool Infinite { get; }
     public bool Ponder { get; }
+    public ulong Nodes { get; }
 
-    public static int Nodes => throw new NotSupportedException();
     public static int Mate => throw new NotSupportedException();
 
 #pragma warning disable CA1002, MA0016 // Do not expose generic lists
@@ -87,7 +87,7 @@ public sealed class GoCommand
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-#pragma warning disable S127 // "for" loop stop conditions should be invariant
+#pragma warning disable S127, MA0071 // "for" loop stop conditions should be invariant, avoid redundant else
         for (int i = 1; i < rangesLength; i++)
         {
             var key = commandAsSpan[ranges[i]];
@@ -213,13 +213,15 @@ public sealed class GoCommand
             }
             else if (key.Equals(NodesSpan, StringComparison.OrdinalIgnoreCase))
             {
-                _logger.Warn("nodes not supported in go command, it will be safely ignored");
-                ++i;
+                if (ulong.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    Nodes = value;
+                }
             }
             else if (key.Equals(MateSpan, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.Warn("mate not supported in go command, it will be safely ignored");
-                ++i;
+                i++;
             }
             else if (key.Equals(SearchmovesSpan, StringComparison.OrdinalIgnoreCase))
             {
@@ -232,7 +234,7 @@ public sealed class GoCommand
                 _logger.Warn("{0} not supported in go command, attempting to continue command parsing", key.ToString());
             }
         }
-#pragma warning restore S127 // "for" loop stop conditions should be invariant
+#pragma warning restore S127, MA0071 // "for" loop stop conditions should be invariant, avoid redundant else
     }
 
     public static string Init() => Id;

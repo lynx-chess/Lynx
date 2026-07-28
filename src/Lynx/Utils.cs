@@ -173,14 +173,12 @@ public static class Utils
                 ? halfMovesWithoutCaptureOrPawnMove
                 : 0;
         }
-        else
-        {
-            var pieceToMove = moveToPlay.Piece();
 
-            return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
-                ? 0
-                : halfMovesWithoutCaptureOrPawnMove + 1;
-        }
+        var pieceToMove = moveToPlay.Piece();
+
+        return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
+            ? 0
+            : halfMovesWithoutCaptureOrPawnMove + 1;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -269,12 +267,36 @@ public static class Utils
         return ((1 << piece) & MajorPieceMask) != 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong Murmur3(ulong n)
+    {
+        n ^= n >> 33;
+        n *= 0xff51afd7ed558ccdUL;
+        n ^= n >> 33;
+        n *= 0xc4ceb9fe1a85ec53UL;
+        n ^= n >> 33;
+
+        return n;
+    }
+
     /// <summary>
     /// Recommended in https://learn.microsoft.com/en-us/dotnet/api/system.boolean.tostring
     /// </summary>
     public static string ToLowerString(this bool b)
     {
         return b.ToString().ToLowerInvariant();
+    }
+
+    internal static string TimeToString(double milliseconds)
+    {
+        return milliseconds switch
+        {
+            < 1 => $"{milliseconds:F} ms",
+            < 1_000 => $"{Math.Round(milliseconds)} ms",
+            < 60_000 => $"{0.001 * milliseconds:F} s",
+            < 3_600_000 => $"{Math.Floor(milliseconds / 60_000)} min {Math.Round(0.001 * (milliseconds % 60_000))} s",
+            _ => $"{Math.Floor(milliseconds / 3_600_000)} h {Math.Round((milliseconds % 3_600_000) / 60_000)} min",
+        };
     }
 
     [Conditional("DEBUG")]

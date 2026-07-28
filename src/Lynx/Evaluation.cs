@@ -477,7 +477,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PhaseFromScratch()
+    internal int PhaseFromScratch()
     {
         return (Knights.CountBits() * GamePhaseByPiece[(int)Piece.N])
             + (Bishops.CountBits() * GamePhaseByPiece[(int)Piece.B])

@@ -27,6 +27,7 @@ public class MoveScoreTest : BaseTest
         {
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
+            engine.Game.CurrentPosition.CalculateThreats(ref evaluationContext);
             return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
         }).ToList();
 
@@ -41,6 +42,7 @@ public class MoveScoreTest : BaseTest
 
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
+        engine.Game.CurrentPosition.CalculateThreats(ref evaluationContext);
 
         foreach (var move in allMoves.Where(move => move.CapturedPiece() == (int)Piece.None && !move.IsCastle()))
         {
@@ -70,6 +72,7 @@ public class MoveScoreTest : BaseTest
         {
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
+            engine.Game.CurrentPosition.CalculateThreats(ref evaluationContext);
             return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
         }).ToList();
 

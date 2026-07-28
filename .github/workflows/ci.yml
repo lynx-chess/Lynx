@@ -22,18 +22,18 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -60,18 +60,18 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -134,18 +134,18 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -192,15 +192,15 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -225,15 +225,15 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -258,15 +258,15 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -291,15 +291,15 @@ jobs:
       fail-fast: true
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -324,15 +324,15 @@ jobs:
       fail-fast: true
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -357,15 +357,47 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" --settings tests/runsettings.xml --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+
+  datagen:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]   # disabled for macOS since that's always the CI bottleneck due to runners availability
+        category: [Datagen]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -389,15 +421,15 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -475,15 +507,15 @@ jobs:
   #    PROJECT_NAME: Lynx
 
   #  steps:
-  #  - uses: actions/checkout@v6
+  #  - uses: actions/checkout@v7
 
   #  - name: Setup .NET
-  #    uses: actions/setup-dotnet@v5
+  #    uses: actions/setup-dotnet@v6
   #    with:
   #      dotnet-version: ${{ env.DOTNET_VERSION }}
 
   #  - name: Nuget cache
-  #    uses: actions/cache@v5
+  #    uses: actions/cache@v6
   #    with:
   #      path:
   #        ~/.nuget/packages

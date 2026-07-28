@@ -40,7 +40,7 @@ public static class EvaluationPSQTs
                 MiddleGameBishopTable,
                 MiddleGameRookTable,
                 MiddleGameQueenTable,
-                MiddleGameKingTable
+                MiddleGameKingTable,
             ],
             [
                 MiddleGameEnemyPawnTable,
@@ -48,8 +48,8 @@ public static class EvaluationPSQTs
                 MiddleGameEnemyBishopTable,
                 MiddleGameEnemyRookTable,
                 MiddleGameEnemyQueenTable,
-                MiddleGameEnemyKingTable
-            ]
+                MiddleGameEnemyKingTable,
+            ],
         ];
 
         short[][][][] egPositionalTables =
@@ -60,7 +60,7 @@ public static class EvaluationPSQTs
                 EndGameBishopTable,
                 EndGameRookTable,
                 EndGameQueenTable,
-                EndGameKingTable
+                EndGameKingTable,
             ],
             [
                 EndGameEnemyPawnTable,
@@ -68,8 +68,8 @@ public static class EvaluationPSQTs
                 EndGameEnemyBishopTable,
                 EndGameEnemyRookTable,
                 EndGameEnemyQueenTable,
-                EndGameEnemyKingTable
-            ]
+                EndGameEnemyKingTable,
+            ],
         ];
 
         for (int friendBucket = 0; friendBucket < PSQTBucketCount; ++friendBucket)

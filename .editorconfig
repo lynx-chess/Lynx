@@ -81,3 +81,14 @@ dotnet_diagnostic.CS8618.severity = error
 dotnet_diagnostic.IDE0079.severity = none
 # File scoped namespaces
 csharp_style_namespace_declarations = file_scoped:warning
+
+# MA0193: Use an overload with a MidpointRounding argument
+dotnet_diagnostic.MA0193.severity = none
+# MA0037: Remove empty statement 
+dotnet_diagnostic.MA0037.severity = warning
+# CA5394: Do not use insecure randomness
+dotnet_diagnostic.CA5394.severity = none
+# S2245: Use a cryptographically secure random number generator.
+dotnet_diagnostic.S2245.severity = none
+# Avoid using this unsafe code block.
+dotnet_diagnostic.S6640.severity = none

@@ -14,7 +14,7 @@ public readonly ref struct ParseFENResult
 #pragma warning restore S3887 // Mutable, non-private fields should not be "readonly"
 
     public readonly int HalfMoveClock;
-    //public readonly int FullMoveCounter;
+    public readonly int FullMoveCounter;
     public readonly BoardSquare EnPassant;
 
     public readonly CastlingData CastlingData;
@@ -30,7 +30,8 @@ public readonly ref struct ParseFENResult
         byte castle,
         BoardSquare enPassant,
         CastlingData castlingData,
-        int halfMoveClock)
+        int halfMoveClock,
+        int fullMoveCounter)
     {
         PieceBitboards = pieceBitboards;
         OccupancyBitboards = occupancyBitboards;
@@ -40,6 +41,7 @@ public readonly ref struct ParseFENResult
         EnPassant = enPassant;
         CastlingData = castlingData;
         HalfMoveClock = halfMoveClock;
+        FullMoveCounter = fullMoveCounter;
     }
 }
 

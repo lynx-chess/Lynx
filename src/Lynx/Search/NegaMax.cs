@@ -1,4 +1,4 @@
-﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -19,7 +19,7 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
+    private unsafe int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
         bool parentWasNullMove = false, bool isVerifyingSE = false)
     {
         var position = Game.CurrentPosition;
@@ -231,7 +231,10 @@ public sealed partial class Engine
                     if (ttCorrectedStaticEval - rfpThreshold >= beta)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (ttCorrectedStaticEval + beta) / 2;
+                        return (Math.Abs(ttCorrectedStaticEval) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            && Math.Abs(beta) < EvaluationConstants.PositiveCheckmateDetectionLimit)
+                            ? (ttCorrectedStaticEval + beta) / 2
+                            : ttCorrectedStaticEval;
 #pragma warning restore S3949 // Calculations should not overflow
                     }
 
@@ -285,11 +288,6 @@ public sealed partial class Engine
                         + Math.Min(
                             Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
                             staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
-
-                    // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                    //var nmpReduction = Math.Min(
-                    //    depth,
-                    //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                     var gameState = position.MakeNullMove();
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
@@ -389,7 +387,7 @@ public sealed partial class Engine
             {
                 // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                 // after searching the first few given by the move ordering algorithm
-                if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                if (visitedMovesCounter >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
                 {
                     break;
                 }
@@ -473,6 +471,12 @@ public sealed partial class Engine
 
                 singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
 
+                // Guarding against TT score values close to checkmate scores (caused by aspiration windows limits), which can cause false mate reporting (very high/low mate values)
+                if (singularBeta <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                {
+                    singularBeta = EvaluationConstants.MinEval;
+                }
+
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 
                 // Singular extension
@@ -540,7 +544,7 @@ public sealed partial class Engine
 
             int score = 0;
 
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition(ref evaluationContext)))
+            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition(ref evaluationContext)))
             {
                 score = 0;
 
@@ -798,7 +802,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
+    public unsafe int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
 

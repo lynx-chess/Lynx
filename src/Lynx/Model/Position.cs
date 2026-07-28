@@ -1107,6 +1107,30 @@ public partial class Position : IDisposable
 
     #endregion
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong MaterialHash()
+    {
+        ulong hash = 0;
+
+        var pieces = _pieceBitboards;
+
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand - CountBits always returns a positive value
+        hash |= (ulong)pieces[(int)Piece.P].CountBits();
+        hash |= (ulong)pieces[(int)Piece.N].CountBits() << 6;
+        hash |= (ulong)pieces[(int)Piece.B].CountBits() << 12;
+        hash |= (ulong)pieces[(int)Piece.R].CountBits() << 18;
+        hash |= (ulong)pieces[(int)Piece.Q].CountBits() << 24;
+
+        hash |= (ulong)pieces[(int)Piece.p].CountBits() << 30;
+        hash |= (ulong)pieces[(int)Piece.n].CountBits() << 36;
+        hash |= (ulong)pieces[(int)Piece.b].CountBits() << 42;
+        hash |= (ulong)pieces[(int)Piece.r].CountBits() << 48;
+        hash |= (ulong)pieces[(int)Piece.q].CountBits() << 54;
+#pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
+
+        return Utils.Murmur3(hash);
+    }
+
     public int CountPieces() => _pieceBitboards.Sum(b => b.CountBits());
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
@@ -1223,7 +1247,12 @@ public partial class Position : IDisposable
 
         sb.Append(' ');
 
-        sb.Append(_enPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)_enPassant]);
+        sb.Append(
+            (_enPassant == BoardSquare.noSquare
+                || (Attacks.PawnAttacks[Utils.OppositeSide((int)_side)][(int)_enPassant]
+                    & _pieceBitboards[(int)Piece.P + Utils.PieceOffset((int)_side)]) == 0)
+            ? "-"
+            : Constants.Coordinates[(int)_enPassant]);
 
         sb.Append(' ').Append(halfMovesWithoutCaptureOrPawnMove).Append(' ').Append(fullMoveClock);
 
@@ -1236,7 +1265,7 @@ public partial class Position : IDisposable
     /// Combines <see cref="_pieceBitboards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
     /// into a human-friendly representation
     /// </summary>
-    public void Print(int halfMovesWithoutCaptureOrPawnMove = -1)
+    public void Print(int halfMovesWithoutCaptureOrPawnMove = -1, int fullMoves = 1)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator + Environment.NewLine);
@@ -1321,7 +1350,7 @@ public partial class Position : IDisposable
             Console.WriteLine($"    Half-moves:\t{halfMovesWithoutCaptureOrPawnMove}");
         }
 
-        Console.WriteLine($"    FEN:\t{FEN()}");
+        Console.WriteLine($"    FEN:\t{FEN(halfMovesWithoutCaptureOrPawnMove, fullMoves)}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
 
         Console.WriteLine(separator);
