@@ -476,7 +476,9 @@ public static class Constants
     /// <summary>
     /// 64 x 64
     /// </summary>
+#pragma warning disable S2386, S3887 // Mutable fields should not be "public static"
     public static readonly Bitboard[][] RaysBetween;
+#pragma warning restore S2386, S3887 // Mutable fields should not be "public static"
 
     /// <summary>
     /// 64 x 64
