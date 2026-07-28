@@ -429,9 +429,10 @@ public sealed class EngineSettings
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveValue"/>
+    /// Actual corrections get divided by <see cref="EvaluationConstants.CorrectionHistoryScale"/>
     /// </summary>
     [SPSA<int>(enabled: false)]
-    public int CorrHistory_MaxValue { get; set; } = 8_192;
+    public int CorrHistory_MaxValue { get; set; } = 16_384;
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveRawBonus"/>
