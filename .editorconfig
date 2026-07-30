@@ -88,3 +88,7 @@ dotnet_diagnostic.MA0193.severity = none
 dotnet_diagnostic.MA0037.severity = warning
 # CA5394: Do not use insecure randomness
 dotnet_diagnostic.CA5394.severity = none
+# S2245: Use a cryptographically secure random number generator.
+dotnet_diagnostic.S2245.severity = none
+# Avoid using this unsafe code block.
+dotnet_diagnostic.S6640.severity = none

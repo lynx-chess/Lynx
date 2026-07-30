@@ -291,8 +291,8 @@ public sealed partial class Engine
                 if (lastSearchResultCandidate.BestMove == default)
                 {
                     _logger.Warn(
-                        "[#{EngineId}] Depth {Depth}: search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
-                        _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore, mate);
+                        "[#{EngineId}] Depth {Depth}: search didn't produce a best move for position {Position} after {Time}ms. Score {Score} (mate in {Mate}?) detected",
+                        _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), _stopWatch.ElapsedMilliseconds, bestScore, mate);
 
                     _bestMoveStability = 0;
                     _scoreDelta = 0;

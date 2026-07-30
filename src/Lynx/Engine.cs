@@ -13,7 +13,7 @@ public sealed partial class Engine : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly int _id;
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly ITranspositionTable _tt;
+    private readonly TranspositionTable _tt;
     private SearchConstraints _searchConstraints;
 
     private bool _disposedValue;
@@ -34,7 +34,7 @@ public sealed partial class Engine : IDisposable
     {
         _id = 0;
         _engineWriter = engineWriter;
-        _tt = TranspositionTableFactory.Create();
+        _tt = new();
 
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
@@ -49,7 +49,9 @@ public sealed partial class Engine : IDisposable
         _logger.Debug("Engine {0} initialized", _id);
     }
 
-    public Engine(int id, ChannelWriter<object> engineWriter, ref ITranspositionTable tt)
+#pragma warning disable RCS1163 // Unused parameter - used in Release mode
+    public Engine(int id, ChannelWriter<object> engineWriter, ref TranspositionTable tt)
+#pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
         _engineWriter = engineWriter;

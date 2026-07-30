@@ -289,11 +289,6 @@ public sealed partial class Engine
                             Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
                             staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
 
-                    // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                    //var nmpReduction = Math.Min(
-                    //    depth,
-                    //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
-
                     var gameState = position.MakeNullMove();
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
                     position.UnMakeNullMove(gameState);
