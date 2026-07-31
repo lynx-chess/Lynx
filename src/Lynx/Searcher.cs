@@ -41,7 +41,7 @@ public sealed class Searcher : IDisposable
         _engineWriter = engineWriter;
 
         _tt = new();
-        _mainEngine = new Engine(MainEngineId, _engineWriter, in _tt);
+        _mainEngine = new Engine(MainEngineId, _engineWriter, ref _tt);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
 
@@ -124,6 +124,8 @@ public sealed class Searcher : IDisposable
         {
             await MultiThreadedSearch(goCommand);
         }
+
+        _tt.BumpAge();
 
         _isProcessingGoCommand = false;
     }
@@ -578,7 +580,7 @@ public sealed class Searcher : IDisposable
 #pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _mainEngine.Dispose();
 #pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _tt);
+            _mainEngine = new Engine(MainEngineId, _engineWriter, ref _tt);
 
             // We need extra engines to know about the new TT
             AllocateExtraEngines();
@@ -600,7 +602,7 @@ public sealed class Searcher : IDisposable
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, ref _tt);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -609,7 +611,7 @@ public sealed class Searcher : IDisposable
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        using var engine = new Engine(-1, _engineWriter, in _tt);
+        using var engine = new Engine(-1, _engineWriter, ref _tt);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
@@ -639,7 +641,7 @@ public sealed class Searcher : IDisposable
             lineCount = bookLines.Count();
         }
 
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, ref _tt);
 
         var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
         var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
@@ -871,7 +873,7 @@ public sealed class Searcher : IDisposable
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
-                    in _tt);
+                    ref _tt);
             }
         }
         else
@@ -911,7 +913,7 @@ public sealed class Searcher : IDisposable
         Parallel.For(0, warmupCount, i =>
         {
             var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-            using var engine = new Engine(-i, silentEngineWriter, in _tt);
+            using var engine = new Engine(-i, silentEngineWriter, ref _tt);
 
             engine.Warmup();
         });
