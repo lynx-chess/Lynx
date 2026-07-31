@@ -220,7 +220,7 @@ public static class ViriformatLoader
                             if (!skipGame)
                             {
                                 // Generic filter
-                                var filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
+                                var filteredOut = filter.ShouldDrop(move.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
                                 if (!filteredOut)
                                 {
                                     validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
@@ -247,7 +247,7 @@ public static class ViriformatLoader
                         }
                     }
 
-                    game.MakeMove(move!.Value);
+                    game.MakeMove(move.Value);
 
                     isFirstGameMove = false;
                     ++stats.PositionsCount;
@@ -535,7 +535,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs][0]));
             }
         }
         // White queenside
@@ -548,7 +548,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs][0]));
             }
         }
 
@@ -562,7 +562,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs][0]));
             }
         }
 
@@ -576,7 +576,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs][0]));
             }
         }
 

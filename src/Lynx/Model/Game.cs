@@ -52,7 +52,7 @@ public sealed class Game : IDisposable
         PositionBeforeLastSearch = new Position(CurrentPosition);
 
 #if DEBUG
-        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+        MoveHistory = [with(Constants.MaxNumberMovesInAGame)];
 #endif
     }
 

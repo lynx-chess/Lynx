@@ -124,10 +124,10 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move.Uci} should be parsable from position {fen}");
                         }
 
                         using var newPosition = new Position(position);
@@ -185,10 +185,10 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move.Uci} should be parsable from position {fen}");
                         }
 
                         using var newPosition = new Position(position);
@@ -248,10 +248,10 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move.Uci} should be parsable from position {fen}");
                         }
 
                         using var newPosition = new Position(position);
@@ -308,10 +308,10 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move.Uci} should be parsable from position {fen}");
                         }
 
                         using var newPosition = new Position(position);

@@ -245,7 +245,6 @@ public static class BitboardExtensions
     /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
-    /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ResetLS1B(this ref Bitboard board)
     {
