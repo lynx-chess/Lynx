@@ -12,7 +12,7 @@
   "MinPositionsPerGame": 0,
   "LimitPositionsPerPhasePerGame": false,
   "MaxPositionsPerPhasePerGame": 4096,
-  "UsePhaseForSampling": true,
+  "UsePhaseForSampling": false,
   "DrawAdjudication": false,
   "DrawAdjudication_Score": 0,
   "DrawAdjudication_MoveCount": 4096,
