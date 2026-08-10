@@ -12,6 +12,7 @@ public class TimeManagerTest
     public void CalculateTimeManagementTest_GoNodes_SoftNodesDisabled()
     {
         Configuration.EngineSettings.SoftNodes = false;
+        Configuration.EngineSettings.SoftNodeFudging = 0;
 
         var game = new Game(Constants.InitialPositionFEN);
         const int nodes = 666;
