@@ -76,7 +76,7 @@ public static class TimeManager
             }
 
             var fudgingAmount = Configuration.EngineSettings.SoftNodeFudging;
-            var extraNodes = Random.Shared.Next(-fudgingAmount, +fudgingAmount);
+            var extraNodes = fudgingAmount <= 0 ? 0 : Random.Shared.Next(-fudgingAmount, +fudgingAmount);
 
             maxNodes = goCommand.Nodes + (ulong)extraNodes;
 

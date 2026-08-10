@@ -119,7 +119,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Torch concept: doing fudging soft-nodes during datagen
     /// </summary>
-    public int SoftNodeFudging { get; set; } = 2_000;
+    public int SoftNodeFudging { get; set; }
 
     /// <summary>
     /// Real NPS aren't calculated until the last search command.
