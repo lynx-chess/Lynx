@@ -853,17 +853,9 @@ public sealed partial class Engine
         ShortMove ttBestMove = ttProbeResult.BestMove;
         _maxDepthReached[ply] = ply;
 
-        int rawStaticEval;
-
-        if (ttHit)
-        {
-            rawStaticEval = ttProbeResult.StaticEval;
-            position.CalculateThreats(ref evaluationContext);
-        }
-        else
-        {
-            rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
-        }
+        var rawStaticEval = ttHit
+            ? ttProbeResult.StaticEval
+            : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
 
         Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
@@ -900,6 +892,11 @@ public sealed partial class Engine
         if (standPat > alpha)
         {
             alpha = standPat;
+        }
+
+        if (ttHit)
+        {
+            position.CalculateThreats(ref evaluationContext);
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
