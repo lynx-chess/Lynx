@@ -274,6 +274,9 @@ public static class ViriformatLoader
                             positionsByPhaseShuffled[group.Key] = positions;
                         }
 
+                        // Shuffle the phase groups
+                        rng.Shuffle(positionsByPhaseShuffled);
+
                         selectedPositionsPerGame = new PositionTuple[positionsToTakePerGame];
 
                         selectedPositionsCount = 0;
