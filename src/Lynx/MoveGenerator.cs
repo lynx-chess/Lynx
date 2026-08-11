@@ -375,6 +375,8 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, Position position, ref EvaluationContext evaluationContext)
     {
+        Debug.Assert(evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)] != 0, "Missing threat calculations");
+
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
@@ -435,6 +437,8 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateKingCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, ref EvaluationContext evaluationContext)
     {
+        Debug.Assert(evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)] != 0, "Missing threat calculations");
+
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var oppositeSide = Utils.OppositeSide((int)position.Side);
 
@@ -466,13 +470,13 @@ public static class MoveGenerator
         try
         {
 #endif
-        return IsAnyPawnMoveValid(position, offset)
-            || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
-            || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-            || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-            || IsAnyCastlingMoveValid(position, ref evaluationContext);
+            return IsAnyPawnMoveValid(position, offset)
+                || IsAnyKingMoveValid((int)Piece.K + offset, position, ref evaluationContext)    // in?
+                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+                || IsAnyCastlingMoveValid(position, ref evaluationContext);
 #if DEBUG
         }
         catch (Exception e)
@@ -673,6 +677,8 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyKingMoveValid(int piece, Position position, ref EvaluationContext evaluationContext)
     {
+        Debug.Assert(evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)] != 0, "Missing threat calculations");
+
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 

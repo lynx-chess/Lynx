@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -66,17 +67,16 @@ public partial class Position
         //    return result;
         //}
 
+        CalculateThreats(ref evaluationContext);
+
         int packedScore = 0;
         int gamePhase = 0;
 
         var whitePawns = _pieceBitboards[(int)Piece.P];
         var blackPawns = _pieceBitboards[(int)Piece.p];
 
-        Bitboard whitePawnAttacks = whitePawns.ShiftUpRightAndLeft();
-        Bitboard blackPawnAttacks = blackPawns.ShiftDownRightAndLeft();
-
-        evaluationContext.AttacksBySide[(int)Side.White] = evaluationContext.Attacks[(int)Piece.P] = whitePawnAttacks;
-        evaluationContext.AttacksBySide[(int)Side.Black] = evaluationContext.Attacks[(int)Piece.p] = blackPawnAttacks;
+        Bitboard whitePawnAttacks = evaluationContext.Attacks[(int)Piece.P];
+        Bitboard blackPawnAttacks = evaluationContext.Attacks[(int)Piece.p];
 
         var whiteKing = _pieceBitboards[(int)Piece.K].GetLS1BIndex();
         var blackKing = _pieceBitboards[(int)Piece.k].GetLS1BIndex();
@@ -277,13 +277,8 @@ public partial class Position
             KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
-        var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
-        evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
-        evaluationContext.AttacksBySide[(int)Side.White] |= whiteKingAttacks;
-
-        var blackKingAttacks = Attacks.KingAttacks[blackKing];
-        evaluationContext.Attacks[(int)Piece.k] |= blackKingAttacks;
-        evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;
+        var whiteKingAttacks = evaluationContext.Attacks[(int)Piece.K];
+        var blackKingAttacks = evaluationContext.Attacks[(int)Piece.k];
 
         // King mobility
         var whiteKingAttacksCount =
@@ -633,8 +628,6 @@ public partial class Position
         var sameSidePawns = _pieceBitboards[pieceIndex - pawnToKnightOffset];
 
         var attacks = Attacks.KnightAttacks[squareIndex];
-        evaluationContext.Attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
-        evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
@@ -661,8 +654,6 @@ public partial class Position
 
         var occupancy = _occupancyBitboards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
-        evaluationContext.Attacks[(int)Piece.B + offset] |= attacks;
-        evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
@@ -773,8 +764,6 @@ public partial class Position
 
         var occupancy = _occupancyBitboards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
-        evaluationContext.Attacks[(int)Piece.R + Utils.PieceOffset(pieceSide)] |= attacks;
-        evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
@@ -829,8 +818,6 @@ public partial class Position
 
         var occupancy = _occupancyBitboards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
-        evaluationContext.Attacks[(int)Piece.Q + Utils.PieceOffset(pieceSide)] |= attacks;
-        evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
@@ -1051,6 +1038,8 @@ public partial class Position
 
         var oppositeSideKingSquare = _pieceBitboards[(int)Piece.k - offset].GetLS1BIndex();
         var oppositeSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
+
+        Debug.Assert(oppositeSideAttacks != 0, "Missing threat calculations");
 
         Span<Bitboard> checkThreats = stackalloc Bitboard[5];
 

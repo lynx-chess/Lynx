@@ -155,6 +155,8 @@ public sealed partial class Engine
 
         if (depth + depthExtension <= 0)
         {
+            position.CalculateThreats(ref evaluationContext);
+
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext))
             {
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
@@ -851,9 +853,17 @@ public sealed partial class Engine
         ShortMove ttBestMove = ttProbeResult.BestMove;
         _maxDepthReached[ply] = ply;
 
-        var rawStaticEval = ttHit
-            ? ttProbeResult.StaticEval
-            : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
+        int rawStaticEval;
+
+        if (ttHit)
+        {
+            rawStaticEval = ttProbeResult.StaticEval;
+            position.CalculateThreats(ref evaluationContext);
+        }
+        else
+        {
+            rawStaticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
+        }
 
         Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 

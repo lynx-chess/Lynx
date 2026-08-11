@@ -87,7 +87,7 @@ public sealed partial class Engine
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
-        Debug.Assert(oppositeSideAttacks != 0);
+        Debug.Assert(oppositeSideAttacks != 0, "Missing threat calculations");
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
@@ -520,8 +520,16 @@ public sealed partial class Engine
     private void ValidatePVTable()
     {
         var position = Game.CurrentPosition;
+
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+
+        var evaluationContext = new EvaluationContext(buffer);
+
         for (int i = 0; i < PVTable.Indexes[1]; ++i)
         {
+            position.CalculateThreats(ref evaluationContext);
+
             if (_pVTable[i] == default)
             {
                 for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
@@ -550,9 +558,11 @@ public sealed partial class Engine
         static void TryParseMove(Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+
             var evaluationContext = new EvaluationContext(buffer);
+
+            position.CalculateThreats(ref evaluationContext);
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),

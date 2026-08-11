@@ -1016,6 +1016,8 @@ public partial class Position : IDisposable
     {
         var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
 
+        Debug.Assert(attacks != 0, "Missing threat calculation");
+
         if (attacks != 0)
         {
             return (attacks & squaresBitboard) != 0;
