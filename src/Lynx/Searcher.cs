@@ -655,16 +655,10 @@ public sealed class Searcher : IDisposable
             if (generateFromBook)
             {
                 sourceFEN = bookLines.ElementAt(rnd.Next(0, lineCount - 1));
+            }
 
-                var minMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MinMoves;
-                var maxMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MaxMoves;
-                randomMovesCount = Random.Shared.Next(minMoves, maxMoves + 1);
-            }
-            else
-            {
-                var baseMoves = Configuration.EngineSettings.Datagen_GenFens_NoBook_BaseMoves;
-                randomMovesCount = baseMoves + (Random.Shared.Next() % 2);
-            }
+            var baseMoves = Configuration.EngineSettings.Datagen_GenFens_NoBook_BaseMoves;
+            randomMovesCount = baseMoves + (Random.Shared.Next() % 2);
 
             var startposFEN = GenerateDatagenStartpos(rnd, sourceFEN, randomMovesCount);
 
