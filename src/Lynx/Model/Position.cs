@@ -912,24 +912,24 @@ public partial class Position : IDisposable
     /// i.e. it doesn't ensure that both kings are on the board
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool WasProduceByAValidMove(Move move)
+    public bool WasProduceByAValidMove()
     {
         Debug.Assert(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
 
         var oppositeKingSquare = _pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
 
-        var isValid = !IsSquareAttacked(oppositeKingSquare, _side)
-            && (!move.IsCastle()
-                || IsValidCastlingMove(oppositeKingSquare));
-
 #if DEBUG
+        var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
+
         if (isValid)
         {
             Validate();
         }
-#endif
 
         return isValid;
+#else
+        return !IsSquareAttacked(oppositeKingSquare, _side);
+#endif
     }
 
     #endregion
@@ -1040,19 +1040,6 @@ public partial class Position : IDisposable
         }
 
         return false;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsValidCastlingMove(int oppositeKingSquare)
-    {
-        return !(oppositeKingSquare switch
-        {
-            Constants.WhiteKingShortCastleSquare => AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black),
-            Constants.WhiteKingLongCastleSquare => AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black),
-            Constants.BlackKingShortCastleSquare => AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White),
-            Constants.BlackKingLongCastleSquare => AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White),
-            _ => throw new LynxException("Invalid castling move target square: " + (BoardSquare)oppositeKingSquare),
-        });
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

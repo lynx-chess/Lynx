@@ -706,7 +706,7 @@ public sealed class Searcher : IDisposable
 
                     game.MakeMove(randomMove);
 
-                    if (!position.WasProduceByAValidMove(randomMove))
+                    if (!position.WasProduceByAValidMove())
                     {
                         throw new LynxException("Error in datagens implementation");
                     }
@@ -732,7 +732,7 @@ public sealed class Searcher : IDisposable
             {
                 var gameState = position.MakeMove(pseudoLegalMove);
 
-                if (position.WasProduceByAValidMove(pseudoLegalMove))
+                if (position.WasProduceByAValidMove())
                 {
                     legalMoves[legalMovesCount++] = pseudoLegalMove;
                     movesByPiece[pseudoLegalMove.Piece() % 6]++;

@@ -502,7 +502,7 @@ public sealed partial class Engine
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove(move);
+            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
             Game.CurrentPosition.UnmakeMove(move, gameState);
 
             if (isPositionValid)
@@ -671,7 +671,7 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[i];
 
             var gameState = position.MakeMove(move);
-            if (!position.WasProduceByAValidMove(move))
+            if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
                 continue;

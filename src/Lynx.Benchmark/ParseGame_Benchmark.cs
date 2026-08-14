@@ -529,7 +529,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-            if (CurrentPosition.WasProduceByAValidMove(moveToPlay))
+            if (CurrentPosition.WasProduceByAValidMove())
             {
 #if DEBUG
                 MoveHistory.Add(moveToPlay);
@@ -612,7 +612,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-            if (CurrentPosition.WasProduceByAValidMove(moveToPlay))
+            if (CurrentPosition.WasProduceByAValidMove())
             {
 #if DEBUG
                 MoveHistory.Add(moveToPlay);
@@ -695,7 +695,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-            if (CurrentPosition.WasProduceByAValidMove(moveToPlay))
+            if (CurrentPosition.WasProduceByAValidMove())
             {
 #if DEBUG
                 MoveHistory.Add(moveToPlay);

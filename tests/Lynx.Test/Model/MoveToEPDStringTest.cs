@@ -101,7 +101,7 @@ public class MoveToEPDStringTest
             .Where(m =>
             {
                 var gameState = position.MakeMove(m);
-                var isLegal = position.WasProduceByAValidMove(m);
+                var isLegal = position.WasProduceByAValidMove();
                 position.UnmakeMove(m, gameState);
 
                 return isLegal;

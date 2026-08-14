@@ -292,7 +292,7 @@ public sealed class Game : IDisposable
     {
         var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-        if (CurrentPosition.WasProduceByAValidMove(moveToPlay))
+        if (CurrentPosition.WasProduceByAValidMove())
         {
 #if DEBUG
             MoveHistory.Add(moveToPlay);

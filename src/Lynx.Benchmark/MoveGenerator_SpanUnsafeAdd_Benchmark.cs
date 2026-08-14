@@ -820,7 +820,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             var gameState = position.MakeMove(move);
 
-            bool result = position.WasProduceByAValidMove(move);
+            bool result = position.WasProduceByAValidMove();
             position.UnmakeMove(move, gameState);
 
             return result;
@@ -1496,7 +1496,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             var gameState = position.MakeMove(move);
 
-            bool result = position.WasProduceByAValidMove(move);
+            bool result = position.WasProduceByAValidMove();
             position.UnmakeMove(move, gameState);
 
             return result;

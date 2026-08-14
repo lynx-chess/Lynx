@@ -233,7 +233,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
         {
             var gameState = CurrentPosition.MakeMove(moveToPlay);
 
-            if (CurrentPosition.WasProduceByAValidMove(moveToPlay))
+            if (CurrentPosition.WasProduceByAValidMove())
             {
 #if DEBUG
                 MoveHistory.Add(moveToPlay);
