@@ -912,24 +912,24 @@ public partial class Position : IDisposable
     /// i.e. it doesn't ensure that both kings are on the board
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool WasProduceByAValidMove()
+    public bool WasProduceByAValidMove(Move move)
     {
         Debug.Assert(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
 
         var oppositeKingSquare = _pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
 
-#if DEBUG
-        var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
+        var isValid = !IsSquareAttacked(oppositeKingSquare, _side)
+            && (!move.IsCastle()
+                || IsValidCastlingMove(oppositeKingSquare));
 
+#if DEBUG
         if (isValid)
         {
             Validate();
         }
+#endif
 
         return isValid;
-#else
-        return !IsSquareAttacked(oppositeKingSquare, _side);
-#endif
     }
 
     #endregion
@@ -1016,14 +1016,19 @@ public partial class Position : IDisposable
     {
         var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
 
-        Debug.Assert(attacks != 0, "Missing threat calculation");
+        //Debug.Assert(attacks != 0, "Missing threat calculation");
 
-        if (attacks != 0)
-        {
-            return (attacks & squaresBitboard) != 0;
-        }
+        return attacks != 0 ?
+            (attacks & squaresBitboard) != 0
+            : AreSquaresAttacked(squaresBitboard, attackingSide);
+    }
 
-        // Fallback: no threats
+    /// <summary>
+    /// Fallback of <see cref="AreSquaresAttacked(ulong, Side, ref EvaluationContext)"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide)
+    {
         while (squaresBitboard != 0)
         {
             squaresBitboard = squaresBitboard.WithoutLS1B(out var square);
@@ -1035,6 +1040,19 @@ public partial class Position : IDisposable
         }
 
         return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsValidCastlingMove(int oppositeKingSquare)
+    {
+        return !(oppositeKingSquare switch
+        {
+            Constants.WhiteKingShortCastleSquare => AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black),
+            Constants.WhiteKingLongCastleSquare => AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black),
+            Constants.BlackKingShortCastleSquare => AreSquaresAttacked(KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White),
+            Constants.BlackKingLongCastleSquare => AreSquaresAttacked(QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White),
+            _ => throw new LynxException("Invalid castling move target square: " + (BoardSquare)oppositeKingSquare),
+        });
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

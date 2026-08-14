@@ -499,13 +499,10 @@ public sealed partial class Engine
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
+            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove(move);
             Game.CurrentPosition.UnmakeMove(move, gameState);
 
             if (isPositionValid)
@@ -652,7 +649,7 @@ public sealed partial class Engine
         position.CalculateThreats(ref evaluationContext);
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -674,7 +671,7 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[i];
 
             var gameState = position.MakeMove(move);
-            if (!position.WasProduceByAValidMove())
+            if (!position.WasProduceByAValidMove(move))
             {
                 position.UnmakeMove(move, gameState);
                 continue;

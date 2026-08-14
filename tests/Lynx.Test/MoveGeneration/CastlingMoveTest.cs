@@ -18,10 +18,7 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -36,10 +33,7 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -54,10 +48,7 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -72,10 +63,7 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());

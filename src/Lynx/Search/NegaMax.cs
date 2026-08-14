@@ -155,9 +155,7 @@ public sealed partial class Engine
 
         if (depth + depthExtension <= 0)
         {
-            position.CalculateThreats(ref evaluationContext);
-
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext))
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
@@ -320,7 +318,7 @@ public sealed partial class Engine
         var ttBestMove = ttEntry.BestMove;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
@@ -439,7 +437,7 @@ public sealed partial class Engine
 
             var gameState = position.MakeMove(move);
 
-            if (!position.WasProduceByAValidMove())
+            if (!position.WasProduceByAValidMove(move))
             {
                 position.UnmakeMove(move, gameState);
                 continue;
@@ -546,7 +544,7 @@ public sealed partial class Engine
 
             int score = 0;
 
-            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition(ref evaluationContext)))
+            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition()))
             {
                 score = 0;
 
@@ -894,13 +892,8 @@ public sealed partial class Engine
             alpha = standPat;
         }
 
-        if (ttHit)
-        {
-            position.CalculateThreats(ref evaluationContext);
-        }
-
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -955,7 +948,7 @@ public sealed partial class Engine
             }
 
             var gameState = position.MakeMove(move);
-            if (!position.WasProduceByAValidMove())
+            if (!position.WasProduceByAValidMove(move))
             {
                 position.UnmakeMove(move, gameState);
                 continue;
@@ -1012,7 +1005,7 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext)) // Bad captures can be pruned, so all moves need to be generated for now
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 

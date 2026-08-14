@@ -522,14 +522,9 @@ public sealed partial class Engine
         var position = Game.CurrentPosition;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-
-        var evaluationContext = new EvaluationContext(buffer);
 
         for (int i = 0; i < PVTable.Indexes[1]; ++i)
         {
-            position.CalculateThreats(ref evaluationContext);
-
             if (_pVTable[i] == default)
             {
                 for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
@@ -546,7 +541,7 @@ public sealed partial class Engine
             var newPosition = new Position(position);
 #pragma warning restore CA2000 // Dispose objects before losing scope
             newPosition.MakeMove(move);
-            if (!newPosition.WasProduceByAValidMove())
+            if (!newPosition.WasProduceByAValidMove(move))
             {
                 throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
             }
@@ -558,15 +553,10 @@ public sealed partial class Engine
         static void TryParseMove(Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-
-            var evaluationContext = new EvaluationContext(buffer);
-
-            position.CalculateThreats(ref evaluationContext);
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
+               MoveGenerator.GenerateAllMoves(position, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";

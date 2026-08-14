@@ -94,17 +94,14 @@ public class MoveToEPDStringTest
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
 
         var ambiguousMoves = pseudoLegalMoves
             .Where(m => m.Piece() == (int)piece && m.TargetSquare() == (int)targetSquare)
             .Where(m =>
             {
                 var gameState = position.MakeMove(m);
-                var isLegal = position.WasProduceByAValidMove();
+                var isLegal = position.WasProduceByAValidMove(m);
                 position.UnmakeMove(m, gameState);
 
                 return isLegal;

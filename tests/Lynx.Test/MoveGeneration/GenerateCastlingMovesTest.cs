@@ -173,10 +173,7 @@ public class GenerateCastlingMovesTest
     {
         int index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
     }
 
 #pragma warning restore RCS1098, S4144 // Methods should not have identical implementations

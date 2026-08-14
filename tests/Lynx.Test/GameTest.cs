@@ -243,7 +243,7 @@ public class GameTest : BaseTest
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
-        Assert.False(game.Is50MovesRepetition(ref evaluationContext));
+        Assert.False(game.Is50MovesRepetition());
     }
 
     [Test]
@@ -274,7 +274,7 @@ public class GameTest : BaseTest
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
-        Assert.True(game.Is50MovesRepetition(ref evaluationContext));
+        Assert.True(game.Is50MovesRepetition());
     }
 
     [Test]
@@ -306,9 +306,6 @@ public class GameTest : BaseTest
 #endif
         Assert.AreEqual(51 + 1, game.PositionHashHistoryLength());
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        Assert.False(game.Is50MovesRepetition(ref evaluationContext));
+        Assert.False(game.Is50MovesRepetition());
     }
 }
