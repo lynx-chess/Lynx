@@ -486,6 +486,12 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int PhaseIncludingPawnsFromScratch()
+    {
+        return PhaseFromScratch() + Pawns.CountBits();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int TaperedEvaluation(int taperedEvaluationTerm, int phase)
     {
         return ((Utils.UnpackMG(taperedEvaluationTerm) * phase) + (Utils.UnpackEG(taperedEvaluationTerm) * (24 - phase))) / 24;

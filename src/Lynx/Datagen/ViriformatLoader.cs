@@ -220,7 +220,7 @@ public static class ViriformatLoader
                                 var filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
                                 if (!filteredOut)
                                 {
-                                    validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
+                                    validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseIncludingPawnsFromScratch());
                                     ++positionsPerGame;
                                 }
                                 // Max initial eval filter

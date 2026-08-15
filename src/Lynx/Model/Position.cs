@@ -105,6 +105,12 @@ public partial class Position : IDisposable
         get => _pieceBitboards[(int)Piece.K] | _pieceBitboards[(int)Piece.k];
     }
 
+    public Bitboard Pawns
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p];
+    }
+
     public int WhiteKingSquare => _pieceBitboards[(int)Piece.K].GetLS1BIndex();
     public int BlackKingSquare => _pieceBitboards[(int)Piece.k].GetLS1BIndex();
 
