@@ -128,9 +128,6 @@ public sealed class Game : IDisposable
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
         FullMoves = parsedFen.FullMoveCounter;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         // Number of potential half-moves provided in the string
@@ -145,7 +142,10 @@ public sealed class Game : IDisposable
             }
 
             var moveString = rawMoves[moveRanges[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+
+            // TODO calculate threats
+            const Bitboard oppositeSideAttacks = 0UL;
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, oppositeSideAttacks, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -249,6 +249,7 @@ public sealed class Game : IDisposable
             return false;
         }
 
+        // TODO use opposideSideAttacks, might need to recalculate them from scratch since this happens after MakeMove
         return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
     }
 

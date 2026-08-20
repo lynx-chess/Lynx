@@ -79,9 +79,6 @@ public static class ViriformatLoader
             byte[] pairBufArr = new byte[4];
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evalCtx = new EvaluationContext(buffer);
-
             PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
 
             while (true)
@@ -157,9 +154,9 @@ public static class ViriformatLoader
 
                     var uci = ViriformatMoveToUci(rawMove);
 
-                    // Reset evaluation context before generating moves (we reuse the same buffer)
-                    evalCtx.Reset();
-                    var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, movePool);
+                    // TODO calculate them
+                    const Bitboard oppositeSideAttacks = 0UL;
+                    var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, oppositeSideAttacks, movePool);
 
                     if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
                     {

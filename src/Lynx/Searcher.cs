@@ -724,8 +724,10 @@ public sealed class Searcher : IDisposable
             Span<Bitboard> evalContextBuffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(evalContextBuffer);
 
+            // TODO use 0
             position.CalculateThreats(ref evaluationContext);
-            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+            var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves);
 
             // Filter out pseudolegal but not-legal moves
             int legalMovesCount = 0;
@@ -757,7 +759,7 @@ public sealed class Searcher : IDisposable
                     var gameState = position.MakeMove(randomMove);
 
                     position.CalculateThreats(ref evaluationContext);
-                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]);
 
                     position.UnmakeMove(randomMove, gameState);
 
