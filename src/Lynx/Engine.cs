@@ -155,20 +155,20 @@ public sealed partial class Engine : IDisposable
 
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS(isPondering, jointCts.Token)!;
+            return IDDFS(isPondering, jointCts.Token);
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         var cancellationToken = jointCts.Token;
-#pragma warning disable MA0040 // Forward the CancellationToken parameter to methods that take one
+#pragma warning disable MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove, cancellationToken),
                 Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken)),
             };
-#pragma warning restore MA0040 // Forward the CancellationToken parameter to methods that take one
+#pragma warning restore MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
 
         var resultList = await Task.WhenAll(tasks);
         var searchResult = resultList[1];
