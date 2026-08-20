@@ -340,7 +340,7 @@ public static class ViriformatLoader
                 // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
                 ++stats.GameCount;
 
-                if(stats.GameCount >= 250_000)
+                if(stats.GameCount >= 238_572)
                 {
                     break;
                 }
