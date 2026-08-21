@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftExtensionsVersion>10.0.10</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion>10.0.11</MicrosoftExtensionsVersion>
     <BenchmarkDotnetVersion>0.15.8</BenchmarkDotnetVersion>
   </PropertyGroup>
 
@@ -29,9 +29,9 @@
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1" />
     <PackageVersion Include="IDisposableAnalyzers" Version="4.0.8" />
-    <PackageVersion Include="Meziantou.Analyzer " Version="3.0.137" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.15.0" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.31.0.145097" />
+    <PackageVersion Include="Meziantou.Analyzer " Version="3.0.138" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.16.0" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.32.0.713" />
   </ItemGroup>
 
   <!-- Tests -->
