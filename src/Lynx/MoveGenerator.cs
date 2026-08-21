@@ -47,7 +47,6 @@ public static class MoveGenerator
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        // TODO calculate them
         const Bitboard oppositeSideAttacks = 0UL;
 
         return (capturesOnly
