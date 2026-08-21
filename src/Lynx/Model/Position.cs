@@ -1034,30 +1034,6 @@ public partial class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, ref EvaluationContext evaluationContext)
-    {
-        var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
-
-        if (attacks != 0)
-        {
-            return (attacks & squaresBitboard) != 0;
-        }
-
-        // Fallback: no threats
-        while (squaresBitboard != 0)
-        {
-            squaresBitboard = squaresBitboard.WithoutLS1B(out var square);
-
-            if (IsSquareAttacked(square, attackingSide))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsInCheck()
     {
         var oppositeSideInt = Utils.OppositeSide((int)_side);
