@@ -41,17 +41,16 @@ public class IsPseudoLegalTest
     [Test]
     public void IsPseudoLegal_ReturnsTrueForAllGeneratedPseudoLegalMoves()
     {
+        const Bitboard oppositeSideAttacks = 0UL;
+
         foreach (var fen in _fens)
         {
             var position = new Position(fen);
             var moves = GeneratePseudoLegalMoves(position);
 
-            Span<Bitboard> buffer = new Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(buffer);
-
             foreach (var move in moves)
             {
-                Assert.That(MoveGenerator.IsPseudoLegal(position, move, ref evaluationContext), Is.True,
+                Assert.True(MoveGenerator.IsPseudoLegal(position, move, oppositeSideAttacks),
                     $"Expected move {move.UCIString()} to be pseudo-legal in {fen}");
             }
         }
@@ -60,6 +59,8 @@ public class IsPseudoLegalTest
     [Test]
     public void IsPseudoLegal_ReturnsFalseForMovesGeneratedFromOtherPositions()
     {
+        const Bitboard oppositeSideAttacks = 0UL;
+
         var positions = _fens.Select(f => new Position(f)).ToArray();
         var moveLists = positions.Select(GeneratePseudoLegalMoves).ToArray();
 
@@ -86,7 +87,7 @@ public class IsPseudoLegalTest
                         continue;
                     }
 
-                    Assert.That(MoveGenerator.IsPseudoLegal(currentPosition, foreignMove, ref evaluationContext), Is.False,
+                    Assert.False(MoveGenerator.IsPseudoLegal(currentPosition, foreignMove, oppositeSideAttacks),
                         $"Foreign move {foreignMove.UCIString()} should not be pseudo-legal in {_fens[i]} (from {_fens[j]})");
                 }
             }
@@ -96,9 +97,9 @@ public class IsPseudoLegalTest
     private static Move[] GeneratePseudoLegalMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
 
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
+        const Bitboard oppositeSideAttacks = 0UL;
+
+        return MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves).ToArray();
     }
 }

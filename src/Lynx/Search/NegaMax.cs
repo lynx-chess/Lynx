@@ -155,7 +155,8 @@ public sealed partial class Engine
 
         if (depth + depthExtension <= 0)
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext))
+            var localOppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, localOppositeSideAttacks))
             {
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
@@ -317,15 +318,17 @@ public sealed partial class Engine
 
         var ttBestMove = ttEntry.BestMove;
 
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
         ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMove(position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, ref evaluationContext, ttBestMove);
+            Unsafe.Add(ref moveScoresRef, i) = ScoreMove(position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, oppositeSideAttacks, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -370,7 +373,7 @@ public sealed partial class Engine
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
-            int quietHistory = QuietHistoryEntry(position, move, ref evaluationContext)
+            int quietHistory = QuietHistoryEntry(move, oppositeSideAttacks)
                 + ContinuationHistoryEntry(piece, targetSquare, ply);
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
@@ -892,8 +895,10 @@ public sealed partial class Engine
             alpha = standPat;
         }
 
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, oppositeSideAttacks, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358

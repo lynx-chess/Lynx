@@ -8,19 +8,17 @@ public class GenerateBishopMovesTest
     private static IEnumerable<Move> GenerateBishopMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        return MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     private static IEnumerable<Move> GenerateBishopCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
-        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        return MoveGenerator.GenerateAllCaptures(position, oppositeSideAttacks, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

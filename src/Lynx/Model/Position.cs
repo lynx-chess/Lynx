@@ -1012,13 +1012,25 @@ public partial class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, Span<Bitboard> attacksBySide)
+    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, Bitboard attacks)
     {
-        var attacks = attacksBySide[(int)attackingSide];
+        if (attacks != 0)
+        {
+            return (attacks & squaresBitboard) != 0;
+        }
 
-        Debug.Assert(attacks != 0);
+        // Fallback: no threats
+        while (squaresBitboard != 0)
+        {
+            squaresBitboard = squaresBitboard.WithoutLS1B(out var square);
 
-        return (attacks & squaresBitboard) != 0;
+            if (IsSquareAttacked(square, attackingSide))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

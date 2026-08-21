@@ -88,33 +88,30 @@ public class QuietCaptureMoveGenerationTest
     private static Move[] GenerateKingMoves(Position position, int piece)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
         int localIndex = 0;
-        MoveGenerator.GenerateKingMoves(ref localIndex, moves, piece, position, ref evaluationContext);
+        MoveGenerator.GenerateKingMoves(ref localIndex, moves, piece, position, oppositeSideAttacks);
         return moves[..localIndex].ToArray();
     }
 
     private static Move[] GenerateQuietKingMoves(Position position, int piece)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
         int localIndex = 0;
-        MoveGenerator.GenerateQuietKingMoves(ref localIndex, moves, piece, position, ref evaluationContext);
+        MoveGenerator.GenerateQuietKingMoves(ref localIndex, moves, piece, position, oppositeSideAttacks);
         return moves[..localIndex].ToArray();
     }
 
     private static Move[] GenerateKingCaptures(Position position, int piece)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
         int localIndex = 0;
-        MoveGenerator.GenerateKingCaptures(ref localIndex, moves, piece, position, ref evaluationContext);
+        MoveGenerator.GenerateKingCaptures(ref localIndex, moves, piece, position, oppositeSideAttacks);
         return moves[..localIndex].ToArray();
     }
 
