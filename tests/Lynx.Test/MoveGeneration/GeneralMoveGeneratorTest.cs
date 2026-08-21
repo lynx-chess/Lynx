@@ -14,14 +14,13 @@ public class GeneralMoveGeneratorTest
         var originalPosition = new Position("8/8/8/k1pP3R/8/8/8/n4K2 w - c6 0 1");
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        const Bitboard oppositeSideAttacks = 0UL;
 
-        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, oppositeSideAttacks, moves).ToArray().Single(m => m.IsEnPassant());
+        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, moves).ToArray().Single(m => m.IsEnPassant());
         var positionAfterEnPassant = new Position(originalPosition);
         positionAfterEnPassant.MakeMove(enPassantMove);
 
         moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, oppositeSideAttacks, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, moves))
         {
             var newPosition = new Position(positionAfterEnPassant);
             newPosition.MakeMove(move);
@@ -41,9 +40,7 @@ public class GeneralMoveGeneratorTest
 
         Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        const Bitboard oppositeSideAttacks = 0UL;
-
-        var allMoves = MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moveSpan);
+        var allMoves = MoveGenerator.GenerateAllMoves(position, moveSpan);
 
         Assert.LessOrEqual(allMoves.Length, Constants.MaxNumberOfPseudolegalMovesInAPosition);
     }

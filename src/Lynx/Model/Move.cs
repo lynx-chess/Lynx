@@ -364,9 +364,7 @@ public static class MoveExtensions
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        // TODO calculate them?
-        const Bitboard oppositeSideAttacks = 0UL;
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves).ToArray();
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
 
 #pragma warning disable MA0029 // Combine LINQ methods
         var movesWithSameSimpleRepresentation = pseudoLegalMoves

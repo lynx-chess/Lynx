@@ -499,10 +499,7 @@ public sealed partial class Engine
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        // TODO calculate them?
-        const Bitboard oppositeSideAttacks = 0UL;
-
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, oppositeSideAttacks, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
@@ -654,7 +651,7 @@ public sealed partial class Engine
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, pseudoLegalMoves);
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves, oppositeSideAttacks);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)

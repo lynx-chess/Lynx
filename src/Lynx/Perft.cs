@@ -40,10 +40,7 @@ public static class Perft
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            // TODO calculate threats?
-            const Bitboard oppositeSideAttacks = 0UL;
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -67,10 +64,7 @@ public static class Perft
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            // TODO calculate threats?
-            const Bitboard oppositeSideAttacks = 0UL;
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 

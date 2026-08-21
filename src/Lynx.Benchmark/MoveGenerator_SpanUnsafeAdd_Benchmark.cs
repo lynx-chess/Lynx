@@ -121,7 +121,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
 
                 var movePool = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberOfPseudolegalMovesInAPosition);
-                var moves = MoveGenerator_SpanUnsafeAdd_Original.GenerateAllMoves(position, oppositeSideAttacks, movePool);
+                var moves = MoveGenerator_SpanUnsafeAdd_Original.GenerateAllMoves(position, movePool, oppositeSideAttacks);
 
                 total += moves.Length;
 
@@ -151,7 +151,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
 
                 var movePool = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberOfPseudolegalMovesInAPosition);
-                var moves = MoveGenerator_SpanUnsafeAdd_Original.GenerateAllMoves(position, oppositeSideAttacks, movePool);
+                var moves = MoveGenerator_SpanUnsafeAdd_Original.GenerateAllMoves(position, movePool, oppositeSideAttacks);
 
                 total += moves.Length;
 
@@ -196,18 +196,16 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            const Bitboard oppositeSideAttacks = 0UL;
-
             return (capturesOnly
-                ? GenerateAllCaptures(position, oppositeSideAttacks, moves)
-                : GenerateAllMoves(position, oppositeSideAttacks, moves)).ToArray();
+                ? GenerateAllCaptures(position, moves)
+                : GenerateAllMoves(position, moves)).ToArray();
         }
 
         /// <summary>
         /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<Move> GenerateAllMoves(Position position, Bitboard oppositeSideAttacks, Span<Move> movePool)
+        public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
         {
             Debug.Assert(position.Side != Side.Both);
 
@@ -230,7 +228,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<Move> GenerateAllCaptures(Position position, Bitboard oppositeSideAttacks, Span<Move> movePool)
+        public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
         {
             Debug.Assert(position.Side != Side.Both);
 
@@ -862,18 +860,16 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            const Bitboard oppositeSideAttacks = 0UL;
-
             return (capturesOnly
-                ? GenerateAllCaptures(position, oppositeSideAttacks, moves)
-                : GenerateAllMoves(position, oppositeSideAttacks, moves)).ToArray();
+                ? GenerateAllCaptures(position, moves)
+                : GenerateAllMoves(position, moves)).ToArray();
         }
 
         /// <summary>
         /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<Move> GenerateAllMoves(Position position, Bitboard oppositeSideAttacks, Span<Move> movePool)
+        public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
         {
             Debug.Assert(position.Side != Side.Both);
 
@@ -896,7 +892,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<Move> GenerateAllCaptures(Position position, Bitboard oppositeSideAttacks, Span<Move> movePool)
+        public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
         {
             Debug.Assert(position.Side != Side.Both);
 

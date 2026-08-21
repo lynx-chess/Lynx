@@ -143,9 +143,7 @@ public sealed class Game : IDisposable
 
             var moveString = rawMoves[moveRanges[i]];
 
-            // TODO calculate threats
-            const Bitboard oppositeSideAttacks = 0UL;
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, oppositeSideAttacks, movePool);
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -249,8 +247,8 @@ public sealed class Game : IDisposable
             return false;
         }
 
-        // TODO use opposideSideAttacks, might need to recalculate them from scratch since this happens after MakeMove
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)CurrentPosition.Side)];
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, oppositeSideAttacks);
     }
 
     /// <summary>
