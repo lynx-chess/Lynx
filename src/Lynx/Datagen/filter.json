@@ -1,4 +1,5 @@
 {
+  "GamesToFilter": 250000,
   "MinPly": 20,
   "MinPieces": 7,
   "MaxInitialEval": 20000,

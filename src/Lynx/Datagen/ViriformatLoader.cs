@@ -81,7 +81,7 @@ public static class ViriformatLoader
 
             PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
 
-            while (true)
+            while (stats.GameCount < (filter?.GamesToFilter ?? ulong.MaxValue))
             {
                 int firstRead = ReadFull(sourceFile, boardBufArr);
                 if (firstRead == 0)

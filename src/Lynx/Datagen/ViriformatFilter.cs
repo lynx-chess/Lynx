@@ -16,6 +16,8 @@ public class ViriformatFilter
         Win = 2,
     }
 
+    public ulong GamesToFilter { get; set; } = ulong.MaxValue;
+
     public int MinPly { get; set; }
 
     public int MinPieces { get; set; } = 4;
@@ -116,6 +118,7 @@ public class ViriformatFilter
 
     public static ViriformatFilter Unrestricted => new()
     {
+        GamesToFilter = ulong.MaxValue,
         MinPly = 0,
         MinPieces = 0,
         MaxInitialEval = uint.MaxValue,
