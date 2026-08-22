@@ -247,8 +247,7 @@ public sealed class Game : IDisposable
             return false;
         }
 
-        var oppositeSideAttacks = CurrentPosition.OppositeSideAttacks();
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, oppositeSideAttacks);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
     }
 
     /// <summary>
