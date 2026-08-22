@@ -247,7 +247,7 @@ public sealed class Game : IDisposable
             return false;
         }
 
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)CurrentPosition.Side)];
+        var oppositeSideAttacks = CurrentPosition.OppositeSideAttacks();
         return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, oppositeSideAttacks);
     }
 
