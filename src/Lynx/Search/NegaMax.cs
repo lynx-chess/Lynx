@@ -155,8 +155,7 @@ public sealed partial class Engine
 
         if (depth + depthExtension <= 0)
         {
-            var localOppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, localOppositeSideAttacks))
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
                 return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
@@ -543,7 +542,7 @@ public sealed partial class Engine
 
             int score = 0;
 
-            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition(ref evaluationContext)))
+            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition()))
             {
                 score = 0;
 
@@ -1006,7 +1005,7 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 
