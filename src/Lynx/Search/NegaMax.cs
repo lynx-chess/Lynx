@@ -284,11 +284,7 @@ public sealed partial class Engine
                     && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                     && (ttNodeType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
                 {
-                    var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
-                        + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
-                        + Math.Min(
-                            Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
-                            staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
+                    var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + (depth / Configuration.EngineSettings.NMP_DepthDivisor);
 
                     var gameState = position.MakeNullMove();
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
@@ -321,7 +317,7 @@ public sealed partial class Engine
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves, oppositeSideAttacks);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
@@ -898,7 +894,7 @@ public sealed partial class Engine
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, oppositeSideAttacks, moves);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves, oppositeSideAttacks);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -1010,7 +1006,7 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext)) // Bad captures can be pruned, so all moves need to be generated for now
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 

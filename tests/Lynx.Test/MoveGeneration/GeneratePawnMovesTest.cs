@@ -9,17 +9,15 @@ public class GeneratePawnMovesTest
     private static IEnumerable<Move> GeneratePawnMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        const Bitboard oppositeSideAttacks = 0UL;
 
-        return MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     private static IEnumerable<Move> GeneratePawnCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        const Bitboard oppositeSideAttacks = 0UL;
 
-        return MoveGenerator.GenerateAllCaptures(position, oppositeSideAttacks, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     [Test]

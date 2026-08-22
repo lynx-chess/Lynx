@@ -47,19 +47,16 @@ public static class MoveGenerator
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        // TODO calculate them
-        const Bitboard oppositeSideAttacks = 0UL;
-
         return (capturesOnly
-            ? GenerateAllCaptures(position, oppositeSideAttacks, moves)
-            : GenerateAllMoves(position, oppositeSideAttacks, moves)).ToArray();
+            ? GenerateAllCaptures(position, moves)
+            : GenerateAllMoves(position, moves)).ToArray();
     }
 
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllMoves(Position position, Bitboard oppositeSideAttacks, Span<Move> movePool)
+    public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -288,7 +285,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, Bitboard oppositeSideAttacks, Span<Move> movePool)
+    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -749,13 +746,8 @@ public static class MoveGenerator
         }
     }
 
-    // TODO
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position, ref EvaluationContext evaluationContext)
-        => CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position, Bitboard oppositeSideAttacks)
+    public static bool CanGenerateAtLeastAValidMove(Position position, Bitboard oppositeSideAttacks = 0)
     {
         Debug.Assert(position.Side != Side.Both);
 

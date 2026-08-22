@@ -98,8 +98,6 @@ public class IsPseudoLegalTest
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        const Bitboard oppositeSideAttacks = 0UL;
-
-        return MoveGenerator.GenerateAllMoves(position, oppositeSideAttacks, moves).ToArray();
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray();
     }
 }

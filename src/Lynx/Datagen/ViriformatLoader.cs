@@ -154,9 +154,7 @@ public static class ViriformatLoader
 
                     var uci = ViriformatMoveToUci(rawMove);
 
-                    // TODO calculate them
-                    const Bitboard oppositeSideAttacks = 0UL;
-                    var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, oppositeSideAttacks, movePool);
+                    var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool);
 
                     if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
                     {
