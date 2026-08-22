@@ -240,7 +240,7 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition(ref EvaluationContext evaluationContext)
+    public bool Is50MovesRepetition()
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
