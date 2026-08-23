@@ -81,7 +81,7 @@ public static class ViriformatLoader
 
             PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
 
-            while (true)
+            while (stats.GameCount < (filter?.GamesToFilter ?? ulong.MaxValue))
             {
                 int firstRead = ReadFull(sourceFile, boardBufArr);
                 if (firstRead == 0)
@@ -164,7 +164,7 @@ public static class ViriformatLoader
 
                     if (filter is not null)
                     {
-                        if(!skipGame)
+                        if (!skipGame)
                         {
                             var fen = game.FEN;
 
@@ -265,45 +265,53 @@ public static class ViriformatLoader
                 if (filter?.LimitPositionsPerGame == true && positionsPerGame > positionsToTakePerGame)
                 //()|| filter?.LimitPositionsPerPhasePerGame == true)   // If we also want to limit positions per phase in short games
                 {
-                    // Group positions by phase, and shuffle them
-                    var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
-                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
+                    if (filter.UsePhaseForSampling)
                     {
-                        // Can only happen in the first group, with promotions when all the pieces are on the board
-                        if (group.Key >= positionsByPhaseShuffled.Length)
+                        // Group positions by phase, and shuffle them
+                        var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
+                        foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
                         {
-                            positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+                            // Can only happen in the first group, with promotions when all the pieces are on the board
+                            if (group.Key >= positionsByPhaseShuffled.Length)
+                            {
+                                positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+                            }
+
+                            var positions = group.ToArray();
+                            Random.Shared.Shuffle(positions);
+                            positionsByPhaseShuffled[group.Key] = positions;
                         }
 
-                        var positions = group.ToArray();
-                        Random.Shared.Shuffle(positions);
-                        positionsByPhaseShuffled[group.Key] = positions;
-                    }
+                        selectedPositionsPerGame = new PositionTuple[positionsToTakePerGame];
 
-                    selectedPositionsPerGame = new PositionTuple[positionsToTakePerGame];
-
-                    selectedPositionsCount = 0;
-                    int positionIndexPerPhase = 1;
+                        selectedPositionsCount = 0;
+                        int positionIndexPerPhase = 1;
 #pragma warning disable RCS1239 // Use 'for' statement instead of 'while' statement
-                    while (selectedPositionsCount < positionsToTakePerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
-                    {
-                        foreach (var group in positionsByPhaseShuffled)
+                        while (selectedPositionsCount < positionsToTakePerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
                         {
-                            if (group is not null && group.Length >= positionIndexPerPhase)
+                            foreach (var group in positionsByPhaseShuffled)
                             {
-                                selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
-                                selectedPositionsCount++;
-
-                                if (selectedPositionsCount == positionsToTakePerGame)
+                                if (group is not null && group.Length >= positionIndexPerPhase)
                                 {
-                                    break;
+                                    selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
+                                    selectedPositionsCount++;
+
+                                    if (selectedPositionsCount == positionsToTakePerGame)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        positionIndexPerPhase++;
-                    }
+                            positionIndexPerPhase++;
+                        }
 #pragma warning restore RCS1239 // Use 'for' statement instead of 'while' statement
+                    }
+                    else
+                    {
+                        Random.Shared.Shuffle(selectedPositionsPerGame);
+                        selectedPositionsCount = positionsToTakePerGame;
+                    }
 
                     selectedPositionsPerGame = selectedPositionsPerGame[..selectedPositionsCount];
                 }

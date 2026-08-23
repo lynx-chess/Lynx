@@ -240,16 +240,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition(ref EvaluationContext evaluationContext)
+    public bool Is50MovesRepetition()
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        // TODO use opposideSideAttacks, might need to recalculate them from scratch since this happens after MakeMove
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)CurrentPosition.Side)];
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, oppositeSideAttacks);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
     }
 
     /// <summary>
