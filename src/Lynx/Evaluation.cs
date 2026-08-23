@@ -448,6 +448,13 @@ public partial class Position
                 }
             }
         }
+        else if ((gamePhase == 6)
+            && (totalPawnsCount != 0)
+            && (((eval > 0) && (_pieceBitboards[(int)Piece.Q] != 0) && (_pieceBitboards[(int)Piece.r] != 0) && (_pieceBitboards[(int)Piece.p] != 0))
+                || ((eval < 0) && (_pieceBitboards[(int)Piece.q] != 0) && (_pieceBitboards[(int)Piece.R] != 0) && (_pieceBitboards[(int)Piece.P] != 0))))
+        {
+            eval >>= 1; // /2
+        }
 
         // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
