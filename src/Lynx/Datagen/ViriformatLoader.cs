@@ -346,6 +346,11 @@ public static class ViriformatLoader
                     var ms = sw.ElapsedMilliseconds;
                     _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * (ulong)stats.GameCount / (ulong)ms);
                 }
+
+                if(stats.GameCount >= 1_000_602)
+                {
+                    break;
+                }
             }
         }
         catch (Exception e)
