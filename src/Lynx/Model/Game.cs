@@ -52,7 +52,7 @@ public sealed class Game : IDisposable
         PositionBeforeLastSearch = new Position(CurrentPosition);
 
 #if DEBUG
-        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+        MoveHistory = [with(Constants.MaxNumberMovesInAGame)];
 #endif
     }
 
@@ -128,9 +128,6 @@ public sealed class Game : IDisposable
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
         FullMoves = parsedFen.FullMoveCounter;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         // Number of potential half-moves provided in the string
@@ -145,7 +142,8 @@ public sealed class Game : IDisposable
             }
 
             var moveString = rawMoves[moveRanges[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -242,14 +240,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition(ref EvaluationContext evaluationContext)
+    public bool Is50MovesRepetition()
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
     }
 
     /// <summary>

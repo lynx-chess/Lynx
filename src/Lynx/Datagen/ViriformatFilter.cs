@@ -18,6 +18,11 @@ public class ViriformatFilter
 
     public int MinPly { get; set; }
 
+    /// <summary>
+    /// Minimum ply (half-moves) for a game to be considered
+    /// </summary>
+    public int MinGamePly { get; set; }
+
     public int MinPieces { get; set; } = 4;
 
     /// <summary>
@@ -59,6 +64,11 @@ public class ViriformatFilter
     /// Maximum number of positions to keep per phase per game. If LimitPositionsPerPhasePerGame is false, this value is ignored.
     /// </summary>
     public int MaxPositionsPerPhasePerGame { get; set; } = MaxNumberOfPositionsPerGame;
+
+    /// <summary>
+    /// Use phase to decide with positions to include in a game.
+    /// </summary>
+    public bool UsePhaseForSampling { get; set; }
 
     public bool DrawAdjudication { get; set; }
 
@@ -107,11 +117,14 @@ public class ViriformatFilter
 
     public double WdlHeuristicScale { get; set; } = 1.5;
 
+    public ulong GamesToFilter { get; set; } = ulong.MaxValue;
+
     #endregion
 
     public static ViriformatFilter Unrestricted => new()
     {
         MinPly = 0,
+        MinGamePly = 0,
         MinPieces = 0,
         MaxInitialEval = uint.MaxValue,
         MaxEval = uint.MaxValue,
@@ -121,8 +134,10 @@ public class ViriformatFilter
         MaxEvalIncorrectness = uint.MaxValue,
         LimitPositionsPerGame = false,
         MaxPositionsPerGame = MaxNumberOfPositionsPerGame,
+        MinPositionsPerGame = 0,
         LimitPositionsPerPhasePerGame = false,
         MaxPositionsPerPhasePerGame = MaxNumberOfPositionsPerGame,
+        UsePhaseForSampling = false,
         DrawAdjudication = false,
         DrawAdjudication_Score = 0,
         DrawAdjudication_MoveCount = Constants.MaxNumberMovesInAGame,
@@ -141,6 +156,7 @@ public class ViriformatFilter
         WdlHeuristicScale = 1.0,
         MaterialCountFiltered = false,
         MaterialCountProbabilities = [],
+        GamesToFilter = ulong.MaxValue,
     };
 
     // Compute FilterWDL model probabilities (win, draw, loss) mirroring the Rust implementation.

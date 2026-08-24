@@ -320,12 +320,12 @@ public sealed class Searcher : IDisposable
 
         SearchResult? finalSearchResult = null;
 
-#pragma warning disable MA0040 // Forward the CancellationToken parameter to methods that take one
+#pragma warning disable MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
         var tasks = _extraEngines
             .Select(engine =>
                 Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
             .ToArray();
-#pragma warning restore MA0040 // Forward the CancellationToken parameter to methods that take one
+#pragma warning restore MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
 
 #if MULTITHREAD_DEBUG
         _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -721,11 +721,7 @@ public sealed class Searcher : IDisposable
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             Span<Move> legalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            Span<Bitboard> evalContextBuffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(evalContextBuffer);
-
-            position.CalculateThreats(ref evaluationContext);
-            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
             // Filter out pseudolegal but not-legal moves
             int legalMovesCount = 0;
@@ -756,8 +752,7 @@ public sealed class Searcher : IDisposable
                 {
                     var gameState = position.MakeMove(randomMove);
 
-                    position.CalculateThreats(ref evaluationContext);
-                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position);
 
                     position.UnmakeMove(randomMove, gameState);
 
@@ -825,8 +820,7 @@ public sealed class Searcher : IDisposable
 
                         var gameState = position.MakeMove(randomMove);
 
-                        position.CalculateThreats(ref evaluationContext);
-                        var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+                        var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position);
 
                         position.UnmakeMove(randomMove, gameState);
 
