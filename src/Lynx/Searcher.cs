@@ -721,11 +721,7 @@ public sealed class Searcher : IDisposable
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             Span<Move> legalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-            Span<Bitboard> evalContextBuffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(evalContextBuffer);
-
-            position.CalculateThreats(ref evaluationContext);
-            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves);
+            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
             // Filter out pseudolegal but not-legal moves
             int legalMovesCount = 0;
@@ -756,8 +752,7 @@ public sealed class Searcher : IDisposable
                 {
                     var gameState = position.MakeMove(randomMove);
 
-                    position.CalculateThreats(ref evaluationContext);
-                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position);
 
                     position.UnmakeMove(randomMove, gameState);
 
@@ -825,8 +820,7 @@ public sealed class Searcher : IDisposable
 
                         var gameState = position.MakeMove(randomMove);
 
-                        position.CalculateThreats(ref evaluationContext);
-                        var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position, ref evaluationContext);
+                        var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position);
 
                         position.UnmakeMove(randomMove, gameState);
 

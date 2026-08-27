@@ -364,10 +364,7 @@ public static class MoveExtensions
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray();
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
 
 #pragma warning disable MA0029 // Combine LINQ methods
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
