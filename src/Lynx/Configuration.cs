@@ -547,7 +547,7 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_Book_MinMoves { get; set; } = 1;
 
-    public int Datagen_GenFens_Book_MaxMoves { get; set; } = 4;
+    public int Datagen_GenFens_Book_MaxMoves { get; set; } = 6;
 
     public bool Datagen_VFtoEPD_EmptyLineBetweenGames { get; set; }
 
