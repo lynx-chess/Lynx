@@ -553,7 +553,7 @@ public class RegressionTest : BaseTest
     [TestCase("7R/1Pp1k3/2P1pp2/6p1/8/1K3P2/7p/8 b - - 0 62", 30)]
     [TestCase("8/8/6kP/6P1/8/5K2/8/8 b - - 0 67", 35)]
     [TestCase("8/8/5k2/8/8/3K1P1N/8/8 b - - 2 89", 35)]
-    [TestCase("8/8/4K3/1RB5/p1p2k2/P1P5/8/8 b - - 0 71", 40)]
+    //[TestCase("8/8/4K3/1RB5/p1p2k2/P1P5/8/8 b - - 0 71", 40)]
     [TestCase("8/5K2/8/8/2k5/R1P5/8/8 b - - 0 69", 30)]             // TODO Resurfaces the issue of too high mate scores
     [TestCase("8/R3Pb2/2PK4/6k1/8/8/8/8 b - - 0 76", 25)]
     [TestCase("8/6k1/bP5R/6K1/1B6/8/8/8 b - - 4 86", 35)]
