@@ -65,6 +65,11 @@ public class ViriformatFilter
     /// </summary>
     public int MaxPositionsPerPhasePerGame { get; set; } = MaxNumberOfPositionsPerGame;
 
+    /// <summary>
+    /// Use phase to decide with positions to include in a game.
+    /// </summary>
+    public bool UsePhaseForSampling { get; set; }
+
     public bool DrawAdjudication { get; set; }
 
     public uint DrawAdjudication_Score { get; set; } = uint.MaxValue;
@@ -112,6 +117,8 @@ public class ViriformatFilter
 
     public double WdlHeuristicScale { get; set; } = 1.5;
 
+    public ulong GamesToFilter { get; set; } = ulong.MaxValue;
+
     #endregion
 
     public static ViriformatFilter Unrestricted => new()
@@ -127,8 +134,10 @@ public class ViriformatFilter
         MaxEvalIncorrectness = uint.MaxValue,
         LimitPositionsPerGame = false,
         MaxPositionsPerGame = MaxNumberOfPositionsPerGame,
+        MinPositionsPerGame = 0,
         LimitPositionsPerPhasePerGame = false,
         MaxPositionsPerPhasePerGame = MaxNumberOfPositionsPerGame,
+        UsePhaseForSampling = false,
         DrawAdjudication = false,
         DrawAdjudication_Score = 0,
         DrawAdjudication_MoveCount = Constants.MaxNumberMovesInAGame,
@@ -147,6 +156,7 @@ public class ViriformatFilter
         WdlHeuristicScale = 1.0,
         MaterialCountFiltered = false,
         MaterialCountProbabilities = [],
+        GamesToFilter = ulong.MaxValue,
     };
 
     // Compute FilterWDL model probabilities (win, draw, loss) mirroring the Rust implementation.
