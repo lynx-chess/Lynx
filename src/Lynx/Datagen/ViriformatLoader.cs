@@ -330,10 +330,6 @@ public static class ViriformatLoader
                     var totalMoves = game.FullMoves;
                     if (totalMoves < stats.ShortestGameMoveCount)
                     {
-                        if (totalMoves < 5)
-                        {
-                            break;
-                        }
                         stats.ShortestGameMoveCount = totalMoves;
 
                         if (totalMoves <= 5)
