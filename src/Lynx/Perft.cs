@@ -34,16 +34,13 @@ public static class Perft
     /// Proper implementation, used by <see cref="DivideImpl(Position, int, long, Action{string})"/> as well
     /// </summary>
     [SkipLocalsInit]
-    internal static long PerftRecursiveImpl(Position position, int depth, long nodes)
+    unsafe internal static long PerftRecursiveImpl(Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(buffer);
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -61,16 +58,13 @@ public static class Perft
     }
 
     [SkipLocalsInit]
-    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
+    unsafe private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
     {
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(buffer);
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 

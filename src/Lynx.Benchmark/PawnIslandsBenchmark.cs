@@ -187,7 +187,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Original_SkipLocalsInit(Bitboard pawns)
+    unsafe private static int Original_SkipLocalsInit(Bitboard pawns)
     {
         const int n = 1;
 

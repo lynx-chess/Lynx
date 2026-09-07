@@ -1012,10 +1012,8 @@ public partial class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, ref EvaluationContext evaluationContext)
+    public bool AreSquaresAttacked(ulong squaresBitboard, Side attackingSide, Bitboard attacks)
     {
-        var attacks = evaluationContext.AttacksBySide[(int)attackingSide];
-
         if (attacks != 0)
         {
             return (attacks & squaresBitboard) != 0;

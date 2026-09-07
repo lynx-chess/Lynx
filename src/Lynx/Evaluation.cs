@@ -962,6 +962,30 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Bitboard OppositeSideAttacks()
+    {
+        Bitboard oppositeSideAttacks = 0;
+
+        var occupancy = _occupancyBitboards[(int)Side.Both];
+
+        var oppositeSideOffset = Utils.PieceOffset(Utils.OppositeSide((int)_side));
+
+        for (int pieceIndex = (int)Piece.P + oppositeSideOffset; pieceIndex <= (int)Piece.K + oppositeSideOffset; ++pieceIndex)
+        {
+            var board = _pieceBitboards[pieceIndex];
+            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
+
+            while (board != 0)
+            {
+                board = board.WithoutLS1B(out var square);
+                oppositeSideAttacks |= attacks(square, occupancy);
+            }
+        }
+
+        return oppositeSideAttacks;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Threats(EvaluationContext evaluationContext, Side side, int oppositeSide)
     {
         var occupancy = OccupancyBitboards[(int)Side.Both];

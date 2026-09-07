@@ -82,11 +82,10 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private short QuietHistoryEntry(Move move, Bitboard oppositeSideAttacks)
     {
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
         Debug.Assert(oppositeSideAttacks != 0);
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
@@ -554,9 +553,11 @@ public sealed partial class Engine
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
 
+            var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
+               MoveGenerator.GenerateAllMoves(position, movePool, oppositeSideAttacks),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";

@@ -15,9 +15,11 @@ public static class ViriformatLoader
     {
         public ulong GameCount;
 
-        public ulong PositonsCount;
+        public ulong SelectedGamesCount;
 
-        public ulong FilteredPositionsCount;
+        public ulong PositionsCount;
+
+        public ulong SelectedPositionsCount;
 
         public int ShortestGameMoveCount;
 
@@ -35,19 +37,20 @@ public static class ViriformatLoader
         {
             _logger.Warn("Source file: {Path}", path);
             _logger.Warn("Total games: {GameCount}", GameCount);
-            _logger.Warn("Total positions: {PositonsCount}", PositonsCount);
-            _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", FilteredPositionsCount, PositonsCount > 0 ? (100 * FilteredPositionsCount / (double)PositonsCount).ToString("F2") : "0");
-            _logger.Warn("Positions/game: {PositonsPerGameCount}", GameCount > 0 ? (ulong)Math.Round(FilteredPositionsCount / (double)GameCount) : 0);
+            _logger.Warn("Games after filtering: {PositonsCount} ({SelectedGamesCountPercentage}%)", SelectedGamesCount, GameCount > 0 ? (100 * SelectedGamesCount / (double)GameCount).ToString("F2") : "0");
+            _logger.Warn("Total positions: {PositonsCount}", PositionsCount);
+            _logger.Warn("Positions after filtering: {FilteredPositionsCount} ({FilteredPositionsPercentage}%)", SelectedPositionsCount, PositionsCount > 0 ? (100 * SelectedPositionsCount / (double)PositionsCount).ToString("F2") : "0");
+            _logger.Warn("Positions/game: {PositonsPerGameCount}", SelectedGamesCount > 0 ? (ulong)Math.Round(SelectedPositionsCount / (double)SelectedGamesCount) : 0);
             _logger.Warn("Shortest game: {ShortestGameMoves} moves, longest game: {LongestGameMoves} moves", ShortestGameMoveCount, LongestGameMoveCount);
 
             if (GamesAdjudicatedAsDrawsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} potential positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / GameCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
+                _logger.Warn("Games adjudicated as a draw: {DrawsAdj} ({DrawsAdjPercentage}%, {PositionsSavedByDrawAdjudicationCount} potential positions saved)", GamesAdjudicatedAsDrawsCount, (100 * GamesAdjudicatedAsDrawsCount / SelectedGamesCount).ToString("F2"), PositionsSavedByDrawAdjudicationCount);
             }
 
             if (GamesAdjudicatedAsWinsCount != 0)
             {
-                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} potential positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / GameCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
+                _logger.Warn("Games adjudicated as a win: {WinsAdj} ({WinsAdjPercentage}%, {PositionsSavedByWinAdjudicationCount} potential positions saved)", GamesAdjudicatedAsWinsCount, (100 * GamesAdjudicatedAsWinsCount / SelectedGamesCount).ToString("F2"), PositionsSavedByWinAdjudicationCount);
             }
 
             _logger.Warn("Total time: {Time}", Utils.TimeToString(elapsedMilliseconds));
@@ -76,12 +79,11 @@ public static class ViriformatLoader
             byte[] pairBufArr = new byte[4];
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evalCtx = new EvaluationContext(buffer);
-
             PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
 
-            while (true)
+            long lastSampledTime = 0;
+
+            while (stats.GameCount < (filter?.GamesToFilter ?? ulong.MaxValue))
             {
                 int firstRead = ReadFull(sourceFile, boardBufArr);
                 if (firstRead == 0)
@@ -106,7 +108,7 @@ public static class ViriformatLoader
 
                 using var game = new Game(parsedFEN);
 
-                var rng = new Random();
+                var rng = new Random(sourceFile.GetHashCode());
                 var ply = game.Ply;
                 var initialFEN = game.FEN;
                 var isFirstGameMove = true;
@@ -154,9 +156,7 @@ public static class ViriformatLoader
 
                     var uci = ViriformatMoveToUci(rawMove);
 
-                    // Reset evaluation context before generating moves (we reuse the same buffer)
-                    evalCtx.Reset();
-                    var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, ref evalCtx, movePool);
+                    var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool);
 
                     if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
                     {
@@ -166,7 +166,7 @@ public static class ViriformatLoader
 
                     if (filter is not null)
                     {
-                        if(!skipGame)
+                        if (!skipGame)
                         {
                             var fen = game.FEN;
 
@@ -217,7 +217,7 @@ public static class ViriformatLoader
                             if (!skipGame)
                             {
                                 // Generic filter
-                                var filteredOut = filter.ShouldDrop(move!.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
+                                var filteredOut = filter.ShouldDrop(move.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
                                 if (!filteredOut)
                                 {
                                     validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
@@ -244,11 +244,19 @@ public static class ViriformatLoader
                         }
                     }
 
-                    game.MakeMove(move!.Value);
+                    game.MakeMove(move.Value);
 
                     isFirstGameMove = false;
-                    ++stats.PositonsCount;
+                    ++stats.PositionsCount;
                     ++ply;
+                }
+
+                // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
+                ++stats.GameCount;
+
+                if (ply < filter?.MinGamePly)
+                {
+                    continue;
                 }
 
                 var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
@@ -257,42 +265,52 @@ public static class ViriformatLoader
                 if (filter?.LimitPositionsPerGame == true && positionsPerGame > positionsToTakePerGame)
                 //()|| filter?.LimitPositionsPerPhasePerGame == true)   // If we also want to limit positions per phase in short games
                 {
-                    // Group positions by phase, and shuffle them
-                    var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
-                    foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
+                    if (filter.UsePhaseForSampling)
                     {
-                        // Can only happen in the first group, with promotions when all the pieces are on the board
-                        if (group.Key >= positionsByPhaseShuffled.Length)
+                        // Group positions by phase, and shuffle them
+                        var positionsByPhaseShuffled = new PositionTuple[24 + 1][];
+                        foreach (var group in selectedPositionsPerGame.GroupBy(tup => tup.Phase).OrderByDescending(t => t.Key))
                         {
-                            positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+                            // Can only happen in the first group, with promotions when all the pieces are on the board
+                            if (group.Key >= positionsByPhaseShuffled.Length)
+                            {
+                                positionsByPhaseShuffled = new PositionTuple[group.Key + 1][];
+                            }
+
+                            var positions = group.ToArray();
+                            Random.Shared.Shuffle(positions);
+                            positionsByPhaseShuffled[group.Key] = positions;
                         }
 
-                        var positions = group.ToArray();
-                        Random.Shared.Shuffle(positions);
-                        positionsByPhaseShuffled[group.Key] = positions;
-                    }
+                        selectedPositionsPerGame = new PositionTuple[positionsToTakePerGame];
 
-                    selectedPositionsPerGame = new PositionTuple[positionsToTakePerGame];
-
-                    selectedPositionsCount = 0;
-                    int positionIndexPerPhase = 1;
-                    while (selectedPositionsCount < positionsToTakePerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
-                    {
-                        foreach (var group in positionsByPhaseShuffled)
+                        selectedPositionsCount = 0;
+                        int positionIndexPerPhase = 1;
+#pragma warning disable RCS1239 // Use 'for' statement instead of 'while' statement
+                        while (selectedPositionsCount < positionsToTakePerGame && positionIndexPerPhase <= filter.MaxPositionsPerPhasePerGame)
                         {
-                            if (group is not null && group.Length >= positionIndexPerPhase)
+                            foreach (var group in positionsByPhaseShuffled)
                             {
-                                selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
-                                selectedPositionsCount++;
-
-                                if (selectedPositionsCount == positionsToTakePerGame)
+                                if (group is not null && group.Length >= positionIndexPerPhase)
                                 {
-                                    break;
+                                    selectedPositionsPerGame[selectedPositionsCount] = group[positionIndexPerPhase - 1];
+                                    selectedPositionsCount++;
+
+                                    if (selectedPositionsCount == positionsToTakePerGame)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        positionIndexPerPhase++;
+                            positionIndexPerPhase++;
+                        }
+#pragma warning restore RCS1239 // Use 'for' statement instead of 'while' statement
+                    }
+                    else
+                    {
+                        Random.Shared.Shuffle(selectedPositionsPerGame);
+                        selectedPositionsCount = positionsToTakePerGame;
                     }
 
                     selectedPositionsPerGame = selectedPositionsPerGame[..selectedPositionsCount];
@@ -303,38 +321,43 @@ public static class ViriformatLoader
                     outputFile.WriteLine($"{selectedFEN}; {selectedEval}; [{gameResult}]");
                 }
 
-                stats.FilteredPositionsCount += (ulong)selectedPositionsPerGame.Length;
+                stats.SelectedPositionsCount += (ulong)selectedPositionsPerGame.Length;
 
-                var totalMoves = game.FullMoves;
-                if (totalMoves < stats.ShortestGameMoveCount)
+                if (selectedPositionsPerGame.Length > 0)
                 {
-                    stats.ShortestGameMoveCount = totalMoves;
+                    ++stats.SelectedGamesCount;
 
-                    if (totalMoves <= 5)
+                    var totalMoves = game.FullMoves;
+                    if (totalMoves < stats.ShortestGameMoveCount)
                     {
-                        _logger.Warn(initialFEN + " -> " + game.FEN);
+                        stats.ShortestGameMoveCount = totalMoves;
+
+                        if (totalMoves <= 5)
+                        {
+                            _logger.Warn(initialFEN + " -> " + game.FEN);
+                        }
+                    }
+
+                    if (totalMoves > stats.LongestGameMoveCount)
+                    {
+                        stats.LongestGameMoveCount = totalMoves;
+                    }
+
+                    // Empty line between games
+                    if (Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
+                    {
+                        outputFile.WriteLine();
                     }
                 }
-
-                if (totalMoves > stats.LongestGameMoveCount)
-                {
-                    stats.LongestGameMoveCount = totalMoves;
-                }
-
-                // Empty line between games
-                if (Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
-                {
-                    outputFile.WriteLine();
-                }
-
-                // _logger.Debug("Loaded game {0} from startpos {1} with {2} move scores", gameCount, fen, scores.Count);
-                ++stats.GameCount;
 
                 const int SampleRate = 10_000;
                 if (stats.GameCount % SampleRate == 0)
                 {
-                    var ms = sw.ElapsedMilliseconds;
-                    _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * (ulong)stats.GameCount / (ulong)ms);
+                    var elapsedTime = sw.ElapsedMilliseconds;
+                    var ms = elapsedTime - lastSampledTime;
+                    _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * SampleRate / (ulong)ms);
+
+                    lastSampledTime = elapsedTime;
                 }
             }
         }
@@ -523,7 +546,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs][0]));
             }
         }
         // White queenside
@@ -536,7 +559,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToUpperInvariant(Constants.Coordinates[rs][0]));
             }
         }
 
@@ -550,7 +573,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs][0]));
             }
         }
 
@@ -564,7 +587,7 @@ public static class ViriformatLoader
             }
             else
             {
-                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs]![0]));
+                castlingSb.Append(char.ToLowerInvariant(Constants.Coordinates[rs][0]));
             }
         }
 

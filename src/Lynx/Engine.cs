@@ -13,7 +13,7 @@ public sealed partial class Engine : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly int _id;
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly ITranspositionTable _tt;
+    private readonly TranspositionTable _tt;
     private SearchConstraints _searchConstraints;
 
     private bool _disposedValue;
@@ -31,11 +31,11 @@ public sealed partial class Engine : IDisposable
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
 #pragma warning disable EPS09 // Pass an argument for an 'in' parameter explicitly
-    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, TranspositionTableFactory.Create()) { }
+    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
 #pragma warning restore EPS09 // Pass an argument for an 'in' parameter explicitly
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in ITranspositionTable tt)
+    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
@@ -155,20 +155,20 @@ public sealed partial class Engine : IDisposable
 
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS(isPondering, jointCts.Token)!;
+            return IDDFS(isPondering, jointCts.Token);
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         var cancellationToken = jointCts.Token;
-#pragma warning disable MA0040 // Forward the CancellationToken parameter to methods that take one
+#pragma warning disable MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove, cancellationToken),
                 Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken)),
             };
-#pragma warning restore MA0040 // Forward the CancellationToken parameter to methods that take one
+#pragma warning restore MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
 
         var resultList = await Task.WhenAll(tasks);
         var searchResult = resultList[1];

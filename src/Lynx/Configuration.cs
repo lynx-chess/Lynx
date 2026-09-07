@@ -117,6 +117,11 @@ public sealed class EngineSettings
     public bool SoftNodes { get; set; }
 
     /// <summary>
+    /// Torch concept: doing fudging soft-nodes during datagen
+    /// </summary>
+    public int SoftNodeFudging { get; set; }
+
+    /// <summary>
     /// Real NPS aren't calculated until the last search command.
     /// This option enables the report of an NPS estimation by the main thread
     /// </summary>
@@ -288,15 +293,10 @@ public sealed class EngineSettings
     public int NMP_Margin { get; set; } = +30;
 
     [SPSA<int>(enabled: false)]
-    public int NMP_BaseDepthReduction { get; set; } = 2;
-
-#pragma warning disable CA1805 // Do not initialize unnecessarily
-    [SPSA<int>(enabled: false)]
-    public int NMP_DepthIncrement { get; set; } = 0;
-#pragma warning restore CA1805 // Do not initialize unnecessarily
+    public int NMP_BaseDepthReduction { get; set; } = 5;
 
     [SPSA<int>(enabled: false)]
-    public int NMP_DepthDivisor { get; set; } = 3;
+    public int NMP_DepthDivisor { get; set; } = 5;
 
     [SPSA<int>(50, 350, 15)]
     public int NMP_StaticEvalBetaDivisor { get; set; } = 82;
@@ -429,9 +429,10 @@ public sealed class EngineSettings
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveValue"/>
+    /// Actual corrections get divided by <see cref="EvaluationConstants.CorrectionHistoryScale"/>
     /// </summary>
     [SPSA<int>(enabled: false)]
-    public int CorrHistory_MaxValue { get; set; } = 8_192;
+    public int CorrHistory_MaxValue { get; set; } = 16_384;
 
     /// <summary>
     /// Initial value same as <see cref="History_MaxMoveRawBonus"/>
@@ -528,7 +529,25 @@ public sealed class EngineSettings
 
     public int Datagen_GenFens_MaxEval { get; set; } = 1000;
 
+    public bool Datagen_GenFens_UsePieceProbabilities { get; set; }
+
+    public int Datagen_GenFens_PieceProbabilities_Pawns { get; set; } = 40;
+
+    public int Datagen_GenFens_PieceProbabilities_Knights { get; set; } = 60;
+
+    public int Datagen_GenFens_PieceProbabilities_Bishops { get; set; } = 80;
+
+    public int Datagen_GenFens_PieceProbabilities_Rooks { get; set; } = 85;
+
+    public int Datagen_GenFens_PieceProbabilities_Queen { get; set; } = 95;
+
     public int Datagen_GenFens_MinHardTimeBound { get; set; } = 1000;
+
+    public int Datagen_GenFens_NoBook_BaseMoves { get; set; } = 8;
+
+    public int Datagen_GenFens_Book_MinMoves { get; set; } = 1;
+
+    public int Datagen_GenFens_Book_MaxMoves { get; set; } = 4;
 
     public bool Datagen_VFtoEPD_EmptyLineBetweenGames { get; set; }
 
