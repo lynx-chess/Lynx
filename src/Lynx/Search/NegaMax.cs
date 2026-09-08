@@ -731,13 +731,13 @@ public sealed partial class Engine
 
                     var historyDepth = depth;
 
+                    if (staticEval <= alpha)
+                    {
+                        ++historyDepth;
+                    }
+
                     if (!isInCheck)
                     {
-                        if (staticEval <= alpha)
-                        {
-                            ++historyDepth;
-                        }
-
                         // Suggestion by Sirius author
                         if (bestScore >= beta + Configuration.EngineSettings.History_BestScoreBetaMargin)
                         {
