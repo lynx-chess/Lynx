@@ -11,17 +11,19 @@ namespace Lynx.Model;
 /// Transposition table based on Hezium.Memory.BigArray
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly struct TranspositionTable
+public struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly BigArray<TranspositionTableElement> _tt = [];
 
+    public int Age { get; private set; }
+
     public int RequestedSizeMBs { get; }
 
     public int SizeMBs { get; }
 
-    public ulong Length => (ulong)_tt.Length;
+    public readonly ulong Length => (ulong)_tt.Length;
 
     public TranspositionTable()
     {
@@ -58,6 +60,12 @@ public readonly struct TranspositionTable
         _logger.Info("TT allocation time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
+    public void BumpAge()
+    {
+        // Circular buffer
+        Age = (Age + 1) % TranspositionTableElement.MaxAge;
+    }
+
     /// <summary>
     /// Checks the transposition table and, if there's an eval value that can be deducted from it
     /// for a previously recorded position, it's returned. Returns false otherwise.
@@ -68,7 +76,7 @@ public readonly struct TranspositionTable
     /// <param name="result">The probe result if found</param>
     /// <returns>True if a valid entry was found, false otherwise</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result)
+    public readonly bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result)
     {
         ref readonly var entry = ref GetTTEntryReadonly(position, halfMovesWithoutCaptureOrPawnMove);
 
@@ -102,7 +110,7 @@ public readonly struct TranspositionTable
     /// <param name="wasPv">Whether this position was part of the principal variation</param>
     /// <param name="move">Best move found (null for fail-low nodes)</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
+    public readonly void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
         Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overridden");
 
@@ -112,9 +120,14 @@ public readonly struct TranspositionTable
 
         var wasPvInt = wasPv ? 1 : 0;
 
+        // This calculation allows to account for the circular buffer, i.e. with Age being back to 0 and entry.Age being 29, delta is +3 instead of -3
+        // Comparing ageDelta > 0 is equivalent to Age != entry.Age, but it also allows more detailed comparisons
+        var ageDelta = (Age - entry.Age + TranspositionTableElement.MaxAge + 1) & TranspositionTableElement.MaxAge;
+
         bool shouldReplace =
             entry.Key != newKey                 // Different key: collision or no actual entry
             || nodeType == NodeType.Exact       // Entering PV data
+            || ageDelta > Configuration.EngineSettings.TTReplacement_AgeOffset          // High age diff
             || depth                            // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
                     + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
@@ -129,7 +142,7 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, Age);
     }
 
     /// <summary>
@@ -140,18 +153,18 @@ public readonly struct TranspositionTable
     /// <param name="staticEval">Static evaluation of the position</param>
     /// <param name="wasPv">Whether this position was part of the principal variation</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
+    public readonly void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
         ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null);
+        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, Age);
     }
 
     /// <summary>
     /// Multithreaded clearing of the transposition table
     /// </summary>
-    public void Clear()
+    public readonly void Clear()
     {
         var threadCount = Configuration.EngineSettings.Threads;
 
@@ -178,7 +191,7 @@ public readonly struct TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    public readonly void PrefetchTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         if (Sse.IsSupported)
         {
@@ -216,7 +229,7 @@ public readonly struct TranspositionTable
     /// Get a reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref TranspositionTableElement GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    private readonly ref TranspositionTableElement GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[(nint)ttIndex];
@@ -226,7 +239,7 @@ public readonly struct TranspositionTable
     /// Get a readonly reference to a transposition table entry for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref readonly TranspositionTableElement GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    private readonly ref readonly TranspositionTableElement GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
         return ref _tt[(nint)ttIndex];
@@ -266,7 +279,7 @@ public readonly struct TranspositionTable
     /// <summary>
     /// Exact transposition table occupancy per mill (0-1000)
     /// </summary>
-    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)_tt.Length));
+    public readonly int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)_tt.Length));
 
     /// <summary>
     /// Orders of magnitude faster than <see cref="HashfullPermill"/>
@@ -325,10 +338,10 @@ public readonly struct TranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal ref TranspositionTableElement Get(int index) => ref _tt[index];
+    internal readonly ref TranspositionTableElement Get(int index) => ref _tt[index];
 
     [Conditional("DEBUG")]
-    private void Stats()
+    private readonly void Stats()
     {
         ulong items = 0;
         for (int i = 0; i < _tt.Length; ++i)
