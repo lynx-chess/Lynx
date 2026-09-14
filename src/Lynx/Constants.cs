@@ -639,6 +639,9 @@ public static class Constants
     public const int ContinuationCorrHistoryHashSize = 16_384;
     public const int ContinuationCorrHistoryHashMask = ContinuationCorrHistoryHashSize - 1;
 
+    public const int LastMoveCorrHistoryHashSize = 16_384;
+    public const int LastMoveCorrHistoryHashMask = ContinuationCorrHistoryHashSize - 1;
+
     public const string NumberWithSignFormat = "+#;-#;0";
 }
 
