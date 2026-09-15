@@ -359,7 +359,7 @@ public sealed class EngineSettings
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
 
     [SPSA<int>(1, 8192, 410)]
-    public int LMP_QuietHistoryDivisor { get; set; } = 6144;
+    public int LMP_QuietHistoryDivisor { get; set; } = 3072;
 
     [SPSA<int>(enabled: false)]
     public int History_MaxMoveValue { get; set; } = 8_192;
