@@ -154,7 +154,7 @@ public static class ViriformatLoader
                         break;
                     }
 
-                    var uci = ViriformatMoveToUci(rawMove);
+                    var uci = ViriformatMoveToUci(game.CurrentPosition, rawMove);
 
                     var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool);
 
@@ -613,17 +613,41 @@ public static class ViriformatLoader
         };
     }
 
-    private static string ViriformatMoveToUci(ushort raw)
+    /// <summary>
+    ///    VF move bits        Hexadecimal
+    /// 0000 0000 0011 1111                     Source square (0-63)
+    /// 0000 1111 1100 0000                     Target square (0-63)
+    /// 0011 0000 0000 0000                     Promoted piece (N=1, B=1, R=2, Q=3)
+    /// 0100 0000 0000 0000     0x40000         En-passant flag
+    /// 1000 0000 0000 0000     0x80000         Castling flag
+    /// 1100 0000 0000 0000     0xC000          Promotion flag
+    /// </summary>
+    private static string ViriformatMoveToUci(Position position, ushort raw)
     {
-        // Bits: low 6 bits = from, next 6 bits = to, promo bits at 12..13, promo flag at high bits
+        const int EnPassantFlag = 0x4000;
+        const int CastlingFlag = 0x8000;
+        const int PromotionFlag = 0xC000;
+
         int from = raw & 0b11_1111;
         int to = (raw >> 6) & 0b11_1111;
-        int promo = (raw >> 12) & 0b11; // 0..3 representing promotion type - 1 in Rust
 
-        // Flags per viriformat: PROMO_FLAG_BITS = 0xC000, EP_FLAG_BITS = 0x4000, CASTLE_FLAG_BITS = 0x8000
-        bool isPromo = (raw & 0xC000) == 0xC000;
-        bool isEp = (raw & 0x4000) != 0 && (raw & 0x8000) == 0;
-        bool isCastle = (raw & 0x8000) != 0 && (raw & 0x4000) == 0;
+        bool isCastle = (raw & CastlingFlag) != 0 && (raw & EnPassantFlag) == 0;
+        if (isCastle)
+        {
+            // Determine side by original 'from' rank (viriformat rank 0 == white)
+            int fromVirRank = from / 8;
+            var side = (int)(fromVirRank == 0
+                ? Side.White
+                : Side.Black);
+
+            bool kingside = to > from;
+
+            var castlingMove = kingside
+                ? Utils.ShortCastle(position, side)
+                : Utils.LongCastle(position, side);
+
+            return castlingMove.UCIString();
+        }
 
         // Convert viriformat square indices (A1=0..H8=63) to Lynx indexing (a8=0..h1=63)
         int fromLynx = from ^ 56;
@@ -631,40 +655,16 @@ public static class ViriformatLoader
         var fromStr = Constants.Coordinates[fromLynx];
         var toStr = Constants.Coordinates[toLynx];
 
+        bool isPromo = (raw & PromotionFlag) == PromotionFlag;
         if (isPromo)
         {
-            // in viriformat promotion mapping, promo = inner-1; inner: 1.. => Queen=4? We map by using order Queen,Rook,Bishop,Knight maybe
-            // Rust code: promotion stored as piece_type.inner()-1; piece_type inner: Pawn=0, Knight=1, Bishop=2, Rook=3, Queen=4, King=5
-            // So promo 0 => Knight? But promotions exclude Pawn/King per Rust - they use inner()-1. So mapping: 0->Knight,1->Bishop,2->Rook,3->Queen
-            char pchar = promo switch { 0 => 'n', 1 => 'b', 2 => 'r', 3 => 'q', _ => 'q' };
+            int pieceIndex = (raw >> 12) & 0b11;
+            char pchar = pieceIndex switch { 0 => 'n', 1 => 'b', 2 => 'r', 3 => 'q', _ => 'q' };
+
             return string.Concat(fromStr, toStr, pchar);
         }
 
-        if (isCastle)
-        {
-            // Determine side by original 'from' rank (viriformat rank 0 == white)
-            int fromVirRank = from / 8;
-            bool isWhite = fromVirRank == 0;
-
-            bool kingside = to > from;
-
-#pragma warning disable S3358 // Ternary operators should not be nested
-            int target = kingside
-                ? (isWhite ? Constants.WhiteKingShortCastleSquare : Constants.BlackKingShortCastleSquare)
-                : (isWhite ? Constants.WhiteKingLongCastleSquare : Constants.BlackKingLongCastleSquare);
-#pragma warning restore S3358 // Ternary operators should not be nested
-
-            var toCastle = Constants.Coordinates[target];
-            return string.Concat(fromStr, toCastle);
-        }
-
-        if (isEp)
-        {
-            // En-passant move: UCI is still from+to (landing square). Make explicit handling for clarity.
-            return string.Concat(fromStr, toStr);
-        }
-
-        // Normal: UCI is from+to
+        // Regular moves, including en-passant: from + to
         return string.Concat(fromStr, toStr);
     }
 }
