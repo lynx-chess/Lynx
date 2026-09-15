@@ -81,6 +81,8 @@ public static class ViriformatLoader
 
             PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
 
+            long lastSampledTime = 0;
+
             while (stats.GameCount < (filter?.GamesToFilter ?? ulong.MaxValue))
             {
                 int firstRead = ReadFull(sourceFile, boardBufArr);
@@ -257,8 +259,6 @@ public static class ViriformatLoader
                     continue;
                 }
 
-                ++stats.SelectedGamesCount;
-
                 var selectedPositionsPerGame = validPositionsPerGame.AsSpan()[..positionsPerGame].ToArray();
                 int selectedPositionsCount = selectedPositionsPerGame.Length;
 
@@ -323,33 +323,41 @@ public static class ViriformatLoader
 
                 stats.SelectedPositionsCount += (ulong)selectedPositionsPerGame.Length;
 
-                var totalMoves = game.FullMoves;
-                if (totalMoves < stats.ShortestGameMoveCount)
+                if (selectedPositionsPerGame.Length > 0)
                 {
-                    stats.ShortestGameMoveCount = totalMoves;
+                    ++stats.SelectedGamesCount;
 
-                    if (totalMoves <= 5)
+                    var totalMoves = game.FullMoves;
+                    if (totalMoves < stats.ShortestGameMoveCount)
                     {
-                        _logger.Warn(initialFEN + " -> " + game.FEN);
+                        stats.ShortestGameMoveCount = totalMoves;
+
+                        if (totalMoves <= 5)
+                        {
+                            _logger.Warn(initialFEN + " -> " + game.FEN);
+                        }
                     }
-                }
 
-                if (totalMoves > stats.LongestGameMoveCount)
-                {
-                    stats.LongestGameMoveCount = totalMoves;
-                }
+                    if (totalMoves > stats.LongestGameMoveCount)
+                    {
+                        stats.LongestGameMoveCount = totalMoves;
+                    }
 
-                // Empty line between games
-                if (Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
-                {
-                    outputFile.WriteLine();
+                    // Empty line between games
+                    if (Configuration.EngineSettings.Datagen_VFtoEPD_EmptyLineBetweenGames)
+                    {
+                        outputFile.WriteLine();
+                    }
                 }
 
                 const int SampleRate = 10_000;
                 if (stats.GameCount % SampleRate == 0)
                 {
-                    var ms = sw.ElapsedMilliseconds;
-                    _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * stats.GameCount / (ulong)ms);
+                    var elapsedTime = sw.ElapsedMilliseconds;
+                    var ms = elapsedTime - lastSampledTime;
+                    _logger.Warn("[{0}s] Loaded {1} games, {2} games/s", ms / 1000, stats.GameCount, 1000 * SampleRate / (ulong)ms);
+
+                    lastSampledTime = elapsedTime;
                 }
             }
         }
