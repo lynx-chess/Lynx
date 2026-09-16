@@ -114,6 +114,16 @@ public static class Utils
         ? Constants.WhiteKingLongCastleSquare
         : Constants.BlackKingLongCastleSquare;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ShortCastle(Position position, int side) => side == (int)Side.White
+        ? position.WhiteShortCastle
+        : position.BlackShortCastle;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int LongCastle(Position position, int side) => side == (int)Side.White
+        ? position.WhiteLongCastle
+        : position.BlackLongCastle;
+
     [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
