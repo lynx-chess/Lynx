@@ -92,11 +92,19 @@ public static class MoveGenerator
 
         // Create full move candidate
         var piece = position.Board[sourceSquare];
+
+        if (piece == (int)Piece.None)
+        {
+            return 0;
+        }
+
         var capturedPiece = position.Board[targetSquare];
 
         var pieceSide = Utils.PieceSide(piece);
 
         if (pieceSide != position.Side
+            || capturedPiece == (int)Piece.K
+            || capturedPiece == (int)Piece.k
             || (capturedPiece != (int)Piece.None
                 && pieceSide == Utils.PieceSide(capturedPiece)
                 && (!Configuration.EngineSettings.IsChess960
@@ -114,6 +122,11 @@ public static class MoveGenerator
             case (int)Piece.N:
             case (int)Piece.n:
                 {
+                    if (!Attacks.KnightAttacks[sourceSquare].Contains(targetSquare))
+                    {
+                        return 0;
+                    }
+
                     // We can save the rays check, since it'll always be 0 for knights
                     return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
                 }
@@ -217,7 +230,8 @@ public static class MoveGenerator
                     var doublePushSquare = singlePushSquare + pawnPush;
                     if (targetSquare == doublePushSquare)
                     {
-                        if (position.Board[targetSquare] != (int)Piece.None || position.Board[singlePushSquare] != (int)Piece.None)
+                        var sourceRank = (sourceSquare >> 3) + 1;
+                        if ((sourceRank != 2 && sourceRank != 7) || position.Board[targetSquare] != (int)Piece.None || position.Board[singlePushSquare] != (int)Piece.None)
                         {
                             return 0;
                         }
@@ -233,7 +247,7 @@ public static class MoveGenerator
                     }
 
                     // Capture
-                    if (capturedPiece == (int)Piece.None)
+                    if (capturedPiece == (int)Piece.None || !Attacks.PawnAttacks[(int)pieceSide][sourceSquare].Contains(targetSquare))
                     {
                         // If the pawn moves files, it needs to be capture
                         return 0;

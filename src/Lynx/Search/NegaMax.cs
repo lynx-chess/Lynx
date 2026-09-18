@@ -316,46 +316,21 @@ public sealed partial class Engine
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves, oppositeSideAttacks);
-
-        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
-        ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
-        ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-        {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMove(position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, oppositeSideAttacks, ttBestMove);
-        }
-
         var nodeType = NodeType.Alpha;
         int bestScore = EvaluationConstants.MinEval;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
+        foreach (var (move, moveScore) in GenerateStagedMoves(ttBestMove, position, oppositeSideAttacks, ply))
         {
-            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
-            // There's no need to sort all the moves since most of them don't get checked anyway
-            // So just find the first unsearched one with the best score and try it
-            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
-            {
-                ref var moveI = ref Unsafe.Add(ref pseudoLegalMovesRef, moveIndex);
-                ref var moveJ = ref Unsafe.Add(ref pseudoLegalMovesRef, j);
-                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
-                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
-
-                if (scoreJ > scoreI)
-                {
-                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
-                }
-            }
-
-            // Value copy
-            var move = Unsafe.Add(ref pseudoLegalMovesRef, moveIndex); // Value copy for use in closures
+            //if(ply == 1)
+            //{
+            //    ;
+            //}
 
             var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
@@ -363,7 +338,6 @@ public sealed partial class Engine
                 continue;
             }
 
-            var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
             var piece = move.Piece();
             var capturedPiece = move.CapturedPiece();
             var isCapture = capturedPiece != (int)Piece.None;
