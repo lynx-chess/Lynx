@@ -223,6 +223,14 @@ public static class MoveGenerator
                             return 0;
                         }
 
+                        var tgtRank = targetSquare >> 3;
+
+                        if ((pieceSide == Side.White && tgtRank == 0 && !(promotedPiece >= (int)Piece.N && promotedPiece <= (int)Piece.Q))
+                           || (pieceSide == Side.Black && tgtRank == 7 && !(promotedPiece >= (int)Piece.n && promotedPiece <= (int)Piece.q)))
+                        {
+                            return 0;
+                        }
+
                         return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece);
                     }
 
@@ -254,6 +262,14 @@ public static class MoveGenerator
                     }
 
                     var move = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
+
+                    var targetRank = targetSquare >> 3;
+
+                    if ((pieceSide == Side.White && targetRank == 0 && !(promotedPiece >= (int)Piece.N && promotedPiece <= (int)Piece.Q))
+                       || (pieceSide == Side.Black && targetRank == 7 && !(promotedPiece >= (int)Piece.n && promotedPiece <= (int)Piece.q)))
+                    {
+                        return 0;
+                    }
 
                     return promotedPiece == (int)Piece.None
                         ? move
