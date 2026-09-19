@@ -635,6 +635,12 @@ public sealed class Searcher : IDisposable
                 return;
             }
 
+            if (genFensCommand.Book.ContainsAny(Constants.FRCStringSearchValues))
+            {
+                Configuration.EngineSettings.IsChess960 = true;
+                _logger.Info("(D)FRC book detected: {Book}, enabling UCI_Chess960", genFensCommand.Book);
+            }
+
             bookLines = File.ReadLines(bookPath);
             lineCount = bookLines.Count();
         }

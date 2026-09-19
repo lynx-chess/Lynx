@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Buffers;
 using System.Collections.Frozen;
 using System.Runtime.CompilerServices;
 
@@ -640,6 +641,10 @@ public static class Constants
     public const int ContinuationCorrHistoryHashMask = ContinuationCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
+
+    private static ReadOnlySpan<string> FRCStrings => new(["FRC", "960", "FISCHER"]);
+
+    public static readonly SearchValues<string> FRCStringSearchValues = SearchValues.Create(FRCStrings, StringComparison.OrdinalIgnoreCase);
 }
 
 #pragma warning restore IDE0055
