@@ -648,8 +648,11 @@ public sealed partial class Engine
 
                     var reducedDepth = newDepth - reduction;
 
-                    // Search with reduced depth and zero window
-                    score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    if (reducedDepth > 0)
+                    {
+                        // Search with reduced depth and zero window
+                        score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    }
 
                     // 🔍 Principal Variation Search (PVS)
                     if (score > alpha && newDepth > reducedDepth)
