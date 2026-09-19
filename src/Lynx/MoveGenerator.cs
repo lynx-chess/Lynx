@@ -1157,7 +1157,7 @@ public static class MoveGenerator
         }
 
         if (targetSquare == sourceSquare + (2 * pawnPush)
-            && (sourceRank == 2 || sourceRank == 7)
+            && (sourceRank == 1 || sourceRank == 6)
             && !occupancy.GetBit(sourceSquare + pawnPush)
             && !occupancy.GetBit(targetSquare))
         {
