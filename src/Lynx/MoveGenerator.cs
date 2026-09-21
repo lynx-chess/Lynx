@@ -122,11 +122,6 @@ public static class MoveGenerator
             case (int)Piece.N:
             case (int)Piece.n:
                 {
-                    if (!Attacks.KnightAttacks[sourceSquare].Contains(targetSquare))
-                    {
-                        return 0;
-                    }
-
                     // We can save the rays check, since it'll always be 0 for knights
                     return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
                 }
@@ -169,12 +164,6 @@ public static class MoveGenerator
                             : 0;
                     }
 
-                    if (capturedPiece <= (int)Piece.K)
-                    {
-                        // We can't capture our own pieces
-                        return 0;
-                    }
-
                     // We don't care if capturedPiece is None or not
                     return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
                 }
@@ -200,12 +189,6 @@ public static class MoveGenerator
                             : 0;
                     }
 
-                    if (capturedPiece >= (int)Piece.p && capturedPiece != (int)Piece.None)
-                    {
-                        // We can't capture our own pieces
-                        return 0;
-                    }
-
                     // We don't care if capturedPiece is None or not
                     return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
                 }
@@ -218,18 +201,7 @@ public static class MoveGenerator
                     // Single pawn push
                     if (targetSquare == singlePushSquare)
                     {
-                        if (position.Board[targetSquare] != (int)Piece.None)
-                        {
-                            return 0;
-                        }
-
                         var tgtRank = targetSquare >> 3;
-
-                        if ((pieceSide == Side.White && tgtRank == 0 && !(promotedPiece >= (int)Piece.N && promotedPiece <= (int)Piece.Q))
-                           || (pieceSide == Side.Black && tgtRank == 7 && !(promotedPiece >= (int)Piece.n && promotedPiece <= (int)Piece.q)))
-                        {
-                            return 0;
-                        }
 
                         return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece);
                     }
@@ -238,12 +210,6 @@ public static class MoveGenerator
                     var doublePushSquare = singlePushSquare + pawnPush;
                     if (targetSquare == doublePushSquare)
                     {
-                        var sourceRank = (sourceSquare >> 3) + 1;
-                        if ((sourceRank != 2 && sourceRank != 7) || position.Board[targetSquare] != (int)Piece.None || position.Board[singlePushSquare] != (int)Piece.None)
-                        {
-                            return 0;
-                        }
-
                         return MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                     }
 
@@ -254,22 +220,7 @@ public static class MoveGenerator
                         return MoveExtensions.EncodeEnPassant(sourceSquare, targetSquare, piece, (int)Piece.p - pieceOffset);
                     }
 
-                    // Capture
-                    if (capturedPiece == (int)Piece.None || !Attacks.PawnAttacks[(int)pieceSide][sourceSquare].Contains(targetSquare))
-                    {
-                        // If the pawn moves files, it needs to be capture
-                        return 0;
-                    }
-
                     var move = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
-
-                    var targetRank = targetSquare >> 3;
-
-                    if ((pieceSide == Side.White && targetRank == 0 && !(promotedPiece >= (int)Piece.N && promotedPiece <= (int)Piece.Q))
-                       || (pieceSide == Side.Black && targetRank == 7 && !(promotedPiece >= (int)Piece.n && promotedPiece <= (int)Piece.q)))
-                    {
-                        return 0;
-                    }
 
                     return promotedPiece == (int)Piece.None
                         ? move
@@ -1100,7 +1051,7 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsPseudoLegalPawnMove(Position position, Move move, bool allowOnlyEnPassant)
+    private static bool  IsPseudoLegalPawnMove(Position position, Move move, bool allowOnlyEnPassant)
     {
         var side = (int)position.Side;
         var sourceSquare = move.SourceSquare();
