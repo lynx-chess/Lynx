@@ -1119,7 +1119,7 @@ public partial class Position : IDisposable
         return Utils.Murmur3(hash);
     }
 
-    public int CountPieces() => _pieceBitboards.Sum(b => b.CountBits());
+    public int CountPieces() => _occupancyBitboards[(int)Side.Both].CountBits();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
