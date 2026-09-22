@@ -206,7 +206,9 @@ public class ViriformatFilter
             return true;
         }
 
-        if (position.CountPieces() < MinPieces)
+        var pìeceCount = position.CountPieces();
+
+        if (pìeceCount < MinPieces)
         {
             return true;
         }
@@ -237,7 +239,7 @@ public class ViriformatFilter
         if (WdlFiltered)
         {
             var outcome = wdlPacked switch { 2 => FilterWDL.Win, 1 => FilterWDL.Draw, 0 => FilterWDL.Loss, _ => FilterWDL.Draw };
-            double chance = ResultChance(position.CountPieces(), eval, outcome);
+            double chance = ResultChance(pìeceCount, eval, outcome);
             if (rng.NextDouble() < (1.0 - chance))
             {
                 return true;
@@ -246,7 +248,7 @@ public class ViriformatFilter
 
         if (MaterialCountFiltered)
         {
-            int index = Math.Min(position.CountPieces(), 32);
+            int index = Math.Min(pìeceCount, 32);
             double prob = MaterialCountProbabilities[index];
             if (rng.NextDouble() < prob)
             {
