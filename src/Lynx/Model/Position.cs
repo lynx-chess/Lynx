@@ -1123,7 +1123,8 @@ public partial class Position : IDisposable
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
-        var sb = new StringBuilder(100);
+        var sb = ObjectPools.StringBuilderPool.Get();
+        sb.EnsureCapacity(100);
 
         for (var rank = 0; rank < 8; ++rank)
         {
@@ -1229,7 +1230,11 @@ public partial class Position : IDisposable
           .Append(' ')
           .Append(fullMoveClock);
 
-        return sb.ToString();
+        var result = sb.ToString();
+
+        ObjectPools.StringBuilderPool.Return(sb);
+
+        return result;
     }
 
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
