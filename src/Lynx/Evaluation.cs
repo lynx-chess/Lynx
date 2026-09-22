@@ -272,12 +272,12 @@ public partial class Position
 
         // Kings - they can't be incremental due to the king buckets
         packedScore +=
-                PSQT(whiteBucket, blackBucket, (int)Piece.K, whiteKing)
-                + PSQT(blackBucket, whiteBucket, (int)Piece.k, blackKing);
+            PSQT(whiteBucket, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(blackBucket, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-                KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
-                - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
+            KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
         var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
         evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
@@ -305,8 +305,8 @@ public partial class Position
 
         // Total king rings attacks
         packedScore +=
-                TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
-                - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
+            TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
+            - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
 
         // Bishop pair bonus
         if (_pieceBitboards[(int)Piece.B].CountBits() >= 2)
