@@ -168,8 +168,6 @@ public static class ViriformatLoader
                     {
                         if (!skipGame)
                         {
-                            var fen = game.FEN;
-
                             // Draw adjufication filter
                             if (filter.DrawAdjudication)
                             {
@@ -199,7 +197,7 @@ public static class ViriformatLoader
                                     if (winAdjudicationScoreCount >= 2 * filter.WinAdjudication_MoveCount)
                                     {
                                         // We include the final position before the adjudication
-                                        outputFile.WriteLine($"{fen}; {eval}; [{gameResult}]");
+                                        outputFile.WriteLine($"{game.FEN}; {eval}; [{gameResult}]");
                                         --positionsToTakePerGame;
 
                                         skipGame = true;
@@ -220,7 +218,7 @@ public static class ViriformatLoader
                                 var filteredOut = filter.ShouldDrop(move.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
                                 if (!filteredOut)
                                 {
-                                    validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
+                                    validPositionsPerGame[positionsPerGame] = (game.FEN, eval, game.CurrentPosition.PhaseFromScratch());
                                     ++positionsPerGame;
                                 }
                                 // Max initial eval filter
