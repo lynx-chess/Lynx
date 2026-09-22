@@ -222,6 +222,8 @@ public partial class Position
                 packedScore += pawnScore;
             }
 
+            ref var phaseByPiece = ref MemoryMarshal.GetReference(GamePhaseByPiece);
+
             // White pieces PSQTs and additional eval and pawn attacks, except king and pawn
             for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
@@ -236,7 +238,7 @@ public partial class Position
 
                     IncrementalEvalAccumulator += PSQT(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
 
-                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
+                    IncrementalPhaseAccumulator += Unsafe.Add(ref phaseByPiece, pieceIndex);
 
                     packedScore += AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, whiteBucket, blackBucket, pieceIndex, (int)Side.White, blackPawnAttacks, blackKing);
                 }
@@ -257,7 +259,7 @@ public partial class Position
 
                     IncrementalEvalAccumulator += PSQT(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
 
-                    IncrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
+                    IncrementalPhaseAccumulator += Unsafe.Add(ref phaseByPiece, pieceIndex);
 
                     packedScore -= AdditionalPieceEvaluation(ref evaluationContext, pieceSquareIndex, blackBucket, whiteBucket, pieceIndex, (int)Side.Black, whitePawnAttacks, whiteKing);
                 }
@@ -270,12 +272,12 @@ public partial class Position
 
         // Kings - they can't be incremental due to the king buckets
         packedScore +=
-            PSQT(whiteBucket, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(blackBucket, whiteBucket, (int)Piece.k, blackKing);
+                PSQT(whiteBucket, blackBucket, (int)Piece.K, whiteKing)
+                + PSQT(blackBucket, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
-            KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
+                KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
+                - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
         var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
         evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
@@ -297,14 +299,14 @@ public partial class Position
             .CountBits();
 
         packedScore += KingMobilityBonus[whiteKingAttacksCount]
-        - KingMobilityBonus[blackKingAttacksCount];
+            - KingMobilityBonus[blackKingAttacksCount];
 
         AssertAttackPopulation(ref evaluationContext);
 
         // Total king rings attacks
         packedScore +=
-            TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
-            - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
+                TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
+                - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
 
         // Bishop pair bonus
         if (_pieceBitboards[(int)Piece.B].CountBits() >= 2)
@@ -479,10 +481,12 @@ public partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int PhaseFromScratch()
     {
-        return (Knights.CountBits() * GamePhaseByPiece[(int)Piece.N])
-            + (Bishops.CountBits() * GamePhaseByPiece[(int)Piece.B])
-            + (Rooks.CountBits() * GamePhaseByPiece[(int)Piece.R])
-            + (Queens.CountBits() * GamePhaseByPiece[(int)Piece.Q]);
+        ref var phaseByPiece = ref MemoryMarshal.GetReference(GamePhaseByPiece);
+
+        return (Knights.CountBits() * Unsafe.Add(ref phaseByPiece, (int)Piece.N))
+            + (Bishops.CountBits() * Unsafe.Add(ref phaseByPiece, (int)Piece.B))
+            + (Rooks.CountBits() * Unsafe.Add(ref phaseByPiece, (int)Piece.R))
+            + (Queens.CountBits() * Unsafe.Add(ref phaseByPiece, (int)Piece.Q));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
