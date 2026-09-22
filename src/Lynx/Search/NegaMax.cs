@@ -325,14 +325,17 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
         foreach (var stage in _stages)
         {
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             var pseudoLegalMoves = stage.GenerateMoves(this, ttBestMove, position, oppositeSideAttacks, ply, moves);
+            var stageMoveScores = moveScores[0..pseudoLegalMoves.Length];
 
-            Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
-            ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
             ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
+            ref var moveScoresRef = ref MemoryMarshal.GetReference(stageMoveScores);
+
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
                 Unsafe.Add(ref moveScoresRef, i) = stage.ScoreMove(this, position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, oppositeSideAttacks);

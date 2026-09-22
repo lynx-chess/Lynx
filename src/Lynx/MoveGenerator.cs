@@ -201,8 +201,6 @@ public static class MoveGenerator
                     // Single pawn push
                     if (targetSquare == singlePushSquare)
                     {
-                        var tgtRank = targetSquare >> 3;
-
                         return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece);
                     }
 
