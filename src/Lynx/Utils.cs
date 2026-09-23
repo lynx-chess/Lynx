@@ -298,6 +298,11 @@ public static class Utils
         };
     }
 
+    public static double Sigmoid(double value)
+    {
+        return 1.0 / (1.0 + Math.Exp(value));
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {
