@@ -45,25 +45,25 @@ public static class TimeManager
 
             hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
 
+            // Instead of returning the single legal move immediately, we do a short search to avoid having to make up an eval
+            if (isSingleLegalMove)
+            {
+                if (hardLimitTimeBound > Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit)
+                {
+                    _logger.Info("[TM] Single legal move detected, using hard time bound of {0}ms instead of the calculated {1}ms", Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit, hardLimitTimeBound);
+                    hardLimitTimeBound = Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit;
+                }
+                else
+                {
+                    _logger.Info("[TM] Single legal move detected, using calculated hard time bound regardless ({0}ms, <= {1}ms)", hardLimitTimeBound, Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit);
+                }
+            }
+
             // Used to apply MovesToGo here if available, but that becomes an issue in some mate-detected high depth searches
             var movesDivisor = MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()));
 
             var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
             softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
-
-            // Instead of returning the single legal move immediately, we do a short search to avoid having to make up an eval
-            if (isSingleLegalMove)
-            {
-                if (softLimitBase > Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit)
-                {
-                    _logger.Info("[TM] Single legal move detected, using soft time limit of {0}ms instead of the standard {1}ms", Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit, softLimitTimeBound);
-                    softLimitTimeBound = Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit;
-                }
-                else
-                {
-                    _logger.Info("[TM] Single legal move detected, using regular soft time limit regardless ({0}ms, <= {1}ms)", softLimitTimeBound, Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit);
-                }
-            }
 
             _logger.Info("[TM] Soft time bound: {0}ms", softLimitTimeBound);
             _logger.Info("[TM] Hard time bound: {0}ms", hardLimitTimeBound);
