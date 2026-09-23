@@ -130,7 +130,7 @@ public sealed class Searcher : IDisposable
 
     private void SingleThreadedSearch(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand, _mainEngine.OnlyOneLegalMove());
         var isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
 
         if (!isPondering)
@@ -229,7 +229,7 @@ public sealed class Searcher : IDisposable
         // Not UCI output is produced by them nor their search results are taken into account
         var extraEnginesSearchConstraints = SearchConstraints.InfiniteSearchConstraint;
 
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand, _mainEngine.OnlyOneLegalMove());
         var isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
 
         if (!isPondering)
