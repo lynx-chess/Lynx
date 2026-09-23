@@ -22,7 +22,7 @@ public struct PlyStackEntry
     {
         StaticEval = int.MaxValue;
         DoubleExtensions = 0;
-        Piece = (int)Model.Piece.None;
+        Piece = 0;
         Move = 0;
     }
 }

@@ -350,7 +350,7 @@ public sealed class Game : IDisposable
     public (Move Move, int Piece) ReadMoveAndPieceFromStack(int n)
     {
         var entry = _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
-        
+
         return (entry.Move, entry.Piece);
     }
 

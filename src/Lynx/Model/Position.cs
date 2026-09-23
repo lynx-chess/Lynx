@@ -513,6 +513,7 @@ public partial class Position : IDisposable
         switch (move.SpecialMoveFlag())
         {
             case SpecialMoveType.None:
+            case SpecialMoveType.Promotion:
                 {
                     if (move.IsDoublePawnPush(Board, sourceSquare, targetSquare))
                     {
@@ -735,7 +736,7 @@ public partial class Position : IDisposable
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
-        int piece = move.Piece(Board, targetSquare);    // Not sourceSquare, since the move has been played over Board already
+        int piece = gameState.Piece;
         int capturedPiece = gameState.CapturedPiece;
         int promotedPiece = move.PromotedPiece((int)_side);
 
@@ -743,6 +744,7 @@ public partial class Position : IDisposable
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
+            piece = (int)Piece.P + offset;
         }
 
         _pieceBitboards[newPiece].PopBit(targetSquare);
@@ -754,6 +756,7 @@ public partial class Position : IDisposable
         switch (move.SpecialMoveFlag())
         {
             case SpecialMoveType.None:
+            case SpecialMoveType.Promotion:
                 {
                     if (capturedPiece != (int)Piece.None)
                     {

@@ -36,7 +36,7 @@ public static class MoveExtensions
     private const int SourceSquareMask = 0x3F;
     private const int TargetSquareMask = 0xFC0;
 
-    private const int UCIMask = 0b0011_1111_1111_1111;
+    private const int UCIMask = 0b1111_1111_1111_1111;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -98,15 +98,7 @@ public static class MoveExtensions
     /// <exception cref="IndexOutOfRangeException"></exception>
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, int side, [NotNullWhen(true)] out Move? move)
     {
-        try
-        {
-
-            Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
-        }
-        catch (Exception e)
-        {
-            ;
-        }
+        Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
         var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
         var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
@@ -167,39 +159,13 @@ public static class MoveExtensions
     public static int TargetSquare(this Move move) => (move & TargetSquareMask) >> TargetSquareOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Piece(this Move move, int[] board)
-    {
-        try
-        {
-
-            return board[move.SourceSquare()];
-        }
-        catch (Exception e)
-        {
-            ;
-        }
-
-        return -1;
-    }
+    public static int Piece(this Move move, int[] board) => board[move.SourceSquare()];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Piece(this Move move, int[] board, int sourceSquare) => board[sourceSquare];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CapturedPiece(this Move move, int[] board)
-    {
-        try
-        {
-
-            return board[move.TargetSquare()];
-        }
-        catch (Exception e)
-        {
-            ;
-        }
-
-        return -1;
-    }
+    public static int CapturedPiece(this Move move, int[] board) => board[move.TargetSquare()];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CapturedPiece(this Move move, int[] board, int targetSquare) => board[targetSquare];
@@ -305,12 +271,18 @@ public static class MoveExtensions
 
                 for (int promotedPiece = (int)Model.Piece.N; promotedPiece < (int)Model.Piece.k; promotedPiece++)
                 {
-                    var move = baseIndex
-                        | ((promotedPiece - 1) << PromotedPieceOffset);
-                    //| (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;    // Not needed, since UCIMask ignores the first two bits
+                    var promotionMove = baseIndex
+                        | ((promotedPiece - 1) << PromotedPieceOffset)
+                        | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;    // Not needed, since UCIMask ignores the first two bits
 
-                    result[move] = $"{baseStr}{Constants.AsciiPiecesLowercase[promotedPiece]}";
+                    result[promotionMove] = $"{baseStr}{Constants.AsciiPiecesLowercase[promotedPiece]}";
                 }
+
+                var enPassantMove = baseIndex | ((int)SpecialMoveType.EnPassant << SpecialMoveFlagOffset);
+                result[baseIndex | enPassantMove] = baseStr;
+
+                var castlingMove = baseIndex | ((int)SpecialMoveType.Castle << SpecialMoveFlagOffset);
+                result[baseIndex | castlingMove] = baseStr;
             }
         }
 

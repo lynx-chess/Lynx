@@ -23,6 +23,8 @@ public readonly struct GameState
 
     public readonly int IncrementalPhaseAccumulator;
 
+    public readonly int Piece;
+
     public readonly int CapturedPiece;
 
     public readonly BoardSquare EnPassant;
@@ -41,6 +43,7 @@ public readonly struct GameState
         MinorKey = position.MinorHash;
         MajorKey = position.MajorHash;
 
+        Piece = move.Piece(position.Board);
         CapturedPiece = move.CapturedPiece(position.Board);
         EnPassant = position.EnPassant;
         Castle = position.Castle;

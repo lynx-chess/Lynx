@@ -88,19 +88,10 @@ public sealed partial class Engine
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
 
-            try
-            {
-
-                return baseCaptureScore
+            return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
-            }
-            catch (Exception e)
-            {
-                ;
-            }
-            return -1;
         }
 
         if (isPromotion)
@@ -153,19 +144,10 @@ public sealed partial class Engine
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
-            try
-            {
-
-                return baseCaptureScore
-                    + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
-                    //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                    + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
-            }
-            catch (Exception e)
-            {
-                ;
-            }
-            return -1;
+            return baseCaptureScore
+                + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
+                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
