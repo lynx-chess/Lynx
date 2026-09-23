@@ -186,6 +186,9 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int PonderHitMinDepthToStopSearch { get; set; } = 15;
 
+    [SPSA<int>(enabled: false)]
+    public int SingleLegalMoveSoftTimeLimit { get; set; } = 500;
+
     #endregion
 
     #region Search

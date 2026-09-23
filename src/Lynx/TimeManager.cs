@@ -15,7 +15,7 @@ public static class TimeManager
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
+    public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand, bool isSingleLegalMove)
     {
         int maxDepth = SearchConstraints.DefaultMaxDepth;
         ulong maxNodes = SearchConstraints.DefaultMaxNodes;
@@ -40,16 +40,30 @@ public static class TimeManager
 
         if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
         {
-            // Used to apply MovesToGo here if available, but that becomes an issue in some mate-detected high depth searches
-            var movesDivisor = MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()));
-
             millisecondsLeft -= engineGuiCommunicationTimeOverhead;
             millisecondsLeft = Math.Clamp(millisecondsLeft, Configuration.EngineSettings.MinSearchTime, int.MaxValue); // Avoiding 0/negative values
 
             hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
 
+            // Used to apply MovesToGo here if available, but that becomes an issue in some mate-detected high depth searches
+            var movesDivisor = MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()));
+
             var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
             softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
+
+            // Instead of returning the single legal move immediately, we do a short search to avoid having to make up an eval
+            if (isSingleLegalMove)
+            {
+                if (softLimitBase > Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit)
+                {
+                    _logger.Info("[TM] Single legal move detected, using soft time limit of {0}ms instead of the standard {1}ms", Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit, softLimitTimeBound);
+                    softLimitTimeBound = Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit;
+                }
+                else
+                {
+                    _logger.Info("[TM] Single legal move detected, using regular soft time limit regardless ({0}ms, <= {1}ms)", softLimitTimeBound, Configuration.EngineSettings.SingleLegalMoveSoftTimeLimit);
+                }
+            }
 
             _logger.Info("[TM] Soft time bound: {0}ms", softLimitTimeBound);
             _logger.Info("[TM] Hard time bound: {0}ms", hardLimitTimeBound);
