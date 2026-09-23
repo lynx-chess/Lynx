@@ -153,6 +153,6 @@ public class GenerateQueenMovesTest
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenCaptures(position);
 
-        Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board) != (int)Piece.None));
+        Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
     }
 }

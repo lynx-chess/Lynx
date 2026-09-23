@@ -197,7 +197,7 @@ public class GenerateRookMovesTest
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a1
             && m.TargetSquare() == (int)BoardSquare.a6
-            && m.CapturedPiece(position.Board) != (int)Piece.None));
+            && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
     }
 
     /// <summary>

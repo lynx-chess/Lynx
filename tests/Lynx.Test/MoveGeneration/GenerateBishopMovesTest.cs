@@ -184,7 +184,7 @@ public class GenerateBishopMovesTest
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopCaptures(position);
 
-        Assert.AreEqual(1, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board) != (int)Piece.None));
+        Assert.AreEqual(1, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.e2
@@ -213,7 +213,7 @@ public class GenerateBishopMovesTest
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopCaptures(position);
 
-        Assert.AreEqual(1, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board) != (int)Piece.None));
+        Assert.AreEqual(1, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.a6

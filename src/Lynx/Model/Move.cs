@@ -165,10 +165,16 @@ public static class MoveExtensions
     public static int Piece(this Move move, int[] board, int sourceSquare) => board[sourceSquare];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CapturedPiece(this Move move, int[] board) => board[move.TargetSquare()];
+    public static int CapturedPiece(this Move move, int[] board, int side) =>
+        !move.IsEnPassant()
+            ? board[move.TargetSquare()]
+            : (int)Model.Piece.p - Utils.PieceOffset(side);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CapturedPiece(this Move move, int[] board, int targetSquare) => board[targetSquare];
+    public static int CapturedPiece(this Move move, int[] board, int side, int targetSquare) =>
+        !move.IsEnPassant()
+            ? board[targetSquare]
+            : (int)Model.Piece.p - Utils.PieceOffset(side);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & SpecialMoveMask) >> SpecialMoveFlagOffset);
@@ -197,7 +203,7 @@ public static class MoveExtensions
         && targetSquare < sourceSquare;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCastle(this Move move) => 
+    public static bool IsCastle(this Move move) =>
         (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.Castle;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -229,7 +235,7 @@ public static class MoveExtensions
     public static string ToEPDString(this Move move, Position position)
     {
         var piece = move.Piece(position.Board);
-        var capturedPiece = move.CapturedPiece(position.Board);
+        var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
 
         if (move.IsShortCastle())
         {

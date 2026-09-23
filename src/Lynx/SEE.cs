@@ -26,13 +26,13 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
-        Debug.Assert(move.CapturedPiece(position.Board) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
-        Debug.Assert(move.PromotedPiece((int)position.Side) == default || move.CapturedPiece(position.Board) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves without captures");
-        Debug.Assert(!move.IsEnPassant() || move.CapturedPiece(position.Board) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle en-passant moves if they aren't marked as captures too");
+        Debug.Assert(move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
+        Debug.Assert(move.PromotedPiece((int)position.Side) == default || move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves without captures");
+        Debug.Assert(!move.IsEnPassant() || move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle en-passant moves if they aren't marked as captures too");
 
         var sideToMove = position.Side;
 
-        var score = PieceValues[move.CapturedPiece(position.Board)] - threshold;    // Gain() - threshold
+        var score = PieceValues[move.CapturedPiece(position.Board, (int)position.Side)] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -211,8 +211,8 @@ public static class SEE
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
-            ? PieceValues[move.CapturedPiece(position.Board)]
-            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + PieceValues[move.CapturedPiece(position.Board)];
+            ? PieceValues[move.CapturedPiece(position.Board, (int)position.Side)]
+            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + PieceValues[move.CapturedPiece(position.Board, (int)position.Side)];
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 

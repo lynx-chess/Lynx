@@ -130,10 +130,10 @@ public static class MoveGenerator
                 if (targetRank == 1 || targetRank == 8)
                 {
                     // Promotion
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B);
                 }
                 else
                 {
@@ -223,10 +223,10 @@ public static class MoveGenerator
                 if (targetRank == 1 || targetRank == 8)
                 {
                     // Promotion
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset);
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R + offset);
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
-                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B + offset);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.R);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.B);
                 }
             }
 
@@ -492,7 +492,7 @@ public static class MoveGenerator
                 {
                     // If any of the promotions isn't valid, it means that the pawn move unveils a discovered check, or that the promoted piece doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions will be valid either
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q + offset)))
+                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.Q)))
                     {
                         return true;
                     }
@@ -541,7 +541,7 @@ public static class MoveGenerator
                 {
                     // If any of the promotions that capture the same piece isn't valid, it means that the pawn move unveils a discovered check, or that the capture doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions capturing the same piece will be valid either
-                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q + offset)))
+                    if (IsValidMove(position, MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q)))
                     {
                         return true;
                     }

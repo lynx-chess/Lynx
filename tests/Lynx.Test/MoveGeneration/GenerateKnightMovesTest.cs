@@ -192,7 +192,7 @@ public class GenerateKnightMovesTest
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 
-        Assert.AreEqual(3, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board) != (int)Piece.None));
+        Assert.AreEqual(3, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.e5
@@ -229,7 +229,7 @@ public class GenerateKnightMovesTest
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 
-        Assert.AreEqual(3, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board) != (int)Piece.None));
+        Assert.AreEqual(3, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.b6

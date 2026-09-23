@@ -44,7 +44,7 @@ public readonly struct GameState
         MajorKey = position.MajorHash;
 
         Piece = move.Piece(position.Board);
-        CapturedPiece = move.CapturedPiece(position.Board);
+        CapturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
         EnPassant = position.EnPassant;
         Castle = position.Castle;
         IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;

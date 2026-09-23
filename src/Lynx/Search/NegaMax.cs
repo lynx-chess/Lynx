@@ -365,7 +365,7 @@ public sealed partial class Engine
 
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
             var piece = move.Piece(position.Board);
-            var capturedPiece = move.CapturedPiece(position.Board);
+            var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
@@ -775,7 +775,7 @@ public sealed partial class Engine
         {
             if (!(isInCheck
                 || (bestMove is not null
-                    && bestMove.Value.CapturedPiece(position.Board) != (int)Piece.None
+                    && bestMove.Value.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
                     && SEE.IsGoodCapture(position, bestMove.Value))
                 || bestMove?.IsPromotion() == true
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
@@ -982,7 +982,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    if (move.CapturedPiece(position.Board) != (int)Piece.None)
+                    if (move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None)
                     {
                         UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, 3, visitedMoves, visitedMovesCounter, move);
                     }

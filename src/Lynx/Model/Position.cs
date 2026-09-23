@@ -409,7 +409,7 @@ public partial class Position : IDisposable
         int targetSquare = move.TargetSquare();
         int piece = move.Piece(Board);
         int promotedPiece = move.PromotedPiece((int)Side);
-        int capturedPiece = move.CapturedPiece(Board);
+        int capturedPiece = move.CapturedPiece(Board, (int)Side);
 
         var newPiece = piece;
         int extraPhaseIfIncremental = 0;

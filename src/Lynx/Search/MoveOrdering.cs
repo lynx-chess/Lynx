@@ -22,8 +22,8 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece((int)position.Side);
         var isPromotion = promotedPiece != default;
-        var capturedPiece = move.CapturedPiece(position.Board);
-        var isCapture = capturedPiece != (int)Piece.None;
+        var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
+        var isCapture = capturedPiece != (int)Piece.None || move.IsEnPassant();
 
         if (!isCapture && !isPromotion)
         {
@@ -117,7 +117,7 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece((int)position.Side);
         var isPromotion = promotedPiece != default;
-        var capturedPiece = move.CapturedPiece(position.Board);
+        var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
         var isCapture = capturedPiece != (int)Piece.None;
 
         // Queen promotion
@@ -198,7 +198,7 @@ public sealed partial class Engine
             for (int i = 0; i < visitedMovesCounter; ++i)
             {
                 var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
-                var capturedPiece = visitedMove.CapturedPiece(position.Board);
+                var capturedPiece = visitedMove.CapturedPiece(position.Board, (int)position.Side);
 
                 if (capturedPiece == (int)Piece.None)
                 {
@@ -258,7 +258,7 @@ public sealed partial class Engine
         var rawHistoryBonus = HistoryBonus[depth];
         var rawHistoryMalus = HistoryMalus[depth];
 
-        ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(position.Board), move.TargetSquare(), move.CapturedPiece(position.Board));
+        ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(position.Board), move.TargetSquare(), move.CapturedPiece(position.Board, (int)position.Side));
         captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
@@ -267,7 +267,7 @@ public sealed partial class Engine
         for (int i = 0; i < visitedMovesCounter; ++i)
         {
             var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
-            var capturedPiece = visitedMove.CapturedPiece(position.Board);
+            var capturedPiece = visitedMove.CapturedPiece(position.Board, (int)position.Side);
 
             if (capturedPiece != (int)Piece.None)
             {

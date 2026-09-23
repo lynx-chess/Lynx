@@ -10,11 +10,9 @@ public class EncodeDecodeMoveTest
     {
         foreach (var value in Enum.GetValues<SpecialMoveType>().Cast<int>())
         {
-            Assert.LessOrEqual(value, 0b111, $"Need to change {MoveExtensions.SpecialMoveFlag} mask");
-            Assert.LessOrEqual(value, (int)SpecialMoveType.Castle, $"Need to change {MoveExtensions.IsCastle}");
+            Assert.LessOrEqual(value, 0b11, $"Need to change {MoveExtensions.SpecialMoveFlag} mask");
+            Assert.LessOrEqual(value, (int)SpecialMoveType.Promotion, $"Need to change {MoveExtensions.IsPromotion}");
         }
-
-        Assert.Greater((int)SpecialMoveType.Castle, (int)SpecialMoveType.Castle, $"Need to change {MoveExtensions.IsCastle}");
     }
 
     [TestCase(BoardSquare.e4, BoardSquare.e5, Piece.P, false)]
@@ -63,7 +61,7 @@ public class EncodeDecodeMoveTest
     [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.n, Side.Black)]
     public void Promotion(BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece, Side side)
     {
-        var move = MoveExtensions.EncodePromotion((int)sourceSquare, (int)targetSquare, promotedPiece: (int)promotedPiece);
+        var move = MoveExtensions.EncodePromotion((int)sourceSquare, (int)targetSquare, promotedPiece: (int)promotedPiece % 6);
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
@@ -72,17 +70,17 @@ public class EncodeDecodeMoveTest
         Assert.False(move.IsEnPassant());
     }
 
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.Q, Piece.q, Side.Black)]
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.R, Piece.q, Side.Black)]
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.B, Piece.q, Side.Black)]
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.N, Piece.q, Side.Black)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.q, Piece.Q, Side.White)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.r, Piece.Q, Side.White)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.b, Piece.Q, Side.White)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.n, Piece.Q, Side.White)]
-    public void PromotionWithCapture(BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece, Piece capturedPiece, Side side)
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.Q, Side.White)]
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.R, Side.White)]
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.B, Side.White)]
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.N, Side.White)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.q, Side.Black)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.r, Side.Black)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.b, Side.Black)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.n, Side.Black)]
+    public void PromotionWithCapture(BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece, Side side)
     {
-        var move = MoveExtensions.EncodePromotion((int)sourceSquare, (int)targetSquare, promotedPiece: (int)promotedPiece);
+        var move = MoveExtensions.EncodePromotion((int)sourceSquare, (int)targetSquare, promotedPiece: (int)promotedPiece % 6);
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
@@ -144,7 +142,7 @@ public class EncodeDecodeMoveTest
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
-        Assert.True(move.IsDoublePawnPush(move.Piece(position.Board)));
+        Assert.True(move.IsDoublePawnPush(move.Piece(position.Board, (int)targetSquare), (int)sourceSquare, (int)targetSquare));
         Assert.False(move.IsPromotion());
         Assert.False(move.IsEnPassant());
     }

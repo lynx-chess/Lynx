@@ -49,7 +49,7 @@ public class MoveScoreTest : BaseTest
 
         var oppositeSideThreats = evaluationContext.AttacksBySide[Utils.OppositeSide((int)engine.Game.CurrentPosition.Side)];
 
-        foreach (var move in allMoves.Where(move => move.CapturedPiece(engine.Game.CurrentPosition.Board) == (int)Piece.None && !move.IsCastle()))
+        foreach (var move in allMoves.Where(move => move.CapturedPiece(engine.Game.CurrentPosition.Board, (int)engine.Game.CurrentPosition.Side) == (int)Piece.None && !move.IsCastle()))
         {
             Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(engine.Game.CurrentPosition, move, default, oppositeSideThreats));
         }
