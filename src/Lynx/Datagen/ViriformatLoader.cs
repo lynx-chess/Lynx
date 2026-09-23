@@ -616,15 +616,15 @@ public static class ViriformatLoader
     /// 0000 0000 0011 1111                     Source square (0-63)
     /// 0000 1111 1100 0000                     Target square (0-63)
     /// 0011 0000 0000 0000                     Promoted piece (N=1, B=1, R=2, Q=3)
-    /// 0100 0000 0000 0000     0x40000         En-passant flag
-    /// 1000 0000 0000 0000     0x80000         Castling flag
+    /// 0100 0000 0000 0000     0x4000          En-passant flag
+    /// 1000 0000 0000 0000     0x8000          Castling flag
     /// 1100 0000 0000 0000     0xC000          Promotion flag
     /// </summary>
     private static string ViriformatMoveToUci(Position position, ushort raw)
     {
-        const int EnPassantFlag = 0x4000;
-        const int CastlingFlag = 0x8000;
-        const int PromotionFlag = 0xC000;
+        const ushort EnPassantFlag = 0x4000;
+        const ushort CastlingFlag = 0x8000;
+        const ushort PromotionFlag = 0xC000;
 
         int from = raw & 0b11_1111;
         int to = (raw >> 6) & 0b11_1111;

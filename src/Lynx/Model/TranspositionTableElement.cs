@@ -30,7 +30,7 @@ public struct TranspositionTableElement
 {
     private ushort _key;        // 2 bytes
 
-    private Move _move;    // 2 bytes
+    private Move _move;         // 2 bytes
 
     private short _score;       // 2 bytes
 

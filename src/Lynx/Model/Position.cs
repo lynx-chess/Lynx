@@ -38,10 +38,10 @@ public partial class Position : IDisposable
     public readonly ulong[] QueensideCastlingNonAttackedSquares;
 
 #pragma warning disable IDE1006 // Naming Styles
-    internal short WhiteShortCastle;
-    internal short WhiteLongCastle;
-    internal short BlackShortCastle;
-    internal short BlackLongCastle;
+    internal Move WhiteShortCastle;
+    internal Move WhiteLongCastle;
+    internal Move BlackShortCastle;
+    internal Move BlackLongCastle;
 #pragma warning restore IDE1006 // Naming Styles
 #pragma warning restore S3887, CA1051
 

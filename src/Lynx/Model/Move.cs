@@ -18,8 +18,8 @@ public enum SpecialMoveType
 /// 0000 0000 0011 1111     0x3F            Source square (0-63)
 /// 0000 1111 1100 0000     0xFC0           Target square (0-63)
 /// 0011 0000 0000 0000     0x3000          Promoted piece (1-4)
-/// 0100 0000 0000 0000     0x40000         En-passant flag
-/// 1000 0000 0000 0000     0x80000         Castle flag
+/// 0100 0000 0000 0000     0x4000          En-passant flag
+/// 1000 0000 0000 0000     0x8000          Castle flag
 /// 1100 0000 0000 0000     0xC000          Promotion flag
 /// --------------------------------------------------------------------------------------------
 /// Total: 16 bits -> fits in a short
@@ -30,13 +30,11 @@ public static class MoveExtensions
     private const int PromotedPieceOffset = 12;
     private const int SpecialMoveFlagOffset = 14;
 
-    private const int SpecialMoveMask = 0xC000;
-    private const int PromotedPieceMask = 0x3000;
-    private const int IsPromotionMask = 0xC000;
-    private const int SourceSquareMask = 0x3F;
-    private const int TargetSquareMask = 0xFC0;
-
-    private const int UCIMask = 0b1111_1111_1111_1111;
+    private const Move SpecialMoveMask = 0xC000;
+    private const Move PromotedPieceMask = 0x3000;
+    private const Move IsPromotionMask = 0xC000;
+    private const Move SourceSquareMask = 0x3F;
+    private const Move TargetSquareMask = 0xFC0;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -51,14 +49,14 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move Encode(int sourceSquare, int targetSquare)
     {
-        return (short)(sourceSquare
+        return (Move)(sourceSquare
             | (targetSquare << TargetSquareOffset));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeEnPassant(int sourceSquare, int targetSquare)
     {
-        return (short)(sourceSquare
+        return (Move)(sourceSquare
             | (targetSquare << TargetSquareOffset)
             | (int)SpecialMoveType.EnPassant << SpecialMoveFlagOffset);
     }
@@ -68,10 +66,10 @@ public static class MoveExtensions
     {
         if (targetSquare == CastlingData.DefaultValues)
         {
-            return -1;
+            return 0;
         }
 
-        return (short)(sourceSquare
+        return (Move)(sourceSquare
             | (targetSquare << TargetSquareOffset)
             | (int)SpecialMoveType.Castle << SpecialMoveFlagOffset);
     }
@@ -79,7 +77,7 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotion(int sourceSquare, int targetSquare, int promotedPiece)
     {
-        return (short)(sourceSquare
+        return (Move)(sourceSquare
             | (targetSquare << TargetSquareOffset)
             | ((promotedPiece - 1) << PromotedPieceOffset)
             | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset);
@@ -87,7 +85,7 @@ public static class MoveExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotionFromPawnMove(Move pawnMove, int promotedPiece) =>
-        (short)(pawnMove
+        (Move)(pawnMove
             | ((promotedPiece - 1) << PromotedPieceOffset)
             | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset);
 
@@ -165,16 +163,22 @@ public static class MoveExtensions
     public static int Piece(this Move move, int[] board, int sourceSquare) => board[sourceSquare];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable S3358 // Ternary operators should not be nested
     public static int CapturedPiece(this Move move, int[] board, int side) =>
-        !move.IsEnPassant()
-            ? board[move.TargetSquare()]
-            : (int)Model.Piece.p - Utils.PieceOffset(side);
+         move.IsCastle()            // DFRC castling moves are represented as KxR
+            ? (int)Model.Piece.None
+            : (!move.IsEnPassant()
+                ? board[move.TargetSquare()]
+                : (int)Model.Piece.p - Utils.PieceOffset(side));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CapturedPiece(this Move move, int[] board, int side, int targetSquare) =>
-        !move.IsEnPassant()
-            ? board[targetSquare]
-            : (int)Model.Piece.p - Utils.PieceOffset(side);
+        move.IsCastle()            // DFRC castling moves are represented as KxR
+            ? (int)Model.Piece.None
+            : (!move.IsEnPassant()
+                ? board[targetSquare]
+                : (int)Model.Piece.p - Utils.PieceOffset(side));
+#pragma warning restore S3358 // Ternary operators should not be nested
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & SpecialMoveMask) >> SpecialMoveFlagOffset);
@@ -297,13 +301,7 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string UCIString(this Move move)
-    {
-        // We can't just cast to ShortMove (aka short), since moves with the highest bit of the second half set to 1
-        // would be interpreted as negative numbers, and therefore throwing an IndexOutOfRangeException when widened back to int for array indexing.
-        // By masking with 0xFFFF, we ensure that the move is always interpreted as an unsigned number.
-        return _uciStrings[move & UCIMask];
-    }
+    public static string UCIString(this Move move) => _uciStrings[move];
 
     /// <summary>
     /// First file letter, then rank number and finally the whole square.
