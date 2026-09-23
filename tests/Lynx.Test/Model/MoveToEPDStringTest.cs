@@ -24,7 +24,7 @@ public class MoveToEPDStringTest
 
         if (isShortCastle != default)
         {
-            move = MoveExtensions.EncodeShortCastle(sourceSquare, targetSquare, piece);
+            move = MoveExtensions.EncodeCastle(sourceSquare, targetSquare, piece);
         }
         else if (isLongCastle != default)
         {

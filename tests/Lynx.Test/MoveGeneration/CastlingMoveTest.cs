@@ -5,9 +5,9 @@ namespace Lynx.Test.MoveGeneration;
 
 public class CastlingMoveTest
 {
-    private static readonly int _whiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
+    private static readonly int _whiteShortCastle = MoveExtensions.EncodeCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
     private static readonly int _whiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
-    private static readonly int _blackShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialBlackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
+    private static readonly int _blackShortCastle = MoveExtensions.EncodeCastle(Constants.InitialBlackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
     private static readonly int _blackLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
 
     [Test]

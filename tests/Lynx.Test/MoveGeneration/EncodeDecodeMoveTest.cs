@@ -122,7 +122,7 @@ public class EncodeDecodeMoveTest
     {
 #pragma warning disable S3358 // Ternary operators should not be nested
         var move = isShortCastle
-            ? MoveExtensions.EncodeShortCastle((int)sourceSquare, (int)targetSquare, (int)Piece.K)
+            ? MoveExtensions.EncodeCastle((int)sourceSquare, (int)targetSquare, (int)Piece.K)
             : (isLongCastle
                 ? MoveExtensions.EncodeLongCastle((int)sourceSquare, (int)targetSquare, (int)Piece.K)
                 : MoveExtensions.Encode((int)sourceSquare, (int)targetSquare, (int)Piece.K));

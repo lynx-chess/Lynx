@@ -134,7 +134,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -195,7 +195,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -258,7 +258,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -318,7 +318,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 

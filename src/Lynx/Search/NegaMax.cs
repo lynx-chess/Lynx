@@ -364,13 +364,13 @@ public sealed partial class Engine
             }
 
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
-            var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
+            var piece = move.Piece(position.Board);
+            var capturedPiece = move.CapturedPiece(position.Board);
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
-            int quietHistory = QuietHistoryEntry(move, oppositeSideAttacks)
-                + ContinuationHistoryEntry(piece, targetSquare, ply);
+            int quietHistory = QuietHistoryEntry(position, move, oppositeSideAttacks)
+                + ContinuationHistoryEntry(position, piece, targetSquare, ply);
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -681,7 +681,7 @@ public sealed partial class Engine
                             ? EvaluationConstants.HistoryBonus[depth]
                             : -EvaluationConstants.HistoryMalus[depth];
 
-                        UpdateContinuationHistory(piece, targetSquare, ply, historyBonus);
+                        UpdateContinuationHistory(position, piece, targetSquare, ply, historyBonus);
                     }
                 }
 
@@ -700,7 +700,7 @@ public sealed partial class Engine
             if (isRoot)
             {
                 var nodesSpentInThisMove = _nodes - previousNodes;
-                UpdateMoveNodeCount(move, nodesSpentInThisMove);
+                UpdateMoveNodeCount(position, move, nodesSpentInThisMove);
             }
 
             PrintMove(position, ply, move, score);
@@ -744,7 +744,7 @@ public sealed partial class Engine
 
                     if (isCapture)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, historyDepth, visitedMoves, visitedMovesCounter, move);
                     }
                     else
                     {
@@ -774,7 +774,7 @@ public sealed partial class Engine
         {
             if (!(isInCheck
                 || (bestMove is not null
-                    && bestMove.Value.CapturedPiece() != (int)Piece.None
+                    && bestMove.Value.CapturedPiece(position.Board) != (int)Piece.None
                     && SEE.IsGoodCapture(position, bestMove.Value))
                 || bestMove?.IsPromotion() == true
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
@@ -980,9 +980,9 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    if (move.CapturedPiece() != (int)Piece.None)
+                    if (move.CapturedPiece(position.Board) != (int)Piece.None)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, 3, visitedMoves, visitedMovesCounter, move);
                     }
 
                     nodeType = NodeType.Beta;

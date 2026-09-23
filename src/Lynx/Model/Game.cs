@@ -174,7 +174,7 @@ public sealed class Game : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Update50movesRule(Move moveToPlay)
     {
-        var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
+        var isCapture = moveToPlay.CapturedPiece(CurrentPosition.Board) != (int)Piece.None;
 
 #pragma warning disable MA0071 // Avoid using redundant else
         if (isCapture)
@@ -192,7 +192,7 @@ public sealed class Game : IDisposable
         }
         else
         {
-            var pieceToMove = moveToPlay.Piece();
+            var pieceToMove = moveToPlay.Piece(CurrentPosition.Board);
 
             if (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p)
             {

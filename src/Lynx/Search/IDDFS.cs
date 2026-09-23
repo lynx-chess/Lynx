@@ -468,7 +468,7 @@ public sealed partial class Engine
         {
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
-            var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
+            var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece(Game.PositionBeforeLastSearch.Board)][bestMove.Value.TargetSquare()];
             var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
 
             if (_logger.IsEnabled(logLevel))

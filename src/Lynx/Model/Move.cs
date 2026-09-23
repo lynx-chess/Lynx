@@ -8,39 +8,33 @@ namespace Lynx.Model;
 public enum SpecialMoveType
 {
     None = 0,
-    DoublePawnPush = 1,
-    EnPassant = 2,
-    ShortCastle = 3,
-    LongCastle = 4,
+    EnPassant = 1,
+    Castle = 2,
+    Promotion = 3,
 }
 
 /// <summary>
-///            Binary move bits               Hexadecimal
-/// 0000 0000 0000 0000 0000 0000 0000 1111     0xF             Promoted piece (0-11)
-/// 0000 0000 0000 0000 0000 0011 1111 0000     0x3F0           Source square (0-63)
-/// 0000 0000 0000 0000 1111 1100 0000 0000     0xFC00          Target Square (0-63)
+///  Binary move bits     Hexadecimal
+/// 0000 0000 0011 1111     0x3F            Source square (0-63)
+/// 0000 1111 1100 0000     0xFC0           Target square (0-63)
+/// 0011 0000 0000 0000     0x3000          Promoted piece (0-11)
+/// 0100 0000 0000 0000     0x40000         En-passant flag
+/// 1000 0000 0000 0000     0x80000         Castle flag
+/// 1100 0000 0000 0000     0xC000          Promotion flag
 /// --------------------------------------------------------------------------------------------
-/// 0000 0000 0000 1111 0000 0000 0000 0000     0xF_0000        Piece (0-11)
-/// 0000 0000 1111 0000 0000 0000 0000 0000     0xF0_0000       Captured piece (0-11)
-/// 0000 0111 0000 0000 0000 0000 0000 0000     0x700_0000      SpecialMoveFlagOffset: Double pawn push, en-passant, short castle or long castle (1-5)
-/// Total: 27 bits -> fits an int
-/// By casting it to ShortMove, a unique int16 (short) move is achieved, since
-/// source and target square and promoted piece can only represent a move in a given position
+/// Total: 16 bits -> fits in a short
 /// </summary>
 public static class MoveExtensions
 {
-    private const int SourceSquareOffset = 4;
-    private const int TargetSquareOffset = 10;
-    private const int PieceOffset = 16;
-    private const int CapturedPieceOffset = 20;
-    private const int SpecialMoveFlagOffset = 24;
+    private const int TargetSquareOffset = 6;
+    private const int PromotedPieceOffset = 12;
+    private const int SpecialMoveFlagOffset = 14;
 
-    private const int SpecialMoveMask = 0x700_0000;
-    private const int PromotedPieceMask = 0xF;
-    private const int SourceSquareMask = 0x3F0;
-    private const int TargetSquareMask = 0xFC00;
-    private const int PieceMask = 0xF_0000;
-    private const int CapturedPieceMask = 0xF0_0000;
+    private const int SpecialMoveMask = 0xC000;
+    private const int PromotedPieceMask = 0x300;
+    private const int IsPromotionMask = 0xC000;
+    private const int SourceSquareMask = 0x3F;
+    private const int TargetSquareMask = 0xFC0;
 
     private const int UCIMask = 0xFFFF;
 
@@ -49,134 +43,53 @@ public static class MoveExtensions
     /// <summary>
     /// Move to represent a null move that fits in 12x64 arrays
     /// </summary>
-    public static readonly Move NullMove = Encode((int)BoardSquare.e1, (int)BoardSquare.e1, (int)Model.Piece.P);
+    public static readonly Move NullMove = Encode((int)BoardSquare.e1, (int)BoardSquare.e1);
 
     /// <summary>
     /// Encodes non-capturing moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move Encode(int sourceSquare, int targetSquare, int piece)
+    public static Move Encode(int sourceSquare, int targetSquare)
     {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | ((int)Model.Piece.None << CapturedPieceOffset);
-    }
-
-    /// <summary>
-    /// Encodes capture and non-capturing moves
-    /// </summary>
-    /// <param name="capturedPiece">Captured piece, or otherwise <see cref="Model.Piece.None"/> if there's not capture</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move Encode(int sourceSquare, int targetSquare, int piece, int capturedPiece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset);
-    }
-
-    /// <summary>
-    /// Encodes capturing move
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece, int capturedPiece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset);
+        return sourceSquare
+            | (targetSquare << TargetSquareOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeDoublePawnPush(int sourceSquare, int targetSquare, int piece)
+    public static Move EncodeEnPassant(int sourceSquare, int targetSquare)
     {
-        return (sourceSquare << SourceSquareOffset)
+        return sourceSquare
             | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | ((int)Model.Piece.None << CapturedPieceOffset)
-            | (int)SpecialMoveType.DoublePawnPush << SpecialMoveFlagOffset;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeEnPassant(int sourceSquare, int targetSquare, int piece, int capturedPiece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset)
-            | (int)SpecialMoveType.EnPassant << SpecialMoveFlagOffset;
-    }
-
-    /// <summary>
-    ///  Override when captured piece (aka side) isn't provided (not needed for IsValidMove)
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeEnPassant(int sourceSquare, int targetSquare, int piece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
             | (int)SpecialMoveType.EnPassant << SpecialMoveFlagOffset;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeShortCastle(int sourceSquare, int targetSquare, int piece)
+    public static Move EncodeCastle(int sourceSquare, int targetSquare)
     {
         if (targetSquare == CastlingData.DefaultValues)
         {
             return -1;
         }
 
-        return (sourceSquare << SourceSquareOffset)
+        return sourceSquare
             | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | ((int)Model.Piece.None << CapturedPieceOffset)
-            | (int)SpecialMoveType.ShortCastle << SpecialMoveFlagOffset;
+            | (int)SpecialMoveType.Castle << SpecialMoveFlagOffset;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeLongCastle(int sourceSquare, int targetSquare, int piece)
+    public static Move EncodePromotion(int sourceSquare, int targetSquare, int promotedPiece)
     {
-        if (targetSquare == CastlingData.DefaultValues)
-        {
-            return -1;
-        }
-
-        return (sourceSquare << SourceSquareOffset)
+        return sourceSquare
             | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | ((int)Model.Piece.None << CapturedPieceOffset)
-            | (int)SpecialMoveType.LongCastle << SpecialMoveFlagOffset;
+            | (promotedPiece << PromotedPieceOffset)
+            | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodePromotion(int sourceSquare, int targetSquare, int piece, int promotedPiece)
-    {
-        return promotedPiece
-            | (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | ((int)Model.Piece.None << CapturedPieceOffset);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodePromotion(int sourceSquare, int targetSquare, int piece, int promotedPiece, int capturedPiece)
-    {
-        return promotedPiece
-            | (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodePromotionFromPawnMove(Move pawnMove, int promotedPiece)
-        => pawnMove | promotedPiece;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapturedPiece(Move move, int capturedPiece)
-        => move | (capturedPiece << CapturedPieceOffset);
+    public static Move EncodePromotionFromPawnMove(Move pawnMove, int promotedPiece) =>
+        pawnMove
+            | (promotedPiece << PromotedPieceOffset)
+            | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
 
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
@@ -230,66 +143,104 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PromotedPiece(this Move move) => move & PromotedPieceMask;
+    public static int PromotedPiece(this Move move) => (move & PromotedPieceMask) >> PromotedPieceOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsPromotion(this Move move) => (move & PromotedPieceMask) != 0;
+    public static bool IsPromotion(this Move move) => (move & IsPromotionMask) != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SourceSquare(this Move move) => (move & SourceSquareMask) >> SourceSquareOffset;
+    public static int SourceSquare(this Move move) => move & SourceSquareMask;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int TargetSquare(this Move move) => (move & TargetSquareMask) >> TargetSquareOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Piece(this Move move) => (move & PieceMask) >> PieceOffset;
+    public static int Piece(this Move move, int[] board)
+    {
+        try
+        {
+
+        return board[move.SourceSquare()];
+        }
+        catch (Exception e)
+        {
+            ;
+        }
+
+        return -1;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CapturedPiece(this Move move) => (move & CapturedPieceMask) >> CapturedPieceOffset;
+    public static int Piece(this Move move, int[] board, int sourceSquare) => board[sourceSquare];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CapturedPiece(this Move move, int[] board)
+    {
+        try
+        {
+
+            return board[move.TargetSquare()];
+        }
+        catch (Exception e)
+        {
+            ;
+        }
+
+        return -1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CapturedPiece(this Move move, int[] board, int targetSquare) => board[targetSquare];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & SpecialMoveMask) >> SpecialMoveFlagOffset);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsDoublePawnPush(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.DoublePawnPush;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsEnPassant(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.EnPassant;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsShortCastle(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.ShortCastle;
+    public static bool IsShortCastle(this Move move) =>
+        (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.Castle
+        && move.TargetSquare() > move.SourceSquare();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsLongCastle(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.LongCastle;
+    public static bool IsShortCastle(this Move move, int sourceSquare, int targetSquare) =>
+        (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.Castle
+        && targetSquare > sourceSquare;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCastle(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset >= (int)SpecialMoveType.ShortCastle;
+    public static bool IsLongCastle(this Move move) =>
+        (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.Castle
+        && move.TargetSquare() < move.SourceSquare();
 
-    [Obsolete(
-        "Consider using the override that accepts a position for fully compliant EPD/PGN string representation of the move. " +
-        "This method be removed/renamed in future versions")]
-    internal static string ToEPDString(this Move move)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsLongCastle(this Move move, int sourceSquare, int targetSquare) =>
+        (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.Castle
+        && targetSquare < sourceSquare;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsCastle(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset >= (int)SpecialMoveType.Castle;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsDoublePawnPush(this Move move, int[] board)
     {
-        var piece = move.Piece();
-        var capturedPiece = move.CapturedPiece();
+        var sourceSquare = move.SourceSquare();
 
-#pragma warning disable S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
-        return move.SpecialMoveFlag() switch
-        {
-            SpecialMoveType.ShortCastle => "O-O",
-            SpecialMoveType.LongCastle => "O-O-O",
-            _ =>
-                (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
-                    ? (capturedPiece != (int)Model.Piece.None
-                        ? Constants.Coordinates[move.SourceSquare()][..^1]  // exd5
-                        : "")    // d5
-                    : char.ToUpperInvariant(Constants.AsciiPieces[move.Piece()]))
+        return
+            (board[sourceSquare] == (int)Model.Piece.P
+                    && move.TargetSquare() == sourceSquare - 16)
+                || (board[sourceSquare] == (int)Model.Piece.p
+                    && move.TargetSquare() == sourceSquare + 16);
+    }
 
-                + (capturedPiece == (int)Model.Piece.None ? "" : "x")
-                + Constants.Coordinates[move.TargetSquare()]
-                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
-        };
-#pragma warning restore S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsDoublePawnPush(this Move move, int[] board, int sourceSquare, int targetSquare)
+    {
+        return
+            (board[sourceSquare] == (int)Model.Piece.P
+                    && targetSquare == sourceSquare - 16)
+                || (board[sourceSquare] == (int)Model.Piece.p
+                    && targetSquare == sourceSquare + 16);
     }
 
     /// <summary>
@@ -298,25 +249,29 @@ public static class MoveExtensions
     /// <param name="move">A valid move for the given position</param>
     public static string ToEPDString(this Move move, Position position)
     {
-        var piece = move.Piece();
-        var capturedPiece = move.CapturedPiece();
+        var piece = move.Piece(position.Board);
+        var capturedPiece = move.CapturedPiece(position.Board);
+
+        if (move.IsShortCastle())
+        {
+            return "O-O";
+        }
+
+        if (move.IsLongCastle())
+        {
+            return "O-O-O";
+        }
 
 #pragma warning disable S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
-        return move.SpecialMoveFlag() switch
-        {
-            SpecialMoveType.ShortCastle => "O-O",
-            SpecialMoveType.LongCastle => "O-O-O",
-            _ =>
-                (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
-                    ? (capturedPiece != (int)Model.Piece.None
-                        ? global::Lynx.Constants.FileString[global::Lynx.Constants.File(move.SourceSquare())]  // exd5
-                        : "")    // d5
-                    : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
-                        + DisambiguateMove(move, position))
-                + (capturedPiece == (int)Model.Piece.None ? "" : "x")
-                + Constants.Coordinates[move.TargetSquare()]
-                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}"),
-        };
+        return (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
+            ? (capturedPiece != (int)Model.Piece.None
+                ? global::Lynx.Constants.FileString[global::Lynx.Constants.File(move.SourceSquare())]  // exd5
+                : "")    // d5
+            : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[piece]))
+                + DisambiguateMove(move, position))
+            + (capturedPiece == (int)Model.Piece.None ? "" : "x")
+            + Constants.Coordinates[move.TargetSquare()]
+            + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}");
 #pragma warning restore S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
     }
 
@@ -330,13 +285,17 @@ public static class MoveExtensions
         {
             for (int target = 0; target < 64; target++)
             {
-                int baseIndex = (source << SourceSquareOffset) | (target << TargetSquareOffset);
+                int baseIndex = source | (target << TargetSquareOffset);
                 var baseStr = string.Concat(Constants.Coordinates[source], Constants.Coordinates[target]);
                 result[baseIndex] = baseStr;
 
                 for (int promotedPiece = (int)Model.Piece.N; promotedPiece < (int)Model.Piece.k; promotedPiece++)
                 {
-                    result[baseIndex | promotedPiece] = $"{baseStr}{Constants.AsciiPiecesLowercase[promotedPiece]}";
+                    var move = baseIndex
+                        | (promotedPiece << PromotedPieceOffset)
+                        | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
+
+                    result[move] = $"{baseStr}{Constants.AsciiPiecesLowercase[promotedPiece]}";
                 }
             }
         }
@@ -359,7 +318,7 @@ public static class MoveExtensions
     /// </summary>
     private static string DisambiguateMove(Move move, Position position)
     {
-        var piece = move.Piece();
+        var piece = move.Piece(position.Board);
         var targetSquare = move.TargetSquare();
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
@@ -368,7 +327,7 @@ public static class MoveExtensions
 
 #pragma warning disable MA0029 // Combine LINQ methods
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
-            .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
+            .Where(m => m != move && m.Piece(position.Board) == piece && m.TargetSquare() == targetSquare)
             .Where(m =>
             {
                 // If any illegal moves exist with the same simple representation there's no need to disambiguate

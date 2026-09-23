@@ -215,7 +215,7 @@ public class ViriformatFilter
 
         if (FilterTactical)
         {
-            if (mv.CapturedPiece() != (int)Piece.None || mv.IsPromotion())
+            if (mv.CapturedPiece(position.Board) != (int)Piece.None || mv.IsPromotion())
             {
                 return true;
             }

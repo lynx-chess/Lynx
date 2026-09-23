@@ -164,16 +164,16 @@ public static class Utils
     ///     At depth 4 there's no capture, but the eval should still be 0
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Update50movesRule(Move moveToPlay, int halfMovesWithoutCaptureOrPawnMove)
+    public static int Update50movesRule(Position position, Move moveToPlay, int halfMovesWithoutCaptureOrPawnMove)
     {
-        if (moveToPlay.CapturedPiece() != (int)Piece.None)
+        if (moveToPlay.CapturedPiece(position.Board) != (int)Piece.None)
         {
             return halfMovesWithoutCaptureOrPawnMove >= 100
                 ? halfMovesWithoutCaptureOrPawnMove
                 : 0;
         }
 
-        var pieceToMove = moveToPlay.Piece();
+        var pieceToMove = moveToPlay.Piece(position.Board);
 
         return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
             ? 0

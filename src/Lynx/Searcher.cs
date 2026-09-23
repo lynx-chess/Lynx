@@ -740,7 +740,7 @@ public sealed class Searcher : IDisposable
                 if (position.WasProduceByAValidMove())
                 {
                     legalMoves[legalMovesCount++] = pseudoLegalMove;
-                    movesByPiece[pseudoLegalMove.Piece() % 6]++;
+                    movesByPiece[pseudoLegalMove.Piece(position.Board) % 6]++;
                 }
 
                 position.UnmakeMove(pseudoLegalMove, gameState);
@@ -818,7 +818,7 @@ public sealed class Searcher : IDisposable
                     // Pick one legal move that doesn't lead to a terminal position and that matches pieceToUse
                     foreach (var randomMove in legalMoves)
                     {
-                        var piece = randomMove.Piece();
+                        var piece = randomMove.Piece(position.Board);
                         if (piece != pieceToUse && piece != (pieceToUse + 6))
                         {
                             continue;

@@ -67,7 +67,7 @@ public class ViriformatFilterTest
         var filter = new ViriformatFilter { MinPly = 0, FilterCastling = true };
         var rng = new Random(1);
 
-        var castle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
+        var castle = MoveExtensions.EncodeCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
         Assert.IsTrue(filter.ShouldDrop(castle, 0, position, 1, 0, rng));
     }
 
