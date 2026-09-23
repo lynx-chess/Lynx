@@ -515,7 +515,7 @@ public partial class Position : IDisposable
             case SpecialMoveType.None:
             case SpecialMoveType.Promotion:
                 {
-                    if (move.IsDoublePawnPush(Board, sourceSquare, targetSquare))
+                    if (move.IsDoublePawnPush(piece, sourceSquare, targetSquare))
                     {
                         var pawnPush = +8 - (oldSide * 16);
                         var enPassantSquare = sourceSquare + pawnPush;

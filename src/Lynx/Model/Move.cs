@@ -200,24 +200,24 @@ public static class MoveExtensions
     public static bool IsCastle(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset >= (int)SpecialMoveType.Castle;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsDoublePawnPush(this Move move, int[] board)
+    public static bool IsDoublePawnPush(this Move move, int piece)
     {
         var sourceSquare = move.SourceSquare();
 
         return
-            (board[sourceSquare] == (int)Model.Piece.P
+            (piece == (int)Model.Piece.P
                     && move.TargetSquare() == sourceSquare - 16)
-                || (board[sourceSquare] == (int)Model.Piece.p
+                || (piece == (int)Model.Piece.p
                     && move.TargetSquare() == sourceSquare + 16);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsDoublePawnPush(this Move move, int[] board, int sourceSquare, int targetSquare)
+    public static bool IsDoublePawnPush(this Move move, int piece, int sourceSquare, int targetSquare)
     {
         return
-            (board[sourceSquare] == (int)Model.Piece.P
+            (piece == (int)Model.Piece.P
                     && targetSquare == sourceSquare - 16)
-                || (board[sourceSquare] == (int)Model.Piece.p
+                || (piece == (int)Model.Piece.p
                     && targetSquare == sourceSquare + 16);
     }
 

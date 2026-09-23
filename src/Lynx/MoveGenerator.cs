@@ -160,7 +160,7 @@ public static class MoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, (int)position.EnPassant);
+                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant);
             }
 
             // Captures
@@ -236,7 +236,7 @@ public static class MoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, (int)position.EnPassant);
+                Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant);
             }
 
             // Captures
@@ -522,7 +522,7 @@ public static class MoveGenerator
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)
                 // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-                && IsValidMove(position, MoveExtensions.Encode(sourceSquare, (int)position.EnPassant))) // Could add here capturedPiece: (int)Piece.p - offset
+                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant))) // Could add here capturedPiece: (int)Piece.p - offset
             {
                 return true;
             }
