@@ -270,7 +270,7 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, Position position, Bitboard oppositeSideAttacks)
+    public static void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position, Bitboard oppositeSideAttacks)
     {
         // TODO: move to position?
         var castlingRights = position.Castle;

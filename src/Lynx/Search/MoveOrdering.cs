@@ -13,9 +13,9 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, Move bestMoveTTCandidate = default)
     {
-        if ((ShortMove)move == bestMoveTTCandidate)
+        if (move == bestMoveTTCandidate)
         {
             return TTMoveScoreValue;
         }
@@ -108,9 +108,9 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMoveQSearch(Position position, Move move, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMoveQSearch(Position position, Move move, Move bestMoveTTCandidate = default)
     {
-        if ((ShortMove)move == bestMoveTTCandidate)
+        if (move == bestMoveTTCandidate)
         {
             return TTMoveScoreValue;
         }
@@ -162,7 +162,7 @@ public sealed partial class Engine
     /// Quiet history, continuation history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<Move> visitedMoves, int visitedMovesCounter, Move move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
     {
         var piece = move.Piece(position.Board);
         var targetSquare = move.TargetSquare();
@@ -194,7 +194,7 @@ public sealed partial class Engine
                 UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
             }
 
-            ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
+            ref var visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
             for (int i = 0; i < visitedMovesCounter; ++i)
             {
                 var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
@@ -253,7 +253,7 @@ public sealed partial class Engine
     /// Capture history
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(Position position, int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
+    private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(Position position, int depth, ReadOnlySpan<Move> visitedMoves, int visitedMovesCounter, Move move)
     {
         var rawHistoryBonus = HistoryBonus[depth];
         var rawHistoryMalus = HistoryMalus[depth];
@@ -263,7 +263,7 @@ public sealed partial class Engine
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
-        ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
+        ref var visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
         for (int i = 0; i < visitedMovesCounter; ++i)
         {
             var visitedMove = Unsafe.Add(ref visitedMovesBase, i);

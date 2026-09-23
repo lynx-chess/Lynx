@@ -51,16 +51,16 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move Encode(int sourceSquare, int targetSquare)
     {
-        return sourceSquare
-            | (targetSquare << TargetSquareOffset);
+        return (short)(sourceSquare
+            | (targetSquare << TargetSquareOffset));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeEnPassant(int sourceSquare, int targetSquare)
     {
-        return sourceSquare
+        return (short)(sourceSquare
             | (targetSquare << TargetSquareOffset)
-            | (int)SpecialMoveType.EnPassant << SpecialMoveFlagOffset;
+            | (int)SpecialMoveType.EnPassant << SpecialMoveFlagOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,25 +71,25 @@ public static class MoveExtensions
             return -1;
         }
 
-        return sourceSquare
+        return (short)(sourceSquare
             | (targetSquare << TargetSquareOffset)
-            | (int)SpecialMoveType.Castle << SpecialMoveFlagOffset;
+            | (int)SpecialMoveType.Castle << SpecialMoveFlagOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotion(int sourceSquare, int targetSquare, int promotedPiece)
     {
-        return sourceSquare
+        return (short)(sourceSquare
             | (targetSquare << TargetSquareOffset)
             | ((promotedPiece - 1) << PromotedPieceOffset)
-            | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
+            | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotionFromPawnMove(Move pawnMove, int promotedPiece) =>
-        pawnMove
+        (short)(pawnMove
             | ((promotedPiece - 1) << PromotedPieceOffset)
-            | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
+            | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset);
 
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>

@@ -30,7 +30,7 @@ public struct TranspositionTableElement
 {
     private ushort _key;        // 2 bytes
 
-    private ShortMove _move;    // 2 bytes
+    private Move _move;    // 2 bytes
 
     private short _score;       // 2 bytes
 
@@ -60,7 +60,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Best move found in the position. 0 if the search failed low (score <= alpha)
     /// </summary>
-    public readonly ShortMove Move
+    public readonly Move Move
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _move;
@@ -128,6 +128,6 @@ public struct TranspositionTableElement
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
         _type_WasPv = (byte)(wasPv | ((int)nodeType << NodeTypeOffset));
-        _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+        _move = move ?? Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 }

@@ -110,7 +110,7 @@ public sealed partial class Engine
                 }
             }
 
-            ttMoveIsCapture = ttEntryHasBestMove && position.Board[((int)ttEntry.BestMove).TargetSquare()] != (int)Piece.None;
+            ttMoveIsCapture = ttEntryHasBestMove && position.Board[(ttEntry.BestMove).TargetSquare()] != (int)Piece.None;
         }
         else
         {
@@ -357,7 +357,7 @@ public sealed partial class Engine
             // Value copy
             var move = Unsafe.Add(ref pseudoLegalMovesRef, moveIndex); // Value copy for use in closures
 
-            var isBestMove = (ShortMove)move == ttBestMove;
+            var isBestMove = move == ttBestMove;
             if (isVerifyingSE && isBestMove)
             {
                 continue;
@@ -848,7 +848,7 @@ public sealed partial class Engine
             return ttScore;
         }
 
-        ShortMove ttBestMove = ttProbeResult.BestMove;
+        Move ttBestMove = ttProbeResult.BestMove;
         _maxDepthReached[ply] = ply;
 
         var rawStaticEval = ttHit

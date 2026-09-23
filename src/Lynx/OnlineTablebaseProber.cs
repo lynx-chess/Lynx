@@ -64,7 +64,7 @@ public static class OnlineTablebaseProber
         TablebaseEvalMove? bestMove = null;
         int mate = 0;
 
-        int[]? allPossibleMoves = null;
+        Move[]? allPossibleMoves = null;
 
         switch (tablebaseEval.Category)
         {

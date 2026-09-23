@@ -14,12 +14,12 @@ public sealed partial class Engine
     /// <summary>
     /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
-    private readonly int[] _killerMoves = GC.AllocateArray<int>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
+    private readonly Move[] _killerMoves = GC.AllocateArray<Move>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
 
     /// <summary>
     /// 12 x 64
     /// </summary>
-    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
+    private readonly Move[] _counterMoves = GC.AllocateArray<Move>(12 * 64, pinned: true);
 
     private const int PieceToQuietHistoryLength = 12 * 64 * 2 * 2;
 
@@ -557,7 +557,7 @@ public sealed partial class Engine
         int bestScore, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
-        var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
+        var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(default(Move))].ToArray();
 
         var maxDepthReached = _maxDepthReached.Max();
 
@@ -628,7 +628,7 @@ public sealed partial class Engine
     private SearchResult BestMoveRoot(Move firstLegalMove)
     {
         var score = 0;
-        ShortMove ttBestMove = default;
+        Move ttBestMove = default;
 
         using var position = new Position(Game.PositionBeforeLastSearch);
         var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply: 0, out var ttEntry);
