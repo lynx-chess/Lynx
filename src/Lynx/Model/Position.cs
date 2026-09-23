@@ -408,7 +408,7 @@ public partial class Position : IDisposable
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
         int piece = move.Piece(Board);
-        int promotedPiece = move.PromotedPiece();
+        int promotedPiece = move.PromotedPiece((int)Side);
         int capturedPiece = move.CapturedPiece(Board);
 
         var newPiece = piece;
@@ -737,7 +737,7 @@ public partial class Position : IDisposable
         int targetSquare = move.TargetSquare();
         int piece = move.Piece(Board, targetSquare);    // Not sourceSquare, since the move has been played over Board already
         int capturedPiece = gameState.CapturedPiece;
-        int promotedPiece = move.PromotedPiece();
+        int promotedPiece = move.PromotedPiece((int)_side);
 
         var newPiece = piece;
         if (promotedPiece != default)

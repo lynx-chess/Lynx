@@ -27,7 +27,7 @@ public static class SEE
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
         Debug.Assert(move.CapturedPiece(position.Board) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
-        Debug.Assert(move.PromotedPiece() == default || move.CapturedPiece(position.Board) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves without captures");
+        Debug.Assert(move.PromotedPiece((int)position.Side) == default || move.CapturedPiece(position.Board) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves without captures");
         Debug.Assert(!move.IsEnPassant() || move.CapturedPiece(position.Board) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle en-passant moves if they aren't marked as captures too");
 
         var sideToMove = position.Side;
@@ -123,8 +123,9 @@ public static class SEE
             return false;
         }
 
-        var next = move.PromotedPiece() != default
-            ? move.PromotedPiece()
+        var promotedPiece = move.PromotedPiece((int)position.Side);
+        var next = promotedPiece != default
+            ? promotedPiece
             : move.Piece(position.Board);
 
         score -= PieceValues[next];
@@ -206,7 +207,7 @@ public static class SEE
             return PieceValues[(int)Piece.P];
         }
 
-        var promotedPiece = move.PromotedPiece();
+        var promotedPiece = move.PromotedPiece((int)position.Side);
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default

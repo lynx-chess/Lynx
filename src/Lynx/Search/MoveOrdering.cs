@@ -20,7 +20,7 @@ public sealed partial class Engine
             return TTMoveScoreValue;
         }
 
-        var promotedPiece = move.PromotedPiece();
+        var promotedPiece = move.PromotedPiece((int)position.Side);
         var isPromotion = promotedPiece != default;
         var capturedPiece = move.CapturedPiece(position.Board);
         var isCapture = capturedPiece != (int)Piece.None;
@@ -88,10 +88,19 @@ public sealed partial class Engine
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
 
-            return baseCaptureScore
+            try
+            {
+
+                return baseCaptureScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
+            }
+            catch (Exception e)
+            {
+                ;
+            }
+            return -1;
         }
 
         if (isPromotion)
@@ -115,7 +124,7 @@ public sealed partial class Engine
             return TTMoveScoreValue;
         }
 
-        var promotedPiece = move.PromotedPiece();
+        var promotedPiece = move.PromotedPiece((int)position.Side);
         var isPromotion = promotedPiece != default;
         var capturedPiece = move.CapturedPiece(position.Board);
         var isCapture = capturedPiece != (int)Piece.None;
@@ -144,10 +153,19 @@ public sealed partial class Engine
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
-            return baseCaptureScore
-                + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
-                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
+            try
+            {
+
+                return baseCaptureScore
+                    + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
+                    //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                    + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
+            }
+            catch (Exception e)
+            {
+                ;
+            }
+            return -1;
         }
 
         if (isPromotion)
@@ -230,7 +248,7 @@ public sealed partial class Engine
         ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
         var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
 
-        if (move.PromotedPiece() == default && move != firstKillerMove)
+        if (move.PromotedPiece((int)position.Side) == default && move != firstKillerMove)
         {
             // 🔍 Killer moves
             if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))

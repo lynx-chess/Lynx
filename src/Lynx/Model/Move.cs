@@ -17,7 +17,7 @@ public enum SpecialMoveType
 ///  Binary move bits     Hexadecimal
 /// 0000 0000 0011 1111     0x3F            Source square (0-63)
 /// 0000 1111 1100 0000     0xFC0           Target square (0-63)
-/// 0011 0000 0000 0000     0x3000          Promoted piece (0-11)
+/// 0011 0000 0000 0000     0x3000          Promoted piece (1-4)
 /// 0100 0000 0000 0000     0x40000         En-passant flag
 /// 1000 0000 0000 0000     0x80000         Castle flag
 /// 1100 0000 0000 0000     0xC000          Promotion flag
@@ -31,12 +31,12 @@ public static class MoveExtensions
     private const int SpecialMoveFlagOffset = 14;
 
     private const int SpecialMoveMask = 0xC000;
-    private const int PromotedPieceMask = 0x300;
+    private const int PromotedPieceMask = 0x3000;
     private const int IsPromotionMask = 0xC000;
     private const int SourceSquareMask = 0x3F;
     private const int TargetSquareMask = 0xFC0;
 
-    private const int UCIMask = 0xFFFF;
+    private const int UCIMask = 0b0011_1111_1111_1111;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -81,14 +81,14 @@ public static class MoveExtensions
     {
         return sourceSquare
             | (targetSquare << TargetSquareOffset)
-            | (promotedPiece << PromotedPieceOffset)
+            | ((promotedPiece - 1) << PromotedPieceOffset)
             | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotionFromPawnMove(Move pawnMove, int promotedPiece) =>
         pawnMove
-            | (promotedPiece << PromotedPieceOffset)
+            | ((promotedPiece - 1) << PromotedPieceOffset)
             | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
 
     /// <summary>
@@ -96,9 +96,17 @@ public static class MoveExtensions
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, [NotNullWhen(true)] out Move? move)
+    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, int side, [NotNullWhen(true)] out Move? move)
     {
-        Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
+        try
+        {
+
+            Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
+        }
+        catch (Exception e)
+        {
+            ;
+        }
 
         var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
         var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
@@ -111,14 +119,14 @@ public static class MoveExtensions
             {
                 if (UCIString.Length == 4)
                 {
-                    Debug.Assert(candidateMove.PromotedPiece() == default);
+                    Debug.Assert(candidateMove.PromotedPiece(side) == default);
 
                     move = candidateMove;
                     return true;
                 }
 
                 var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
-                var candidatePromotedPiece = candidateMove.PromotedPiece();
+                var candidatePromotedPiece = candidateMove.PromotedPiece(side);
 
                 if (candidatePromotedPiece == promotedPiece
                     || candidatePromotedPiece == promotedPiece - 6)
@@ -129,9 +137,10 @@ public static class MoveExtensions
 
                 Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
 #pragma warning disable MA0031 // Optimize Enumerable.Count() usage
-                Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) % 4 == 0,
+                Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece(side) != default) % 4 == 0,
                     "Assert fail", "There should be 0 or a multiple of 4 that are a promotion");
-                Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
+                Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece(side) != default) == 4,
+                    "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
 #pragma warning restore MA0031 // Optimize Enumerable.Count() usage
             }
         }
@@ -143,10 +152,13 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PromotedPiece(this Move move) => (move & PromotedPieceMask) >> PromotedPieceOffset;
+    public static int PromotedPiece(this Move move, int side) =>
+        move.IsPromotion()
+            ? ((move & PromotedPieceMask) >> PromotedPieceOffset) + 1 + Utils.PieceOffset(side)
+            : 0;    // None?   
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsPromotion(this Move move) => (move & IsPromotionMask) != 0;
+    public static bool IsPromotion(this Move move) => (move & IsPromotionMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.Promotion;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SourceSquare(this Move move) => move & SourceSquareMask;
@@ -160,7 +172,7 @@ public static class MoveExtensions
         try
         {
 
-        return board[move.SourceSquare()];
+            return board[move.SourceSquare()];
         }
         catch (Exception e)
         {
@@ -271,7 +283,7 @@ public static class MoveExtensions
                 + DisambiguateMove(move, position))
             + (capturedPiece == (int)Model.Piece.None ? "" : "x")
             + Constants.Coordinates[move.TargetSquare()]
-            + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}");
+            + (move.PromotedPiece((int)position.Side) == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece((int)position.Side)])}");
 #pragma warning restore S3358, MA0075 // Ternary operators should not be nested, culture-sensitive string
     }
 
@@ -285,15 +297,17 @@ public static class MoveExtensions
         {
             for (int target = 0; target < 64; target++)
             {
-                int baseIndex = source | (target << TargetSquareOffset);
+                int baseIndex = source
+                    | (target << TargetSquareOffset);
+
                 var baseStr = string.Concat(Constants.Coordinates[source], Constants.Coordinates[target]);
                 result[baseIndex] = baseStr;
 
                 for (int promotedPiece = (int)Model.Piece.N; promotedPiece < (int)Model.Piece.k; promotedPiece++)
                 {
                     var move = baseIndex
-                        | (promotedPiece << PromotedPieceOffset)
-                        | (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;
+                        | ((promotedPiece - 1) << PromotedPieceOffset);
+                    //| (int)SpecialMoveType.Promotion << SpecialMoveFlagOffset;    // Not needed, since UCIMask ignores the first two bits
 
                     result[move] = $"{baseStr}{Constants.AsciiPiecesLowercase[promotedPiece]}";
                 }

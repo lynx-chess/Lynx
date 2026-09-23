@@ -532,6 +532,10 @@ public sealed partial class Engine
             var canBeRepetition = Game.Update50movesRule(move);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
+            if(move == 33156)
+            {
+                ;
+            }
             stack.Piece = move.Piece(position.Board, targetSquare); // Using target square here since the move is already played
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -964,7 +968,7 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             stack.Move = move;
-            stack.Piece = move.Piece(position.Board);
+            stack.Piece = move.Piece(position.Board, move.TargetSquare()); // Using target square here since the move is already played
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);

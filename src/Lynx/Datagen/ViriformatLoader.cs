@@ -158,7 +158,7 @@ public static class ViriformatLoader
 
                     var generated = MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool);
 
-                    if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, out var move))
+                    if (!MoveExtensions.TryParseFromUCIString(uci.AsSpan(), generated, (int)game.CurrentPosition.Side, out var move))
                     {
                         _logger.Warn("Unable to parse move {0} in current position", uci);
                         throw new InvalidDataException($"Unable to parse move ({uci}) in current position ({game.FEN})");

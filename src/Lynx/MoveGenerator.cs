@@ -180,14 +180,10 @@ public static class MoveGenerator
                 if (targetRank == 1 || targetRank == 8)
                 {
                     // Capture with promotion
-                    var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
-
-                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;
-                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;
-                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;
-                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;
-
-                    localIndex += 4;
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B);
                 }
                 else
                 {
@@ -264,14 +260,10 @@ public static class MoveGenerator
                 if (targetRank == 1 || targetRank == 8)
                 {
                     // Capture with promotion
-                    var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N + offset);
-
-                    Unsafe.Add(ref movePoolRef, localIndex) = knightPromo + 3;         // Q
-                    Unsafe.Add(ref movePoolRef, localIndex + 1) = knightPromo + 2;     // R
-                    Unsafe.Add(ref movePoolRef, localIndex + 2) = knightPromo;         // N
-                    Unsafe.Add(ref movePoolRef, localIndex + 3) = knightPromo + 1;     // B
-
-                    localIndex += 4;
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.Q);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.R);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.N);
+                    Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodePromotionFromPawnMove(pawnCapture, promotedPiece: (int)Piece.B);
                 }
                 else
                 {
