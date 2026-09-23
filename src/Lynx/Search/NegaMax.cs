@@ -529,7 +529,7 @@ public sealed partial class Engine
 
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-            var canBeRepetition = Game.Update50movesRule(move);
+            var canBeRepetition = Game.Update50movesRule(move, gameState.Piece, gameState.CapturedPiece);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
             stack.Piece = gameState.Piece;

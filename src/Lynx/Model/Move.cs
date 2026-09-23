@@ -197,7 +197,8 @@ public static class MoveExtensions
         && targetSquare < sourceSquare;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCastle(this Move move) => (move & SpecialMoveMask) >> SpecialMoveFlagOffset >= (int)SpecialMoveType.Castle;
+    public static bool IsCastle(this Move move) => 
+        (move & SpecialMoveMask) >> SpecialMoveFlagOffset == (int)SpecialMoveType.Castle;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsDoublePawnPush(this Move move, int piece)
@@ -269,7 +270,7 @@ public static class MoveExtensions
                 var baseStr = string.Concat(Constants.Coordinates[source], Constants.Coordinates[target]);
                 result[baseIndex] = baseStr;
 
-                for (int promotedPiece = (int)Model.Piece.N; promotedPiece < (int)Model.Piece.k; promotedPiece++)
+                for (int promotedPiece = (int)Model.Piece.N; promotedPiece < (int)Model.Piece.K; promotedPiece++)
                 {
                     var promotionMove = baseIndex
                         | ((promotedPiece - 1) << PromotedPieceOffset)
