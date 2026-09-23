@@ -26,8 +26,8 @@ public class GeneralMoveGeneratorTest
             newPosition.MakeMove(move);
             if (newPosition.IsValid())
             {
-                Assert.AreNotEqual(Piece.n, (Piece)move.Piece());
-                Assert.AreEqual(Piece.k, (Piece)move.Piece());
+                Assert.AreNotEqual(Piece.n, (Piece)move.Piece(newPosition.Board));
+                Assert.AreEqual(Piece.k, (Piece)move.Piece(newPosition.Board));
             }
         }
     }

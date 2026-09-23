@@ -9,14 +9,14 @@ public class GenerateKingMovesTest
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece(position.Board) == (int)Piece.K || m.Piece(position.Board) == (int)Piece.k);
     }
 
     private static IEnumerable<Move> GenerateKingCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece(position.Board) == (int)Piece.K || m.Piece(position.Board) == (int)Piece.k);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
@@ -62,7 +62,7 @@ public class GenerateKingMovesTest
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingMoves(position);
 
-        Assert.AreEqual(7, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(7, moves.Count(m => m.Piece(position.Board) == piece));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.b2
@@ -116,7 +116,7 @@ public class GenerateKingMovesTest
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingMoves(position);
 
-        Assert.AreEqual(7, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(7, moves.Count(m => m.Piece(position.Board) == piece));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.g6
@@ -170,7 +170,7 @@ public class GenerateKingMovesTest
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingCaptures(position);
 
-        Assert.AreEqual(4, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(4, moves.Count(m => m.Piece(position.Board) == piece));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.b2
@@ -212,7 +212,7 @@ public class GenerateKingMovesTest
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingCaptures(position);
 
-        Assert.AreEqual(3, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(3, moves.Count(m => m.Piece(position.Board) == piece));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.g6

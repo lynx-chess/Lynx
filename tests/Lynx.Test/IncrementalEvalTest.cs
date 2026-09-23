@@ -30,7 +30,7 @@ public class IncrementalEvalTest
             foreach (var move in moveSpan[..index])
             {
                 Assert.IsTrue(move.IsCastle());
-                Assert.AreEqual((int)Piece.K + Utils.PieceOffset(position.Side), move.Piece());
+                Assert.AreEqual((int)Piece.K + Utils.PieceOffset(position.Side), move.Piece(position.Board));
             }
         }
     }
