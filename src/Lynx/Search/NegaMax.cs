@@ -370,7 +370,7 @@ public sealed partial class Engine
             var targetSquare = move.TargetSquare();
 
             int quietHistory = QuietHistoryEntry(position, move, oppositeSideAttacks)
-                + ContinuationHistoryEntry(position, piece, targetSquare, ply);
+                + ContinuationHistoryEntry(piece, targetSquare, ply);
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -532,6 +532,7 @@ public sealed partial class Engine
             var canBeRepetition = Game.Update50movesRule(move);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
+            stack.Piece = move.Piece(position.Board, targetSquare); // Using target square here since the move is already played
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()
@@ -681,7 +682,7 @@ public sealed partial class Engine
                             ? EvaluationConstants.HistoryBonus[depth]
                             : -EvaluationConstants.HistoryMalus[depth];
 
-                        UpdateContinuationHistory(position, piece, targetSquare, ply, historyBonus);
+                        UpdateContinuationHistory(piece, targetSquare, ply, historyBonus);
                     }
                 }
 
@@ -963,6 +964,7 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             stack.Move = move;
+            stack.Piece = move.Piece(position.Board);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);

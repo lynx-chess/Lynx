@@ -332,10 +332,27 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UpdateMoveInStack(int n, Move move) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
+    public void UpdateMoveInStack(int n, Move move, Position position)
+    {
+        ref var entry = ref _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+
+        entry.Move = move;
+        entry.Piece = move.Piece(position.Board);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Move ReadMoveFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int ReadPieceFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Piece;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (Move Move, int Piece) ReadMoveAndPieceFromStack(int n)
+    {
+        var entry = _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+        
+        return (entry.Move, entry.Piece);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int ReadStaticEvalFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval;

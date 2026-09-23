@@ -45,7 +45,7 @@ public sealed partial class Engine
             if (ply >= 1)
             {
                 // Countermove
-                if (CounterMove(position, ply - 1) == move)
+                if (CounterMove(ply - 1) == move)
                 {
                     return CounterMoveValue;
                 }
@@ -56,7 +56,7 @@ public sealed partial class Engine
                 // Counter move history
                 return BaseMoveScore
                     + QuietHistoryEntry(position, move, oppositeSideAttacks)
-                    + ContinuationHistoryEntry(position, piece, targetSquare, ply);
+                    + ContinuationHistoryEntry(piece, targetSquare, ply);
             }
 
             // History move or 0 if not found
@@ -191,7 +191,7 @@ public sealed partial class Engine
             if (!isRoot)
             {
                 // 🔍 Continuation history
-                UpdateContinuationHistory(position, piece, targetSquare, ply, rawHistoryBonus);
+                UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
             }
 
             ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
@@ -220,7 +220,7 @@ public sealed partial class Engine
                     if (!isRoot)
                     {
                         // 🔍 Continuation history penalty / malus
-                        UpdateContinuationHistory(position, visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
+                        UpdateContinuationHistory(visitedMovePiece, visitedMoveTargetSquare, ply, -rawHistoryMalus);
                     }
                 }
             }
@@ -243,7 +243,7 @@ public sealed partial class Engine
             if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
-                ref var counterMove = ref CounterMove(position, ply - 1);
+                ref var counterMove = ref CounterMove(ply - 1);
                 counterMove = move;
             }
         }
