@@ -23,7 +23,7 @@ public sealed partial class Engine
         var promotedPiece = move.PromotedPiece((int)position.Side);
         var isPromotion = promotedPiece != default;
         var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
-        var isCapture = capturedPiece != (int)Piece.None || move.IsEnPassant();
+        var isCapture = capturedPiece != (int)Piece.None;
 
         if (!isCapture && !isPromotion)
         {
