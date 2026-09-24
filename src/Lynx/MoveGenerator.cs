@@ -168,7 +168,6 @@ public static class MoveGenerator
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.Encode(sourceSquare, targetSquare);
 
@@ -244,7 +243,6 @@ public static class MoveGenerator
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.Encode(sourceSquare, targetSquare);
 
@@ -403,7 +401,6 @@ public static class MoveGenerator
             while (attacks != default)
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
                 Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, targetSquare);
             }
         }
@@ -427,8 +424,6 @@ public static class MoveGenerator
         while (attacks != default)
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
-
-            var capturedPiece = position.Board[targetSquare];
             Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, targetSquare);
         }
     }
@@ -532,7 +527,6 @@ public static class MoveGenerator
             while (attackedSquares != default)
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
-                var capturedPiece = position.Board[targetSquare];
 
                 var pawnCapture = MoveExtensions.Encode(sourceSquare, targetSquare);
 

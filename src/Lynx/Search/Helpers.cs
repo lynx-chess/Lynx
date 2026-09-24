@@ -91,7 +91,7 @@ public sealed partial class Engine
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
 
-        var pieceToHistory = PieceToQuietHistoryEntry(move.Piece(position.Board), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+        var pieceToHistory = PieceToQuietHistoryEntry(MoveExtensions.Piece(position.Board, sourceSquare), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
         var butterflyHistory = ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
 
         return (short)((pieceToHistory + butterflyHistory) / 2);

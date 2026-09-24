@@ -160,7 +160,7 @@ public static class MoveExtensions
     public static int Piece(this Move move, int[] board) => board[move.SourceSquare()];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Piece(this Move move, int[] board, int sourceSquare) => board[sourceSquare];
+    public static int Piece(int[] board, int sourceSquare) => board[sourceSquare];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #pragma warning disable S3358 // Ternary operators should not be nested
@@ -223,7 +223,7 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsDoublePawnPush(this Move move, int piece, int sourceSquare, int targetSquare)
+    public static bool IsDoublePawnPush(int piece, int sourceSquare, int targetSquare)
     {
         return
             (piece == (int)Model.Piece.P

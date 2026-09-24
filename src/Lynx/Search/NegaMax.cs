@@ -110,7 +110,7 @@ public sealed partial class Engine
                 }
             }
 
-            ttMoveIsCapture = ttEntryHasBestMove 
+            ttMoveIsCapture = ttEntryHasBestMove
                 && position.Board[ttEntry.BestMove.TargetSquare()] != (int)Piece.None;
             //&& ttEntry.BestMove.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None;
         }
@@ -531,7 +531,7 @@ public sealed partial class Engine
 
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-            var canBeRepetition = Game.Update50movesRule(move, gameState.Piece, gameState.CapturedPiece);
+            var canBeRepetition = Game.Update50movesRule(gameState.Piece, gameState.CapturedPiece);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
             stack.Piece = gameState.Piece;

@@ -407,7 +407,7 @@ public partial class Position : IDisposable
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
-        int piece = move.Piece(Board);
+        int piece = MoveExtensions.Piece(Board, sourceSquare);
         int promotedPiece = move.PromotedPiece((int)Side);
         int capturedPiece = move.CapturedPiece(Board, (int)Side);
 
@@ -515,7 +515,7 @@ public partial class Position : IDisposable
             case SpecialMoveType.None:
             case SpecialMoveType.Promotion:
                 {
-                    if (move.IsDoublePawnPush(piece, sourceSquare, targetSquare))
+                    if (MoveExtensions.IsDoublePawnPush(piece, sourceSquare, targetSquare))
                     {
                         var pawnPush = +8 - (oldSide * 16);
                         var enPassantSquare = sourceSquare + pawnPush;
