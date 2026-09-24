@@ -110,7 +110,9 @@ public sealed partial class Engine
                 }
             }
 
-            ttMoveIsCapture = ttEntryHasBestMove && ttEntry.BestMove.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None;
+            ttMoveIsCapture = ttEntryHasBestMove 
+                && position.Board[ttEntry.BestMove.TargetSquare()] != (int)Piece.None;
+            //&& ttEntry.BestMove.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None;
         }
         else
         {
