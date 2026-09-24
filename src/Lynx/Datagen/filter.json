@@ -14,7 +14,7 @@
   "MaxPositionsPerPhasePerGame": 4096,
   "UsePhaseForSampling": true,
   "UseEvalGameResultMismatch": true,
-  "EvalGameResultMismatch_Threshold": 45,
+  "EvalGameResultMismatch_Threshold": 70,
   "EvalGameResultMismatch_EvalDivisor": 400,
   "DrawAdjudication": false,
   "DrawAdjudication_Score": 0,
