@@ -110,7 +110,9 @@ public sealed partial class Engine
                 }
             }
 
-            ttMoveIsCapture = ttEntryHasBestMove && position.Board[((int)ttEntry.BestMove).TargetSquare()] != (int)Piece.None;
+            ttMoveIsCapture = ttEntryHasBestMove
+                && position.Board[ttEntry.BestMove.TargetSquare()] != (int)Piece.None;
+            //&& ttEntry.BestMove.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None;
         }
         else
         {
@@ -357,19 +359,19 @@ public sealed partial class Engine
             // Value copy
             var move = Unsafe.Add(ref pseudoLegalMovesRef, moveIndex); // Value copy for use in closures
 
-            var isBestMove = (ShortMove)move == ttBestMove;
+            var isBestMove = move == ttBestMove;
             if (isVerifyingSE && isBestMove)
             {
                 continue;
             }
 
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
-            var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
+            var piece = move.Piece(position.Board);
+            var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
-            int quietHistory = QuietHistoryEntry(move, oppositeSideAttacks)
+            int quietHistory = QuietHistoryEntry(position, move, oppositeSideAttacks)
                 + ContinuationHistoryEntry(piece, targetSquare, ply);
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
@@ -529,9 +531,10 @@ public sealed partial class Engine
 
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-            var canBeRepetition = Game.Update50movesRule(move);
+            var canBeRepetition = Game.Update50movesRule(gameState.Piece, gameState.CapturedPiece);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             stack.Move = move;
+            stack.Piece = gameState.Piece;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()
@@ -700,7 +703,7 @@ public sealed partial class Engine
             if (isRoot)
             {
                 var nodesSpentInThisMove = _nodes - previousNodes;
-                UpdateMoveNodeCount(move, nodesSpentInThisMove);
+                UpdateMoveNodeCount(position, move, nodesSpentInThisMove);
             }
 
             PrintMove(position, ply, move, score);
@@ -744,7 +747,7 @@ public sealed partial class Engine
 
                     if (isCapture)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, historyDepth, visitedMoves, visitedMovesCounter, move);
                     }
                     else
                     {
@@ -774,7 +777,7 @@ public sealed partial class Engine
         {
             if (!(isInCheck
                 || (bestMove is not null
-                    && bestMove.Value.CapturedPiece() != (int)Piece.None
+                    && bestMove.Value.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
                     && SEE.IsGoodCapture(position, bestMove.Value))
                 || bestMove?.IsPromotion() == true
                 || (nodeType == NodeType.Beta && bestScore <= staticEval)
@@ -847,7 +850,7 @@ public sealed partial class Engine
             return ttScore;
         }
 
-        ShortMove ttBestMove = ttProbeResult.BestMove;
+        Move ttBestMove = ttProbeResult.BestMove;
         _maxDepthReached[ply] = ply;
 
         var rawStaticEval = ttHit
@@ -963,6 +966,7 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             stack.Move = move;
+            stack.Piece = gameState.Piece;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
@@ -980,9 +984,9 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    if (move.CapturedPiece() != (int)Piece.None)
+                    if (move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(3, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(position, 3, visitedMoves, visitedMovesCounter, move);
                     }
 
                     nodeType = NodeType.Beta;

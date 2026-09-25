@@ -13,13 +13,13 @@ public readonly ref struct TTProbeResult
 
     public readonly int Depth;
 
-    public readonly short BestMove;
+    public readonly Move BestMove;
 
     public readonly NodeType NodeType;
 
     public readonly bool WasPv;
 
-    public TTProbeResult(int score, short bestMove, NodeType nodeType, int staticEval, int depth, bool wasPv)
+    public TTProbeResult(int score, Move bestMove, NodeType nodeType, int staticEval, int depth, bool wasPv)
     {
         Score = score;
         BestMove = bestMove;

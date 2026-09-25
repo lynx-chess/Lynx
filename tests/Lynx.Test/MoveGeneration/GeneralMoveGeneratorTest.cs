@@ -23,11 +23,11 @@ public class GeneralMoveGeneratorTest
         foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, moves))
         {
             var newPosition = new Position(positionAfterEnPassant);
-            newPosition.MakeMove(move);
+            var gameState = newPosition.MakeMove(move);
             if (newPosition.IsValid())
             {
-                Assert.AreNotEqual(Piece.n, (Piece)move.Piece());
-                Assert.AreEqual(Piece.k, (Piece)move.Piece());
+                Assert.AreNotEqual((int)Piece.n, gameState.Piece);
+                Assert.AreEqual((int)Piece.k, gameState.Piece);
             }
         }
     }

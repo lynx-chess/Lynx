@@ -37,7 +37,7 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
 
-        var captureMove = moves.Single(m => m.CapturedPiece() != (int)Piece.None);
+        var captureMove = moves.Single(m => m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None);
 
         // Act
         var newPosition = new Position(position);
@@ -83,7 +83,7 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d5));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var captureMove = moves.Single(m => m.CapturedPiece() != (int)Piece.None);
+        var captureMove = moves.Single(m => m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None);
 
         // Act
         var newPosition = new Position(position);
@@ -133,7 +133,7 @@ public class PositionMakeMoveTest
         Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
+        var promotionMove = moves.Single(m => m.PromotedPiece((int)position.Side) == (int)Piece.N);
 
         // Act
         var newPosition = new Position(position);
@@ -177,7 +177,7 @@ public class PositionMakeMoveTest
         Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
+        var promotionMove = moves.Single(m => m.PromotedPiece((int)position.Side) == (int)Piece.n);
 
         // Act
         var newPosition = new Position(position);
@@ -223,7 +223,7 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a8));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
+        var promotionMove = moves.Single(m => m.PromotedPiece((int)position.Side) == (int)Piece.N);
 
         // Act
         var newPosition = new Position(position);
@@ -271,7 +271,7 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.a1));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
+        var promotionMove = moves.Single(m => m.PromotedPiece((int)position.Side) == (int)Piece.n);
 
         // Act
         var newPosition = new Position(position);
@@ -310,7 +310,7 @@ public class PositionMakeMoveTest
         Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b4));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var enPassant = moves.Single(m => m.IsDoublePawnPush());
+        var enPassant = moves.Single(m => m.IsDoublePawnPush(m.Piece(position.Board)));
 
         // Act
         var newPosition = new Position(position);
@@ -350,7 +350,7 @@ public class PositionMakeMoveTest
         Assert.False(position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c5));
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var enPassant = moves.Single(m => m.IsDoublePawnPush());
+        var enPassant = moves.Single(m => m.IsDoublePawnPush(m.Piece(position.Board)));
 
         // Act
         var newPosition = new Position(position);
@@ -456,7 +456,7 @@ public class PositionMakeMoveTest
     {
         var position = new Position(fen);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => m.IsDoublePawnPush()))
+        foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => m.IsDoublePawnPush(m.Piece(position.Board))))
         {
             var newPosition = new Position(position);
             newPosition.MakeMove(move);
@@ -477,7 +477,7 @@ public class PositionMakeMoveTest
 
         Assert.AreNotEqual(BoardSquare.noSquare, position.EnPassant);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => !m.IsDoublePawnPush()))
+        foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => !m.IsDoublePawnPush(m.Piece(position.Board))))
         {
             var newPosition = new Position(position);
             newPosition.MakeMove(move);
@@ -709,7 +709,7 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
+        var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece(position.Board) == (int)Piece.K + Utils.PieceOffset(position.Side));
 
         // Act
         var newPosition = new Position(position);
@@ -733,7 +733,7 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
         var moves = MoveGenerator.GenerateAllMoves(position);
-        var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
+        var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece(position.Board) == (int)Piece.K + Utils.PieceOffset(position.Side));
 
         // Act
         var newPosition = new Position(position);
@@ -758,8 +758,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
-            m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() == (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.R + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -785,8 +785,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
-            m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() == (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.R + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -812,8 +812,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
-            m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() == (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.R + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -839,8 +839,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookMove = moves.First(m =>
-            m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() == (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.R + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) == (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
         // Act
@@ -866,8 +866,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
-            m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() != (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.B + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         Assert.AreEqual((int)BoardSquare.a8, rookCapture.TargetSquare());
@@ -895,8 +895,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
-            m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() != (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.B + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.e5);
 
         Assert.AreEqual((int)BoardSquare.h8, rookCapture.TargetSquare());
@@ -924,8 +924,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
-            m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() != (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.B + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.e5);
 
         Assert.AreEqual((int)BoardSquare.a1, rookCapture.TargetSquare());
@@ -953,8 +953,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
-            m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() != (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.B + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         Assert.AreEqual((int)BoardSquare.h1, rookCapture.TargetSquare());
@@ -996,8 +996,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
-            m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() != (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.B + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         // Act
@@ -1037,8 +1037,8 @@ public class PositionMakeMoveTest
 
         var moves = MoveGenerator.GenerateAllMoves(position);
         var rookCapture = moves.First(m =>
-            m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
-            && m.CapturedPiece() != (int)Piece.None
+            m.Piece(position.Board) == (int)Piece.B + Utils.PieceOffset(position.Side)
+            && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         // Act

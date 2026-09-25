@@ -59,14 +59,14 @@ public static class ReferenceMoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, promotedPiece: (int)Piece.Q + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, promotedPiece: (int)Piece.R + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, promotedPiece: (int)Piece.N + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, promotedPiece: (int)Piece.B + offset);
                 }
                 else if (!capturesOnly)
                 {
-                    yield return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
+                    yield return MoveExtensions.Encode(sourceSquare, singlePushSquare);
                 }
 
                 // Double pawn push
@@ -77,7 +77,7 @@ public static class ReferenceMoveGenerator
                     if (!position.OccupancyBitboards[2].GetBit(doublePushSquare)
                         && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                     {
-                        yield return MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
+                        yield return MoveExtensions.Encode(sourceSquare, doublePushSquare);
                     }
                 }
             }
@@ -88,7 +88,7 @@ public static class ReferenceMoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
             // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
+                yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant);
             }
 
             // Captures
@@ -102,14 +102,14 @@ public static class ReferenceMoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, promotedPiece: (int)Piece.Q + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, promotedPiece: (int)Piece.R + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, promotedPiece: (int)Piece.N + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, promotedPiece: (int)Piece.B + offset);
                 }
                 else
                 {
-                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.Encode(sourceSquare, targetSquare);
                 }
             }
         }
@@ -175,11 +175,11 @@ public static class ReferenceMoveGenerator
                 if (position.OccupancyBitboards[(int)Side.Both].GetBit(targetSquare))
                 {
                     var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
-                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.Encode(sourceSquare, targetSquare);
                 }
                 else if (!capturesOnly)
                 {
-                    yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece);
+                    yield return MoveExtensions.Encode(sourceSquare, targetSquare);
                 }
             }
         }

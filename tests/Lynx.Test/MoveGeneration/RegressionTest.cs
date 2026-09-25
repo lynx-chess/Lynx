@@ -14,10 +14,10 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));
         Assert.True(moves.Exists(m => m.IsEnPassant()));
-        Assert.True(moves.Exists(m => m.PromotedPiece() != default));
-        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() != (int)Piece.None));
-        Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() == (int)Piece.None));
-        Assert.True(moves.Exists(m => m.IsDoublePawnPush()));
+        Assert.True(moves.Exists(m => m.PromotedPiece((int)position.Side) != default));
+        Assert.True(moves.Exists(m => m.PromotedPiece((int)position.Side) != default && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
+        Assert.True(moves.Exists(m => m.PromotedPiece((int)position.Side) != default && m.CapturedPiece(position.Board, (int)position.Side) == (int)Piece.None));
+        Assert.True(moves.Exists(m => m.IsDoublePawnPush(m.Piece(position.Board))));
 
         Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -26,9 +26,9 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));
         Assert.True(captures.Exists(m => m.IsEnPassant()));
-        Assert.True(captures.Exists(m => m.PromotedPiece() != default));
-        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() != (int)Piece.None));
-        Assert.True(captures.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() == (int)Piece.None));
-        Assert.False(captures.Exists(m => m.IsDoublePawnPush()));
+        Assert.True(captures.Exists(m => m.PromotedPiece((int)position.Side) != default));
+        Assert.True(captures.Exists(m => m.PromotedPiece((int)position.Side) != default && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
+        Assert.True(captures.Exists(m => m.PromotedPiece((int)position.Side) != default && m.CapturedPiece(position.Board, (int)position.Side) == (int)Piece.None));
+        Assert.False(captures.Exists(m => m.IsDoublePawnPush(m.Piece(position.Board))));
     }
 }

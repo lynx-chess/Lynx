@@ -11,8 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Include="System.Int32" Alias="Move" />
-    <Using Include="System.Int16" Alias="ShortMove" />
+    <Using Include="System.UInt16" Alias="Move" />
     <Using Include="System.UInt64" Alias="Bitboard" />
   </ItemGroup >
 

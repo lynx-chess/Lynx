@@ -23,13 +23,17 @@ public readonly struct GameState
 
     public readonly int IncrementalPhaseAccumulator;
 
+    public readonly int Piece;
+
+    public readonly int CapturedPiece;
+
     public readonly BoardSquare EnPassant;
 
     public readonly byte Castle;
 
     public readonly bool IsIncrementalEval;
 
-    public GameState(Position position)
+    public GameState(Position position, Move move)
     {
         ZobristKey = position.UniqueIdentifier;
 
@@ -39,6 +43,8 @@ public readonly struct GameState
         MinorKey = position.MinorHash;
         MajorKey = position.MajorHash;
 
+        Piece = move.Piece(position.Board);
+        CapturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
         EnPassant = position.EnPassant;
         Castle = position.Castle;
         IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;

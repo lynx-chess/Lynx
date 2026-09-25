@@ -13,16 +13,16 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, Move bestMoveTTCandidate = default)
     {
-        if ((ShortMove)move == bestMoveTTCandidate)
+        if (move == bestMoveTTCandidate)
         {
             return TTMoveScoreValue;
         }
 
-        var promotedPiece = move.PromotedPiece();
+        var promotedPiece = move.PromotedPiece((int)position.Side);
         var isPromotion = promotedPiece != default;
-        var capturedPiece = move.CapturedPiece();
+        var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
         var isCapture = capturedPiece != (int)Piece.None;
 
         if (!isCapture && !isPromotion)
@@ -50,18 +50,18 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
-                var piece = move.Piece();
+                var piece = move.Piece(position.Board);
                 var targetSquare = move.TargetSquare();
 
                 // Counter move history
                 return BaseMoveScore
-                    + QuietHistoryEntry(move, oppositeSideAttacks)
+                    + QuietHistoryEntry(position, move, oppositeSideAttacks)
                     + ContinuationHistoryEntry(piece, targetSquare, ply);
             }
 
             // History move or 0 if not found
             return BaseMoveScore
-                + QuietHistoryEntry(move, oppositeSideAttacks);
+                + QuietHistoryEntry(position, move, oppositeSideAttacks);
         }
 
         // Queen promotion
@@ -80,7 +80,7 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-            var piece = move.Piece();
+            var piece = move.Piece(position.Board);
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
@@ -108,16 +108,16 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMoveQSearch(Position position, Move move, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMoveQSearch(Position position, Move move, Move bestMoveTTCandidate = default)
     {
-        if ((ShortMove)move == bestMoveTTCandidate)
+        if (move == bestMoveTTCandidate)
         {
             return TTMoveScoreValue;
         }
 
-        var promotedPiece = move.PromotedPiece();
+        var promotedPiece = move.PromotedPiece((int)position.Side);
         var isPromotion = promotedPiece != default;
-        var capturedPiece = move.CapturedPiece();
+        var capturedPiece = move.CapturedPiece(position.Board, (int)position.Side);
         var isCapture = capturedPiece != (int)Piece.None;
 
         // Queen promotion
@@ -140,7 +140,7 @@ public sealed partial class Engine
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
 
-            var piece = move.Piece();
+            var piece = move.Piece(position.Board);
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
@@ -162,9 +162,9 @@ public sealed partial class Engine
     /// Quiet history, continuation history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<Move> visitedMoves, int visitedMovesCounter, Move move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
     {
-        var piece = move.Piece();
+        var piece = move.Piece(position.Board);
         var targetSquare = move.TargetSquare();
 
         // Idea by Alayan in Ethereal: don't update history on low depths
@@ -194,15 +194,15 @@ public sealed partial class Engine
                 UpdateContinuationHistory(piece, targetSquare, ply, rawHistoryBonus);
             }
 
-            ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
+            ref var visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
             for (int i = 0; i < visitedMovesCounter; ++i)
             {
                 var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
-                var capturedPiece = visitedMove.CapturedPiece();
+                var capturedPiece = visitedMove.CapturedPiece(position.Board, (int)position.Side);
 
                 if (capturedPiece == (int)Piece.None)
                 {
-                    var visitedMovePiece = visitedMove.Piece();
+                    var visitedMovePiece = visitedMove.Piece(position.Board);
                     var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
                     // 🔍 Quiet history penalty / malus
@@ -230,7 +230,7 @@ public sealed partial class Engine
         ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
         var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
 
-        if (move.PromotedPiece() == default && move != firstKillerMove)
+        if (move.PromotedPiece((int)position.Side) == default && move != firstKillerMove)
         {
             // 🔍 Killer moves
             if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
@@ -253,25 +253,25 @@ public sealed partial class Engine
     /// Capture history
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
+    private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(Position position, int depth, ReadOnlySpan<Move> visitedMoves, int visitedMovesCounter, Move move)
     {
         var rawHistoryBonus = HistoryBonus[depth];
         var rawHistoryMalus = HistoryMalus[depth];
 
-        ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(), move.TargetSquare(), move.CapturedPiece());
+        ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(position.Board), move.TargetSquare(), move.CapturedPiece(position.Board, (int)position.Side));
         captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
-        ref int visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
+        ref var visitedMovesBase = ref MemoryMarshal.GetReference(visitedMoves);
         for (int i = 0; i < visitedMovesCounter; ++i)
         {
             var visitedMove = Unsafe.Add(ref visitedMovesBase, i);
-            var capturedPiece = visitedMove.CapturedPiece();
+            var capturedPiece = visitedMove.CapturedPiece(position.Board, (int)position.Side);
 
             if (capturedPiece != (int)Piece.None)
             {
-                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove.Piece(), visitedMove.TargetSquare(), capturedPiece);
+                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove.Piece(position.Board), visitedMove.TargetSquare(), capturedPiece);
                 captureHistoryVisitedMove = (short)ScoreHistoryMove(captureHistoryVisitedMove, -rawHistoryMalus);
             }
         }
