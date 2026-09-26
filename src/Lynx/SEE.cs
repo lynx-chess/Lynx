@@ -26,13 +26,13 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
-        Debug.Assert(move.CapturedPiece() != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
-        Debug.Assert(move.PromotedPiece() == default || move.CapturedPiece() != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves without captures");
-        Debug.Assert(!move.IsEnPassant() || move.CapturedPiece() != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle en-passant moves if they aren't marked as captures too");
+        Debug.Assert(move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
+        Debug.Assert(move.PromotedPiece((int)position.Side) == default || move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves without captures");
+        Debug.Assert(!move.IsEnPassant() || move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle en-passant moves if they aren't marked as captures too");
 
         var sideToMove = position.Side;
 
-        var score = PieceValues[move.CapturedPiece()] - threshold;    // Gain() - threshold
+        var score = PieceValues[move.CapturedPiece(position.Board, (int)position.Side)] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -40,7 +40,7 @@ public static class SEE
             return false;
         }
 
-        var next = move.Piece();
+        var next = move.Piece(position.Board);
         score -= PieceValues[next];
 
         // If risking our piece being fully lost and the exchange value is still >= 0
@@ -115,7 +115,7 @@ public static class SEE
     {
         var sideToMove = (int)position.Side;
 
-        var score = Gain(move) - threshold;
+        var score = Gain(position, move) - threshold;
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -123,9 +123,10 @@ public static class SEE
             return false;
         }
 
-        var next = move.PromotedPiece() != default
-            ? move.PromotedPiece()
-            : move.Piece();
+        var promotedPiece = move.PromotedPiece((int)position.Side);
+        var next = promotedPiece != default
+            ? promotedPiece
+            : move.Piece(position.Board);
 
         score -= PieceValues[next];
 
@@ -194,7 +195,7 @@ public static class SEE
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Gain(Move move)
+    private static int Gain(Position position, Move move)
     {
         if (move.IsCastle())
         {
@@ -206,12 +207,12 @@ public static class SEE
             return PieceValues[(int)Piece.P];
         }
 
-        var promotedPiece = move.PromotedPiece();
+        var promotedPiece = move.PromotedPiece((int)position.Side);
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
-            ? PieceValues[move.CapturedPiece()]
-            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + PieceValues[move.CapturedPiece()];
+            ? PieceValues[move.CapturedPiece(position.Board, (int)position.Side)]
+            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + PieceValues[move.CapturedPiece(position.Board, (int)position.Side)];
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 

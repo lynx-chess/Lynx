@@ -429,7 +429,7 @@ static void _26_Piece_Moves()
     var position = new Position(TrickyPosition);
     position.Print();
 
-    var moves = MoveGenerator.GenerateAllMoves(position).Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n).ToList();
+    var moves = MoveGenerator.GenerateAllMoves(position).Where(m => m.Piece(position.Board) == (int)Piece.N || m.Piece(position.Board) == (int)Piece.n).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
     moves = [.. MoveGenerator.GenerateAllMoves(position)];
@@ -458,7 +458,7 @@ static void _28_Move_Encoding()
     Console.WriteLine(Constants.Coordinates[square]);
 }
 
-static void PrintMoveList(IEnumerable<Move> moves)
+static void PrintMoveList(Position position, IEnumerable<Move> moves)
 {
     Console.WriteLine($"{"#",-3}{"Pc",-3}{"src",-4}{"x",-2}{"tgt",-4}{"DPP",-4}{"ep",-3}{"O-O",-4}{"O-O-O",-7}\n");
 
@@ -471,11 +471,11 @@ static void PrintMoveList(IEnumerable<Move> moves)
         var move = moves.ElementAt(i);
 
         sb.AppendFormat("{0,-3}", i + 1)
-          .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece()])
+          .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece(position.Board)])
           .AppendFormat("{0,-4}", Constants.Coordinates[move.SourceSquare()])
-          .AppendFormat("{0,-2}", isCapture(move.CapturedPiece() != (int)Piece.None))
+          .AppendFormat("{0,-2}", isCapture(move.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None))
           .AppendFormat("{0,-4}", Constants.Coordinates[move.TargetSquare()])
-          .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush()))
+          .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush(move.Piece(position.Board))))
           .AppendFormat("{0,-3}", bts(move.IsEnPassant()))
           .AppendFormat("{0,-4}", bts(move.IsShortCastle()))
           .AppendFormat("{0,-4}", bts(move.IsLongCastle()))
@@ -489,16 +489,16 @@ static void _29_Move_List()
 {
     var position = new Position(TrickyPosition);
     var moves = MoveGenerator.GenerateAllMoves(position);
-    PrintMoveList(moves);
+    PrintMoveList(position, moves);
 
     position = new Position(TrickyPositionReversed);
     moves = MoveGenerator.GenerateAllMoves(position);
-    PrintMoveList(moves);
+    PrintMoveList(position, moves);
 
     position = new Position(KillerPosition);
     position.Print();
     moves = MoveGenerator.GenerateAllMoves(position);
-    PrintMoveList(moves);
+    PrintMoveList(position, moves);
 }
 
 static void _32_Make_Move()
@@ -517,7 +517,7 @@ static void _32_Make_Move()
     //CastlingRightsTest(game);
     //CastlingRightsTest(reversedGame);
 
-    PrintMoveList(MoveGenerator.GenerateAllMoves(gameWithPromotion.CurrentPosition));
+    PrintMoveList(gameWithPromotion.CurrentPosition, MoveGenerator.GenerateAllMoves(gameWithPromotion.CurrentPosition));
 
     GeneralMoveTest(gameWithPromotion);
 
@@ -543,10 +543,12 @@ static void _32_Make_Move()
 
     static void CastlingRightsTest(Game game)
     {
+        var position = game.CurrentPosition;
+
         foreach (var move in MoveGenerator.GenerateAllMoves(game.CurrentPosition))
         {
-            if (move.Piece() == (int)Piece.R || (move.Piece() == (int)Piece.r)
-             || move.Piece() == (int)Piece.K || (move.Piece() == (int)Piece.k))
+            if (move.Piece(position.Board) == (int)Piece.R || (move.Piece(position.Board) == (int)Piece.r)
+             || move.Piece(position.Board) == (int)Piece.K || (move.Piece(position.Board) == (int)Piece.k))
             {
                 game.CurrentPosition.Print();
 
@@ -728,7 +730,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos)[0]);
+    var updatedHash = UpdatePositionHash(pos, zobristTable, hash, MoveGenerator.GenerateAllMoves(pos)[0]);
 
     Console.WriteLine(updatedHash);
 }
@@ -767,10 +769,10 @@ static long CalculatePositionHash(long[,] zobristTable, Position position)
     return positionHash;
 }
 
-static long UpdatePositionHash(long[,] zobristTable, long positionHash, Move move)
+static long UpdatePositionHash(Position position, long[,] zobristTable, long positionHash, Move move)
 {
-    var sourcePiece = move.Piece();
-    var piece = move.PromotedPiece();
+    var sourcePiece = move.Piece(position.Board);
+    var piece = move.PromotedPiece((int)position.Side);
     if (piece == default)
     {
         piece = sourcePiece;

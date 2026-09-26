@@ -169,7 +169,7 @@ public class GenerateCastlingMovesTest
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
 
-    private static void GenerateCastlingMoves(Position position, int[] moves)
+    private static void GenerateCastlingMoves(Position position, Move[] moves)
     {
         int index = 0;
 

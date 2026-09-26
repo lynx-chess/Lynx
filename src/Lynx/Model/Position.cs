@@ -38,10 +38,10 @@ public partial class Position : IDisposable
     public readonly ulong[] QueensideCastlingNonAttackedSquares;
 
 #pragma warning disable IDE1006 // Naming Styles
-    internal int WhiteShortCastle;
-    internal int WhiteLongCastle;
-    internal int BlackShortCastle;
-    internal int BlackLongCastle;
+    internal Move WhiteShortCastle;
+    internal Move WhiteLongCastle;
+    internal Move BlackShortCastle;
+    internal Move BlackLongCastle;
 #pragma warning restore IDE1006 // Naming Styles
 #pragma warning restore S3887, CA1051
 
@@ -255,22 +255,22 @@ public partial class Position : IDisposable
         {
             if ((_castle & (int)CastlingRights.WK) != default)
             {
-                WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare, (int)Piece.K);
+                WhiteShortCastle = MoveExtensions.EncodeCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingShortCastleSquare);
             }
 
             if ((_castle & (int)CastlingRights.WQ) != default)
             {
-                WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingLongCastleSquare, (int)Piece.K);
+                WhiteLongCastle = MoveExtensions.EncodeCastle(Constants.InitialWhiteKingSquare, Constants.WhiteKingLongCastleSquare);
             }
 
             if ((_castle & (int)CastlingRights.BK) != default)
             {
-                BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.InitialBlackKingSquare, Constants.BlackKingShortCastleSquare, (int)Piece.k);
+                BlackShortCastle = MoveExtensions.EncodeCastle(Constants.InitialBlackKingSquare, Constants.BlackKingShortCastleSquare);
             }
 
             if ((_castle & (int)CastlingRights.BQ) != default)
             {
-                BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.InitialBlackKingSquare, Constants.BlackKingLongCastleSquare, (int)Piece.k);
+                BlackLongCastle = MoveExtensions.EncodeCastle(Constants.InitialBlackKingSquare, Constants.BlackKingLongCastleSquare);
             }
         }
         // KxR encoding for DFRC
@@ -280,28 +280,28 @@ public partial class Position : IDisposable
             {
                 Debug.Assert(whiteKingsideRook != CastlingData.DefaultValues);
 
-                WhiteShortCastle = MoveExtensions.EncodeShortCastle(whiteKingSquare, whiteKingsideRook, (int)Piece.K);
+                WhiteShortCastle = MoveExtensions.EncodeCastle(whiteKingSquare, whiteKingsideRook);
             }
 
             if ((_castle & (int)CastlingRights.WQ) != default)
             {
                 Debug.Assert(whiteQueensideRook != CastlingData.DefaultValues);
 
-                WhiteLongCastle = MoveExtensions.EncodeLongCastle(whiteKingSquare, whiteQueensideRook, (int)Piece.K);
+                WhiteLongCastle = MoveExtensions.EncodeCastle(whiteKingSquare, whiteQueensideRook);
             }
 
             if ((_castle & (int)CastlingRights.BK) != default)
             {
                 Debug.Assert(blackKingsideRook != CastlingData.DefaultValues);
 
-                BlackShortCastle = MoveExtensions.EncodeShortCastle(blackKingSquare, blackKingsideRook, (int)Piece.k);
+                BlackShortCastle = MoveExtensions.EncodeCastle(blackKingSquare, blackKingsideRook);
             }
 
             if ((_castle & (int)CastlingRights.BQ) != default)
             {
                 Debug.Assert(blackQueensideRook != CastlingData.DefaultValues);
 
-                BlackLongCastle = MoveExtensions.EncodeLongCastle(blackKingSquare, blackQueensideRook, (int)Piece.k);
+                BlackLongCastle = MoveExtensions.EncodeCastle(blackKingSquare, blackQueensideRook);
             }
         }
 
@@ -399,7 +399,7 @@ public partial class Position : IDisposable
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
-        var gameState = new GameState(this);
+        var gameState = new GameState(this, move);
 
         var oldSide = (int)_side;
         var offset = Utils.PieceOffset(oldSide);
@@ -407,8 +407,9 @@ public partial class Position : IDisposable
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
-        int piece = move.Piece();
-        int promotedPiece = move.PromotedPiece();
+        int piece = MoveExtensions.Piece(Board, sourceSquare);
+        int promotedPiece = move.PromotedPiece((int)Side);
+        int capturedPiece = move.CapturedPiece(Board, (int)Side);
 
         var newPiece = piece;
         int extraPhaseIfIncremental = 0;
@@ -507,170 +508,173 @@ public partial class Position : IDisposable
             IncrementalPhaseAccumulator += extraPhaseIfIncremental;
         }
 
-        var capturedPiece = (int)Piece.None;
         var capturedSquare = (int)BoardSquare.noSquare;
 
         switch (move.SpecialMoveFlag())
         {
             case SpecialMoveType.None:
+            case SpecialMoveType.Promotion:
                 {
-                    capturedPiece = move.CapturedPiece();
-
-                    if (capturedPiece != (int)Piece.None)
+                    if (MoveExtensions.IsDoublePawnPush(piece, sourceSquare, targetSquare))
                     {
-                        capturedSquare = targetSquare;
+                        var pawnPush = +8 - (oldSide * 16);
+                        var enPassantSquare = sourceSquare + pawnPush;
+                        Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
-                        _pieceBitboards[capturedPiece].PopBit(capturedSquare);
-                        _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
-
-                        var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        _uniqueIdentifier ^= capturedPieceHash;
-
-                        // Kings can't be captured
-                        if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
+                        _enPassant = (BoardSquare)enPassantSquare;
+                        _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+                    }
+                    else
+                    {
+                        if (capturedPiece != (int)Piece.None)
                         {
-                            _kingPawnUniqueIdentifier ^= capturedPieceHash;
+                            capturedSquare = targetSquare;
+
+                            _pieceBitboards[capturedPiece].PopBit(capturedSquare);
+                            _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
+
+                            var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                            _uniqueIdentifier ^= capturedPieceHash;
+
+                            // Kings can't be captured
+                            if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
+                            {
+                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
+                            }
+                            else
+                            {
+                                _nonPawnHash[oppositeSide] ^= capturedPieceHash;
+
+                                if (Utils.IsMinorPiece(capturedPiece))
+                                {
+                                    _minorHash ^= capturedPieceHash;
+                                }
+                                else if (Utils.IsMajorPiece(capturedPiece))
+                                {
+                                    _majorHash ^= capturedPieceHash;
+                                }
+                            }
                         }
-                        else
+                    }
+
+                    break;
+                }
+            case SpecialMoveType.Castle:
+                {
+                    if (move.IsShortCastle())
+                    {
+
+
+                        var rookSourceSquare = Configuration.EngineSettings.IsChess960
+                            ? targetSquare
+                            : Utils.ShortCastleRookSourceSquare(oldSide);
+                        var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                        var rookIndex = (int)Piece.R + offset;
+
+                        _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
+
+                        var kingTargetSquare = Utils.KingShortCastleSquare(oldSide);
+
+                        if (Configuration.EngineSettings.IsChess960)
                         {
-                            _nonPawnHash[oppositeSide] ^= capturedPieceHash;
+                            // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
+                            // We need to revert the incorrect changes + apply the right ones
+                            // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
+                            // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
+                            _pieceBitboards[newPiece].PopBit(targetSquare);
+                            _occupancyBitboards[oldSide].PopBit(targetSquare);
+                            _board[targetSquare] = (int)Piece.None;
+                            var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
 
-                            if (Utils.IsMinorPiece(capturedPiece))
-                            {
-                                _minorHash ^= capturedPieceHash;
-                            }
-                            else if (Utils.IsMajorPiece(capturedPiece))
-                            {
-                                _majorHash ^= capturedPieceHash;
-                            }
+                            _pieceBitboards[newPiece].SetBit(kingTargetSquare);
+                            _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
+                            _board[kingTargetSquare] = newPiece;
+                            var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
+
+                            var hashFix = hashToRevert ^ hashToApply;
+
+                            _uniqueIdentifier ^= hashFix;
+                            _nonPawnHash[oldSide] ^= hashFix;
+                            _kingPawnUniqueIdentifier ^= hashFix;
                         }
+
+                        // In DFRC the square where the rook was could be occupied by the king after castling
+                        // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
+                        if (rookSourceSquare != kingTargetSquare)
+                        {
+                            _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
+                            _board[rookSourceSquare] = (int)Piece.None;
+                        }
+
+                        _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                        _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
+                        _board[rookTargetSquare] = rookIndex;
+
+                        var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+
+                        _uniqueIdentifier ^= hashChange;
+                        _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
+
                     }
-
-                    break;
-                }
-            case SpecialMoveType.DoublePawnPush:
-                {
-                    var pawnPush = +8 - (oldSide * 16);
-                    var enPassantSquare = sourceSquare + pawnPush;
-                    Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
-
-                    _enPassant = (BoardSquare)enPassantSquare;
-                    _uniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
-
-                    break;
-                }
-            case SpecialMoveType.ShortCastle:
-                {
-                    var rookSourceSquare = Configuration.EngineSettings.IsChess960
-                        ? targetSquare
-                        : Utils.ShortCastleRookSourceSquare(oldSide);
-                    var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
-
-                    var kingTargetSquare = Utils.KingShortCastleSquare(oldSide);
-
-                    if (Configuration.EngineSettings.IsChess960)
+                    else
                     {
-                        // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                        // We need to revert the incorrect changes + apply the right ones
-                        // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
-                        // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                        _pieceBitboards[newPiece].PopBit(targetSquare);
-                        _occupancyBitboards[oldSide].PopBit(targetSquare);
-                        _board[targetSquare] = (int)Piece.None;
-                        var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
+                        var rookSourceSquare = Configuration.EngineSettings.IsChess960
+                            ? targetSquare
+                            : Utils.LongCastleRookSourceSquare(oldSide);
+                        var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                        var rookIndex = (int)Piece.R + offset;
 
-                        _pieceBitboards[newPiece].SetBit(kingTargetSquare);
-                        _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
-                        _board[kingTargetSquare] = newPiece;
-                        var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
+                        _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
 
-                        var hashFix = hashToRevert ^ hashToApply;
+                        var kingTargetSquare = Utils.KingLongCastleSquare(oldSide);
 
-                        _uniqueIdentifier ^= hashFix;
-                        _nonPawnHash[oldSide] ^= hashFix;
-                        _kingPawnUniqueIdentifier ^= hashFix;
+                        if (Configuration.EngineSettings.IsChess960)
+                        {
+                            // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
+                            // We need to revert the incorrect changes + apply the right ones
+                            // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
+                            // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
+                            _pieceBitboards[newPiece].PopBit(targetSquare);
+                            _occupancyBitboards[oldSide].PopBit(targetSquare);
+                            _board[targetSquare] = (int)Piece.None;
+                            var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
+
+                            _pieceBitboards[newPiece].SetBit(kingTargetSquare);
+                            _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
+                            _board[kingTargetSquare] = newPiece;
+                            var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
+
+                            var hashFix = hashToRevert ^ hashToApply;
+
+                            _uniqueIdentifier ^= hashFix;
+                            _nonPawnHash[oldSide] ^= hashFix;
+                            _kingPawnUniqueIdentifier ^= hashFix;
+                        }
+
+                        // In DFRC the square where the rook was could be occupied by the king after castling
+                        // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
+                        if (rookSourceSquare != kingTargetSquare)
+                        {
+                            _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
+                            _board[rookSourceSquare] = (int)Piece.None;
+                        }
+
+                        _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                        _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
+                        _board[rookTargetSquare] = rookIndex;
+
+                        var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+
+                        _uniqueIdentifier ^= hashChange;
+                        _nonPawnHash[oldSide] ^= hashChange;
+                        _majorHash ^= hashChange;
+
                     }
-
-                    // In DFRC the square where the rook was could be occupied by the king after castling
-                    // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
-                    if (rookSourceSquare != kingTargetSquare)
-                    {
-                        _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
-                    }
-
-                    _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
-                    _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
-                    _board[rookTargetSquare] = rookIndex;
-
-                    var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                        ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                    _uniqueIdentifier ^= hashChange;
-                    _nonPawnHash[oldSide] ^= hashChange;
-                    _majorHash ^= hashChange;
-
-                    break;
                 }
-            case SpecialMoveType.LongCastle:
-                {
-                    var rookSourceSquare = Configuration.EngineSettings.IsChess960
-                        ? targetSquare
-                        : Utils.LongCastleRookSourceSquare(oldSide);
-                    var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
-
-                    var kingTargetSquare = Utils.KingLongCastleSquare(oldSide);
-
-                    if (Configuration.EngineSettings.IsChess960)
-                    {
-                        // In DFRC castling moves are encoded as KxR, so the target square in the move isn't really the king target square
-                        // We need to revert the incorrect changes + apply the right ones
-                        // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
-                        // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                        _pieceBitboards[newPiece].PopBit(targetSquare);
-                        _occupancyBitboards[oldSide].PopBit(targetSquare);
-                        _board[targetSquare] = (int)Piece.None;
-                        var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
-
-                        _pieceBitboards[newPiece].SetBit(kingTargetSquare);
-                        _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
-                        _board[kingTargetSquare] = newPiece;
-                        var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
-
-                        var hashFix = hashToRevert ^ hashToApply;
-
-                        _uniqueIdentifier ^= hashFix;
-                        _nonPawnHash[oldSide] ^= hashFix;
-                        _kingPawnUniqueIdentifier ^= hashFix;
-                    }
-
-                    // In DFRC the square where the rook was could be occupied by the king after castling
-                    // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
-                    if (rookSourceSquare != kingTargetSquare)
-                    {
-                        _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
-                    }
-
-                    _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
-                    _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
-                    _board[rookTargetSquare] = rookIndex;
-
-                    var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                        ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                    _uniqueIdentifier ^= hashChange;
-                    _nonPawnHash[oldSide] ^= hashChange;
-                    _majorHash ^= hashChange;
-
-                    break;
-                }
+                break;
             case SpecialMoveType.EnPassant:
                 {
                     var oppositePawnIndex = (int)Piece.p - offset;
@@ -723,6 +727,8 @@ public partial class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
+        Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
+
         var oppositeSide = (int)_side;
         var side = Utils.OppositeSide(oppositeSide);
         _side = (Side)side;
@@ -730,13 +736,15 @@ public partial class Position : IDisposable
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
-        int piece = move.Piece();
-        int promotedPiece = move.PromotedPiece();
+        int piece = gameState.Piece;
+        int capturedPiece = gameState.CapturedPiece;
+        int promotedPiece = move.PromotedPiece((int)_side);
 
         var newPiece = piece;
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
+            piece = (int)Piece.P + offset;
         }
 
         _pieceBitboards[newPiece].PopBit(targetSquare);
@@ -748,9 +756,8 @@ public partial class Position : IDisposable
         switch (move.SpecialMoveFlag())
         {
             case SpecialMoveType.None:
+            case SpecialMoveType.Promotion:
                 {
-                    var capturedPiece = move.CapturedPiece();
-
                     if (capturedPiece != (int)Piece.None)
                     {
                         _pieceBitboards[capturedPiece].SetBit(targetSquare);
@@ -760,10 +767,9 @@ public partial class Position : IDisposable
 
                     break;
                 }
-            case SpecialMoveType.ShortCastle:
-            case SpecialMoveType.LongCastle:
+            case SpecialMoveType.Castle:
                 {
-                    var isShortCastle = move.SpecialMoveFlag() == SpecialMoveType.ShortCastle;
+                    var isShortCastle = move.IsShortCastle();
 
                     int rookSourceSquare;
                     if (Configuration.EngineSettings.IsChess960)
@@ -858,6 +864,7 @@ public partial class Position : IDisposable
         IsIncrementalEval = gameState.IsIncrementalEval;
 
         Validate();
+        Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

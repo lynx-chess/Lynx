@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/dev_test/">
-    <Project Path="src/Lynx.Benchmark/Lynx.Benchmark.csproj" />
     <Project Path="src/Lynx.ConstantsGenerator/Lynx.ConstantsGenerator.csproj" />
     <Project Path="src/Lynx.Dev/Lynx.Dev.csproj" />
     <Project Path="src/Lynx_SIMD.Benchmark/Lynx_SIMD.Benchmark.csproj" />

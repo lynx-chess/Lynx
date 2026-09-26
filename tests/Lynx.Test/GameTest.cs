@@ -14,14 +14,14 @@ public class GameTest : BaseTest
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
             {
-                MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                MoveExtensions.Encode((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
-                MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                MoveExtensions.Encode((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),  // Repetition detected for the first time
-                MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                MoveExtensions.Encode((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
-                MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                MoveExtensions.Encode((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),
+                MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.e2),
+                MoveExtensions.Encode((int)BoardSquare.h8, (int)BoardSquare.h7),
+                MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.f2),
+                MoveExtensions.Encode((int)BoardSquare.h7, (int)BoardSquare.h8),  // Repetition detected for the first time
+                MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.e2),
+                MoveExtensions.Encode((int)BoardSquare.h8, (int)BoardSquare.h7),
+                MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.f2),
+                MoveExtensions.Encode((int)BoardSquare.h7, (int)BoardSquare.h8),
             };
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[0]));
@@ -58,14 +58,14 @@ public class GameTest : BaseTest
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
             {
-                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),      // Repetition detected for the first time
-                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),
+                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1),
+                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2),
+                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1),
+                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3),      // Repetition detected for the first time
+                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1),
+                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2),
+                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1),
+                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3),
             };
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[0]));
@@ -104,14 +104,14 @@ public class GameTest : BaseTest
         var game = new Game(winningPosition.FEN());
         var repeatedMoves = new List<Move>
             {
-                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
-                MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                MoveExtensions.Encode((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
-                MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),  // Repetition detected
-                MoveExtensions.Encode((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                MoveExtensions.Encode((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)
+                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3),
+                MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6),
+                MoveExtensions.Encode((int)BoardSquare.c3, (int)BoardSquare.b1),
+                MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8),  // Repetition detected
+                MoveExtensions.Encode((int)BoardSquare.e1, (int)BoardSquare.d1),
+                MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6),
+                MoveExtensions.Encode((int)BoardSquare.d1, (int)BoardSquare.e1),
+                MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8)
             };
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[0]));
@@ -139,14 +139,14 @@ public class GameTest : BaseTest
         game = new Game(winningPosition.FEN());
         repeatedMoves =
         [
-            MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
-            MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-            MoveExtensions.Encode((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
-            MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),  // Repetition detected, but that's not what we want to test
-            MoveExtensions.Encode((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
-            MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-            MoveExtensions.Encode((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
-            MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)   // Not repetition, due to castling rights removal
+            MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3),
+            MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6),
+            MoveExtensions.Encode((int)BoardSquare.c3, (int)BoardSquare.b1),
+            MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8),  // Repetition detected, but that's not what we want to test
+            MoveExtensions.Encode((int)BoardSquare.e1, (int)BoardSquare.d1),
+            MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6),
+            MoveExtensions.Encode((int)BoardSquare.d1, (int)BoardSquare.e1),
+            MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8)   // Not repetition, due to castling rights removal
         ];
 
         // Act
@@ -218,10 +218,10 @@ public class GameTest : BaseTest
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                MoveExtensions.Encode((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
-                MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                MoveExtensions.Encode((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k)
+                MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.e2),
+                MoveExtensions.Encode((int)BoardSquare.h8, (int)BoardSquare.h7),
+                MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.f2),
+                MoveExtensions.Encode((int)BoardSquare.h7, (int)BoardSquare.h8)
             };
 
         for (int i = 0; i < 98; ++i)
@@ -231,7 +231,7 @@ public class GameTest : BaseTest
 
         Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
         Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[3]));
-        Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
+        Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.h2)));   // Mate on move 51
 
 #if DEBUG
         Assert.AreEqual(101, game.MoveHistory.Count);
@@ -255,10 +255,10 @@ public class GameTest : BaseTest
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
+                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1),
+                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2),
+                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1),
+                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3)
             };
 
         for (int i = 0; i < 100; ++i)
@@ -286,10 +286,10 @@ public class GameTest : BaseTest
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
+                MoveExtensions.Encode((int)BoardSquare.a1, (int)BoardSquare.b1),
+                MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.a2),
+                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.a1),
+                MoveExtensions.Encode((int)BoardSquare.a2, (int)BoardSquare.b3)
             };
 
         for (int i = 0; i < 48; ++i)
@@ -297,8 +297,8 @@ public class GameTest : BaseTest
             Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
         }
 
-        Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.EncodePromotion((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)Piece.q)));   // Promotion
-        Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
+        Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.EncodePromotion((int)BoardSquare.h2, (int)BoardSquare.h1, promotedPiece: (int)Piece.q)));   // Promotion
+        Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.c4)));
         Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[0]));
 
 #if DEBUG
