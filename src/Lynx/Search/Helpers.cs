@@ -204,7 +204,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
+    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth, int ply)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -314,6 +314,19 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
+        // Last move correction history
+        var previousMove = Game.ReadMoveFromStack(ply - 1);
+        if (previousMove != 0)
+        {
+            var lastMoveIndex = (ShortMove)previousMove;
+            var lastMoveCorrHistIndex = lastMoveIndex & Constants.LastMoveCorrHistoryHashMask;
+
+            Debug.Assert(lastMoveCorrHistIndex < _lastMoveCorrHistory.Length);
+
+            ref var lastMoveCorrHist = ref _lastMoveCorrHistory[lastMoveCorrHistIndex];
+            lastMoveCorrHist = UpdateCorrectionHistory(lastMoveCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -334,7 +347,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CorrectStaticEvaluation(Position position, int staticEvaluation)
+    private int CorrectStaticEvaluation(Position position, int staticEvaluation, int ply)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -434,6 +447,19 @@ public sealed partial class Engine
             continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
+        // Last move correction history
+        int lastMoveCorrHist = 0;
+        var previousMove = Game.ReadMoveFromStack(ply - 1);
+        if (previousMove != 0)
+        {
+            var lastMoveIndex = (ShortMove)previousMove;
+            var lastMoveCorrHistIndex = lastMoveIndex & Constants.LastMoveCorrHistoryHashMask;
+
+            Debug.Assert(lastMoveCorrHistIndex < _lastMoveCorrHistory.Length);
+
+            lastMoveCorrHist = _lastMoveCorrHistory[lastMoveCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
@@ -443,7 +469,8 @@ public sealed partial class Engine
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
             + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
             + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
-            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4);
+            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4)
+            + (lastMoveCorrHist * Configuration.EngineSettings.CorrHistoryWeight_LastMove);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
