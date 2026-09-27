@@ -1314,4 +1314,16 @@ public class PositionTest
             Assert.AreNotEqual(0, score);
         }
     }
+
+    [Test]
+    public void CountPieces()
+    {
+        foreach(var fen in Engine._benchmarkFens)
+        {
+            var position = new Position(fen);
+
+            var pieceCount = position.PieceBitboards.Sum(b => b.CountBits());
+            Assert.AreEqual(pieceCount, position.CountPieces());
+        }
+    }
 }

@@ -114,6 +114,16 @@ public static class Utils
         ? Constants.WhiteKingLongCastleSquare
         : Constants.BlackKingLongCastleSquare;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ShortCastle(Position position, int side) => side == (int)Side.White
+        ? position.WhiteShortCastle
+        : position.BlackShortCastle;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int LongCastle(Position position, int side) => side == (int)Side.White
+        ? position.WhiteLongCastle
+        : position.BlackLongCastle;
+
     [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
@@ -286,6 +296,11 @@ public static class Utils
             < 3_600_000 => $"{Math.Floor(milliseconds / 60_000)} min {Math.Round(0.001 * (milliseconds % 60_000))} s",
             _ => $"{Math.Floor(milliseconds / 3_600_000)} h {Math.Round((milliseconds % 3_600_000) / 60_000)} min",
         };
+    }
+
+    public static double Sigmoid(double value)
+    {
+        return 1.0 / (1.0 + Math.Exp(value));
     }
 
     [Conditional("DEBUG")]

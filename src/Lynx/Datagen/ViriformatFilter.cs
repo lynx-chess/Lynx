@@ -70,6 +70,12 @@ public class ViriformatFilter
     /// </summary>
     public bool UsePhaseForSampling { get; set; }
 
+    public bool UseEvalGameResultMismatch { get; set; }
+
+    public uint EvalGameResultMismatch_Threshold { get; set; } = 100;
+
+    public uint EvalGameResultMismatch_EvalDivisor { get; set; } = 400;
+
     public bool DrawAdjudication { get; set; }
 
     public uint DrawAdjudication_Score { get; set; } = uint.MaxValue;
@@ -138,6 +144,9 @@ public class ViriformatFilter
         LimitPositionsPerPhasePerGame = false,
         MaxPositionsPerPhasePerGame = MaxNumberOfPositionsPerGame,
         UsePhaseForSampling = false,
+        UseEvalGameResultMismatch = false,
+        EvalGameResultMismatch_Threshold = 100,
+        EvalGameResultMismatch_EvalDivisor = 400,
         DrawAdjudication = false,
         DrawAdjudication_Score = 0,
         DrawAdjudication_MoveCount = Constants.MaxNumberMovesInAGame,
@@ -206,7 +215,9 @@ public class ViriformatFilter
             return true;
         }
 
-        if (position.CountPieces() < MinPieces)
+        var pìeceCount = position.CountPieces();
+
+        if (pìeceCount < MinPieces)
         {
             return true;
         }
@@ -234,10 +245,27 @@ public class ViriformatFilter
             return true;
         }
 
+        if (UseEvalGameResultMismatch)
+        {
+            var gameResult = wdlPacked switch { 2 => 1.0, 1 => 0.5, 0 => 0.0, _ => 0.5 };
+
+            var sigmoid = Utils.Sigmoid(eval / (double)EvalGameResultMismatch_EvalDivisor);
+
+            var maxMismatch = Math.Max(gameResult, 1.0 - gameResult);
+            var actualMismatch = Math.Abs(sigmoid - gameResult) / maxMismatch;
+
+            var acceptedMismatch = EvalGameResultMismatch_Threshold / 100.0;
+
+            if (actualMismatch > acceptedMismatch)
+            {
+                return true;
+            }
+        }
+
         if (WdlFiltered)
         {
             var outcome = wdlPacked switch { 2 => FilterWDL.Win, 1 => FilterWDL.Draw, 0 => FilterWDL.Loss, _ => FilterWDL.Draw };
-            double chance = ResultChance(position.CountPieces(), eval, outcome);
+            double chance = ResultChance(pìeceCount, eval, outcome);
             if (rng.NextDouble() < (1.0 - chance))
             {
                 return true;
@@ -246,7 +274,7 @@ public class ViriformatFilter
 
         if (MaterialCountFiltered)
         {
-            int index = Math.Min(position.CountPieces(), 32);
+            int index = Math.Min(pìeceCount, 32);
             double prob = MaterialCountProbabilities[index];
             if (rng.NextDouble() < prob)
             {
