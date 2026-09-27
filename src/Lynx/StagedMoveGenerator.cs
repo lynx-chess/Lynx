@@ -16,7 +16,7 @@ public sealed partial class Engine
     {
         Span<Move> GenerateMoves(Engine engine, ShortMove ttMove, Position position, Bitboard oppositeSideAttacks, int ply, Span<Move> movePool);
 
-        int ScoreMove(Engine engine, Position position, Move move, int ply, Bitboard oppositeSideAttacks);
+        int ScoreMove(Engine engine, Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate);
     }
 
     private sealed class TTStage : IMovegenStage
@@ -36,7 +36,7 @@ public sealed partial class Engine
             return [];
         }
 
-        public int ScoreMove(Engine engine, Position position, Move move, int ply, Bitboard oppositeSideAttacks)
+        public int ScoreMove(Engine engine, Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate)
         {
             return EvaluationConstants.TTMoveScoreValue;
         }
@@ -49,9 +49,9 @@ public sealed partial class Engine
             return MoveGenerator.GenerateAllMoves(position, movePool, oppositeSideAttacks);
         }
 
-        public int ScoreMove(Engine engine, Position position, Move move, int ply, Bitboard oppositeSideAttacks)
+        public int ScoreMove(Engine engine, Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate)
         {
-            return engine.ScoreMove(position, move, ply, oppositeSideAttacks);
+            return engine.ScoreMove(position, move, ply, oppositeSideAttacks, bestMoveTTCandidate);
         }
     }
 }

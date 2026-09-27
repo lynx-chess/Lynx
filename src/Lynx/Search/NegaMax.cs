@@ -338,7 +338,7 @@ public sealed partial class Engine
 
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                Unsafe.Add(ref moveScoresRef, i) = stage.ScoreMove(this, position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, oppositeSideAttacks);
+                Unsafe.Add(ref moveScoresRef, i) = stage.ScoreMove(this, position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, oppositeSideAttacks, ttBestMove);
             }
 
             for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
