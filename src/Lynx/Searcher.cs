@@ -53,7 +53,10 @@ public sealed class Searcher : IDisposable
         AllocateExtraEngines();
 
 #if !DEBUG
-        Warmup();
+        if (!Configuration.EngineSettings.SkipWarmup)
+        {
+            Warmup();
+        }
 #endif
 
         // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
