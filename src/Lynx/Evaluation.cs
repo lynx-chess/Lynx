@@ -450,7 +450,9 @@ public partial class Position
                 }
                 else if (gamePhase == 4)
                 {
-                    if (_pieceBitboards[(int)Piece.R] != 0 && _pieceBitboards[(int)Piece.r] != 0)
+                    if (_pieceBitboards[(int)Piece.R] != 0
+                        && _pieceBitboards[(int)Piece.r] != 0
+                        && CountPawnIslands((int)Piece.P) == CountPawnIslands((int)Piece.p))
                     {
                         eval >>= 1; // /2
                     }
@@ -911,26 +913,27 @@ public partial class Position
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int CountPawnIslands(Bitboard pawns)
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CountPawnIslands(Bitboard pawns)
+    {
+        byte pawnFileBitboard = 0;
+
+        while (pawns != 0)
         {
-            byte pawnFileBitboard = 0;
+            pawns = pawns.WithoutLS1B(out var squareIndex);
 
-            while (pawns != 0)
-            {
-                pawns = pawns.WithoutLS1B(out var squareIndex);
-
-                // Bitboard.SetBit equivalent but for byte instead of ulong
-                pawnFileBitboard |= (byte)(1 << (squareIndex % 8));
-            }
-
-            int shifted = pawnFileBitboard << 1;
-
-            // Treat shifted’s MSB as 0 implicitly
-            int starts = pawnFileBitboard & (~shifted);
-
-            return BitOperations.PopCount((uint)starts);
+            // Bitboard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitboard |= (byte)(1 << (squareIndex % 8));
         }
+
+        int shifted = pawnFileBitboard << 1;
+
+        // Treat shifted’s MSB as 0 implicitly
+        int starts = pawnFileBitboard & (~shifted);
+
+        return BitOperations.PopCount((uint)starts);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
