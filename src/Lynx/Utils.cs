@@ -201,7 +201,9 @@ public static class Utils
         // Adding double.Epsilon to avoid potential System.OverflowException
         // i.e. when calculating multithreading aggregated stats in a single-move position:0
         // the elapsed seconds are taken from existing SearchResult.Time, already rounded and therefore 0
-        return Convert.ToUInt64(Math.Clamp(nodes / (elapsedSeconds + double.Epsilon), 1, ulong.MaxValue));
+        // Using Convert.ToUInt64 instead of (ulong) can produce System.OverflowException in WASM, see https://github.com/lynx-chess/Lynx/issues/2587
+
+        return (ulong)Math.Clamp(nodes / (elapsedSeconds + double.Epsilon), 1, ulong.MaxValue);
     }
 
     /// <summary>
@@ -220,7 +222,7 @@ public static class Utils
     /// </summary>
     public static ulong CalculateUCITime(double elapsedSeconds)
     {
-        return Math.Clamp(Convert.ToUInt64(elapsedSeconds * 1_000), 1, ulong.MaxValue);
+        return Convert.ToUInt64(Math.Clamp(elapsedSeconds * 1_000, 1, ulong.MaxValue));
     }
 
     /// <summary>
