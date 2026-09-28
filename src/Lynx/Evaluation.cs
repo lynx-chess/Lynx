@@ -448,6 +448,13 @@ public partial class Position
                         eval >>= 1; // /2
                     }
                 }
+                else if (gamePhase == 4)
+                {
+                    if (_pieceBitboards[(int)Piece.R] != 0 && _pieceBitboards[(int)Piece.r] != 0)
+                    {
+                        eval >>= 1; // /2
+                    }
+                }
             }
         }
 
