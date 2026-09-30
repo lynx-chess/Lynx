@@ -22,6 +22,7 @@
     <File Path="LICENSE" />
     <File Path="Makefile" />
   </Folder>
+  <Project Path="src/Hezium.Memory/Hezium.Memory.csproj" />
   <Project Path="src/Lynx.Cli/Lynx.Cli.csproj" />
   <Project Path="src/Lynx/Lynx.csproj" />
 </Solution>

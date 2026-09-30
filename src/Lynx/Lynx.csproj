@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hezium.Memory" />
     <PackageReference Include="Macross.Json.Extensions" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
@@ -101,6 +100,10 @@
   <ItemGroup>
     <!-- Exclude the output of source generators from the compilation -->
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hezium.Memory\Hezium.Memory.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
