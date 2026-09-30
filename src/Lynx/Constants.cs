@@ -645,6 +645,8 @@ public static class Constants
     private static ReadOnlySpan<string> FRCStrings => new(["FRC", "960", "FISCHER"]);
 
     public static readonly SearchValues<string> FRCStringSearchValues = SearchValues.Create(FRCStrings, StringComparison.OrdinalIgnoreCase);
+
+    public static readonly nuint Alignment = Environment.Is64BitProcess ? 64u : 32u;
 }
 
 #pragma warning restore IDE0055

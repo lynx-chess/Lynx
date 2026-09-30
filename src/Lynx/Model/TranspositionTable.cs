@@ -37,7 +37,7 @@ public unsafe readonly struct TranspositionTable
         {
             try
             {
-                _tt = (TranspositionTableElement*)NativeMemory.Alloc(totalSizeBytes);
+                _tt = (TranspositionTableElement*)NativeMemory.AlignedAlloc(totalSizeBytes, Constants.Alignment);
                 break;
             }
             catch (OutOfMemoryException e)
@@ -346,7 +346,7 @@ public unsafe readonly struct TranspositionTable
     {
         if (_tt != null)
         {
-            NativeMemory.Free(_tt);
+            NativeMemory.AlignedFree(_tt);
         }
     }
 }
