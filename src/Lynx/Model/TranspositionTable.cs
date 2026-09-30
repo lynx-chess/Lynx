@@ -7,7 +7,7 @@ using System.Runtime.Intrinsics.X86;
 namespace Lynx.Model;
 
 /// <summary>
-/// Transposition table based on Hezium.Memory.BigArray
+/// Transposition table
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe readonly struct TranspositionTable
