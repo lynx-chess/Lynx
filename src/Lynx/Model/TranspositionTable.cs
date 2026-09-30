@@ -33,7 +33,7 @@ public unsafe readonly struct TranspositionTable
         var totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableElement);
 
         bool exceptionThrown = false;
-        while (SizeMBs > Constants.AbsoluteMinTTSize)
+        do
         {
             try
             {
@@ -49,7 +49,7 @@ public unsafe readonly struct TranspositionTable
                 ttLength = CalculateLength(SizeMBs);
                 totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableElement);
             }
-        }
+        } while (SizeMBs > Constants.AbsoluteMinTTSize);
 
         Length = ttLength;
 
