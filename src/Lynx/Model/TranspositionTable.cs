@@ -33,7 +33,7 @@ public readonly struct TranspositionTable
         var ttLength = CalculateLength(SizeMBs);
 
         bool exceptionThrown = false;
-        while (SizeMBs > Constants.AbsoluteMinTTSize)
+        do
         {
             try
             {
@@ -48,7 +48,7 @@ public readonly struct TranspositionTable
                 SizeMBs /= 2;
                 ttLength = CalculateLength(SizeMBs);
             }
-        }
+        } while (SizeMBs > Constants.AbsoluteMinTTSize);
 
         if (exceptionThrown)
         {
