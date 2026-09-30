@@ -938,6 +938,8 @@ public sealed class Searcher : IDisposable
 
                 _absoluteSearchCancellationTokenSource.Dispose();
                 _searchCancellationTokenSource.Dispose();
+
+                _tt.Release();
             }
             _disposedValue = true;
         }
