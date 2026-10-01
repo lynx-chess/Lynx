@@ -23,7 +23,12 @@ public sealed partial class Engine : IDisposable
     public double AverageDepth { get; private set; }
 
 #pragma warning disable IDISP008 // Don't assign member with injected and created disposables - caused by SetGame, internal-only for tests
-    public Game Game { get; private set; }
+    public Game Game
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+        private set;
+    }
 #pragma warning restore IDISP008 // Don't assign member with injected and created disposables
 
     public bool PendingConfirmation { get; set; }

@@ -48,7 +48,11 @@ public static class Masks
     /// 1  0 0 0 0 0 0 0 0
     ///    a b c d e f g h
     /// </summary>
-    public static Bitboard[] WhitePassedPawnMasks { get; } = new Bitboard[64];
+    public static Bitboard[] WhitePassedPawnMasks
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+    } = new Bitboard[64];
 
     /// <summary>
     /// Passed pawn mask for square c5
@@ -62,7 +66,11 @@ public static class Masks
     /// 1  0 1 1 1 0 0 0 0
     ///    a b c d e f g h
     /// </summary>
-    public static Bitboard[] BlackPassedPawnMasks { get; } = new Bitboard[64];
+    public static Bitboard[] BlackPassedPawnMasks
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+    } = new Bitboard[64];
 
     /// <summary>
     /// Passed 'side' pawn mask for square c4

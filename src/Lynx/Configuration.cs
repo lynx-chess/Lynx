@@ -1,10 +1,17 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace Lynx;
 
 public static class Configuration
 {
-    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
+    public static EngineSettings EngineSettings
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+        set;
+    } = new EngineSettings();
+
     public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
 
     private static int _isDebug;

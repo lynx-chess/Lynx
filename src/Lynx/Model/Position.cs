@@ -62,10 +62,25 @@ public partial class Position : IDisposable
     public ulong MinorHash => _minorHash;
     public ulong MajorHash => _majorHash;
 
-    public Bitboard[] PieceBitboards => _pieceBitboards;
-    public Bitboard[] OccupancyBitboards => _occupancyBitboards;
+    public Bitboard[] PieceBitboards
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _pieceBitboards;
+    }
+
+    public Bitboard[] OccupancyBitboards
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _occupancyBitboards;
+    }
+
     public int[] Board => _board;
-    public Side Side => _side;
+    public Side Side
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _side;
+    }
+
     public BoardSquare EnPassant => _enPassant;
 
     /// <summary>

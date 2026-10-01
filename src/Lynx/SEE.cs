@@ -9,16 +9,20 @@ namespace Lynx;
 /// </summary>
 public static class SEE
 {
-    #pragma warning disable IDE0055 // Discard formatting in this region
+#pragma warning disable IDE0055 // Discard formatting in this region
 
-    private static ReadOnlySpan<int> PieceValues =>
-    [
-        100, 450, 450, 650, 1250, 0,
-        100, 450, 450, 650, 1250, 0,
-        0,
-    ];
+    private static ReadOnlySpan<int> PieceValues
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => 
+        [
+            100, 450, 450, 650, 1250, 0,
+            100, 450, 450, 650, 1250, 0,
+            0,
+        ];
+    }
 
-    #pragma warning restore IDE0055
+#pragma warning restore IDE0055
 
     /// <summary>
     /// Doesn't handle non-captures, promotions and en-passants
