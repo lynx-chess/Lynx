@@ -557,9 +557,15 @@ public partial class Position
         var oppositeSidePawns = _pieceBitboards[(int)Piece.p - pieceIndex];
 
         // Isolated pawn
-        if ((_pieceBitboards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
+        var sameSidePawns = _pieceBitboards[pieceIndex];
+        if ((sameSidePawns & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
             packedBonus += IsolatedPawnPenalty[Constants.File(squareIndex)];
+
+            if ((Masks.FileMask(squareIndex) & ~(1UL << squareIndex) & sameSidePawns) != 0)
+            {
+                packedBonus += DoubledPawnPenalty[Constants.File(squareIndex)];
+            }
         }
         // Backwards pawn
         else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
