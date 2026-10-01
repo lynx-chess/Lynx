@@ -909,7 +909,14 @@ public partial class Position
         while (doubledPawns != 0)
         {
             doubledPawns = doubledPawns.WithoutLS1B(out var pieceSquareIndex);
-            packedBonus += DoubledPawnPenalty[Constants.File(pieceSquareIndex)];
+
+            var file = Constants.File(pieceSquareIndex);
+            if (file > 3)
+            {
+                file = 7 - file;
+            }
+
+            packedBonus += DoubledPawnPenalty[file];
         }
 
         return packedBonus;
