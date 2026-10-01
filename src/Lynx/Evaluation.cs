@@ -992,7 +992,7 @@ public partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Threats(EvaluationContext evaluationContext, Side side, int oppositeSide)
     {
-        var occupancy = OccupancyBitboards[(int)Side.Both];
+        var occupancy = _occupancyBitboards[(int)Side.Both];
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
         var oppositeSidePieces = _occupancyBitboards[oppositeSide];
         var oppositeSidePawnIndex = (int)Piece.P + oppositeSideOffset;
@@ -1034,8 +1034,8 @@ public partial class Position
         }
 
         // Pawn push threats
-        var ourPawns = PieceBitboards[(int)Piece.p - oppositeSidePawnIndex];
-        var theirPawns = PieceBitboards[oppositeSidePawnIndex];
+        var ourPawns = _pieceBitboards[(int)Piece.p - oppositeSidePawnIndex];
+        var theirPawns = _pieceBitboards[oppositeSidePawnIndex];
 
         var nonPawnEnemies = oppositeSidePieces & ~theirPawns;
         var safeSquaresToPush = ~defendedSquares;

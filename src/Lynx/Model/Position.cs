@@ -1375,7 +1375,7 @@ public partial class Position : IDisposable
     {
         const string failureMessage = "Position validation failed";
 
-        Debug.Assert(Side != Side.Both, failureMessage, "Side == Side.Both");
+        Debug.Assert(_side != Side.Both, failureMessage, "Side == Side.Both");
 
         var whitePawns = _pieceBitboards[(int)Piece.P];
         var blackPawns = _pieceBitboards[(int)Piece.p];
@@ -1546,7 +1546,7 @@ public partial class Position : IDisposable
 
             var pawnToCaptureSquare = Constants.EnPassantCaptureSquares[(int)_enPassant];
 
-            if (Side == Side.White)
+            if (_side == Side.White)
             {
                 Debug.Assert(blackPawns.GetBit(pawnToCaptureSquare), failureMessage, $"No black pawn on en-passant capture square for {_enPassant}");
             }
@@ -1557,7 +1557,7 @@ public partial class Position : IDisposable
         }
 
         // Can't capture opponent's king
-        Debug.Assert(!IsSquareAttacked(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
+        Debug.Assert(!IsSquareAttacked(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), _side), failureMessage, "Can't capture opponent's king");
 
         Debug.Assert(Math.Min(MaxPhase, PhaseFromScratch()) == Phase(), failureMessage, $"Wrong incremental phase: {Phase()} vs from scratch {Math.Min(MaxPhase, PhaseFromScratch())}");
     }
