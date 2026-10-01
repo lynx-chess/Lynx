@@ -33,6 +33,7 @@
  */
 
 using BenchmarkDotNet.Attributes;
+using Lynx.Model;
 using System.Threading.Channels;
 
 namespace Lynx.Benchmark;
@@ -44,7 +45,8 @@ public class UCI_Benchmark : BaseBenchmark
     [Benchmark]
     public (ulong, ulong) Bench_DefaultDepth()
     {
-        var engine = new Engine(_channel.Writer);
+        var tt = new TranspositionTable();
+        var engine = new Engine(-1, _channel.Writer, in tt);
         return engine.Bench(Configuration.EngineSettings.BenchDepth);
     }
 }
