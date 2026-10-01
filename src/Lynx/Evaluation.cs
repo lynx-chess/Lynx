@@ -106,7 +106,7 @@ public partial class Position
             // Not hit in pawnEvalTable table
             else
             {
-                var pawnScore = PawnStructureEvaluation(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks, whiteKing, blackKing, whitePawnKingRingAttacks, blackPawnKingRingAttacks);
+                var pawnScore = PawnStructureEvaluation(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks, whiteKing, blackKing, whiteBucket, blackBucket, whitePawnKingRingAttacks, blackPawnKingRingAttacks);
 
                 var whitePawnsCopy = whitePawns;
                 while (whitePawnsCopy != default)
@@ -195,7 +195,7 @@ public partial class Position
             // Not hit in pawnTable table
             else
             {
-                var pawnScore = PawnStructureEvaluation(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks, whiteKing, blackKing, whitePawnKingRingAttacks, blackPawnKingRingAttacks);
+                var pawnScore = PawnStructureEvaluation(whitePawns, blackPawns, whitePawnAttacks, blackPawnAttacks, whiteKing, blackKing, whiteBucket, blackBucket, whitePawnKingRingAttacks, blackPawnKingRingAttacks);
 
                 // Bitboard copy that we 'empty'
                 var whitePawnsCopy = whitePawns;
@@ -608,6 +608,7 @@ public partial class Position
         ulong whitePawns, ulong blackPawns,
         ulong whitePawnAttacks, ulong blackPawnAttacks,
         int whiteKing, int blackKing,
+        int whiteBucket, int blackBucket,
         int whitePawnKingRingAttacks, int blackPawnKingRingAttacks)
     {
         int pawnScore = 0;
@@ -626,6 +627,10 @@ public partial class Position
 
         // Pawn islands
         pawnScore += PawnIslands(whitePawns, blackPawns);
+
+        // Doubled pawns
+        pawnScore += DoubledPawns(whitePawns, whiteBucket);
+        pawnScore -= DoubledPawns(blackPawns, blackBucket);
 
         return pawnScore;
     }
@@ -894,6 +899,21 @@ public partial class Position
 
         return (KingShieldBonus * (kingShieldCount - nonAttackedShieldCount))
             + (KingShieldNonAttackedBonus * nonAttackedShieldCount);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int DoubledPawns(Bitboard sameSidePawns, int bucket)
+    {
+        var packedBonus = 0;
+
+        var doubledPawns = sameSidePawns & sameSidePawns.ShiftUp();
+        while (doubledPawns != 0)
+        {
+            doubledPawns = doubledPawns.WithoutLS1B(out var pieceSquareIndex);
+            packedBonus += DoubledPawnPenalty[bucket][Constants.File(pieceSquareIndex)];
+        }
+
+        return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
