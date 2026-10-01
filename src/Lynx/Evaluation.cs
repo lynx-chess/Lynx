@@ -557,9 +557,15 @@ public partial class Position
         var oppositeSidePawns = _pieceBitboards[(int)Piece.p - pieceIndex];
 
         // Isolated pawn
-        if ((_pieceBitboards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
+        var sameSidePawns = _pieceBitboards[pieceIndex];
+        if ((sameSidePawns & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
             packedBonus += IsolatedPawnPenalty[Constants.File(squareIndex)];
+
+            if ((Masks.FileMask(squareIndex) & ~(1UL << squareIndex) & sameSidePawns) != 0)
+            {
+                packedBonus += DoubledPawnPenalty[Constants.File(squareIndex)];
+            }
         }
         // Backwards pawn
         else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
@@ -626,10 +632,6 @@ public partial class Position
 
         // Pawn islands
         pawnScore += PawnIslands(whitePawns, blackPawns);
-
-        // Doubled pawns
-        pawnScore += DoubledPawns(whitePawns);
-        pawnScore -= DoubledPawns(blackPawns);
 
         return pawnScore;
     }
@@ -898,21 +900,6 @@ public partial class Position
 
         return (KingShieldBonus * (kingShieldCount - nonAttackedShieldCount))
             + (KingShieldNonAttackedBonus * nonAttackedShieldCount);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int DoubledPawns(Bitboard sameSidePawns)
-    {
-        var packedBonus = 0;
-
-        var doubledPawns = sameSidePawns & sameSidePawns.ShiftUp();
-        while (doubledPawns != 0)
-        {
-            doubledPawns = doubledPawns.WithoutLS1B(out var pieceSquareIndex);
-            packedBonus += DoubledPawnPenalty[Constants.File(pieceSquareIndex)];
-        }
-
-        return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
