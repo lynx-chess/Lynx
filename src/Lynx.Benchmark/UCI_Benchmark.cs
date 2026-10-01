@@ -33,7 +33,6 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.Model;
 using System.Threading.Channels;
 
 namespace Lynx.Benchmark;
