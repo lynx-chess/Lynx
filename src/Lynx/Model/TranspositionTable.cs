@@ -339,11 +339,6 @@ public unsafe readonly struct TranspositionTable
 
     public void Release()
     {
-        ReleaseUnmanagedMemory();
-    }
-
-    private void ReleaseUnmanagedMemory()
-    {
         if (_tt != null)
         {
             NativeMemory.Free(_tt);

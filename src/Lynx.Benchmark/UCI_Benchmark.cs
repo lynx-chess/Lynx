@@ -47,6 +47,10 @@ public class UCI_Benchmark : BaseBenchmark
     {
         var tt = new TranspositionTable();
         var engine = new Engine(-1, _channel.Writer, in tt);
-        return engine.Bench(Configuration.EngineSettings.BenchDepth);
+        
+        var result = engine.Bench(Configuration.EngineSettings.BenchDepth);
+        tt.Release();
+
+        return result;
     }
 }
