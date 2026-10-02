@@ -448,6 +448,49 @@ public partial class Position
                         eval >>= 1; // /2
                     }
                 }
+                else if (gamePhase == 4)
+                {
+                    if (PieceBitboards[(int)Piece.R] != 0 && PieceBitboards[(int)Piece.r] != 0)
+                    {
+                        // Detect if potential passed pawns
+                        bool hasPassers = Math.Abs(whitePawns.CountBits() - blackPawns.CountBits()) > 1;
+
+                        if (!hasPassers)
+                        {
+                            var whitePawnsCopy = whitePawns;
+                            while (whitePawnsCopy != 0)
+                            {
+                                whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
+
+                                if ((blackPawns & Masks.WhitePassedPawnMasks[pieceSquareIndex]) == 0)
+                                {
+                                    hasPassers = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!hasPassers)
+                        {
+                            var blackPawnsCopy = blackPawns;
+                            while (blackPawnsCopy != 0)
+                            {
+                                blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
+
+                                if ((whitePawns & Masks.BlackPassedPawnMasks[pieceSquareIndex]) == 0)
+                                {
+                                    hasPassers = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!hasPassers)
+                        {
+                            eval >>= 1; // /2
+                        }
+                    }
+                }
             }
         }
 
