@@ -7,18 +7,19 @@ namespace Lynx.Model;
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
 [StructLayout(LayoutKind.Sequential)]
-public ref struct EvaluationContext
+public readonly ref struct EvaluationContext
 {
     private const int AttacksCount = 12;
     private const int AttacksBySideCount = 2;
+    private const int KingRingAttacksCount = 2;
 
-    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount;
+    private const int KingRingAttacksOffset = AttacksCount + KingRingAttacksCount;
 
-    public Span<Bitboard> Attacks;
-    public Span<Bitboard> AttacksBySide;
+    public const int RequiredBufferSize = AttacksCount + AttacksBySideCount + KingRingAttacksCount;
 
-    public int WhiteKingRingAttacks;
-    public int BlackKingRingAttacks;
+    public readonly Span<Bitboard> Attacks;
+    public readonly Span<Bitboard> AttacksBySide;
+    public readonly Span<ulong> KingRingAttacks;
 
     public EvaluationContext(Span<Bitboard> buffer)
     {
@@ -28,29 +29,11 @@ public ref struct EvaluationContext
 
         Attacks = buffer[..AttacksCount];
         AttacksBySide = buffer.Slice(AttacksCount, AttacksBySideCount);
-    }
-
-    public void Reset()
-    {
-        Attacks.Clear();
-        AttacksBySide.Clear();
-
-        WhiteKingRingAttacks = 0;
-        BlackKingRingAttacks = 0;
+        KingRingAttacks = buffer.Slice(KingRingAttacksOffset, KingRingAttacksCount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void IncreaseKingRingAttacks(int side, int count)
-    {
-        if (side == (int)Side.White)
-        {
-            WhiteKingRingAttacks += count;
-        }
-        else
-        {
-            BlackKingRingAttacks += count;
-        }
-    }
+    public readonly void IncreaseKingRingAttacks(int side, int count) => KingRingAttacks[side] += (ulong)count;
 }
 
 #pragma warning restore CA1051 // Do not declare visible instance fields

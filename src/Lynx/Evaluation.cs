@@ -305,8 +305,8 @@ public partial class Position
 
         // Total king rings attacks
         packedScore +=
-            TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
-            - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
+            TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.KingRingAttacks[(int)Side.White])]
+            - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.KingRingAttacks[(int)Side.Black])];
 
         // Bishop pair bonus
         if (_pieceBitboards[(int)Piece.B].CountBits() >= 2)

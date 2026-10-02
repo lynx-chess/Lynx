@@ -116,7 +116,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             foreach (var position in _positions)
             {
-                evaluationContext.Reset();
+                buffer.Clear();
                 position.CalculateThreats(ref evaluationContext);
                 var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];
 
@@ -145,7 +145,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         {
             foreach (var position in _positions)
             {
-                evaluationContext.Reset();
+                buffer.Clear();
 
                 position.CalculateThreats(ref evaluationContext);
                 var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide(position.Side)];

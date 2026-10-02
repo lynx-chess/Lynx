@@ -73,7 +73,7 @@ public class Threats_Benchmark : BaseBenchmark
 
         foreach (var position in _positions)
         {
-            evaluationContext.Reset();
+            buffer.Clear();
             position.CalculateThreats(ref evaluationContext);
 
             total += position.Threats_Original(evaluationContext, (int)Side.White)
@@ -93,7 +93,7 @@ public class Threats_Benchmark : BaseBenchmark
 
         foreach (var position in _positions)
         {
-            evaluationContext.Reset();
+            buffer.Clear();
             position.CalculateThreats(ref evaluationContext);
 
             total += position.Threats_Optimized(evaluationContext, (int)Side.White)
