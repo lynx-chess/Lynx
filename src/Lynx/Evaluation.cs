@@ -629,8 +629,8 @@ public partial class Position
         pawnScore += PawnIslands(whitePawns, blackPawns);
 
         // Doubled pawns
-        pawnScore += DoubledPawns(whitePawns, whiteBucket);
-        pawnScore -= DoubledPawns(blackPawns, blackBucket);
+        pawnScore += DoubledPawns(whitePawns, whiteBucket, blackBucket);
+        pawnScore -= DoubledPawns(blackPawns, blackBucket, whiteBucket);
 
         return pawnScore;
     }
@@ -902,7 +902,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int DoubledPawns(Bitboard sameSidePawns, int bucket)
+    private static int DoubledPawns(Bitboard sameSidePawns,  int sameSideBucket, int oppositeSideBucket)
     {
         var packedBonus = 0;
 
@@ -910,7 +910,10 @@ public partial class Position
         while (doubledPawns != 0)
         {
             doubledPawns = doubledPawns.WithoutLS1B(out var pieceSquareIndex);
-            packedBonus += DoubledPawnPenalty[bucket][Constants.File(pieceSquareIndex)];
+            var file = Constants.File(pieceSquareIndex);
+
+            packedBonus += DoubledPawnPenalty[sameSideBucket][file];
+            packedBonus += DoubledPawnEnemyPenalty[oppositeSideBucket][file];
         }
 
         return packedBonus;
