@@ -82,7 +82,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private short QuietHistoryEntry(Move move, Bitboard oppositeSideAttacks)
+    private short QuietHistoryEntry(Position position, Move move, Bitboard oppositeSideAttacks)
     {
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
@@ -91,7 +91,7 @@ public sealed partial class Engine
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
 
-        var pieceToHistory = PieceToQuietHistoryEntry(move.Piece(), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
+        var pieceToHistory = PieceToQuietHistoryEntry(MoveExtensions.Piece(position.Board, sourceSquare), targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
         var butterflyHistory = ButterflyQuietHistoryEntry(sourceSquare, targetSquare, isStartSquareAttacked, isTargetSquareAttacked);
 
         return (short)((pieceToHistory + butterflyHistory) / 2);
@@ -130,24 +130,24 @@ public sealed partial class Engine
 
         // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
         // Counter move history (continuation history, ply - 1)
-        var ply1Move = Game.ReadMoveFromStack(ply - 1);
-        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+        var (ply1Move, ply1Piece) = Game.ReadMoveAndPieceFromStack(ply - 1);
+        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move, ply1Piece);
         Debug.Assert(ply1Index < _continuationHistory.Length);
 
         // Follow-up history (continuation history, ply - 2)
-        var ply2Move = Game.ReadMoveFromStack(ply - 2);
-        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+        var (ply2Move, ply2Piece) = Game.ReadMoveAndPieceFromStack(ply - 2);
+        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move, ply2Piece);
         Debug.Assert(ply2Index < _continuationHistory.Length);
 
         return _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ContinuationHistoryPreviousMoveIndex(Move previousMove)
+    private static int ContinuationHistoryPreviousMoveIndex(Move previousMove, int previousMovePiece)
     {
         const int previousMovePieceOffset = 64;
 
-        return (previousMove.Piece() * previousMovePieceOffset)
+        return (previousMovePiece * previousMovePieceOffset)
             + previousMove.TargetSquare();
     }
 
@@ -165,8 +165,8 @@ public sealed partial class Engine
         if (ply >= 1)
         {
             // Counter move history (continuation history, ply - 1)
-            var ply1Move = Game.ReadMoveFromStack(ply - 1);
-            var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+            var (ply1Move, ply1Piece) = Game.ReadMoveAndPieceFromStack(ply - 1);
+            var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move, ply1Piece);
             Debug.Assert(ply1Index < _continuationHistory.Length);
 
             ref var contHist1 = ref _continuationHistory[ply1Index];
@@ -175,8 +175,8 @@ public sealed partial class Engine
             if (ply >= 2)
             {
                 // Follow-up history (continuation history, ply - 2)
-                var ply2Move = Game.ReadMoveFromStack(ply - 2);
-                var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+                var (ply2Move, ply2Piece) = Game.ReadMoveAndPieceFromStack(ply - 2);
+                var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move, ply2Piece);
                 Debug.Assert(ply2Index < _continuationHistory.Length);
 
                 ref var contHist2 = ref _continuationHistory[ply2Index];
@@ -193,10 +193,12 @@ public sealed partial class Engine
     {
         const int sourceSquareOffset = 64;
 
-        var previousMove = Game.ReadMoveFromStack(ply);
+        (var previousMove, var previousPiece) = Game.ReadMoveAndPieceFromStack(ply);
 
-        var index = (previousMove.Piece() * sourceSquareOffset)
+        var index = (previousPiece * sourceSquareOffset)
             + previousMove.TargetSquare();
+
+        // And the piece calculation is incorrect, we can't really tell the piece that moved without the copy of the Board of -ply
 
         Debug.Assert(index < _counterMoves.Length);
 
@@ -451,9 +453,9 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveNodeCount(Move move, ulong nodesToAdd)
+    private void UpdateMoveNodeCount(Position position, Move move, ulong nodesToAdd)
     {
-        _moveNodeCount[move.Piece()][move.TargetSquare()] += nodesToAdd;
+        _moveNodeCount[move.Piece(position.Board)][move.TargetSquare()] += nodesToAdd;
     }
 
     /// <summary>
@@ -546,7 +548,7 @@ public sealed partial class Engine
 #pragma warning restore IDISP003 // Dispose previous before re-assigning
         }
 
-        static void TryParseMove(Position position, int i, int move)
+        static void TryParseMove(Position position, int i, Move move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -558,6 +560,7 @@ public sealed partial class Engine
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
                MoveGenerator.GenerateAllMoves(position, movePool, oppositeSideAttacks),
+               (int)position.Side,
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
@@ -645,36 +648,36 @@ public sealed partial class Engine
         }
     }
 
-    /// <summary>
-    /// Assumes Configuration.EngineSettings.MaxDepth = 64
-    /// </summary>
-    [Conditional("DEBUG")]
-    private void PrintPvTable(int target = -1, int source = -1, int movesToCopy = 0, int depth = 0)
-    {
-        if (depth != default)
-        {
-            Console.WriteLine($"PV Table at depth {depth}");
-        }
-        if (movesToCopy != default)
-        {
-            Console.WriteLine($"Copying {movesToCopy} moves");
-        }
+    //    /// <summary>
+    //    /// Assumes Configuration.EngineSettings.MaxDepth = 64
+    //    /// </summary>
+    //    [Conditional("DEBUG")]
+    //    private void PrintPvTable(int target = -1, int source = -1, int movesToCopy = 0, int depth = 0)
+    //    {
+    //        if (depth != default)
+    //        {
+    //            Console.WriteLine($"PV Table at depth {depth}");
+    //        }
+    //        if (movesToCopy != default)
+    //        {
+    //            Console.WriteLine($"Copying {movesToCopy} moves");
+    //        }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        Console.WriteLine(
-(target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
-$" {0,-3} {_pVTable[0].ToEPDString(),-6} {_pVTable[1].ToEPDString(),-6} {_pVTable[2].ToEPDString(),-6} {_pVTable[3].ToEPDString(),-6} {_pVTable[4].ToEPDString(),-6} {_pVTable[5].ToEPDString(),-6} {_pVTable[6].ToEPDString(),-6} {_pVTable[7].ToEPDString(),-6} {_pVTable[8].ToEPDString(),-6} {_pVTable[9].ToEPDString(),-6} {_pVTable[10].ToEPDString(),-6}" + Environment.NewLine +
-$" {64,-3}        {_pVTable[64].ToEPDString(),-6} {_pVTable[65].ToEPDString(),-6} {_pVTable[66].ToEPDString(),-6} {_pVTable[67].ToEPDString(),-6} {_pVTable[68].ToEPDString(),-6} {_pVTable[69].ToEPDString(),-6} {_pVTable[70].ToEPDString(),-6} {_pVTable[71].ToEPDString(),-6} {_pVTable[72].ToEPDString(),-6} {_pVTable[73].ToEPDString(),-6}" + Environment.NewLine +
-$" {127,-3}               {_pVTable[127].ToEPDString(),-6} {_pVTable[128].ToEPDString(),-6} {_pVTable[129].ToEPDString(),-6} {_pVTable[130].ToEPDString(),-6} {_pVTable[131].ToEPDString(),-6} {_pVTable[132].ToEPDString(),-6} {_pVTable[133].ToEPDString(),-6} {_pVTable[134].ToEPDString(),-6} {_pVTable[135].ToEPDString(),-6}" + Environment.NewLine +
-$" {189,-3}                      {_pVTable[189].ToEPDString(),-6} {_pVTable[190].ToEPDString(),-6} {_pVTable[191].ToEPDString(),-6} {_pVTable[192].ToEPDString(),-6} {_pVTable[193].ToEPDString(),-6} {_pVTable[194].ToEPDString(),-6} {_pVTable[195].ToEPDString(),-6} {_pVTable[196].ToEPDString(),-6}" + Environment.NewLine +
-$" {250,-3}                             {_pVTable[250].ToEPDString(),-6} {_pVTable[251].ToEPDString(),-6} {_pVTable[252].ToEPDString(),-6} {_pVTable[253].ToEPDString(),-6} {_pVTable[254].ToEPDString(),-6} {_pVTable[255].ToEPDString(),-6} {_pVTable[256].ToEPDString(),-6}" + Environment.NewLine +
-$" {310,-3}                                    {_pVTable[310].ToEPDString(),-6} {_pVTable[311].ToEPDString(),-6} {_pVTable[312].ToEPDString(),-6} {_pVTable[313].ToEPDString(),-6} {_pVTable[314].ToEPDString(),-6} {_pVTable[315].ToEPDString(),-6}" + Environment.NewLine +
-$" {369,-3}                                           {_pVTable[369].ToEPDString(),-6} {_pVTable[370].ToEPDString(),-6} {_pVTable[371].ToEPDString(),-6} {_pVTable[372].ToEPDString(),-6} {_pVTable[373].ToEPDString(),-6}" + Environment.NewLine +
-$" {427,-3}                                                  {_pVTable[427].ToEPDString(),-6} {_pVTable[428].ToEPDString(),-6} {_pVTable[429].ToEPDString(),-6} {_pVTable[430].ToEPDString(),-6}" + Environment.NewLine +
-$" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
-(target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
+    //#pragma warning disable CS0618 // Type or member is obsolete
+    //        Console.WriteLine(
+    //(target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
+    //$" {0,-3} {_pVTable[0].ToEPDString(),-6} {_pVTable[1].ToEPDString(),-6} {_pVTable[2].ToEPDString(),-6} {_pVTable[3].ToEPDString(),-6} {_pVTable[4].ToEPDString(),-6} {_pVTable[5].ToEPDString(),-6} {_pVTable[6].ToEPDString(),-6} {_pVTable[7].ToEPDString(),-6} {_pVTable[8].ToEPDString(),-6} {_pVTable[9].ToEPDString(),-6} {_pVTable[10].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {64,-3}        {_pVTable[64].ToEPDString(),-6} {_pVTable[65].ToEPDString(),-6} {_pVTable[66].ToEPDString(),-6} {_pVTable[67].ToEPDString(),-6} {_pVTable[68].ToEPDString(),-6} {_pVTable[69].ToEPDString(),-6} {_pVTable[70].ToEPDString(),-6} {_pVTable[71].ToEPDString(),-6} {_pVTable[72].ToEPDString(),-6} {_pVTable[73].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {127,-3}               {_pVTable[127].ToEPDString(),-6} {_pVTable[128].ToEPDString(),-6} {_pVTable[129].ToEPDString(),-6} {_pVTable[130].ToEPDString(),-6} {_pVTable[131].ToEPDString(),-6} {_pVTable[132].ToEPDString(),-6} {_pVTable[133].ToEPDString(),-6} {_pVTable[134].ToEPDString(),-6} {_pVTable[135].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {189,-3}                      {_pVTable[189].ToEPDString(),-6} {_pVTable[190].ToEPDString(),-6} {_pVTable[191].ToEPDString(),-6} {_pVTable[192].ToEPDString(),-6} {_pVTable[193].ToEPDString(),-6} {_pVTable[194].ToEPDString(),-6} {_pVTable[195].ToEPDString(),-6} {_pVTable[196].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {250,-3}                             {_pVTable[250].ToEPDString(),-6} {_pVTable[251].ToEPDString(),-6} {_pVTable[252].ToEPDString(),-6} {_pVTable[253].ToEPDString(),-6} {_pVTable[254].ToEPDString(),-6} {_pVTable[255].ToEPDString(),-6} {_pVTable[256].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {310,-3}                                    {_pVTable[310].ToEPDString(),-6} {_pVTable[311].ToEPDString(),-6} {_pVTable[312].ToEPDString(),-6} {_pVTable[313].ToEPDString(),-6} {_pVTable[314].ToEPDString(),-6} {_pVTable[315].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {369,-3}                                           {_pVTable[369].ToEPDString(),-6} {_pVTable[370].ToEPDString(),-6} {_pVTable[371].ToEPDString(),-6} {_pVTable[372].ToEPDString(),-6} {_pVTable[373].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {427,-3}                                                  {_pVTable[427].ToEPDString(),-6} {_pVTable[428].ToEPDString(),-6} {_pVTable[429].ToEPDString(),-6} {_pVTable[430].ToEPDString(),-6}" + Environment.NewLine +
+    //$" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
+    //(target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
+    //#pragma warning restore CS0618 // Type or member is obsolete
+    //    }
 
 #pragma warning restore S125 // Sections of code should not be commented out
 #pragma warning restore S1199 // Nested code blocks should not be used
