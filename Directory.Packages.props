@@ -29,7 +29,7 @@
     <PackageVersion Include="ErrorProne.NET.CoreAnalyzers" Version="0.8.2-beta.1" />
     <PackageVersion Include="IDisposableAnalyzers" Version="4.0.8" />
     <PackageVersion Include="Meziantou.Analyzer " Version="3.0.290" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="5.0.0" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="5.0.1" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
   </ItemGroup>
 
