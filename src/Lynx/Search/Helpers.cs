@@ -186,10 +186,18 @@ public sealed partial class Engine
     }
 
     /// <summary>
+    /// Killer and counter moves are shared across positions, so they also keep the piece that moved
+    /// (<see cref="Move"/> only has squares and flags): piece in bits 16+, move in bits 0-15.
+    /// Never 0 for a real move, so 0 means 'no move'
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int PieceAwareMove(Move move, int piece) => move | (piece << 16);
+
+    /// <summary>
     /// [12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref Move CounterMove(int ply)
+    private ref int CounterMove(int ply)
     {
         const int sourceSquareOffset = 64;
 

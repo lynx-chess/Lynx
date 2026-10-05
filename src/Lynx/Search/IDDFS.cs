@@ -14,12 +14,12 @@ public sealed partial class Engine
     /// <summary>
     /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
-    private readonly Move[] _killerMoves = GC.AllocateArray<Move>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
+    private readonly int[] _killerMoves = GC.AllocateArray<int>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
 
     /// <summary>
     /// 12 x 64
     /// </summary>
-    private readonly Move[] _counterMoves = GC.AllocateArray<Move>(12 * 64, pinned: true);
+    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     private const int PieceToQuietHistoryLength = 12 * 64 * 2 * 2;
 

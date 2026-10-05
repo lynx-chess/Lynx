@@ -27,17 +27,18 @@ public sealed partial class Engine
 
         if (!isCapture && !isPromotion)
         {
+            var pieceAwareMove = PieceAwareMove(move, move.Piece(position.Board));
             var thisPlyKillerMovesBaseIndex = ply * 2;
             ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
 
             // 1st killer move
-            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) == move)
+            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) == pieceAwareMove)
             {
                 return FirstKillerMoveValue;
             }
 
             // 2nd killer move
-            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) == move)
+            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) == pieceAwareMove)
             {
                 return SecondKillerMoveValue;
             }
@@ -45,7 +46,7 @@ public sealed partial class Engine
             if (ply >= 1)
             {
                 // Countermove
-                if (CounterMove(ply - 1) == move)
+                if (CounterMove(ply - 1) == pieceAwareMove)
                 {
                     return CounterMoveValue;
                 }
@@ -229,22 +230,23 @@ public sealed partial class Engine
         var thisPlyKillerMovesBaseIndex = ply * 2;
         ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
         var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
+        var pieceAwareMove = PieceAwareMove(move, piece);
 
-        if (move.PromotedPiece((int)position.Side) == default && move != firstKillerMove)
+        if (move.PromotedPiece((int)position.Side) == default && pieceAwareMove != firstKillerMove)
         {
             // 🔍 Killer moves
-            if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
+            if (pieceAwareMove != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
             {
                 Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) = firstKillerMove;
             }
 
-            Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) = move;
+            Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) = pieceAwareMove;
 
             if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
                 ref var counterMove = ref CounterMove(ply - 1);
-                counterMove = move;
+                counterMove = pieceAwareMove;
             }
         }
     }
