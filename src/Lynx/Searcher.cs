@@ -566,6 +566,7 @@ public sealed class Searcher : IDisposable
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _tt.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
             _engineWriter.TryWrite($"info string Resizing TT ({_tt.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
+            _tt.Release();
             _tt = new();
 
             if (_tt.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
@@ -938,6 +939,8 @@ public sealed class Searcher : IDisposable
 
                 _absoluteSearchCancellationTokenSource.Dispose();
                 _searchCancellationTokenSource.Dispose();
+
+                _tt.Release();
             }
             _disposedValue = true;
         }
