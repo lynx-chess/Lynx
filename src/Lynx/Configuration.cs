@@ -143,6 +143,11 @@ public sealed class EngineSettings
                 Constants.MaxMoveOverhead);
     }
 
+    /// <summary>
+    /// JIT compilation and optimizations happens during warmup.
+    /// </summary>
+    public bool SkipWarmup { get; set; }
+
     #region Time management
 
     /// <summary>
