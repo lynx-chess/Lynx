@@ -868,8 +868,11 @@ public sealed partial class Engine
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves, oppositeSideAttacks);
-        if (pseudoLegalMoves.Length == 0)
+        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true);
+
+        if (!movePicker.TryGetNext(out var move, out var moveScore))
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
             return staticEval;
@@ -881,41 +884,12 @@ public sealed partial class Engine
 
         bool isAnyCaptureValid = false;
 
-        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
-
-        ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
-        ref var movesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-        {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref movesRef, i), ttBestMove);
-        }
-
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
+        do
         {
-            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
-            // There's no need to sort all the moves since most of them don't get checked anyway
-            // So just find the first unsearched one with the best score and try it
-            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
-            {
-                ref var moveI = ref Unsafe.Add(ref movesRef, moveIndex);
-                ref var moveJ = ref Unsafe.Add(ref movesRef, j);
-                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
-                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
-
-                if (scoreJ > scoreI)
-                {
-                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
-                }
-            }
-
-            // Value copies
-            var move = Unsafe.Add(ref movesRef, moveIndex);
-            var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
-
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
@@ -978,6 +952,7 @@ public sealed partial class Engine
 
             ++visitedMovesCounter;
         }
+        while (movePicker.TryGetNext(out move, out moveScore));
 
         if (!isAnyCaptureValid
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
