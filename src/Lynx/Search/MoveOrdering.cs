@@ -17,7 +17,7 @@ public sealed partial class Engine
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
-            return int.MinValue;
+            return TTMoveScoreValue;
         }
 
         var promotedPiece = move.PromotedPiece();

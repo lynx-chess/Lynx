@@ -25,13 +25,14 @@ public sealed partial class Engine
         {
             var fullTTMove = MoveGenerator.GenerateFullTTMove(ttMove, position, oppositeSideAttacks);
 
-            if (fullTTMove != 0 && MoveGenerator.IsPseudoLegal(position, fullTTMove, oppositeSideAttacks))
+            // TT entries can be corrupted (hash collisions), e.g. with promotion bits set for a non-pawn move
+            if (fullTTMove != 0
+                && (ShortMove)fullTTMove == ttMove
+                && MoveGenerator.IsPseudoLegal(position, fullTTMove, oppositeSideAttacks))
             {
                 movePool[0] = fullTTMove;
                 return movePool[0..1];
             }
-
-            Debug.Assert(!MoveGenerator.IsPseudoLegal(position, fullTTMove, oppositeSideAttacks));
 
             return [];
         }

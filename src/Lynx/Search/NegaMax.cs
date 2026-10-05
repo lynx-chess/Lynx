@@ -328,9 +328,18 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
+        bool ttMoveGenerated = false;
+
         foreach (var stage in _stages)
         {
+            var isTTStage = stage is TTStage;
             var pseudoLegalMoves = stage.GenerateMoves(this, ttBestMove, position, oppositeSideAttacks, ply, moves);
+
+            if (isTTStage)
+            {
+                ttMoveGenerated = pseudoLegalMoves.Length > 0;
+            }
+
             var stageMoveScores = moveScores[0..pseudoLegalMoves.Length];
 
             ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
@@ -357,6 +366,16 @@ public sealed partial class Engine
                     {
                         (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
                     }
+                }
+
+                // The TT move was already tried in the TT stage.
+                // It has the highest score, so the sorting above leaves it at index 0 (same ordering as when generating all moves at once)
+                if (ttMoveGenerated
+                    && !isTTStage
+                    && moveIndex == 0
+                    && (ShortMove)Unsafe.Add(ref pseudoLegalMovesRef, 0) == ttBestMove)
+                {
+                    continue;
                 }
 
                 // Value copy
