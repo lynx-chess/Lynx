@@ -1119,62 +1119,45 @@ public partial class Position : IDisposable
         return Utils.Murmur3(hash);
     }
 
-    public int CountPieces() => _pieceBitboards.Sum(b => b.CountBits());
+    public int CountPieces() => _occupancyBitboards[(int)Side.Both].CountBits();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
-        var sb = new StringBuilder(100);
+        var sb = ObjectPools.StringBuilderPool.Get();
+        sb.EnsureCapacity(100);
 
-        var squaresPerFile = 0;
-
-        int squaresWithoutPiece = 0;
-        int lengthBeforeSlash = sb.Length;
-        for (int square = 0; square < 64; ++square)
+        for (var rank = 0; rank < 8; ++rank)
         {
-            int foundPiece = -1;
-            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
-            {
-                if (_pieceBitboards[pieceBoardIndex].GetBit(square))
-                {
-                    foundPiece = pieceBoardIndex;
-                    break;
-                }
-            }
+            int emptyCount = 0;
 
-            if (foundPiece != -1)
+            for (var file = 0; file < 8; ++file)
             {
-                if (squaresWithoutPiece != 0)
+                var square = (rank * 8) + file;
+                var foundPiece = _board[square];
+
+                if (foundPiece == (int)Piece.None)
                 {
-                    sb.Append(squaresWithoutPiece);
-                    squaresWithoutPiece = 0;
+                    ++emptyCount;
+                    continue;
+                }
+
+                if (emptyCount != 0)
+                {
+                    sb.Append((char)('0' + emptyCount));
+                    emptyCount = 0;
                 }
 
                 sb.Append(Constants.AsciiPieces[foundPiece]);
             }
-            else
+
+            if (emptyCount != 0)
             {
-                ++squaresWithoutPiece;
+                sb.Append((char)('0' + emptyCount));
             }
 
-            squaresPerFile = (squaresPerFile + 1) % 8;
-            if (squaresPerFile == 0)
+            if (rank != 7)
             {
-                if (squaresWithoutPiece != 0)
-                {
-                    sb.Append(squaresWithoutPiece);
-                    squaresWithoutPiece = 0;
-                }
-
-                if (square != 63)
-                {
-                    if (sb.Length == lengthBeforeSlash)
-                    {
-                        sb.Append('8');
-                    }
-                    sb.Append('/');
-                    lengthBeforeSlash = sb.Length;
-                    squaresWithoutPiece = 0;
-                }
+                sb.Append('/');
             }
         }
 
@@ -1242,9 +1225,16 @@ public partial class Position : IDisposable
             ? "-"
             : Constants.Coordinates[(int)_enPassant]);
 
-        sb.Append(' ').Append(halfMovesWithoutCaptureOrPawnMove).Append(' ').Append(fullMoveClock);
+        sb.Append(' ')
+          .Append(halfMovesWithoutCaptureOrPawnMove)
+          .Append(' ')
+          .Append(fullMoveClock);
 
-        return sb.ToString();
+        var result = sb.ToString();
+
+        ObjectPools.StringBuilderPool.Return(sb);
+
+        return result;
     }
 
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
@@ -1385,7 +1375,7 @@ public partial class Position : IDisposable
     {
         const string failureMessage = "Position validation failed";
 
-        Debug.Assert(Side != Side.Both, failureMessage, "Side == Side.Both");
+        Debug.Assert(_side != Side.Both, failureMessage, "Side == Side.Both");
 
         var whitePawns = _pieceBitboards[(int)Piece.P];
         var blackPawns = _pieceBitboards[(int)Piece.p];
@@ -1556,7 +1546,7 @@ public partial class Position : IDisposable
 
             var pawnToCaptureSquare = Constants.EnPassantCaptureSquares[(int)_enPassant];
 
-            if (Side == Side.White)
+            if (_side == Side.White)
             {
                 Debug.Assert(blackPawns.GetBit(pawnToCaptureSquare), failureMessage, $"No black pawn on en-passant capture square for {_enPassant}");
             }
@@ -1567,7 +1557,7 @@ public partial class Position : IDisposable
         }
 
         // Can't capture opponent's king
-        Debug.Assert(!IsSquareAttacked(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), Side), failureMessage, "Can't capture opponent's king");
+        Debug.Assert(!IsSquareAttacked(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), _side), failureMessage, "Can't capture opponent's king");
 
         Debug.Assert(Math.Min(MaxPhase, PhaseFromScratch()) == Phase(), failureMessage, $"Wrong incremental phase: {Phase()} vs from scratch {Math.Min(MaxPhase, PhaseFromScratch())}");
     }

@@ -168,8 +168,6 @@ public static class ViriformatLoader
                     {
                         if (!skipGame)
                         {
-                            var fen = game.FEN;
-
                             // Draw adjufication filter
                             if (filter.DrawAdjudication)
                             {
@@ -199,7 +197,7 @@ public static class ViriformatLoader
                                     if (winAdjudicationScoreCount >= 2 * filter.WinAdjudication_MoveCount)
                                     {
                                         // We include the final position before the adjudication
-                                        outputFile.WriteLine($"{fen}; {eval}; [{gameResult}]");
+                                        outputFile.WriteLine($"{game.FEN}; {eval}; [{gameResult}]");
                                         --positionsToTakePerGame;
 
                                         skipGame = true;
@@ -220,7 +218,7 @@ public static class ViriformatLoader
                                 var filteredOut = filter.ShouldDrop(move.Value, eval, game.CurrentPosition, wdlByte, ply, rng, isFirstGameMove);
                                 if (!filteredOut)
                                 {
-                                    validPositionsPerGame[positionsPerGame] = (fen, eval, game.CurrentPosition.PhaseFromScratch());
+                                    validPositionsPerGame[positionsPerGame] = (game.FEN, eval, game.CurrentPosition.PhaseFromScratch());
                                     ++positionsPerGame;
                                 }
                                 // Max initial eval filter
@@ -618,8 +616,8 @@ public static class ViriformatLoader
     /// 0000 0000 0011 1111                     Source square (0-63)
     /// 0000 1111 1100 0000                     Target square (0-63)
     /// 0011 0000 0000 0000                     Promoted piece (N=1, B=1, R=2, Q=3)
-    /// 0100 0000 0000 0000     0x40000         En-passant flag
-    /// 1000 0000 0000 0000     0x80000         Castling flag
+    /// 0100 0000 0000 0000     0x4000          En-passant flag
+    /// 1000 0000 0000 0000     0x8000          Castling flag
     /// 1100 0000 0000 0000     0xC000          Promotion flag
     /// </summary>
     private static string ViriformatMoveToUci(Position position, ushort raw)
