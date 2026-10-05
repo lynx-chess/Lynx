@@ -13,7 +13,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {

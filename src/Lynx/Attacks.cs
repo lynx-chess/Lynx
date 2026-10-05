@@ -46,6 +46,14 @@ public static class Attacks
         get;
     }
 
+
+    /// <summary>
+    /// 64 x 64
+    /// </summary>
+#pragma warning disable S2386, S3887 // Mutable fields should not be "public static"
+    public static readonly Bitboard[][] RaysBetween;
+#pragma warning restore S2386, S3887 // Mutable fields should not be "public static"
+
 #pragma warning disable CA1810 // Initialize reference type static fields inline
     static Attacks()
 #pragma warning restore CA1810 // Initialize reference type static fields inline
@@ -70,6 +78,32 @@ public static class Attacks
             _pextAttacks = [];
             _pextBishopOffset = [];
             _pextRookOffset = [];
+        }
+
+        RaysBetween = new Bitboard[64][];
+
+        for (int square1 = 0; square1 < 64; ++square1)
+        {
+            RaysBetween[square1] = new Bitboard[64];
+
+            for (var square2 = 0; square2 < 64; ++square2)
+            {
+                var occupancy = 1UL << square1 | 1UL << square2;
+
+                int file1 = Constants.File(square1);
+                int file2 = Constants.File(square2);
+                int rank1 = Constants.Rank(square1);
+                int rank2 = Constants.Rank(square2);
+
+                if (file1 == file2 || rank1 == rank2)
+                {
+                    RaysBetween[square1][square2] = Attacks.RookAttacks(square1, occupancy) & Attacks.RookAttacks(square2, occupancy);
+                }
+                else if (file1 - rank1 == file2 - rank2)
+                {
+                    RaysBetween[square1][square2] = Attacks.BishopAttacks(square1, occupancy) & Attacks.BishopAttacks(square2, occupancy);
+                }
+            }
         }
     }
 
