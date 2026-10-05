@@ -33,7 +33,7 @@ public static class SEE
         var sideToMove = position.Side;
 
         var pieceValues = PieceValues;
-        var score = pieceValues[move.CapturedPiece(position.Board, (int)position.Side))] - threshold;    // Gain() - threshold
+        var score = pieceValues[move.CapturedPiece(position.Board, (int)position.Side)] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
