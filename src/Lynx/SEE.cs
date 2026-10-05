@@ -32,7 +32,8 @@ public static class SEE
 
         var sideToMove = position.Side;
 
-        var score = PieceValues[move.CapturedPiece(position.Board, (int)position.Side)] - threshold;    // Gain() - threshold
+        var pieceValues = PieceValues;
+        var score = pieceValues[move.CapturedPiece(position.Board, (int)position.Side))] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -41,7 +42,7 @@ public static class SEE
         }
 
         var next = move.Piece(position.Board);
-        score -= PieceValues[next];
+        score -= pieceValues[next];
 
         // If risking our piece being fully lost and the exchange value is still >= 0
         if (score >= 0)
@@ -88,7 +89,7 @@ public static class SEE
             // Removing used pieces from attackers
             attackers &= occupancy;
 
-            score = -score - 1 - PieceValues[nextPiece];
+            score = -score - 1 - pieceValues[nextPiece];
             us = Utils.OppositeSide(us);
 
             if (score >= 0)
@@ -123,12 +124,14 @@ public static class SEE
             return false;
         }
 
+        var pieceValues = PieceValues;
+
         var promotedPiece = move.PromotedPiece((int)position.Side);
         var next = promotedPiece != default
             ? promotedPiece
             : move.Piece(position.Board);
 
-        score -= PieceValues[next];
+        score -= pieceValues[next];
 
         // If risking our piece being fully lost and the exchange value is still >= 0
         if (score >= 0)
@@ -175,7 +178,7 @@ public static class SEE
             // Removing used pieces from attackers
             attackers &= occupancy;
 
-            score = -score - 1 - PieceValues[nextPiece];
+            score = -score - 1 - pieceValues[nextPiece];
             us = Utils.OppositeSide(us);
 
             if (score >= 0)
@@ -209,10 +212,12 @@ public static class SEE
 
         var promotedPiece = move.PromotedPiece((int)position.Side);
 
+        var pieceValues = PieceValues;
+
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
-            ? PieceValues[move.CapturedPiece(position.Board, (int)position.Side)]
-            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + PieceValues[move.CapturedPiece(position.Board, (int)position.Side)];
+            ? pieceValues[move.CapturedPiece(position.Board, (int)position.Side)]
+            : pieceValues[promotedPiece] - PieceValues[(int)Piece.P] + pieceValues[move.CapturedPiece(position.Board, (int)position.Side)];
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
