@@ -43,7 +43,7 @@ internal ref struct MovePicker
         {
             _stage = Stage.GenerateAllMovesStage;
 
-            var fullTTMove = MoveGenerator.GeneratefullTTMove(_ttMove, _position, _oppositeSideAttacks);
+            var fullTTMove = MoveGenerator.GenerateFullTTMove(_ttMove, _position, _oppositeSideAttacks);
 
             // TT entries can be corrupted (hash collisions), e.g. with promotion bits set for a non-pawn move
             if (fullTTMove != 0
