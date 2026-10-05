@@ -18,6 +18,7 @@ internal ref struct MovePicker
     private readonly Bitboard _oppositeSideAttacks;
     private readonly ShortMove _ttMove;
     private readonly int _ply;
+    private readonly bool _isQuiescence;
     private readonly Span<Move> _moves;
     private readonly Span<int> _moveScores;
 
@@ -26,13 +27,15 @@ internal ref struct MovePicker
     private int _index;
     private bool _ttMoveGenerated;
 
-    public MovePicker(Engine engine, Position position, ShortMove TTMoveStage, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores)
+    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isQuiescence = false)
     {
         _engine = engine;
         _position = position;
-        _ttMove = TTMoveStage;
+        _ttMove = ttMove;
         _oppositeSideAttacks = oppositeSideAttacks;
         _ply = ply;
+        _isQuiescence = isQuiescence;
+        _stage = isQuiescence ? Stage.GenerateAllMovesStage : Stage.TTMoveStage;
         _moves = moves;
         _moveScores = moveScores;
     }
@@ -63,11 +66,23 @@ internal ref struct MovePicker
         {
             _stage = Stage.AllMovesStage;
 
-            _count = MoveGenerator.GenerateAllMoves(_position, _moves, _oppositeSideAttacks).Length;
-
-            for (int i = 0; i < _count; ++i)
+            if (_isQuiescence)
             {
-                _moveScores[i] = _engine.ScoreMove(_position, _moves[i], _ply, _oppositeSideAttacks, _ttMove);
+                _count = MoveGenerator.GenerateAllCaptures(_position, _moves, _oppositeSideAttacks).Length;
+
+                for (int i = 0; i < _count; ++i)
+                {
+                    _moveScores[i] = _engine.ScoreMoveQSearch(_position, _moves[i], _ttMove);
+                }
+            }
+            else
+            {
+                _count = MoveGenerator.GenerateAllMoves(_position, _moves, _oppositeSideAttacks).Length;
+
+                for (int i = 0; i < _count; ++i)
+                {
+                    _moveScores[i] = _engine.ScoreMove(_position, _moves[i], _ply, _oppositeSideAttacks, _ttMove);
+                }
             }
         }
 
