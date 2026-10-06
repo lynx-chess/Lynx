@@ -863,8 +863,10 @@ public sealed partial class Engine
 
         int standPat =
             (ttNodeType == NodeType.Exact
-                || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
-                || (ttNodeType == NodeType.Beta && ttScore > staticEval))
+                // If we use TT checkmate scores as stand pat, they are propagated as exact scores and mate distances wrongly increase over time
+                || (Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                    && ((ttNodeType == NodeType.Alpha && ttScore < staticEval)
+                        || (ttNodeType == NodeType.Beta && ttScore > staticEval))))
             ? ttScore
             : staticEval;
 
