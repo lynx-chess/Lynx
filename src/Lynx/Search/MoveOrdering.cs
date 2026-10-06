@@ -72,10 +72,7 @@ public sealed partial class Engine
                 return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
-            return PromotionMoveScoreValue
-                + (SEE.HasPositiveScore(position, move)
-                    ? GoodCaptureMoveBaseScoreValue
-                    : BadCaptureMoveBaseScoreValue);
+            return GoodCaptureMoveBaseScoreValue;
         }
 
         if (isCapture)
@@ -128,10 +125,7 @@ public sealed partial class Engine
                 return QueenPromotionWithCaptureBaseValue + capturedPiece;
             }
 
-            return PromotionMoveScoreValue
-                + (SEE.HasPositiveScore(position, move)
-                    ? GoodCaptureMoveBaseScoreValue
-                    : BadCaptureMoveBaseScoreValue);
+            return GoodCaptureMoveBaseScoreValue;
         }
 
         if (isCapture)
