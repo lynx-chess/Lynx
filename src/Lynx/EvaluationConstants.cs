@@ -192,8 +192,6 @@ public static class EvaluationConstants
 
     public const int TTMoveScoreValue = 2_097_152;
 
-    public const int QueenPromotionWithCaptureBaseValue = GoodCaptureMoveBaseScoreValue + PromotionMoveScoreValue;
-
     public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
 
     public const int FirstKillerMoveValue = 524_288;
@@ -202,10 +200,7 @@ public static class EvaluationConstants
 
     public const int CounterMoveValue = 65_536;
 
-    // Revisit bad capture pruning in NegaMax.cs if order changes and promos aren't the lowest before bad captures
-    public const int PromotionMoveScoreValue = 32_768;
-
-    public const int BadCaptureMoveBaseScoreValue = 16_384;
+    public const int BadCaptureAndPromotionMoveBaseScoreValue = 32_768;
 
     //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 

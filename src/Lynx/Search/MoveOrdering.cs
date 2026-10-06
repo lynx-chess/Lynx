@@ -25,67 +25,17 @@ public sealed partial class Engine
         var capturedPiece = move.CapturedPiece();
         var isCapture = capturedPiece != (int)Piece.None;
 
-        if (!isCapture && !isPromotion)
-        {
-            var thisPlyKillerMovesBaseIndex = ply * 2;
-            ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
-
-            // 1st killer move
-            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) == move)
-            {
-                return FirstKillerMoveValue;
-            }
-
-            // 2nd killer move
-            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) == move)
-            {
-                return SecondKillerMoveValue;
-            }
-
-            if (ply >= 1)
-            {
-                // Countermove
-                if (CounterMove(ply - 1) == move)
-                {
-                    return CounterMoveValue;
-                }
-
-                var piece = move.Piece();
-                var targetSquare = move.TargetSquare();
-
-                // Counter move history
-                return BaseMoveScore
-                    + QuietHistoryEntry(move, oppositeSideAttacks)
-                    + ContinuationHistoryEntry(piece, targetSquare, ply);
-            }
-
-            // History move or 0 if not found
-            return BaseMoveScore
-                + QuietHistoryEntry(move, oppositeSideAttacks);
-        }
-
-        // Queen promotion
-        if (isPromotion && (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q))
-        {
-            if (isCapture)
-            {
-                return QueenPromotionWithCaptureBaseValue + capturedPiece;
-            }
-
-            return GoodCaptureMoveBaseScoreValue;
-        }
-
         if (isCapture)
         {
             var piece = move.Piece();
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
                 $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(position, move))
+            var baseScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(position, move))
                 ? GoodCaptureMoveBaseScoreValue
-                : BadCaptureMoveBaseScoreValue;
+                : BadCaptureAndPromotionMoveBaseScoreValue;
 
-            return baseCaptureScore
+            return baseScore
                 + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
@@ -93,12 +43,46 @@ public sealed partial class Engine
 
         if (isPromotion)
         {
-            return PromotionMoveScoreValue;
+            return (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q)
+                ? GoodCaptureMoveBaseScoreValue
+                : (BadCaptureAndPromotionMoveBaseScoreValue + promotedPiece);
         }
 
-        _logger.Warn("Unexpected move while scoring: {Move}", move.UCIString());
+        var thisPlyKillerMovesBaseIndex = ply * 2;
+        ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
 
-        return BaseMoveScore;
+        // 1st killer move
+        if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) == move)
+        {
+            return FirstKillerMoveValue;
+        }
+
+        // 2nd killer move
+        if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) == move)
+        {
+            return SecondKillerMoveValue;
+        }
+
+        if (ply >= 1)
+        {
+            // Countermove
+            if (CounterMove(ply - 1) == move)
+            {
+                return CounterMoveValue;
+            }
+
+            var piece = move.Piece();
+            var targetSquare = move.TargetSquare();
+
+            // Counter move history
+            return BaseMoveScore
+                + QuietHistoryEntry(move, oppositeSideAttacks)
+                + ContinuationHistoryEntry(piece, targetSquare, ply);
+        }
+
+        // History move or 0 if not found
+        return BaseMoveScore
+            + QuietHistoryEntry(move, oppositeSideAttacks);
     }
 
     /// <summary>
@@ -117,22 +101,11 @@ public sealed partial class Engine
         var capturedPiece = move.CapturedPiece();
         var isCapture = capturedPiece != (int)Piece.None;
 
-        // Queen promotion
-        if (isPromotion && (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q))
-        {
-            if (isCapture)
-            {
-                return QueenPromotionWithCaptureBaseValue + capturedPiece;
-            }
-
-            return GoodCaptureMoveBaseScoreValue;
-        }
-
         if (isCapture)
         {
             var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(position, move))
                 ? GoodCaptureMoveBaseScoreValue
-                : BadCaptureMoveBaseScoreValue;
+                : BadCaptureAndPromotionMoveBaseScoreValue;
 
             var piece = move.Piece();
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k,
@@ -146,7 +119,9 @@ public sealed partial class Engine
 
         if (isPromotion)
         {
-            return PromotionMoveScoreValue;
+            return (promotedPiece == (int)Piece.Q || promotedPiece == (int)Piece.q)
+                ? GoodCaptureMoveBaseScoreValue
+                : (BadCaptureAndPromotionMoveBaseScoreValue + promotedPiece);
         }
 
         return BaseMoveScore;

@@ -382,7 +382,7 @@ public sealed partial class Engine
                 && !pvNode
                 && !isInCheck
                 && isNotGettingCheckmated
-                && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet or bad capture
+                && moveScore < EvaluationConstants.CounterMoveValue) // Quiet or bad capture
             {
                 // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                 // after searching the first few given by the move ordering algorithm
@@ -634,8 +634,8 @@ public sealed partial class Engine
                         // Bad captures are reduced more
                         // Last attempt to move it inside of LMR conditions was https://github.com/lynx-chess/Lynx/pull/1589
                         if (!isInCheck
-                            && moveScore < EvaluationConstants.PromotionMoveScoreValue
-                            && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                            && moveScore < EvaluationConstants.CounterMoveValue
+                            && moveScore >= EvaluationConstants.BadCaptureAndPromotionMoveBaseScoreValue)
                         {
                             reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
                         }
@@ -943,7 +943,7 @@ public sealed partial class Engine
             var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
 
             // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (moveScore < EvaluationConstants.CounterMoveValue && moveScore >= EvaluationConstants.BadCaptureAndPromotionMoveBaseScoreValue)
             {
                 continue;
             }
