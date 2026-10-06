@@ -500,7 +500,7 @@ public sealed partial class Engine
                 }
                 // Multicut
 #pragma warning disable MA0071 // Avoid using redundant else
-                else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
+                else if (singularScore >= beta && Math.Abs(singularScore) < EvaluationConstants.PositiveCheckmateDetectionLimit)
                 {
                     return singularScore;
                 }
