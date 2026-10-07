@@ -30,7 +30,9 @@ public class ViriformatCliIntegrationTest
         var file = Path.GetTempFileName();
         try
         {
+#pragma warning disable IDE0305 // Simplify collection initialization
             await File.WriteAllBytesAsync(file, buf.Concat(new byte[4]).ToArray());
+#pragma warning restore IDE0305 // Simplify collection initialization
 
             // Run runner with --load-viriformat <file> and then 'quit' to ensure listener exits
             var args = new string[] { "--load-viriformat", file, "quit" };
