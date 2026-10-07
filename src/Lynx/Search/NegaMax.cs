@@ -773,6 +773,7 @@ public sealed partial class Engine
         if (!isVerifyingSE)
         {
             if (!(isInCheck
+                || Math.Abs(bestScore) > EvaluationConstants.PositiveCheckmateDetectionLimit
                 || (bestMove is not null
                     && bestMove.Value.CapturedPiece() != (int)Piece.None
                     && SEE.IsGoodCapture(position, bestMove.Value))
