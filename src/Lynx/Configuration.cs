@@ -4,8 +4,8 @@ namespace Lynx;
 
 public static class Configuration
 {
-    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
-    public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
+    public static readonly EngineSettings EngineSettings = new ();
+    public static readonly GeneralSettings GeneralSettings = new ();
 
     private static int _isDebug;
 #pragma warning disable IDE1006 // Naming Styles
