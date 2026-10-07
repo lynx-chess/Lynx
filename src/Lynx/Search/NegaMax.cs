@@ -1,4 +1,4 @@
-#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -862,11 +862,11 @@ public sealed partial class Engine
         stack.StaticEval = staticEval;
 
         int standPat =
-            (ttNodeType == NodeType.Exact
-                // If we use TT checkmate scores as stand pat, they are propagated as exact scores and mate distances wrongly increase over time
-                || (Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                    && ((ttNodeType == NodeType.Alpha && ttScore < staticEval)
-                        || (ttNodeType == NodeType.Beta && ttScore > staticEval))))
+            // If we use TT checkmate scores as stand pat, they are propagated as exact scores and mate distances wrongly increase over time
+            (Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ((ttNodeType == NodeType.Alpha && ttScore < staticEval)
+                    || (ttNodeType == NodeType.Beta && ttScore > staticEval)))
+            // || ttNodeType == NodeType.Exact  Not needed due to the cutoff above
             ? ttScore
             : staticEval;
 
