@@ -840,6 +840,7 @@ public sealed partial class Engine
         Debug.Assert(ttProbeResult.Depth >= 0, "Assertion failed", "We would need to add it as a TT cutoff condition");
 
         if (ttHit
+            && !pvNode
             && (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
                 || (ttNodeType == NodeType.Beta && ttScore >= beta)))
