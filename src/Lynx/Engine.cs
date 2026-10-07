@@ -59,12 +59,12 @@ public sealed partial class Engine : IDisposable
     {
         AdjustPosition(Configuration.EngineSettings.IsChess960 ? Constants.SuperLongPositionCommand_DFRC : Constants.SuperLongPositionCommand);
 
-        const string goWarmupCommand = "go depth 10";   // ~300 ms
+        const string goWarmupCommand = "go depth 10";
         var command = new GoCommand(goWarmupCommand);
 
         BestMove(command);
 
-        Bench(2);
+        Bench(Configuration.EngineSettings.WarmupBenchDepth);
     }
 
     private void ResetEngine()
