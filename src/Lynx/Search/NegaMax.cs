@@ -900,7 +900,7 @@ public sealed partial class Engine
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
-            return staticEval;
+            return standPat;
         }
 
         var nodeType = NodeType.Alpha;
