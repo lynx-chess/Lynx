@@ -53,6 +53,8 @@ jobs:
         include:
           - os: ubuntu-latest
             runtime-identifier: linux-x64
+          - os: ubuntu-26.04-arm
+            runtime-identifier: linux-arm64
           - os: windows-latest
             runtime-identifier: win-x64
           - os: macOS-latest

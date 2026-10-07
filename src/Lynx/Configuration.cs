@@ -148,7 +148,7 @@ public sealed class EngineSettings
     /// </summary>
     public bool SkipWarmup { get; set; }
 
-    public int WarmupBenchDepth { get; set; } = 8;
+    public int WarmupBenchDepth { get; set; } = 6;
 
     #region Time management
 
