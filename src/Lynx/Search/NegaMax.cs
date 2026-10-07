@@ -863,12 +863,12 @@ public sealed partial class Engine
 
         int standPat =
             (ttNodeType == NodeType.Exact
-                // If we use TT checkmate scores as stand pat, they are propagated as exact scores and mate distances wrongly increase over time
-                || (Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                    && ((ttNodeType == NodeType.Alpha && ttScore < staticEval)
-                        || (ttNodeType == NodeType.Beta && ttScore > staticEval))))
+                || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
+                || (ttNodeType == NodeType.Beta && ttScore > staticEval))
             ? ttScore
             : staticEval;
+
+        bool standPatIsMate = ttNodeType != NodeType.Exact && Math.Abs(standPat) > EvaluationConstants.PositiveCheckmateDetectionLimit;
 
         var isInCheck = position.IsInCheck();
 
@@ -885,6 +885,12 @@ public sealed partial class Engine
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
                 return standPat;
             }
+        }
+
+        // If we use TT checkmate scores as stand pat, other than for the cutoff, they are propagated as exact scores and mate distances wrongly increase over time
+        if (standPatIsMate)
+        {
+            standPat = staticEval;
         }
 
         // Better move
