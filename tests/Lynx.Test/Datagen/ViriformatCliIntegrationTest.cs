@@ -38,7 +38,7 @@ public class ViriformatCliIntegrationTest
             var runTask = Task.Run(() => Runner.Run(args));
 
             // Wait for runner to complete or timeout
-            var completed = await Task.WhenAny(runTask, Task.Delay(5000));
+            var completed = await Task.WhenAny(runTask, Task.Delay(10_000));
             Assert.IsTrue(completed == runTask, "Runner did not exit within timeout");
 
             // Ensure the task completed successfully

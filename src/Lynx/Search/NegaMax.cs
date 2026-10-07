@@ -1,4 +1,4 @@
-#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -862,13 +862,12 @@ public sealed partial class Engine
         stack.StaticEval = staticEval;
 
         int standPat =
-            (ttNodeType == NodeType.Exact
-                || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
+            ((ttNodeType == NodeType.Alpha && ttScore < staticEval)
                 || (ttNodeType == NodeType.Beta && ttScore > staticEval))
             ? ttScore
             : staticEval;
 
-        bool standPatIsMate = ttNodeType != NodeType.Exact && Math.Abs(standPat) > EvaluationConstants.PositiveCheckmateDetectionLimit;
+        bool standPatIsMate = Math.Abs(standPat) > EvaluationConstants.PositiveCheckmateDetectionLimit;
 
         var isInCheck = position.IsInCheck();
 
