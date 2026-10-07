@@ -123,6 +123,18 @@ public partial class Engine
         "8/2q2pkp/6p1/8/8/8/Q4PKP/8 w - - 0 1",                         // KQ vs KQ pawn endgame, where an extra pawn doesn't matter
         "8/pkp5/1p2q3/8/8/6QP/5PK1/8 w - - 0 1",                        // KQ vs KQ pawn endgame, where an extra pawn matters (opposite side castling)
 
+        // Mates
+        "8/5KP1/8/pQ6/5k2/8/8/8 b - - 0 77",
+        "7r/6K1/8/4k1r1/8/8/8/8 w - - 0 90",
+        "R7/2P5/3K4/8/1k6/8/8/8 b - - 2 83",
+        "8/3k4/3Q4/8/4N1Kp/7P/8/8 b - - 8 81",
+        "2R5/1P6/5k2/8/8/8/5K2/8 b - - 0 100",
+        "8/8/2P5/1R6/p2B4/P2K1k2/8/8 w - - 1 83",
+        "8/8/8/2p2q2/8/4b1K1/3k4/8 b - - 13 96",
+        "1Q6/8/8/3K4/k2P4/8/8/8 b - - 8 61",
+        "6q1/8/2q5/5NK1/8/8/4p3/4k3 w - - 6 89",
+        "8/8/7p/1BKQk3/8/8/7P/8 b - - 2 64",
+
         "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Kq - 4 11",    // X-FEN sample position
     ];
 
