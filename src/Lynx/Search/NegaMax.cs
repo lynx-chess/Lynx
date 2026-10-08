@@ -114,7 +114,15 @@ public sealed partial class Engine
         }
         else
         {
-            ttEntry = default;
+            bool ttEntryHasBestMoveAtRoot = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var rootTTEntry)
+                && rootTTEntry.NodeType != NodeType.Unknown
+                && rootTTEntry.BestMove != default;
+
+            // Root: TT best move only used for move ordering, no TT cutoffs nor singular extensions
+            ttEntry = ttEntryHasBestMoveAtRoot
+                ? new TTProbeResult(EvaluationConstants.NoScore, rootTTEntry.BestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
+                : default;
+
             ttWasPv = false;
         }
 
@@ -458,8 +466,8 @@ public sealed partial class Engine
             // If that search fails low, the move is 'singular' (very good) and therefore we extend it
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
-                && depth >= Configuration.EngineSettings.SE_MinDepth
+                isBestMove      // Ensures TT hit (otherwise there wouldn't be a TT move)
+                && depth >= Configuration.EngineSettings.SE_MinDepth    // This implis !isRoot
                 && ttEntry.Depth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 && Math.Abs(ttEntry.Score) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttEntry.NodeType != NodeType.Alpha
