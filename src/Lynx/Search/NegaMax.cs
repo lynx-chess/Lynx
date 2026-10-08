@@ -292,9 +292,17 @@ public sealed partial class Engine
 
                     if (nmpScore >= beta)
                     {
-                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                            ? nmpScore
-                            : beta;
+                        if (Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            return nmpScore;
+                        }
+
+                        // Avoid returning unproven null move checkmate scores unless beta is a checkmate score itself
+                        // Otherwise, returning arbitrary bounds (i.e. widened aspiration window ones) can end up in the TT
+                        if (Math.Abs(beta) > EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            return beta;
+                        }
                     }
                 }
             }
