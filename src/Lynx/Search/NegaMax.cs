@@ -126,7 +126,7 @@ public sealed partial class Engine
             ttWasPv = false;
         }
 
-        // Internal iterative reduction (IIR)
+        // 🔍 Internal iterative reduction (IIR)
         // If this position isn't found in TT, it has never been searched before,
         // so the search will be potentially expensive.
         // Therefore, we search with reduced depth for now, expecting to record a TT move

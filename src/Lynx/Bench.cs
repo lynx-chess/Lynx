@@ -120,7 +120,7 @@ public partial class Engine
         "8/2r2pkp/6p1/8/8/6P1/1R4KP/8 w - - 0 1",                       // KR vs KR pawn endgame, where an extra pawn doesn't matter
         "8/2r2pkp/6p1/8/8/6P1/1R3PK1/8 w - - 0 1",                      // KR vs KR pawn endgame, where an extra pawn doesn't matter
         "8/1r3pkp/6p1/8/8/K5P1/3R3P/8 w - - 0 1",                       // KR vs KR pawn endgame, where an extra pawn matters (white king too far)
-        "8/1r3p1p/6p1/8/8/6Pk/3R3P/6K1 w - - 0 1",                      // KR vs KR pawn endgame, where an extra pawn matters (black king too close
+        "8/1r3p1p/6p1/8/8/6Pk/3R3P/6K1 w - - 0 1",                      // KR vs KR pawn endgame, where an extra pawn matters (black king too close)
         "8/2q2pkp/6p1/8/8/7P/Q4PK1/8 w - - 0 1",                        // KQ vs KQ pawn endgame, where an extra pawn doesn't matter
         "8/2q2pkp/6p1/8/8/8/Q4PKP/8 w - - 0 1",                         // KQ vs KQ pawn endgame, where an extra pawn doesn't matter
         "8/pkp5/1p2q3/8/8/6QP/5PK1/8 w - - 0 1",                        // KQ vs KQ pawn endgame, where an extra pawn matters (opposite side castling)
