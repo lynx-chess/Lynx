@@ -9,14 +9,14 @@ public class GenerateQueenMovesTest
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece(position.Board) == (int)Piece.Q || m.Piece(position.Board) == (int)Piece.q);
     }
 
     private static IEnumerable<Move> GenerateQueenCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece(position.Board) == (int)Piece.Q || m.Piece(position.Board) == (int)Piece.q);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
@@ -62,7 +62,7 @@ public class GenerateQueenMovesTest
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenMoves(position);
 
-        Assert.AreEqual(9, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(9, moves.Count(m => m.Piece(position.Board) == piece));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.f3
@@ -123,7 +123,7 @@ public class GenerateQueenMovesTest
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenMoves(position);
 
-        Assert.AreEqual(4, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(4, moves.Count(m => m.Piece(position.Board) == piece));
 
         Assert.AreEqual(1, moves.Count(m =>
             m.SourceSquare() == (int)BoardSquare.e7
@@ -153,6 +153,6 @@ public class GenerateQueenMovesTest
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenCaptures(position);
 
-        Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece() == piece && m.CapturedPiece() != (int)Piece.None));
+        Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece(position.Board) == piece && m.CapturedPiece(position.Board, (int)position.Side) != (int)Piece.None));
     }
 }

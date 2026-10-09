@@ -1542,7 +1542,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteKingShortCastleSquare, piece);
+                        movePool[localIndex++] = MoveExtensions.EncodeCastle(sourceSquare, Constants.WhiteKingShortCastleSquare, piece);
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -1566,7 +1566,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackKingShortCastleSquare, piece);
+                        movePool[localIndex++] = MoveExtensions.EncodeCastle(sourceSquare, Constants.BlackKingShortCastleSquare, piece);
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)

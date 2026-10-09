@@ -64,7 +64,7 @@ public static class OnlineTablebaseProber
         TablebaseEvalMove? bestMove = null;
         int mate = 0;
 
-        int[]? allPossibleMoves = null;
+        Move[]? allPossibleMoves = null;
 
         switch (tablebaseEval.Category)
         {
@@ -124,7 +124,7 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, (int)position.Side, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new LynxException($"{move.Uci} should be parsable from position {fen}");
@@ -134,7 +134,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -185,7 +185,7 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, (int)position.Side, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new LynxException($"{move.Uci} should be parsable from position {fen}");
@@ -195,7 +195,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -248,7 +248,7 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, (int)position.Side, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new LynxException($"{move.Uci} should be parsable from position {fen}");
@@ -258,7 +258,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -308,7 +308,7 @@ public static class OnlineTablebaseProber
 
                     foreach (var move in bestMoveList)
                     {
-                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, out var moveCandidate))
+                        if (!MoveExtensions.TryParseFromUCIString(move.Uci, allPossibleMoves, (int)position.Side, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new LynxException($"{move.Uci} should be parsable from position {fen}");
@@ -318,7 +318,7 @@ public static class OnlineTablebaseProber
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
-                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(position, moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -348,7 +348,7 @@ public static class OnlineTablebaseProber
 
         Move? parsedMove = 0;
 #pragma warning disable CS0618 // Type or member is obsolete
-        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
+        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), (int)position.Side, out parsedMove))
         {
             throw new LynxException($"{bestMove.Uci} should be parsable from position {fen}");
         }

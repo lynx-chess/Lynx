@@ -146,7 +146,7 @@ public sealed class Game : IDisposable
             var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
 
             // TODO: consider creating moves on the fly
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, (int)CurrentPosition.Side, out var parsedMove))
             {
                 _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
                 break;
@@ -172,9 +172,9 @@ public sealed class Game : IDisposable
     /// </remarks>
     /// <returns>true if threefold/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Update50movesRule(Move moveToPlay)
+    public bool Update50movesRule(int piece, int capturedPiece)
     {
-        var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
+        var isCapture = capturedPiece != (int)Piece.None;
 
 #pragma warning disable MA0071 // Avoid using redundant else
         if (isCapture)
@@ -192,9 +192,8 @@ public sealed class Game : IDisposable
         }
         else
         {
-            var pieceToMove = moveToPlay.Piece();
 
-            if (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p)
+            if (piece == (int)Piece.P || piece == (int)Piece.p)
             {
                 if (HalfMovesWithoutCaptureOrPawnMove < 100)
                 {
@@ -299,7 +298,7 @@ public sealed class Game : IDisposable
             MoveHistory.Add(moveToPlay);
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
-            Update50movesRule(moveToPlay);
+            Update50movesRule(gameState.Piece, gameState.CapturedPiece);
 
             if (CurrentPosition.Side == Side.White)
             {
@@ -332,10 +331,27 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UpdateMoveInStack(int n, Move move) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
+    public void UpdateMoveInStack(int n, Move move, Position position)
+    {
+        ref var entry = ref _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+
+        entry.Move = move;
+        entry.Piece = move.Piece(position.Board);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Move ReadMoveFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int ReadPieceFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].Piece;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (Move Move, int Piece) ReadMoveAndPieceFromStack(int n)
+    {
+        var entry = _stack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+
+        return (entry.Move, entry.Piece);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int ReadStaticEvalFromStack(int n) => _stack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval;

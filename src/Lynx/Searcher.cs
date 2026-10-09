@@ -727,7 +727,7 @@ public sealed class Searcher : IDisposable
             return game.CurrentPosition.FEN();
         }
 
-        static int PickRandomMove(Position position, Random rnd)
+        static Move PickRandomMove(Position position, Random rnd)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             Span<Move> legalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
@@ -735,7 +735,7 @@ public sealed class Searcher : IDisposable
 
             // Filter out pseudolegal but not-legal moves
             int legalMovesCount = 0;
-            Span<int> movesByPiece = stackalloc int[12];
+            Span<Move> movesByPiece = stackalloc Move[12];
             movesByPiece.Clear();
             foreach (var pseudoLegalMove in pseudoLegalMoves)
             {
@@ -744,7 +744,7 @@ public sealed class Searcher : IDisposable
                 if (position.WasProduceByAValidMove())
                 {
                     legalMoves[legalMovesCount++] = pseudoLegalMove;
-                    movesByPiece[pseudoLegalMove.Piece() % 6]++;
+                    movesByPiece[pseudoLegalMove.Piece(position.Board) % 6]++;
                 }
 
                 position.UnmakeMove(pseudoLegalMove, gameState);
@@ -822,7 +822,7 @@ public sealed class Searcher : IDisposable
                     // Pick one legal move that doesn't lead to a terminal position and that matches pieceToUse
                     foreach (var randomMove in legalMoves)
                     {
-                        var piece = randomMove.Piece();
+                        var piece = randomMove.Piece(position.Board);
                         if (piece != pieceToUse && piece != (pieceToUse + 6))
                         {
                             continue;

@@ -37,12 +37,12 @@ public class TryParseFromUCIStringTest
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         // Act
-        Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var move));
+        Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, (int)Side.White, out var move));
 
         // Assert
         Assert.AreEqual((int)sourceSquare, move!.Value.SourceSquare());
         Assert.AreEqual((int)targetSquare, move!.Value.TargetSquare());
-        Assert.AreEqual((int)promotedPiece, move!.Value.PromotedPiece());
+        Assert.AreEqual((int)promotedPiece, move!.Value.PromotedPiece((int)Side.White));
     }
 
     /// <summary>
@@ -77,12 +77,12 @@ public class TryParseFromUCIStringTest
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         // Act
-        Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var move));
+        Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, (int)Side.Black, out var move));
 
         // Assert
         Assert.AreEqual((int)sourceSquare, move!.Value.SourceSquare());
         Assert.AreEqual((int)targetSquare, move!.Value.TargetSquare());
-        Assert.AreEqual((int)promotedPiece, move!.Value.PromotedPiece());
+        Assert.AreEqual((int)promotedPiece, move!.Value.PromotedPiece((int)Side.Black));
     }
 
     [TestCase("e2e5")]
@@ -94,7 +94,7 @@ public class TryParseFromUCIStringTest
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         // Act & Assert
-        Assert.False(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var result));
+        Assert.False(MoveExtensions.TryParseFromUCIString(UCIString, moves, (int)Side.White, out var result));
         Assert.Null(result);
     }
 }
