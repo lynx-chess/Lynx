@@ -70,6 +70,8 @@ public partial class Engine
         "3qr2k/1p3rbp/2p3p1/p7/P2pBNn1/1P3n2/6P1/B1Q1RR1K b - - 1 30",
         "3qk1b1/1p4r1/1n4r1/2P1b2B/p3N2p/P2Q3P/8/1R3R1K w - - 2 39",
 
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",     // Standard chess initial position
+
         "6RR/4bP2/8/8/5r2/3K4/5p2/4k3 w - - 0 1",                       // SEE test suite - regular promotion
         "1n2kb1r/p1P4p/2qb4/5pP1/4n2Q/8/PP1PPP1P/RNB1KBNR w KQk - 0 1", // SEE test suite - promotion with capture
         "6Q1/8/1kp4P/2q1p3/2PpP3/2nP2P1/p7/5BK1 b - - 1 35",            // Fischer vs Petrosian - double promotion
@@ -118,10 +120,22 @@ public partial class Engine
         "8/2r2pkp/6p1/8/8/6P1/1R4KP/8 w - - 0 1",                       // KR vs KR pawn endgame, where an extra pawn doesn't matter
         "8/2r2pkp/6p1/8/8/6P1/1R3PK1/8 w - - 0 1",                      // KR vs KR pawn endgame, where an extra pawn doesn't matter
         "8/1r3pkp/6p1/8/8/K5P1/3R3P/8 w - - 0 1",                       // KR vs KR pawn endgame, where an extra pawn matters (white king too far)
-        "8/1r3p1p/6p1/8/8/6Pk/3R3P/6K1 w - - 0 1",                      // KR vs KR pawn endgame, where an extra pawn matters (black king too close
+        "8/1r3p1p/6p1/8/8/6Pk/3R3P/6K1 w - - 0 1",                      // KR vs KR pawn endgame, where an extra pawn matters (black king too close)
         "8/2q2pkp/6p1/8/8/7P/Q4PK1/8 w - - 0 1",                        // KQ vs KQ pawn endgame, where an extra pawn doesn't matter
         "8/2q2pkp/6p1/8/8/8/Q4PKP/8 w - - 0 1",                         // KQ vs KQ pawn endgame, where an extra pawn doesn't matter
         "8/pkp5/1p2q3/8/8/6QP/5PK1/8 w - - 0 1",                        // KQ vs KQ pawn endgame, where an extra pawn matters (opposite side castling)
+
+        // Mates
+        "8/5KP1/8/pQ6/5k2/8/8/8 b - - 0 77",
+        "7r/6K1/8/4k1r1/8/8/8/8 w - - 0 90",
+        "R7/2P5/3K4/8/1k6/8/8/8 b - - 2 83",
+        "8/3k4/3Q4/8/4N1Kp/7P/8/8 b - - 8 81",
+        "2R5/1P6/5k2/8/8/8/5K2/8 b - - 0 100",
+        "8/8/2P5/1R6/p2B4/P2K1k2/8/8 w - - 1 83",
+        "8/8/8/2p2q2/8/4b1K1/3k4/8 b - - 13 96",
+        "1Q6/8/8/3K4/k2P4/8/8/8 b - - 8 61",
+        "6q1/8/2q5/5NK1/8/8/4p3/4k3 w - - 6 89",
+        "8/8/7p/1BKQk3/8/8/7P/8 b - - 2 64",
 
         "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Kq - 4 11",    // X-FEN sample position
     ];

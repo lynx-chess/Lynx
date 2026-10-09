@@ -4,8 +4,8 @@ namespace Lynx;
 
 public static class Configuration
 {
-    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
-    public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
+    public static readonly EngineSettings EngineSettings = new ();
+    public static readonly GeneralSettings GeneralSettings = new ();
 
     private static int _isDebug;
 #pragma warning disable IDE1006 // Naming Styles
@@ -147,6 +147,8 @@ public sealed class EngineSettings
     /// JIT compilation and optimizations happens during warmup.
     /// </summary>
     public bool SkipWarmup { get; set; }
+
+    public int WarmupBenchDepth { get; set; } = 6;
 
     #region Time management
 
@@ -302,12 +304,6 @@ public sealed class EngineSettings
 
     [SPSA<int>(enabled: false)]
     public int NMP_DepthDivisor { get; set; } = 5;
-
-    [SPSA<int>(50, 350, 15)]
-    public int NMP_StaticEvalBetaDivisor { get; set; } = 82;
-
-    [SPSA<int>(enabled: false)]
-    public int NMP_StaticEvalBetaMaxReduction { get; set; } = 3;
 
     [SPSA<int>(enabled: false)]
     public int AspirationWindow_Base { get; set; } = 9;

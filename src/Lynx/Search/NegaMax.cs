@@ -1,4 +1,4 @@
-#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -114,11 +114,19 @@ public sealed partial class Engine
         }
         else
         {
-            ttEntry = default;
+            bool ttEntryHasBestMoveAtRoot = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var rootTTEntry)
+                && rootTTEntry.NodeType != NodeType.Unknown
+                && rootTTEntry.BestMove != default;
+
+            // Root: TT best move only used for move ordering, no TT cutoffs nor singular extensions
+            ttEntry = ttEntryHasBestMoveAtRoot
+                ? new TTProbeResult(EvaluationConstants.NoScore, rootTTEntry.BestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
+                : default;
+
             ttWasPv = false;
         }
 
-        // Internal iterative reduction (IIR)
+        // 🔍 Internal iterative reduction (IIR)
         // If this position isn't found in TT, it has never been searched before,
         // so the search will be potentially expensive.
         // Therefore, we search with reduced depth for now, expecting to record a TT move
@@ -292,9 +300,17 @@ public sealed partial class Engine
 
                     if (nmpScore >= beta)
                     {
-                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                            ? nmpScore
-                            : beta;
+                        if (Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            return nmpScore;
+                        }
+
+                        // Avoid returning unproven null move checkmate scores unless beta is a checkmate score itself
+                        // Otherwise, returning arbitrary bounds (i.e. widened aspiration window ones) can end up in the TT
+                        if (Math.Abs(beta) > EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            return beta;
+                        }
                     }
                 }
             }
@@ -450,8 +466,8 @@ public sealed partial class Engine
             // If that search fails low, the move is 'singular' (very good) and therefore we extend it
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
-                && depth >= Configuration.EngineSettings.SE_MinDepth
+                isBestMove      // Ensures TT hit (otherwise there wouldn't be a TT move)
+                && depth >= Configuration.EngineSettings.SE_MinDepth    // This implis !isRoot
                 && ttEntry.Depth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 && Math.Abs(ttEntry.Score) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttEntry.NodeType != NodeType.Alpha
@@ -500,7 +516,7 @@ public sealed partial class Engine
                 }
                 // Multicut
 #pragma warning disable MA0071 // Avoid using redundant else
-                else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
+                else if (singularScore >= beta && Math.Abs(singularScore) < EvaluationConstants.PositiveCheckmateDetectionLimit)
                 {
                     return singularScore;
                 }
@@ -862,9 +878,11 @@ public sealed partial class Engine
         stack.StaticEval = staticEval;
 
         int standPat =
-            (ttNodeType == NodeType.Exact
-                || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
-                || (ttNodeType == NodeType.Beta && ttScore > staticEval))
+            // If we use TT checkmate scores as stand pat, they are propagated as exact scores and mate distances wrongly increase over time
+            (Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ((ttNodeType == NodeType.Alpha && ttScore < staticEval)
+                    || (ttNodeType == NodeType.Beta && ttScore > staticEval)))
+            // || ttNodeType == NodeType.Exact  Not needed due to the cutoff above
             ? ttScore
             : staticEval;
 
