@@ -19,7 +19,7 @@ public sealed class Searcher : IDisposable
 
     private int _searchThreadsCount;
     private Engine _mainEngine;
-    private Engine[] _extraEngines = [];
+    private SearchWorker[] _extraWorkers = [];
     private TranspositionTable _tt;
 
     private CancellationTokenSource _searchCancellationTokenSource;
@@ -323,12 +323,9 @@ public sealed class Searcher : IDisposable
 
         SearchResult? finalSearchResult = null;
 
-#pragma warning disable MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
-        var tasks = _extraEngines
-            .Select(engine =>
-                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+        var tasks = _extraWorkers
+            .Select(worker => worker.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None))
             .ToArray();
-#pragma warning restore MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
 
 #if MULTITHREAD_DEBUG
         _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -466,16 +463,16 @@ public sealed class Searcher : IDisposable
 
     public void AdjustPosition(ReadOnlySpan<char> command)
     {
-        // Can't update MainEngine.Game until previous search is completed
+        // Can't update _mainEngine.Game until previous search is completed
         // Some GUIs wait until a bestmove is sent before sending a new position + go command (cutechess)
         // but some others don't (WinBoard)
         SpinWait.SpinUntil(() => !_isProcessingGoCommand);
 
         _mainEngine.AdjustPosition(command);
 
-        foreach (var engine in _extraEngines)
+        foreach (var worker in _extraWorkers)
         {
-            engine.AdjustPosition(command);
+            worker.Engine.AdjustPosition(command);
         }
     }
 
@@ -522,9 +519,9 @@ public sealed class Searcher : IDisposable
 
         // We don't need to reset the extra engines in case of hash or threads update
         // because they were already reset there, but whatever
-        foreach (var engine in _extraEngines)
+        foreach (var worker in _extraWorkers)
         {
-            engine.NewGame();
+            worker.Engine.NewGame();
         }
 
         // During the first run, TT is cleared at the end of the constructor
@@ -847,27 +844,22 @@ public sealed class Searcher : IDisposable
     }
 
     /// <summary>
-    /// Removes existing <see cref="_extraEngines"/> and allocates new ones based on <see cref="_searchThreadsCount"/>
+    /// Removes existing <see cref="_extraWorkers"/> (and the engines they own) and allocates new ones based on <see cref="_searchThreadsCount"/>
     /// </summary>
     private void AllocateExtraEngines()
     {
         // _searchThreadsCount includes _mainEngine
         const int mainEngineOffset = 1;
 
-        foreach (var engine in _extraEngines)
-        {
-            engine.Dispose();
-        }
-
-        Array.Clear(_extraEngines);
+        DisposeExtraWorkers();
 
         if (_searchThreadsCount > 1)
         {
-            _extraEngines = new Engine[_searchThreadsCount - mainEngineOffset];
+            _extraWorkers = new SearchWorker[_searchThreadsCount - mainEngineOffset];
 
             for (int i = 0; i < _searchThreadsCount - mainEngineOffset; ++i)
             {
-                _extraEngines[i] = new Engine(i + 2,
+                _extraWorkers[i] = new SearchWorker(i + 2,
 #if MULTITHREAD_DEBUG
                 _logger.IsDebugEnabled
                     ? _engineWriter
@@ -880,7 +872,22 @@ public sealed class Searcher : IDisposable
         }
         else
         {
-            _extraEngines = [];
+            _extraWorkers = [];
+        }
+    }
+
+    private void DisposeExtraWorkers()
+    {
+        // Stopping all of them before invoking .Dispose() allows their threads to stop concurrently, instead of potentially waiting for the timeout of each one sequentially
+        // Not that they should ever timeout, because searches shouldn't be in progress, but just in case
+        foreach (var worker in _extraWorkers)
+        {
+            worker.Stop();
+        }
+
+        foreach (var worker in _extraWorkers)
+        {
+            worker.Dispose();
         }
     }
 
@@ -910,7 +917,7 @@ public sealed class Searcher : IDisposable
         _logger.Debug("Warming-up engine");
         var sw = Stopwatch.StartNew();
 
-        var warmupCount = Math.Min(8, _extraEngines.Length + 1);
+        var warmupCount = Math.Min(8, _extraWorkers.Length + 1);
 
         Parallel.For(0, warmupCount, i =>
         {
@@ -932,10 +939,7 @@ public sealed class Searcher : IDisposable
             {
                 _mainEngine.Dispose();
 
-                foreach (var engine in _extraEngines)
-                {
-                    engine.Dispose();
-                }
+                DisposeExtraWorkers();
 
                 _absoluteSearchCancellationTokenSource.Dispose();
                 _searchCancellationTokenSource.Dispose();

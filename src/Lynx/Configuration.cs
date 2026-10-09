@@ -150,6 +150,8 @@ public sealed class EngineSettings
 
     public int WarmupBenchDepth { get; set; } = 6;
 
+    public int MinThreadpoolThreads { get; set; } = 4;
+
     #region Time management
 
     /// <summary>
