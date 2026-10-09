@@ -70,6 +70,7 @@ public sealed class UCIHandler
                     HandleQuit();
                     return;
                 case SetOptionCommand.Id:
+                    await HandleStop();
                     HandleSetOption(rawCommand);
                     break;
                 case StopCommand.Id:

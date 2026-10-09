@@ -325,12 +325,12 @@ public partial class Position
                 - (whitePawnAttacks & _occupancyBitboards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats(evaluationContext, side: Side.White, oppositeSide: (int)Side.Black)
-            - Threats(evaluationContext, side: Side.Black, oppositeSide: (int)Side.White);
+        packedScore += Threats(ref evaluationContext, side: Side.White, oppositeSide: (int)Side.Black)
+            - Threats(ref evaluationContext, side: Side.Black, oppositeSide: (int)Side.White);
 
         // Checks
-        packedScore += Checks(evaluationContext, (int)Side.White, (int)Side.Black)
-            - Checks(evaluationContext, (int)Side.Black, (int)Side.White);
+        packedScore += Checks(ref evaluationContext, (int)Side.White, (int)Side.Black)
+            - Checks(ref evaluationContext, (int)Side.Black, (int)Side.White);
 
         if (gamePhase > MaxPhase)    // Early promotions
         {
@@ -1009,7 +1009,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(EvaluationContext evaluationContext, Side side, int oppositeSide)
+    private int Threats(ref EvaluationContext evaluationContext, Side side, int oppositeSide)
     {
         var occupancy = _occupancyBitboards[(int)Side.Both];
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
@@ -1089,7 +1089,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Checks(EvaluationContext evaluationContext, int side, int oppositeSide)
+    private int Checks(ref EvaluationContext evaluationContext, int side, int oppositeSide)
     {
         int packedBonus = 0;
 
