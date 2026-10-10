@@ -151,12 +151,11 @@ class Position_CalculateThreats_Benchmark
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = PieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                evaluationContext.Attacks[pieceIndex] |= attacks(square, occupancy);
+                evaluationContext.Attacks[pieceIndex] |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             evaluationContext.AttacksBySide[(int)Side.White] |= evaluationContext.Attacks[pieceIndex];
@@ -165,12 +164,11 @@ class Position_CalculateThreats_Benchmark
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = PieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                evaluationContext.Attacks[pieceIndex] |= attacks(square, occupancy);
+                evaluationContext.Attacks[pieceIndex] |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             evaluationContext.AttacksBySide[(int)Side.Black] |= evaluationContext.Attacks[pieceIndex];
@@ -189,13 +187,12 @@ class Position_CalculateThreats_Benchmark
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             attacksByWhite |= existingAttacks;
@@ -204,13 +201,12 @@ class Position_CalculateThreats_Benchmark
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             attacksByBlack |= existingAttacks;
@@ -230,13 +226,12 @@ class Position_CalculateThreats_Benchmark
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             Unsafe.Add(ref attacksBySideRef, (int)Side.White) |= existingAttacks;
@@ -245,13 +240,12 @@ class Position_CalculateThreats_Benchmark
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             Unsafe.Add(ref attacksBySideRef, (int)Side.Black) |= existingAttacks;
