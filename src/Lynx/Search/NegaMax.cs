@@ -114,12 +114,12 @@ public sealed partial class Engine
         }
         else
         {
-            bool ttEntryHasBestMoveAtRoot = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var rootTTEntry)
+            ttEntryHasBestMove = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var rootTTEntry)
                 && rootTTEntry.NodeType != NodeType.Unknown
                 && rootTTEntry.BestMove != default;
 
             // Root: TT best move only used for move ordering, no TT cutoffs nor singular extensions
-            ttEntry = ttEntryHasBestMoveAtRoot
+            ttEntry = ttEntryHasBestMove
                 ? new TTProbeResult(EvaluationConstants.NoScore, rootTTEntry.BestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
                 : default;
 
