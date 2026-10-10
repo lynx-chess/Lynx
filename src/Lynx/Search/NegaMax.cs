@@ -201,9 +201,14 @@ public sealed partial class Engine
 
             if (ply >= 2)
             {
-                var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
-                improving = evalDiff >= 0;
-                improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
+                var previousEval = Game.ReadStaticEvalFromStack(ply - 2);
+
+                if (previousEval != PlyStackEntry.StaticEvalDefaultValue)
+                {
+                    var evalDiff = staticEval - previousEval;
+                    improving = evalDiff >= 0;
+                    improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
+                }
             }
 
             var ttCorrectedStaticEval = staticEval;
@@ -323,6 +328,11 @@ public sealed partial class Engine
             if (!ttHit)
             {
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
+            }
+
+            if (isInCheck)
+            {
+                stack.StaticEval = PlyStackEntry.StaticEvalDefaultValue;
             }
         }
 
