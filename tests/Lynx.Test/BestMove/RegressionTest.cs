@@ -554,13 +554,13 @@ public class RegressionTest : BaseTest
     [TestCase("8/R3Pb2/2PK4/6k1/8/8/8/8 b - - 0 76", 25)]
     [TestCase("8/6k1/bP5R/6K1/1B6/8/8/8 b - - 4 86", 35)]
     [TestCase("8/8/8/8/5K2/2N1p3/3p1k2/2q5 w - - 0 82", 23)]
-    [TestCase("8/5PP1/R7/8/8/3k1K2/8/4r3 b - - 0 78", 26)]
     [TestCase("5Q2/8/4K3/8/6n1/5k2/8/8 b - - 16 89", 30)]
     [TestCase("8/4k3/8/1KP5/1N2p3/4B3/6p1/8 b - - 0 53", 33)]
     [TestCase("5R2/8/3K4/3bP3/2N5/1P6/4k3/8 b - - 2 75", 35)]
     [TestCase("5Q2/4K2n/p5pP/P5P1/8/8/3k4/8 b - - 0 66", 35)]   // Extra long, >2min
     [TestCase("2r5/8/3k4/8/1K6/8/2p1N3/8 w - - 0 84", 37)]      // Extra long, >2min, still some fluctuations
     [TestCase("8/8/1k6/8/8/K2B4/P7/8 b - - 0 70", 36)]          // Extra long, >2min
+    [TestCase("8/5PP1/R7/8/8/3k1K2/8/4r3 b - - 0 78", 29)]      // Mate at depth 23 and then 27+, >2 min, still some fluctuations
     //[TestCase("8/8/5k2/8/8/3K1P1N/8/8 b - - 2 89", 35)]       // Mate at depth 35 after >2min
     //[TestCase("5k2/8/4K3/8/5P1p/b1R5/8/8 b - - 8 57", 30)]    // Mate at depth 38 after >7min, still some fluctuations
     public void OutOfRangeMateScores(string fen, int depth)
