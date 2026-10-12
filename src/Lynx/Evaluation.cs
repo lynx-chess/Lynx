@@ -956,13 +956,12 @@ public partial class Position
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             Unsafe.Add(ref attacksBySideRef, (int)Side.White) |= existingAttacks;
@@ -971,13 +970,12 @@ public partial class Position
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             Unsafe.Add(ref attacksBySideRef, (int)Side.Black) |= existingAttacks;
@@ -996,12 +994,11 @@ public partial class Position
         for (int pieceIndex = (int)Piece.P + oppositeSideOffset; pieceIndex <= (int)Piece.K + oppositeSideOffset; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                oppositeSideAttacks |= attacks(square, occupancy);
+                oppositeSideAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
         }
 
