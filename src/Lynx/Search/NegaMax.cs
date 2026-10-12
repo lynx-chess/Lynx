@@ -203,12 +203,9 @@ public sealed partial class Engine
             {
                 var previousEval = Game.ReadStaticEvalFromStack(ply - 2);
 
-                if (previousEval != PlyStackEntry.StaticEvalDefaultValue)
-                {
-                    var evalDiff = staticEval - previousEval;
-                    improving = evalDiff >= 0;
-                    improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
-                }
+                var evalDiff = staticEval - previousEval;
+                improving = evalDiff >= 0;
+                improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
             }
 
             var ttCorrectedStaticEval = staticEval;
