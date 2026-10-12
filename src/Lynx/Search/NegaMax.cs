@@ -205,7 +205,10 @@ public sealed partial class Engine
 
                 var evalDiff = staticEval - previousEval;
                 improving = evalDiff >= 0;
-                improvingRate = evalDiff / (double)Configuration.EngineSettings.ImprovingRate;
+
+                improvingRate = previousEval != PlyStackEntry.StaticEvalDefaultValue
+                    ? evalDiff / (double)Configuration.EngineSettings.ImprovingRate
+                    : 1;
             }
 
             var ttCorrectedStaticEval = staticEval;
