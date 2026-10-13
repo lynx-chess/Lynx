@@ -448,6 +448,16 @@ public partial class Position
                         eval >>= 1; // /2
                     }
                 }
+                else if (gamePhase == 3)
+                {
+                    // Rook vs Bishop + pawn
+                    if ((totalPawnsCount == 1)
+                        && ((_pieceBitboards[(int)Piece.R] != 0 && _pieceBitboards[(int)Piece.b] != 0 && _pieceBitboards[(int)Piece.p] != 0)
+                        || (_pieceBitboards[(int)Piece.r] != 0 && _pieceBitboards[(int)Piece.B] != 0 && _pieceBitboards[(int)Piece.P] != 0)))
+                    {
+                        eval >>= 1; // /2
+                    }
+                }
             }
         }
 

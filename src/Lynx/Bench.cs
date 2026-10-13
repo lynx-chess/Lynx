@@ -125,6 +125,8 @@ public partial class Engine
         "8/2q2pkp/6p1/8/8/8/Q4PKP/8 w - - 0 1",                         // KQ vs KQ pawn endgame, where an extra pawn doesn't matter
         "8/pkp5/1p2q3/8/8/6QP/5PK1/8 w - - 0 1",                        // KQ vs KQ pawn endgame, where an extra pawn matters (opposite side castling)
 
+        "k7/8/4p3/4Kb2/8/8/8/5R2 w - - 0 1",                            // KR vs KBP endgame, a draw
+
         // Mates
         "8/5KP1/8/pQ6/5k2/8/8/8 b - - 0 77",
         "7r/6K1/8/4k1r1/8/8/8/8 w - - 0 90",
