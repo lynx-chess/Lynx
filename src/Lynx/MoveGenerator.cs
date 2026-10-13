@@ -214,20 +214,20 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all pseudo-legal quiet moves from <paramref name="position"/>.
-    /// Complements <see cref="GenerateAllCaptures(Position, ref EvaluationContext, Span{int})"/>.
+    /// Generates all pseudo-legal quiet moves from <paramref name="position"/>, castling included.
+    /// Complements <see cref="GenerateAllCaptures(Position, Span{int}, Bitboard)"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllQuiets(Position position, ref EvaluationContext evaluationContext, Span<Move> movePool)
+    public static Span<Move> GenerateAllQuiets(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks)
     {
         Debug.Assert(position.Side != Side.Both);
 
         int localIndex = 0;
 
         var offset = Utils.PieceOffset((int)position.Side);
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[(int)Utils.OppositeSide((int)position.Side)];
 
         GeneratePawnQuiets(ref localIndex, movePool, position, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, position, oppositeSideAttacks);
         GenerateQuietKingMoves(ref localIndex, movePool, (int)Piece.K + offset, position, oppositeSideAttacks);
         GenerateQuietPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
         GenerateQuietPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);

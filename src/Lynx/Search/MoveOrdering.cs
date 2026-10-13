@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -102,6 +102,19 @@ public sealed partial class Engine
         _logger.Warn("Unexpected move while scoring: {Move}", move.UCIString());
 
         return BaseMoveScore;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int ScoreQuietMove(Move move, int ply, Bitboard oppositeSideAttacks)
+    {
+        var score = BaseMoveScore + QuietHistoryEntry(move, oppositeSideAttacks);
+
+        if(ply >= 1)
+        {
+            score += ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply);
+        }
+
+        return score;
     }
 
     /// <summary>

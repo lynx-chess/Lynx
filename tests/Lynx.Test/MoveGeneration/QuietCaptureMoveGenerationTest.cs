@@ -61,6 +61,38 @@ public class QuietCaptureMoveGenerationTest
         Assert.That(splitMoves, Is.EquivalentTo(allMoves), $"Pawn moves mismatch in position {fen}");
     }
 
+    [TestCase(Constants.InitialPositionFEN)]
+    [TestCase(Constants.TrickyTestPositionFEN)]
+    [TestCase(Constants.TrickyTestPositionReversedFEN)]
+    [TestCase(Constants.KillerTestPositionFEN)]
+    [TestCase(Constants.ComplexPositionFEN)]
+    [TestCase("4k3/8/8/8/8/8/4q3/R3K2R w KQ - 0 1")]                // In check, castling not allowed
+    [TestCase("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")]              // Both castling sides
+    [TestCase("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1")]
+    [TestCase("r3k2r/8/8/8/8/8/5q2/R3K2R w KQkq - 0 1")]            // Castling through an attacked square
+    [TestCase("8/P6P/8/8/K1k5/8/p6p/8 w - - 0 1")]
+    [TestCase("8/8/8/3pP3/8/8/8/K1k5 w - d6 0 1")]
+    public void AllMoves_AreEquivalentToQuietPlusCaptures(string fen)
+    {
+        var position = new Position(fen);
+
+        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
+        var evaluationContext = new EvaluationContext(buffer);
+        position.CalculateThreats(ref evaluationContext);
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
+        Span<Move> allMovesPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Move> capturesPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Move> quietsPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        var allMoves = MoveGenerator.GenerateAllMoves(position, allMovesPool, oppositeSideAttacks).ToArray();
+        var splitMoves = MoveGenerator.GenerateAllCaptures(position, capturesPool, oppositeSideAttacks).ToArray()
+            .Concat(MoveGenerator.GenerateAllQuiets(position, quietsPool, oppositeSideAttacks).ToArray())
+            .ToArray();
+
+        Assert.That(splitMoves, Is.EquivalentTo(allMoves), $"All moves mismatch in position {fen}");
+    }
+
     private static Move[] GenerateAllPieceMoves(Position position, int piece)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
