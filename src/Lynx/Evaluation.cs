@@ -325,12 +325,12 @@ public partial class Position
                 - (whitePawnAttacks & _occupancyBitboards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
-        packedScore += Threats(evaluationContext, side: Side.White, oppositeSide: (int)Side.Black)
-            - Threats(evaluationContext, side: Side.Black, oppositeSide: (int)Side.White);
+        packedScore += Threats(ref evaluationContext, side: Side.White, oppositeSide: (int)Side.Black)
+            - Threats(ref evaluationContext, side: Side.Black, oppositeSide: (int)Side.White);
 
         // Checks
-        packedScore += Checks(evaluationContext, (int)Side.White, (int)Side.Black)
-            - Checks(evaluationContext, (int)Side.Black, (int)Side.White);
+        packedScore += Checks(ref evaluationContext, (int)Side.White, (int)Side.Black)
+            - Checks(ref evaluationContext, (int)Side.Black, (int)Side.White);
 
         if (gamePhase > MaxPhase)    // Early promotions
         {
@@ -956,13 +956,12 @@ public partial class Position
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             Unsafe.Add(ref attacksBySideRef, (int)Side.White) |= existingAttacks;
@@ -971,13 +970,12 @@ public partial class Position
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             Unsafe.Add(ref attacksBySideRef, (int)Side.Black) |= existingAttacks;
@@ -996,12 +994,11 @@ public partial class Position
         for (int pieceIndex = (int)Piece.P + oppositeSideOffset; pieceIndex <= (int)Piece.K + oppositeSideOffset; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                oppositeSideAttacks |= attacks(square, occupancy);
+                oppositeSideAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
         }
 
@@ -1009,7 +1006,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Threats(EvaluationContext evaluationContext, Side side, int oppositeSide)
+    private int Threats(ref EvaluationContext evaluationContext, Side side, int oppositeSide)
     {
         var occupancy = _occupancyBitboards[(int)Side.Both];
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
@@ -1089,7 +1086,7 @@ public partial class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Checks(EvaluationContext evaluationContext, int side, int oppositeSide)
+    private int Checks(ref EvaluationContext evaluationContext, int side, int oppositeSide)
     {
         int packedBonus = 0;
 
