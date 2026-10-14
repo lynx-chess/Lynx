@@ -12,7 +12,7 @@ namespace Lynx.Test;
 public class PerftTestSuiteMovePicker : BaseTest
 {
     [TestCaseSource(typeof(PerftTestSuiteCases), nameof(PerftTestSuiteCases.Cases))]
-    public void Suite(string fen, int depth, long expectedNumberOfNodes)
+    public void Suite_MovePicker(string fen, int depth, long expectedNumberOfNodes)
     {
         // Test cases can run in parallel, so each one needs its own engine and state
         using var engine = GetEngine(fen);

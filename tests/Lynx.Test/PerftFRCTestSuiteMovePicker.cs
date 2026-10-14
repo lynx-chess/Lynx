@@ -15,7 +15,7 @@ public class PerftFRCTestSuiteMovePicker : BaseTest
     }
 
     [TestCaseSource(typeof(PerftFRCTestSuiteCases), nameof(PerftFRCTestSuiteCases.Cases))]
-    public void FRCSuite(string fen, int depth, long expectedNumberOfNodes)
+    public void FRCSuite_MovePicker(string fen, int depth, long expectedNumberOfNodes)
     {
         // Test cases can run in parallel, so each one needs its own engine and state
         using var engine = GetEngine(fen);
