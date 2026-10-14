@@ -60,25 +60,22 @@ public static class MoveGenerator
             return 0;
         }
 
-        // Extract short move info
         int intTTMove = ttMove;
 
         var sourceSquare = intTTMove.SourceSquare();
-        var targetSquare = intTTMove.TargetSquare();
-        var promotedPiece = intTTMove.PromotedPiece();
 
-        // Create full move candidate
         var piece = position.Board[sourceSquare];
-
         if (piece == (int)Piece.None)
         {
             return 0;
         }
 
+        var targetSquare = intTTMove.TargetSquare();
         var capturedPiece = position.Board[targetSquare];
 
         var pieceSide = Utils.PieceSide(piece);
 
+        // Wrong side, king capture or same side king capture (taking into account DFRC castling)
         if (pieceSide != position.Side
             || capturedPiece == (int)Piece.K
             || capturedPiece == (int)Piece.k
@@ -90,7 +87,6 @@ public static class MoveGenerator
                         && ttMove != (ShortMove)position.BlackShortCastle
                         && ttMove != (ShortMove)position.BlackLongCastle))))
         {
-            // Wrong side
             return 0;
         }
 
@@ -99,7 +95,6 @@ public static class MoveGenerator
             case (int)Piece.N:
             case (int)Piece.n:
                 {
-                    // We can save the rays check, since it'll always be 0 for knights
                     return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
                 }
             case (int)Piece.B:
@@ -113,7 +108,7 @@ public static class MoveGenerator
 
                     if ((occupancy & Attacks.RaysBetween[sourceSquare][targetSquare]) != 0)
                     {
-                        // Jumping over pieces
+                        // This would imply jumping over a piece
                         return 0;
                     }
 
@@ -141,7 +136,6 @@ public static class MoveGenerator
                             : 0;
                     }
 
-                    // We don't care if capturedPiece is None or not
                     return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
                 }
             case (int)Piece.k:
@@ -166,12 +160,13 @@ public static class MoveGenerator
                             : 0;
                     }
 
-                    // We don't care if capturedPiece is None or not
                     return MoveExtensions.Encode(sourceSquare, targetSquare, piece, capturedPiece);
                 }
             case (int)Piece.P:
             case (int)Piece.p:
                 {
+                    var promotedPiece = intTTMove.PromotedPiece();
+
                     var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
                     var singlePushSquare = sourceSquare + pawnPush;
 
@@ -204,7 +199,6 @@ public static class MoveGenerator
             case (int)Piece.None:
             case (int)Piece.Unknown:
                 {
-                    // Invalid TT move
                     return 0;
                 }
         }
@@ -277,9 +271,9 @@ public static class MoveGenerator
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
-            var sourceRank = (sourceSquare >> 3) + 1;
+            var sourceRank = sourceSquare >> 3;
 
-            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+            Debug.Assert(sourceRank != 0 && sourceRank != 7, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -288,8 +282,8 @@ public static class MoveGenerator
                 // Single pawn push
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
 
-                var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)
+                var targetRank = singlePushSquare >> 3;
+                if (targetRank == 0 || targetRank == 7)
                 {
                     // Promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
@@ -307,8 +301,8 @@ public static class MoveGenerator
 
                     // Double pawn push
                     // Inside of the single pawn push if because singlePush square cannot be occupied either
-                    if ((sourceRank == 2)        // position.Side == Side.Black is always true, otherwise targetRank would be 1
-                        || (sourceRank == 7))    // position.Side == Side.White is always true, otherwise targetRank would be 8
+                    if ((sourceRank == 1)        // position.Side == Side.Black is always true, otherwise targetRank would be 0
+                        || (sourceRank == 6))    // position.Side == Side.White is always true, otherwise targetRank would be 7
                     {
                         var doublePushSquare = singlePushSquare + pawnPush;
 
@@ -373,24 +367,24 @@ public static class MoveGenerator
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
-            var sourceRank = (sourceSquare >> 3) + 1;
-            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+            var sourceRank = sourceSquare >> 3;
+            Debug.Assert(sourceRank != 0 && sourceRank != 7, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
             if (!occupancy.GetBit(singlePushSquare))
             {
                 // Single pawn push
-                var targetRank = (singlePushSquare >> 3) + 1;
+                var targetRank = singlePushSquare >> 3;
 
-                if (targetRank != 1 && targetRank != 8)
+                if (targetRank != 0 && targetRank != 7)
                 {
                     Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
 
                     // Double pawn push
                     // Inside of the single pawn push if because singlePush square cannot be occupied either
-                    if ((sourceRank == 2)        // position.Side == Side.Black is always true, otherwise targetRank would be 1
-                        || (sourceRank == 7))    // position.Side == Side.White is always true, otherwise targetRank would be 8
+                    if ((sourceRank == 1)        // position.Side == Side.Black is always true, otherwise targetRank would be 0
+                        || (sourceRank == 6))    // position.Side == Side.White is always true, otherwise targetRank would be 7
                     {
                         var doublePushSquare = singlePushSquare + pawnPush;
 
@@ -423,9 +417,9 @@ public static class MoveGenerator
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
-            var sourceRank = (sourceSquare >> 3) + 1;
+            var sourceRank = sourceSquare >> 3;
 
-            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+            Debug.Assert(sourceRank != 0 && sourceRank != 7, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -434,8 +428,8 @@ public static class MoveGenerator
                 // Single pawn push
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
 
-                var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)
+                var targetRank = singlePushSquare >> 3;
+                if (targetRank == 0 || targetRank == 7)
                 {
                     // Promotion
                     var knightPromo = MoveExtensions.EncodePromotionFromPawnMove(singlePawnPush, promotedPiece: (int)Piece.N + offset);
@@ -739,9 +733,9 @@ public static class MoveGenerator
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
-            var sourceRank = (sourceSquare >> 3) + 1;
+            var sourceRank = sourceSquare >> 3;
 
-            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+            Debug.Assert(sourceRank != 0 && sourceRank != 7, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -750,8 +744,8 @@ public static class MoveGenerator
                 // Single pawn push
                 var singlePawnPush = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
 
-                var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                var targetRank = singlePushSquare >> 3;
+                if (targetRank == 0 || targetRank == 7)  // Promotion
                 {
                     // If any of the promotions isn't valid, it means that the pawn move unveils a discovered check, or that the promoted piece doesn't stop an existing check in the 8th rank
                     // Therefore none of the other promotions will be valid either
@@ -771,8 +765,8 @@ public static class MoveGenerator
                     // Inside of the if because singlePush square cannot be occupied either
                     var doublePushSquare = singlePushSquare + pawnPush;
                     if (!occupancy.GetBit(doublePushSquare)
-                        && (sourceRank == 2         // position.Side == Side.Black is always true, otherwise targetRank would be 1
-                            || sourceRank == 7)     // position.Side == Side.White is always true, otherwise targetRank would be 8
+                        && (sourceRank == 1         // position.Side == Side.Black is always true, otherwise targetRank would be 0
+                            || sourceRank == 6)     // position.Side == Side.White is always true, otherwise targetRank would be 7
                         && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
                     {
                         return true;
