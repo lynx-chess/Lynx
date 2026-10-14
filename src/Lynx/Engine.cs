@@ -119,7 +119,7 @@ public sealed partial class Engine : IDisposable
     /// </summary>
     public SearchResult BestMove(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand, isSingleLegalMove: false);
 
         return BestMove(in searchConstraints, isPondering: false, CancellationToken.None, CancellationToken.None);
     }

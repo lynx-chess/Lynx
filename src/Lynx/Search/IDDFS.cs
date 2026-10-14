@@ -149,17 +149,6 @@ public sealed partial class Engine
 
         try
         {
-            if (!isPondering && _searchConstraints.MaxDepth == SearchConstraints.DefaultMaxDepth && _searchConstraints.MaxNodes == SearchConstraints.DefaultMaxNodes
-                && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
-            {
-                if (!Configuration.EngineSettings.UCI_Minimal)
-                {
-                    _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
-                }
-
-                return onlyOneLegalMoveSearchResult;
-            }
-
             Array.Clear(_killerMoves);
             // Not clearing quiet and capture histories here on purpose
 
@@ -492,13 +481,13 @@ public sealed partial class Engine
     }
 
     [SkipLocalsInit]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private unsafe bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
+    internal unsafe bool OnlyOneLegalMove()
     {
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
+        Move firstLegalMove = default;
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
@@ -513,7 +502,7 @@ public sealed partial class Engine
                     firstLegalMove = move;
                     onlyOneLegalMove = true;
                 }
-                // If there's a second legal move, we exit and let the search continue
+                // If there's a second legal move, we exit
                 else
                 {
                     onlyOneLegalMove = false;
@@ -522,34 +511,7 @@ public sealed partial class Engine
             }
         }
 
-        // Detect if there was only one legal move
-        if (onlyOneLegalMove)
-        {
-            _logger.Debug("One single move found");
-
-            // We don't have or need any eval, and we return a fake but recognizable one
-            // See constant XML for details
-            var score = Game.CurrentPosition.Side == Side.White
-                ? +EvaluationConstants.SingleMoveScore
-                : -EvaluationConstants.SingleMoveScore;
-
-            result = new SearchResult(
-#if MULTITHREAD_DEBUG
-                _id,
-#endif
-                firstLegalMove, score, targetDepth: 1, [firstLegalMove])
-            {
-                DepthReached = 1,
-                Nodes = 0,
-                Time = 1,
-                NodesPerSecond = 1,
-            };
-
-            return true;
-        }
-
-        result = null;
-        return false;
+        return onlyOneLegalMove;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
