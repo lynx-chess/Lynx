@@ -395,8 +395,10 @@ public sealed partial class Engine
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
-            int quietHistory = QuietHistoryEntry(move, oppositeSideAttacks)
-                + ContinuationHistoryEntry(piece, targetSquare, ply);
+            int quietHistory = !isCapture
+                ? (QuietHistoryEntry(move, oppositeSideAttacks)
+                    + ContinuationHistoryEntry(piece, targetSquare, ply))
+                : 0;
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -866,6 +868,7 @@ public sealed partial class Engine
         Debug.Assert(ttProbeResult.Depth >= 0, "Assertion failed", "We would need to add it as a TT cutoff condition");
 
         if (ttHit
+            && !pvNode
             && (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
                 || (ttNodeType == NodeType.Beta && ttScore >= beta)))
