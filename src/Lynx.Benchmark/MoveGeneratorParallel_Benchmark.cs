@@ -250,7 +250,7 @@ file static class CustomMoveGenerator
             var attacks = LocalAttacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece);
@@ -293,8 +293,8 @@ file static class CustomMoveGenerator
             if (position.Side == Side.White)
             {
                 if (((position.Castle & (int)CastlingRights.WK) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f1)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.f1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.g1)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
@@ -303,9 +303,9 @@ file static class CustomMoveGenerator
                 }
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d1)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c1)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.d1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.c1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.b1)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
@@ -316,8 +316,8 @@ file static class CustomMoveGenerator
             else
             {
                 if (((position.Castle & (int)CastlingRights.BK) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f8)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.f8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.g8)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
@@ -326,9 +326,9 @@ file static class CustomMoveGenerator
                 }
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d8)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c8)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.d8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.c8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.b8)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide))

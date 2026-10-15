@@ -170,36 +170,22 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         /// </summary>
         public static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
         [
-#pragma warning disable IDE0350 // Use implicitly typed lambda
-            (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
-        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
-        Attacks.BishopAttacks,
-        Attacks.RookAttacks,
-        Attacks.QueenAttacks,
-        (int origin, Bitboard _) => Attacks.KingAttacks[origin],
+    #pragma warning disable IDE0350 // Use implicitly typed lambda
+                (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+            (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
+            (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
-        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
-        Attacks.BishopAttacks,
-        Attacks.RookAttacks,
-        Attacks.QueenAttacks,
-        (int origin, Bitboard _) => Attacks.KingAttacks[origin],
-#pragma warning restore IDE0350 // Use implicitly typed lambda
-    ];
-
-        /// <summary>
-        /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
-        /// </summary>
-        /// <param name="capturesOnly">Filters out all moves but captures</param>
-        [Obsolete("dev and test only")]
-        internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
-        {
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-
-            return (capturesOnly
-                ? GenerateAllCaptures(position, moves)
-                : GenerateAllMoves(position, moves)).ToArray();
-        }
+            (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+            (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
+            (int origin, Bitboard _) => Attacks.KingAttacks[origin],
+    #pragma warning restore IDE0350 // Use implicitly typed lambda
+        ];
 
         /// <summary>
         /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
@@ -307,7 +293,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var attacks = pawnAttacks[sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
                 // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
                     movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
@@ -387,7 +373,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var attacks = pawnAttacks[sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
                 // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
                     movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
@@ -661,7 +647,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)
                     // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                     && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
                 {
@@ -834,36 +820,22 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         /// </summary>
         public static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
         [
-#pragma warning disable IDE0350 // Use implicitly typed lambda
-            (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
-        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
-        Attacks.BishopAttacks,
-        Attacks.RookAttacks,
-        Attacks.QueenAttacks,
-        (int origin, Bitboard _) => Attacks.KingAttacks[origin],
+    #pragma warning disable IDE0350 // Use implicitly typed lambda
+                (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+            (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
+            (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
-        (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
-        Attacks.BishopAttacks,
-        Attacks.RookAttacks,
-        Attacks.QueenAttacks,
-        (int origin, Bitboard _) => Attacks.KingAttacks[origin]
-#pragma warning restore IDE0350 // Use implicitly typed lambda
+            (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+            (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
+            (int origin, Bitboard _) => Attacks.KingAttacks[origin]
+    #pragma warning restore IDE0350 // Use implicitly typed lambda
         ];
-
-        /// <summary>
-        /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
-        /// </summary>
-        /// <param name="capturesOnly">Filters out all moves but captures</param>
-        [Obsolete("dev and test only")]
-        internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
-        {
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-
-            return (capturesOnly
-                ? GenerateAllCaptures(position, moves)
-                : GenerateAllMoves(position, moves)).ToArray();
-        }
 
         /// <summary>
         /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
@@ -971,7 +943,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var attacks = pawnAttacks[sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
                 {
                     Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
                 }
@@ -1052,7 +1024,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var attacks = pawnAttacks[sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
                 // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
                     Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
@@ -1334,7 +1306,7 @@ public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                 var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)
                     // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                     && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece))) // Could add here capturedPiece: (int)Piece.p - offset
                 {

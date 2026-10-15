@@ -445,8 +445,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsShortCastle())
             {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -461,8 +461,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsLongCastle())
             {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -564,8 +564,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsShortCastle())
             {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -580,8 +580,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsLongCastle())
             {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -685,8 +685,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsShortCastle())
             {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -701,8 +701,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsLongCastle())
             {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -806,8 +806,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsShortCastle())
             {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -822,8 +822,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsLongCastle())
             {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -913,8 +913,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsShortCastle())
             {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(Side);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)Side);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)Side);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].SetBit(rookSourceSquare);
@@ -929,8 +929,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsLongCastle())
             {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(Side);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)Side);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)Side);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].SetBit(rookSourceSquare);
@@ -1014,8 +1014,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsShortCastle())
             {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(Side);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)Side);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)Side);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].SetBit(rookSourceSquare);
@@ -1030,8 +1030,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsLongCastle())
             {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(Side);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)Side);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)Side);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].SetBit(rookSourceSquare);
@@ -1115,8 +1115,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsShortCastle())
             {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(Side);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)Side);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)Side);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].SetBit(rookSourceSquare);
@@ -1131,8 +1131,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             }
             else if (move.IsLongCastle())
             {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(Side);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)Side);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)Side);
                 var rookIndex = (int)Piece.R + offset;
 
                 PieceBitboards[rookIndex].SetBit(rookSourceSquare);
@@ -1488,7 +1488,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 var attacks = MakeMoveAttacks.PawnAttacks[(int)position.Side][sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
                 // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
                     movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece);
@@ -1536,8 +1536,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 {
                     bool ise1Attacked = MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
                     if (((position.Castle & (int)CastlingRights.WK) != default)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f1)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.f1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.g1)
                         && !ise1Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
@@ -1546,9 +1546,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d1)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c1)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.d1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.c1)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.b1)
                         && !ise1Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
@@ -1560,8 +1560,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                 {
                     bool ise8Attacked = MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide);
                     if (((position.Castle & (int)CastlingRights.BK) != default)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f8)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.f8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.g8)
                         && !ise8Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
@@ -1570,9 +1570,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d8)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c8)
-                        && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.d8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.c8)
+                        && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.b8)
                         && !ise8Attacked
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.c8, position, oppositeSide))

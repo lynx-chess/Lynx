@@ -85,7 +85,7 @@ public static class ReferenceMoveGenerator
             var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);

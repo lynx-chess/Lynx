@@ -1043,7 +1043,7 @@ public class PositionTest
         nonAttackedWhiteShortCastleSquares.SetBit(Constants.WhiteKingShortCastleSquare);
 
         var nonAttackedWhiteLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.White];
-        nonAttackedWhiteLongCastleSquares.PopBit(BoardSquare.b1);
+        nonAttackedWhiteLongCastleSquares.PopBit((int)BoardSquare.b1);
         nonAttackedWhiteLongCastleSquares.SetBit(Constants.InitialWhiteKingSquare);
         nonAttackedWhiteLongCastleSquares.SetBit(Constants.WhiteKingLongCastleSquare);
 
@@ -1052,7 +1052,7 @@ public class PositionTest
         nonAttackedBlackShortCastleSquares.SetBit(Constants.BlackKingShortCastleSquare);
 
         var nonAttackedBlackLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.Black];
-        nonAttackedBlackLongCastleSquares.PopBit(BoardSquare.b8);
+        nonAttackedBlackLongCastleSquares.PopBit((int)BoardSquare.b8);
         nonAttackedBlackLongCastleSquares.SetBit(Constants.InitialBlackKingSquare);
         nonAttackedBlackLongCastleSquares.SetBit(Constants.BlackKingLongCastleSquare);
 
