@@ -34,8 +34,8 @@ public class RookAttacksTest
         // Assert
         foreach (var attackedSquare in attackedSquares)
         {
-            Assert.True(attacks.GetBit(attackedSquare));
-            attacks.PopBit(attackedSquare);
+            Assert.True(attacks.GetBit((int)attackedSquare));
+            attacks.PopBit((int)attackedSquare);
         }
 
         Assert.AreEqual(default(Bitboard), attacks);
@@ -78,8 +78,8 @@ public class RookAttacksTest
             // Assert
             foreach (var attackedSquare in attackedSquares)
             {
-                Assert.True(attacks.GetBit(attackedSquare));
-                attacks.PopBit(attackedSquare);
+                Assert.True(attacks.GetBit((int)attackedSquare));
+                attacks.PopBit((int)attackedSquare);
             }
 
             Assert.AreEqual(default(Bitboard), attacks);

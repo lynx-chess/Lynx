@@ -167,7 +167,7 @@ public static class MoveGenerator
                 {
                     var promotedPiece = intTTMove.PromotedPiece();
 
-                    var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
+                    var pawnPush = Utils.PawhPushSquare((int)position.Side);
                     var singlePushSquare = sourceSquare + pawnPush;
 
                     // Single pawn push
@@ -258,8 +258,8 @@ public static class MoveGenerator
     {
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide((int)position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        var pawnPush = Utils.PawhPushSquare((int)position.Side);
+        int oppositeSide = Utils.OppositeSide((int)position.Side);
         var bitboard = position.PieceBitboards[piece];
 
         var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
@@ -357,7 +357,7 @@ public static class MoveGenerator
     {
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
+        var pawnPush = Utils.PawhPushSquare((int)position.Side);
         var bitboard = position.PieceBitboards[piece];
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
@@ -401,8 +401,8 @@ public static class MoveGenerator
     internal static void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, Position position, int offset)
     {
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide((int)position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        var pawnPush = Utils.PawhPushSquare((int)position.Side);
+        int oppositeSide = Utils.OppositeSide((int)position.Side);
         var bitboard = position.PieceBitboards[piece];
 
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
@@ -714,8 +714,8 @@ public static class MoveGenerator
     private static bool IsAnyPawnMoveValid(Position position, int offset)
     {
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide((int)position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        var pawnPush = Utils.PawhPushSquare((int)position.Side);
+        int oppositeSide = Utils.OppositeSide((int)position.Side);
         var bitboard = position.PieceBitboards[piece];
 
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
@@ -976,7 +976,7 @@ public static class MoveGenerator
                 return false;
             }
 
-            var pawnPush = +8 - (side * 16);
+            var pawnPush = Utils.PawhPushSquare((int)side);
             var capturedSquare = targetSquare - pawnPush;
 
             return (BoardSquare)targetSquare == position.EnPassant
@@ -1026,7 +1026,7 @@ public static class MoveGenerator
         var side = (int)position.Side;
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
-        var pawnPush = +8 - (side * 16);
+        var pawnPush = Utils.PawhPushSquare(side);
 
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
         var oppositeSide = Utils.OppositeSide(side);

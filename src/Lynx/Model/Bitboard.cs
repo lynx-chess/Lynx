@@ -315,22 +315,6 @@ public static class BitboardExtensions
     }
 
     #endregion
-
-    #region Methods accepting BoardSquares
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool GetBit(this Bitboard board, BoardSquare square) => board.GetBit((int)square);
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Bitboard SetBit(this ref Bitboard board, BoardSquare square) => board.SetBit((int)square);
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Bitboard PopBit(this ref Bitboard board, BoardSquare square) => board.PopBit((int)square);
-
-    #endregion
 }
 
 #pragma warning restore S4136

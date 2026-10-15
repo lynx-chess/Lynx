@@ -54,7 +54,7 @@ public class GenerateKnightMovesTest
     public void KnightMoves_White()
     {
         var position = new Position(Constants.TrickyTestPositionFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightMoves(position);
 
@@ -123,7 +123,7 @@ public class GenerateKnightMovesTest
     public void KnightMoves_Black()
     {
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightMoves(position);
 
@@ -188,7 +188,7 @@ public class GenerateKnightMovesTest
     public void KnightMoves_CapturesOnly_White()
     {
         var position = new Position(Constants.TrickyTestPositionFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 
@@ -225,7 +225,7 @@ public class GenerateKnightMovesTest
     public void KnightMoves_CapturesOnly_Black()
     {
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.N + offset;
         var moves = GenerateKnightCaptures(position);
 

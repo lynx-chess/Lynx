@@ -58,7 +58,7 @@ public class GenerateQueenMovesTest
     public void QueenMoves_White()
     {
         var position = new Position(Constants.TrickyTestPositionFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenMoves(position);
 
@@ -119,7 +119,7 @@ public class GenerateQueenMovesTest
     public void QueenMoves_Black()
     {
         var position = new Position("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenMoves(position);
 
@@ -149,7 +149,7 @@ public class GenerateQueenMovesTest
     public void QueenMoves_CapturesOnly(string fen, int expectedCaptures)
     {
         var position = new Position(fen);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.Q + offset;
         var moves = GenerateQueenCaptures(position);
 
