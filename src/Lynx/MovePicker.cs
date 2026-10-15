@@ -11,18 +11,18 @@ internal ref struct MovePicker
         TTMoveStage,
 
         GenerateNoisyMovesStage,
-        
+
         GoodNoisyMovesStage,
         FirstKillerMoveStage,
         SecondKillerMoveStage,
         CounterMoveStage,
         BadNoisyMovesStage,
-        
+
         GenerateQuietMovesStage,
-        
+
         QuietMovesStage,
 
-        EndStage
+        EndStage,
     }
 
     private readonly Engine _engine;
@@ -103,7 +103,7 @@ internal ref struct MovePicker
                         Stage nextStage;
 
                         // In quiescence this is the last stage and all generated moves (captures) are returned
-                        if(_isQuiescence)
+                        if (_isQuiescence)
                         {
                             nextStage = Stage.EndStage;
                             nextThreshold = int.MinValue;

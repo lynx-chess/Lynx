@@ -203,7 +203,6 @@ public static class MoveGenerator
                 }
         }
 
-
         return 0;
     }
 
@@ -232,7 +231,8 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>.
+    /// Complements <see cref="GenerateAllQuiets(Position, Span{int}, ulong)"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
@@ -244,7 +244,6 @@ public static class MoveGenerator
         var offset = Utils.PieceOffset((int)position.Side);
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        //GenerateCastlingMoves(ref localIndex, movePool, position, oppositeSideAttacks);
         GenerateKingCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, oppositeSideAttacks);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
@@ -489,7 +488,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void GenerateCastlingMoves(ref int localIndex, Span<int> movePool, Position position, Bitboard oppositeSideAttacks)
     {
-        // TODO: move to position?
         var castlingRights = position.Castle;
 
         if (castlingRights != default)
@@ -620,9 +618,6 @@ public static class MoveGenerator
         }
     }
 
-    /// <summary>
-    /// Generate King moves
-    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateKingMoves(ref int localIndex, Span<Move> movePool, int piece, Position position, Bitboard oppositeSideAttacks)
     {
@@ -645,9 +640,6 @@ public static class MoveGenerator
         }
     }
 
-    /// <summary>
-    /// Generate King quiet moves.
-    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateQuietKingMoves(ref int localIndex, Span<Move> movePool, int piece, Position position, Bitboard oppositeSideKingAttacks)
     {
@@ -1025,7 +1017,7 @@ public static class MoveGenerator
         var targetSquare = move.TargetSquare();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
-        return (PieceAttacks(piece, sourceSquare, occupancy) & (1UL << targetSquare)) != 0;
+        return PieceAttacks(piece, sourceSquare, occupancy).GetBit(targetSquare);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1065,14 +1057,14 @@ public static class MoveGenerator
         }
 
         var attackMask = Attacks.PawnAttacks[side][sourceSquare];
-        if (((attackMask >> targetSquare) & 1UL) != 0)
+        if (attackMask.GetBit(targetSquare))
         {
             if (allowOnlyEnPassant)
             {
                 return (BoardSquare)targetSquare == position.EnPassant;
             }
 
-            return (oppositeSidePieces & (1UL << targetSquare)) != 0;
+            return oppositeSidePieces.GetBit(targetSquare);
         }
 
         if (allowOnlyEnPassant)
