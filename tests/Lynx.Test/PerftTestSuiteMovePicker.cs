@@ -11,11 +11,19 @@ namespace Lynx.Test;
 [TestFixture(Category = Categories.Perft, Explicit = true)]
 public class PerftTestSuiteMovePicker : BaseTest
 {
+    private TranspositionTable _tt;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp() => _tt = new();
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown() => _tt.Release();
+
     [TestCaseSource(typeof(PerftTestSuiteCases), nameof(PerftTestSuiteCases.Cases))]
     public void Suite_MovePicker(string fen, int depth, long expectedNumberOfNodes)
     {
         // Test cases can run in parallel, so each one needs its own engine and state
-        using var engine = GetEngine(fen);
+        using var engine = GetEngine(fen, in _tt);
 
         Assert.AreEqual(expectedNumberOfNodes, new PerftMovePickerWalker(engine).Perft(engine.Game.CurrentPosition, depth, ply: 0));
     }

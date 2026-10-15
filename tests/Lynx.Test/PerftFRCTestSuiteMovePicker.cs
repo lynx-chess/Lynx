@@ -1,3 +1,4 @@
+using Lynx.Model;
 using NUnit.Framework;
 
 namespace Lynx.Test;
@@ -9,6 +10,14 @@ namespace Lynx.Test;
 [TestFixture(Category = Categories.PerftFRC, Explicit = true)]
 public class PerftFRCTestSuiteMovePicker : BaseTest
 {
+    private TranspositionTable _tt;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp() => _tt = new();
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown() => _tt.Release();
+
     public PerftFRCTestSuiteMovePicker()
     {
         Configuration.EngineSettings.IsChess960 = true;
@@ -18,7 +27,7 @@ public class PerftFRCTestSuiteMovePicker : BaseTest
     public void FRCSuite_MovePicker(string fen, int depth, long expectedNumberOfNodes)
     {
         // Test cases can run in parallel, so each one needs its own engine and state
-        using var engine = GetEngine(fen);
+        using var engine = GetEngine(fen, in _tt);
 
         Assert.AreEqual(expectedNumberOfNodes, new PerftMovePickerWalker(engine).Perft(engine.Game.CurrentPosition, depth, ply: 0));
     }
