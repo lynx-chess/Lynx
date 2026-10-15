@@ -87,7 +87,7 @@ public sealed partial class Engine
     {
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
-        Debug.Assert(oppositeSideAttacks != 0);
+        Debug.Assert(oppositeSideAttacks.NotEmpty());
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
