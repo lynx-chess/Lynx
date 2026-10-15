@@ -4,7 +4,7 @@ namespace Lynx.Test;
 
 /// <summary>
 /// Runs <see cref="PerftFRCTestSuite"/> positions using <see cref="MovePicker"/> (staged move generation) instead of generating all moves at once.
-/// Specially relevant for castling, which in FRC/DFRC is encoded as the king moving to its own rook square.
+/// Specially relevant for castling moves, which are KxR in (D)FRC
 /// </summary>
 [TestFixture(Category = Categories.PerftFRC, Explicit = true)]
 public class PerftFRCTestSuiteMovePicker : BaseTest

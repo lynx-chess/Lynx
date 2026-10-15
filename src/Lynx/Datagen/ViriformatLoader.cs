@@ -136,7 +136,7 @@ public static class ViriformatLoader
 
                     if (read == 0)
                     {
-                        // EOF reached while reading moves — treat as end of last game
+                        // EOF reached while reading moves - treat as end of last game
                         break;
                     }
 

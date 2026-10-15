@@ -22,8 +22,8 @@ public class MovePickerFRCTest : BaseTest
         "r3k2r/8/8/8/8/8/8/R3K2R b AHah - 0 1",
         "5k2/8/8/8/8/8/8/1R1K3R w HB - 0 1",
         "1r1k3r/8/8/8/8/8/8/5K2 b hb - 0 1",
-        "5k2/8/8/8/8/8/8/6KR w H - 0 1",                                                    // King doesn't move when castling short
-        "5k2/8/8/8/8/8/8/RK6 w A - 0 1",                                                    // King moves 1 square, rook 2 when castling long
+        "5k2/8/8/8/8/8/8/6KR w H - 0 1",                        // King doesn't move when castling short
+        "5k2/8/8/8/8/8/8/RK6 w A - 0 1",                        // King moves 1 square, rook 2 when castling long
         "4r1kr/8/pppppppp/8/8/PPPPPPPP/8/RK2R3 b EAhe - 0 1",
     ];
 

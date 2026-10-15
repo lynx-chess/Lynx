@@ -10,19 +10,19 @@ public class MovePickerTest : BaseTest
         Constants.InitialPositionFEN,
         Constants.TrickyTestPositionFEN,
         Constants.TrickyTestPositionReversedFEN,
-        Constants.KillerTestPositionFEN, // Promotions and en passant
+        Constants.KillerTestPositionFEN,                                    // Promotions and en passant
         Constants.CmkTestPositionFEN,
         Constants.ComplexPositionFEN,
         Constants.CaptureTrainPositionFEN,
-        "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3", // En passant
-        "4k3/8/8/8/8/8/4q3/R3K2R w KQ - 0 1", // In check, castling not allowed
+        "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3",    // En passant
+        "4k3/8/8/8/8/8/4q3/R3K2R w KQ - 0 1",                               // In check, castling not allowed
         "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1",
-        "8/P1P5/8/8/8/8/p1p5/k1K5 w - - 0 1", // Promotions
+        "8/P1P5/8/8/8/8/p1p5/k1K5 w - - 0 1",                               // Promotions
     ];
 
     /// <summary>
     /// Quiescence: only captures and promotions, in the same order and with the same scores as sorting them all at once.
-    /// Quiet TT moves are ignored, and so are corrupted ones.
+    /// Quiet TT moves are ignored, and so are 'corrupted' ones (aka the result of hashing collisions).
     /// </summary>
     [TestCaseSource(nameof(_fens))]
     public void MovePicker_Quiescence_ReturnsSameMovesAsGeneratingAllCapturesAtOnce(string fen)

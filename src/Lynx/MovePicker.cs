@@ -68,7 +68,6 @@ internal ref struct MovePicker
 
                         var fullTTMove = MoveGenerator.GenerateFullTTMove(_ttMove, _position, _oppositeSideAttacks);
 
-                        // TT entries can be corrupted (hash collisions), e.g. with promotion bits set for a non-pawn move
                         if (fullTTMove != 0
                             && (ShortMove)fullTTMove == _ttMove
                             && MoveGenerator.IsPseudoLegal(_position, fullTTMove, _oppositeSideAttacks))
@@ -87,7 +86,6 @@ internal ref struct MovePicker
                     {
                         _stage = Stage.GoodNoisyMovesStage;
 
-                        // Scored lazily, after the TT move has been searched
                         _count = MoveGenerator.GenerateAllCaptures(_position, _moves, _oppositeSideAttacks).Length;
 
                         for (int i = 0; i < _count; ++i)
@@ -102,7 +100,7 @@ internal ref struct MovePicker
                         int nextThreshold;
                         Stage nextStage;
 
-                        // In quiescence this is the last stage and all generated moves (captures) are returned
+                        // In quiescence this is the last stage and all generated moves (captures and promotions) are returned
                         if (_isQuiescence)
                         {
                             nextStage = Stage.EndStage;
@@ -274,7 +272,8 @@ internal ref struct MovePicker
                 }
             }
 
-            // Not consumed: the next stage will continue from this index (repeating the sorting above is a no-op)
+            // We save this move for the next stage where .TrySelectNext() is used (bad captures), which will continue from this _index
+            // Sorting will produce no changes for the first bad capture
             if (Unsafe.Add(ref scoresRef, moveIndex) <= minScore)
             {
                 break;
@@ -285,7 +284,7 @@ internal ref struct MovePicker
             // If the TT move was already returned in the TT stage, it'll have the highest score in the noisy moves list. So we skip it
             if (_ttMoveGenerated
                 && moveIndex == 0
-                && (ShortMove)Unsafe.Add(ref movesRef, 0) == _ttMove)
+                && (ShortMove)movesRef == _ttMove)
             {
                 continue;
             }

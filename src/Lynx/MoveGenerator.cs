@@ -1134,9 +1134,10 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsPieceFromSide(int piece, int side)
     {
-        return side == (int)Side.White
-            ? piece is >= (int)Piece.P and <= (int)Piece.K
-            : piece is >= (int)Piece.p and <= (int)Piece.k;
+        var offset = Utils.PieceOffset(side);
+        var p = piece - offset;
+
+        return p >= (int)Piece.P && p <= (int)Piece.K;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
