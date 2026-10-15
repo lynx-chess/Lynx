@@ -629,7 +629,7 @@ public static class MoveGenerator
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
-        var attacks = PieceAttacks(piece, sourceSquare, occupancy)
+        var attacks = Attacks.KingAttacks[sourceSquare]
             & ~position.OccupancyBitboards[(int)position.Side]
             & ~oppositeSideAttacks;
 
@@ -654,7 +654,7 @@ public static class MoveGenerator
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
-        var attacks = PieceAttacks(piece, sourceSquare, occupancy)
+        var attacks = Attacks.KingAttacks[sourceSquare]
             & ~occupancy
             & ~oppositeSideKingAttacks;
 
