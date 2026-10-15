@@ -34,6 +34,7 @@ public class MovePickerFRCTest : BaseTest
         "2nnrbkr/p1qppppp/8/1ppb4/6PP/3PP3/PPP2P2/BQNNRBKR w HEhe - 1 9",
         "2r1kr2/8/8/8/8/8/8/1R2K1R1 w GBfc - 0 1",
         "3rkr2/8/8/8/8/8/8/R3K2R w HAfd - 0 1",
+        "r3k2r/8/8/8/8/8/4q3/R3K2R w AHah - 0 1",                                       // In check, castling not allowed
     ];
 
     [TestCaseSource(nameof(_frcFens))]

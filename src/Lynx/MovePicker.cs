@@ -1,4 +1,5 @@
 using Lynx.Model;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -31,6 +32,11 @@ internal ref struct MovePicker
     private readonly ShortMove _ttMove;
     private readonly int _ply;
     private readonly bool _isQuiescence;
+    private readonly bool _isInCheck;
+    private readonly bool _isDoubleCheck;
+    private readonly int _oppositeSideKing;
+    private readonly int _checkerSquare;
+    private readonly Bitboard _evasionTargets;
     private readonly Span<Move> _moves;
     private readonly Span<int> _moveScores;
 
@@ -42,8 +48,12 @@ internal ref struct MovePicker
     private Move _secondKiller;
     private Move _counterMove;
 
-    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isQuiescence = false)
+    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isQuiescence = false, bool isInCheck = false)
     {
+        // Since QSearch uses !isAnyCaptureValid as a condition to check CanGenerateAtLeastAValidMove,
+        // generating only evasion moves in QSearch would affect the existing logic, which deserves a different patch
+        Debug.Assert(!(isQuiescence && isInCheck) || (isQuiescence ^ isInCheck));
+
         _engine = engine;
         _position = position;
         _ttMove = ttMove;
@@ -53,6 +63,30 @@ internal ref struct MovePicker
         _stage = isQuiescence ? Stage.GenerateNoisyMovesStage : Stage.TTMoveStage;
         _moves = moves;
         _moveScores = moveScores;
+
+        // If enabled, we prepare to filter out most moves that can't get the king out of check
+        if (isInCheck)
+        {
+            _isInCheck = true;
+
+            var side = (int)position.Side;
+            _oppositeSideKing = (int)Piece.K + Utils.PieceOffset(side);
+
+            var _oppositeSideKingSquare = position.PieceBitboards[_oppositeSideKing].GetLS1BIndex();
+            var checkers = position.AllSideAttackersTo(_oppositeSideKingSquare, side);
+
+            Debug.Assert(checkers.NotEmpty(), "Not in check");
+
+            _isDoubleCheck = !checkers.IsSinglePopulated();
+
+            if (!_isDoubleCheck)
+            {
+                _checkerSquare = checkers.GetLS1BIndex();
+
+                // Capturing the attacker or blocking its ray (only B, R and Q)
+                _evasionTargets = checkers | Attacks.RaysBetween[_oppositeSideKingSquare][_checkerSquare];
+            }
+        }
     }
 
     [SkipLocalsInit]
@@ -70,7 +104,8 @@ internal ref struct MovePicker
 
                         if (fullTTMove != 0
                             && (ShortMove)fullTTMove == _ttMove
-                            && MoveGenerator.IsPseudoLegal(_position, fullTTMove, _oppositeSideAttacks))
+                            && MoveGenerator.IsPseudoLegal(_position, fullTTMove, _oppositeSideAttacks)
+                            && (!_isInCheck || IsEvasion(fullTTMove)))
                         {
                             _ttMoveGenerated = true;
 
@@ -87,6 +122,11 @@ internal ref struct MovePicker
                         _stage = Stage.GoodNoisyMovesStage;
 
                         _count = MoveGenerator.GenerateAllCaptures(_position, _moves, _oppositeSideAttacks).Length;
+
+                        if (_isInCheck)
+                        {
+                            _count = RemoveNonEvasions(_count);
+                        }
 
                         for (int i = 0; i < _count; ++i)
                         {
@@ -202,7 +242,8 @@ internal ref struct MovePicker
                             if (quietMove == _firstKiller
                                 || quietMove == _secondKiller
                                 || quietMove == _counterMove
-                                || (_ttMoveGenerated && (ShortMove)quietMove == _ttMove))
+                                || (_ttMoveGenerated && (ShortMove)quietMove == _ttMove)
+                                || (_isInCheck && !IsEvasion(quietMove)))
                             {
                                 continue;
                             }
@@ -244,7 +285,53 @@ internal ref struct MovePicker
     {
         return move != 0
             && !(_ttMoveGenerated && (ShortMove)move == _ttMove)
-            && MoveGenerator.IsPseudoLegal(_position, move, _oppositeSideAttacks);
+            && MoveGenerator.IsPseudoLegal(_position, move, _oppositeSideAttacks)
+            && (!_isInCheck || IsEvasion(move));
+    }
+
+    /// <summary>
+    /// Whether <paramref name="move"/> can get the king out of check: king moves, captures of the attacker (including en passant) and blocks.
+    /// This doesn't check for pins nor discards moves where the king moves to another attacked square (i.e. not getting out of the ray)
+    /// Only meant to be used when <see cref="_isInCheck"/> is true
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private readonly bool IsEvasion(Move move)
+    {
+        if (move.Piece() == _oppositeSideKing)
+        {
+            return true;
+        }
+
+        if (_isDoubleCheck)
+        {
+            return false;
+        }
+
+        var targetSquare = move.TargetSquare();
+
+        return _evasionTargets.GetBit(targetSquare)
+            || (move.IsEnPassant() && targetSquare - (+8 - ((int)_position.Side * 16)) == _checkerSquare);   // Captured pawn is the checker, which isn't in the target square
+    }
+
+    /// <summary>
+    /// Removes non-evasions (<see cref="IsEvasion(Move)"/>) from the first <paramref name="count"/> moves in _moves, keeping the order.
+    /// </summary>
+    /// <returns>New effective size of _moves</returns>
+    private readonly int RemoveNonEvasions(int count)
+    {
+        var kept = 0;
+
+        for (int i = 0; i < count; ++i)
+        {
+            var move = _moves[i];
+
+            if (IsEvasion(move))
+            {
+                _moves[kept++] = move;
+            }
+        }
+
+        return kept;
     }
 
     private bool TrySelectNext(int minScore, out Move move, out int score)

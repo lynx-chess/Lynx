@@ -5,8 +5,20 @@ namespace Lynx.Test.MoveGeneration;
 
 public class MovePickerTest : BaseTest
 {
+    private static readonly string[] _inCheckFens =
+    [
+        "4k3/8/8/8/8/8/4q3/R3K2R w KQ - 0 1",                                           // Queen next to the king, castling not allowed
+        "rnbqk1nr/pppp1ppp/8/4p3/1b1PP3/8/PPP2PPP/RNBQKBNR w KQkq - 1 3",               // Bishop check that can be blocked or captured
+        "rnbqkbnr/pppppppp/8/8/8/5n2/PPPPPPPP/RNBQKB1R w KQkq - 0 1",                   // Knight check, can't be blocked
+        "8/8/8/2k5/3Pp3/8/8/4K3 b - d3 0 1",                                            // Pawn check that can be captured en passant
+        "4k3/8/8/8/8/3n4/8/r3K1R1 w - - 0 1",                                           // Double check: only king moves
+        "7r/6P1/8/8/8/8/8/k6K w - - 0 1",                                               // Promotion capturing the checker
+        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",        // Not in check, used as reference below
+    ];
+
     private static readonly string[] _fens =
     [
+        .. _inCheckFens,
         Constants.InitialPositionFEN,
         Constants.TrickyTestPositionFEN,
         Constants.TrickyTestPositionReversedFEN,
@@ -19,6 +31,35 @@ public class MovePickerTest : BaseTest
         "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1",
         "8/P1P5/8/8/8/8/p1p5/k1K5 w - - 0 1",                               // Promotions
     ];
+
+    /// <summary>
+    /// In check, only king moves, captures of the checker and blocks are returned.
+    /// No pins are taken into account, and king moves could still be illegal.
+    /// </summary>
+    [TestCaseSource(nameof(_inCheckFens))]
+    public void MovePicker_InCheck_ReturnsFewerMovesThanGeneratedAndAllTheLegalOnes(string fen)
+    {
+        var engine = GetEngine(fen);
+        var position = engine.Game.CurrentPosition;
+        var oppositeSideAttacks = GetOppositeSideAttacks(position);
+
+        var allMoves = GenerateAllMoves(position, oppositeSideAttacks);
+        var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove: 0, ply: 0, isQuiescence: false);
+
+        if (position.IsInCheck())
+        {
+            Assert.Less(returned.Count, allMoves.Length, $"Moves that don't get the king out of check weren't removed in {fen}");
+        }
+        else
+        {
+            Assert.AreEqual(allMoves.Length, returned.Count, $"Moves removed when not in check in {fen}");
+        }
+
+        Assert.AreEqual(
+            allMoves.Where(move => IsLegal(position, move)).Order().ToArray(),
+            returned.Select(r => r.Move).Where(move => IsLegal(position, move)).Order().ToArray(),
+            $"Different legal moves in {fen}");
+    }
 
     /// <summary>
     /// Quiescence: only captures and promotions, in the same order and with the same scores as sorting them all at once.
@@ -211,7 +252,7 @@ public class MovePickerTest : BaseTest
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence);
+        var movePicker = new MovePicker(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence, isInCheck: !isQuiescence && position.IsInCheck());
 
         var result = new List<(Move, int)>();
 
