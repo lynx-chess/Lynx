@@ -62,12 +62,10 @@ public class MovePickerTest : BaseTest
     }
 
     /// <summary>
-    /// Quiescence in check: only captures that get the king out of check are returned, and all the legal ones.
-    /// <see cref="MovePicker.HadPseudoLegalNoisyMoves"/> must still tell whether there were captures before removing the rest,
-    /// because that's what <see cref="Engine.QuiescenceSearch"/> uses to decide whether to look for a final position
+    /// Quiescence in check: only captures that get the king out of check are returned, and all the legal ones
     /// </summary>
     [TestCaseSource(nameof(_fens))]
-    public void MovePicker_Quiescence_InCheck_ReturnsOnlyEvasionCapturesAndKnowsIfThereWereAny(string fen)
+    public void MovePicker_Quiescence_InCheck_ReturnsOnlyEvasionCaptures(string fen)
     {
         var engine = GetEngine(fen);
         var position = engine.Game.CurrentPosition;
@@ -87,7 +85,6 @@ public class MovePickerTest : BaseTest
             returned.Add(move);
         }
 
-        Assert.AreEqual(captures.Length > 0, movePicker.HadPseudoLegalNoisyMoves, $"Wrong HadPseudoLegalNoisyMoves in {fen}");
         Assert.That(returned, Is.SubsetOf(captures), $"Returned something that isn't a capture in {fen}");
         Assert.AreEqual(returned.Count, returned.Distinct().Count(), $"Repeated moves in {fen}");
         Assert.AreEqual(

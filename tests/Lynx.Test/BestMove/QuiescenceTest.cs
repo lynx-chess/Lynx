@@ -39,7 +39,7 @@ public class QuiescenceTest : BaseTest
     /// 1   . . . . . . K .
     ///     a b c d e f g h
     /// Checkmate by Ra8, but black has a (pseudo-legal) capture: Rxa2, which doesn't get the king out of check.
-    /// Final positions are only looked for if there was at least one pseudo-legal capture, regardless of the captures that can actually be played in check
+    /// In check, QSearch looks for a final position if there isn't any valid capture, regardless of the (pseudo-legal) captures that exist
     /// </summary>
     [Test]
     public void QuiescenceSearch_DetectsCheckmate_WhenCapturesExistButNoneGetsTheKingOutOfCheck()
@@ -58,6 +58,32 @@ public class QuiescenceTest : BaseTest
     public void QuiescenceSearch_DoesNotDetectCheckmate_WhenCapturesExistButAnotherMoveGetsTheKingOutOfCheck()
     {
         var engine = GetEngine("R5k1/5ppp/8/8/8/8/P3r3/6K1 b - - 0 1");
+
+        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+
+        Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
+    }
+
+    /// <summary>
+    /// Checkmate by Ra8, and black doesn't have any capture at all
+    /// </summary>
+    [Test]
+    public void QuiescenceSearch_DetectsCheckmate_WhenThereAreNoCaptures()
+    {
+        var engine = GetEngine("R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1");
+
+        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+
+        Assert.AreEqual(Position.EvaluateFinalPosition(0, isInCheck: true), score);
+    }
+
+    /// <summary>
+    /// Ra8 gives check, black doesn't have any capture, but the king can move to h7, so it's not a final position
+    /// </summary>
+    [Test]
+    public void QuiescenceSearch_DoesNotDetectCheckmate_WhenThereAreNoCapturesButTheKingCanMove()
+    {
+        var engine = GetEngine("R5k1/5pp1/7p/8/8/8/8/6K1 b - - 0 1");
 
         var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
 

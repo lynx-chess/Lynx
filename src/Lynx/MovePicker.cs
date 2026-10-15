@@ -47,12 +47,6 @@ internal ref struct MovePicker
     private Move _firstKiller;
     private Move _secondKiller;
     private Move _counterMove;
-    private bool _hadPseudoLegalNoisyMoves;
-
-    /// <summary>
-    /// This lets <see cref="Engine.QuiescenceSearch"/> tell 'there were no captures' from 'there were captures, but none of them is an evasion'
-    /// </summary>
-    public readonly bool HadPseudoLegalNoisyMoves => _hadPseudoLegalNoisyMoves;
 
     public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isQuiescence = false, bool isInCheck = false)
     {
@@ -124,7 +118,6 @@ internal ref struct MovePicker
                         _stage = Stage.GoodNoisyMovesStage;
 
                         _count = MoveGenerator.GenerateAllCaptures(_position, _moves, _oppositeSideAttacks).Length;
-                        _hadPseudoLegalNoisyMoves = _count > 0;
 
                         if (_isInCheck)
                         {

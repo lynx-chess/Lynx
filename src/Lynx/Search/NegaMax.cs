@@ -895,10 +895,10 @@ public sealed partial class Engine
 
         var hasNextMove = movePicker.TryGetNext(out var move, out var moveScore);
 
-        // If we're in check, the picker only returns evasions.
-        if (!hasNextMove && !movePicker.HadPseudoLegalNoisyMoves)
+        // Nothing to search and not in check: stand pat, without checking if it's a final position (it's rare, see https://github.com/lynx-chess/Lynx/pull/358).
+        // If we're in check we can't stand pat, and the picker only returns evasions: not having any doesn't mean there are no legal moves, so we need to keep going and check it below
+        if (!hasNextMove && !isInCheck)
         {
-            // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
             return staticEval;
         }
 
@@ -977,8 +977,12 @@ public sealed partial class Engine
             ++visitedMovesCounter;
         }
 
-        if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
+        // Final positions are only looked for when in check and no capture was valid (either because there were none, or because they were illegal), since
+        // - that's where almost all of them are: checkmates (stalemates and checkmates without captures are very rare otherwise, so not worth the cost for all the other nodes)
+        // - not in check, the captures not being valid is usually because they were pruned (bad captures), not because there are no legal moves
+        if (isInCheck
+            && !isAnyCaptureValid
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
         {
             Debug.Assert(bestMove is null);
 
