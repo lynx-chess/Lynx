@@ -62,6 +62,46 @@ public class MovePickerTest : BaseTest
     }
 
     /// <summary>
+    /// Quiescence in check: only captures that get the king out of check are returned, and all the legal ones.
+    /// <see cref="MovePicker.HadPseudoLegalNoisyMoves"/> must still tell whether there were captures before removing the rest,
+    /// because that's what <see cref="Engine.QuiescenceSearch"/> uses to decide whether to look for a final position
+    /// </summary>
+    [TestCaseSource(nameof(_fens))]
+    public void MovePicker_Quiescence_InCheck_ReturnsOnlyEvasionCapturesAndKnowsIfThereWereAny(string fen)
+    {
+        var engine = GetEngine(fen);
+        var position = engine.Game.CurrentPosition;
+        var oppositeSideAttacks = GetOppositeSideAttacks(position);
+
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var captures = MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).ToArray();
+
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, isQuiescence: true, isInCheck: position.IsInCheck());
+
+        var returned = new List<Move>();
+        while (movePicker.TryGetNext(out var move, out _))
+        {
+            returned.Add(move);
+        }
+
+        Assert.AreEqual(captures.Length > 0, movePicker.HadPseudoLegalNoisyMoves, $"Wrong HadPseudoLegalNoisyMoves in {fen}");
+        Assert.That(returned, Is.SubsetOf(captures), $"Returned something that isn't a capture in {fen}");
+        Assert.AreEqual(returned.Count, returned.Distinct().Count(), $"Repeated moves in {fen}");
+        Assert.AreEqual(
+            captures.Where(move => IsLegal(position, move)).Order().ToArray(),
+            returned.Where(move => IsLegal(position, move)).Order().ToArray(),
+            $"Different legal captures in {fen}");
+
+        if (!position.IsInCheck())
+        {
+            Assert.AreEqual(captures.Length, returned.Count, $"Captures removed when not in check in {fen}");
+        }
+    }
+
+    /// <summary>
     /// Quiescence: only captures and promotions, in the same order and with the same scores as sorting them all at once.
     /// Quiet TT moves are ignored, and so are 'corrupted' ones (aka the result of hashing collisions).
     /// </summary>
