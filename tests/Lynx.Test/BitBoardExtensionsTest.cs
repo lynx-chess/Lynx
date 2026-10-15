@@ -2,6 +2,7 @@
 using NUnit.Framework;
 
 namespace Lynx.Test;
+
 public class BitboardExtensionsTest
 {
     [TestCase(0b10001UL, 1UL)]
@@ -103,6 +104,7 @@ public class BitboardExtensionsTest
         var bb = position.PieceBitboards[(int)piece];
 
         Assert.AreEqual(shouldContain, bb.Contains((int)square));
-        Assert.AreEqual(!shouldContain, bb.DoesNotContain((int)square));
+
+        Assert.AreEqual(shouldContain, bb.GetBit((int)square));
     }
 }

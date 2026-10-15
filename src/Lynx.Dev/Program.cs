@@ -710,7 +710,7 @@ static void _54_ScoreMove()
 
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, opposideSideAttacks)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, opposideSideAttacks, 0)}");
     }
 
     position = new Position(TrickyPosition);
@@ -719,7 +719,7 @@ static void _54_ScoreMove()
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, opposideSideAttacks)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, opposideSideAttacks, 0)}");
     }
 }
 

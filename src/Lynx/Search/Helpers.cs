@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Lynx;
@@ -565,6 +566,18 @@ public sealed partial class Engine
                 throw new LynxException(message);
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Move GetKillerMove(int ply, int index)
+    {
+        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_killerMoves), (ply * 2) + index);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Move GetCounterMove(int ply)
+    {
+        return CounterMove(ply - 1);
     }
 
     [Conditional("DEBUG")]

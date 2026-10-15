@@ -36,6 +36,17 @@ public static class Utils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(bool isWhite) => isWhite ? 0 : 6;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Side PieceSide(int piece)
+    {
+        Debug.Assert(piece != (int)Piece.None);
+        Debug.Assert(piece != (int)Piece.Unknown);
+
+        return piece >= (int)Piece.P && piece <= (int)Piece.K
+            ? Side.White
+            : Side.Black;
+    }
+
     /// <summary>
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
