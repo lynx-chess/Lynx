@@ -88,6 +88,11 @@ public static class Attacks
 
             for (var square2 = 0; square2 < 64; ++square2)
             {
+                if(square1 == square2)
+                {
+                    continue;
+                }
+
                 var occupancy = 1UL << square1 | 1UL << square2;
 
                 int file1 = Constants.File(square1);
@@ -97,11 +102,12 @@ public static class Attacks
 
                 if (file1 == file2 || rank1 == rank2)
                 {
-                    RaysBetween[square1][square2] = Attacks.RookAttacks(square1, occupancy) & Attacks.RookAttacks(square2, occupancy);
+                    RaysBetween[square1][square2] = RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
                 }
-                else if (file1 - rank1 == file2 - rank2)
+                else if (file1 - rank1 == file2 - rank2
+                    || file1 + rank1 == file2 + rank2)
                 {
-                    RaysBetween[square1][square2] = Attacks.BishopAttacks(square1, occupancy) & Attacks.BishopAttacks(square2, occupancy);
+                    RaysBetween[square1][square2] = BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
                 }
             }
         }
