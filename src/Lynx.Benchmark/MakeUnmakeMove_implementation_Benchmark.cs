@@ -360,7 +360,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             Board = new int[64];
             Array.Copy(position.Board, Board, position.Board.Length);
 
-            Side = (Side)Utils.OppositeSide(position.Side);
+            Side = (Side)Utils.OppositeSide((int)position.Side);
             Castle = position.Castle;
             EnPassant = BoardSquare.noSquare;
 
@@ -373,8 +373,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         public MakeMovePosition(MakeMovePosition position, Move move) : this(position)
         {
             var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
+            var offset = Utils.PieceOffset((int)oldSide);;
+            var oppositeSide = Utils.OppositeSide((int)oldSide);
 
             int sourceSquare = move.SourceSquare();
             int targetSquare = move.TargetSquare();
@@ -434,7 +434,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             }
             else if (move.IsDoublePawnPush())
             {
-                var pawnPush = +8 - ((int)oldSide * 16);
+                var pawnPush = Utils.PawhPushSquare((int)oldSide);
                 var enPassantSquare = sourceSquare + pawnPush;
 
                 EnPassant = (BoardSquare)enPassantSquare;
@@ -491,8 +491,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             BoardSquare enpassantCopy = EnPassant;
 
             var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
+            var offset = Utils.PieceOffset((int)oldSide);;
+            var oppositeSide = Utils.OppositeSide((int)oldSide);
 
             int sourceSquare = move.SourceSquare();
             int targetSquare = move.TargetSquare();
@@ -553,7 +553,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             }
             else if (move.IsDoublePawnPush())
             {
-                var pawnPush = +8 - ((int)oldSide * 16);
+                var pawnPush = Utils.PawhPushSquare((int)oldSide);
                 var enPassantSquare = sourceSquare + pawnPush;
 
                 EnPassant = (BoardSquare)enPassantSquare;
@@ -608,8 +608,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         public void UnmakeMove_Original(Move move, MakeMoveGameState gameState)
         {
             var oppositeSide = (int)Side;
-            Side = (Side)Utils.OppositeSide(Side);
-            var offset = Utils.PieceOffset(Side);
+            Side = (Side)Utils.OppositeSide((int)Side);
+            var offset = Utils.PieceOffset((int)Side);
 
             int sourceSquare = move.SourceSquare();
             int targetSquare = move.TargetSquare();
@@ -714,8 +714,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             var uniqueIdentifierCopy = UniqueIdentifier;
 
             var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
+            var offset = Utils.PieceOffset((int)oldSide);;
+            var oppositeSide = Utils.OppositeSide((int)oldSide);
 
             int sourceSquare = move.SourceSquare();
             int targetSquare = move.TargetSquare();
@@ -776,7 +776,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             }
             else if (move.IsDoublePawnPush())
             {
-                var pawnPush = +8 - ((int)oldSide * 16);
+                var pawnPush = Utils.PawhPushSquare((int)oldSide);
                 var enPassantSquare = sourceSquare + pawnPush;
 
                 EnPassant = (BoardSquare)enPassantSquare;
@@ -836,8 +836,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             var uniqueIdentifierCopy = UniqueIdentifier;
 
             var oldSide = (int)Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
+            var offset = Utils.PieceOffset((int)oldSide);;
+            var oppositeSide = Utils.OppositeSide((int)oldSide);
 
             int sourceSquare = move.SourceSquare();
             int targetSquare = move.TargetSquare();
@@ -948,8 +948,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             var uniqueIdentifierCopy = UniqueIdentifier;
 
             var oldSide = (int)Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
+            var offset = Utils.PieceOffset((int)oldSide);;
+            var oppositeSide = Utils.OppositeSide((int)oldSide);
 
             int sourceSquare = move.SourceSquare();
             int targetSquare = move.TargetSquare();
@@ -1072,8 +1072,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         public void UnmakeMove_WithZobristKey(Move move, MakeMoveGameStateWithZobristKey gameState)
         {
             var oppositeSide = (int)Side;
-            Side = (Side)Utils.OppositeSide(Side);
-            var offset = Utils.PieceOffset(Side);
+            Side = (Side)Utils.OppositeSide((int)Side);
+            var offset = Utils.PieceOffset((int)Side);
 
             int sourceSquare = move.SourceSquare();
             int targetSquare = move.TargetSquare();
@@ -1316,7 +1316,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void MakeNullMove()
         {
-            Side = (Side)Utils.OppositeSide(Side);
+            Side = (Side)Utils.OppositeSide((int)Side);
             var oldEnPassant = EnPassant;
             EnPassant = BoardSquare.noSquare;
 
@@ -1328,7 +1328,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UnMakeNullMove(MakeMoveGameState gameState)
         {
-            Side = (Side)Utils.OppositeSide(Side);
+            Side = (Side)Utils.OppositeSide((int)Side);
             EnPassant = gameState.EnPassant;
 
             UniqueIdentifier ^=
@@ -1342,10 +1342,10 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal readonly bool IsValid()
         {
-            var kingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset(Side)];
+            var kingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset((int)Side)];
             var kingSquare = kingBitboard == default ? -1 : kingBitboard.GetLS1BIndex();
 
-            var oppositeKingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
+            var oppositeKingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset(Utils.OppositeSide((int)Side))];
             var oppositeKingSquare = oppositeKingBitboard == default ? -1 : oppositeKingBitboard.GetLS1BIndex();
 
             return kingSquare >= 0 && oppositeKingSquare >= 0
@@ -1360,7 +1360,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool WasProduceByAValidMove()
         {
-            var oppositeKingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
+            var oppositeKingBitboard = PieceBitboards[(int)Piece.K + Utils.PieceOffset(Utils.OppositeSide((int)Side))];
             var oppositeKingSquare = oppositeKingBitboard == default ? -1 : oppositeKingBitboard.GetLS1BIndex();
 
             return oppositeKingSquare >= 0 && !MakeMoveAttacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitboards, OccupancyBitboards);
@@ -1554,7 +1554,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             movePool ??= new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
             int localIndex = 0;
 
-            var offset = Utils.PieceOffset(position.Side);
+            var offset = Utils.PieceOffset((int)position.Side);
 
             GeneratePawnMoves(ref localIndex, movePool, position, offset, capturesOnly);
             GenerateCastlingMoves(ref localIndex, movePool, position, offset);
@@ -1573,8 +1573,8 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             int sourceSquare, targetSquare;
 
             var piece = (int)Piece.P + offset;
-            var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-            int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+            var pawnPush = Utils.PawhPushSquare((int)position.Side);
+            int oppositeSide = Utils.OppositeSide((int)position.Side);
             var bitboard = position.PieceBitboards[piece];
 
             while (bitboard != default)
@@ -1655,7 +1655,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         internal static void GenerateCastlingMoves(ref int localIndex, Move[] movePool, MakeMovePosition position, int offset)
         {
             var piece = (int)Piece.K + offset;
-            var oppositeSide = (Side)Utils.OppositeSide(position.Side);
+            var oppositeSide = (Side)Utils.OppositeSide((int)position.Side);
 
             int sourceSquare = position.PieceBitboards[piece].GetLS1BIndex(); // There's for sure only one
 
@@ -1842,7 +1842,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         {
             Utils.Assert(sideToMove != Side.Both);
 
-            var offset = Utils.PieceOffset(sideToMove);
+            var offset = Utils.PieceOffset((int)sideToMove);
 
             // I tried to order them from most to least likely
             return
@@ -1859,7 +1859,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         {
             Utils.Assert(sideToMove != Side.Both);
 
-            var offset = Utils.PieceOffset(sideToMove);
+            var offset = Utils.PieceOffset((int)sideToMove);
 
             // I tried to order them from most to least likely
             return

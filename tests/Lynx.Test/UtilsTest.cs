@@ -9,7 +9,6 @@ public class UtilsTest
     [TestCase(Side.White, 0)]
     public void PieceOffSet(Side sideToMove, int expectedOffset)
     {
-        Assert.AreEqual(expectedOffset, Utils.PieceOffset(sideToMove));
         Assert.AreEqual(expectedOffset, Utils.PieceOffset((int)sideToMove));
         Assert.AreEqual(expectedOffset, Utils.PieceOffset(sideToMove == Side.White));
     }
@@ -18,7 +17,7 @@ public class UtilsTest
     [TestCase(Side.White, (int)Side.Black)]
     public void OppositeSide(Side sideToMove, int expectedSide)
     {
-        Assert.AreEqual(expectedSide, Utils.OppositeSide(sideToMove));
+        Assert.AreEqual(expectedSide, Utils.OppositeSide((int)sideToMove));
     }
 
     [TestCase(Side.White, Constants.WhiteRookShortCastleSquare)]

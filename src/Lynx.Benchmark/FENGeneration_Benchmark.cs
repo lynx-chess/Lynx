@@ -398,8 +398,8 @@ internal struct StructCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -450,7 +450,7 @@ internal struct StructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -495,8 +495,8 @@ internal struct StructCustomPosition
 
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -549,7 +549,7 @@ internal struct StructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -738,8 +738,8 @@ internal readonly struct ReadonlyStructCustomPosition
     public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -790,7 +790,7 @@ internal readonly struct ReadonlyStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -836,8 +836,8 @@ internal readonly struct ReadonlyStructCustomPosition
     public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -890,7 +890,7 @@ internal readonly struct ReadonlyStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -1086,8 +1086,8 @@ internal class ClassCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1138,7 +1138,7 @@ internal class ClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -1182,8 +1182,8 @@ internal class ClassCustomPosition
     public ClassCustomPosition(ClassCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1236,7 +1236,7 @@ internal class ClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -1432,8 +1432,8 @@ internal record class RecordClassCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1484,7 +1484,7 @@ internal record class RecordClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -1528,8 +1528,8 @@ internal record class RecordClassCustomPosition
     public RecordClassCustomPosition(RecordClassCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1582,7 +1582,7 @@ internal record class RecordClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -1778,8 +1778,8 @@ internal record struct RecordStructCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1830,7 +1830,7 @@ internal record struct RecordStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
@@ -1874,8 +1874,8 @@ internal record struct RecordStructCustomPosition
     public RecordStructCustomPosition(RecordStructCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1928,7 +1928,7 @@ internal record struct RecordStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;

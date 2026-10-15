@@ -13,14 +13,6 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PieceOffset(Side side) => PieceOffset((int)side);
-
-    /// <summary>
-    /// Side.White -> 0
-    /// Side.Black -> 6
-    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(int side)
     {
@@ -51,20 +43,19 @@ public static class Utils
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
     /// </summary>
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int OppositeSide(Side side) => OppositeSide((int)side);
-
-    /// <summary>
-    /// Side.Black -> Side.White
-    /// Side.White -> Side.Black
-    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int OppositeSide(int side)
     {
         GuardAgainstSideBoth(side);
 
         return side ^ 1;     // or  (int)Side.White - side
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PawhPushSquare(int side)
+    {
+        // position.Side == Side.White ? -8 : +8
+        return +8 - (side * 16);
     }
 
     [Obsolete("Test only, to avoid indirection")]
