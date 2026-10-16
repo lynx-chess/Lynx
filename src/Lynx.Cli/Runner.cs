@@ -10,6 +10,11 @@ public static class Runner
 
     public static async Task Run(params string[] args)
     {
+        // minWorkerThreads is by default Environment.ProcessorCount, which can cause starvation in 1/2 thread machines given
+        // given we use 1 thread for search, but we also run the writer, make use of CTS, etc.
+        ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
+        ThreadPool.SetMinThreads(Math.Max(minWorkerThreads, Configuration.EngineSettings.MinThreadpoolThreads), minCompletionPortThreads);
+
         var uciChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = true, FullMode = BoundedChannelFullMode.Wait });
         var engineChannel = Channel.CreateBounded<object>(new BoundedChannelOptions(2 * Configuration.EngineSettings.MaxDepth) { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropOldest });
 
@@ -21,11 +26,13 @@ public static class Runner
         var writer = new Writer(engineChannel);
         var listener = new Listener(uciHandler);
 
+        var listenerTask = Task.Factory.StartNew(() => listener.Run(cancellationToken, args), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+
         var tasks = new List<Task>
         {
             Task.Run(() => writer.Run(cancellationToken)),
             Task.Run(() => searcher.Run(cancellationToken)),
-            Task.Run(() => listener.Run(cancellationToken, args)),
+            listenerTask,
             uciChannel.Reader.Completion,
             engineChannel.Reader.Completion
         };
