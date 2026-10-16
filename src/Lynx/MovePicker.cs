@@ -135,11 +135,6 @@ internal ref struct MovePicker
                             _count = RemoveNonEvasions(_count);
                         }
 
-                        if (_isInCheck)
-                        {
-                            _count = RemoveNonEvasions(_count);
-                        }
-
                         for (int i = 0; i < _count; ++i)
                         {
                             _moveScores[i] = _engine.ScoreMoveQSearch(_position, _moves[i], _ttMove);
