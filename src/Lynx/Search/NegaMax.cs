@@ -983,7 +983,8 @@ public sealed partial class Engine
         // In check and either no pseudolegal captures, no legal captures or all of them pruned -> we try to generate all moves
         if (isInCheck
             && !isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))  
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
+        {
             Debug.Assert(bestMove is null);
 
             bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
