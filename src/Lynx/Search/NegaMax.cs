@@ -893,7 +893,10 @@ public sealed partial class Engine
 
         var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true);
 
-        if (!movePicker.TryGetNext(out var move, out var moveScore))
+        var hasNextMove = movePicker.TryGetNext(out var move, out var moveScore);
+
+        // If we're in check we can't stand pat, so we need to keep going and check it below
+        if (!hasNextMove && !isInCheck)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
             return staticEval;
@@ -909,7 +912,8 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        do
+        // First move fetched above
+        for (; hasNextMove; hasNextMove = movePicker.TryGetNext(out move, out moveScore))
         {
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
@@ -973,9 +977,9 @@ public sealed partial class Engine
 
             ++visitedMovesCounter;
         }
-        while (movePicker.TryGetNext(out move, out moveScore));
 
-        if (!isAnyCaptureValid
+        if (isInCheck
+            && !isAnyCaptureValid
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
