@@ -524,6 +524,9 @@ public sealed class EngineSettings
     [SPSA<int>(0, 20, 2)]
     public int SE_NoPV { get; set; } = 10;
 
+    [SPSA<int>(enabled: false)]
+    public int QSearchStalemateMaxPieces { get ; set; } = 8;
+
     #endregion
 
     #region Datagen

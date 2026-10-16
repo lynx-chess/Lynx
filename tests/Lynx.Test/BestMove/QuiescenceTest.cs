@@ -104,6 +104,41 @@ public class QuiescenceTest : BaseTest
         Assert.Greater(score, 0, "Black wins a rook");
     }
 
+    /// <summary>
+    /// 8   . . . . . . . k
+    /// 7   . . . . . Q . .
+    /// 6   . . . . . . K .
+    ///     a b c d e f g h
+    /// Stalemate: black isn't in check, doesn't have any captures, and the king has no legal moves.
+    /// Final positions are looked for when not in check only in sparse positions, where stalemates are
+    /// </summary>
+    [Test]
+    public void QuiescenceSearch_DetectsStalemate_WhenThereAreNoCapturesAndFewPieces()
+    {
+        var engine = GetEngine("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1");
+
+        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+
+        Assert.AreEqual(Position.EvaluateFinalPosition(0, isInCheck: false), score);
+    }
+
+    /// <summary>
+    /// 8   . . . . . . . k
+    /// 7   p . . . . Q . .
+    /// 6   . . . . . . K .
+    ///     a b c d e f g h
+    /// Same as <see cref="QuiescenceSearch_DetectsStalemate_WhenThereAreNoCapturesAndFewPieces"/>, but black has a pawn that can move (a6), so it isn't a final position
+    /// </summary>
+    [Test]
+    public void QuiescenceSearch_DoesNotDetectStalemate_WhenThereIsALegalMove()
+    {
+        var engine = GetEngine("7k/p4Q2/6K1/8/8/8/8/8 b - - 0 1");
+
+        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+
+        Assert.AreNotEqual(Position.EvaluateFinalPosition(0, isInCheck: false), score);
+    }
+
     [TestCase("7k/8/5NQ1/8/8/KN6/8/1r6 b - - 0 1", 1, new[] { "b1b3" })]
     [TestCase("5Rbk/8/5N2/6Q1/8/1r6/8/KN6 b - - 0 1", 1, new[] { "b3b1" })]
     public void DetectDrawWhenNoCaptures(string fen, int depth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)

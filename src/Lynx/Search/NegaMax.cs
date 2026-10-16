@@ -972,16 +972,9 @@ public sealed partial class Engine
             ++visitedMovesCounter;
         }
 
-        // Not in check and nothing to search: non-mated positions with no captures. Could be stalemate.
-        if (!isInCheck && !isAnyMoveFetched)
-        {
-            // Checking if final position first didn't gain in https://github.com/lynx-chess/Lynx/pull/358
-            // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
-            return staticEval;
-        }
-
-        // In check and either no pseudolegal captures, no legal captures or all of them pruned -> we try to generate all moves
-        if (isInCheck
+        // We check for final positions if in check or if in positions with relatively few pieces, providing there were no pseudolegal captures, no legal captures or all of them are pruned
+        if ((isInCheck
+                || position.OccupancyBitboards[(int)Side.Both].CountBits() <= Configuration.EngineSettings.QSearchStalemateMaxPieces)
             && !isAnyCaptureValid
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
         {
@@ -991,6 +984,12 @@ public sealed partial class Engine
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;
+        }
+        // Not in check and nothing to search: non-mated positions with no captures. Could technically be stalemates though
+        else if (!isInCheck && !isAnyMoveFetched)
+        {
+            // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
+            return staticEval;
         }
 
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
