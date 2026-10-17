@@ -13,7 +13,7 @@ public class MovePickerTest : BaseTest
         "8/8/8/2k5/3Pp3/8/8/4K3 b - d3 0 1",                                            // Pawn check that can be captured en passant
         "4k3/8/8/8/8/3n4/8/r3K1R1 w - - 0 1",                                           // Double check: only king moves
         "7r/6P1/8/8/8/8/8/k6K w - - 0 1",                                               // Promotion capturing the checker
-        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",        // Not in check, used as reference below
+        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",         // Not in check, used as reference below
     ];
 
     private static readonly string[] _fens =
