@@ -270,54 +270,6 @@ public static class BitboardExtensions
     }
 
     #endregion
-
-    #region Methods accepting BoardSquares
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool GetBit(this Bitboard board, BoardSquare square) => board.GetBit((int)square);
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Bitboard SetBit(this ref Bitboard board, BoardSquare square) => board.SetBit((int)square);
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Bitboard PopBit(this ref Bitboard board, BoardSquare square) => board.PopBit((int)square);
-
-    #endregion
-
-    #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
-    [Obsolete("Test only")]
-    internal static void Print(this Bitboard board)
-    {
-        const string separator = "____________________________________________________";
-        Console.WriteLine(separator);
-
-        for (var rank = 0; rank < 8; ++rank)
-        {
-            for (var file = 0; file < 8; ++file)
-            {
-                if (file == 0)
-                {
-                    Console.Write($"{8 - rank}  ");
-                }
-
-                var squareIndex = SquareIndex(rank, file);
-
-                Console.Write($" {(board.GetBit(squareIndex) ? "1" : "0")}");
-            }
-
-            Console.WriteLine();
-        }
-
-        Console.Write("\n    a b c d e f g h\n");
-
-        Console.WriteLine($"\n    Bitboard: {board} (0x{board:X})");
-        Console.WriteLine(separator);
-    }
-#pragma warning restore S106,S2228 // Standard outputs should not be used directly to log anything
-
 }
 
 #pragma warning restore S4136

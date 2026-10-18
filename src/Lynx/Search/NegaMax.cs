@@ -344,7 +344,7 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores);
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck);
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
@@ -888,8 +888,8 @@ public sealed partial class Engine
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
+        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
 
         var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true);
 
@@ -905,7 +905,7 @@ public sealed partial class Engine
 
         bool isAnyCaptureValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 

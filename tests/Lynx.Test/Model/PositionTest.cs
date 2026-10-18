@@ -469,7 +469,7 @@ public class PositionTest
             : whiteKingDistance;
 
         var expectedEval = 0;
-        if ((passedPawnsMask & position.OccupancyBitboards[OppositeSide(position.Side)]) == 0)
+        if ((passedPawnsMask & position.OccupancyBitboards[OppositeSide((int)position.Side)]) == 0)
         {
             expectedEval += UnpackMG(PassedPawnNoEnemiesAheadBonus[0][rank]);
             expectedEval += UnpackMG(PassedPawnNoEnemiesAheadEnemyBonus[0][rank]);
@@ -1043,7 +1043,7 @@ public class PositionTest
         nonAttackedWhiteShortCastleSquares.SetBit(Constants.WhiteKingShortCastleSquare);
 
         var nonAttackedWhiteLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.White];
-        nonAttackedWhiteLongCastleSquares.PopBit(BoardSquare.b1);
+        nonAttackedWhiteLongCastleSquares.PopBit((int)BoardSquare.b1);
         nonAttackedWhiteLongCastleSquares.SetBit(Constants.InitialWhiteKingSquare);
         nonAttackedWhiteLongCastleSquares.SetBit(Constants.WhiteKingLongCastleSquare);
 
@@ -1052,7 +1052,7 @@ public class PositionTest
         nonAttackedBlackShortCastleSquares.SetBit(Constants.BlackKingShortCastleSquare);
 
         var nonAttackedBlackLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.Black];
-        nonAttackedBlackLongCastleSquares.PopBit(BoardSquare.b8);
+        nonAttackedBlackLongCastleSquares.PopBit((int)BoardSquare.b8);
         nonAttackedBlackLongCastleSquares.SetBit(Constants.InitialBlackKingSquare);
         nonAttackedBlackLongCastleSquares.SetBit(Constants.BlackKingLongCastleSquare);
 
@@ -1095,7 +1095,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(position.Side);
+        var winnigSideOffset = Utils.PieceOffset((int)position.Side);
         Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
     }
 
@@ -1154,7 +1154,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winningSideOffset = Utils.PieceOffset(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black);
+        var winningSideOffset = Utils.PieceOffset((int)(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black));
         Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winningSideOffset));
 
         static bool IsBishopPawnDraw(Position position, int winningSideOffset)

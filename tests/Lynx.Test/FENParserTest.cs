@@ -66,47 +66,47 @@ public class FENParserTest
 
         // Assert
 
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.a7));
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.b4));
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.c7));
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.d7));
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.e6));
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.f7));
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.g6));
-        Assert.True(pieceBitboards[(int)Piece.p].GetBit(BoardSquare.h3));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.a7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.b4));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.c7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.d7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.e6));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.f7));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.g6));
+        Assert.True(pieceBitboards[(int)Piece.p].GetBit((int)BoardSquare.h3));
 
         Assert.True(pieceBitboards[(int)Piece.r].GetBit(Constants.InitialBlackQueensideRookSquare));
         Assert.True(pieceBitboards[(int)Piece.r].GetBit(Constants.InitialBlackKingsideRookSquare));
 
-        Assert.True(pieceBitboards[(int)Piece.n].GetBit(BoardSquare.b6));
-        Assert.True(pieceBitboards[(int)Piece.n].GetBit(BoardSquare.f6));
+        Assert.True(pieceBitboards[(int)Piece.n].GetBit((int)BoardSquare.b6));
+        Assert.True(pieceBitboards[(int)Piece.n].GetBit((int)BoardSquare.f6));
 
-        Assert.True(pieceBitboards[(int)Piece.b].GetBit(BoardSquare.a6));
-        Assert.True(pieceBitboards[(int)Piece.b].GetBit(BoardSquare.g7));
+        Assert.True(pieceBitboards[(int)Piece.b].GetBit((int)BoardSquare.a6));
+        Assert.True(pieceBitboards[(int)Piece.b].GetBit((int)BoardSquare.g7));
 
-        Assert.True(pieceBitboards[(int)Piece.q].GetBit(BoardSquare.e7));
-        Assert.True(pieceBitboards[(int)Piece.k].GetBit(BoardSquare.e8));
+        Assert.True(pieceBitboards[(int)Piece.q].GetBit((int)BoardSquare.e7));
+        Assert.True(pieceBitboards[(int)Piece.k].GetBit((int)BoardSquare.e8));
 
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.a2));
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.b2));
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.c2));
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.d5));
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.e4));
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.f2));
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.g2));
-        Assert.True(pieceBitboards[(int)Piece.P].GetBit(BoardSquare.h2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.a2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.b2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.c2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.d5));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.e4));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.f2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.g2));
+        Assert.True(pieceBitboards[(int)Piece.P].GetBit((int)BoardSquare.h2));
 
         Assert.True(pieceBitboards[(int)Piece.R].GetBit(Constants.InitialWhiteQueensideRookSquare));
         Assert.True(pieceBitboards[(int)Piece.R].GetBit(Constants.InitialWhiteKingsideRookSquare));
 
-        Assert.True(pieceBitboards[(int)Piece.N].GetBit(BoardSquare.c3));
-        Assert.True(pieceBitboards[(int)Piece.N].GetBit(BoardSquare.e5));
+        Assert.True(pieceBitboards[(int)Piece.N].GetBit((int)BoardSquare.c3));
+        Assert.True(pieceBitboards[(int)Piece.N].GetBit((int)BoardSquare.e5));
 
-        Assert.True(pieceBitboards[(int)Piece.B].GetBit(BoardSquare.d2));
-        Assert.True(pieceBitboards[(int)Piece.B].GetBit(BoardSquare.e2));
+        Assert.True(pieceBitboards[(int)Piece.B].GetBit((int)BoardSquare.d2));
+        Assert.True(pieceBitboards[(int)Piece.B].GetBit((int)BoardSquare.e2));
 
-        Assert.True(pieceBitboards[(int)Piece.Q].GetBit(BoardSquare.f3));
-        Assert.True(pieceBitboards[(int)Piece.K].GetBit(BoardSquare.e1));
+        Assert.True(pieceBitboards[(int)Piece.Q].GetBit((int)BoardSquare.f3));
+        Assert.True(pieceBitboards[(int)Piece.K].GetBit((int)BoardSquare.e1));
     }
 
     [TestCase("K1k5/8/8/8/8/8/8/8 w - - 0 1")]

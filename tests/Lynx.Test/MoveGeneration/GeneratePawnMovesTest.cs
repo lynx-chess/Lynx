@@ -137,7 +137,7 @@ public class GeneratePawnMovesTest
     public void PromotionsWithoutCapturing()
     {
         var position = new Position("8/P6P/8/8/K1k5/8/p6p/8 w - - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var whiteMoves = GeneratePawnMoves(position).ToList();
 
         Assert.AreEqual(8, whiteMoves.Count);
@@ -149,7 +149,7 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.h8));
 
         position = new Position("8/P6P/8/8/K1k5/8/p6p/8 b - - 0 1");
-        offset = Utils.PieceOffset(position.Side);
+        offset = Utils.PieceOffset((int)position.Side);
         var blackMoves = GeneratePawnMoves(position).ToList();
 
         Assert.AreEqual(8, blackMoves.Count);
@@ -165,7 +165,7 @@ public class GeneratePawnMovesTest
     public void PromotionsCapturing()
     {
         var position = new Position("BqB2NqB/P6P/8/K1k5/8/8/p6p/bQb2bNb w - - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var whiteMoves = GeneratePawnMoves(position).ToList();
 
         Assert.AreEqual(8, whiteMoves.Count);
@@ -187,7 +187,7 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.g8));
 
         position = new Position("BqB2BqB/P6P/8/8/K1k5/8/p6p/bQb2bQb b - - 0 1");
-        offset = Utils.PieceOffset(position.Side);
+        offset = Utils.PieceOffset((int)position.Side);
         var blackMoves = GeneratePawnMoves(position).ToList();
 
         Assert.AreEqual(8, blackMoves.Count);

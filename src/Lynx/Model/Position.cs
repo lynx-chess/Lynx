@@ -550,7 +550,7 @@ public partial class Position : IDisposable
                 }
             case SpecialMoveType.DoublePawnPush:
                 {
-                    var pawnPush = +8 - (oldSide * 16);
+                    var pawnPush = Utils.PawhPushSquare(oldSide);
                     var enPassantSquare = sourceSquare + pawnPush;
                     Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
