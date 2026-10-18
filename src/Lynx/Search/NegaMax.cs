@@ -893,6 +893,12 @@ public sealed partial class Engine
 
         var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true);
 
+        if (!movePicker.TryGetNext(out var move, out var moveScore))
+        {
+            // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
+            return staticEval;
+        }
+
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         int bestScore = standPat;
@@ -903,12 +909,8 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        var isAnyMoveFetched = false;
-
-        while (movePicker.TryGetNext(out var move, out var moveScore))
+        do
         {
-            isAnyMoveFetched = true;
-
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
@@ -971,19 +973,10 @@ public sealed partial class Engine
 
             ++visitedMovesCounter;
         }
+        while (movePicker.TryGetNext(out move, out moveScore));
 
-        // Not in check and nothing to search: non-mated positions with no captures. Could be stalemate.
-        if (!isInCheck && !isAnyMoveFetched)
-        {
-            // Checking if final position first didn't gain in https://github.com/lynx-chess/Lynx/pull/358
-            // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
-            return staticEval;
-        }
-
-        // In check and either no pseudolegal captures, no legal captures or all of them pruned -> we try to generate all moves
-        if (isInCheck
-            && !isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
+        if (!isAnyCaptureValid
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 

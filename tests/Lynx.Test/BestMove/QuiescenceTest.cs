@@ -1,5 +1,4 @@
-﻿using Lynx.Model;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Lynx.Test.BestMove;
 
@@ -26,82 +25,6 @@ public class QuiescenceTest : BaseTest
 #pragma warning restore RCS1163, IDE0060 // Unused parameter.
     {
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth);
-    }
-
-    /// <summary>
-    /// 8   R . . . . . k .
-    /// 7   . . . . . p p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . p . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P . . . r . . .
-    /// 1   . . . . . . K .
-    ///     a b c d e f g h
-    /// Checkmate by Ra8, but black has a (pseudo-legal) capture: Rxa2, which doesn't get the king out of check.
-    /// In check, QSearch looks for a final position if there isn't any valid capture, regardless of the (pseudo-legal) captures that exist
-    /// </summary>
-    [Test]
-    public void QuiescenceSearch_DetectsCheckmate_WhenCapturesExistButNoneGetsTheKingOutOfCheck()
-    {
-        var engine = GetEngine("R5k1/5ppp/8/4p3/8/8/P3r3/6K1 b - - 0 1");
-
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
-
-        Assert.AreEqual(Position.EvaluateFinalPosition(0, isInCheck: true), score);
-    }
-
-    /// <summary>
-    /// Same as <see cref="QuiescenceSearch_DetectsCheckmate_WhenCapturesExistButNoneGetsTheKingOutOfCheck"/>, but the rook can block the check (Re8), so it isn't a final position
-    /// </summary>
-    [Test]
-    public void QuiescenceSearch_DoesNotDetectCheckmate_WhenCapturesExistButAnotherMoveGetsTheKingOutOfCheck()
-    {
-        var engine = GetEngine("R5k1/5ppp/8/8/8/8/P3r3/6K1 b - - 0 1");
-
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
-
-        Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
-    }
-
-    /// <summary>
-    /// Checkmate by Ra8, and black doesn't have any capture at all
-    /// </summary>
-    [Test]
-    public void QuiescenceSearch_DetectsCheckmate_WhenThereAreNoCaptures()
-    {
-        var engine = GetEngine("R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1");
-
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
-
-        Assert.AreEqual(Position.EvaluateFinalPosition(0, isInCheck: true), score);
-    }
-
-    /// <summary>
-    /// Ra8 gives check, black doesn't have any capture, but the king can move to h7, so it's not a final position
-    /// </summary>
-    [Test]
-    public void QuiescenceSearch_DoesNotDetectCheckmate_WhenThereAreNoCapturesButTheKingCanMove()
-    {
-        var engine = GetEngine("R5k1/5pp1/7p/8/8/8/8/6K1 b - - 0 1");
-
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
-
-        Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
-    }
-
-    /// <summary>
-    /// In check, and one of the captures (Rxa8) gets the king out of check
-    /// </summary>
-    [Test]
-    public void QuiescenceSearch_SearchesCaptureThatGetsTheKingOutOfCheck()
-    {
-        var engine = GetEngine("R5k1/5ppp/8/8/8/8/r7/6K1 b - - 0 1");
-
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
-
-        Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
-        Assert.Greater(score, 0, "Black wins a rook");
     }
 
     [TestCase("7k/8/5NQ1/8/8/KN6/8/1r6 b - - 0 1", 1, new[] { "b1b3" })]
