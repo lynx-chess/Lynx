@@ -893,15 +893,6 @@ public sealed partial class Engine
 
         var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true, isInCheck: isInCheck);
 
-        var hasNextMove = movePicker.TryGetNext(out var move, out var moveScore);
-
-        // Nothing to search and not in check: stand pat, without checking if it's a final position (it's rare, see https://github.com/lynx-chess/Lynx/pull/358).
-        // If we're in check we can't stand pat, and the picker only returns evasions: not having any doesn't mean there are no legal moves, so we need to keep going and check it below
-        if (!hasNextMove && !isInCheck)
-        {
-            return staticEval;
-        }
-
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         int bestScore = standPat;
@@ -912,8 +903,12 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-       for (; hasNextMove; hasNextMove = movePicker.TryGetNext(out move, out moveScore))
+        var isAnyMoveFetched = false;
+
+        while (movePicker.TryGetNext(out var move, out var moveScore))
         {
+            isAnyMoveFetched = true;
+
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
@@ -977,9 +972,7 @@ public sealed partial class Engine
             ++visitedMovesCounter;
         }
 
-        // Final positions are only looked for when in check and no capture was valid (either because there were none, or because they were illegal), since
-        // - that's where almost all of them are: checkmates (stalemates and checkmates without captures are very rare otherwise, so not worth the cost for all the other nodes)
-        // - not in check, the captures not being valid is usually because they were pruned (bad captures), not because there are no legal moves
+        // We check for final positions if in check or if in positions with relatively few pieces, providing there were no pseudolegal captures, no legal captures or all of them are pruned
         if (isInCheck
             && !isAnyCaptureValid
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
@@ -990,6 +983,12 @@ public sealed partial class Engine
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;
+        }
+        // Not in check and nothing to search: non-mated positions with no captures. Could technically be stalemates though
+        else if (!isInCheck && !isAnyMoveFetched)
+        {
+            // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
+            return staticEval;
         }
 
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
