@@ -89,7 +89,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
     {
         public static bool IsSquaredAttacked_ExternalMethods(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
         {
-            var offset = Utils.PieceOffset(sideToMove);
+            var offset = Utils.PieceOffset((int)sideToMove);
 
             // I tried to order them from most to least likely
             return
@@ -141,7 +141,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
     {
         public static async Task<bool> IsSquaredAttacked_WhenAll(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
         {
-            var offset = Utils.PieceOffset(sideToMove);
+            var offset = Utils.PieceOffset((int)sideToMove);
 
             var tasks = new Task<bool>[]
             {
@@ -196,7 +196,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
     {
         public static async Task<bool> IsSquaredAttacked_WhenAny(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
         {
-            var offset = Utils.PieceOffset(sideToMove);
+            var offset = Utils.PieceOffset((int)sideToMove);
 
             using var cancellationTokenSource = new CancellationTokenSource();
             var token = cancellationTokenSource.Token;

@@ -28,7 +28,7 @@ using Lynx.Model;
 namespace Lynx.Benchmark;
 
 /// <summary>
-/// <see cref="Utils.OppositeSide(Side)"/>
+/// <see cref="Utils.OppositeSide((int)Side)"/>
 /// </summary>
 public static class OppositeSiteImplementations
 {

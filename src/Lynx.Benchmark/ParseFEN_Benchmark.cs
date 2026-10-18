@@ -1869,7 +1869,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     var pawnOffset = ((int)side << 4) - 8; // side == Side.White ? +8 : -8
                     var pawnSquare = (int)enPassant + pawnOffset;
 
-                    var pawnBitboard = PieceBitboards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide(side))];
+                    var pawnBitboard = PieceBitboards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide((int)side))];
 
                     if (!pawnBitboard.GetBit(pawnSquare))
                     {

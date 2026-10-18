@@ -9,7 +9,7 @@
 
 Lynx is a chess engine developed by [@eduherminio](https://github.com/eduherminio).
 
-It's written in C# (.NET 9) and uses so-called HCE (hand-crafted evaluation).
+It's written in C# (.NET 10) and uses so-called HCE (hand-crafted evaluation).
 
 You can find Lynx:
 
