@@ -106,7 +106,7 @@ public static class MoveGenerator
                 {
                     var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
-                    if ((occupancy & Attacks.RaysBetween[sourceSquare][targetSquare]) != 0)
+                    if ((occupancy & Attacks.RaysBetween[sourceSquare][targetSquare]).NotEmpty())
                     {
                         // This would imply jumping over a piece
                         return 0;
@@ -121,7 +121,7 @@ public static class MoveGenerator
                     if (ttMove == (ShortMove)position.WhiteShortCastle)
                     {
                         return (position.Castle & (int)CastlingRights.WK) != 0
-                                && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                                && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]).Empty()
                                 && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks)
                             ? position.WhiteShortCastle
                             : 0;
@@ -130,7 +130,7 @@ public static class MoveGenerator
                     if (ttMove == (ShortMove)position.WhiteLongCastle)
                     {
                         return (position.Castle & (int)CastlingRights.WQ) != 0
-                                && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                                && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]).Empty()
                                 && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks)
                             ? position.WhiteLongCastle
                             : 0;
@@ -145,7 +145,7 @@ public static class MoveGenerator
                     if (ttMove == (ShortMove)position.BlackShortCastle)
                     {
                         return (position.Castle & (int)CastlingRights.BK) != 0
-                                && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                                && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]).Empty()
                                 && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks)
                             ? position.BlackShortCastle
                             : 0;
@@ -154,7 +154,7 @@ public static class MoveGenerator
                     if (ttMove == (ShortMove)position.BlackLongCastle)
                     {
                         return (position.Castle & (int)CastlingRights.BQ) != 0
-                                && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                                && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]).Empty()
                                 && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks)
                             ? position.BlackLongCastle
                             : 0;
@@ -266,7 +266,7 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
@@ -324,7 +324,7 @@ public static class MoveGenerator
 
             // Captures
             var attackedSquares = attacks & position.OccupancyBitboards[oppositeSide];
-            while (attackedSquares != default)
+            while (attackedSquares.NotEmpty())
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
@@ -362,7 +362,7 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
@@ -412,7 +412,7 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
@@ -453,7 +453,7 @@ public static class MoveGenerator
 
             // Captures
             var attackedSquares = attacks & oppositeSidePieces;
-            while (attackedSquares != default)
+            while (attackedSquares.NotEmpty())
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
@@ -497,14 +497,14 @@ public static class MoveGenerator
             if (position.Side == Side.White)
             {
                 if ((castlingRights & (int)CastlingRights.WK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]).Empty()
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks))
                 {
                     movePool[localIndex++] = position.WhiteShortCastle;
                 }
 
                 if ((castlingRights & (int)CastlingRights.WQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]).Empty()
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks))
 
                 {
@@ -514,14 +514,14 @@ public static class MoveGenerator
             else
             {
                 if ((castlingRights & (int)CastlingRights.BK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]).Empty()
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks))
                 {
                     movePool[localIndex++] = position.BlackShortCastle;
                 }
 
                 if ((castlingRights & (int)CastlingRights.BQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]).Empty()
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks))
                 {
                     movePool[localIndex++] = position.BlackLongCastle;
@@ -543,14 +543,14 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var attacks = PieceAttacks(piece, sourceSquare, occupancy)
                 & squaresNotOccupiedByUs;
 
-            while (attacks != default)
+            while (attacks.NotEmpty())
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
 
@@ -574,14 +574,14 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var attacks = PieceAttacks(piece, sourceSquare, occupancy)
                 & emptySquares;
 
-            while (attacks != default)
+            while (attacks.NotEmpty())
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
                 Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
@@ -603,14 +603,14 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var attacks = PieceAttacks(piece, sourceSquare, occupancy)
                 & oppositeSidePieces;
 
-            while (attacks != default)
+            while (attacks.NotEmpty())
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
                 Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
@@ -630,7 +630,7 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (attacks != default)
+        while (attacks.NotEmpty())
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
@@ -652,7 +652,7 @@ public static class MoveGenerator
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (attacks != default)
+        while (attacks.NotEmpty())
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
             Unsafe.Add(ref movePoolRef, localIndex++) = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
@@ -673,7 +673,7 @@ public static class MoveGenerator
             & ~oppositeSideAttacks;
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
-        while (attacks != default)
+        while (attacks.NotEmpty())
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
@@ -721,7 +721,7 @@ public static class MoveGenerator
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
         var oppositeSidePieces = position.OccupancyBitboards[oppositeSide];
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
@@ -778,7 +778,7 @@ public static class MoveGenerator
 
             // Captures
             var attackedSquares = attacks & oppositeSidePieces;
-            while (attackedSquares != default)
+            while (attackedSquares.NotEmpty())
             {
                 attackedSquares = attackedSquares.WithoutLS1B(out int targetSquare);
                 var capturedPiece = position.Board[targetSquare];
@@ -823,7 +823,7 @@ public static class MoveGenerator
             if (position.Side == Side.White)
             {
                 if ((castlingRights & (int)CastlingRights.WK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]).Empty()
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks)
                     && IsValidMove(position, position.WhiteShortCastle))
                 {
@@ -831,7 +831,7 @@ public static class MoveGenerator
                 }
 
                 if ((castlingRights & (int)CastlingRights.WQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]).Empty()
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks)
                     && IsValidMove(position, position.WhiteLongCastle))
                 {
@@ -841,7 +841,7 @@ public static class MoveGenerator
             else
             {
                 if ((castlingRights & (int)CastlingRights.BK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]).Empty()
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks)
                     && IsValidMove(position, position.BlackShortCastle))
                 {
@@ -849,7 +849,7 @@ public static class MoveGenerator
                 }
 
                 if ((castlingRights & (int)CastlingRights.BQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]).Empty()
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks)
                     && IsValidMove(position, position.BlackLongCastle))
                 {
@@ -872,14 +872,14 @@ public static class MoveGenerator
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
         var squaresNotOccupiedByUs = ~position.OccupancyBitboards[(int)position.Side];
 
-        while (bitboard != default)
+        while (bitboard.NotEmpty())
         {
             bitboard = bitboard.WithoutLS1B(out int sourceSquare);
 
             var attacks = PieceAttacks(piece, sourceSquare, occupancy)
                 & squaresNotOccupiedByUs;
 
-            while (attacks != default)
+            while (attacks.NotEmpty())
             {
                 attacks = attacks.WithoutLS1B(out int targetSquare);
 
@@ -905,7 +905,7 @@ public static class MoveGenerator
             & ~position.OccupancyBitboards[(int)position.Side]
             & ~oppositeSideAttacks;
 
-        while (attacks != default)
+        while (attacks.NotEmpty())
         {
             attacks = attacks.WithoutLS1B(out var targetSquare);
 
@@ -1100,14 +1100,14 @@ public static class MoveGenerator
             if (move == position.WhiteShortCastle)
             {
                 return (castlingRights & (int)CastlingRights.WK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]) == 0
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.White]).Empty()
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks);
             }
 
             if (move == position.WhiteLongCastle)
             {
                 return (castlingRights & (int)CastlingRights.WQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]) == 0
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.White]).Empty()
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.White], Side.Black, oppositeSideAttacks);
             }
         }
@@ -1116,14 +1116,14 @@ public static class MoveGenerator
             if (move == position.BlackShortCastle)
             {
                 return (castlingRights & (int)CastlingRights.BK) != default
-                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && (occupancy & position.KingsideCastlingFreeSquares[(int)Side.Black]).Empty()
                     && !position.AreSquaresAttacked(position.KingsideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks);
             }
 
             if (move == position.BlackLongCastle)
             {
                 return (castlingRights & (int)CastlingRights.BQ) != default
-                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]) == 0
+                    && (occupancy & position.QueensideCastlingFreeSquares[(int)Side.Black]).Empty()
                     && !position.AreSquaresAttacked(position.QueensideCastlingNonAttackedSquares[(int)Side.Black], Side.White, oppositeSideAttacks);
             }
         }

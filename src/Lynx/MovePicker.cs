@@ -50,6 +50,10 @@ internal ref struct MovePicker
 
     public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isQuiescence = false, bool isInCheck = false)
     {
+        // Since QSearch uses !isAnyCaptureValid as a condition to check CanGenerateAtLeastAValidMove,
+        // generating only evasion moves in QSearch would affect the existing logic, which deserves a different patch
+        Debug.Assert(!(isQuiescence && isInCheck) || (isQuiescence ^ isInCheck));
+
         _engine = engine;
         _position = position;
         _ttMove = ttMove;
