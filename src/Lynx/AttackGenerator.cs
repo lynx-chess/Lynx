@@ -154,7 +154,7 @@ public static class AttackGenerator
              * 0 0 0 0 0
              */
             var right = bitboard >> 7;
-            if ((right & Constants.NotAFile) != default)
+            if ((right & Constants.NotAFile).NotEmpty())
             {
                 attacks |= right;
             }
@@ -165,7 +165,7 @@ public static class AttackGenerator
              * 0 0 0 0 0
              */
             var left = bitboard >> 9;
-            if ((left & Constants.NotHFile) != default)
+            if ((left & Constants.NotHFile).NotEmpty())
             {
                 attacks |= left;
             }
@@ -178,7 +178,7 @@ public static class AttackGenerator
              * 0 X 0 0 0
              */
             var left = bitboard << 7;
-            if ((left & Constants.NotHFile) != default)
+            if ((left & Constants.NotHFile).NotEmpty())
             {
                 attacks |= left;
             }
@@ -189,7 +189,7 @@ public static class AttackGenerator
              * 0 0 0 X 0
              */
             var right = bitboard << 9;
-            if ((right & Constants.NotAFile) != default)
+            if ((right & Constants.NotAFile).NotEmpty())
             {
                 attacks |= right;
             }
@@ -219,7 +219,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          */
         var attack = bitboard >> 17;
-        if ((attack & Constants.NotHFile) != default)
+        if ((attack & Constants.NotHFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -232,7 +232,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          */
         attack = bitboard >> 15;
-        if ((attack & Constants.NotAFile) != default)
+        if ((attack & Constants.NotAFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -245,7 +245,7 @@ public static class AttackGenerator
          * 0 X 0 0 0
          */
         attack = bitboard << 15;
-        if ((attack & Constants.NotHFile) != default)
+        if ((attack & Constants.NotHFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -258,7 +258,7 @@ public static class AttackGenerator
          * 0 0 0 X 0
          */
         attack = bitboard << 17;
-        if ((attack & Constants.NotAFile) != default)
+        if ((attack & Constants.NotAFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -271,7 +271,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          */
         attack = bitboard >> 10;
-        if ((attack & Constants.NotHGFiles) != default)
+        if ((attack & Constants.NotHGFiles).NotEmpty())
         {
             attacks |= attack;
         }
@@ -284,7 +284,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          */
         attack = bitboard >> 6;
-        if ((attack & Constants.NotABFiles) != default)
+        if ((attack & Constants.NotABFiles).NotEmpty())
         {
             attacks |= attack;
         }
@@ -297,7 +297,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          */
         attack = bitboard << 6;
-        if ((attack & Constants.NotHGFiles) != default)
+        if ((attack & Constants.NotHGFiles).NotEmpty())
         {
             attacks |= attack;
         }
@@ -310,7 +310,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          */
         attack = bitboard << 10;
-        if ((attack & Constants.NotABFiles) != default)
+        if ((attack & Constants.NotABFiles).NotEmpty())
         {
             attacks |= attack;
         }
@@ -337,7 +337,7 @@ public static class AttackGenerator
          * 0 0 0
          */
         var attack = bitboard >> 9;
-        if ((attack & Constants.NotHFile) != default)
+        if ((attack & Constants.NotHFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -355,7 +355,7 @@ public static class AttackGenerator
          * 0 0 0
          */
         attack = bitboard >> 7;
-        if ((attack & Constants.NotAFile) != default)
+        if ((attack & Constants.NotAFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -366,7 +366,7 @@ public static class AttackGenerator
          * 0 0 0
          */
         attack = bitboard >> 1;
-        if ((attack & Constants.NotHFile) != default)
+        if ((attack & Constants.NotHFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -377,7 +377,7 @@ public static class AttackGenerator
          * 0 0 0
          */
         attack = bitboard << 1;
-        if ((attack & Constants.NotAFile) != default)
+        if ((attack & Constants.NotAFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -388,7 +388,7 @@ public static class AttackGenerator
          * X 0 0
          */
         attack = bitboard << 7;
-        if ((attack & Constants.NotHFile) != default)
+        if ((attack & Constants.NotHFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -406,7 +406,7 @@ public static class AttackGenerator
          * X 0 0
          */
         attack = bitboard << 9;
-        if ((attack & Constants.NotAFile) != default)
+        if ((attack & Constants.NotAFile).NotEmpty())
         {
             attacks |= attack;
         }
@@ -609,7 +609,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }
@@ -627,7 +627,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }
@@ -645,7 +645,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }
@@ -663,7 +663,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }
@@ -696,7 +696,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }
@@ -714,7 +714,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(targetRank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }
@@ -732,7 +732,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }
@@ -750,7 +750,7 @@ public static class AttackGenerator
             ulong square = 1UL << BitboardExtensions.SquareIndex(rank, targetFile);
             attacks |= square;
 
-            if ((square & occupiedSquares) != default)
+            if ((square & occupiedSquares).NotEmpty())
             {
                 break;
             }

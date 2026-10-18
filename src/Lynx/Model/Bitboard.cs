@@ -7,12 +7,6 @@ namespace Lynx.Model;
 
 public static class BitboardExtensions
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool Empty(this Bitboard board) => board == default;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool NotEmpty(this Bitboard board) => board != default;
-
     public static Bitboard Initialize(params ReadOnlySpan<BoardSquare> occupiedSquares)
     {
 #pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
@@ -27,43 +21,18 @@ public static class BitboardExtensions
         return board;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool Empty(this Bitboard board) => board == default;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool NotEmpty(this Bitboard board) => board != default;
+
     internal static void Clear(this ref Bitboard board) => board = default;
-
-#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
-    [Obsolete("Test only")]
-    internal static void Print(this Bitboard board)
-    {
-        const string separator = "____________________________________________________";
-        Console.WriteLine(separator);
-
-        for (var rank = 0; rank < 8; ++rank)
-        {
-            for (var file = 0; file < 8; ++file)
-            {
-                if (file == 0)
-                {
-                    Console.Write($"{8 - rank}  ");
-                }
-
-                var squareIndex = SquareIndex(rank, file);
-
-                Console.Write($" {(board.GetBit(squareIndex) ? "1" : "0")}");
-            }
-
-            Console.WriteLine();
-        }
-
-        Console.Write("\n    a b c d e f g h\n");
-
-        Console.WriteLine($"\n    Bitboard: {board} (0x{board:X})");
-        Console.WriteLine(separator);
-    }
-#pragma warning restore S106,S2228 // Standard outputs should not be used directly to log anything
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool GetBit(this Bitboard board, int squareIndex)
     {
-        return (board & (1UL << squareIndex)) != default;
+        return (board & (1UL << squareIndex)).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,7 +53,7 @@ public static class BitboardExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsSinglePopulated(this Bitboard board)
     {
-        return board != default && WithoutLS1B(board) == default;
+        return board.NotEmpty() && WithoutLS1B(board).Empty();
     }
 
     /// <summary>
@@ -212,7 +181,7 @@ public static class BitboardExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetLS1BIndex(this Bitboard board)
     {
-        Utils.Assert(board != default);
+        Utils.Assert(board.NotEmpty());
 
         return BitOperations.TrailingZeroCount(board);
     }
@@ -266,20 +235,6 @@ public static class BitboardExtensions
         return 1UL << boardSquare;
     }
 
-    public static bool Contains(this Bitboard board, int boardSquare)
-    {
-        var bit = SquareBit(boardSquare);
-
-        return (board & bit) != default;
-    }
-
-    public static bool DoesNotContain(this Bitboard board, int boardSquare)
-    {
-        var bit = SquareBit(boardSquare);
-
-        return (board & bit) == default;
-    }
-
     public static ulong MaskBetweenTwoSquaresSameRankInclusive(int start, int end)
     {
 #pragma warning disable S3353 // Unchanged local variables should be "const" - FP
@@ -315,6 +270,37 @@ public static class BitboardExtensions
     }
 
     #endregion
+
+#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
+    [Obsolete("Test only")]
+    internal static void Print(this Bitboard board)
+    {
+        const string separator = "____________________________________________________";
+        Console.WriteLine(separator);
+
+        for (var rank = 0; rank < 8; ++rank)
+        {
+            for (var file = 0; file < 8; ++file)
+            {
+                if (file == 0)
+                {
+                    Console.Write($"{8 - rank}  ");
+                }
+
+                var squareIndex = SquareIndex(rank, file);
+
+                Console.Write($" {(board.GetBit(squareIndex) ? "1" : "0")}");
+            }
+
+            Console.WriteLine();
+        }
+
+        Console.Write("\n    a b c d e f g h\n");
+
+        Console.WriteLine($"\n    Bitboard: {board} (0x{board:X})");
+        Console.WriteLine(separator);
+    }
+#pragma warning restore S106,S2228 // Standard outputs should not be used directly to log anything
 }
 
 #pragma warning restore S4136
