@@ -903,12 +903,8 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        var isAnyMoveFetched = false;
-
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            isAnyMoveFetched = true;
-
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
@@ -972,23 +968,27 @@ public sealed partial class Engine
             ++visitedMovesCounter;
         }
 
-        // We check for final positions if in check and no valid moves generated
-        if (isInCheck
-            && !isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
+        // No valid moves generated
+        if (!isAnyCaptureValid)
         {
-            Debug.Assert(bestMove is null);
+            // If not in check, we assume we have a non-mated position with no captures.
+            // Could technically be a stalemate, though, but checking it failed in https://github.com/lynx-chess/Lynx/pull/358 (TODO retry)
+            if (!isInCheck)
+            {
+                // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
+                return staticEval;
+            }
 
-            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
+            // When in check, we test for final positions if in check and no valid moves generated
+            if (!MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
+            {
+                Debug.Assert(bestMove is null);
 
-            nodeType = NodeType.Exact;
-            staticEval = bestScore;
-        }
-        // If not in check and no pseudlegal moves generated, we can assume we have a non-mated position with no captures. Could technically be a stalemate, though
-        else if (!isInCheck && !isAnyMoveFetched)
-        {
-            // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
-            return staticEval;
+                bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
+
+                nodeType = NodeType.Exact;
+                staticEval = bestScore;
+            }
         }
 
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
