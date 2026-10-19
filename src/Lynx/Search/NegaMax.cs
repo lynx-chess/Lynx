@@ -337,7 +337,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfLegalMovesInAPosition];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
