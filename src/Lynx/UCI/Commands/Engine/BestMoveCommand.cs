@@ -30,7 +30,7 @@ public sealed class BestMoveCommand
     {
         return $"bestmove {_move.UCIString()}" +
             (_moveToPonder.HasValue
-                ? $" ponder {_moveToPonder!.Value.UCIString()}"
+                ? $" ponder {_moveToPonder.Value.UCIString()}"
                 : string.Empty);
     }
 }

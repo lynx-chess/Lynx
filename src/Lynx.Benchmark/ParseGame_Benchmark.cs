@@ -668,9 +668,6 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
         public ImprovedGame2(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
         {
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(buffer);
-
             for (int i = 0; i < rangeSpan.Length; ++i)
             {
                 if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -679,7 +676,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                 }
                 var moveString = rawMoves[rangeSpan[i]];
 
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {

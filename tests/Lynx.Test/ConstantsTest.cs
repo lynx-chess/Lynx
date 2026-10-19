@@ -97,7 +97,7 @@ public class ConstantsTest
     public void HFile()
     {
         Bitboard bb = 0;
-        bb.SetBit(BoardSquare.h1);
+        bb.SetBit((int)BoardSquare.h1);
 
         Assert.NotZero(bb & Constants.HFile);
         Assert.Zero(bb & NotHFile);
@@ -110,7 +110,7 @@ public class ConstantsTest
     public void AFile()
     {
         Bitboard bb = 0;
-        bb.SetBit(BoardSquare.a1);
+        bb.SetBit((int)BoardSquare.a1);
 
         Assert.NotZero(bb & Constants.AFile);
         Assert.Zero(bb & NotAFile);
@@ -172,14 +172,5 @@ public class ConstantsTest
         Assert.AreEqual(2, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b7]);
         Assert.AreEqual(4, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.c6]);
         Assert.AreEqual(3, Constants.ManhattanDistance[(int)BoardSquare.a8][(int)BoardSquare.b6]);
-    }
-
-    /// <summary>
-    /// Ensure <see cref="MultiArrayTranspositionTable.HashfullPermillApprox"/> works as expected
-    /// </summary>
-    [Test]
-    public void MaxTTArrayLength()
-    {
-        Assert.GreaterOrEqual(Constants.MaxTTArrayLength, 1000);
     }
 }

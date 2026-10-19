@@ -150,7 +150,7 @@ public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
     }
 
     /// <summary>
-    /// Original layout: <c>_table[square][piece]</c> — two pointer dereferences per lookup.
+    /// Original layout: <c>_table[square][piece]</c> - two pointer dereferences per lookup.
     /// </summary>
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -173,7 +173,7 @@ public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
     }
 
     /// <summary>
-    /// Flat layout: <c>_table[square * 12 + piece]</c> — single bounds-checked array access.
+    /// Flat layout: <c>_table[square * 12 + piece]</c> - single bounds-checked array access.
     /// </summary>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
@@ -196,7 +196,7 @@ public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
     }
 
     /// <summary>
-    /// Flat layout with <see cref="Unsafe.Add"/> on a pinned array — no bounds check.
+    /// Flat layout with <see cref="Unsafe.Add"/> on a pinned array - no bounds check.
     /// This is what <see cref="ZobristTable.PieceHash"/> currently uses.
     /// </summary>
     [Benchmark]

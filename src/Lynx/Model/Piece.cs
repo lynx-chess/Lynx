@@ -7,7 +7,7 @@ public enum Piece
     Unknown = -1,
     P, N, B, R, Q, K,   // White
     p, n, b, r, q, k,   // Black
-    None
+    None,
 }
 
 #pragma warning restore CA1708 // Identifiers should differ by more than case

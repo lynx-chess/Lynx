@@ -27,7 +27,11 @@ public class MoveScoreTest : BaseTest
         {
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
-            return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
+            engine.Game.CurrentPosition.CalculateThreats(ref evaluationContext);
+
+            var oppositeSideThreats = evaluationContext.AttacksBySide[Utils.OppositeSide((int)engine.Game.CurrentPosition.Side)];
+
+            return engine.ScoreMove(engine.Game.CurrentPosition, move, default, oppositeSideThreats, 0);
         }).ToList();
 
         Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
@@ -41,10 +45,13 @@ public class MoveScoreTest : BaseTest
 
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
+        engine.Game.CurrentPosition.CalculateThreats(ref evaluationContext);
+
+        var oppositeSideThreats = evaluationContext.AttacksBySide[Utils.OppositeSide((int)engine.Game.CurrentPosition.Side)];
 
         foreach (var move in allMoves.Where(move => move.CapturedPiece() == (int)Piece.None && !move.IsCastle()))
         {
-            Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext));
+            Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(engine.Game.CurrentPosition, move, default, oppositeSideThreats, 0));
         }
     }
 
@@ -70,12 +77,17 @@ public class MoveScoreTest : BaseTest
         {
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
-            return engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext);
+            engine.Game.CurrentPosition.CalculateThreats(ref evaluationContext);
+
+            var oppositeSideThreats = evaluationContext.AttacksBySide[Utils.OppositeSide((int)engine.Game.CurrentPosition.Side)];
+
+            return engine.ScoreMove(engine.Game.CurrentPosition, move, default, oppositeSideThreats, 0);
         }).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValuableVictimLeastValuableAttacker[0][6], engine.ScoreMove(engine.Game.CurrentPosition, allMoves[0], default, ref evaluationContext));
+
+        const Bitboard oppositeSideAttacks = 0UL;
+
+        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValuableVictimLeastValuableAttacker[0][6], engine.ScoreMove(engine.Game.CurrentPosition, allMoves[0], default, oppositeSideAttacks, 0));
     }
 }

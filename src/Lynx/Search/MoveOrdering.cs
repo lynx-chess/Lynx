@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,7 +13,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int ply, ref EvaluationContext evaluationContext, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -55,13 +55,13 @@ public sealed partial class Engine
 
                 // Counter move history
                 return BaseMoveScore
-                    + QuietHistoryEntry(position, move, ref evaluationContext)
+                    + QuietHistoryEntry(move, oppositeSideAttacks)
                     + ContinuationHistoryEntry(piece, targetSquare, ply);
             }
 
             // History move or 0 if not found
             return BaseMoveScore
-                + QuietHistoryEntry(position, move, ref evaluationContext);
+                + QuietHistoryEntry(move, oppositeSideAttacks);
         }
 
         // Queen promotion
@@ -102,6 +102,19 @@ public sealed partial class Engine
         _logger.Warn("Unexpected move while scoring: {Move}", move.UCIString());
 
         return BaseMoveScore;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int ScoreQuietMove(Move move, int ply, Bitboard oppositeSideAttacks)
+    {
+        var score = BaseMoveScore + QuietHistoryEntry(move, oppositeSideAttacks);
+
+        if(ply >= 1)
+        {
+            score += ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply);
+        }
+
+        return score;
     }
 
     /// <summary>
@@ -176,6 +189,7 @@ public sealed partial class Engine
             int rawHistoryMalus = HistoryMalus[depth];
 
             var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+            Debug.Assert(oppositeSideAttacks.NotEmpty());
 
             var sourceSquare = move.SourceSquare();
             var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;

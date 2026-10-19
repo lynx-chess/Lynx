@@ -14,15 +14,13 @@ public class GeneralMoveGeneratorTest
         var originalPosition = new Position("8/8/8/k1pP3R/8/8/8/n4K2 w - c6 0 1");
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
 
-        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, ref evaluationContext, moves).ToArray().Single(m => m.IsEnPassant());
+        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, moves).ToArray().Single(m => m.IsEnPassant());
         var positionAfterEnPassant = new Position(originalPosition);
         positionAfterEnPassant.MakeMove(enPassantMove);
 
         moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, ref evaluationContext, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, moves))
         {
             var newPosition = new Position(positionAfterEnPassant);
             newPosition.MakeMove(move);
@@ -41,10 +39,8 @@ public class GeneralMoveGeneratorTest
         var position = new Position(fen);
 
         Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moveSpan);
+        var allMoves = MoveGenerator.GenerateAllMoves(position, moveSpan);
 
         Assert.LessOrEqual(allMoves.Length, Constants.MaxNumberOfPseudolegalMovesInAPosition);
     }

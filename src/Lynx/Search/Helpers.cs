@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Lynx;
@@ -82,11 +83,11 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private short QuietHistoryEntry(Position position, Move move, ref EvaluationContext evaluationContext)
+    private short QuietHistoryEntry(Move move, Bitboard oppositeSideAttacks)
     {
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+        Debug.Assert(oppositeSideAttacks.NotEmpty());
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
@@ -196,10 +197,10 @@ public sealed partial class Engine
                 ref var constHist2 = ref _continuationHistory[ply2Index];
                 totalContHist += constHist2;
 
-                constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
+                constHist2 = (short)ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
             }
 
-            contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
+            contHist1 = (short)ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
         }
     }
 
@@ -286,6 +287,52 @@ public sealed partial class Engine
         ref var majorCorrHistEntry = ref _majorCorrHistory[majorCorrHistIndex];
         majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
 
+        // Material correction history
+        var materialHash = position.MaterialHash();
+        var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
+        var materialCorrHistIndex = (2 * materialIndex) + side;
+        Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
+
+        ref var materialCorrHistEntry = ref _materialCorrHistory[materialCorrHistIndex];
+        materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
+
+        // Continuation correction history
+        var previousMoveHash = Game.PreviousMoveHash(1);
+        if (previousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
+        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
+        if (previousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
+        var previous4MoveHash = Game.PreviousMoveHash(4);
+        if (previous4MoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previous4MoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -360,12 +407,63 @@ public sealed partial class Engine
 
         var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
 
+        // Material correction history - Caissa author original idea
+        var materialHash = position.MaterialHash();
+        var materialIndex = materialHash & Constants.MaterialCorrHistoryHashMask;
+        var materialCorrHistIndex = (2 * materialIndex) + side;
+        Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
+
+        var materialCorrHist = _materialCorrHistory[materialCorrHistIndex];
+
+        // Continuation correction history - Motor author original idea
+        int continuationCorrHist = 0;
+        int continuationCorrHist2 = 0;
+        int continuationCorrHist4 = 0;
+
+        var previousMoveHash = Game.PreviousMoveHash(1);
+        if (previousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
+        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
+        if (previousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
+        var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(4);
+        if (previousPreviousPreviousMoveHash != 0)
+        {
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
+
+            Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
+
+            continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
             + (nonPawnNoSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnNoSTM)
             + (minorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Minor)
-            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major);
+            + (majorCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Major)
+            + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
+            + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
+            + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
+            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4);
+
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
@@ -474,9 +572,11 @@ public sealed partial class Engine
             Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
             var evaluationContext = new EvaluationContext(buffer);
 
+            var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, ref evaluationContext, movePool),
+               MoveGenerator.GenerateAllMoves(position, movePool, oppositeSideAttacks),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
@@ -484,6 +584,18 @@ public sealed partial class Engine
                 throw new LynxException(message);
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Move GetKillerMove(int ply, int index)
+    {
+        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_killerMoves), (ply * 2) + index);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Move GetCounterMove(int ply)
+    {
+        return CounterMove(ply - 1);
     }
 
     [Conditional("DEBUG")]

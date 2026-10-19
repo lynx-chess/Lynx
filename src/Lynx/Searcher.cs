@@ -19,8 +19,8 @@ public sealed class Searcher : IDisposable
 
     private int _searchThreadsCount;
     private Engine _mainEngine;
-    private Engine[] _extraEngines = [];
-    private ITranspositionTable _ttWrapper;
+    private SearchWorker[] _extraWorkers = [];
+    private TranspositionTable _tt;
 
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
@@ -40,8 +40,8 @@ public sealed class Searcher : IDisposable
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        _ttWrapper = TranspositionTableFactory.Create();
-        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+        _tt = new();
+        _mainEngine = new Engine(MainEngineId, _engineWriter, in _tt);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
 
@@ -53,13 +53,16 @@ public sealed class Searcher : IDisposable
         AllocateExtraEngines();
 
 #if !DEBUG
-        Warmup();
+        if (!Configuration.EngineSettings.SkipWarmup)
+        {
+            Warmup();
+        }
 #endif
 
         // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
         // It might help performance though due to preventing that zeroing from happening during search
         // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
-        _ttWrapper.Clear();
+        _tt.Clear();
 
         ForceGCCollection();
     }
@@ -93,7 +96,7 @@ public sealed class Searcher : IDisposable
         }
     }
 
-    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove);
+    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove, _mainEngine.Game.FullMoves);
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
@@ -320,9 +323,8 @@ public sealed class Searcher : IDisposable
 
         SearchResult? finalSearchResult = null;
 
-        var tasks = _extraEngines
-            .Select(engine =>
-                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+        var tasks = _extraWorkers
+            .Select(worker => worker.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None))
             .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -347,6 +349,7 @@ public sealed class Searcher : IDisposable
         var totalNodes = finalSearchResult?.Nodes ?? 0;
         var finalTime = finalSearchResult?.Time ?? 0;
 
+#pragma warning disable MA0079 // Forward the CancellationToken using .WithCancellation()
         await foreach (var task in Task.WhenEach(tasks))
         {
             var extraResult = await task;
@@ -404,7 +407,7 @@ public sealed class Searcher : IDisposable
 
                                 => extraResult,
 
-                        _ => finalSearchResult
+                        _ => finalSearchResult,
                     };
 
 #if MULTITHREAD_DEBUG
@@ -432,6 +435,7 @@ public sealed class Searcher : IDisposable
                 }
             }
         }
+#pragma warning restore MA0079 // Forward the CancellationToken using .WithCancellation()
 
         if (finalSearchResult is not null)
         {
@@ -459,16 +463,16 @@ public sealed class Searcher : IDisposable
 
     public void AdjustPosition(ReadOnlySpan<char> command)
     {
-        // Can't update MainEngine.Game until previous search is completed
+        // Can't update _mainEngine.Game until previous search is completed
         // Some GUIs wait until a bestmove is sent before sending a new position + go command (cutechess)
         // but some others don't (WinBoard)
         SpinWait.SpinUntil(() => !_isProcessingGoCommand);
 
         _mainEngine.AdjustPosition(command);
 
-        foreach (var engine in _extraEngines)
+        foreach (var worker in _extraWorkers)
         {
-            engine.AdjustPosition(command);
+            worker.Engine.AdjustPosition(command);
         }
     }
 
@@ -515,15 +519,15 @@ public sealed class Searcher : IDisposable
 
         // We don't need to reset the extra engines in case of hash or threads update
         // because they were already reset there, but whatever
-        foreach (var engine in _extraEngines)
+        foreach (var worker in _extraWorkers)
         {
-            engine.NewGame();
+            worker.Engine.NewGame();
         }
 
         // During the first run, TT is cleared at the end of the constructor
         if (!_firstRun && !hashUpdated)
         {
-            _ttWrapper.Clear();
+            _tt.Clear();
         }
         _firstRun = false;
 
@@ -553,22 +557,29 @@ public sealed class Searcher : IDisposable
 
     public bool UpdateHash()
     {
-        if (_ttWrapper.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
+        if (_tt.SizeMBs != Configuration.EngineSettings.TranspositionTableSize
+            && _tt.RequestedSizeMBs != Configuration.EngineSettings.TranspositionTableSize)
         {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
-            _engineWriter.TryWrite($"info string Resizing TT ({_ttWrapper.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _tt.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
+            _engineWriter.TryWrite($"info string Resizing TT ({_tt.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
-            _ttWrapper = TranspositionTableFactory.Create();
+            _tt.Release();
+            _tt = new();
+
+            if (_tt.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
+            {
+                _engineWriter.TryWrite($"info string Using only {_tt.SizeMBs} MB for TT (instead of {Configuration.EngineSettings.TranspositionTableSize} MB) due to an issue during allocation");
+            }
 
             // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
             // It might impact performance though, due to preventing that zeroing from happening during search
             // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
-            _ttWrapper.Clear();
+            _tt.Clear();
 
 #pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
             _mainEngine.Dispose();
 #pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
+            _mainEngine = new Engine(MainEngineId, _engineWriter, in _tt);
 
             // We need extra engines to know about the new TT
             AllocateExtraEngines();
@@ -590,7 +601,7 @@ public sealed class Searcher : IDisposable
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -599,34 +610,256 @@ public sealed class Searcher : IDisposable
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        using var engine = new Engine(-1, _engineWriter, in _ttWrapper);
+        using var engine = new Engine(-1, _engineWriter, in _tt);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
     }
 
+    public void GenFens(GenFensCommand genFensCommand)
+    {
+        _logger.Info("{Positions} requested, with seed {Seed} for book {Book}, extra params {Extra}", genFensCommand.Count, genFensCommand.Seed, genFensCommand.Book, genFensCommand.Extra);
+
+        bool generateFromBook = !string.Equals(genFensCommand.Book, GenFensCommand.NoBook, StringComparison.OrdinalIgnoreCase);
+        int lineCount = 0;
+
+        IEnumerable<string> bookLines = [];
+        string bookPath = string.Empty;
+
+        if (generateFromBook)
+        {
+            bookPath = Path.Combine(Directory.GetCurrentDirectory(), genFensCommand.Book);
+
+            if (!File.Exists(bookPath))
+            {
+                _logger.Error("Book file {Book} not found", bookPath);
+                return;
+            }
+
+            if (genFensCommand.Book.ContainsAny(Constants.FRCStringSearchValues))
+            {
+                Configuration.EngineSettings.IsChess960 = true;
+                _logger.Info("(D)FRC book detected: {Book}, enabling UCI_Chess960", genFensCommand.Book);
+            }
+
+            bookLines = File.ReadLines(bookPath);
+            lineCount = bookLines.Count();
+        }
+
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
+
+        var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
+        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
+
+        var rnd = new Random(genFensCommand.Seed);
+
+        var positionsToGenerate = genFensCommand.Count;
+        while (positionsToGenerate > 0)
+        {
+            string sourceFEN = Constants.InitialPositionFEN;
+            int randomMovesCount;
+
+            if (generateFromBook)
+            {
+                sourceFEN = bookLines.ElementAt(rnd.Next(0, lineCount - 1));
+
+                var minMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MinMoves;
+                var maxMoves = Configuration.EngineSettings.Datagen_GenFens_Book_MaxMoves;
+                randomMovesCount = Random.Shared.Next(minMoves, maxMoves + 1);
+            }
+            else
+            {
+                var baseMoves = Configuration.EngineSettings.Datagen_GenFens_NoBook_BaseMoves;
+                randomMovesCount = baseMoves + (Random.Shared.Next() % 2);
+            }
+
+            var startposFEN = GenerateDatagenStartpos(rnd, sourceFEN, randomMovesCount);
+
+            engine.AdjustPosition($"position fen {startposFEN}");
+            var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+
+            if (searchResult is null || Math.Abs(searchResult.Score) > maxAllowedEval)
+            {
+                continue;
+            }
+
+            _engineWriter.TryWrite($"info string genfens {startposFEN}");
+            --positionsToGenerate;
+        }
+
+        string GenerateDatagenStartpos(Random rnd, string fen, int moveCount)
+        {
+            using var game = new Game(fen);
+            var position = game.CurrentPosition;
+
+            // We purposedly use the shared one here, since it isn't critical
+            var movesCount = moveCount;
+
+            bool success = false;
+            while (!success)
+            {
+                success = true;
+                for (int halfMoveIndex = 0; halfMoveIndex < movesCount; halfMoveIndex++)
+                {
+                    var randomMove = PickRandomMove(position, rnd);
+
+                    if (randomMove == 0)
+                    {
+                        _logger.Warn("We found ourselves in {Position}, restarting startpos search", game.FEN);
+                        // Terminal position reached, let's just start over
+                        success = false;
+                        break;
+                    }
+
+                    game.MakeMove(randomMove);
+
+                    if (!position.WasProduceByAValidMove())
+                    {
+                        throw new LynxException("Error in datagens implementation");
+                    }
+                }
+            }
+
+            // Using game.FEN here would return half and full move counters, which.. for some reason appears to be bad for datagen
+            return game.CurrentPosition.FEN();
+        }
+
+        static int PickRandomMove(Position position, Random rnd)
+        {
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            Span<Move> legalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
+
+            // Filter out pseudolegal but not-legal moves
+            int legalMovesCount = 0;
+            Span<int> movesByPiece = stackalloc int[12];
+            movesByPiece.Clear();
+            foreach (var pseudoLegalMove in pseudoLegalMoves)
+            {
+                var gameState = position.MakeMove(pseudoLegalMove);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    legalMoves[legalMovesCount++] = pseudoLegalMove;
+                    movesByPiece[pseudoLegalMove.Piece() % 6]++;
+                }
+
+                position.UnmakeMove(pseudoLegalMove, gameState);
+            }
+
+            legalMoves = legalMoves[..legalMovesCount];
+
+            // Shuffle legal moves
+            rnd.Shuffle(legalMoves);
+
+            if (!Configuration.EngineSettings.Datagen_GenFens_UsePieceProbabilities)
+            {
+                // Pick one legal move that doesn't lead to a terminal position
+                foreach (var randomMove in legalMoves)
+                {
+                    var gameState = position.MakeMove(randomMove);
+
+                    var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position);
+
+                    position.UnmakeMove(randomMove, gameState);
+
+                    if (nextPositionHasAnyLegalMoves)
+                    {
+                        return randomMove;
+                    }
+                }
+            }
+            else
+            {
+                var piecesToVisit = 0;
+                foreach (var pieceCount in movesByPiece)
+                {
+                    if (pieceCount != 0)
+                    {
+                        ++piecesToVisit;
+                    }
+                }
+
+                int piecesVisited = 0;
+
+                // We first try all pieces, before discarding the position (by returning 0)
+                while (piecesVisited != piecesToVisit)
+                {
+                    // Choose the piece for each move
+                    int pieceToUse = (int)Piece.K;
+
+                    var n = rnd.Next(0, 100);
+                    if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Pawns)
+                    {
+                        pieceToUse = (int)Piece.P;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Knights)
+                    {
+                        pieceToUse = (int)Piece.N;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Bishops)
+                    {
+                        pieceToUse = (int)Piece.B;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Rooks)
+                    {
+                        pieceToUse = (int)Piece.R;
+                    }
+                    else if (n <= Configuration.EngineSettings.Datagen_GenFens_PieceProbabilities_Queen)
+                    {
+                        pieceToUse = (int)Piece.Q;
+                    }
+
+                    if (movesByPiece[pieceToUse] != 0)
+                    {
+                        ++piecesVisited;
+                        movesByPiece[pieceToUse] = 0;
+                    }
+
+                    // Pick one legal move that doesn't lead to a terminal position and that matches pieceToUse
+                    foreach (var randomMove in legalMoves)
+                    {
+                        var piece = randomMove.Piece();
+                        if (piece != pieceToUse && piece != (pieceToUse + 6))
+                        {
+                            continue;
+                        }
+
+                        var gameState = position.MakeMove(randomMove);
+
+                        var nextPositionHasAnyLegalMoves = MoveGenerator.CanGenerateAtLeastAValidMove(position);
+
+                        position.UnmakeMove(randomMove, gameState);
+
+                        if (nextPositionHasAnyLegalMoves)
+                        {
+                            return randomMove;
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+    }
+
     /// <summary>
-    /// Removes existing <see cref="_extraEngines"/> and allocates new ones based on <see cref="_searchThreadsCount"/>
+    /// Removes existing <see cref="_extraWorkers"/> (and the engines they own) and allocates new ones based on <see cref="_searchThreadsCount"/>
     /// </summary>
     private void AllocateExtraEngines()
     {
         // _searchThreadsCount includes _mainEngine
         const int mainEngineOffset = 1;
 
-        foreach (var engine in _extraEngines)
-        {
-            engine.Dispose();
-        }
-
-        Array.Clear(_extraEngines);
+        DisposeExtraWorkers();
 
         if (_searchThreadsCount > 1)
         {
-            _extraEngines = new Engine[_searchThreadsCount - mainEngineOffset];
+            _extraWorkers = new SearchWorker[_searchThreadsCount - mainEngineOffset];
 
             for (int i = 0; i < _searchThreadsCount - mainEngineOffset; ++i)
             {
-                _extraEngines[i] = new Engine(i + 2,
+                _extraWorkers[i] = new SearchWorker(i + 2,
 #if MULTITHREAD_DEBUG
                 _logger.IsDebugEnabled
                     ? _engineWriter
@@ -634,12 +867,27 @@ public sealed class Searcher : IDisposable
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
-                    in _ttWrapper);
+                    in _tt);
             }
         }
         else
         {
-            _extraEngines = [];
+            _extraWorkers = [];
+        }
+    }
+
+    private void DisposeExtraWorkers()
+    {
+        // Stopping all of them before invoking .Dispose() allows their threads to stop concurrently, instead of potentially waiting for the timeout of each one sequentially
+        // Not that they should ever timeout, because searches shouldn't be in progress, but just in case
+        foreach (var worker in _extraWorkers)
+        {
+            worker.Stop();
+        }
+
+        foreach (var worker in _extraWorkers)
+        {
+            worker.Dispose();
         }
     }
 
@@ -669,12 +917,12 @@ public sealed class Searcher : IDisposable
         _logger.Debug("Warming-up engine");
         var sw = Stopwatch.StartNew();
 
-        var warmupCount = Math.Min(8, _extraEngines.Length + 1);
+        var warmupCount = Math.Min(8, _extraWorkers.Length + 1);
 
         Parallel.For(0, warmupCount, i =>
         {
             var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-            using var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
+            using var engine = new Engine(-i, silentEngineWriter, in _tt);
 
             engine.Warmup();
         });
@@ -691,13 +939,12 @@ public sealed class Searcher : IDisposable
             {
                 _mainEngine.Dispose();
 
-                foreach (var engine in _extraEngines)
-                {
-                    engine.Dispose();
-                }
+                DisposeExtraWorkers();
 
                 _absoluteSearchCancellationTokenSource.Dispose();
                 _searchCancellationTokenSource.Dispose();
+
+                _tt.Release();
             }
             _disposedValue = true;
         }

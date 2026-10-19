@@ -34,16 +34,13 @@ public static class Perft
     /// Proper implementation, used by <see cref="DivideImpl(Position, int, long, Action{string})"/> as well
     /// </summary>
     [SkipLocalsInit]
-    internal static long PerftRecursiveImpl(Position position, int depth, long nodes)
+    unsafe internal static long PerftRecursiveImpl(Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(buffer);
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -61,16 +58,13 @@ public static class Perft
     }
 
     [SkipLocalsInit]
-    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
+    unsafe private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
     {
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-            var evaluationContext = new EvaluationContext(buffer);
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -95,24 +89,12 @@ public static class Perft
 
     private static void PrintPerftResult(int depth, long nodes, double elapsedSeconds, Action<string> write)
     {
-        var timeStr = TimeToString(elapsedSeconds * 1_000);
+        var timeStr = Utils.TimeToString(elapsedSeconds * 1_000);
 
         write(
             $"Depth:\t{depth}" + Environment.NewLine +
             $"Nodes:\t{nodes}" + Environment.NewLine +
             $"Time:\t{timeStr}" + Environment.NewLine +
             $"nps:\t{nodes / (elapsedSeconds * 1_000_000):F} Mnps" + Environment.NewLine);
-    }
-
-    private static string TimeToString(double milliseconds)
-    {
-        return milliseconds switch
-        {
-            < 1 => $"{milliseconds:F} ms",
-            < 1_000 => $"{Math.Round(milliseconds)} ms",
-            < 60_000 => $"{0.001 * milliseconds:F} s",
-            < 3_600_000 => $"{Math.Floor(milliseconds / 60_000)} min {Math.Round(0.001 * (milliseconds % 60_000))} s",
-            _ => $"{Math.Floor(milliseconds / 3_600_000)} h {Math.Round((milliseconds % 3_600_000) / 60_000)} min"
-        };
     }
 }

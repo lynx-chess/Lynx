@@ -19,7 +19,7 @@ public enum TablebaseEvaluationCategory : byte
     MaybeWin,
     [EnumMember(Value = "maybe-loss")]
     MaybeLoss,
-    Cancelled = byte.MaxValue
+    Cancelled = byte.MaxValue,
 }
 
 public record class TablebaseEvaluation

@@ -8,18 +8,15 @@ public class GenerateRookMovesTest
     private static IEnumerable<Move> GenerateRookMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
 
-        return MoveGenerator.GenerateAllMoves(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     private static IEnumerable<Move> GenerateRookCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-        return MoveGenerator.GenerateAllCaptures(position, ref evaluationContext, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
@@ -57,7 +54,7 @@ public class GenerateRookMovesTest
     public void RookMoves_White()
     {
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.R + offset;
         var moves = GenerateRookMoves(position);
 
@@ -126,7 +123,7 @@ public class GenerateRookMovesTest
     public void RookMoves_Black()
     {
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.R + offset;
         var moves = GenerateRookMoves(position);
 
@@ -191,7 +188,7 @@ public class GenerateRookMovesTest
     public void RookMoves_CapturesOnly_White()
     {
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.R + offset;
         var moves = GenerateRookCaptures(position);
 
@@ -221,7 +218,7 @@ public class GenerateRookMovesTest
     public void RookMoves_CapturesOnly_Black()
     {
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.R + offset;
         var moves = GenerateRookCaptures(position);
 

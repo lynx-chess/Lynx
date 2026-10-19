@@ -18,10 +18,9 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, oppositeSideAttacks);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -36,10 +35,9 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, oppositeSideAttacks);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -54,10 +52,9 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, oppositeSideAttacks);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());
@@ -72,10 +69,9 @@ public class CastlingMoveTest
         Span<Move> moveSpan = stackalloc Move[2];
         var index = 0;
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        const Bitboard oppositeSideAttacks = 0UL;
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, ref evaluationContext);
+        MoveGenerator.GenerateCastlingMoves(ref index, moveSpan, position, oppositeSideAttacks);
 
         var move = moveSpan[0];
         Assert.IsTrue(move.IsCastle());

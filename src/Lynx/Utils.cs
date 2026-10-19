@@ -13,14 +13,6 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PieceOffset(Side side) => PieceOffset((int)side);
-
-    /// <summary>
-    /// Side.White -> 0
-    /// Side.Black -> 6
-    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(int side)
     {
@@ -36,13 +28,16 @@ public static class Utils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(bool isWhite) => isWhite ? 0 : 6;
 
-    /// <summary>
-    /// Side.Black -> Side.White
-    /// Side.White -> Side.Black
-    /// </summary>
-    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int OppositeSide(Side side) => OppositeSide((int)side);
+    public static Side PieceSide(int piece)
+    {
+        Debug.Assert(piece != (int)Piece.None);
+        Debug.Assert(piece != (int)Piece.Unknown);
+
+        return piece >= (int)Piece.P && piece <= (int)Piece.K
+            ? Side.White
+            : Side.Black;
+    }
 
     /// <summary>
     /// Side.Black -> Side.White
@@ -56,9 +51,12 @@ public static class Utils
         return side ^ 1;     // or  (int)Side.White - side
     }
 
-    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int ShortCastleRookTargetSquare(Side side) => ShortCastleRookTargetSquare((int)side);
+    public static int PawhPushSquare(int side)
+    {
+        // position.Side == Side.White ? -8 : +8
+        return +8 - (side * 16);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ShortCastleRookTargetSquare(int side)
@@ -68,10 +66,6 @@ public static class Utils
         return Constants.BlackRookShortCastleSquare + (7 * 8 * side);
     }
 
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int LongCastleRookTargetSquare(Side side) => LongCastleRookTargetSquare((int)side);
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LongCastleRookTargetSquare(int side)
     {
@@ -80,10 +74,6 @@ public static class Utils
         return Constants.BlackRookLongCastleSquare + (7 * 8 * side);
     }
 
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
-    public static int ShortCastleRookSourceSquare(Side side) => ShortCastleRookSourceSquare((int)side);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ShortCastleRookSourceSquare(int side)
     {
@@ -91,10 +81,6 @@ public static class Utils
 
         return (int)BoardSquare.h8 + (7 * 8 * side);
     }
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int LongCastleRookSourceSquare(Side side) => LongCastleRookSourceSquare((int)side);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LongCastleRookSourceSquare(int side)
@@ -114,9 +100,15 @@ public static class Utils
         ? Constants.WhiteKingLongCastleSquare
         : Constants.BlackKingLongCastleSquare;
 
-    [Obsolete("Test only, to avoid indirection")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
+    public static int ShortCastle(Position position, int side) => side == (int)Side.White
+        ? position.WhiteShortCastle
+        : position.BlackShortCastle;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int LongCastle(Position position, int side) => side == (int)Side.White
+        ? position.WhiteLongCastle
+        : position.BlackLongCastle;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(int side)
@@ -127,10 +119,6 @@ public static class Utils
             (int)BoardSquare.h8 + (7 * 8 * side),
             Constants.BlackRookShortCastleSquare + (7 * 8 * side));
     }
-
-    [Obsolete("Test only, to avoid indirection")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(Side side) => LongCastleRookSourceAndTargetSquare((int)side);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(int side)
@@ -162,14 +150,12 @@ public static class Utils
                 ? halfMovesWithoutCaptureOrPawnMove
                 : 0;
         }
-        else
-        {
-            var pieceToMove = moveToPlay.Piece();
 
-            return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
-                ? 0
-                : halfMovesWithoutCaptureOrPawnMove + 1;
-        }
+        var pieceToMove = moveToPlay.Piece();
+
+        return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
+            ? 0
+            : halfMovesWithoutCaptureOrPawnMove + 1;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -193,7 +179,9 @@ public static class Utils
         // Adding double.Epsilon to avoid potential System.OverflowException
         // i.e. when calculating multithreading aggregated stats in a single-move position:0
         // the elapsed seconds are taken from existing SearchResult.Time, already rounded and therefore 0
-        return Convert.ToUInt64(Math.Clamp(nodes / (elapsedSeconds + double.Epsilon), 1, ulong.MaxValue));
+        // Using Convert.ToUInt64 instead of (ulong) can produce System.OverflowException in WASM, see https://github.com/lynx-chess/Lynx/issues/2587
+
+        return (ulong)Math.Clamp(nodes / (elapsedSeconds + double.Epsilon), 1, ulong.MaxValue);
     }
 
     /// <summary>
@@ -212,7 +200,7 @@ public static class Utils
     /// </summary>
     public static ulong CalculateUCITime(double elapsedSeconds)
     {
-        return Math.Clamp(Convert.ToUInt64(elapsedSeconds * 1_000), 1, ulong.MaxValue);
+        return Convert.ToUInt64(Math.Clamp(elapsedSeconds * 1_000, 1, ulong.MaxValue));
     }
 
     /// <summary>
@@ -258,12 +246,41 @@ public static class Utils
         return ((1 << piece) & MajorPieceMask) != 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong Murmur3(ulong n)
+    {
+        n ^= n >> 33;
+        n *= 0xff51afd7ed558ccdUL;
+        n ^= n >> 33;
+        n *= 0xc4ceb9fe1a85ec53UL;
+        n ^= n >> 33;
+
+        return n;
+    }
+
     /// <summary>
     /// Recommended in https://learn.microsoft.com/en-us/dotnet/api/system.boolean.tostring
     /// </summary>
     public static string ToLowerString(this bool b)
     {
         return b.ToString().ToLowerInvariant();
+    }
+
+    internal static string TimeToString(double milliseconds)
+    {
+        return milliseconds switch
+        {
+            < 1 => $"{milliseconds:F} ms",
+            < 1_000 => $"{Math.Round(milliseconds)} ms",
+            < 60_000 => $"{0.001 * milliseconds:F} s",
+            < 3_600_000 => $"{Math.Floor(milliseconds / 60_000)} min {Math.Round(0.001 * (milliseconds % 60_000))} s",
+            _ => $"{Math.Floor(milliseconds / 3_600_000)} h {Math.Round((milliseconds % 3_600_000) / 60_000)} min",
+        };
+    }
+
+    public static double Sigmoid(double value)
+    {
+        return 1.0 / (1.0 + Math.Exp(value));
     }
 
     [Conditional("DEBUG")]

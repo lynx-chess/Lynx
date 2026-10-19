@@ -76,7 +76,7 @@ public static class BenchmarkLegacyMoveExtensions
             int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
             var targetSquare = move.TargetSquare();
-            var oppositeSide = Utils.OppositeSide(position.Side);
+            var oppositeSide = Utils.OppositeSide((int)position.Side);
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 

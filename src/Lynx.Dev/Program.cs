@@ -68,11 +68,11 @@ const string CmkPosition = Constants.CmkTestPositionFEN;
 static void _2_GettingStarted()
 {
     var board = 4UL;
-    board.SetBit(BoardSquare.e4);
+    board.SetBit((int)BoardSquare.e4);
     board.Print();
-    board.PopBit(BoardSquare.e4);
+    board.PopBit((int)BoardSquare.e4);
     board.Print();
-    board.PopBit(BoardSquare.e4);
+    board.PopBit((int)BoardSquare.e4);
     board.Print();
 
     Console.ReadKey();
@@ -138,10 +138,10 @@ static void _8_Slider_Pieces_Attacks()
     // Occupancy bitboard
     Bitboard block = default;
 
-    block.SetBit(BoardSquare.b6);
-    block.SetBit(BoardSquare.g7);
-    block.SetBit(BoardSquare.f2);
-    block.SetBit(BoardSquare.b2);
+    block.SetBit((int)BoardSquare.b6);
+    block.SetBit((int)BoardSquare.g7);
+    block.SetBit((int)BoardSquare.f2);
+    block.SetBit((int)BoardSquare.b2);
 
     var bishopAttacks = AttackGenerator.GenerateBishopAttacksOnTheFly((int)BoardSquare.d4, block);
 
@@ -262,9 +262,9 @@ static void _14_GeneratingMagicNumbersByBruteForce()
 static void _16_InitializingSliderPiecesAttackTables()
 {
     var occupancy = new Bitboard();
-    occupancy.SetBit(BoardSquare.e5);
-    occupancy.SetBit(BoardSquare.d5);
-    occupancy.SetBit(BoardSquare.d8);
+    occupancy.SetBit((int)BoardSquare.e5);
+    occupancy.SetBit((int)BoardSquare.d5);
+    occupancy.SetBit((int)BoardSquare.d8);
     occupancy.Print();
 
     var bishopAttacks = Attacks.BishopAttacks((int)BoardSquare.d4, occupancy);
@@ -279,7 +279,7 @@ static void _17_Defining_variables()
     var position = new Position(Constants.EmptyBoardFEN);
 
     var whitePawnBitboard = position.PieceBitboards[(int)Piece.P];
-    whitePawnBitboard.SetBit(BoardSquare.e2);
+    whitePawnBitboard.SetBit((int)BoardSquare.e2);
     whitePawnBitboard.Print();
 
     Console.WriteLine($"Piece: {Constants.PiecesByChar['K']}");
@@ -343,8 +343,8 @@ static void _21_IsSquareAttacked()
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitboards[(int)Piece.n].SetBit(BoardSquare.c6);
-    position.PieceBitboards[(int)Piece.n].SetBit(BoardSquare.f6);
+    position.PieceBitboards[(int)Piece.n].SetBit((int)BoardSquare.c6);
+    position.PieceBitboards[(int)Piece.n].SetBit((int)BoardSquare.f6);
 
     position.PrintAttackedSquares(Side.Black);
 
@@ -353,24 +353,24 @@ static void _21_IsSquareAttacked()
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.b7);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.d7);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.f7);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.h7);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.b3);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.d3);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.f3);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.h3);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.d1);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.c4);
-    position.PieceBitboards[(int)Piece.q].SetBit(BoardSquare.g4);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.b7);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.d7);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.f7);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.h7);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.b3);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.d3);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.f3);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.h3);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.d1);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.c4);
+    position.PieceBitboards[(int)Piece.q].SetBit((int)BoardSquare.g4);
 
     position.PrintAttackedSquares(Side.Black);
 
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitboards[(int)Piece.K].SetBit(BoardSquare.e4);
+    position.PieceBitboards[(int)Piece.K].SetBit((int)BoardSquare.e4);
     position.PrintAttackedSquares(Side.White);
 
     Console.WriteLine("=====================================");
@@ -413,10 +413,10 @@ static void _23_Castling_Moves()
     int index = 0;
     var moves = new Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-    Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-    var evaluationContext = new EvaluationContext(buffer);
+    // TODO calculate them
+    const Bitboard opposideSideAttacks = 0UL;
 
-    MoveGenerator.GenerateCastlingMoves(ref index, moves, position, ref evaluationContext);
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position, opposideSideAttacks);
 
     foreach (var move in moves[..index])
     {
@@ -704,11 +704,13 @@ static void _54_ScoreMove()
 
     var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position.FEN()));
-    Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-    var evaluationContext = new EvaluationContext(buffer);
+
+    // TODO calculate them
+    const Bitboard opposideSideAttacks = 0UL;
+
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, opposideSideAttacks, 0)}");
     }
 
     position = new Position(TrickyPosition);
@@ -717,7 +719,7 @@ static void _54_ScoreMove()
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, ref evaluationContext)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(engine.Game.CurrentPosition, move, default, opposideSideAttacks, 0)}");
     }
 }
 
@@ -1050,7 +1052,7 @@ static void TranspositionTableMethod()
     static void TesSize(int size)
     {
         Console.WriteLine("Hash: {0} MB", size);
-        var length = (int)SingleArrayTranspositionTable.CalculateLength(size);
+        var length = (int)TranspositionTable.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
@@ -1071,8 +1073,8 @@ static void TranspositionTableMethod()
     TesSize(512);
     TesSize(1024);
 
-    var ttLength = SingleArrayTranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-    var transpositionTable = TranspositionTableFactory.Create();
+    var ttLength = TranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var transpositionTable = new TranspositionTable();
 
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();

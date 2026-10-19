@@ -34,7 +34,7 @@ public sealed class IdCommand
         {
             >= 2 => $"{parts[0]}-dev-{parts[1][..Math.Min(8, parts[1].Length)]}",
             1 => parts[0],
-            _ => "Unknown"
+            _ => "Unknown",
         };
 #endif
     }

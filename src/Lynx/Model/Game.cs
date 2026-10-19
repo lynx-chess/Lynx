@@ -28,11 +28,15 @@ public sealed class Game : IDisposable
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
+    public int FullMoves { get; set; } = 1;
+
+    public int Ply => ((FullMoves - 1) * 2) + (CurrentPosition.Side == Side.Black ? 1 : 0);
+
     public Position CurrentPosition { get; }
 
     public Position PositionBeforeLastSearch { get; }
 
-    public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove);
+    public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove, FullMoves);
 
     private Game()
     {
@@ -48,7 +52,7 @@ public sealed class Game : IDisposable
         PositionBeforeLastSearch = new Position(CurrentPosition);
 
 #if DEBUG
-        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+        MoveHistory = [with(Constants.MaxNumberMovesInAGame)];
 #endif
     }
 
@@ -122,9 +126,7 @@ public sealed class Game : IDisposable
 
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
+        FullMoves = parsedFen.FullMoveCounter;
 
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -140,7 +142,8 @@ public sealed class Game : IDisposable
             }
 
             var moveString = rawMoves[moveRanges[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, ref evaluationContext, movePool);
+
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -172,6 +175,8 @@ public sealed class Game : IDisposable
     public bool Update50movesRule(Move moveToPlay)
     {
         var isCapture = moveToPlay.CapturedPiece() != (int)Piece.None;
+
+#pragma warning disable MA0071 // Avoid using redundant else
         if (isCapture)
         {
             if (HalfMovesWithoutCaptureOrPawnMove < 100)
@@ -203,15 +208,18 @@ public sealed class Game : IDisposable
 
             return true;
         }
+#pragma warning restore MA0071 // Avoid using redundant else
     }
 
     /// <summary>
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsThreefoldRepetition()
+    public bool IsThreefoldRepetition(int ply)
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
+
+        var twofoldRepetitionDetected = false;
 
         // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 earlier and finish HalfMovesWithoutCaptureOrPawnMove earlier
         var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
@@ -219,7 +227,12 @@ public sealed class Game : IDisposable
         {
             if (currentHash == _positionHashHistory[i])
             {
-                return true;
+                if (ply > 0 || twofoldRepetitionDetected)
+                {
+                    return true;
+                }
+
+                twofoldRepetitionDetected = true;
             }
         }
 
@@ -227,14 +240,14 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition(ref EvaluationContext evaluationContext)
+    public bool Is50MovesRepetition()
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, ref evaluationContext);
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
     }
 
     /// <summary>
@@ -265,6 +278,17 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong PreviousMoveHash(int nMovesAgo)
+    {
+        if (_positionHashHistoryPointer >= nMovesAgo)
+        {
+            return _positionHashHistory[_positionHashHistoryPointer - nMovesAgo];
+        }
+
+        return 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
         var gameState = CurrentPosition.MakeMove(moveToPlay);
@@ -276,6 +300,11 @@ public sealed class Game : IDisposable
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay);
+
+            if (CurrentPosition.Side == Side.White)
+            {
+                ++FullMoves;
+            }
         }
         else
         {

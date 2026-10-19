@@ -23,6 +23,55 @@ public class PositionTest
         Assert.AreEqual(fen, newPosition.FEN());
     }
 
+
+    [Test]
+    public void FEN_EnPassantWhite()
+    {
+        var position = new Position("rnbqkb1r/p1pp1pp1/1p4np/8/P2P1p2/8/1PP1PPPP/RNBQKB1R w KQkq - 1 3");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e2e4");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.True(result.Contains("e3"));
+    }
+
+    [Test]
+    public void FEN_EnPassantBlack()
+    {
+        var position = new Position("rnbqk1nr/1p2p1bp/p2p4/3P1p2/8/P2B1P2/RP2N1PP/1NBQ1RK1 b kq - 0 8");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e7e5");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.True(result.Contains("e6"));
+    }
+
+    [Test]
+    public void FEN_NotEnPassantWhite()
+    {
+        var position = new Position("rnbqk1nr/pp1pbpp1/7p/1Pp1p3/N7/8/P1PPPPPP/R1BQKBNR w KQkq - 0 1");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e2e4");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.False(result.Contains("e3"));
+    }
+
+    [Test]
+    public void FEN_NotEnPassantBlack()
+    {
+        var position = new Position("r1bqkb1r/ppp1pp1p/2n5/3p2P1/3P2n1/4PN2/PPP1KP2/RNBQ1B1R b kq - 0 1");
+        var move = MoveGenerator.GenerateAllMoves(position).First(m => m.UCIString() == "e7e5");
+        position.MakeMove(move);
+
+        var result = position.FEN();
+
+        Assert.False(result.Contains("e6"));
+    }
+
     [TestCase(Constants.InitialPositionFEN)]
     [TestCase(Constants.TrickyTestPositionFEN)]
     [TestCase(Constants.TrickyTestPositionReversedFEN)]
@@ -420,7 +469,7 @@ public class PositionTest
             : whiteKingDistance;
 
         var expectedEval = 0;
-        if ((passedPawnsMask & position.OccupancyBitboards[OppositeSide(position.Side)]) == 0)
+        if ((passedPawnsMask & position.OccupancyBitboards[OppositeSide((int)position.Side)]) == 0)
         {
             expectedEval += UnpackMG(PassedPawnNoEnemiesAheadBonus[0][rank]);
             expectedEval += UnpackMG(PassedPawnNoEnemiesAheadEnemyBonus[0][rank]);
@@ -994,7 +1043,7 @@ public class PositionTest
         nonAttackedWhiteShortCastleSquares.SetBit(Constants.WhiteKingShortCastleSquare);
 
         var nonAttackedWhiteLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.White];
-        nonAttackedWhiteLongCastleSquares.PopBit(BoardSquare.b1);
+        nonAttackedWhiteLongCastleSquares.PopBit((int)BoardSquare.b1);
         nonAttackedWhiteLongCastleSquares.SetBit(Constants.InitialWhiteKingSquare);
         nonAttackedWhiteLongCastleSquares.SetBit(Constants.WhiteKingLongCastleSquare);
 
@@ -1003,7 +1052,7 @@ public class PositionTest
         nonAttackedBlackShortCastleSquares.SetBit(Constants.BlackKingShortCastleSquare);
 
         var nonAttackedBlackLongCastleSquares = position.QueensideCastlingFreeSquares[(int)Side.Black];
-        nonAttackedBlackLongCastleSquares.PopBit(BoardSquare.b8);
+        nonAttackedBlackLongCastleSquares.PopBit((int)BoardSquare.b8);
         nonAttackedBlackLongCastleSquares.SetBit(Constants.InitialBlackKingSquare);
         nonAttackedBlackLongCastleSquares.SetBit(Constants.BlackKingLongCastleSquare);
 
@@ -1046,7 +1095,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset(position.Side);
+        var winnigSideOffset = Utils.PieceOffset((int)position.Side);
         Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
     }
 
@@ -1105,7 +1154,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winningSideOffset = Utils.PieceOffset(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black);
+        var winningSideOffset = Utils.PieceOffset((int)(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black));
         Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winningSideOffset));
 
         static bool IsBishopPawnDraw(Position position, int winningSideOffset)
@@ -1263,6 +1312,18 @@ public class PositionTest
         else
         {
             Assert.AreNotEqual(0, score);
+        }
+    }
+
+    [Test]
+    public void CountPieces()
+    {
+        foreach(var fen in Engine._benchmarkFens)
+        {
+            var position = new Position(fen);
+
+            var pieceCount = position.PieceBitboards.Sum(b => b.CountBits());
+            Assert.AreEqual(pieceCount, position.CountPieces());
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Buffers;
 using System.Collections.Frozen;
 using System.Runtime.CompilerServices;
 
@@ -111,7 +112,7 @@ public static class Constants
         "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
         "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
         "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
     ];
 
     public static readonly char[][] CoordinatesCharArray =
@@ -123,7 +124,7 @@ public static class Constants
         ['a','4'], ['b','4'], ['c','4'], ['d','4'], ['e','4'], ['f','4'], ['g','4'], ['h','4'],
         ['a','3'], ['b','3'], ['c','3'], ['d','3'], ['e','3'], ['f','3'], ['g','3'], ['h','3'],
         ['a','2'], ['b','2'], ['c','2'], ['d','2'], ['e','2'], ['f','2'], ['g','2'], ['h','2'],
-        ['a','1'], ['b','1'], ['c','1'], ['d','1'], ['e','1'], ['f','1'], ['g','1'], ['h','1']
+        ['a','1'], ['b','1'], ['c','1'], ['d','1'], ['e','1'], ['f','1'], ['g','1'], ['h','1'],
     ];
 
     /// <summary>
@@ -144,7 +145,7 @@ public static class Constants
     [
         "♙", "♘", "♗", "♖", "♕", "♔",   // White
         "♟︎", "♞", "♝", "♜", "♛", "♚",   // Black
-        "-"
+        "-",
     ];
 
     /// <summary>
@@ -196,7 +197,7 @@ public static class Constants
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
-        12, 11, 11, 11, 11, 11, 11, 12
+        12, 11, 11, 11, 11, 11, 11, 12,
     ];
 
     public static ReadOnlySpan<Bitboard> RookMagicNumbers =>
@@ -291,7 +292,7 @@ public static class Constants
         (int)BoardSquare.e3 - 8,
         (int)BoardSquare.f3 - 8,
         (int)BoardSquare.g3 - 8,
-        (int)BoardSquare.h3 - 8     //47 = h3
+        (int)BoardSquare.h3 - 8,     //47 = h3
     ];
 
 #pragma warning disable RCS1257 // Use enum field explicitly
@@ -324,15 +325,8 @@ public static class Constants
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15,
-        13, 15, 15, 15, 12, 15, 15, 14
+        13, 15, 15, 15, 12, 15, 15, 14,
     ];
-
-    /// <summary>
-    /// ~20 GB
-    /// </summary>
-    public static readonly int MaxTTArrayLength = Array.MaxLength;
-
-    public static double TTArraySizeGBs => (double)MaxTTArrayLength * TranspositionTableElement.Size / (1024 * 1024 * 1024);
 
     /// <summary>
     /// ~2048 TB theoretical limit, max validated size is 256 GB
@@ -346,12 +340,23 @@ public static class Constants
     public static readonly int MaxMoveOverhead = 60_000;
 
     /// <summary>
-    /// 218 or 224 seems to be the known limit of legal moves
-    /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
-    /// We generally need to account for a number higher than that due to pseudolegal movegen
+    /// A position can have at most 218 legal moves
+    /// See https://lichess.org/@/Tobs40/blog/why-a-reachable-position-can-have-at-most-218-playable-moves/a5xdxeqs
     /// Regardless, we want to support positions like kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1 (270 pseudolegal and legal moves)
     /// </summary>
+    public const int MaxNumberOfLegalMovesInAPosition = 512;
+
+    /// <summary>
+    /// We need to account for a number higher than the teoretical 218 limit for <see cref="MaxNumberOfLegalMovesInAPosition"/> due to pseudolegal movegen
+    /// </summary>
     public const int MaxNumberOfPseudolegalMovesInAPosition = 512;
+
+    /// <summary>
+    /// Max known number of legal capures in a position seems to be 74
+    /// See https://chess.stackexchange.com/questions/8323/maximum-number-of-captures-in-a-position/8412#8412
+    /// We also need to account for a number higher than that due to pseudolegal movegen
+    /// </summary>
+    public const int MaxNumberOfPseudolegalNoisyMovesInAPosition = 256;
 
     public const int MaxNumberMovesInAGame = 2048;
 
@@ -378,7 +383,7 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
-        0, 1, 2, 3, 4, 5, 6, 7
+        0, 1, 2, 3, 4, 5, 6, 7,
     ];
 
     /// <summary>
@@ -548,7 +553,7 @@ public static class Constants
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 4, 3, 2, 2, 2, 2, 2, 3, 4, 3, 2, 1, 1, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3],
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 5, 4, 3, 3, 3, 3, 3, 3, 5, 4, 3, 2, 2, 2, 2, 2, 5, 4, 3, 2, 1, 1, 1, 2, 5, 4, 3, 2, 1, 0, 1, 2],
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 6, 5, 4, 4, 4, 4, 4, 4, 6, 5, 4, 3, 3, 3, 3, 3, 6, 5, 4, 3, 2, 2, 2, 2, 6, 5, 4, 3, 2, 1, 1, 1, 6, 5, 4, 3, 2, 1, 0, 1],
-        [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 7, 6, 5, 5, 5, 5, 5, 5, 7, 6, 5, 4, 4, 4, 4, 4, 7, 6, 5, 4, 3, 3, 3, 3, 7, 6, 5, 4, 3, 2, 2, 2, 7, 6, 5, 4, 3, 2, 1, 1, 7, 6, 5, 4, 3, 2, 1, 0]
+        [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 7, 6, 5, 5, 5, 5, 5, 5, 7, 6, 5, 4, 4, 4, 4, 4, 7, 6, 5, 4, 3, 3, 3, 3, 7, 6, 5, 4, 3, 2, 2, 2, 7, 6, 5, 4, 3, 2, 1, 1, 7, 6, 5, 4, 3, 2, 1, 0],
     ];
 
     /// <summary>
@@ -640,7 +645,17 @@ public static class Constants
     public const int MajorCorrHistoryHashSize = 16_384;
     public const int MajorCorrHistoryHashMask = MajorCorrHistoryHashSize - 1;
 
+    public const int MaterialCorrHistoryHashSize = 2_048;
+    public const int MaterialCorrHistoryHashMask = MaterialCorrHistoryHashSize - 1;
+
+    public const int ContinuationCorrHistoryHashSize = 16_384;
+    public const int ContinuationCorrHistoryHashMask = ContinuationCorrHistoryHashSize - 1;
+
     public const string NumberWithSignFormat = "+#;-#;0";
+
+    private static ReadOnlySpan<string> FRCStrings => new(["FRC", "960", "FISCHER"]);
+
+    public static readonly SearchValues<string> FRCStringSearchValues = SearchValues.Create(FRCStrings, StringComparison.OrdinalIgnoreCase);
 }
 
 #pragma warning restore IDE0055

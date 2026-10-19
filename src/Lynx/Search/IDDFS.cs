@@ -14,12 +14,12 @@ public sealed partial class Engine
     /// <summary>
     /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
-    private readonly int[] _killerMoves = GC.AllocateArray<int>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
+    internal readonly int[] _killerMoves = GC.AllocateArray<int>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
 
     /// <summary>
     /// 12 x 64
     /// </summary>
-    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
+    internal readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     private const int PieceToQuietHistoryLength = 12 * 64 * 2 * 2;
 
@@ -45,7 +45,7 @@ public sealed partial class Engine
 
     /// <summary>
     /// 12 x 64 x 12 x 64
-    /// piece x target square x last piece x last target square x plies back
+    /// piece x target square x previous piece x previous target square
     /// ply - 1 -> Counter-move history
     /// ply - 2 -> Follow-up move history
     /// </summary>
@@ -74,6 +74,17 @@ public sealed partial class Engine
     /// Major hash x side to move
     /// </summary>
     private readonly short[] _majorCorrHistory = GC.AllocateArray<short>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.MaterialCorrHistoryHashSize"/> x 2
+    /// Material hash x side to move
+    /// </summary>
+    private readonly short[] _materialCorrHistory = GC.AllocateArray<short>(Constants.MaterialCorrHistoryHashSize * 2, pinned: true);
+
+    /// <summary>
+    /// <see cref="Constants.ContinuationCorrHistoryHashSize"/>
+    /// </summary>
+    private readonly short[] _continuationCorrHistory = GC.AllocateArray<short>(Constants.ContinuationCorrHistoryHashSize, pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -138,7 +149,8 @@ public sealed partial class Engine
 
         try
         {
-            if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (!isPondering && _searchConstraints.MaxDepth == SearchConstraints.DefaultMaxDepth && _searchConstraints.MaxNodes == SearchConstraints.DefaultMaxNodes
+                && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 if (!Configuration.EngineSettings.UCI_Minimal)
                 {
@@ -191,6 +203,17 @@ public sealed partial class Engine
                     {
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
+
+                        // Alpha and beta values close to checkmate scores due to window widening can cause false mate reporting (very high/low mate values) after being saved in TT
+                        if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            beta = EvaluationConstants.MaxEval;
+                        }
+
+                        if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                        {
+                            alpha = EvaluationConstants.MinEval;
+                        }
 
                         if (_logger.IsEnabled(logLevel))
                         {
@@ -268,8 +291,8 @@ public sealed partial class Engine
                 if (lastSearchResultCandidate.BestMove == default)
                 {
                     _logger.Warn(
-                        "[#{EngineId}] Depth {Depth}: search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
-                        _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore, mate);
+                        "[#{EngineId}] Depth {Depth}: search didn't produce a best move for position {Position} after {Time}ms. Score {Score} (mate in {Mate}?) detected",
+                        _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), _stopWatch.ElapsedMilliseconds, bestScore, mate);
 
                     _bestMoveStability = 0;
                     _scoreDelta = 0;
@@ -412,15 +435,30 @@ public sealed partial class Engine
         }
 
         var maxDepth = _searchConstraints.MaxDepth;
-        if (maxDepth > 0)
+        if (maxDepth != SearchConstraints.DefaultMaxDepth)
         {
             var shouldContinue = depth + 1 <= maxDepth;
 
             if (!shouldContinue)
             {
                 _logger.Log(logLevel,
-                    "[#{EngineId}] Depth {Depth}: stopping, max. depth reached",
+                    "[#{EngineId}] Depth {Depth}: stopping, max. go command depth reached",
                     _id, depth);
+            }
+
+            return shouldContinue;
+        }
+
+        var maxNodes = _searchConstraints.MaxNodes;
+        if (maxNodes != SearchConstraints.DefaultMaxNodes)
+        {
+            var shouldContinue = _nodes <= maxNodes;
+
+            if (!shouldContinue)
+            {
+                _logger.Log(logLevel,
+                    "[#{EngineId}] Nodes {Nodes}: stopping, go command nodes reached",
+                    _id, _nodes);
             }
 
             return shouldContinue;
@@ -455,16 +493,13 @@ public sealed partial class Engine
 
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
+    private unsafe bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
-        var evaluationContext = new EvaluationContext(buffer);
-
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref evaluationContext, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
@@ -502,12 +537,12 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                firstLegalMove, score, 0, [firstLegalMove])
+                firstLegalMove, score, targetDepth: 1, [firstLegalMove])
             {
-                DepthReached = 0,
+                DepthReached = 1,
                 Nodes = 0,
-                Time = 0,
-                NodesPerSecond = 0
+                Time = 1,
+                NodesPerSecond = 1,
             };
 
             return true;
@@ -538,7 +573,7 @@ public sealed partial class Engine
             DepthReached = maxDepthReached,
             Nodes = _nodes,
             Time = Utils.CalculateUCITime(elapsedSeconds),
-            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds)
+            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds),
         };
     }
 
@@ -609,16 +644,19 @@ public sealed partial class Engine
             }
         }
 
+        // TODO calculate manually
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
+        position.CalculateThreats(ref evaluationContext);
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, ref evaluationContext, pseudoLegalMoves);
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves, oppositeSideAttacks);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(position, pseudoLegalMoves[i], 0, ref evaluationContext, ttBestMove);
+            moveScores[i] = ScoreMove(position, pseudoLegalMoves[i], 0, oppositeSideAttacks, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -653,9 +691,9 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                move, singleMoveEval, 0, [move])
+                move, singleMoveEval, targetDepth: 1, [move])
             {
-                DepthReached = 0
+                DepthReached = 1,
             };
         }
 

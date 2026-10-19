@@ -1517,7 +1517,8 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
             bool success;
             Side side;
             byte castlingRights = 0;
-            int halfMoveClock = 0/*, fullMoveCounter = 1*/;
+            int halfMoveClock = 0;
+            int fullMoveCounter = 1;
             BoardSquare enPassant = BoardSquare.noSquare;
             CastlingData castlingData;
 
@@ -1547,10 +1548,10 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     _logger.Debug("No half move clock detected");
                 }
 
-                //if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
-                //{
-                //    _logger.Debug("No full move counter detected");
-                //}
+                if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
+                {
+                   _logger.Debug("No full move counter detected");
+                }
 
                 if (pieceBitboards[(int)Piece.K].CountBits() != 1
                     || pieceBitboards[(int)Piece.k].CountBits() != 1)
@@ -1570,8 +1571,8 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
             return success
                 ? new(pieceBitboards, occupancyBitboards, board, side, castlingRights, enPassant,
                     castlingData,
-                    halfMoveClock/*, fullMoveCounter*/)
-                : throw new LynxException($"Error parsing {fen.ToString()}");
+                    halfMoveClock, fullMoveCounter)
+                : throw new LynxException($"Error parsing {fen}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1868,7 +1869,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     var pawnOffset = ((int)side << 4) - 8; // side == Side.White ? +8 : -8
                     var pawnSquare = (int)enPassant + pawnOffset;
 
-                    var pawnBitboard = PieceBitboards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide(side))];
+                    var pawnBitboard = PieceBitboards[(int)Piece.P + Utils.PieceOffset(Utils.OppositeSide((int)side))];
 
                     if (!pawnBitboard.GetBit(pawnSquare))
                     {

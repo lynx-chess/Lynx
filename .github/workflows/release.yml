@@ -6,6 +6,7 @@ on:
     inputs:
       new_engine_version:
         description: 'New engine version. If empty, run number will be used and no commit/tag/release will be created'
+        type: string
         default: ''
         required: false
       should_push_new_nuget_version:
@@ -48,12 +49,12 @@ jobs:
             os: windows-latest
           - runtime-identifier: linux-x64
             os: ubuntu-latest
-          - runtime-identifier: linux-arm64
-            os: ubuntu-latest
-          - runtime-identifier: linux-arm
-            os: ubuntu-latest
           - runtime-identifier: linux-musl-x64
             os: ubuntu-latest
+          - runtime-identifier: linux-arm64
+            os: ubuntu-26.04-arm
+          - runtime-identifier: linux-arm
+            os: ubuntu-26.04-arm
           - runtime-identifier: osx-x64
             os: macOS-15-intel
           - runtime-identifier: osx-arm64
@@ -62,18 +63,18 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path:
           ~/.nuget/packages
@@ -153,9 +154,9 @@ jobs:
         sudo apt-get update && sudo apt-get install -y hub
 
     - name: Install NuGet
-      uses: nuget/setup-nuget@v2
+      uses: nuget/setup-nuget@v4
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         token: ${{ secrets.GH_RELEASE }}
 

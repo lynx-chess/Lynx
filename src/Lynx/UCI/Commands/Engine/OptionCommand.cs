@@ -134,6 +134,7 @@ public sealed class OptionCommand
             $"option name Ponder type check default {Configuration.EngineSettings.IsPonder.ToLowerString()}",
             $"option name MoveOverhead type spin default {Configuration.EngineSettings.MoveOverhead} min 1 max {Constants.MaxMoveOverhead}",
             $"option name Minimal type check default {Configuration.EngineSettings.UCI_Minimal.ToLowerString()}",
+            $"option name SoftNodes type check default {Configuration.EngineSettings.SoftNodes.ToLowerString()}",
             $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions.ToLowerString()}",
             .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : [],
         ];

@@ -31,7 +31,7 @@ public sealed partial class Engine
                         (int)Math.CopySign(
                             EvaluationConstants.PositiveCheckmateDetectionLimit + tablebaseResult.MateScore,
                             tablebaseResult.MateScore),
-                        0)
+                        0),
                 };
 
                 await _engineWriter.WriteAsync(searchResult, cancellationToken);
