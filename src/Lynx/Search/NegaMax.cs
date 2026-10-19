@@ -893,7 +893,7 @@ public sealed partial class Engine
             oppositeSideAttacks = position.OppositeSideAttacks();
         }
 
-        var poolSize = isInCheck 
+        var poolSize = isInCheck
             ? Constants.MaxNumberOfPseudolegalMovesInAPosition
             : Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition;
 
@@ -906,7 +906,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         int bestScore = standPat;
 
-        bool isAnyMovePlayed = false;
+        bool isAnyMoveValid = false;
 
         Span<Move> visitedMoves = stackalloc Move[poolSize];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
@@ -914,12 +914,6 @@ public sealed partial class Engine
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-            {
-                continue;
-            }
-
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
@@ -927,9 +921,17 @@ public sealed partial class Engine
                 continue;
             }
 
+            isAnyMoveValid = true;
+
+            // 🔍 QSearch SEE pruning: pruning bad captures
+            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
             ++_nodes;
             Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
-            isAnyMovePlayed = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
@@ -978,7 +980,7 @@ public sealed partial class Engine
         }
 
         // No valid moves generated
-        if (!isAnyMovePlayed)
+        if (!isAnyMoveValid)
         {
             // If not in check, we assume we have a non-mated position with no captures.
             // Could technically be a stalemate, though, but checking it failed in https://github.com/lynx-chess/Lynx/pull/358 (TODO retry)
@@ -988,16 +990,14 @@ public sealed partial class Engine
                 return staticEval;
             }
 
-            // When in check, we test for final positions if in check and no valid moves generated
-            if (!MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
-            {
-                Debug.Assert(bestMove is null);
+            // When in check, if no valid evasion was generated:
+            Debug.Assert(bestMove is null);
+            Debug.Assert(!MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]));
 
-                bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
+            bestScore = -EvaluationConstants.CheckMateBaseEvaluation + ply;
 
-                nodeType = NodeType.Exact;
-                staticEval = bestScore;
-            }
+            nodeType = NodeType.Exact;
+            staticEval = bestScore;
         }
 
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
