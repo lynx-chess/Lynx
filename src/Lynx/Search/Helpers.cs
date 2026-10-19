@@ -129,18 +129,30 @@ public sealed partial class Engine
         var commonIndex = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset);
 
+        int totalContHist = 0;
+
         // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
-        // Counter move history (continuation history, ply - 1)
-        var ply1Move = Game.ReadMoveFromStack(ply - 1);
-        var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
-        Debug.Assert(ply1Index < _continuationHistory.Length);
+        if (ply >= 1)
+        {
+            // Counter move history (continuation history, ply - 1)
+            var ply1Move = Game.ReadMoveFromStack(ply - 1);
+            var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
+            Debug.Assert(ply1Index < _continuationHistory.Length);
 
-        // Follow-up history (continuation history, ply - 2)
-        var ply2Move = Game.ReadMoveFromStack(ply - 2);
-        var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
-        Debug.Assert(ply2Index < _continuationHistory.Length);
+            totalContHist += _continuationHistory[ply1Index];
 
-        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
+            if (ply >= 2)
+            {
+                // Follow-up history (continuation history, ply - 2)
+                var ply2Move = Game.ReadMoveFromStack(ply - 2);
+                var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
+                Debug.Assert(ply2Index < _continuationHistory.Length);
+
+                totalContHist += _continuationHistory[ply2Index];
+            }
+        }
+
+        return totalContHist;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -159,6 +171,8 @@ public sealed partial class Engine
         const int targetSquareOffset = 12 * 64;
         //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
 
+        int totalContHist = 0;
+
         var commonIndex = (piece * pieceOffset)
             + (targetSquare * targetSquareOffset);
 
@@ -171,7 +185,7 @@ public sealed partial class Engine
             Debug.Assert(ply1Index < _continuationHistory.Length);
 
             ref var contHist1 = ref _continuationHistory[ply1Index];
-            contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
+            totalContHist += contHist1;
 
             if (ply >= 2)
             {
@@ -180,9 +194,13 @@ public sealed partial class Engine
                 var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
                 Debug.Assert(ply2Index < _continuationHistory.Length);
 
-                ref var contHist2 = ref _continuationHistory[ply2Index];
-                contHist2 = (short)ScoreHistoryMove(contHist2, rawHistoryBonus);
+                ref var constHist2 = ref _continuationHistory[ply2Index];
+                totalContHist += constHist2;
+
+                constHist2 = ScoreContinuationHistoryMove(rawHistoryBonus, constHist2, totalContHist);
             }
+
+            contHist1 = ScoreContinuationHistoryMove(rawHistoryBonus, contHist1, totalContHist);
         }
     }
 
