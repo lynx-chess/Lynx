@@ -342,8 +342,12 @@ public static class Constants
     /// <summary>
     /// A position can have at most 218 legal moves
     /// See https://lichess.org/@/Tobs40/blog/why-a-reachable-position-can-have-at-most-218-playable-moves/a5xdxeqs
-    /// We need to account for a number higher than that due to pseudolegal movegen
     /// Regardless, we want to support positions like kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1 (270 pseudolegal and legal moves)
+    /// </summary>
+    public const int MaxNumberOfLegalMovesInAPosition = 512;
+
+    /// <summary>
+    /// We need to account for a number higher than the teoretical 218 limit for <see cref="MaxNumberOfLegalMovesInAPosition"/> due to pseudolegal movegen
     /// </summary>
     public const int MaxNumberOfPseudolegalMovesInAPosition = 512;
 
