@@ -888,8 +888,12 @@ public sealed partial class Engine
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
-        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
+        var poolSize = isInCheck 
+            ? Constants.MaxNumberOfPseudolegalMovesInAPosition
+            : Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition;
+
+        Span<Move> moves = stackalloc Move[poolSize];
+        Span<int> moveScores = stackalloc int[poolSize];
 
         var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, capturesOnly: !isInCheck, isInCheck: isInCheck);
 
@@ -897,9 +901,9 @@ public sealed partial class Engine
         Move? bestMove = null;
         int bestScore = standPat;
 
-        bool isAnyCaptureValid = false;
+        bool isAnyMovePlayed = false;
 
-        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
+        Span<Move> visitedMoves = stackalloc Move[poolSize];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
@@ -920,11 +924,11 @@ public sealed partial class Engine
 
             ++_nodes;
             Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
-            isAnyCaptureValid = true;
+            isAnyMovePlayed = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
-            // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
+            // TODO check for threefold or 50 moves repetitions when in check (and therefore, quiet evasions are generated)
             stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
@@ -969,7 +973,7 @@ public sealed partial class Engine
         }
 
         // No valid moves generated
-        if (!isAnyCaptureValid)
+        if (!isAnyMovePlayed)
         {
             // If not in check, we assume we have a non-mated position with no captures.
             // Could technically be a stalemate, though, but checking it failed in https://github.com/lynx-chess/Lynx/pull/358 (TODO retry)
