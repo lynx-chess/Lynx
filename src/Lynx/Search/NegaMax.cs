@@ -972,7 +972,7 @@ public sealed partial class Engine
             ++visitedMovesCounter;
         }
 
-        // We check for final positions if in check or if in positions with relatively few pieces, providing there were no pseudolegal captures, no legal captures or all of them are pruned
+        // We check for final positions if in check and no valid moves generated
         if (isInCheck
             && !isAnyCaptureValid
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
@@ -984,7 +984,7 @@ public sealed partial class Engine
             nodeType = NodeType.Exact;
             staticEval = bestScore;
         }
-        // Not in check and nothing to search: non-mated positions with no captures. Could technically be stalemates though
+        // If not in check and no pseudlegal moves generated, we can assume we have a non-mated position with no captures. Could technically be a stalemate, though
         else if (!isInCheck && !isAnyMoveFetched)
         {
             // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
