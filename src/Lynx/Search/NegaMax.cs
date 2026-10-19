@@ -891,13 +891,7 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true);
-
-        if (!movePicker.TryGetNext(out var move, out var moveScore))
-        {
-            // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
-            return staticEval;
-        }
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true, isInCheck: isInCheck);
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
@@ -909,8 +903,12 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        do
+        var isAnyMoveFetched = false;
+
+        while (movePicker.TryGetNext(out var move, out var moveScore))
         {
+            isAnyMoveFetched = true;
+
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
@@ -973,10 +971,11 @@ public sealed partial class Engine
 
             ++visitedMovesCounter;
         }
-        while (movePicker.TryGetNext(out move, out moveScore));
 
-        if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
+        // We check for final positions if in check and no valid moves generated
+        if (isInCheck
+            && !isAnyCaptureValid
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
         {
             Debug.Assert(bestMove is null);
 
@@ -984,6 +983,12 @@ public sealed partial class Engine
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;
+        }
+        // If not in check and no pseudlegal moves generated, we can assume we have a non-mated position with no captures. Could technically be a stalemate, though
+        else if (!isInCheck && !isAnyMoveFetched)
+        {
+            // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
+            return staticEval;
         }
 
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);

@@ -50,10 +50,6 @@ internal ref struct MovePicker
 
     public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isQuiescence = false, bool isInCheck = false)
     {
-        // Since QSearch uses !isAnyCaptureValid as a condition to check CanGenerateAtLeastAValidMove,
-        // generating only evasion moves in QSearch would affect the existing logic, which deserves a different patch
-        Debug.Assert(!(isQuiescence && isInCheck) || (isQuiescence ^ isInCheck));
-
         _engine = engine;
         _position = position;
         _ttMove = ttMove;
@@ -140,7 +136,7 @@ internal ref struct MovePicker
                         int nextThreshold;
                         Stage nextStage;
 
-                        // In quiescence this is the last stage and all generated moves (captures and promotions) are returned
+                        // In qsearch this is the last stage and all generated moves (captures and promotions) are returned
                         if (_isQuiescence)
                         {
                             nextStage = Stage.EndStage;
@@ -230,7 +226,7 @@ internal ref struct MovePicker
                     {
                         _stage = Stage.QuietMovesStage;
 
-                        // Noisy moves are exhausted at this point, so their buffers can be reused
+                        // No more noisy moves, so their buffers can be reused
                         var quietMoves = MoveGenerator.GenerateAllQuiets(_position, _moves, _oppositeSideAttacks);
 
                         // Removing moves already returned in previous stages, preserving the order of the rest

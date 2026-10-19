@@ -13,7 +13,7 @@ public class MovePickerTest : BaseTest
         "8/8/8/2k5/3Pp3/8/8/4K3 b - d3 0 1",                                            // Pawn check that can be captured en passant
         "4k3/8/8/8/8/3n4/8/r3K1R1 w - - 0 1",                                           // Double check: only king moves
         "7r/6P1/8/8/8/8/8/k6K w - - 0 1",                                               // Promotion capturing the checker
-        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",        // Not in check, used as reference below
+        "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",         // Not in check, used as reference below
     ];
 
     private static readonly string[] _fens =
@@ -59,6 +59,43 @@ public class MovePickerTest : BaseTest
             allMoves.Where(move => IsLegal(position, move)).Order().ToArray(),
             returned.Select(r => r.Move).Where(move => IsLegal(position, move)).Order().ToArray(),
             $"Different legal moves in {fen}");
+    }
+
+    /// <summary>
+    /// Quiescence in check: only captures that get the king out of check are returned, and all the legal ones
+    /// </summary>
+    [TestCaseSource(nameof(_fens))]
+    public void MovePicker_Quiescence_InCheck_ReturnsOnlyEvasionCaptures(string fen)
+    {
+        var engine = GetEngine(fen);
+        var position = engine.Game.CurrentPosition;
+        var oppositeSideAttacks = GetOppositeSideAttacks(position);
+
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var captures = MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).ToArray();
+
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, isQuiescence: true, isInCheck: position.IsInCheck());
+
+        var returned = new List<Move>();
+        while (movePicker.TryGetNext(out var move, out _))
+        {
+            returned.Add(move);
+        }
+
+        Assert.That(returned, Is.SubsetOf(captures), $"Returned something that isn't a capture in {fen}");
+        Assert.AreEqual(returned.Count, returned.Distinct().Count(), $"Repeated moves in {fen}");
+        Assert.AreEqual(
+            captures.Where(move => IsLegal(position, move)).Order().ToArray(),
+            returned.Where(move => IsLegal(position, move)).Order().ToArray(),
+            $"Different legal captures in {fen}");
+
+        if (!position.IsInCheck())
+        {
+            Assert.AreEqual(captures.Length, returned.Count, $"Captures removed when not in check in {fen}");
+        }
     }
 
     /// <summary>
