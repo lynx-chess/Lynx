@@ -891,7 +891,7 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true, isInCheck: isInCheck);
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, capturesOnly: !isInCheck, isInCheck: isInCheck);
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;

@@ -31,7 +31,7 @@ internal ref struct MovePicker
     private readonly Bitboard _oppositeSideAttacks;
     private readonly ShortMove _ttMove;
     private readonly int _ply;
-    private readonly bool _isQuiescence;
+    private readonly bool _capturesOnly;
     private readonly bool _isInCheck;
     private readonly bool _isDoubleCheck;
     private readonly int _oppositeSideKing;
@@ -48,15 +48,15 @@ internal ref struct MovePicker
     private Move _secondKiller;
     private Move _counterMove;
 
-    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isQuiescence = false, bool isInCheck = false)
+    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool capturesOnly = false, bool isInCheck = false)
     {
         _engine = engine;
         _position = position;
         _ttMove = ttMove;
         _oppositeSideAttacks = oppositeSideAttacks;
         _ply = ply;
-        _isQuiescence = isQuiescence;
-        _stage = isQuiescence ? Stage.GenerateNoisyMovesStage : Stage.TTMoveStage;
+        _capturesOnly = capturesOnly;
+        _stage = capturesOnly ? Stage.GenerateNoisyMovesStage : Stage.TTMoveStage;
         _moves = moves;
         _moveScores = moveScores;
 
@@ -136,8 +136,8 @@ internal ref struct MovePicker
                         int nextThreshold;
                         Stage nextStage;
 
-                        // In qsearch this is the last stage and all generated moves (captures and promotions) are returned
-                        if (_isQuiescence)
+                        // In qsearch when generating only captures, this is the last stage and all generated moves (captures and promotions) are returned
+                        if (_capturesOnly)
                         {
                             nextStage = Stage.EndStage;
                             nextThreshold = int.MinValue;

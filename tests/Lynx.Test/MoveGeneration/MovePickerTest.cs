@@ -72,12 +72,12 @@ public class MovePickerTest : BaseTest
         var oppositeSideAttacks = GetOppositeSideAttacks(position);
 
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var captures = MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).ToArray();
+        var captures = MoveGenerator.GenerateAllMoves(position, movePool, oppositeSideAttacks).ToArray();
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, isQuiescence: true, isInCheck: position.IsInCheck());
+        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, capturesOnly: true, isInCheck: position.IsInCheck());
 
         var returned = new List<Move>();
         while (movePicker.TryGetNext(out var move, out _))
