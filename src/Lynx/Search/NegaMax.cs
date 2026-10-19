@@ -905,12 +905,6 @@ public sealed partial class Engine
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue)
-            {
-                continue;
-            }
-
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
@@ -918,9 +912,17 @@ public sealed partial class Engine
                 continue;
             }
 
+            isAnyCaptureValid = true;
+
+            // 🔍 QSearch SEE pruning: pruning bad captures
+            if (moveScore < EvaluationConstants.PromotionMoveScoreValue)
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
             ++_nodes;
             Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
-            isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
