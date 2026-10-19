@@ -887,6 +887,11 @@ public sealed partial class Engine
         }
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+        if (isInCheck && oppositeSideAttacks == 0)
+        {
+            // Needed for quiet evasions generation
+            oppositeSideAttacks = position.OppositeSideAttacks();
+        }
 
         var poolSize = isInCheck 
             ? Constants.MaxNumberOfPseudolegalMovesInAPosition
