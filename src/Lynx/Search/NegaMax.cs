@@ -973,7 +973,7 @@ public sealed partial class Engine
         {
             // If not in check, we assume we have a non-mated position with no captures.
             // Could technically be a stalemate, though, but checking it failed in https://github.com/lynx-chess/Lynx/pull/358 (TODO retry)
-            if (!isInCheck)
+            if (!isInCheck || position.Phase() > 2)
             {
                 // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
                 return staticEval;
