@@ -878,12 +878,12 @@ public sealed partial class Engine
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
                 return standPat;
             }
-        }
 
-        // Better move
-        if (standPat > alpha)
-        {
-            alpha = standPat;
+            // Better move
+            if (standPat > alpha)
+            {
+                alpha = standPat;
+            }
         }
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
