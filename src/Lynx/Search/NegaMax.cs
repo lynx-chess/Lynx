@@ -905,8 +905,9 @@ public sealed partial class Engine
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            // 🔍 QSearch SEE pruning: pruning bad captures, except when in check
+            if (!isInCheck
+                && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }
