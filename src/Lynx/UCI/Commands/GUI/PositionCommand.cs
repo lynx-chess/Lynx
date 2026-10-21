@@ -32,10 +32,11 @@ public sealed class PositionCommand
         var evaluationContext = new EvaluationContext(buffer);
 
         var opposideSide = Utils.OppositeSide((int)game.CurrentPosition.Side);
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[opposideSide];
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool, evaluationContext.AttacksBySide[opposideSide]),
+            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool, oppositeSideAttacks),
             (int)game.CurrentPosition.Side,
             out lastMove))
         {

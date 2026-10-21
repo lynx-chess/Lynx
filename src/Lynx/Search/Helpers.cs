@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Lynx;
@@ -86,7 +87,7 @@ public sealed partial class Engine
     {
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
-        Debug.Assert(oppositeSideAttacks != 0);
+        Debug.Assert(oppositeSideAttacks.NotEmpty());
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
@@ -191,7 +192,7 @@ public sealed partial class Engine
     /// Never 0 for a real move, so 0 means 'no move'
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int PieceAwareMove(Move move, int piece) => move | (piece << 16);
+    internal static int PieceAwareMove(Move move, int piece) => move | (piece << 16);
 
     /// <summary>
     /// [12][64]
@@ -576,6 +577,18 @@ public sealed partial class Engine
                 throw new LynxException(message);
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetKillerMove(int ply, int index)
+    {
+        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_killerMoves), (ply * 2) + index);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetCounterMove(int ply)
+    {
+        return CounterMove(ply - 1);
     }
 
     [Conditional("DEBUG")]

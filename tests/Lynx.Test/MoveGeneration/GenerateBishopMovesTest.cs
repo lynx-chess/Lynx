@@ -54,7 +54,7 @@ public class GenerateBishopMovesTest
     public void BishopMoves_White()
     {
         var position = new Position(Constants.TrickyTestPositionFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopMoves(position);
 
@@ -123,7 +123,7 @@ public class GenerateBishopMovesTest
     public void BishopMoves_Black()
     {
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopMoves(position);
 
@@ -180,7 +180,7 @@ public class GenerateBishopMovesTest
     public void BishopMoves_CapturesOnly_White()
     {
         var position = new Position(Constants.TrickyTestPositionFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopCaptures(position);
 
@@ -209,7 +209,7 @@ public class GenerateBishopMovesTest
     public void BishopMoves_CapturesOnly_Black()
     {
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.B + offset;
         var moves = GenerateBishopCaptures(position);
 

@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,7 +13,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, Move bestMoveTTCandidate)
     {
         if (move == bestMoveTTCandidate)
         {
@@ -105,6 +105,19 @@ public sealed partial class Engine
         return BaseMoveScore;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int ScoreQuietMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks)
+    {
+        var score = BaseMoveScore + QuietHistoryEntry(position, move, oppositeSideAttacks);
+
+        if(ply >= 1)
+        {
+            score += ContinuationHistoryEntry(move.Piece(position.Board), move.TargetSquare(), ply);
+        }
+
+        return score;
+    }
+
     /// <summary>
     /// Returns the score evaluation of a move
     /// </summary>
@@ -177,7 +190,7 @@ public sealed partial class Engine
             int rawHistoryMalus = HistoryMalus[depth];
 
             var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
-            Debug.Assert(oppositeSideAttacks != 0);
+            Debug.Assert(oppositeSideAttacks.NotEmpty());
 
             var sourceSquare = move.SourceSquare();
             var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;

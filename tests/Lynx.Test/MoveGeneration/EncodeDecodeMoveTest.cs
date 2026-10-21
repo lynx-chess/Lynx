@@ -142,7 +142,7 @@ public class EncodeDecodeMoveTest
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
-        Assert.True(move.IsDoublePawnPush(move.Piece(position.Board, (int)targetSquare), (int)sourceSquare, (int)targetSquare));
+        Assert.True(MoveExtensions.IsDoublePawnPush(position.Board[(int)targetSquare], (int)sourceSquare, (int)targetSquare));
         Assert.False(move.IsPromotion());
         Assert.False(move.IsEnPassant());
     }

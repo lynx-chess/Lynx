@@ -35,8 +35,8 @@ public static class ReferenceMoveGenerator
         int sourceSquare, targetSquare;
 
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        var pawnPush = Utils.PawhPushSquare((int)position.Side);
+        int oppositeSide = Utils.OppositeSide((int)position.Side);
         var bitboard = position.PieceBitboards[piece];
 
         while (bitboard != default)
@@ -85,7 +85,7 @@ public static class ReferenceMoveGenerator
             var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant);
@@ -117,35 +117,35 @@ public static class ReferenceMoveGenerator
 
     internal static IEnumerable<Move> GenerateKingMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMovesForReference((int)Piece.K + offset, position, offset, capturesOnly);
     }
 
     internal static IEnumerable<Move> GenerateKnightMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMovesForReference((int)Piece.N + offset, position, offset, capturesOnly);
     }
 
     internal static IEnumerable<Move> GenerateBishopMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMovesForReference((int)Piece.B + offset, position, offset, capturesOnly);
     }
 
     internal static IEnumerable<Move> GenerateRookMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMovesForReference((int)Piece.R + offset, position, offset, capturesOnly);
     }
 
     internal static IEnumerable<Move> GenerateQueenMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMovesForReference((int)Piece.Q + offset, position, offset, capturesOnly);
     }

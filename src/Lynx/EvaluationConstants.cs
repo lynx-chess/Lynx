@@ -184,7 +184,7 @@ public static class EvaluationConstants
     /// It needs to be positive or negative high enough to avoid draw adjudications
     /// It needs to be negative low enough or positive to avoid loss adjudications
     /// It needs to be negative low or positive low enough to prevent 'emergency moves' from being chosen over real moves,
-    /// sspecially if those other moves have positive scores
+    /// especially if those other moves have positive scores
     /// </summary>
     public const int EmergencyMoveScore = -66;
 
@@ -195,6 +195,8 @@ public static class EvaluationConstants
     public const int QueenPromotionWithCaptureBaseValue = GoodCaptureMoveBaseScoreValue + PromotionMoveScoreValue;
 
     public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
+
+    public const int GoodCaptureMoveCutoff = EvaluationConstants.FirstKillerMoveValue;
 
     public const int FirstKillerMoveValue = 524_288;
 

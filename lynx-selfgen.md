@@ -3214,3 +3214,56 @@ https://openbench.lynx-chess.com/test/3133/
 ```
 
 </details>
+
+#### ❌ `selfgen/eg-data-15kn`
+
+3145 dataset (`endgames_cdb95105.epd` + 1-4 moves, 15kn)
+
+MinPly 20, MinPieces 7, MaxEval 20000, filter checks and tactical, 40 pos/game sampling alternating phases in descending order
+
+```json
+Source file: 3145-eg-15kn-1M-interleaved.vf
+Total games: 1043509
+Games after filtering: 931010 (89.22%)
+Total positions: 101129071
+Positions after filtering: 22481091 (22.23%)
+Positions/game: 24
+Shortest game: 11 moves, longest game: 284 moves
+Total time: 2 min 1 s
+```
+
+SPRT (using 500K)
+Endgame book (the one used to generate the positions
+```
+Test  | eval/eg-data-500k
+Elo   | 2.81 +- 2.01 (95%)
+SPRT  | 8.0+0.08s Threads=1 Hash=32MB
+LLR   | 2.90 (-2.25, 2.89) [0.00, 3.00]
+Games | 27164: +6217 -5997 =14950
+Penta | [12, 3047, 7244, 3267, 12]
+https://openbench.lynx-chess.com/test/3241/
+```
+
+UHO book
+```
+Test  | eval/eg-data-500k
+Elo   | -2.89 +- 3.00 (95%)
+SPRT  | 8.0+0.08s Threads=1 Hash=32MB
+LLR   | -2.26 (-2.25, 2.89) [-3.00, 1.00]
+Games | 16972: +4172 -4313 =8487
+Penta | [188, 2132, 3972, 2021, 173]
+https://openbench.lynx-chess.com/test/3240/
+```
+
+#### `selfgen/eg-data-15kn-relabelled`
+
+```json
+Source file: 3145-eg-15kn-1M-interleaved_relabelled.vf
+Total games: 1042108
+Games after filtering: 929803 (89.22%)
+Total positions: 100854140
+Positions after filtering: 22446621 (22.26%)
+Positions/game: 24
+Shortest game: 11 moves, longest game: 284 moves
+Total time: 1 min 44 s
+```
