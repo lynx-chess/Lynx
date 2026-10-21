@@ -52,6 +52,8 @@ internal ref struct MovePicker
 
     public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isInCheck, bool capturesOnly)
     {
+        Debug.Assert(!(capturesOnly && isInCheck));
+
         _engine = engine;
         _position = position;
         _ttMove = ttMove;
