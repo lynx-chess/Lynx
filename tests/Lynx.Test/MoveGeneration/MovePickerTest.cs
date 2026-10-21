@@ -44,7 +44,7 @@ public class MovePickerTest : BaseTest
         var oppositeSideAttacks = GetOppositeSideAttacks(position);
 
         var allMoves = GenerateAllMoves(position, oppositeSideAttacks);
-        var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove: 0, ply: 0, isQuiescence: false);
+        var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove: 0, ply: 0, capturesOnly: false);
 
         if (position.IsInCheck())
         {
@@ -80,7 +80,7 @@ public class MovePickerTest : BaseTest
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, capturesOnly: !isInCheck, isInCheck: isInCheck);
+        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, isInCheck: isInCheck, capturesOnly: !isInCheck);
 
         var returned = new List<Move>();
         while (movePicker.TryGetNext(out var move, out _))
@@ -129,7 +129,7 @@ public class MovePickerTest : BaseTest
         foreach (var ttMove in ttMoves)
         {
             var expected = SortAlreadyGeneratedMoves(engine, position, captures, ttMove);
-            var actual = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply: 0, isQuiescence: true);
+            var actual = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply: 0, capturesOnly: true);
 
             Assert.AreEqual(expected, actual, $"Different moves/order/scores for TT move {ttMove} in {fen}");
         }
@@ -142,7 +142,7 @@ public class MovePickerTest : BaseTest
 
             Assert.AreEqual(
                 withoutTTMove,
-                GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, corruptedTTMove, ply: 0, isQuiescence: true),
+                GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, corruptedTTMove, ply: 0, capturesOnly: true),
                 $"Corrupted TT move {corruptedTTMove} in {fen}");
         }
     }
@@ -207,7 +207,7 @@ public class MovePickerTest : BaseTest
 
                 var description = $"TT: {ttMove}, killers: {firstKiller}, {secondKiller}, counter: {counterMove}, ply: {ply}, FEN: {fen}";
 
-                var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply, isQuiescence: false);
+                var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply, capturesOnly: false);
 
                 Assert.AreEqual(returned.Count, returned.Select(r => r.Move).Distinct().Count(), $"Repeated moves. {description}");
 
@@ -293,12 +293,12 @@ public class MovePickerTest : BaseTest
         return result;
     }
 
-    internal static List<(Move Move, int Score)> GetAllMovesFromMovePicker(Engine engine, Position position, Bitboard oppositeSideAttacks, ShortMove ttMove, int ply, bool isQuiescence)
+    internal static List<(Move Move, int Score)> GetAllMovesFromMovePicker(Engine engine, Position position, Bitboard oppositeSideAttacks, ShortMove ttMove, int ply, bool capturesOnly)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence, isInCheck: !isQuiescence && position.IsInCheck());
+        var movePicker = new MovePicker(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: position.IsInCheck(), capturesOnly: capturesOnly);
 
         var result = new List<(Move, int)>();
 

@@ -344,7 +344,7 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck);
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: false);
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
@@ -900,7 +900,7 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[poolSize];
         Span<int> moveScores = stackalloc int[poolSize];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, capturesOnly: !isInCheck, isInCheck: isInCheck);
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: !isInCheck);
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
@@ -998,11 +998,11 @@ public sealed partial class Engine
                 return staticEval;
             }
 
-            // When in check, if no valid evasion was generated:
+            // When in check, if no valid evasion was generated, it's mate
             Debug.Assert(bestMove is null);
             Debug.Assert(!MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]));
 
-            bestScore = -EvaluationConstants.CheckMateBaseEvaluation + ply;
+            bestScore = Position.MatedScore(ply);
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;

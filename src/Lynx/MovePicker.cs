@@ -50,7 +50,7 @@ internal ref struct MovePicker
 
     internal readonly Stage Stage => _stage;
 
-    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool capturesOnly = false, bool isInCheck = false)
+    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isInCheck, bool capturesOnly)
     {
         _engine = engine;
         _position = position;
@@ -58,7 +58,7 @@ internal ref struct MovePicker
         _oppositeSideAttacks = oppositeSideAttacks;
         _ply = ply;
         _capturesOnly = capturesOnly;
-        _stage = capturesOnly ? Stage.GenerateNoisyMovesStage : Stage.TTMoveStage;
+        _stage = _capturesOnly ? Stage.GenerateNoisyMovesStage : Stage.TTMoveStage;
         _moves = moves;
         _moveScores = moveScores;
 
