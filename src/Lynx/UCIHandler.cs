@@ -51,6 +51,7 @@ public sealed class UCIHandler
             switch (ExtractCommandItems(rawCommand))
             {
                 case GoCommand.Id:
+                    _searcher.RegisterPendingGoCommand();
                     await _uciToEngine.Writer.WriteAsync(rawCommand, cancellationToken);
                     break;
 
@@ -61,7 +62,7 @@ public sealed class UCIHandler
                     await HandleIsReady(cancellationToken);
                     break;
                 case PonderHitCommand.Id:
-                    await HandlePonderHit();
+                    HandlePonderHit();
                     break;
                 case PositionCommand.Id:
                     HandlePosition(rawCommand);
@@ -70,11 +71,11 @@ public sealed class UCIHandler
                     HandleQuit();
                     return;
                 case SetOptionCommand.Id:
-                    await HandleStop();
+                    HandleStop();
                     HandleSetOption(rawCommand);
                     break;
                 case StopCommand.Id:
-                    await HandleStop();
+                    HandleStop();
                     break;
                 case UCICommand.Id:
                     await HandleUCI(cancellationToken);
@@ -159,7 +160,7 @@ public sealed class UCIHandler
 #endif
     }
 
-    private async Task HandleStop() => await _searcher.StopSearching();
+    private void HandleStop() => _searcher.StopSearching();
 
     internal async Task HandleUCI(CancellationToken cancellationToken)
     {
@@ -176,11 +177,11 @@ public sealed class UCIHandler
 
     private async Task HandleIsReady(CancellationToken cancellationToken) => await SendCommand(ReadyOKCommand.Id, cancellationToken);
 
-    private async Task HandlePonderHit()
+    private void HandlePonderHit()
     {
         if (Configuration.EngineSettings.IsPonder)
         {
-            await _searcher.PonderHit();
+            _searcher.PonderHit();
         }
         else
         {
@@ -602,9 +603,9 @@ public sealed class UCIHandler
 
             filter = new ViriformatFilter();
 
-            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             config.Bind(filter);
-            #pragma warning restore IL2026
+#pragma warning restore IL2026
         }
 
         ViriformatLoader.LoadFile(path, filter);
