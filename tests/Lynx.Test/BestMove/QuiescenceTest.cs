@@ -52,16 +52,31 @@ public class QuiescenceTest : BaseTest
     }
 
     /// <summary>
-    /// Same as <see cref="QuiescenceSearch_DetectsCheckmate_WhenCapturesExistButNoneGetsTheKingOutOfCheck"/>, but the rook can block the check (Re8), so it isn't a final position
+    /// Same as <see cref="QuiescenceSearch_DetectsCheckmate_WhenCapturesExistButNoneGetsTheKingOutOfCheck"/>, but the rook can block the check (Re8) and the king can move (Kh7),
+    /// so it isn't a final position (there is no mate afterwards either, thanks to the h6 pawn)
     /// </summary>
     [Test]
     public void QuiescenceSearch_DoesNotDetectCheckmate_WhenCapturesExistButAnotherMoveGetsTheKingOutOfCheck()
+    {
+        var engine = GetEngine("R5k1/5pp1/7p/8/8/8/P3r3/6K1 b - - 0 1");
+
+        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+
+        Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
+    }
+
+    /// <summary>
+    /// Same as <see cref="QuiescenceSearch_DoesNotDetectCheckmate_WhenCapturesExistButAnotherMoveGetsTheKingOutOfCheck"/> without the h6 pawn:
+    /// it isn't a final position, because the only evasion is the (quiet) block Re8, but it loses to Rxe8#, which QSearch finds in check by searching the evasion
+    /// </summary>
+    [Test]
+    public void QuiescenceSearch_DetectsCheckmateInTwoPlies_WhenTheOnlyEvasionIsAQuietBlockThatLoses()
     {
         var engine = GetEngine("R5k1/5ppp/8/8/8/8/P3r3/6K1 b - - 0 1");
 
         var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
 
-        Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
+        Assert.AreEqual(Position.EvaluateFinalPosition(2, isInCheck: true), score);
     }
 
     /// <summary>
