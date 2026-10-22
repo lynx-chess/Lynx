@@ -149,6 +149,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Correction history
 
+- Check evasions
+
 ### Evaluation
 
 - Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
@@ -176,6 +178,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 - King pawn shield, king virtual mobility, king in open and semi-open files, king ring attacks
 
 - Isolated pawns
+
+- Doubled pawns
 
 - Passed pawns, including bonus for not opponent pieces ahead and friend/opponent king distance to it
 
@@ -227,11 +231,15 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Incremental move sorting
 
+- Staged move generation
+
 - Expected moves to go [[1](https://expositor.dev/pdf/movetime.pdf)]
 
 - Pondering/permanent brain [[1](https://www.chessprogramming.org/Pondering)]
 
 - Multithreaded search/parallel search/SMP [[0](https://www.chessprogramming.org/Parallel_Search)], [[Multithreaded search section](#multithreaded-search)]
+
+- `vftoepd` tool, which includes a wide range of filters
 
 </details>
 

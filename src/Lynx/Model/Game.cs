@@ -52,7 +52,9 @@ public sealed class Game : IDisposable
         PositionBeforeLastSearch = new Position(CurrentPosition);
 
 #if DEBUG
-        MoveHistory = [with(Constants.MaxNumberMovesInAGame)];
+#pragma warning disable IDE0028 // Simplify collection initialization - suggested syntax causes issues for some .NET 10 SDK versions
+        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+#pragma warning restore IDE0028 // Simplify collection initialization
 #endif
     }
 
