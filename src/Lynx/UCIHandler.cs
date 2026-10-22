@@ -299,6 +299,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "multipv":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.MultiPV = value;
+                    }
+                    break;
+                }
             case "minimal":
                 {
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))

@@ -339,6 +339,8 @@ public static class Constants
 
     public static readonly int MaxMoveOverhead = 60_000;
 
+    public const int MaxMultiPV = MaxNumberOfLegalMovesInAPosition;
+
     /// <summary>
     /// A position can have at most 218 legal moves
     /// See https://lichess.org/@/Tobs40/blog/why-a-reachable-position-can-have-at-most-218-playable-moves/a5xdxeqs

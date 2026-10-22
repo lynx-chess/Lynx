@@ -118,9 +118,34 @@ public sealed partial class Engine
                 && rootTTEntry.NodeType != NodeType.Unknown
                 && rootTTEntry.BestMove != default;
 
+            var rootBestMove = ttEntryHasBestMoveAtRoot
+                ? rootTTEntry.BestMove
+                : default;
+
+            // The move that was the best of this PV line in the previous depth is the one to search first.
+            // For lines other than the first one, the TT move is the best move of a previous PV line, which will be excluded
+            if (_multiPV > 1)
+            {
+                var previousLineRootMove = _rootMoves[_pvIndex];
+
+                if (previousLineRootMove.Score != RootMove.DefaultScore)
+                {
+                    rootBestMove = (ShortMove)previousLineRootMove.Move;
+                }
+                else if (_pvIndex > 0)
+                {
+                    Debug.Assert(
+                        Configuration.EngineSettings.Threads != 1
+                        || rootBestMove == default
+                        || _rootMoves[0.._pvIndex].Select(r => (ShortMove)r.Move).Contains(rootBestMove));
+
+                    rootBestMove = default;
+                }
+            }
+
             // Root: TT best move only used for move ordering, no TT cutoffs nor singular extensions
-            ttEntry = ttEntryHasBestMoveAtRoot
-                ? new TTProbeResult(EvaluationConstants.NoScore, rootTTEntry.BestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
+            ttEntry = rootBestMove != default
+                ? new TTProbeResult(EvaluationConstants.NoScore, rootBestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
                 : default;
 
             ttWasPv = false;
@@ -350,6 +375,12 @@ public sealed partial class Engine
         {
             var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
+            {
+                continue;
+            }
+
+            // MultiPV: moves already chosen as the best ones of previous PV lines aren't searched again
+            if (isRoot && _multiPV > 1 && WasSearchedAsRootMove(move))
             {
                 continue;
             }
@@ -775,7 +806,11 @@ public sealed partial class Engine
                 UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
 
-            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            // MultiPV: when not searching the first PV lines, root moves are excluded, so the best move of the initial PV line shouldn't be overwritten
+            if (!isRoot || _pvIndex == 0)
+            {
+                _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            }
         }
 
         return bestScore;
