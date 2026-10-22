@@ -239,6 +239,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Multithreaded search/parallel search/SMP [[0](https://www.chessprogramming.org/Parallel_Search)], [[Multithreaded search section](#multithreaded-search)]
 
+- `MultiPV`
+
 - `vftoepd` tool, which includes a wide range of filters
 
 </details>
