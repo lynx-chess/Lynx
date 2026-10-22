@@ -305,6 +305,20 @@ Elo difference: 118.6 +/- 8.1, LOS: 100.0 %, DrawRatio: 60.6 %
 SPRT: llr 0 (0.0%), lbound -inf, ubound inf
 ```
 
+## MultiPV
+
+Lynx development versions support MultiPV.
+
+It can be enabled using `MultiPV` UCI command or via `appsettings.json` configuration file.
+
+|    MultiPV   |     2     |     4     |
+|:------------:|:---------:|:---------:|
+| D=10 | [+70.67](https://openbench.lynx-chess.com/test/3272/) | [+110.56](https://openbench.lynx-chess.com/test/3273/)|
+| D=20 | [+29.60](https://openbench.lynx-chess.com/test/3274/) | [+49.67](https://openbench.lynx-chess.com/test/3275/) |
+| 8+0.08 | [-123.87](https://openbench.lynx-chess.com/test/3269/) | [-268.11](https://openbench.lynx-chess.com/test/3271/) |
+| 8+0.08 (2t vs 1t) | [-18.90](https://openbench.lynx-chess.com/test/3278/) | - |
+| 8+0.08 (4t vs 1t) | - | [-70.26](https://openbench.lynx-chess.com/test/3279/) |
+
 ## Non-standard UCI commands
 
 The following non-standard UCI commands are supported:
