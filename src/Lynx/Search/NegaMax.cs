@@ -970,13 +970,40 @@ public sealed partial class Engine
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
-            // TODO check for threefold or 50 moves repetitions when in check (and therefore, quiet evasions are generated)
-            stack.Move = move;
+            // Before making a move
+            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+            var canBeRepetition = Game.Update50movesRule(move);
+            Game.AddToPositionHashHistory(position.UniqueIdentifier);
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void RevertMove()
+            {
+                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                Game.RemoveFromPositionHashHistory();
+                position.UnmakeMove(move, gameState);
+            }
+
+            stack.Move = move;
+            int score;
+
+            // TODO this only makes sense if last move was not a capture: not QS or check evasion
+            if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition()))
+            {
+                score = 0;
+
+                // We don't need to evaluate further down to know it's a draw.
+                // Since we won't be evaluating further down, we need to clear the PV table because those moves there
+                // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
+                Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
+            }
+            else
+            {
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
+                score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
-            position.UnmakeMove(move, gameState);
+            }
+
+            RevertMove();
 
             PrintMove(position, ply, move, score, isQuiescence: true);
 
