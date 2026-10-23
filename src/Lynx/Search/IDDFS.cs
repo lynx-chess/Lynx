@@ -110,6 +110,31 @@ public sealed partial class Engine
     private int _bestMoveStability;
     private int _scoreDelta;
 
+    #region MultiPV
+
+    /// <summary>
+    /// Number of PV lines searched per depth. This is equivalent to <see cref="Configuration.EngineSettings.MultiPV"/>, limited by the number of legal moves
+    /// </summary>
+    private int _multiPV = 1;
+
+    /// <summary>
+    /// Index (0-based) of the PV line being searched.
+    /// It divides <see cref="_rootMoves"/> in finished/searched PV lines and unfinished ones
+    /// </summary>
+    private int _pvIndex;
+
+    /// <summary>
+    /// First <see cref="_pvIndex"/> moves are the already searched PV lines of the current depth, sorted by score
+    /// </summary>
+    private readonly RootMove[] _rootMoves = new RootMove[Constants.MaxNumberOfLegalMovesInAPosition];
+
+    /// <summary>
+    /// Number of legal moves at root, aka used length of <see cref="_rootMoves"/> buffer
+    /// </summary>
+    private int _rootMovesCount;
+
+    #endregion
+
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
     /// Requires <see cref="_searchConstraints"/> to be populated before invoking it
@@ -131,8 +156,6 @@ public sealed partial class Engine
         AgeQuietHistory();
 
         int bestScore = 0;
-        int alpha = EvaluationConstants.MinEval;
-        int beta = EvaluationConstants.MaxEval;
         SearchResult? lastSearchResult = null;
         int depth = 1;
         Move firstLegalMove = default;
@@ -165,128 +188,64 @@ public sealed partial class Engine
 
             int mate = 0;
 
+            _multiPV = 1;
+            _pvIndex = 0;
+
+            if (Configuration.EngineSettings.MultiPV > 1)
+            {
+                InitializeRootMoves();
+            }
+
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
-                    || lastSearchResult?.Score is null)
+                Debug.Assert(
+                    lastSearchResult is null
+                    || (lastSearchResult.Mate == 0
+                        ? lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit
+                        : Math.Abs(lastSearchResult.Score) < EvaluationConstants.CheckMateBaseEvaluation && (lastSearchResult.Score > EvaluationConstants.PositiveCheckmateDetectionLimit || lastSearchResult.Score < EvaluationConstants.NegativeCheckmateDetectionLimit)));
+
+                SearchResult[] extraLines = [];
+
+                if (_multiPV == 1)
                 {
-                    bestScore = NegaMax(depth: depth, ply: 0, alpha, beta, cutnode: false, cancellationToken);
+                    bestScore = SearchRoot(depth, lastSearchResult?.Score, logLevel, cancellationToken);
+
+                    //PrintPvTable(depth: depth);
+                    ValidatePVTable();
                 }
                 else
                 {
-                    // 🔍 Aspiration windows - search using a window around an expected score (the previous search one)
-                    // If the resulting score doesn't fall inside of the window, it is widened it until it does
-                    var window = Configuration.EngineSettings.AspirationWindow_Base;
+                    var validLines = SearchRootLines(depth, logLevel, cancellationToken);
+                    // We need to re-populate it with the best PV
 
-                    // A temporary reduction is used for fail highs, because the verification for those 'too good' lines
-                    // are expected to happen at lower depths
-                    int failHighReduction = 0;
+                    Array.Clear(_pVTable);
 
-                    alpha = Math.Clamp(lastSearchResult.Score - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
-                    beta = Math.Clamp(lastSearchResult.Score + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
-
-                    if (_logger.IsEnabled(logLevel))
+                    if (validLines > 0)
                     {
-                        _logger.Log(logLevel,
-                            "[#{EngineId}] Depth {Depth}: asp-win [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
-                            _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
+                        bestScore = _rootMoves[0].Score;
+
+                        // Before clearing it above, The PV table held the PV of the last line searched.
+                        // However, it's the strongest line's PV the one we need for the rest of the logic
+                        _rootMoves[0].PV.CopyTo(_pVTable, 0);
+
+                        extraLines = BuildExtraLines(validLines, depth);
                     }
-
-                    Debug.Assert(
-                        lastSearchResult.Mate == 0
-                            ? lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit
-                            : Math.Abs(lastSearchResult.Score) < EvaluationConstants.CheckMateBaseEvaluation && (lastSearchResult.Score > EvaluationConstants.PositiveCheckmateDetectionLimit || lastSearchResult.Score < EvaluationConstants.NegativeCheckmateDetectionLimit));
-
-                    while (true)
+                    else
                     {
-                        var depthToSearch = depth - failHighReduction;
-                        Debug.Assert(depthToSearch > 0);
-
-                        // Alpha and beta values close to checkmate scores due to window widening can cause false mate reporting (very high/low mate values) after being saved in TT
-                        if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit)
-                        {
-                            beta = EvaluationConstants.MaxEval;
-                        }
-
-                        if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit)
-                        {
-                            alpha = EvaluationConstants.MinEval;
-                        }
-
-                        if (_logger.IsEnabled(logLevel))
-                        {
-                            _logger.Log(logLevel,
-                                "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, time {Time}, nodes {Nodes}",
-                                _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
-                        }
-
-                        bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
-                        Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
-
-                        // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
-                        window = Math.Min(EvaluationConstants.MaxEval, (int)(window * Configuration.EngineSettings.AspirationWindow_Multiplier));
-
-                        // Depth change: https://github.com/lynx-chess/Lynx/pull/440
-                        if (alpha >= bestScore)     // Fail low
-                        {
-                            alpha = Math.Clamp(bestScore - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
-                            beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
-                            failHighReduction = 0;
-                        }
-                        else if (beta <= bestScore)     // Fail high
-                        {
-                            beta = Math.Clamp(bestScore + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
-                            if (failHighReduction < 3)
-                            {
-                                ++failHighReduction;
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
-
-                        if (bestScore > EvaluationConstants.CheckMateBaseEvaluation)
-                        {
-                            _logger.Warn(
-                                "[#{EngineId}] Depth {Depth}: potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
-                                _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
-
-                            bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
-
-                            break;
-                        }
-
-                        if (bestScore < -EvaluationConstants.CheckMateBaseEvaluation)
-                        {
-                            // TODO bug
-                            _logger.Warn(
-                            //_logger.Info(
-                                "[#{EngineId}] Depth {Depth}: potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
-                                _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
-
-                            bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit - 1;
-
-                            break;
-                        }
+                        _logger.Warn("No best move found while doing MultiPV {MultiPV} of {Position}",
+                        _multiPV, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
                     }
                 }
 
-                //PrintPvTable(depth: depth);
-                ValidatePVTable();
                 Debug.Assert(bestScore != EvaluationConstants.MinEval);
 
-                var bestScoreAbs = Math.Abs(bestScore);
-                bool isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit && bestScoreAbs < EvaluationConstants.CheckMateBaseEvaluation;
-                mate = isMateDetected
-                    ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
-                    : 0;
+                mate = CalculateMate(bestScore);
 
                 var oldBestMove = lastSearchResult?.BestMove;
                 var oldScore = lastSearchResult?.Score ?? 0;
-                var lastSearchResultCandidate = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
+                var lastSearchResultCandidate = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate, extraLines);
 
                 if (lastSearchResultCandidate.BestMove == default)
                 {
@@ -337,6 +296,7 @@ public sealed partial class Engine
                 _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
+            Array.Clear(_pVTable);
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
             {
                 _pVTable[i] = lastSearchResult.Moves[i];
@@ -363,6 +323,262 @@ public sealed partial class Engine
         //}
 
         return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove, isPondering);
+    }
+
+    /// <summary>
+    /// Searches the root position at the given depth.
+    /// Uses aspiration windows centered in <paramref name="expectedScore"/> when the depth is high enough and there is one,
+    /// and a full window search otherwise
+    /// </summary>
+    /// <param name="expectedScore">lastSearchResult.Score</param>
+    /// <returns>Score of the search, whose PV is left in <see cref="_pVTable"/></returns>
+    private int SearchRoot(int depth, int? expectedScore, LogLevel logLevel, CancellationToken cancellationToken)
+    {
+        int bestScore = EvaluationConstants.MinEval;
+
+        if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
+            || expectedScore is null)
+        {
+            return NegaMax(depth: depth, ply: 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, cutnode: false, cancellationToken);
+        }
+
+        // 🔍 Aspiration windows - search using a window around an expected score (the previous search one)
+        // If the resulting score doesn't fall inside of the window, it is widened it until it does
+        var window = Configuration.EngineSettings.AspirationWindow_Base;
+
+        // A temporary reduction is used for fail highs, because the verification for those 'too good' lines
+        // are expected to happen at lower depths
+        int failHighReduction = 0;
+
+        var alpha = Math.Clamp(expectedScore.Value - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+        var beta = Math.Clamp(expectedScore.Value + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+
+        if (_logger.IsEnabled(logLevel))
+        {
+            _logger.Log(logLevel,
+                "[#{EngineId}] Depth {Depth}: asp-win [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                _id, depth, alpha, beta, expectedScore.Value, _nodes);
+        }
+
+        Debug.Assert(Math.Abs(expectedScore.Value) < EvaluationConstants.CheckMateBaseEvaluation);
+
+        while (true)
+        {
+            var depthToSearch = depth - failHighReduction;
+            Debug.Assert(depthToSearch > 0);
+
+            // Alpha and beta values close to checkmate scores due to window widening can cause false mate reporting (very high/low mate values) after being saved in TT
+            if (beta >= EvaluationConstants.PositiveCheckmateDetectionLimit)
+            {
+                beta = EvaluationConstants.MaxEval;
+            }
+
+            if (alpha <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+            {
+                alpha = EvaluationConstants.MinEval;
+            }
+
+            if (_logger.IsEnabled(logLevel))
+            {
+                _logger.Log(logLevel,
+                    "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, time {Time}, nodes {Nodes}",
+                    _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
+            }
+
+            bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
+            Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
+
+            // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
+            window = Math.Min(EvaluationConstants.MaxEval, (int)(window * Configuration.EngineSettings.AspirationWindow_Multiplier));
+
+            // Depth change: https://github.com/lynx-chess/Lynx/pull/440
+            if (alpha >= bestScore)     // Fail low
+            {
+                alpha = Math.Clamp(bestScore - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+                beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
+                failHighReduction = 0;
+            }
+            else if (beta <= bestScore)     // Fail high
+            {
+                beta = Math.Clamp(bestScore + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+                if (failHighReduction < 3)
+                {
+                    ++failHighReduction;
+                }
+            }
+            else
+            {
+                break;
+            }
+
+            if (bestScore > EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn(
+                    "[#{EngineId}] Depth {Depth}: potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                    _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
+
+                bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
+
+                break;
+            }
+
+            if (bestScore < -EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn(
+                    "[#{EngineId}] Depth {Depth}: potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                    _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
+
+                bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit - 1;
+
+                break;
+            }
+        }
+
+        return bestScore;
+    }
+
+    [SkipLocalsInit]
+    private void InitializeRootMoves()
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        _rootMovesCount = 0;
+
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        {
+            var gameState = Game.CurrentPosition.MakeMove(move);
+            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
+            Game.CurrentPosition.UnmakeMove(move, gameState);
+
+            if (isPositionValid)
+            {
+                _rootMoves[_rootMovesCount++] = new RootMove(move);
+            }
+        }
+
+        _multiPV = Math.Clamp(_rootMovesCount, 1, Configuration.EngineSettings.MultiPV);
+    }
+
+    /// <summary>
+    /// Searches the first <see cref="_multiPV"/> PV lines of the root position at the given depth, one after the other.
+    /// Moves chosen as the best ones of the previous lines are excluded from the search of the following ones.
+    /// After this method, the first moves of <see cref="_rootMoves"/> are the PV lines (as many as the returned value), sorted by score
+    /// </summary>
+    /// <returns>Number of PV lines successfully searched</returns>
+    private int SearchRootLines(int depth, LogLevel logLevel, CancellationToken cancellationToken)
+    {
+        for (_pvIndex = 0; _pvIndex < _multiPV; ++_pvIndex)
+        {
+            var previousScore = _rootMoves[_pvIndex].Score;
+
+            var score = SearchRoot(
+                depth,
+                previousScore != RootMove.DefaultScore ? previousScore : null,
+                logLevel,
+                cancellationToken);
+
+            ValidatePVTable();
+
+            var pvTableSpan = _pVTable.AsSpan();
+            var pvLength = pvTableSpan.IndexOf(0);
+            if (pvLength <= 0)
+            {
+                _logger.Warn(
+                    "[#{EngineId}] Depth {Depth}: PV line {PVIndex} didn't produce a best move for position {Position}. Score {Score} detected",
+                    _id, depth, _pvIndex + 1, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), score);
+
+                return _pvIndex;
+            }
+
+            var pv = pvTableSpan[..pvLength].ToArray();
+            var firstPVMove = pv[0];
+
+            // Search the RootMove equivalent of firstPVMove in the unfinished part of _rootMoves
+            var rootMoveIndex = -1;
+            for (int i = _pvIndex; i < _rootMovesCount; ++i)
+            {
+                if (_rootMoves[i].Move == firstPVMove)
+                {
+                    rootMoveIndex = i;
+                    break;
+                }
+            }
+
+            if (rootMoveIndex == -1)
+            {
+                _logger.Warn(
+                    "[#{EngineId}] Depth {Depth}: PV line {PVIndex} best move {Move} not found among the remaining root moves of position {Position}",
+                    _id, depth, _pvIndex + 1, firstPVMove.UCIString(), Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+
+                return _pvIndex;
+            }
+
+            // Move that RootMove to _pvIndex, right after the previously finished PV lines, keeping the relative order of the rest (stable)
+            var rootMove = _rootMoves[rootMoveIndex];
+            Array.Copy(_rootMoves, _pvIndex, _rootMoves, _pvIndex + 1, rootMoveIndex - _pvIndex);
+            rootMove.Score = score;
+            rootMove.PV = pv;
+            _rootMoves[_pvIndex] = rootMove;
+
+            // Sort by score the lines searched so far. Lines before this one were already sorted, so only this one can be misplaced
+            for (int i = _pvIndex; i > 0 && _rootMoves[i].Score > _rootMoves[i - 1].Score; --i)
+            {
+                (_rootMoves[i], _rootMoves[i - 1]) = (_rootMoves[i - 1], _rootMoves[i]);
+            }
+        }
+
+        return _multiPV;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="move"/> has already been chosen as the best move of a previous PV line of the current depth
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool WasSearchedAsRootMove(Move move)
+    {
+        for (int i = 0; i < _pvIndex; ++i)
+        {
+            if (_rootMoves[i].Move == move)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private SearchResult[] BuildExtraLines(int validLines, int depth)
+    {
+        var extraLinesCount = validLines - 1;
+        var extraLines = new SearchResult[extraLinesCount];
+
+        for (int i = 0; i < extraLinesCount; ++i)
+        {
+            ref var rootMove = ref _rootMoves[i + 1];
+
+            extraLines[i] = new SearchResult(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+                rootMove.PV[0], rootMove.Score, depth, rootMove.PV, CalculateMate(rootMove.Score))
+            {
+                MultiPVIndex = i + 2,
+                DepthReached = _maxDepthReached.Max(),
+            };
+        }
+
+        return extraLines;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CalculateMate(int score)
+    {
+        var scoreAbs = Math.Abs(score);
+        bool isMateDetected = scoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit && scoreAbs < EvaluationConstants.CheckMateBaseEvaluation;
+
+        return isMateDetected
+            ? Utils.CalculateMateInX(score, scoreAbs)
+            : 0;
     }
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isPondering)
@@ -554,12 +770,10 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestScore, int depth, int mate)
+        int bestScore, int depth, int mate, SearchResult[] extraLines)
     {
         var pvTableSpan = _pVTable.AsSpan();
         var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
-
-        var maxDepthReached = _maxDepthReached.Max();
 
         var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
 
@@ -570,10 +784,11 @@ public sealed partial class Engine
 #endif
             pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
         {
-            DepthReached = maxDepthReached,
+            DepthReached = _maxDepthReached.Max(),
             Nodes = _nodes,
             Time = Utils.CalculateUCITime(elapsedSeconds),
             NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds),
+            ExtraLines = extraLines,
         };
     }
 

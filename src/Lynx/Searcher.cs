@@ -454,7 +454,8 @@ public sealed class Searcher : IDisposable
                 }
 
                 // Thread voting, original impl slightly corrected based on by Heimdall's (based on Berserk's)
-                if (extraResult.BestMove != default)
+                // Skipped when MultiPV > 1, since only the first line is considered in the current implementation
+                if (extraResult.BestMove != default && Configuration.EngineSettings.MultiPV == 1)
                 {
 #if MULTITHREAD_DEBUG
                     var previousEngineId = finalSearchResult.EngineId;

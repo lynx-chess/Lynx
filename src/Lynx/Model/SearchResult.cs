@@ -1,5 +1,6 @@
 ﻿using Lynx.UCI.Commands.Engine;
 using System.Diagnostics;
+using System.Text;
 
 namespace Lynx.Model;
 
@@ -30,6 +31,17 @@ public sealed class SearchResult
     public int HashfullPermill { get; set; } = -1;
 
     public Move BestMove { get; init; }
+
+    /// <summary>
+    /// 1-based index of the PV line
+    /// </summary>
+    public int MultiPVIndex { get; init; } = 1;
+
+    /// <summary>
+    /// Empty unless in a root instance of a MultiPV search
+    /// (<see cref="Configuration.EngineSettings.MultiPV"/> &gt; 1 and <see cref="MultiPVIndex"/> == 1)
+    /// </summary>
+    public SearchResult[] ExtraLines { get; init; } = [];
 
 #if MULTITHREAD_DEBUG
     public SearchResult(Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
@@ -62,15 +74,34 @@ public sealed class SearchResult
         var sb = ObjectPools.StringBuilderPool.Get();
         sb.EnsureCapacity(128 + (Moves.Length * 5));
 
+        AppendInfoLine(sb, this);
+
+        // MultiPV: the rest of the lines are written in the SB together with the first one, so that they are all sent to UCI at the same time
+        // They all share nodes, time, nps and hashfull
+        foreach (var line in ExtraLines)
+        {
+            sb.AppendLine();
+            line.AppendInfoLine(sb, this);
+        }
+
+        var result = sb.ToString();
+
+        ObjectPools.StringBuilderPool.Return(sb);
+
+        return result;
+    }
+
+    private void AppendInfoLine(StringBuilder sb, SearchResult shared)
+    {
 #if MULTITHREAD_DEBUG
         sb.Append("[#").Append(EngineId).Append("] ");
 #endif
 
-        var nps = NodesPerSecond;
+        var nps = shared.NodesPerSecond;
 
         if (Configuration.EngineSettings.Threads > 1
             && Configuration.EngineSettings.EstimateMultithreadedSearchNPS
-            && HashfullPermill == -1)   // Not last info command
+            && shared.HashfullPermill == -1)   // Not last info command
         {
             // Estimate total nps
             nps *= (ulong)Configuration.EngineSettings.Threads;
@@ -83,20 +114,25 @@ public sealed class SearchResult
         sb.Append(InfoCommand.Id)
           .Append(" depth ").Append(Depth)
           .Append(" seldepth ").Append(DepthReached)
-          .Append(" multipv 1")
+          .Append(" multipv ").Append(MultiPVIndex)
           .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Score) : "mate " + Mate)
-          .Append(" nodes ").Append(Nodes)
+          .Append(" nodes ").Append(shared.Nodes)
           .Append(" nps ").Append(nps)
-          .Append(" time ").Append(Time);
+          .Append(" time ").Append(shared.Time);
 
-        if (HashfullPermill != -1)
+        if (shared.HashfullPermill != -1)
         {
-            sb.Append(" hashfull ").Append(HashfullPermill);
+            sb.Append(" hashfull ").Append(shared.HashfullPermill);
         }
 
-        if (WDL is not null)
+        // Extra lines don't have their own WDL, since it depends on their score
+        var wdl = ReferenceEquals(this, shared) || shared.WDL is null
+            ? WDL
+            : Lynx.WDL.WDLModel(Score, Depth);
+
+        if (wdl is not null)
         {
-            var (wdlWin, wdlDraw, wdlLoss) = WDL.Value;
+            var (wdlWin, wdlDraw, wdlLoss) = wdl.Value;
 
             sb.Append(" wdl ")
               .Append(wdlWin).Append(' ')
@@ -115,11 +151,5 @@ public sealed class SearchResult
         {
             sb.Length--;
         }
-
-        var result = sb.ToString();
-
-        ObjectPools.StringBuilderPool.Return(sb);
-
-        return result;
     }
 }

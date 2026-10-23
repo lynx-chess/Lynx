@@ -132,6 +132,7 @@ public sealed class OptionCommand
             $"option name Threads type spin default {Configuration.EngineSettings.Threads} min 1 max {Constants.MaxThreadCount}",
             $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
             $"option name Ponder type check default {Configuration.EngineSettings.IsPonder.ToLowerString()}",
+            $"option name MultiPV type spin default {Configuration.EngineSettings.MultiPV} min 1 max {Constants.MaxMultiPV}",
             $"option name MoveOverhead type spin default {Configuration.EngineSettings.MoveOverhead} min 1 max {Constants.MaxMoveOverhead}",
             $"option name Minimal type check default {Configuration.EngineSettings.UCI_Minimal.ToLowerString()}",
             $"option name SoftNodes type check default {Configuration.EngineSettings.SoftNodes.ToLowerString()}",
@@ -144,7 +145,6 @@ public sealed class OptionCommand
     //"option name NalimovCache type spin default 1 min 1 max 32
     //"option name Ponder type check",
     //"option name OwnBook type check",
-    //"option name MultiPV type spin default 1",
     //"option name UCI_ShowCurrLine type check default false",      // Interesting
     //"option name UCI_ShowRefutations type check default false",
     //"option name UCI_LimitStrength type check default false",
