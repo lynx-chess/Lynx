@@ -306,7 +306,9 @@ public sealed partial class Engine
         var previous4PositionsHash = Game.PreviousPositionHash(4);
         if (previous4PositionsHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previous4PositionsHash;
+            var previous3PositionsHash = Game.PreviousPositionHash(3);
+            var continuationIndex = position.UniqueIdentifier ^ previousPositionHash ^ previous3PositionsHash ^ previous4PositionsHash;
+
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
