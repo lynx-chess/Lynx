@@ -111,6 +111,7 @@ public sealed class SearchResult
             nps = nps / k * k;
         }
 
+#pragma warning disable MA0075 // Do not use implicit culture-sensitive ToString
         sb.Append(InfoCommand.Id)
           .Append(" depth ").Append(Depth)
           .Append(" seldepth ").Append(DepthReached)
@@ -119,6 +120,7 @@ public sealed class SearchResult
           .Append(" nodes ").Append(shared.Nodes)
           .Append(" nps ").Append(nps)
           .Append(" time ").Append(shared.Time);
+#pragma warning restore MA0075 // Do not use implicit culture-sensitive ToString
 
         if (shared.HashfullPermill != -1)
         {

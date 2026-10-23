@@ -66,7 +66,7 @@ public static class FENParser
 
             if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
             {
-               _logger.Debug("No full move counter detected");
+                _logger.Debug("No full move counter detected");
             }
 
             if (pieceBitboards[(int)Piece.K].CountBits() != 1
@@ -340,7 +340,8 @@ public static class FENParser
 
                             break;
                         }
-                        else if (ch >= 'a' && ch <= 'h')
+
+                        if (ch >= 'a' && ch <= 'h')
                         {
                             var square = BitboardExtensions.SquareIndex(rank: 0, file: ch - 'a');
 

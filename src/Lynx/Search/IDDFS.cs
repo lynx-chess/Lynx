@@ -438,7 +438,7 @@ public sealed partial class Engine
     }
 
     [SkipLocalsInit]
-    private void InitializeRootMoves()
+    private unsafe void InitializeRootMoves()
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
