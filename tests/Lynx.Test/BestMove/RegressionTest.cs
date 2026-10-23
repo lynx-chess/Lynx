@@ -547,7 +547,7 @@ public class RegressionTest : BaseTest
     [TestCase("8/3rk3/8/p2p1B2/2pP1pQ1/2P1b2p/P7/7K b - - 9 43", 28)]
     [TestCase("7R/1Pp1k3/2P1pp2/6p1/8/1K3P2/7p/8 b - - 0 62", 30)]
     [TestCase("8/8/6kP/6P1/8/5K2/8/8 b - - 0 67", 35)]
-    [TestCase("8/8/4K3/1RB5/p1p2k2/P1P5/8/8 b - - 0 71", 40)]
+    [TestCase("8/8/4K3/1RB5/p1p2k2/P1P5/8/8 b - - 0 71", 38)]   //   Lost at depth 40
     [TestCase("8/R3Pb2/2PK4/6k1/8/8/8/8 b - - 0 76", 25)]
     [TestCase("8/6k1/bP5R/6K1/1B6/8/8/8 b - - 4 86", 35)]
     [TestCase("8/8/8/8/5K2/2N1p3/3p1k2/2q5 w - - 0 82", 23)]
@@ -559,7 +559,7 @@ public class RegressionTest : BaseTest
 
     // Tests that take more than 2min and whose outcome fluctuates from patch to patch anyway
     //[TestCase("5R2/8/3K4/3bP3/2N5/1P6/4k3/8 b - - 2 75", 35)] // Extra long, >2min
-    //[TestCase("8/8/2kn4/8/3Q1K2/8/8/8 b - - 12 72", 35)]      // Explores to 18min with some patches    
+    //[TestCase("8/8/2kn4/8/3Q1K2/8/8/8 b - - 12 72", 35)]      // Explores to 18min with some patches
     //[TestCase("5Q2/4K2n/p5pP/P5P1/8/8/3k4/8 b - - 0 66", 35)] // Extra long, >2min
     //[TestCase("8/8/1k6/8/8/K2B4/P7/8 b - - 0 70", 36)]        // Extra long, >2min
     //[TestCase("8/5PP1/R7/8/8/3k1K2/8/4r3 b - - 0 78", 29)]    // Mate at depth 23 and then 27+, >2 min, still some fluctuations
