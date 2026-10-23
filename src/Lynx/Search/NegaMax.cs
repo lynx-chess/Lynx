@@ -959,7 +959,7 @@ public sealed partial class Engine
             isAnyMoveValid = true;
 
             // 🔍 QSearch SEE pruning: pruning bad captures (not when in check, where they could be the only way out)
-            if (!isInCheck && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (!isInCheck && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= 0)
             {
                 position.UnmakeMove(move, gameState);
                 continue;
