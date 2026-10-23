@@ -1,6 +1,7 @@
 ﻿using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
@@ -282,11 +283,14 @@ public sealed class Game : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong PreviousMoveHash(int nPliesAgo)
     {
-        // (_positionHashHistoryPointer - 1) points to the hash of the current position itself
-        var index = _positionHashHistoryPointer - 1 - nPliesAgo;
+        Debug.Assert(nPliesAgo > 0);
 
-        return index >= 0
-            ? _positionHashHistory[index]
+        // (_positionHashHistoryPointer - 1) points to the hash of the current position itself,
+        // so the move played nPliesAgo plies ago took us from [index - 1] to [index]
+        var index = _positionHashHistoryPointer - nPliesAgo;
+
+        return index >= 1
+            ? _positionHashHistory[index] ^ _positionHashHistory[index - 1]
             : 0;
     }
 

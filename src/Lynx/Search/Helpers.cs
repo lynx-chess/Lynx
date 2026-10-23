@@ -282,7 +282,7 @@ public sealed partial class Engine
         var previousMoveHash = Game.PreviousMoveHash(1);
         if (previousMoveHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationIndex = previousMoveHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -294,7 +294,7 @@ public sealed partial class Engine
         var previousPreviousMoveHash = Game.PreviousMoveHash(2);
         if (previousPreviousMoveHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationIndex = previousPreviousMoveHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -306,7 +306,7 @@ public sealed partial class Engine
         var previous4MoveHash = Game.PreviousMoveHash(4);
         if (previous4MoveHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previous4MoveHash;
+            var continuationIndex = previous4MoveHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -405,7 +405,7 @@ public sealed partial class Engine
         var previousMoveHash = Game.PreviousMoveHash(1);
         if (previousMoveHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationIndex = previousMoveHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -416,7 +416,7 @@ public sealed partial class Engine
         var previousPreviousMoveHash = Game.PreviousMoveHash(2);
         if (previousPreviousMoveHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationIndex = previousPreviousMoveHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -427,7 +427,7 @@ public sealed partial class Engine
         var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(4);
         if (previousPreviousPreviousMoveHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationIndex = previousPreviousPreviousMoveHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);

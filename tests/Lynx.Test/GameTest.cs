@@ -336,23 +336,26 @@ public class GameTest : BaseTest
     }
 
     [Test]
-    public void PreviousMoveHash_ReturnsThePositionNPliesAgo()
+    public void PreviousMoveHash_ReturnsTheHashOfTheMovePlayedNPliesAgo()
     {
         var (game, hashes) = GameWithShufflingMoves();
 
-        Assert.AreEqual(hashes[4], game.PreviousMoveHash(0), "0 plies ago is the current position");
-        Assert.AreEqual(hashes[3], game.PreviousMoveHash(1));
-        Assert.AreEqual(hashes[2], game.PreviousMoveHash(2));
-        Assert.AreEqual(hashes[1], game.PreviousMoveHash(3));
-        Assert.AreEqual(hashes[0], game.PreviousMoveHash(4));
-        Assert.AreEqual(0UL, game.PreviousMoveHash(5), "Before the first position there is nothing");
+        Assert.AreEqual(hashes[4] ^ hashes[3], game.PreviousMoveHash(1));
+        Assert.AreEqual(hashes[3] ^ hashes[2], game.PreviousMoveHash(2));
+        Assert.AreEqual(hashes[2] ^ hashes[1], game.PreviousMoveHash(3));
+        Assert.AreEqual(hashes[1] ^ hashes[0], game.PreviousMoveHash(4));
+        Assert.AreEqual(0UL, game.PreviousMoveHash(5), "Before the first position there is no move");
     }
 
     [Test]
-    public void PreviousMoveHash_OnePlyAgoIsNeverTheCurrentPosition()
+    public void PreviousMoveHash_DoesNotDependOnThePositionTheMoveWasPlayedFrom()
     {
-        var (game, _) = GameWithShufflingMoves();
+        var (game, hashes) = GameWithShufflingMoves();
 
-        Assert.AreNotEqual(game.CurrentPosition.UniqueIdentifier, game.PreviousMoveHash(1));
+        // Rf2-e2 and its reverse Re2-f2 (and Kh8-h7 and Kh7-h8) have the same Zobrist delta
+        Assert.AreEqual(game.PreviousMoveHash(4), game.PreviousMoveHash(2));
+        Assert.AreEqual(game.PreviousMoveHash(3), game.PreviousMoveHash(1));
+        Assert.AreNotEqual(game.PreviousMoveHash(1), game.PreviousMoveHash(2));
+        Assert.AreEqual(hashes[0], hashes[4], "The shuffle goes back to the initial position");
     }
 }
