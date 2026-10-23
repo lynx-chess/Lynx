@@ -340,12 +340,12 @@ public class GameTest : BaseTest
     {
         var (game, hashes) = GameWithShufflingMoves();
 
-        Assert.AreEqual(hashes[4], game.PreviousMoveHash(0), "0 plies ago is the current position");
-        Assert.AreEqual(hashes[3], game.PreviousMoveHash(1));
-        Assert.AreEqual(hashes[2], game.PreviousMoveHash(2));
-        Assert.AreEqual(hashes[1], game.PreviousMoveHash(3));
-        Assert.AreEqual(hashes[0], game.PreviousMoveHash(4));
-        Assert.AreEqual(0UL, game.PreviousMoveHash(5), "Before the first position there is nothing");
+        Assert.AreEqual(hashes[4], game.PreviousPositionHash(0), "0 plies ago is the current position");
+        Assert.AreEqual(hashes[3], game.PreviousPositionHash(1));
+        Assert.AreEqual(hashes[2], game.PreviousPositionHash(2));
+        Assert.AreEqual(hashes[1], game.PreviousPositionHash(3));
+        Assert.AreEqual(hashes[0], game.PreviousPositionHash(4));
+        Assert.AreEqual(0UL, game.PreviousPositionHash(5), "Before the first position there is nothing");
     }
 
     [Test]
@@ -353,6 +353,6 @@ public class GameTest : BaseTest
     {
         var (game, _) = GameWithShufflingMoves();
 
-        Assert.AreNotEqual(game.CurrentPosition.UniqueIdentifier, game.PreviousMoveHash(1));
+        Assert.AreNotEqual(game.CurrentPosition.UniqueIdentifier, game.PreviousPositionHash(1));
     }
 }
