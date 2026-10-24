@@ -47,7 +47,7 @@ internal sealed class PerftMovePickerWalker
             _engine._counterMoves[(previousMove.Piece() * 64) + previousMove.TargetSquare()] = _lastQuietMoves[ply];
         }
 
-        var movePicker = new MovePicker(_engine, position, (ShortMove)_lastMoves[ply], oppositeSideAttacks, ply, moves, moveScores, isInCheck: position.IsInCheck());
+        var movePicker = new MovePicker(_engine, position, (ShortMove)_lastMoves[ply], oppositeSideAttacks, ply, moves, moveScores, isInCheck: position.IsInCheck(), capturesOnly: false);
 
         long nodes = 0;
 

@@ -52,7 +52,9 @@ public sealed class Game : IDisposable
         PositionBeforeLastSearch = new Position(CurrentPosition);
 
 #if DEBUG
-        MoveHistory = [with(Constants.MaxNumberMovesInAGame)];
+#pragma warning disable IDE0028 // Simplify collection initialization - suggested syntax causes issues for some .NET 10 SDK versions
+        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+#pragma warning restore IDE0028 // Simplify collection initialization
 #endif
     }
 
@@ -278,14 +280,14 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong PreviousMoveHash(int nMovesAgo)
+    public ulong PreviousPositionHash(int nPliesAgo)
     {
-        if (_positionHashHistoryPointer >= nMovesAgo)
-        {
-            return _positionHashHistory[_positionHashHistoryPointer - nMovesAgo];
-        }
+        // (_positionHashHistoryPointer - 1) points to the hash of the current position itself
+        var index = _positionHashHistoryPointer - 1 - nPliesAgo;
 
-        return 0;
+        return index >= 0
+            ? _positionHashHistory[index]
+            : 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

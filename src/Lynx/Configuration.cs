@@ -94,6 +94,17 @@ public sealed class EngineSettings
                 Constants.MaxThreadCount);
     }
 
+    private int _multiPV = 1;
+    public int MultiPV
+    {
+        get => _multiPV;
+        set => _multiPV =
+            Math.Clamp(
+                value,
+                1,
+                Constants.MaxMultiPV);
+    }
+
     public bool UseOnlineTablebaseInRootPositions { get; set; }
 
     /// <summary>

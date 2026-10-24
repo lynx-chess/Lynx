@@ -118,9 +118,34 @@ public sealed partial class Engine
                 && rootTTEntry.NodeType != NodeType.Unknown
                 && rootTTEntry.BestMove != default;
 
+            var rootBestMove = ttEntryHasBestMoveAtRoot
+                ? rootTTEntry.BestMove
+                : default;
+
+            // The move that was the best of this PV line in the previous depth is the one to search first.
+            // For lines other than the first one, the TT move is the best move of a previous PV line, which will be excluded
+            if (_multiPV > 1)
+            {
+                var previousLineRootMove = _rootMoves[_pvIndex];
+
+                if (previousLineRootMove.Score != RootMove.DefaultScore)
+                {
+                    rootBestMove = (ShortMove)previousLineRootMove.Move;
+                }
+                else if (_pvIndex > 0)
+                {
+                    Debug.Assert(
+                        Configuration.EngineSettings.Threads != 1
+                        || rootBestMove == default
+                        || _rootMoves[0.._pvIndex].Select(r => (ShortMove)r.Move).Contains(rootBestMove));
+
+                    rootBestMove = default;
+                }
+            }
+
             // Root: TT best move only used for move ordering, no TT cutoffs nor singular extensions
-            ttEntry = ttEntryHasBestMoveAtRoot
-                ? new TTProbeResult(EvaluationConstants.NoScore, rootTTEntry.BestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
+            ttEntry = rootBestMove != default
+                ? new TTProbeResult(EvaluationConstants.NoScore, rootBestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
                 : default;
 
             ttWasPv = false;
@@ -344,12 +369,18 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck);
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: false);
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
             var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
+            {
+                continue;
+            }
+
+            // MultiPV: moves already chosen as the best ones of previous PV lines aren't searched again
+            if (isRoot && _multiPV > 1 && WasSearchedAsRootMove(move))
             {
                 continue;
             }
@@ -775,7 +806,11 @@ public sealed partial class Engine
                 UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
 
-            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            // MultiPV: when not searching the first PV lines, root moves are excluded, so the best move of the initial PV line shouldn't be overwritten
+            if (!isRoot || _pvIndex == 0)
+            {
+                _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            }
         }
 
         return bestScore;
@@ -878,39 +913,42 @@ public sealed partial class Engine
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
                 return standPat;
             }
-        }
 
-        // Better move
-        if (standPat > alpha)
-        {
-            alpha = standPat;
+            // Better move
+            if (standPat > alpha)
+            {
+                alpha = standPat;
+            }
         }
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+        if (isInCheck && oppositeSideAttacks == 0)
+        {
+            // Needed for quiet evasions generation
+            oppositeSideAttacks = position.OppositeSideAttacks();
+        }
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
-        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition];
+        var poolSize = isInCheck
+            ? Constants.MaxNumberOfPseudolegalMovesInAPosition
+            : Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition;
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence: true, isInCheck: isInCheck);
+        Span<Move> moves = stackalloc Move[poolSize];
+        Span<int> moveScores = stackalloc int[poolSize];
+
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: !isInCheck);
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
-        int bestScore = standPat;
+        int bestScore = isInCheck ? EvaluationConstants.MinEval : standPat;
 
-        bool isAnyCaptureValid = false;
+        bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfLegalMovesInAPosition];
+        Span<Move> visitedMoves = stackalloc Move[poolSize];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-            {
-                continue;
-            }
-
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
@@ -918,13 +956,21 @@ public sealed partial class Engine
                 continue;
             }
 
+            isAnyMoveValid = true;
+
+            // 🔍 QSearch SEE pruning: pruning bad captures (not when in check, where they could be the only way out)
+            if (!isInCheck && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
             ++_nodes;
             Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
-            isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
-            // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
+            // TODO check for threefold or 50 moves repetitions when in check (and therefore, quiet evasions are generated)
             stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
@@ -966,10 +1012,18 @@ public sealed partial class Engine
             }
 
             ++visitedMovesCounter;
+
+            // Quiet evasions pruning: once a (non-mated) score is known, only the first plain quiet evasion is searched
+            if (isInCheck
+                && bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit
+                && movePicker.Stage >= Stage.QuietMovesStage)
+            {
+                break;
+            }
         }
 
         // No valid moves generated
-        if (!isAnyCaptureValid)
+        if (!isAnyMoveValid)
         {
             // If not in check, we assume we have a non-mated position with no captures.
             // Could technically be a stalemate, though, but checking it failed in https://github.com/lynx-chess/Lynx/pull/358 (TODO retry)
@@ -979,16 +1033,14 @@ public sealed partial class Engine
                 return staticEval;
             }
 
-            // When in check, we test for final positions if in check and no valid moves generated
-            if (!MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]))
-            {
-                Debug.Assert(bestMove is null);
+            // When in check, if no valid evasion was generated, it's mate
+            Debug.Assert(bestMove is null);
+            Debug.Assert(!MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]));
 
-                bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
+            bestScore = Position.MatedScore(ply);
 
-                nodeType = NodeType.Exact;
-                staticEval = bestScore;
-            }
+            nodeType = NodeType.Exact;
+            staticEval = bestScore;
         }
 
         _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);

@@ -149,6 +149,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Correction history
 
+- Check evasions
+
 ### Evaluation
 
 - Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
@@ -176,6 +178,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 - King pawn shield, king virtual mobility, king in open and semi-open files, king ring attacks
 
 - Isolated pawns
+
+- Doubled pawns
 
 - Passed pawns, including bonus for not opponent pieces ahead and friend/opponent king distance to it
 
@@ -227,11 +231,17 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Incremental move sorting
 
+- Staged move generation
+
 - Expected moves to go [[1](https://expositor.dev/pdf/movetime.pdf)]
 
 - Pondering/permanent brain [[1](https://www.chessprogramming.org/Pondering)]
 
 - Multithreaded search/parallel search/SMP [[0](https://www.chessprogramming.org/Parallel_Search)], [[Multithreaded search section](#multithreaded-search)]
+
+- `MultiPV`
+
+- `vftoepd` tool, which includes a wide range of filters
 
 </details>
 
@@ -294,6 +304,20 @@ Score of Lynx 1.8.0 vs Lynx 1.8.0: 903 - 81 - 1516  [0.664] 2500
 Elo difference: 118.6 +/- 8.1, LOS: 100.0 %, DrawRatio: 60.6 %
 SPRT: llr 0 (0.0%), lbound -inf, ubound inf
 ```
+
+## MultiPV
+
+Lynx development versions support MultiPV.
+
+It can be enabled using `MultiPV` UCI command or via `appsettings.json` configuration file.
+
+|    MultiPV   |     2     |     4     |
+|:------------:|:---------:|:---------:|
+| D=10 | [+70.67](https://openbench.lynx-chess.com/test/3272/) | [+110.56](https://openbench.lynx-chess.com/test/3273/)|
+| D=20 | [+29.60](https://openbench.lynx-chess.com/test/3274/) | [+49.67](https://openbench.lynx-chess.com/test/3275/) |
+| 8+0.08 | [-123.87](https://openbench.lynx-chess.com/test/3269/) | [-268.11](https://openbench.lynx-chess.com/test/3271/) |
+| 8+0.08 (2t vs 1t) | [-18.90](https://openbench.lynx-chess.com/test/3278/) | - |
+| 8+0.08 (4t vs 1t) | - | [-70.26](https://openbench.lynx-chess.com/test/3279/) |
 
 ## Non-standard UCI commands
 

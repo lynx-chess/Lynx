@@ -44,7 +44,7 @@ public class MovePickerTest : BaseTest
         var oppositeSideAttacks = GetOppositeSideAttacks(position);
 
         var allMoves = GenerateAllMoves(position, oppositeSideAttacks);
-        var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove: 0, ply: 0, isQuiescence: false);
+        var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove: 0, ply: 0, isInCheck: position.IsInCheck(), capturesOnly: false);
 
         if (position.IsInCheck())
         {
@@ -62,22 +62,25 @@ public class MovePickerTest : BaseTest
     }
 
     /// <summary>
-    /// Quiescence in check: only captures that get the king out of check are returned, and all the legal ones
+    /// Quiescence, built the way <see cref="Engine.QuiescenceSearch"/> does it:
+    /// when in check all the evasions are returned (captures and quiet moves) and nothing else, otherwise only captures and promotions
     /// </summary>
     [TestCaseSource(nameof(_fens))]
-    public void MovePicker_Quiescence_InCheck_ReturnsOnlyEvasionCaptures(string fen)
+    public void MovePicker_Quiescence_ReturnsEvasionsWhenInCheckAndCapturesOtherwise(string fen)
     {
         var engine = GetEngine(fen);
         var position = engine.Game.CurrentPosition;
+        var isInCheck = position.IsInCheck();
         var oppositeSideAttacks = GetOppositeSideAttacks(position);
 
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         var captures = MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).ToArray();
+        var allMoves = GenerateAllMoves(position, oppositeSideAttacks);
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, isQuiescence: true, isInCheck: position.IsInCheck());
+        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, isInCheck: isInCheck, capturesOnly: !isInCheck);
 
         var returned = new List<Move>();
         while (movePicker.TryGetNext(out var move, out _))
@@ -85,14 +88,20 @@ public class MovePickerTest : BaseTest
             returned.Add(move);
         }
 
-        Assert.That(returned, Is.SubsetOf(captures), $"Returned something that isn't a capture in {fen}");
+        var expected = isInCheck ? allMoves : captures;
+
+        Assert.That(returned, Is.SubsetOf(expected), $"Returned something unexpected in {fen}");
         Assert.AreEqual(returned.Count, returned.Distinct().Count(), $"Repeated moves in {fen}");
         Assert.AreEqual(
-            captures.Where(move => IsLegal(position, move)).Order().ToArray(),
+            expected.Where(move => IsLegal(position, move)).Order().ToArray(),
             returned.Where(move => IsLegal(position, move)).Order().ToArray(),
-            $"Different legal captures in {fen}");
+            $"Different legal moves in {fen}");
 
-        if (!position.IsInCheck())
+        if (isInCheck)
+        {
+            Assert.LessOrEqual(returned.Count, allMoves.Length, $"More moves than generated in {fen}");
+        }
+        else
         {
             Assert.AreEqual(captures.Length, returned.Count, $"Captures removed when not in check in {fen}");
         }
@@ -120,7 +129,7 @@ public class MovePickerTest : BaseTest
         foreach (var ttMove in ttMoves)
         {
             var expected = SortAlreadyGeneratedMoves(engine, position, captures, ttMove);
-            var actual = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply: 0, isQuiescence: true);
+            var actual = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply: 0, isInCheck: false, capturesOnly: true);
 
             Assert.AreEqual(expected, actual, $"Different moves/order/scores for TT move {ttMove} in {fen}");
         }
@@ -133,7 +142,7 @@ public class MovePickerTest : BaseTest
 
             Assert.AreEqual(
                 withoutTTMove,
-                GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, corruptedTTMove, ply: 0, isQuiescence: true),
+                GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, corruptedTTMove, ply: 0, isInCheck: false, capturesOnly: true),
                 $"Corrupted TT move {corruptedTTMove} in {fen}");
         }
     }
@@ -198,7 +207,7 @@ public class MovePickerTest : BaseTest
 
                 var description = $"TT: {ttMove}, killers: {firstKiller}, {secondKiller}, counter: {counterMove}, ply: {ply}, FEN: {fen}";
 
-                var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply, isQuiescence: false);
+                var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply, isInCheck: position.IsInCheck(), capturesOnly: false);
 
                 Assert.AreEqual(returned.Count, returned.Select(r => r.Move).Distinct().Count(), $"Repeated moves. {description}");
 
@@ -284,12 +293,12 @@ public class MovePickerTest : BaseTest
         return result;
     }
 
-    internal static List<(Move Move, int Score)> GetAllMovesFromMovePicker(Engine engine, Position position, Bitboard oppositeSideAttacks, ShortMove ttMove, int ply, bool isQuiescence)
+    internal static List<(Move Move, int Score)> GetAllMovesFromMovePicker(Engine engine, Position position, Bitboard oppositeSideAttacks, ShortMove ttMove, int ply, bool isInCheck, bool capturesOnly)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isQuiescence, isInCheck: !isQuiescence && position.IsInCheck());
+        var movePicker = new MovePicker(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: capturesOnly);
 
         var result = new List<(Move, int)>();
 

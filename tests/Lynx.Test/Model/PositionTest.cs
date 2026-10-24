@@ -1095,7 +1095,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = Utils.PieceOffset((int)position.Side);
+        var winnigSideOffset = PieceOffset((int)position.Side);
         Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
     }
 
@@ -1154,7 +1154,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        var winningSideOffset = Utils.PieceOffset((int)(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black));
+        var winningSideOffset = PieceOffset((int)(position.PieceBitboards[(int)Piece.P] != 0 ? Side.White : Side.Black));
         Assert.AreEqual(isDraw, IsBishopPawnDraw(position, winningSideOffset));
 
         static bool IsBishopPawnDraw(Position position, int winningSideOffset)

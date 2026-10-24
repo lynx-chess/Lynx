@@ -508,12 +508,14 @@ public partial class Position
     {
         if (isInCheck)
         {
-            // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
-            return -CheckMateBaseEvaluation + ply;
+            return MatedScore(ply);
         }
 
         return 0;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int MatedScore(int ply) => -CheckMateBaseEvaluation + ply;
 
     /// <summary>
     /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation

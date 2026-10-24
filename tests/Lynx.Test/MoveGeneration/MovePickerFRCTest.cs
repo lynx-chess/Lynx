@@ -62,7 +62,7 @@ public class MovePickerFRCTest : BaseTest
 
         // Quiescence doesn't include castling
         Assert.IsEmpty(
-            GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove: (ShortMove)castlingMoves[0], ply: 0, isQuiescence: true).Where(r => r.Move.IsCastle()),
+            GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove: (ShortMove)castlingMoves[0], ply: 0, isInCheck: false, capturesOnly: true).Where(r => r.Move.IsCastle()),
             $"Castling in quiescence in {fen}");
 
         foreach (var castle in castlingMoves)
@@ -82,7 +82,7 @@ public class MovePickerFRCTest : BaseTest
             {
                 SetKillersAndCounterMove(engine, ply, firstKiller, secondKiller, counterMove, previousMove: allMoves[0]);
 
-                var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply, isQuiescence: false);
+                var returned = GetAllMovesFromMovePicker(engine, position, oppositeSideAttacks, ttMove, ply, isInCheck: position.IsInCheck(), capturesOnly: false);
                 var description = $"{name}: {castle.UCIString()} in {fen}";
 
                 Assert.AreEqual(1, returned.Count(r => r.Move == castle), $"Castling not returned exactly once. {description}");
