@@ -196,7 +196,7 @@ public static class EvaluationConstants
 
     public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
 
-    public const int GoodCaptureMoveCutoff = EvaluationConstants.FirstKillerMoveValue;
+    public const int GoodCaptureMoveCutoff = FirstKillerMoveValue;
 
     public const int FirstKillerMoveValue = 524_288;
 
