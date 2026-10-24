@@ -402,10 +402,10 @@ public sealed partial class Engine
         int continuationCorrHist2 = 0;
         int continuationCorrHist4 = 0;
 
-        var previousMoveHash = Game.PreviousPositionHash(1);
-        if (previousMoveHash != 0)
+        var previousPositionHash = Game.PreviousPositionHash(1);
+        if (previousPositionHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previousPositionHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -413,10 +413,10 @@ public sealed partial class Engine
             continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        var previousPreviousMoveHash = Game.PreviousPositionHash(2);
-        if (previousPreviousMoveHash != 0)
+        var previousPreviousPositionHash = Game.PreviousPositionHash(2);
+        if (previousPreviousPositionHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPositionHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -424,10 +424,10 @@ public sealed partial class Engine
             continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        var previousPreviousPreviousMoveHash = Game.PreviousPositionHash(4);
-        if (previousPreviousPreviousMoveHash != 0)
+        var previous4PositionsHash = Game.PreviousPositionHash(4);
+        if (previous4PositionsHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previous4PositionsHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
