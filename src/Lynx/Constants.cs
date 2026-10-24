@@ -650,7 +650,7 @@ public static class Constants
     public const int MaterialCorrHistoryHashSize = 2_048;
     public const int MaterialCorrHistoryHashMask = MaterialCorrHistoryHashSize - 1;
 
-    public const int ContinuationCorrHistoryHashSize = 16_384;
+    public const int ContinuationCorrHistoryHashSize = 32_768;
     public const int ContinuationCorrHistoryHashMask = ContinuationCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
