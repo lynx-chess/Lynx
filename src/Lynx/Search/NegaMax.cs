@@ -900,6 +900,13 @@ public sealed partial class Engine
 
         var isInCheck = position.IsInCheck();
 
+        // Standing pat beta-cutoff (updating alpha after this check)
+        if (standPat >= beta)
+        {
+            PrintMessage(ply - 1, "Pruning before starting quiescence search");
+            return standPat;
+        }
+
         if (!isInCheck)
         {
             if (!ttHit)
@@ -907,25 +914,11 @@ public sealed partial class Engine
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
             }
 
-            // Standing pat beta-cutoff (updating alpha after this check)
-            if (standPat >= beta)
-            {
-                PrintMessage(ply - 1, "Pruning before starting quiescence search");
-                return standPat;
-            }
-
             // Better move
             if (standPat > alpha)
             {
                 alpha = standPat;
             }
-        }
-        else if (standPat >= beta)
-        {
-            // This avoids some search explosions when the position is too good
-            return MoveGenerator.CanGenerateAtLeastAValidMove(position)
-                ? standPat
-                : Position.MatedScore(ply);
         }
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
