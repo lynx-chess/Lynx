@@ -970,12 +970,20 @@ public sealed partial class Engine
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
+            // Even if we don't do repetition detection, hmc is part of the TT key, and the hash history is read by the continuation correction history
+            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+            Game.Update50movesRule(move);
+            Game.AddToPositionHashHistory(position.UniqueIdentifier);
+
             // TODO check for threefold or 50 moves repetitions when in check (and therefore, quiet evasions are generated)
             stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
+
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+            Game.RemoveFromPositionHashHistory();
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, score, isQuiescence: true);
