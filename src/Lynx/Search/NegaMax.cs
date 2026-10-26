@@ -922,10 +922,7 @@ public sealed partial class Engine
         }
         else if (standPat >= beta)
         {
-            // This avoids some search explosions when the position is too good
-            return MoveGenerator.CanGenerateAtLeastAValidMove(position)
-                ? standPat
-                : Position.MatedScore(ply);
+            return standPat;
         }
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
