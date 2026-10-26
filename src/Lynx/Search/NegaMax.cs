@@ -390,10 +390,14 @@ public sealed partial class Engine
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
-            int quietHistory = !isCapture
-                ? (QuietHistoryEntry(move, oppositeSideAttacks)
-                    + ContinuationHistoryEntry(piece, targetSquare, ply))
-                : 0;
+            int quietHistory = 0;
+            int continuationHistory = 0;
+
+            if (!isCapture)
+            {
+                continuationHistory = ContinuationHistoryEntry(piece, targetSquare, ply);
+                quietHistory = (QuietHistoryEntry(move, oppositeSideAttacks) + continuationHistory);
+            }
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -454,6 +458,14 @@ public sealed partial class Engine
                     {
                         continue;
                     }
+                }
+
+                // 🔍 Continuation history pruning - prune moves if they seem to have bad continuations
+                if (!isCapture
+                    && depth <= Configuration.EngineSettings.CHP_MaxDepth
+                    && continuationHistory < Configuration.EngineSettings.CHP_Constant - (Configuration.EngineSettings.CHP_Linear * (depth - 1)))
+                {
+                    continue;
                 }
             }
 

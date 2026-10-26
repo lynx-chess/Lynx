@@ -535,6 +535,15 @@ public sealed class EngineSettings
     [SPSA<int>(0, 20, 2)]
     public int SE_NoPV { get; set; } = 10;
 
+    [SPSA<int>(enabled: false)]
+    public int CHP_MaxDepth { get; set; } = 4;
+
+    [SPSA<int>(180, 750, 57)]
+    public int CHP_Constant { get; set; } = 375;
+
+    [SPSA<int>(500, 2000, 15)]
+    public int CHP_Linear { get; set; } = 1000;
+
     #endregion
 
     #region Datagen
