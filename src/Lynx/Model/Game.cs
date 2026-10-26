@@ -280,14 +280,14 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong PreviousMoveHash(int nMovesAgo)
+    public ulong PreviousPositionHash(int nPliesAgo)
     {
-        if (_positionHashHistoryPointer >= nMovesAgo)
-        {
-            return _positionHashHistory[_positionHashHistoryPointer - nMovesAgo];
-        }
+        // (_positionHashHistoryPointer - 1) points to the hash of the current position itself
+        var index = _positionHashHistoryPointer - 1 - nPliesAgo;
 
-        return 0;
+        return index >= 0
+            ? _positionHashHistory[index]
+            : 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

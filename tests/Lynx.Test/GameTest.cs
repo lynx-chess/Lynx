@@ -311,4 +311,48 @@ public class GameTest : BaseTest
 
         Assert.False(game.Is50MovesRepetition());
     }
+
+    private static (Game Game, List<ulong> Hashes) GameWithShufflingMoves()
+    {
+        // The last entry of the position hash history is the current position: hashes[i] is the position after i moves
+        var game = new Game("7k/8/5KR1/8/8/8/5R2/8 w - - 0 1");
+        var hashes = new List<ulong> { game.CurrentPosition.UniqueIdentifier };
+
+        var moves = new[]
+        {
+            MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+            MoveExtensions.Encode((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+            MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+            MoveExtensions.Encode((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),
+        };
+
+        foreach (var move in moves)
+        {
+            game.MakeMove(move);
+            hashes.Add(game.CurrentPosition.UniqueIdentifier);
+        }
+
+        return (game, hashes);
+    }
+
+    [Test]
+    public void PreviousMoveHash_ReturnsThePositionNPliesAgo()
+    {
+        var (game, hashes) = GameWithShufflingMoves();
+
+        Assert.AreEqual(hashes[4], game.PreviousPositionHash(0), "0 plies ago is the current position");
+        Assert.AreEqual(hashes[3], game.PreviousPositionHash(1));
+        Assert.AreEqual(hashes[2], game.PreviousPositionHash(2));
+        Assert.AreEqual(hashes[1], game.PreviousPositionHash(3));
+        Assert.AreEqual(hashes[0], game.PreviousPositionHash(4));
+        Assert.AreEqual(0UL, game.PreviousPositionHash(5), "Before the first position there is nothing");
+    }
+
+    [Test]
+    public void PreviousMoveHash_OnePlyAgoIsNeverTheCurrentPosition()
+    {
+        var (game, _) = GameWithShufflingMoves();
+
+        Assert.AreNotEqual(game.CurrentPosition.UniqueIdentifier, game.PreviousPositionHash(1));
+    }
 }
