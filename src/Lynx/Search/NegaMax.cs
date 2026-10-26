@@ -920,6 +920,13 @@ public sealed partial class Engine
                 alpha = standPat;
             }
         }
+        else if (standPat >= beta)
+        {
+            // This avoids some search explosions when the position is too good
+            return MoveGenerator.CanGenerateAtLeastAValidMove(position)
+                ? standPat
+                : Position.MatedScore(ply);
+        }
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
         if (isInCheck && oppositeSideAttacks == 0)
