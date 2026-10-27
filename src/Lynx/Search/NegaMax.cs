@@ -949,6 +949,13 @@ public sealed partial class Engine
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
+            // 🔍 QSearch move count pruning: when not in check, only the first moves are searched
+            // This helps dealing with some search explosions
+            if (!isInCheck && visitedMovesCounter >= Configuration.EngineSettings.QS_MaxMovesNotInCheck)
+            {
+                break;
+            }
+
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
