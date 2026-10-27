@@ -941,20 +941,13 @@ public sealed partial class Engine
         Move? bestMove = null;
         int bestScore = isInCheck ? EvaluationConstants.MinEval : standPat;
 
-        bool isAnyMoveValid = false;
-
         Span<Move> visitedMoves = stackalloc Move[poolSize];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
+        int legalMovesCounter = 0;
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // 🔍 QSearch move count pruning: when not in check, only the first moves are searched
-            if (!isInCheck && visitedMovesCounter >= Configuration.EngineSettings.QS_MaxMovesNotInCheck)
-            {
-                break;
-            }
-
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
@@ -962,7 +955,14 @@ public sealed partial class Engine
                 continue;
             }
 
-            isAnyMoveValid = true;
+            ++legalMovesCounter;
+
+            // 🔍 QSearch move count pruning: when not in check, only the first moves are searched
+            if (!isInCheck && legalMovesCounter >= Configuration.EngineSettings.QS_MaxLegalMovesNotInCheck)
+            {
+                position.UnmakeMove(move, gameState);
+                break;
+            }
 
             // 🔍 QSearch SEE pruning: pruning bad captures (not when in check, where they could be the only way out)
             if (!isInCheck && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
@@ -1037,7 +1037,7 @@ public sealed partial class Engine
         }
 
         // No valid moves generated
-        if (!isAnyMoveValid)
+        if (legalMovesCounter == 0)
         {
             // If not in check, we assume we have a non-mated position with no captures.
             // Could technically be a stalemate, though, but checking it failed in https://github.com/lynx-chess/Lynx/pull/358 (TODO retry)
