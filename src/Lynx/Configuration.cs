@@ -541,8 +541,8 @@ public sealed class EngineSettings
     [SPSA<int>(180, 750, 57)]
     public int CHP_Constant { get; set; } = 375;
 
-    [SPSA<int>(500, 2000, 15)]
-    public int CHP_Linear { get; set; } = 4500;
+    [SPSA<int>(1100, 4400, 330)]
+    public int CHP_Linear { get; set; } = 2200;
 
     #endregion
 
