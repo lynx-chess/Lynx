@@ -536,7 +536,7 @@ public sealed class EngineSettings
     public int SE_NoPV { get; set; } = 10;
 
     [SPSA<int>(enabled: false)]
-    public int QS_MaxMovesNotInCheck { get; set; } = 2;
+    public int QS_MaxMovesNotInCheck { get; set; } = 3;
 
     #endregion
 
