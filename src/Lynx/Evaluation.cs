@@ -1098,28 +1098,25 @@ public partial class Position
         var oppositeSideKingSquare = _pieceBitboards[(int)Piece.k - offset].GetLS1BIndex();
         var oppositeSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
 
-        Span<Bitboard> checkThreats = stackalloc Bitboard[5];
-
         var bishopAttacks = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var rookAttacks = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
 
-        checkThreats[(int)Piece.N] = Attacks.KnightAttacks[oppositeSideKingSquare];
-        checkThreats[(int)Piece.B] = bishopAttacks;
-        checkThreats[(int)Piece.R] = rookAttacks;
-        checkThreats[(int)Piece.Q] = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-
         ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
 
-        for (int piece = (int)Piece.N; piece < (int)Piece.K; ++piece)
+        packedBonus += CheckBonus((int)Piece.N, Unsafe.Add(ref attacksRef, (int)Piece.N + offset) & Attacks.KnightAttacks[oppositeSideKingSquare], oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.B, Unsafe.Add(ref attacksRef, (int)Piece.B + offset) & bishopAttacks, oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.R, Unsafe.Add(ref attacksRef, (int)Piece.R + offset) & rookAttacks, oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.Q, Unsafe.Add(ref attacksRef, (int)Piece.Q + offset) & Attacks.QueenAttacks(rookAttacks, bishopAttacks), oppositeSideAttacks);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CheckBonus(int piece, Bitboard checks, Bitboard oppositeSideAttacks)
         {
-            var checks = Unsafe.Add(ref attacksRef, piece + offset) & checkThreats[piece];
             var checksCount = checks.CountBits();
 
             var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
             var safeChecksCount = checksCount - unsafeChecksCount;
 
-            packedBonus += SafeCheckBonus[piece] * safeChecksCount;
-            packedBonus += UnsafeCheckBonus[piece] * unsafeChecksCount;
+            return (SafeCheckBonus[piece] * safeChecksCount) + (UnsafeCheckBonus[piece] * unsafeChecksCount);
         }
 
         return packedBonus;
