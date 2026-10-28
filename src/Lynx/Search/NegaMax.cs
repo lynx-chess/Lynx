@@ -961,10 +961,10 @@ public sealed partial class Engine
                 }
 
                 // 🔍 QSearch futility pruning: prune captures that, even with the captured piece value and a margin, can't raise alpha
-                if (move.PromotedPiece() == default
-                    && bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit
+                if (bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit
                     && futilityScore <= alpha
-                    && !SEE.IsGoodCapture(position, move, 1))
+                    && moveScore < EvaluationConstants.PromotionMoveScoreValue
+                    && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     bestScore = Math.Max(bestScore, futilityScore);
                     continue;
