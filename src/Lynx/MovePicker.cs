@@ -89,7 +89,6 @@ internal ref struct MovePicker
         }
     }
 
-    [SkipLocalsInit]
     public bool TryGetNext(out Move move, out int score)
     {
         while (true)

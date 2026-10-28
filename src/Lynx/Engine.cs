@@ -108,7 +108,6 @@ public sealed partial class Engine : IDisposable
         ResetEngine();
     }
 
-    [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Game.ParsePositionCommand(rawPositionCommand);
