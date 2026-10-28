@@ -941,7 +941,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         int bestScore = isInCheck ? EvaluationConstants.MinEval : standPat;
 
-        var baseFutilityScore = standPat + Configuration.EngineSettings.QS_FP_Margin;
+        var futilityScore = standPat + Configuration.EngineSettings.QS_FP_Margin;
 
         bool isAnyMoveValid = false;
 
@@ -951,11 +951,24 @@ public sealed partial class Engine
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // 🔍 QSearch move count pruning: when not in check, only the first moves are searched
-            // This helps dealing with some search explosions
-            if (!isInCheck && visitedMovesCounter >= Configuration.EngineSettings.QS_MaxMovesNotInCheck)
+            if (!isInCheck)
             {
-                break;
+                // 🔍 QSearch move count pruning: when not in check, only the first moves are searched
+                // This helps dealing with some search explosions
+                if (visitedMovesCounter >= Configuration.EngineSettings.QS_MaxMovesNotInCheck)
+                {
+                    break;
+                }
+
+                // 🔍 QSearch futility pruning: prune captures that, even with the captured piece value and a margin, can't raise alpha
+                if (move.PromotedPiece() == default
+                    && bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit
+                    && futilityScore <= alpha
+                    && !SEE.IsGoodCapture(position, move, 1))
+                {
+                    bestScore = Math.Max(bestScore, futilityScore);
+                    continue;
+                }
             }
 
             var gameState = position.MakeMove(move);
@@ -967,22 +980,11 @@ public sealed partial class Engine
 
             isAnyMoveValid = true;
 
-            if (!isInCheck)
+            // 🔍 QSearch SEE pruning: pruning bad captures (not when in check, where they could be the only way out)
+            if (!isInCheck && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
-                // 🔍 QSearch SEE pruning: pruning bad captures (not when in check, where they could be the only way out)
-                if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-                {
-                    position.UnmakeMove(move, gameState);
-                    continue;
-                }
-
-                // 🔍 QSearch futility pruning: prune captures that, even with the captured piece value and a margin, can't raise alpha
-                if (move.PromotedPiece() == default
-                    && baseFutilityScore + SEE.PieceValues[move.CapturedPiece()] <= alpha)
-                {
-                    position.UnmakeMove(move, gameState);
-                    continue;
-                }
+                position.UnmakeMove(move, gameState);
+                continue;
             }
 
             ++_nodes;
