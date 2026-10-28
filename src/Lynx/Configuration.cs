@@ -538,6 +538,9 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int QS_MaxMovesNotInCheck { get; set; } = 2;
 
+    [SPSA<int>(0, 400, 20)]
+    public int QS_FP_Margin { get; set; } = 200;
+
     #endregion
 
     #region Datagen
