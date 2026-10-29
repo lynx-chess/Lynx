@@ -1,4 +1,4 @@
-using Lynx.UCI.Commands.GUI;
+﻿using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Buffers;
 using System.Runtime.CompilerServices;

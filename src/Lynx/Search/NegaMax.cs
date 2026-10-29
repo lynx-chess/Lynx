@@ -1,4 +1,4 @@
-#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
