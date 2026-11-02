@@ -15,7 +15,7 @@ public static class TimeManager
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
+    public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand, Move[] searchMoves)
     {
         int maxDepth = SearchConstraints.DefaultMaxDepth;
         ulong maxNodes = SearchConstraints.DefaultMaxNodes;
@@ -93,7 +93,7 @@ public static class TimeManager
             _logger.Warn("Unexpected or unsupported go command");
         }
 
-        return new(hardLimitTimeBound, softLimitTimeBound, maxDepth, maxNodes);
+        return new(hardLimitTimeBound, softLimitTimeBound, maxDepth, maxNodes, searchMoves);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
