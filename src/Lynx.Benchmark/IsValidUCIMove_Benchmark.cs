@@ -23,10 +23,7 @@ using System.Text.RegularExpressions;
 
 namespace Lynx.Benchmark;
 
-/// <summary>
-/// Hand-written <see cref="GoCommand.IsValidUCIMove(ReadOnlySpan{char})"/> vs regex alternatives
-/// </summary>
-public partial class IsValidUCIMove_Regex_Benchmark : BaseBenchmark
+public partial class IsValidUCIMove_Benchmark : BaseBenchmark
 {
     private const string Pattern = "^[a-h][1-8][a-h][1-8][nbrqNBRQ]?$";
 
@@ -38,7 +35,7 @@ public partial class IsValidUCIMove_Regex_Benchmark : BaseBenchmark
     private static readonly Regex _compiledRegex = new(Pattern, RegexOptions.Compiled);
 
     /// <summary>
-    /// Typical mix: valid moves, a promotion, the keywords that end the list and a few rejects
+    /// Valid moves, a promotion, some keywords and some invalid moves
     /// </summary>
     private readonly string[] _tokens = ["e2e4", "d2d4", "g1f3", "a7a8q", "depth", "wtime", "12", "E2E4"];
 
