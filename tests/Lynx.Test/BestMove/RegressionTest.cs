@@ -543,7 +543,7 @@ public class RegressionTest : BaseTest
     [TestCase("8/2k5/7p/1BK5/8/P7/7P/8 b - - 0 56", 30)]
     [TestCase("5R2/6K1/8/2k5/5P2/8/8/8 b - - 0 77", 30)]
     [TestCase("8/2k5/7p/1BK5/8/P7/7P/8 b - - 0 56", 30)]
-    [TestCase("8/8/8/6K1/7P/8/6k1/8 b - - 0 70", 39)]
+    [TestCase("8/8/8/6K1/7P/8/6k1/8 b - - 0 70", 42)]
     [TestCase("8/3rk3/8/p2p1B2/2pP1pQ1/2P1b2p/P7/7K b - - 9 43", 28)]
     [TestCase("7R/1Pp1k3/2P1pp2/6p1/8/1K3P2/7p/8 b - - 0 62", 30)]
     [TestCase("8/8/6kP/6P1/8/5K2/8/8 b - - 0 67", 35)]
