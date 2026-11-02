@@ -224,7 +224,7 @@ public sealed class Searcher : IDisposable
 
     private void SingleThreadedSearch(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand, _mainEngine.GetSearchMoves(goCommand));
         var isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
 
         if (!isPondering)
@@ -316,9 +316,11 @@ public sealed class Searcher : IDisposable
         // Basic lazy SMP implementation
         // Extra engines run in "go infinite" mode and their purpose is to populate the TT
         // Not UCI output is produced by them nor their search results are taken into account
-        var extraEnginesSearchConstraints = SearchConstraints.InfiniteSearchConstraint;
+        var searchMoves = _mainEngine.GetSearchMoves(goCommand);
 
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+        var extraEnginesSearchConstraints = SearchConstraints.Infinite(searchMoves);
+
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand, searchMoves);
         var isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
 
         if (!isPondering)
@@ -776,7 +778,7 @@ public sealed class Searcher : IDisposable
         using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
 
         var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
-        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
+        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes, []);
 
         var rnd = new Random(genFensCommand.Seed);
 

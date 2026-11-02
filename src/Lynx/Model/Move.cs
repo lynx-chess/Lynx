@@ -204,7 +204,7 @@ public static class MoveExtensions
                     return true;
                 }
 
-                var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
+                var promotedPiece = (int)Enum.Parse<Piece>(char.ToLowerInvariant(UCIString[4]).ToString());
                 var candidatePromotedPiece = candidateMove.PromotedPiece();
 
                 if (candidatePromotedPiece == promotedPiece
