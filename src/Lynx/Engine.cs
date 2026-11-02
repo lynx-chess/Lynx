@@ -1,7 +1,6 @@
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace Lynx;

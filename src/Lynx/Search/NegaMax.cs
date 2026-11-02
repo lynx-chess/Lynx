@@ -320,7 +320,13 @@ public sealed partial class Engine
                     var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + (depth / Configuration.EngineSettings.NMP_DepthDivisor);
 
                     var gameState = position.MakeNullMove();
+
+                    stack.Move = MoveExtensions.NullMove;
+                    var previousNullMovePointer = Game.AddNullMoveToPositionHashHistory(position.UniqueIdentifier);
+
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+
+                    Game.RemoveNullMoveFromPositionHashHistory(previousNullMovePointer);
                     position.UnMakeNullMove(gameState);
 
                     if (nmpScore >= beta)
