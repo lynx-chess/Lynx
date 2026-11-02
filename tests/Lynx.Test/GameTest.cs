@@ -198,8 +198,8 @@ public class GameTest : BaseTest
         game.HalfMovesWithoutCaptureOrPawnMove = 10;
 
         // Same position as the current one, 2 plies before the null move, with the same side to move
-        game.AddToPositionHashHistory(1);                                           // [hash, 1]
-        var previousBarrier = game.AddNullMoveToPositionHashHistory(2);             // [hash, 1, 2]
+        game.AddToPositionHashHistory(1);                                               // [hash, 1]
+        var previousNullPointer = game.AddNullMoveToPositionHashHistory(2);             // [hash, 1, 2]
 
         Assert.AreEqual(3, game.PositionHashHistoryLength());
         Assert.AreEqual(2ul, game.PreviousPositionHash(0));
@@ -207,11 +207,11 @@ public class GameTest : BaseTest
         Assert.AreEqual(hash, game.PreviousPositionHash(2));
         Assert.False(game.IsThreefoldRepetition(1), "Repetitions through a null move aren't actual repetitions");
 
-        game.RemoveNullMoveFromPositionHashHistory(previousBarrier);
+        game.RemoveNullMoveFromPositionHashHistory(previousNullPointer);
         Assert.AreEqual(2, game.PositionHashHistoryLength());
 
         game.AddToPositionHashHistory(2);                                           // [hash, 1, 2]
-        Assert.True(game.IsThreefoldRepetition(1), "Barrier should have been removed");
+        Assert.True(game.IsThreefoldRepetition(1), "Null pointer should have been removed");
 
         // Repetitions after the null move are detected
         game.RemoveFromPositionHashHistory();
