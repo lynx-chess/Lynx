@@ -190,6 +190,39 @@ public class GameTest : BaseTest
         Assert.Less(result.Score, 0);
     }
 
+    [Test]
+    public void IsThreefoldRepetition_NullMovePointer()
+    {
+        var game = new Game(Constants.InitialPositionFEN);
+        var hash = game.CurrentPosition.UniqueIdentifier;
+        game.HalfMovesWithoutCaptureOrPawnMove = 10;
+
+        // Same position as the current one, 2 plies before the null move, with the same side to move
+        game.AddToPositionHashHistory(1);                                               // [hash, 1]
+        var previousNullPointer = game.AddNullMoveToPositionHashHistory(2);             // [hash, 1, 2]
+
+        Assert.AreEqual(3, game.PositionHashHistoryLength());
+        Assert.AreEqual(2ul, game.PreviousPositionHash(0));
+        Assert.AreEqual(1ul, game.PreviousPositionHash(1));
+        Assert.AreEqual(hash, game.PreviousPositionHash(2));
+        Assert.False(game.IsThreefoldRepetition(1), "Repetitions through a null move aren't actual repetitions");
+
+        game.RemoveNullMoveFromPositionHashHistory(previousNullPointer);
+        Assert.AreEqual(2, game.PositionHashHistoryLength());
+
+        game.AddToPositionHashHistory(2);                                           // [hash, 1, 2]
+        Assert.True(game.IsThreefoldRepetition(1), "Null pointer should have been removed");
+
+        // Repetitions after the null move are detected
+        game.RemoveFromPositionHashHistory();
+        game.RemoveFromPositionHashHistory();                                       // [hash]
+        game.AddNullMoveToPositionHashHistory(hash);                                // [hash, hash]
+        game.AddToPositionHashHistory(3);                                           // [hash, hash, 3]
+        game.AddToPositionHashHistory(hash);                                        // [hash, hash, 3, hash]
+
+        Assert.True(game.IsThreefoldRepetition(1));
+    }
+
     [TestCase("position startpos moves d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1f4 e8g8" +
         " e2e3 c7c5 d4c5 e7c5 a2a3 a7a6 d1d2 d5c4 f1c4 b7b5 c4d3 c8b7 b2b4 b7f3 b4c5 f3g2" +
         " h1g1 g2f3 g1g3 f3c6 f4h6 g7g6 h6f8 d8f8 a3a4 b5b4 c3a2 b4b3 a2c1 f8c5 c1b3 c5d5" +
