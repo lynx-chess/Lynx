@@ -175,7 +175,7 @@ public sealed partial class Engine : IDisposable
 
         using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
 
-        SearchResult resultToReturn = IDDFS(isPondering, jointCts.Token);
+        SearchResult resultToReturn = IDDFS(in searchConstrains, isPondering, jointCts.Token);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
@@ -193,14 +193,14 @@ public sealed partial class Engine : IDisposable
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
-    private async ValueTask<SearchResult> SearchBestMove(bool isPondering, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
+    private async ValueTask<SearchResult> SearchBestMove(in SearchConstraints searchConstrains, bool isPondering, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
 #pragma warning restore S1144 // Unused private types or members should be removed
     {
         using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
 
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS(isPondering, jointCts.Token);
+            return IDDFS(in searchConstrains, isPondering, jointCts.Token);
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -211,7 +211,7 @@ public sealed partial class Engine : IDisposable
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove, cancellationToken),
-                Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken)),
+                Task.Run(()=>(SearchResult?)IDDFS(in searchConstrains, isPondering, cancellationToken)),
             };
 #pragma warning restore MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
 

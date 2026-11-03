@@ -206,6 +206,9 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int PonderHitMinDepthToStopSearch { get; set; } = 15;
 
+    [SPSA<int>(enabled: false)]
+    public ulong DivisibleNodesToCheckTimeLimit { get; set; } = 1024;
+
     #endregion
 
     #region Search
@@ -541,6 +544,8 @@ public sealed class EngineSettings
     #endregion
 
     #region Datagen
+
+    public bool Datagen_GenFens_HardNodes { get; set; }
 
     public int Datagen_GenFens_Depth { get; set; } = 10;
 

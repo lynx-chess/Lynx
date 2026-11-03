@@ -13,9 +13,9 @@ public readonly struct SearchConstraints
     /// </summary>
     private const int DefaultTimeBound = 10_000_000;
 
-    public const int DefaultHardLimitTimeBound  = DefaultTimeBound;
+    public const int DefaultHardLimitTimeBound = DefaultTimeBound;
 
-    public const int DefaultSoftLimitTimeBound  = DefaultTimeBound;
+    public const int DefaultSoftLimitTimeBound = DefaultTimeBound;
 
     public const ulong DefaultMaxNodes = 10_000_000_000_000_000_000;
 
@@ -29,23 +29,26 @@ public readonly struct SearchConstraints
 
     public readonly ulong MaxNodes;
 
+    public readonly bool HardNodes;
+
 #pragma warning disable S3887  // Mutable, non-private fields should not be "readonly"
     public readonly Move[] SearchMoves;
 #pragma warning restore S3887 // Mutable, non-private fields should not be "readonly"
 
-    public static readonly SearchConstraints InfiniteSearchConstraint = new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, DefaultMaxDepth, DefaultMaxNodes, []);
+    public static readonly SearchConstraints InfiniteSearchConstraint = new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, DefaultMaxDepth, DefaultMaxNodes, false, []);
 
     public static SearchConstraints Infinite(Move[] searchMoves)
         => searchMoves.Length == 0
             ? InfiniteSearchConstraint
-            : new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, DefaultMaxDepth, DefaultMaxNodes, searchMoves);
+            : new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, DefaultMaxDepth, DefaultMaxNodes, hardNodes: false, searchMoves);
 
-    public SearchConstraints(int hardLimitTimeBound, int softLimitTimeBound, int maxDepth, ulong maxNodes, Move[] searchMoves)
+    public SearchConstraints(int hardLimitTimeBound, int softLimitTimeBound, int maxDepth, ulong maxNodes, bool hardNodes, Move[] searchMoves)
     {
         HardLimitTimeBound = hardLimitTimeBound;
         SoftLimitTimeBound = softLimitTimeBound;
         MaxDepth = maxDepth;
         MaxNodes = maxNodes;
+        HardNodes = hardNodes;
         SearchMoves = searchMoves;
     }
 }

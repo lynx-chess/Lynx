@@ -93,7 +93,7 @@ public static class TimeManager
             _logger.Warn("Unexpected or unsupported go command");
         }
 
-        return new(hardLimitTimeBound, softLimitTimeBound, maxDepth, maxNodes, searchMoves);
+        return new(hardLimitTimeBound, softLimitTimeBound, maxDepth, maxNodes, !Configuration.EngineSettings.SoftNodes, searchMoves);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

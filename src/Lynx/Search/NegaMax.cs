@@ -19,7 +19,7 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private unsafe int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
+    private unsafe int NegaMax(in SearchConstraints searchConstrains, int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
         bool parentWasNullMove = false, bool isVerifyingSE = false)
     {
         var position = Game.CurrentPosition;
@@ -48,6 +48,11 @@ public sealed partial class Engine
         }
 
         _maxDepthReached[ply] = ply;
+
+        if (searchConstrains.HardNodes && _nodes > searchConstrains.MaxNodes)
+        {
+            throw new OperationCanceledException("Search canceled due to hard node limit reached");
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -191,7 +196,7 @@ public sealed partial class Engine
             var localOppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position, localOppositeSideAttacks))
             {
-                return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                return QuiescenceSearch(in searchConstrains, ply, alpha, beta, pvNode, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -285,7 +290,7 @@ public sealed partial class Engine
                                 // that corrected eval is at least as good as QSearch result would be
                                 var qSearchScore = ttCorrectedStaticEval != staticEval
                                     ? ttCorrectedStaticEval
-                                    : QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                    : QuiescenceSearch(in searchConstrains, ply, alpha, beta, pvNode, cancellationToken);
 
                                 return qSearchScore > score
                                     ? qSearchScore
@@ -296,7 +301,7 @@ public sealed partial class Engine
 
                             if (score < beta)               // Static evaluation indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                var qSearchScore = QuiescenceSearch(in searchConstrains, ply, alpha, beta, pvNode, cancellationToken);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
                                     return qSearchScore > score
@@ -324,7 +329,7 @@ public sealed partial class Engine
                     stack.Move = MoveExtensions.NullMove;
                     var previousNullMovePointer = Game.AddNullMoveToPositionHashHistory(position.UniqueIdentifier);
 
-                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+                    var nmpScore = -NegaMax(in searchConstrains, depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
 
                     Game.RemoveNullMoveFromPositionHashHistory(previousNullMovePointer);
                     position.UnMakeNullMove(gameState);
@@ -512,7 +517,7 @@ public sealed partial class Engine
                     singularBeta = EvaluationConstants.MinEval;
                 }
 
-                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
+                var singularScore = NegaMax(in searchConstrains, verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 
                 // Singular extension
                 if (singularScore < singularBeta)
@@ -685,7 +690,7 @@ public sealed partial class Engine
                     var reducedDepth = newDepth - reduction;
 
                     // Search with reduced depth and zero window
-                    score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    score = -NegaMax(in searchConstrains, reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
 
                     // 🔍 Principal Variation Search (PVS)
                     if (score > alpha && newDepth > reducedDepth)
@@ -709,7 +714,7 @@ public sealed partial class Engine
                         if (newDepth > reducedDepth)
                         {
                             // Search with full depth but narrowed score bandwidth (zero-window search)
-                            score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                            score = -NegaMax(in searchConstrains, newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                         }
 
                         // 🔍 Post-LMR continuation history update
@@ -726,7 +731,7 @@ public sealed partial class Engine
                 if (visitedMovesCounter == 0 || (score > alpha && score < beta))
                 {
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(newDepth, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
+                    score = -NegaMax(in searchConstrains, newDepth, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
@@ -842,9 +847,14 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public unsafe int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
+    public unsafe int QuiescenceSearch(in SearchConstraints searchConstrains, int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
+
+        if (searchConstrains.HardNodes && _nodes > searchConstrains.MaxNodes)
+        {
+            throw new OperationCanceledException("Search canceled due to hard node limit reached");
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -1000,7 +1010,7 @@ public sealed partial class Engine
             stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
+            int score = -QuiescenceSearch(in searchConstrains, ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
 
             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;

@@ -143,7 +143,7 @@ public sealed partial class Engine
     /// </summary>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     [SkipLocalsInit]
-    private SearchResult IDDFS(bool isPondering, CancellationToken cancellationToken)
+    private SearchResult IDDFS(in SearchConstraints searchConstrains, bool isPondering, CancellationToken cancellationToken)
     {
         // Cleanup
         _nodes = 0;
@@ -213,14 +213,14 @@ public sealed partial class Engine
 
                 if (_multiPV == 1)
                 {
-                    bestScore = SearchRoot(depth, lastSearchResult?.Score, logLevel, cancellationToken);
+                    bestScore = SearchRoot(in searchConstrains, depth, lastSearchResult?.Score, logLevel, cancellationToken);
 
                     //PrintPvTable(depth: depth);
                     ValidatePVTable();
                 }
                 else
                 {
-                    var validLines = SearchRootLines(depth, logLevel, cancellationToken);
+                    var validLines = SearchRootLines(in searchConstrains, depth, logLevel, cancellationToken);
                     // We need to re-populate it with the best PV
 
                     Array.Clear(_pVTable);
@@ -335,14 +335,14 @@ public sealed partial class Engine
     /// </summary>
     /// <param name="expectedScore">lastSearchResult.Score</param>
     /// <returns>Score of the search, whose PV is left in <see cref="_pVTable"/></returns>
-    private int SearchRoot(int depth, int? expectedScore, LogLevel logLevel, CancellationToken cancellationToken)
+    private int SearchRoot(in SearchConstraints searchConstrains, int depth, int? expectedScore, LogLevel logLevel, CancellationToken cancellationToken)
     {
         int bestScore = EvaluationConstants.MinEval;
 
         if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
             || expectedScore is null)
         {
-            return NegaMax(depth: depth, ply: 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, cutnode: false, cancellationToken);
+            return NegaMax(in searchConstrains, depth: depth, ply: 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, cutnode: false, cancellationToken);
         }
 
         // 🔍 Aspiration windows - search using a window around an expected score (the previous search one)
@@ -388,7 +388,7 @@ public sealed partial class Engine
                     _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
             }
 
-            bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
+            bestScore = NegaMax(in searchConstrains, depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
             Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
 
             // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
@@ -468,13 +468,14 @@ public sealed partial class Engine
     /// After this method, the first moves of <see cref="_rootMoves"/> are the PV lines (as many as the returned value), sorted by score
     /// </summary>
     /// <returns>Number of PV lines successfully searched</returns>
-    private int SearchRootLines(int depth, LogLevel logLevel, CancellationToken cancellationToken)
+    private int SearchRootLines(in SearchConstraints searchConstrains, int depth, LogLevel logLevel, CancellationToken cancellationToken)
     {
         for (_pvIndex = 0; _pvIndex < _multiPV; ++_pvIndex)
         {
             var previousScore = _rootMoves[_pvIndex].Score;
 
             var score = SearchRoot(
+                in searchConstrains,
                 depth,
                 previousScore != RootMove.DefaultScore ? previousScore : null,
                 logLevel,
