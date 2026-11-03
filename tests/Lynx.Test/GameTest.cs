@@ -369,7 +369,7 @@ public class GameTest : BaseTest
     }
 
     [Test]
-    public void PreviousMoveHash_ReturnsThePositionNPliesAgo()
+    public void PreviousPositionHash_ReturnsThePositionNPliesAgo()
     {
         var (game, hashes) = GameWithShufflingMoves();
 
@@ -382,7 +382,7 @@ public class GameTest : BaseTest
     }
 
     [Test]
-    public void PreviousMoveHash_OnePlyAgoIsNeverTheCurrentPosition()
+    public void PreviousPositionHash_OnePlyAgoIsNeverTheCurrentPosition()
     {
         var (game, _) = GameWithShufflingMoves();
 
