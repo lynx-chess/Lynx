@@ -398,8 +398,8 @@ internal struct StructCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -450,15 +450,15 @@ internal struct StructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -469,8 +469,8 @@ internal struct StructCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -495,8 +495,8 @@ internal struct StructCustomPosition
 
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -549,15 +549,15 @@ internal struct StructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -568,8 +568,8 @@ internal struct StructCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -738,8 +738,8 @@ internal readonly struct ReadonlyStructCustomPosition
     public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -790,15 +790,15 @@ internal readonly struct ReadonlyStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -809,8 +809,8 @@ internal readonly struct ReadonlyStructCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -836,8 +836,8 @@ internal readonly struct ReadonlyStructCustomPosition
     public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -890,15 +890,15 @@ internal readonly struct ReadonlyStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -909,8 +909,8 @@ internal readonly struct ReadonlyStructCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1086,8 +1086,8 @@ internal class ClassCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1138,15 +1138,15 @@ internal class ClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1157,8 +1157,8 @@ internal class ClassCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1182,8 +1182,8 @@ internal class ClassCustomPosition
     public ClassCustomPosition(ClassCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1236,15 +1236,15 @@ internal class ClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1255,8 +1255,8 @@ internal class ClassCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1432,8 +1432,8 @@ internal record class RecordClassCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1484,15 +1484,15 @@ internal record class RecordClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1503,8 +1503,8 @@ internal record class RecordClassCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1528,8 +1528,8 @@ internal record class RecordClassCustomPosition
     public RecordClassCustomPosition(RecordClassCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1582,15 +1582,15 @@ internal record class RecordClassCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1601,8 +1601,8 @@ internal record class RecordClassCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1778,8 +1778,8 @@ internal record struct RecordStructCustomPosition
     {
         _fen = null;
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1830,15 +1830,15 @@ internal record struct RecordStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1849,8 +1849,8 @@ internal record struct RecordStructCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1874,8 +1874,8 @@ internal record struct RecordStructCustomPosition
     public RecordStructCustomPosition(RecordStructCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
+        var offset = Utils.PieceOffset((int)oldSide);
+        var oppositeSide = Utils.OppositeSide((int)oldSide);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -1928,15 +1928,15 @@ internal record struct RecordStructCustomPosition
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = Utils.PawhPushSquare((int)oldSide);
             var enPassantSquare = sourceSquare + pawnPush;
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);
@@ -1947,8 +1947,8 @@ internal record struct RecordStructCustomPosition
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare((int)oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare((int)oldSide);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitboards[rookIndex].PopBit(rookSourceSquare);

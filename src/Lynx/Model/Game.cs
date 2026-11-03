@@ -15,8 +15,9 @@ public sealed class Game : IDisposable
 #pragma warning restore CA1002, MA0016 // Do not expose generic lists
 #endif
 
-    //private int _positionHashHistoryPointerBeforeLastSearch;
+    private int _positionHashHistoryPointerBeforeLastSearch;
     private int _positionHashHistoryPointer;
+    private int _lastNullMoveHashHistoryPointer;
     private readonly ulong[] _positionHashHistory;
 
     /// <summary>
@@ -52,7 +53,9 @@ public sealed class Game : IDisposable
         PositionBeforeLastSearch = new Position(CurrentPosition);
 
 #if DEBUG
-        MoveHistory = [with(Constants.MaxNumberMovesInAGame)];
+#pragma warning disable IDE0028 // Simplify collection initialization - suggested syntax causes issues for some .NET 10 SDK versions
+        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+#pragma warning restore IDE0028 // Simplify collection initialization
 #endif
     }
 
@@ -106,6 +109,7 @@ public sealed class Game : IDisposable
     private void Populate(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves)
     {
         _positionHashHistoryPointer = 0;
+        _lastNullMoveHashHistoryPointer = 0;
 
         for (int i = 0; i < _stack.Length; ++i)
         {
@@ -156,7 +160,7 @@ public sealed class Game : IDisposable
         }
 
         PositionBeforeLastSearch.ResetTo(CurrentPosition);
-        //_positionHashHistoryPointerBeforeLastSearch = _positionHashHistoryPointer;
+        _positionHashHistoryPointerBeforeLastSearch = _positionHashHistoryPointer;
     }
 
     /// <summary>
@@ -222,7 +226,7 @@ public sealed class Game : IDisposable
         var twofoldRepetitionDetected = false;
 
         // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 earlier and finish HalfMovesWithoutCaptureOrPawnMove earlier
-        var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
+        var limit = Math.Max(_lastNullMoveHashHistoryPointer, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
         for (int i = _positionHashHistoryPointer - 3; i >= limit; i -= 2)
         {
             if (currentHash == _positionHashHistory[i])
@@ -278,14 +282,14 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong PreviousMoveHash(int nMovesAgo)
+    public ulong PreviousPositionHash(int nPliesAgo)
     {
-        if (_positionHashHistoryPointer >= nMovesAgo)
-        {
-            return _positionHashHistory[_positionHashHistoryPointer - nMovesAgo];
-        }
+        // (_positionHashHistoryPointer - 1) points to the hash of the current position itself
+        var index = _positionHashHistoryPointer - 1 - nPliesAgo;
 
-        return 0;
+        return index >= 0
+            ? _positionHashHistory[index]
+            : 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -323,7 +327,8 @@ public sealed class Game : IDisposable
     public void ResetCurrentPositionToBeforeSearchState()
     {
         CurrentPosition.ResetTo(PositionBeforeLastSearch);
-        //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
+        _positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;
+        _lastNullMoveHashHistoryPointer = 0;
     }
 
     public void UpdateInitialPosition()
@@ -357,6 +362,24 @@ public sealed class Game : IDisposable
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveFromPositionHashHistory() => --_positionHashHistoryPointer;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int AddNullMoveToPositionHashHistory(ulong hash)
+    {
+        var previousNullMovePointer = _lastNullMoveHashHistoryPointer;
+
+        AddToPositionHashHistory(hash);
+        _lastNullMoveHashHistoryPointer = _positionHashHistoryPointer - 1;
+
+        return previousNullMovePointer;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void RemoveNullMoveFromPositionHashHistory(int previousNullMovePointer)
+    {
+        RemoveFromPositionHashHistory();
+        _lastNullMoveHashHistoryPointer = previousNullMovePointer;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];

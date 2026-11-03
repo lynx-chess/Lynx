@@ -2,6 +2,7 @@
 using NUnit.Framework;
 
 namespace Lynx.Test;
+
 public class BitboardExtensionsTest
 {
     [TestCase(0b10001UL, 1UL)]
@@ -38,71 +39,5 @@ public class BitboardExtensionsTest
         {
             Assert.AreEqual(lsb, System.Runtime.Intrinsics.X86.Bmi1.X64.ExtractLowestSetBit(n));
         }
-    }
-
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.a2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.b2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.c2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.d2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.e2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.f2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.g2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.h2, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.a7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.b7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.c7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.d7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.e7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.f7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.g7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.P, BoardSquare.h7, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.a7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.b7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.c7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.d7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.e7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.f7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.g7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.h7, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.a2, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.b2, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.c2, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.d2, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.e2, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.f2, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.g2, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.p, BoardSquare.h2, false)]
-
-    [TestCase(Constants.InitialPositionFEN, Piece.R, (BoardSquare)Constants.InitialWhiteQueensideRookSquare, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.R, (BoardSquare)Constants.InitialWhiteKingsideRookSquare, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.r, (BoardSquare)Constants.InitialBlackQueensideRookSquare, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.r, (BoardSquare)Constants.InitialBlackKingsideRookSquare, true)]
-
-    [TestCase(Constants.InitialPositionFEN, Piece.N, BoardSquare.b1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.N, BoardSquare.g1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.n, BoardSquare.b8, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.n, BoardSquare.g8, true)]
-
-    [TestCase(Constants.InitialPositionFEN, Piece.B, BoardSquare.c1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.B, BoardSquare.f1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.b, BoardSquare.c8, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.b, BoardSquare.f8, true)]
-
-    [TestCase(Constants.InitialPositionFEN, Piece.Q, BoardSquare.d1, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.Q, (BoardSquare)Constants.InitialWhiteKingSquare, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.q, BoardSquare.d8, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.q, (BoardSquare)Constants.InitialBlackKingSquare, false)]
-
-    [TestCase(Constants.InitialPositionFEN, Piece.K, (BoardSquare)Constants.InitialWhiteKingSquare, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.K, BoardSquare.d1, false)]
-    [TestCase(Constants.InitialPositionFEN, Piece.k, (BoardSquare)Constants.InitialBlackKingSquare, true)]
-    [TestCase(Constants.InitialPositionFEN, Piece.k, BoardSquare.d8, false)]
-    public void Contains_DoesNotContain(string fen, Piece piece, BoardSquare square, bool shouldContain)
-    {
-        var position = new Position(fen);
-        var bb = position.PieceBitboards[(int)piece];
-
-        Assert.AreEqual(shouldContain, bb.Contains((int)square));
-        Assert.AreEqual(!shouldContain, bb.DoesNotContain((int)square));
     }
 }

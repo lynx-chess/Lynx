@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Lynx;
@@ -86,7 +87,7 @@ public sealed partial class Engine
     {
         var sourceSquare = move.SourceSquare();
         var targetSquare = move.TargetSquare();
-        Debug.Assert(oppositeSideAttacks != 0);
+        Debug.Assert(oppositeSideAttacks.NotEmpty());
 
         var isStartSquareAttacked = oppositeSideAttacks.GetBit(sourceSquare) ? 1 : 0;
         var isTargetSquareAttacked = oppositeSideAttacks.GetBit(targetSquare) ? 1 : 0;
@@ -278,10 +279,10 @@ public sealed partial class Engine
         materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
 
         // Continuation correction history
-        var previousMoveHash = Game.PreviousMoveHash(1);
-        if (previousMoveHash != 0)
+        var previousPositionHash = Game.PreviousPositionHash(1);
+        if (previousPositionHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previousPositionHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -290,10 +291,10 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
-        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
-        if (previousPreviousMoveHash != 0)
+        var previousPreviousPositionHash = Game.PreviousPositionHash(2);
+        if (previousPreviousPositionHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPositionHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -302,10 +303,10 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
-        var previous4MoveHash = Game.PreviousMoveHash(4);
-        if (previous4MoveHash != 0)
+        var previous4PositionsHash = Game.PreviousPositionHash(4);
+        if (previous4PositionsHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previous4MoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previous4PositionsHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -401,10 +402,10 @@ public sealed partial class Engine
         int continuationCorrHist2 = 0;
         int continuationCorrHist4 = 0;
 
-        var previousMoveHash = Game.PreviousMoveHash(1);
-        if (previousMoveHash != 0)
+        var previousPositionHash = Game.PreviousPositionHash(1);
+        if (previousPositionHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previousPositionHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -412,10 +413,10 @@ public sealed partial class Engine
             continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        var previousPreviousMoveHash = Game.PreviousMoveHash(2);
-        if (previousPreviousMoveHash != 0)
+        var previousPreviousPositionHash = Game.PreviousPositionHash(2);
+        if (previousPreviousPositionHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPositionHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -423,10 +424,10 @@ public sealed partial class Engine
             continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
-        var previousPreviousPreviousMoveHash = Game.PreviousMoveHash(4);
-        if (previousPreviousPreviousMoveHash != 0)
+        var previous4PositionsHash = Game.PreviousPositionHash(4);
+        if (previous4PositionsHash != 0)
         {
-            var continuationIndex = position.UniqueIdentifier ^ previousPreviousPreviousMoveHash;
+            var continuationIndex = position.UniqueIdentifier ^ previous4PositionsHash;
             var continuationCorrHistIndex = (int)(continuationIndex & Constants.ContinuationCorrHistoryHashMask);
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
@@ -565,6 +566,18 @@ public sealed partial class Engine
                 throw new LynxException(message);
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Move GetKillerMove(int ply, int index)
+    {
+        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_killerMoves), (ply * 2) + index);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Move GetCounterMove(int ply)
+    {
+        return CounterMove(ply - 1);
     }
 
     [Conditional("DEBUG")]

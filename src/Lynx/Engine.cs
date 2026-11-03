@@ -1,7 +1,6 @@
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -59,12 +58,12 @@ public sealed partial class Engine : IDisposable
     {
         AdjustPosition(Configuration.EngineSettings.IsChess960 ? Constants.SuperLongPositionCommand_DFRC : Constants.SuperLongPositionCommand);
 
-        const string goWarmupCommand = "go depth 10";   // ~300 ms
+        const string goWarmupCommand = "go depth 10";
         var command = new GoCommand(goWarmupCommand);
 
         BestMove(command);
 
-        Bench(2);
+        Bench(Configuration.EngineSettings.WarmupBenchDepth);
     }
 
     private void ResetEngine()
@@ -108,18 +107,64 @@ public sealed partial class Engine : IDisposable
         ResetEngine();
     }
 
-    [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Game.ParsePositionCommand(rawPositionCommand);
     }
 
     /// <summary>
-    /// Uses <see cref="TimeManager.CalculateTimeManagement(Game, GoCommand)"/> internally
+    /// Extracts the actual legal moves to search among <see cref="GoCommand.SearchMoves"/> for the current position.
+    /// </summary>
+    public Move[] GetSearchMoves(GoCommand goCommand)
+    {
+        if (goCommand.SearchMoves.Length == 0)
+        {
+            return [];
+        }
+
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(Game.CurrentPosition, pseudoLegalMoves);
+
+        var searchMoves = new HashSet<Move>(goCommand.SearchMoves.Length);
+
+        foreach (var rawMove in goCommand.SearchMoves)
+        {
+            if (!MoveExtensions.TryParseFromUCIString(rawMove, pseudoLegalMoves, out var parsedMove))
+            {
+                _logger.Warn("searchmoves move {Move} is not a pseudolegal move for position {Position}, ignoring it", rawMove, Game.FEN);
+                continue;
+            }
+
+            var move = parsedMove.Value;
+            var gameState = Game.CurrentPosition.MakeMove(move);
+            var isLegal = Game.CurrentPosition.WasProduceByAValidMove();
+            Game.CurrentPosition.UnmakeMove(move, gameState);
+
+            if (!isLegal)
+            {
+                _logger.Warn("searchmoves move {Move} is not a legal move for position {Position}", rawMove, Game.FEN);
+                continue;
+            }
+
+            searchMoves.Add(move);
+        }
+
+        if (searchMoves.Count == 0)
+        {
+            _logger.Warn("searchmoves {Moves} doesn't contain any legal moves for position {Position}, performing a full search instead", string.Join(", ", goCommand.SearchMoves), Game.FEN);
+
+            return [];
+        }
+
+        return [.. searchMoves];
+    }
+
+    /// <summary>
+    /// Uses <see cref="TimeManager.CalculateTimeManagement(Game, GoCommand, Move[])"/> internally
     /// </summary>
     public SearchResult BestMove(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand, GetSearchMoves(goCommand));
 
         return BestMove(in searchConstraints, isPondering: false, CancellationToken.None, CancellationToken.None);
     }

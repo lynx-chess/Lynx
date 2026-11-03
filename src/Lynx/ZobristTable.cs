@@ -129,7 +129,7 @@ public static class ZobristTable
         {
             var bitboard = position.PieceBitboards[pieceIndex];
 
-            while (bitboard != default)
+            while (bitboard.NotEmpty())
             {
                 bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
@@ -166,7 +166,7 @@ public static class ZobristTable
         ulong pawnKingHash = 0;
 
         var whitePawns = position.PieceBitboards[(int)Piece.P];
-        while (whitePawns != default)
+        while (whitePawns.NotEmpty())
         {
             whitePawns = whitePawns.WithoutLS1B(out var pieceSquareIndex);
 
@@ -174,7 +174,7 @@ public static class ZobristTable
         }
 
         var blackPawns = position.PieceBitboards[(int)Piece.p];
-        while (blackPawns != default)
+        while (blackPawns.NotEmpty())
         {
             blackPawns = blackPawns.WithoutLS1B(out var pieceSquareIndex);
 
@@ -202,7 +202,7 @@ public static class ZobristTable
         {
             var bitboard = position.PieceBitboards[pieceIndex];
 
-            while (bitboard != default)
+            while (bitboard.NotEmpty())
             {
                 bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
@@ -221,7 +221,7 @@ public static class ZobristTable
         for (int pieceIndex = (int)Piece.N; pieceIndex <= (int)Piece.B; ++pieceIndex)
         {
             var whiteBitboard = position.PieceBitboards[pieceIndex];
-            while (whiteBitboard != default)
+            while (whiteBitboard.NotEmpty())
             {
                 whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
 
@@ -229,7 +229,7 @@ public static class ZobristTable
             }
 
             var blackBitboard = position.PieceBitboards[pieceIndex + 6];
-            while (blackBitboard != default)
+            while (blackBitboard.NotEmpty())
             {
                 blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
 
@@ -248,14 +248,14 @@ public static class ZobristTable
         for (int pieceIndex = (int)Piece.R; pieceIndex <= (int)Piece.Q; ++pieceIndex)
         {
             var whiteBitboard = position.PieceBitboards[pieceIndex];
-            while (whiteBitboard != default)
+            while (whiteBitboard.NotEmpty())
             {
                 whiteBitboard = whiteBitboard.WithoutLS1B(out var pieceSquareIndex);
                 majorHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
 
             var blackBitboard = position.PieceBitboards[pieceIndex + 6];
-            while (blackBitboard != default)
+            while (blackBitboard.NotEmpty())
             {
                 blackBitboard = blackBitboard.WithoutLS1B(out var pieceSquareIndex);
                 majorHash ^= PieceHash(pieceSquareIndex, pieceIndex + 6);

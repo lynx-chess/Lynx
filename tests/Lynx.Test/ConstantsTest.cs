@@ -97,7 +97,7 @@ public class ConstantsTest
     public void HFile()
     {
         Bitboard bb = 0;
-        bb.SetBit(BoardSquare.h1);
+        bb.SetBit((int)BoardSquare.h1);
 
         Assert.NotZero(bb & Constants.HFile);
         Assert.Zero(bb & NotHFile);
@@ -110,7 +110,7 @@ public class ConstantsTest
     public void AFile()
     {
         Bitboard bb = 0;
-        bb.SetBit(BoardSquare.a1);
+        bb.SetBit((int)BoardSquare.a1);
 
         Assert.NotZero(bb & Constants.AFile);
         Assert.Zero(bb & NotAFile);

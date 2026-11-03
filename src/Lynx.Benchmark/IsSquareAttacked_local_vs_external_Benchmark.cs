@@ -81,7 +81,7 @@ public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
     {
         public static bool IsSquaredAttacked_ExternalMethods(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
         {
-            var offset = Utils.PieceOffset(sideToMove);
+            var offset = Utils.PieceOffset((int)sideToMove);
 
             // I tried to order them from most to least likely
             return
@@ -133,7 +133,7 @@ public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
     {
         public static bool IsSquaredAttacked_LocalMethods(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
         {
-            var offset = Utils.PieceOffset(sideToMove);
+            var offset = Utils.PieceOffset((int)sideToMove);
 
             return
                 IsSquareAttackedByPawns(squareIndex, sideToMove, offset, piecePosition)

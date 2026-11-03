@@ -44,6 +44,13 @@ public abstract class BaseTest
         return SetEnginePosition(engine, fen);
     }
 
+    protected static Engine GetEngine(string fen, in TranspositionTable tt)
+    {
+        var engine = GetEngine(in tt);
+
+        return SetEnginePosition(engine, fen);
+    }
+
     protected static Engine GetEngine()
     {
         var mock = new Mock<ChannelWriter<object>>();
@@ -53,6 +60,17 @@ public abstract class BaseTest
             .Returns(ValueTask.CompletedTask);
 
         return new Engine(mock.Object);
+    }
+
+    protected static Engine GetEngine(in TranspositionTable tt)
+    {
+        var mock = new Mock<ChannelWriter<object>>();
+
+        mock
+            .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.CompletedTask);
+
+        return new Engine(-1, mock.Object, in tt);
     }
 
     protected static Engine SetEnginePosition(Engine engine, string fen)

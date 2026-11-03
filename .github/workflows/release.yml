@@ -6,6 +6,7 @@ on:
     inputs:
       new_engine_version:
         description: 'New engine version. If empty, run number will be used and no commit/tag/release will be created'
+        type: string
         default: ''
         required: false
       should_push_new_nuget_version:
@@ -48,12 +49,12 @@ jobs:
             os: windows-latest
           - runtime-identifier: linux-x64
             os: ubuntu-latest
-          - runtime-identifier: linux-arm64
-            os: ubuntu-latest
-          - runtime-identifier: linux-arm
-            os: ubuntu-latest
           - runtime-identifier: linux-musl-x64
             os: ubuntu-latest
+          - runtime-identifier: linux-arm64
+            os: ubuntu-26.04-arm
+          - runtime-identifier: linux-arm
+            os: ubuntu-26.04-arm
           - runtime-identifier: osx-x64
             os: macOS-15-intel
           - runtime-identifier: osx-arm64

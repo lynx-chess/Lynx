@@ -20,7 +20,7 @@ public class StopCommandTest
 
         // A command that guarantees that the search doesn't finish before the end of the test
         var goCommand = new GoCommand($"go depth {Configuration.EngineSettings.MaxDepth}");
-        var searchConstraints = TimeManager.CalculateTimeManagement(engine.Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(engine.Game, goCommand, []);
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(10_000);
 

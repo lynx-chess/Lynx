@@ -76,7 +76,7 @@ public class TranspositionTableTests
     [Explicit]
     [NonParallelizable]
     [Category(Categories.LongRunning)]
-    public void ClearTT()
+    public unsafe void ClearTT()
     {
         Configuration.EngineSettings.TranspositionTableSize = 31;
         Configuration.EngineSettings.Threads = 7;
@@ -87,8 +87,8 @@ public class TranspositionTableTests
 
         for (int index = 0; index < (int)tt.Length; ++index)
         {
-            ref var ttEntry = ref tt.Get(index);
-            ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6);
+            var ttEntry = tt.Get(index);
+            ttEntry->Update(1, 2, 3, 4, NodeType.Exact, 5, 6);
         }
 
         tt.Clear();
@@ -97,13 +97,13 @@ public class TranspositionTableTests
         {
             var ttEntry = tt.Get(index);
 
-            Assert.AreEqual(0, ttEntry.Score);
-            Assert.AreEqual(0, ttEntry.StaticEval);
-            Assert.AreEqual(0, ttEntry.Depth);
-            Assert.AreEqual(NodeType.Unknown, ttEntry.Type);
-            Assert.AreEqual(false, ttEntry.WasPv);
-            Assert.AreEqual(0, ttEntry.Move);
-            Assert.AreEqual(0, ttEntry.Key);
+            Assert.AreEqual(0, ttEntry->Score);
+            Assert.AreEqual(0, ttEntry->StaticEval);
+            Assert.AreEqual(0, ttEntry->Depth);
+            Assert.AreEqual(NodeType.Unknown, ttEntry->Type);
+            Assert.AreEqual(false, ttEntry->WasPv);
+            Assert.AreEqual(0, ttEntry->Move);
+            Assert.AreEqual(0, ttEntry->Key);
         }
     }
 

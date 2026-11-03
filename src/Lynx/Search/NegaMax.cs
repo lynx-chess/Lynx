@@ -1,4 +1,4 @@
-#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -114,11 +114,44 @@ public sealed partial class Engine
         }
         else
         {
-            ttEntry = default;
+            bool ttEntryHasBestMoveAtRoot = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var rootTTEntry)
+                && rootTTEntry.NodeType != NodeType.Unknown
+                && rootTTEntry.BestMove != default;
+
+            var rootBestMove = ttEntryHasBestMoveAtRoot
+                ? rootTTEntry.BestMove
+                : default;
+
+            // The move that was the best of this PV line in the previous depth is the one to search first.
+            // For lines other than the first one, the TT move is the best move of a previous PV line, which will be excluded
+            if (_multiPV > 1)
+            {
+                var previousLineRootMove = _rootMoves[_pvIndex];
+
+                if (previousLineRootMove.Score != RootMove.DefaultScore)
+                {
+                    rootBestMove = (ShortMove)previousLineRootMove.Move;
+                }
+                else if (_pvIndex > 0)
+                {
+                    Debug.Assert(
+                        Configuration.EngineSettings.Threads != 1
+                        || rootBestMove == default
+                        || _rootMoves[0.._pvIndex].Select(r => (ShortMove)r.Move).Contains(rootBestMove));
+
+                    rootBestMove = default;
+                }
+            }
+
+            // Root: TT best move only used for move ordering, no TT cutoffs nor singular extensions
+            ttEntry = rootBestMove != default
+                ? new TTProbeResult(EvaluationConstants.NoScore, rootBestMove, NodeType.Unknown, EvaluationConstants.NoScore, 0, wasPv: false)
+                : default;
+
             ttWasPv = false;
         }
 
-        // Internal iterative reduction (IIR)
+        // 🔍 Internal iterative reduction (IIR)
         // If this position isn't found in TT, it has never been searched before,
         // so the search will be potentially expensive.
         // Therefore, we search with reduced depth for now, expecting to record a TT move
@@ -287,14 +320,28 @@ public sealed partial class Engine
                     var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + (depth / Configuration.EngineSettings.NMP_DepthDivisor);
 
                     var gameState = position.MakeNullMove();
+
+                    stack.Move = MoveExtensions.NullMove;
+                    var previousNullMovePointer = Game.AddNullMoveToPositionHashHistory(position.UniqueIdentifier);
+
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+
+                    Game.RemoveNullMoveFromPositionHashHistory(previousNullMovePointer);
                     position.UnMakeNullMove(gameState);
 
                     if (nmpScore >= beta)
                     {
-                        return Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                            ? nmpScore
-                            : beta;
+                        if (Math.Abs(nmpScore) < EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            return nmpScore;
+                        }
+
+                        // Avoid returning unproven null move checkmate scores unless beta is a checkmate score itself
+                        // Otherwise, returning arbitrary bounds (i.e. widened aspiration window ones) can end up in the TT
+                        if (Math.Abs(beta) > EvaluationConstants.PositiveCheckmateDetectionLimit)
+                        {
+                            return beta;
+                        }
                     }
                 }
             }
@@ -316,61 +363,50 @@ public sealed partial class Engine
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves, oppositeSideAttacks);
-
-        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
-        ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
-        ref var pseudoLegalMovesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-        {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMove(position, Unsafe.Add(ref pseudoLegalMovesRef, i), ply, oppositeSideAttacks, ttBestMove);
-        }
-
         var nodeType = NodeType.Alpha;
         int bestScore = EvaluationConstants.MinEval;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedMoves = stackalloc Move[Constants.MaxNumberOfLegalMovesInAPosition];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: false);
+
+        while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
-            // There's no need to sort all the moves since most of them don't get checked anyway
-            // So just find the first unsearched one with the best score and try it
-            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
-            {
-                ref var moveI = ref Unsafe.Add(ref pseudoLegalMovesRef, moveIndex);
-                ref var moveJ = ref Unsafe.Add(ref pseudoLegalMovesRef, j);
-                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
-                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
-
-                if (scoreJ > scoreI)
-                {
-                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
-                }
-            }
-
-            // Value copy
-            var move = Unsafe.Add(ref pseudoLegalMovesRef, moveIndex); // Value copy for use in closures
-
             var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
             {
                 continue;
             }
 
-            var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
+            if (isRoot)
+            {
+                if (_multiPV > 1 && WasSearchedAsRootMove(move))
+                {
+                    continue;
+                }
+
+                if (_searchMoves.Length > 0 && !IsSearchMove(move))
+                {
+                    continue;
+                }
+            }
+
             var piece = move.Piece();
             var capturedPiece = move.CapturedPiece();
             var isCapture = capturedPiece != (int)Piece.None;
             var targetSquare = move.TargetSquare();
 
-            int quietHistory = QuietHistoryEntry(move, oppositeSideAttacks)
-                + ContinuationHistoryEntry(piece, targetSquare, ply);
+            int quietHistory = !isCapture
+                ? (QuietHistoryEntry(move, oppositeSideAttacks)
+                    + ContinuationHistoryEntry(piece, targetSquare, ply))
+                : 0;
 
             // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -456,8 +492,8 @@ public sealed partial class Engine
             // If that search fails low, the move is 'singular' (very good) and therefore we extend it
             if (
                 //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                isBestMove      // Ensures !isRoot and TT hit (otherwise there wouldn't be a TT move)
-                && depth >= Configuration.EngineSettings.SE_MinDepth
+                isBestMove      // Ensures TT hit (otherwise there wouldn't be a TT move)
+                && depth >= Configuration.EngineSettings.SE_MinDepth    // This implis !isRoot
                 && ttEntry.Depth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 && Math.Abs(ttEntry.Score) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttEntry.NodeType != NodeType.Alpha
@@ -506,7 +542,7 @@ public sealed partial class Engine
                 }
                 // Multicut
 #pragma warning disable MA0071 // Avoid using redundant else
-                else if (singularScore >= beta && singularScore < Math.Abs(EvaluationConstants.PositiveCheckmateDetectionLimit))
+                else if (singularScore >= beta && Math.Abs(singularScore) < EvaluationConstants.PositiveCheckmateDetectionLimit)
                 {
                     return singularScore;
                 }
@@ -789,7 +825,12 @@ public sealed partial class Engine
                 UpdateCorrectionHistory(position, bestScore - staticEval, depth);
             }
 
-            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            // MultiPV: when not searching the first PV lines, root moves are excluded, so the best move of the initial PV line shouldn't be overwritten
+            // searchmoves: the root score and best move always reflect a subset of the moves, so reusing them for future searches makes little sense
+            if (!isRoot || (_pvIndex == 0 && _searchMoves.Length == 0))
+            {
+                _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+            }
         }
 
         return bestScore;
@@ -846,6 +887,7 @@ public sealed partial class Engine
         Debug.Assert(ttProbeResult.Depth >= 0, "Assertion failed", "We would need to add it as a TT cutoff condition");
 
         if (ttHit
+            && !pvNode
             && (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
                 || (ttNodeType == NodeType.Beta && ttScore >= beta)))
@@ -868,9 +910,11 @@ public sealed partial class Engine
         stack.StaticEval = staticEval;
 
         int standPat =
-            (ttNodeType == NodeType.Exact
-                || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
-                || (ttNodeType == NodeType.Beta && ttScore > staticEval))
+            // If we use TT checkmate scores as stand pat, they are propagated as exact scores and mate distances wrongly increase over time
+            (Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ((ttNodeType == NodeType.Alpha && ttScore < staticEval)
+                    || (ttNodeType == NodeType.Beta && ttScore > staticEval)))
+            // || ttNodeType == NodeType.Exact  Not needed due to the cutoff above
             ? ttScore
             : staticEval;
 
@@ -889,69 +933,47 @@ public sealed partial class Engine
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
                 return standPat;
             }
-        }
 
-        // Better move
-        if (standPat > alpha)
-        {
-            alpha = standPat;
+            // Better move
+            if (standPat > alpha)
+            {
+                alpha = standPat;
+            }
         }
 
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
-
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves, oppositeSideAttacks);
-        if (pseudoLegalMoves.Length == 0)
+        if (isInCheck && oppositeSideAttacks == 0)
         {
-            // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
-            return staticEval;
+            // Needed for quiet evasions generation
+            oppositeSideAttacks = position.OppositeSideAttacks();
         }
+
+        var poolSize = isInCheck
+            ? Constants.MaxNumberOfPseudolegalMovesInAPosition
+            : Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition;
+
+        Span<Move> moves = stackalloc Move[poolSize];
+        Span<int> moveScores = stackalloc int[poolSize];
+
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: !isInCheck);
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
-        int bestScore = standPat;
+        int bestScore = isInCheck ? EvaluationConstants.MinEval : standPat;
 
-        bool isAnyCaptureValid = false;
+        bool isAnyMoveValid = false;
 
-        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
-
-        ref var moveScoresRef = ref MemoryMarshal.GetReference(moveScores);
-        ref var movesRef = ref MemoryMarshal.GetReference(pseudoLegalMoves);
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-        {
-            Unsafe.Add(ref moveScoresRef, i) = ScoreMoveQSearch(position, Unsafe.Add(ref movesRef, i), ttBestMove);
-        }
-
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedMoves = stackalloc Move[poolSize];
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
+        while (movePicker.TryGetNext(out var move, out var moveScore))
         {
-            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
-            // There's no need to sort all the moves since most of them don't get checked anyway
-            // So just find the first unsearched one with the best score and try it
-            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
+            // 🔍 QSearch move count pruning: when not in check, only the first moves are searched
+            // This helps dealing with some search explosions
+            if (!isInCheck && visitedMovesCounter >= Configuration.EngineSettings.QS_MaxMovesNotInCheck)
             {
-                ref var moveI = ref Unsafe.Add(ref movesRef, moveIndex);
-                ref var moveJ = ref Unsafe.Add(ref movesRef, j);
-                ref var scoreI = ref Unsafe.Add(ref moveScoresRef, moveIndex);
-                ref var scoreJ = ref Unsafe.Add(ref moveScoresRef, j);
-
-                if (scoreJ > scoreI)
-                {
-                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
-                }
-            }
-
-            // Value copies
-            var move = Unsafe.Add(ref movesRef, moveIndex);
-            var moveScore = Unsafe.Add(ref moveScoresRef, moveIndex);
-
-            // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-            {
-                continue;
+                break;
             }
 
             var gameState = position.MakeMove(move);
@@ -961,18 +983,34 @@ public sealed partial class Engine
                 continue;
             }
 
+            isAnyMoveValid = true;
+
+            // 🔍 QSearch SEE pruning: pruning bad captures (not when in check, where they could be the only way out)
+            if (!isInCheck && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
             ++_nodes;
             Unsafe.Add(ref visitedMovesRef, visitedMovesCounter) = move;
-            isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
-            // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
+            // Even if we don't do repetition detection, hmc is part of the TT key, and the hash history is read by the continuation correction history
+            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+            Game.Update50movesRule(move);
+            Game.AddToPositionHashHistory(position.UniqueIdentifier);
+
+            // TODO check for threefold or 50 moves repetitions when in check (and therefore, quiet evasions are generated)
             stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
+
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+            Game.RemoveFromPositionHashHistory();
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, score, isQuiescence: true);
@@ -1009,14 +1047,32 @@ public sealed partial class Engine
             }
 
             ++visitedMovesCounter;
+
+            // Quiet evasions pruning: once a (non-mated) score is known, only the first plain quiet evasion is searched
+            if (isInCheck
+                && bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit
+                && movePicker.Stage >= Stage.QuietMovesStage)
+            {
+                break;
+            }
         }
 
-        if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)])) // Bad captures can be pruned, so all moves need to be generated for now
+        // No valid moves generated
+        if (!isAnyMoveValid)
         {
-            Debug.Assert(bestMove is null);
+            // If not in check, we assume we have a non-mated position with no captures.
+            // Could technically be a stalemate, though, but checking it failed in https://github.com/lynx-chess/Lynx/pull/358 (TODO retry)
+            if (!isInCheck)
+            {
+                // Returning stand pat instead of static eval was neutral in https://github.com/lynx-chess/Lynx/pull/2735
+                return staticEval;
+            }
 
-            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
+            // When in check, if no valid evasion was generated, it's mate
+            Debug.Assert(bestMove is null);
+            Debug.Assert(!MoveGenerator.CanGenerateAtLeastAValidMove(position, evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)]));
+
+            bestScore = Position.MatedScore(ply);
 
             nodeType = NodeType.Exact;
             staticEval = bestScore;

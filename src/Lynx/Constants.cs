@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Buffers;
 using System.Collections.Frozen;
 using System.Runtime.CompilerServices;
 
@@ -338,13 +339,26 @@ public static class Constants
 
     public static readonly int MaxMoveOverhead = 60_000;
 
+    public const int MaxMultiPV = MaxNumberOfLegalMovesInAPosition;
+
     /// <summary>
-    /// 218 or 224 seems to be the known limit of legal moves
-    /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
-    /// We generally need to account for a number higher than that due to pseudolegal movegen
+    /// A position can have at most 218 legal moves
+    /// See https://lichess.org/@/Tobs40/blog/why-a-reachable-position-can-have-at-most-218-playable-moves/a5xdxeqs
     /// Regardless, we want to support positions like kBQQQQQQ/BR5Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/KQQQQQQQ w - - 0 1 (270 pseudolegal and legal moves)
     /// </summary>
+    public const int MaxNumberOfLegalMovesInAPosition = 512;
+
+    /// <summary>
+    /// We need to account for a number higher than the teoretical 218 limit for <see cref="MaxNumberOfLegalMovesInAPosition"/> due to pseudolegal movegen
+    /// </summary>
     public const int MaxNumberOfPseudolegalMovesInAPosition = 512;
+
+    /// <summary>
+    /// Max known number of legal capures in a position seems to be 74
+    /// See https://chess.stackexchange.com/questions/8323/maximum-number-of-captures-in-a-position/8412#8412
+    /// We also need to account for a number higher than that due to pseudolegal movegen
+    /// </summary>
+    public const int MaxNumberOfPseudolegalNoisyMovesInAPosition = 256;
 
     public const int MaxNumberMovesInAGame = 2048;
 
@@ -640,6 +654,10 @@ public static class Constants
     public const int ContinuationCorrHistoryHashMask = ContinuationCorrHistoryHashSize - 1;
 
     public const string NumberWithSignFormat = "+#;-#;0";
+
+    private static ReadOnlySpan<string> FRCStrings => new(["FRC", "960", "FISCHER"]);
+
+    public static readonly SearchValues<string> FRCStringSearchValues = SearchValues.Create(FRCStrings, StringComparison.OrdinalIgnoreCase);
 }
 
 #pragma warning restore IDE0055

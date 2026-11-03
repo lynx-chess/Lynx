@@ -14,12 +14,30 @@ public sealed class Searcher : IDisposable
     private readonly Logger _logger;
 
     internal const int MainEngineId = 1;
+
+    #region UCI go command state
+
+    /// <summary>
+    /// This guards go command state (<see cref="_pendingGoCommands"/>, <see cref="_isProcessingGoCommand"/>, <see cref="_stopRequestedForPendingGo"/>, <see cref="_isPondering"/> and <see cref="_isPonderHit"/>)
+    private readonly Lock _goCommandStateLock = new();
+
+    /// <summary>
+    /// go commands received by the listener but not yet processed by the searcher
+    /// </summary>
+    private int _pendingGoCommands;
+
     private bool _isProcessingGoCommand;
+    private bool _stopRequestedForPendingGo;
+
+
+    private bool _isPondering;
     private bool _isPonderHit;
+
+    #endregion
 
     private int _searchThreadsCount;
     private Engine _mainEngine;
-    private Engine[] _extraEngines = [];
+    private SearchWorker[] _extraWorkers = [];
     private TranspositionTable _tt;
 
     private CancellationTokenSource _searchCancellationTokenSource;
@@ -53,7 +71,10 @@ public sealed class Searcher : IDisposable
         AllocateExtraEngines();
 
 #if !DEBUG
-        Warmup();
+        if (!Configuration.EngineSettings.SkipWarmup)
+        {
+            Warmup();
+        }
 #endif
 
         // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
@@ -95,26 +116,63 @@ public sealed class Searcher : IDisposable
 
     public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove, _mainEngine.Game.FullMoves);
 
+    private void BeginGoCommand(bool isPondering)
+    {
+        // We lock the state to make sure not we don't process stop commands between go command being registed and its full processing here
+        lock (_goCommandStateLock)
+        {
+            _isProcessingGoCommand = true;
+
+            if (_pendingGoCommands > 0)
+            {
+                --_pendingGoCommands;
+            }
+
+#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
+            if (!_absoluteSearchCancellationTokenSource.TryReset())
+            {
+                _absoluteSearchCancellationTokenSource.Dispose();
+                _absoluteSearchCancellationTokenSource = new();
+            }
+
+            if (!_searchCancellationTokenSource.TryReset())
+            {
+                _searchCancellationTokenSource.Dispose();
+                _searchCancellationTokenSource = new();
+            }
+#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
+
+            _isPondering = isPondering;
+
+            if (!isPondering)
+            {
+                // We ignore any previous ponderhits if the go command doesn't include ponder
+                _isPonderHit = false;
+            }
+            else if (_isPonderHit)
+            {
+                // If ponderhit is received right before this 'go ponder', there's no point in searching
+                _absoluteSearchCancellationTokenSource.Cancel();
+            }
+
+            // Only true if _pendingGoCommands > 0 while processing the stop command
+            // This happens when GUi starts a go ponder search, followed by a stop + regular go:
+            // stop command is processed after the go ponder is registered, but the go ponder is processed afterwrads
+            if (_stopRequestedForPendingGo)
+            {
+                _stopRequestedForPendingGo = false;
+
+                // The search returns right away, with a 'bestmove' as every 'go' requires
+                _absoluteSearchCancellationTokenSource.Cancel();
+            }
+        }
+    }
+
     private async Task OnGoCommand(GoCommand goCommand)
     {
         _firstRun = false;
-        _isProcessingGoCommand = true;
 
-        if (!_absoluteSearchCancellationTokenSource.TryReset())
-        {
-#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
-            _absoluteSearchCancellationTokenSource.Dispose();
-#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
-            _absoluteSearchCancellationTokenSource = new();
-        }
-
-        if (!_searchCancellationTokenSource.TryReset())
-        {
-#pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
-            _searchCancellationTokenSource.Dispose();
-#pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
-            _searchCancellationTokenSource = new();
-        }
+        BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder);
 
         if (_searchThreadsCount == 1)
         {
@@ -125,12 +183,48 @@ public sealed class Searcher : IDisposable
             await MultiThreadedSearch(goCommand);
         }
 
-        _isProcessingGoCommand = false;
+        lock (_goCommandStateLock)
+        {
+            _isProcessingGoCommand = false;
+
+            // Not necessarily consumed already if the search threw
+            _isPondering = false;
+            _isPonderHit = false;
+        }
+    }
+
+    /// <summary>
+    /// Even if a pondering search finishes early (i.e. mate detected, max depth reached),
+    /// engines aren't expected to send search results to the GUI until a stop or ponderhit is sent to them
+    /// For those cases, this method waits until <see cref="_absoluteSearchCancellationTokenSource"/> is cancelled by stop or ponderhit.
+    /// </summary>
+    /// <returns><see langword="true"/> for ponderhit, <see langword="false"/> for stop</returns>
+    private bool WaitForPonderHitOrStop()
+    {
+        _absoluteSearchCancellationTokenSource.Token.WaitHandle.WaitOne();
+
+        lock (_goCommandStateLock)
+        {
+            var isPonderHit = _isPonderHit;
+
+            _isPonderHit = false;
+            _isPondering = false;
+
+            return isPonderHit;
+        }
+    }
+
+    private bool IsPonderHitRequested()
+    {
+        lock (_goCommandStateLock)
+        {
+            return _isPonderHit;
+        }
     }
 
     private void SingleThreadedSearch(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand, _mainEngine.GetSearchMoves(goCommand));
         var isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
 
         if (!isPondering)
@@ -158,9 +252,8 @@ public sealed class Searcher : IDisposable
 
             SearchResult? searchResult = null;
 
-            // This check takes care of early ponderhits that may have cancelled the ct
-            // before it was reset in OnGoCommand and therefore stay undetected
-            if (!_isPonderHit)
+            // Avoid searching if early ponderhit
+            if (!IsPonderHitRequested())
             {
                 searchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
@@ -175,9 +268,7 @@ public sealed class Searcher : IDisposable
 
             // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
             // before a potential ponderhit command
-            SpinWait.SpinUntil(() => _isPonderHit || _absoluteSearchCancellationTokenSource.IsCancellationRequested);
-
-            if (_isPonderHit)
+            if (WaitForPonderHitOrStop())
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
 #pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
@@ -210,8 +301,6 @@ public sealed class Searcher : IDisposable
                     // Final info command
                     _engineWriter.TryWrite(searchResult);
                 }
-
-                _isPonderHit = false;
             }
 
             if (searchResult is not null)
@@ -227,9 +316,11 @@ public sealed class Searcher : IDisposable
         // Basic lazy SMP implementation
         // Extra engines run in "go infinite" mode and their purpose is to populate the TT
         // Not UCI output is produced by them nor their search results are taken into account
-        var extraEnginesSearchConstraints = SearchConstraints.InfiniteSearchConstraint;
+        var searchMoves = _mainEngine.GetSearchMoves(goCommand);
 
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+        var extraEnginesSearchConstraints = SearchConstraints.Infinite(searchMoves);
+
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand, searchMoves);
         var isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
 
         if (!isPondering)
@@ -248,18 +339,15 @@ public sealed class Searcher : IDisposable
 
             SearchResult? finalSearchResult = null;
 
-            // This check takes care of early ponderhits that may have cancelled the ct
-            // before it was reset in OnGoCommand and therefore stay undetected
-            if (!_isPonderHit)
+            // Avoid searching if early ponderhit
+            if (!IsPonderHitRequested())
             {
                 finalSearchResult = await MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints, isPondering: true);
             }
 
             // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
             // before a potential ponderhit command
-            SpinWait.SpinUntil(() => _isPonderHit || _absoluteSearchCancellationTokenSource.IsCancellationRequested);
-
-            if (_isPonderHit)
+            if (WaitForPonderHitOrStop())
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
 #pragma warning disable S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
@@ -292,10 +380,8 @@ public sealed class Searcher : IDisposable
                     // bestmove command
                     _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
                 }
-
-                _isPonderHit = false;
             }
-            else
+            else // stop
             {
                 if (finalSearchResult is not null)
                 {
@@ -320,12 +406,14 @@ public sealed class Searcher : IDisposable
 
         SearchResult? finalSearchResult = null;
 
-#pragma warning disable MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
-        var tasks = _extraEngines
-            .Select(engine =>
-                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+        // This linked one is cancelled either by the main search finishing on its own, or by 'stop'/'ponderhit'.
+        using var extraEnginesCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_absoluteSearchCancellationTokenSource.Token);
+
+#pragma warning disable IDISP013 // Await in using - we aren't returning the task
+        var tasks = _extraWorkers
+            .Select(worker => worker.Search(in extraEnginesSearchConstraints, isPondering, extraEnginesCancellationTokenSource.Token, CancellationToken.None))
             .ToArray();
-#pragma warning restore MA0040, S8949 // Forward the CancellationToken parameter to methods that take one
+#pragma warning restore IDISP013 // Await in using
 
 #if MULTITHREAD_DEBUG
         _logger.Info("[MT] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -339,7 +427,9 @@ public sealed class Searcher : IDisposable
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        await _absoluteSearchCancellationTokenSource.CancelAsync();
+        // Even while pondering, main search can finish on its own (i.e. mate detected, max depth reached)
+        // Doing _absoluteSearchCancellationTokenSource.CancelAsync() here while pondering could look like a UCI stop or ponderhit
+        await extraEnginesCancellationTokenSource.CancelAsync();
 
 #if MULTITHREAD_DEBUG
         _logger.Info("[MT] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -366,7 +456,8 @@ public sealed class Searcher : IDisposable
                 }
 
                 // Thread voting, original impl slightly corrected based on by Heimdall's (based on Berserk's)
-                if (extraResult.BestMove != default)
+                // Skipped when MultiPV > 1, since only the first line is considered in the current implementation
+                if (extraResult.BestMove != default && Configuration.EngineSettings.MultiPV == 1)
                 {
 #if MULTITHREAD_DEBUG
                     var previousEngineId = finalSearchResult.EngineId;
@@ -463,28 +554,66 @@ public sealed class Searcher : IDisposable
 
     public void AdjustPosition(ReadOnlySpan<char> command)
     {
-        // Can't update MainEngine.Game until previous search is completed
+        // Can't update _mainEngine.Game until previous search is completed
         // Some GUIs wait until a bestmove is sent before sending a new position + go command (cutechess)
         // but some others don't (WinBoard)
-        SpinWait.SpinUntil(() => !_isProcessingGoCommand);
+        // Also waiting for go commands that haven't been picked up by the search thread yet, otherwise the position
+        // could change before their search starts.
+        SpinWait.SpinUntil(() =>
+        {
+            lock (_goCommandStateLock)
+            {
+                return _pendingGoCommands == 0 && !_isProcessingGoCommand;
+            }
+        });
 
         _mainEngine.AdjustPosition(command);
 
-        foreach (var engine in _extraEngines)
+        foreach (var worker in _extraWorkers)
         {
-            engine.AdjustPosition(command);
+            worker.Engine.AdjustPosition(command);
         }
     }
 
-    public async Task StopSearching()
+    /// <summary>
+    /// To be invoked by the UCI listener thread as soon as a go command is received, before enqueuing it
+    /// </summary>
+    public void RegisterPendingGoCommand()
     {
-        await _absoluteSearchCancellationTokenSource.CancelAsync();
+        lock (_goCommandStateLock)
+        {
+            ++_pendingGoCommands;
+        }
     }
 
-    public async Task PonderHit()
+    public void StopSearching()
     {
-        _isPonderHit = true;
-        await _absoluteSearchCancellationTokenSource.CancelAsync();
+        lock (_goCommandStateLock)
+        {
+            // Early stop command: the previous go command was received but not yet processed in the searcher thread
+            if (_pendingGoCommands > 0)
+            {
+                _stopRequestedForPendingGo = true;
+            }
+
+            _absoluteSearchCancellationTokenSource.Cancel();
+        }
+    }
+
+    public void PonderHit()
+    {
+        lock (_goCommandStateLock)
+        {
+            // Pending go commands handled in BeginGoCommand
+            if (!_isPondering && _pendingGoCommands == 0)
+            {
+                _logger.Warn("Unexpected ponderhit: no pondering search in progress. Ignoring it");
+                return;
+            }
+
+            _isPonderHit = true;
+            _absoluteSearchCancellationTokenSource.Cancel();
+        }
     }
 
     public void NewGame()
@@ -519,9 +648,9 @@ public sealed class Searcher : IDisposable
 
         // We don't need to reset the extra engines in case of hash or threads update
         // because they were already reset there, but whatever
-        foreach (var engine in _extraEngines)
+        foreach (var worker in _extraWorkers)
         {
-            engine.NewGame();
+            worker.Engine.NewGame();
         }
 
         // During the first run, TT is cleared at the end of the constructor
@@ -563,6 +692,7 @@ public sealed class Searcher : IDisposable
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _tt.SizeMBs, Configuration.EngineSettings.TranspositionTableSize);
             _engineWriter.TryWrite($"info string Resizing TT ({_tt.SizeMBs} MB -> {Configuration.EngineSettings.TranspositionTableSize} MB)");
 
+            _tt.Release();
             _tt = new();
 
             if (_tt.SizeMBs != Configuration.EngineSettings.TranspositionTableSize)
@@ -635,6 +765,12 @@ public sealed class Searcher : IDisposable
                 return;
             }
 
+            if (genFensCommand.Book.ContainsAny(Constants.FRCStringSearchValues))
+            {
+                Configuration.EngineSettings.IsChess960 = true;
+                _logger.Info("(D)FRC book detected: {Book}, enabling UCI_Chess960", genFensCommand.Book);
+            }
+
             bookLines = File.ReadLines(bookPath);
             lineCount = bookLines.Count();
         }
@@ -642,7 +778,7 @@ public sealed class Searcher : IDisposable
         using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _tt);
 
         var maxAllowedEval = Configuration.EngineSettings.Datagen_GenFens_MaxEval;
-        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes);
+        var searchConstraints = new SearchConstraints(SearchConstraints.DefaultHardLimitTimeBound, SearchConstraints.DefaultSoftLimitTimeBound, Configuration.EngineSettings.Datagen_GenFens_Depth, SearchConstraints.DefaultMaxNodes, []);
 
         var rnd = new Random(genFensCommand.Seed);
 
@@ -837,27 +973,22 @@ public sealed class Searcher : IDisposable
     }
 
     /// <summary>
-    /// Removes existing <see cref="_extraEngines"/> and allocates new ones based on <see cref="_searchThreadsCount"/>
+    /// Removes existing <see cref="_extraWorkers"/> (and the engines they own) and allocates new ones based on <see cref="_searchThreadsCount"/>
     /// </summary>
     private void AllocateExtraEngines()
     {
         // _searchThreadsCount includes _mainEngine
         const int mainEngineOffset = 1;
 
-        foreach (var engine in _extraEngines)
-        {
-            engine.Dispose();
-        }
-
-        Array.Clear(_extraEngines);
+        DisposeExtraWorkers();
 
         if (_searchThreadsCount > 1)
         {
-            _extraEngines = new Engine[_searchThreadsCount - mainEngineOffset];
+            _extraWorkers = new SearchWorker[_searchThreadsCount - mainEngineOffset];
 
             for (int i = 0; i < _searchThreadsCount - mainEngineOffset; ++i)
             {
-                _extraEngines[i] = new Engine(i + 2,
+                _extraWorkers[i] = new SearchWorker(i + 2,
 #if MULTITHREAD_DEBUG
                 _logger.IsDebugEnabled
                     ? _engineWriter
@@ -870,7 +1001,22 @@ public sealed class Searcher : IDisposable
         }
         else
         {
-            _extraEngines = [];
+            _extraWorkers = [];
+        }
+    }
+
+    private void DisposeExtraWorkers()
+    {
+        // Stopping all of them before invoking .Dispose() allows their threads to stop concurrently, instead of potentially waiting for the timeout of each one sequentially
+        // Not that they should ever timeout, because searches shouldn't be in progress, but just in case
+        foreach (var worker in _extraWorkers)
+        {
+            worker.Stop();
+        }
+
+        foreach (var worker in _extraWorkers)
+        {
+            worker.Dispose();
         }
     }
 
@@ -900,7 +1046,7 @@ public sealed class Searcher : IDisposable
         _logger.Debug("Warming-up engine");
         var sw = Stopwatch.StartNew();
 
-        var warmupCount = Math.Min(8, _extraEngines.Length + 1);
+        var warmupCount = Math.Min(8, _extraWorkers.Length + 1);
 
         Parallel.For(0, warmupCount, i =>
         {
@@ -922,13 +1068,12 @@ public sealed class Searcher : IDisposable
             {
                 _mainEngine.Dispose();
 
-                foreach (var engine in _extraEngines)
-                {
-                    engine.Dispose();
-                }
+                DisposeExtraWorkers();
 
                 _absoluteSearchCancellationTokenSource.Dispose();
                 _searchCancellationTokenSource.Dispose();
+
+                _tt.Release();
             }
             _disposedValue = true;
         }
