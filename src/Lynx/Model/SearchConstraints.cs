@@ -29,14 +29,24 @@ public readonly struct SearchConstraints
 
     public readonly ulong MaxNodes;
 
-    public static readonly SearchConstraints InfiniteSearchConstraint = new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, DefaultMaxDepth, DefaultMaxNodes);
+#pragma warning disable S3887  // Mutable, non-private fields should not be "readonly"
+    public readonly Move[] SearchMoves;
+#pragma warning restore S3887 // Mutable, non-private fields should not be "readonly"
 
-    public SearchConstraints(int hardLimitTimeBound, int softLimitTimeBound, int maxDepth, ulong maxNodes)
+    public static readonly SearchConstraints InfiniteSearchConstraint = new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, DefaultMaxDepth, DefaultMaxNodes, []);
+
+    public static SearchConstraints Infinite(Move[] searchMoves)
+        => searchMoves.Length == 0
+            ? InfiniteSearchConstraint
+            : new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, DefaultMaxDepth, DefaultMaxNodes, searchMoves);
+
+    public SearchConstraints(int hardLimitTimeBound, int softLimitTimeBound, int maxDepth, ulong maxNodes, Move[] searchMoves)
     {
         HardLimitTimeBound = hardLimitTimeBound;
         SoftLimitTimeBound = softLimitTimeBound;
         MaxDepth = maxDepth;
         MaxNodes = maxNodes;
+        SearchMoves = searchMoves;
     }
 }
 

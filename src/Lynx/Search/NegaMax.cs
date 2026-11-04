@@ -385,10 +385,17 @@ public sealed partial class Engine
                 continue;
             }
 
-            // MultiPV: moves already chosen as the best ones of previous PV lines aren't searched again
-            if (isRoot && _multiPV > 1 && WasSearchedAsRootMove(move))
+            if (isRoot)
             {
-                continue;
+                if (_multiPV > 1 && WasSearchedAsRootMove(move))
+                {
+                    continue;
+                }
+
+                if (_searchMoves.Length > 0 && !IsSearchMove(move))
+                {
+                    continue;
+                }
             }
 
             var piece = move.Piece();
@@ -813,7 +820,8 @@ public sealed partial class Engine
             }
 
             // MultiPV: when not searching the first PV lines, root moves are excluded, so the best move of the initial PV line shouldn't be overwritten
-            if (!isRoot || _pvIndex == 0)
+            // searchmoves: the root score and best move always reflect a subset of the moves, so reusing them for future searches makes little sense
+            if (!isRoot || (_pvIndex == 0 && _searchMoves.Length == 0))
             {
                 _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
             }

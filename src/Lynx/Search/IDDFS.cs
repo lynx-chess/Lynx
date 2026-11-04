@@ -141,6 +141,8 @@ public sealed partial class Engine
 
     #endregion
 
+    private Move[] _searchMoves = [];
+
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
     /// Requires <see cref="_searchConstraints"/> to be populated before invoking it
@@ -151,6 +153,7 @@ public sealed partial class Engine
     {
         // Cleanup
         _nodes = 0;
+        _searchMoves = _searchConstraints.SearchMoves;
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
@@ -456,7 +459,7 @@ public sealed partial class Engine
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
             Game.CurrentPosition.UnmakeMove(move, gameState);
 
-            if (isPositionValid)
+            if (isPositionValid && IsSearchMove(move))
             {
                 _rootMoves[_rootMovesCount++] = new RootMove(move);
             }
@@ -552,6 +555,10 @@ public sealed partial class Engine
 
         return false;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsSearchMove(Move move) =>
+        _searchMoves.Length == 0 || Array.IndexOf(_searchMoves, move) >= 0;
 
     private SearchResult[] BuildExtraLines(int validLines, int depth)
     {
@@ -892,6 +899,11 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[i];
+
+            if (!IsSearchMove(move))
+            {
+                continue;
+            }
 
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())

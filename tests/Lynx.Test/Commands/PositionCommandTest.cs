@@ -19,7 +19,7 @@ public class PositionCommandTest
         engine.NewGame();
         engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
         var goCommand = new GoCommand($"go depth {Engine.DefaultMaxDepth}");
-        var searchConstraints = TimeManager.CalculateTimeManagement(engine.Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(engine.Game, goCommand, []);
 
         using var cts = new CancellationTokenSource();
         var resultTask = Task.Run(() => engine.BestMove(searchConstraints, isPondering: false, cts.Token, CancellationToken.None));

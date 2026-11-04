@@ -76,9 +76,7 @@ public sealed class GoCommand
 
     public static int Mate => throw new NotSupportedException();
 
-#pragma warning disable CA1002, MA0016 // Do not expose generic lists
-    public static List<string> SearchMoves => throw new NotSupportedException();
-#pragma warning restore CA1002, MA0016 // Do not expose generic lists
+    public string[] SearchMoves { get; } = [];
 
     public GoCommand(string command)
     {
@@ -225,9 +223,15 @@ public sealed class GoCommand
             }
             else if (key.Equals(SearchmovesSpan, StringComparison.OrdinalIgnoreCase))
             {
-                const string message = "searchmoves not supported in go command";
-                _logger.Error(message);
-                throw new NotSupportedException(message);
+                var searchMoves = new List<string>(rangesLength - i - 1);
+
+                while (i + 1 < rangesLength && IsValidUCIMove(commandAsSpan[ranges[i + 1]]))
+                {
+                    i++;
+                    searchMoves.Add(commandAsSpan[ranges[i]].ToString());
+                }
+
+                SearchMoves = [.. searchMoves];
             }
             else
             {
@@ -235,6 +239,23 @@ public sealed class GoCommand
             }
         }
 #pragma warning restore S127, MA0071 // "for" loop stop conditions should be invariant, avoid redundant else
+    }
+
+    /// <summary>
+    /// Essentially [a-h][1-8][a-h][1-8][nbrqNBRQ]?
+    /// </summary>
+    internal static bool IsValidUCIMove(ReadOnlySpan<char> token)
+    {
+        if (token.Length is not (4 or 5))
+        {
+            return false;
+        }
+
+        return token[0] is >= 'a' and <= 'h'
+            && token[1] is >= '1' and <= '8'
+            && token[2] is >= 'a' and <= 'h'
+            && token[3] is >= '1' and <= '8'
+            && (token.Length == 4 || token[4] is 'n' or 'b' or 'r' or 'q' or 'N' or 'B' or 'R' or 'Q');
     }
 
     public static string Init() => Id;

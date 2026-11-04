@@ -114,11 +114,58 @@ public sealed partial class Engine : IDisposable
     }
 
     /// <summary>
-    /// Uses <see cref="TimeManager.CalculateTimeManagement(Game, GoCommand)"/> internally
+    /// Extracts the actual legal moves to search among <see cref="GoCommand.SearchMoves"/> for the current position.
+    /// </summary>
+    public Move[] GetSearchMoves(GoCommand goCommand)
+    {
+        if (goCommand.SearchMoves.Length == 0)
+        {
+            return [];
+        }
+
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(Game.CurrentPosition, pseudoLegalMoves);
+
+        var searchMoves = new HashSet<Move>(goCommand.SearchMoves.Length);
+
+        foreach (var rawMove in goCommand.SearchMoves)
+        {
+            if (!MoveExtensions.TryParseFromUCIString(rawMove, pseudoLegalMoves, out var parsedMove))
+            {
+                _logger.Warn("searchmoves move {Move} is not a pseudolegal move for position {Position}, ignoring it", rawMove, Game.FEN);
+                continue;
+            }
+
+            var move = parsedMove.Value;
+            var gameState = Game.CurrentPosition.MakeMove(move);
+            var isLegal = Game.CurrentPosition.WasProduceByAValidMove();
+            Game.CurrentPosition.UnmakeMove(move, gameState);
+
+            if (!isLegal)
+            {
+                _logger.Warn("searchmoves move {Move} is not a legal move for position {Position}", rawMove, Game.FEN);
+                continue;
+            }
+
+            searchMoves.Add(move);
+        }
+
+        if (searchMoves.Count == 0)
+        {
+            _logger.Warn("searchmoves {Moves} doesn't contain any legal moves for position {Position}, performing a full search instead", string.Join(", ", goCommand.SearchMoves), Game.FEN);
+
+            return [];
+        }
+
+        return [.. searchMoves];
+    }
+
+    /// <summary>
+    /// Uses <see cref="TimeManager.CalculateTimeManagement(Game, GoCommand, Move[])"/> internally
     /// </summary>
     public SearchResult BestMove(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand, GetSearchMoves(goCommand));
 
         return BestMove(in searchConstraints, isPondering: false, CancellationToken.None, CancellationToken.None);
     }
