@@ -174,6 +174,9 @@ public sealed class Searcher : IDisposable
 
         BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder);
 
+        // Before the search instead of after to prevent empty entries from competing in age vs depth 0 ones
+        _tt.BumpAge();
+
         if (_searchThreadsCount == 1)
         {
             SingleThreadedSearch(goCommand);

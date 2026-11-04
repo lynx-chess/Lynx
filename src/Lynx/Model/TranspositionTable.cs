@@ -8,13 +8,21 @@ namespace Lynx.Model;
 
 /// <summary>
 /// Transposition table
+/// Every engine receives its own instance of this struct, but they all point to the same native memory block.
+/// [ age (<see cref="Alignment"/> bytes) | <see cref="Length"/> entries ]
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe readonly struct TranspositionTable
 {
+    private const nuint Alignment = 64;
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    private readonly byte* _nativeMemoryPointer;
+
     private readonly TranspositionTableElement* _tt;
+
+    private readonly int* _age;
 
     public int RequestedSizeMBs { get; }
 
@@ -37,7 +45,10 @@ public unsafe readonly struct TranspositionTable
         {
             try
             {
-                _tt = (TranspositionTableElement*)NativeMemory.Alloc(totalSizeBytes);
+                _nativeMemoryPointer = (byte*)NativeMemory.AlignedAlloc(Alignment + totalSizeBytes, Alignment);
+                _tt = (TranspositionTableElement*)(_nativeMemoryPointer + Alignment);
+                _age = (int*)_nativeMemoryPointer;
+                *_age = 0;
                 break;
             }
             catch (OutOfMemoryException e)
@@ -132,7 +143,7 @@ public unsafe readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry->Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry->Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, *_age);
     }
 
     /// <summary>
@@ -148,8 +159,20 @@ public unsafe readonly struct TranspositionTable
         TranspositionTableElement* entry = GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry->Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null);
+        entry->Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, *_age);
     }
+
+    /// <summary>
+    /// Circular buffer [0, <see cref="TranspositionTableElement.MaxAge"/> - 1]
+    /// </summary>
+    public int Age
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => *_age;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void BumpAge() => *_age = (*_age + 1) & TranspositionTableElement.AgeMask;
 
     /// <summary>
     /// Multithreaded clearing of the transposition table
@@ -178,6 +201,8 @@ public unsafe readonly struct TranspositionTable
 
             NativeMemory.Clear(ttPtr, bytesToClear);
         });
+
+        *_age = 0;
 
         _logger.Info("TT clearing/zeroing time using {0} threads:\t{1} ms", threadCount, sw.ElapsedMilliseconds);
     }
@@ -339,9 +364,9 @@ public unsafe readonly struct TranspositionTable
 
     public void Release()
     {
-        if (_tt != null)
+        if (_nativeMemoryPointer != null)
         {
-            NativeMemory.Free(_tt);
+            NativeMemory.AlignedFree(_nativeMemoryPointer);
         }
     }
 }
