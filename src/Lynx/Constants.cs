@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using System.Buffers;
 using System.Collections.Frozen;
 using System.Runtime.CompilerServices;

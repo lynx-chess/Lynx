@@ -205,7 +205,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
+    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth, int ply)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -315,6 +315,14 @@ public sealed partial class Engine
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
+        // Move-based continuation correction history
+        var moveContinuationCorrHistIndex = MoveContinuationCorrHistoryIndex(ply);
+        if (moveContinuationCorrHistIndex >= 0)
+        {
+            ref var moveContinuationCorrHist = ref _moveContinuationCorrHistory[moveContinuationCorrHistIndex];
+            moveContinuationCorrHist = UpdateCorrectionHistory(moveContinuationCorrHist, scaledBonus, weight);
+        }
+
         // Common update logic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short UpdateCorrectionHistory(short previousCorrectedScore, int scaledBonus, int weight)
@@ -335,7 +343,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CorrectStaticEvaluation(Position position, int staticEvaluation)
+    private int CorrectStaticEvaluation(Position position, int staticEvaluation, int ply)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -435,6 +443,15 @@ public sealed partial class Engine
             continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
         }
 
+        // Move-based continuation correction history
+        int moveContinuationCorrHist = 0;
+
+        var moveContinuationCorrHistIndex = MoveContinuationCorrHistoryIndex(ply);
+        if (moveContinuationCorrHistIndex >= 0)
+        {
+            moveContinuationCorrHist = _moveContinuationCorrHistory[moveContinuationCorrHistIndex];
+        }
+
         // Correction aggregation
         var correction = (pawnCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Pawn)
             + (nonPawnSTMCorrHist * Configuration.EngineSettings.CorrHistoryWeight_NonPawnSTM)
@@ -444,11 +461,48 @@ public sealed partial class Engine
             + (materialCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Material)
             + (continuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_Continuation1)
             + (continuationCorrHist2 * Configuration.EngineSettings.CorrHistoryWeight_Continuation2)
-            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4);
+            + (continuationCorrHist4 * Configuration.EngineSettings.CorrHistoryWeight_Continuation4)
+            + (moveContinuationCorrHist * Configuration.EngineSettings.CorrHistoryWeight_MoveContinuation2);
 
         var correctStaticEval = staticEvaluation + (correction / (EvaluationConstants.CorrectionHistoryScale * EvaluationConstants.CorrHistScaleFactor));
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
+    }
+
+    /// <summary>
+    /// [12][64][12][64] index: move 2 plies ago (piece, target square) x move 1 ply ago (piece, target square).
+    /// Returns -1 when any of those moves is a null move or happened before the search root.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int MoveContinuationCorrHistoryIndex(int ply)
+    {
+        const int ply2PieceOffset = 64 * 12 * 64;
+        const int ply2TargetSquareOffset = 12 * 64;
+        const int ply1PieceOffset = 64;
+
+        // Moves before the root aren't stored in the stack (they're 0 there)
+        if (ply < 2)
+        {
+            return -1;
+        }
+
+        // ContinuationHistoryPlyCount (2) is the stack padding, so ply - 2 never underflows
+        var ply1Move = Game.ReadMoveFromStack(ply - 1);
+        var ply2Move = Game.ReadMoveFromStack(ply - 2);
+
+        if (ply1Move == MoveExtensions.NullMove || ply2Move == MoveExtensions.NullMove)
+        {
+            return -1;
+        }
+
+        var index = (ply2Move.Piece() * ply2PieceOffset)
+            + (ply2Move.TargetSquare() * ply2TargetSquareOffset)
+            + (ply1Move.Piece() * ply1PieceOffset)
+            + ply1Move.TargetSquare();
+
+        Debug.Assert(index < _moveContinuationCorrHistory.Length);
+
+        return index;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
