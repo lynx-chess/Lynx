@@ -9,7 +9,8 @@ namespace Lynx.Model;
 /// <summary>
 /// Transposition table
 /// Every engine receives its own instance of this struct, but they all point to the same native memory block.
-/// [ age (<see cref="Alignment"/> bytes) | <see cref="Length"/> entries ]
+/// [ age (<see cref="Alignment"/> bytes) | <see cref="Length"/> buckets ]
+/// Each bucket holds <see cref="Constants.TranspositionTableEntriesPerBucket"/> entries, see <see cref="TranspositionTableBucket"/>
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe readonly struct TranspositionTable
@@ -20,7 +21,7 @@ public unsafe readonly struct TranspositionTable
 
     private readonly byte* _nativeMemoryPointer;
 
-    private readonly TranspositionTableElement* _tt;
+    private readonly TranspositionTableBucket* _buckets;
 
     private readonly int* _age;
 
@@ -28,17 +29,23 @@ public unsafe readonly struct TranspositionTable
 
     public int SizeMBs { get; }
 
+    /// <summary>
+    /// Number of buckets
+    /// </summary>
     public nuint Length { get; }
 
     public TranspositionTable()
     {
+        Debug.Assert(Constants.TranspositionTableEntriesPerBucket * sizeof(TranspositionTableElement) <= Constants.TranspositionTableBucketSize);
+        Debug.Assert(Alignment % Constants.TranspositionTableBucketSize == 0);
+
         _logger.Debug("Allocating TT");
         var sw = Stopwatch.StartNew();
 
         RequestedSizeMBs = Configuration.EngineSettings.TranspositionTableSize;
         SizeMBs = RequestedSizeMBs;
         var ttLength = CalculateLength(SizeMBs);
-        var totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableElement);
+        var totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableBucket);
 
         bool exceptionThrown = false;
         do
@@ -46,7 +53,7 @@ public unsafe readonly struct TranspositionTable
             try
             {
                 _nativeMemoryPointer = (byte*)NativeMemory.AlignedAlloc(Alignment + totalSizeBytes, Alignment);
-                _tt = (TranspositionTableElement*)(_nativeMemoryPointer + Alignment);
+                _buckets = (TranspositionTableBucket*)(_nativeMemoryPointer + Alignment);
                 _age = (int*)_nativeMemoryPointer;
                 *_age = 0;
                 break;
@@ -58,7 +65,7 @@ public unsafe readonly struct TranspositionTable
 
                 SizeMBs /= 2;
                 ttLength = CalculateLength(SizeMBs);
-                totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableElement);
+                totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableBucket);
             }
         } while (SizeMBs > Constants.AbsoluteMinTTSize);
 
@@ -84,23 +91,28 @@ public unsafe readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result)
     {
-        TranspositionTableElement* entry = GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
+        TranspositionTableElement* bucket = GetBucket(position, halfMovesWithoutCaptureOrPawnMove);
 
         var key = GenerateTTKey(position.UniqueIdentifier);
 
-        if (key != entry->Key)
+        for (int i = 0; i < Constants.TranspositionTableEntriesPerBucket; ++i)
         {
-            result = default;
-            return false;
+            TranspositionTableElement* entry = bucket + i;
+
+            if (key == entry->Key)
+            {
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                var recalculatedScore = RecalculateMateScores(entry->Score, ply);
+
+                result = new TTProbeResult(recalculatedScore, entry->Move, entry->Type, entry->StaticEval, entry->Depth, entry->WasPv);
+
+                return true;
+            }
         }
 
-        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-        var recalculatedScore = RecalculateMateScores(entry->Score, ply);
-
-        result = new TTProbeResult(recalculatedScore, entry->Move, entry->Type, entry->StaticEval, entry->Depth, entry->WasPv);
-
-        return true;
+        result = default;
+        return false;
     }
 
     /// <summary>
@@ -120,15 +132,19 @@ public unsafe readonly struct TranspositionTable
     {
         Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overridden");
 
-        TranspositionTableElement* entry = GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
+        TranspositionTableElement* bucket = GetBucket(position, halfMovesWithoutCaptureOrPawnMove);
 
         var newKey = GenerateTTKey(position.UniqueIdentifier);
+        var age = *_age;
+
+        TranspositionTableElement* entry = SelectEntry(bucket, newKey, age);
 
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            entry->Key != newKey                 // Different key: collision or no actual entry
+            entry->Key != newKey                // Different key: collision or no actual entry, entry is the least valuable one in the bucket
             || nodeType == NodeType.Exact       // Entering PV data
+            || entry->Age != age                // Entry from a previous search
             || depth                            // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
                     + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
@@ -143,7 +159,7 @@ public unsafe readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry->Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, *_age);
+        entry->Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, age);
     }
 
     /// <summary>
@@ -156,10 +172,49 @@ public unsafe readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
-        TranspositionTableElement* entry = GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
+        TranspositionTableElement* bucket = GetBucket(position, halfMovesWithoutCaptureOrPawnMove);
+
+        var key = GenerateTTKey(position.UniqueIdentifier);
+        var age = *_age;
+
+        TranspositionTableElement* entry = SelectEntry(bucket, key, age);
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry->Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, *_age);
+        entry->Update(key, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, age);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static TranspositionTableElement* SelectEntry(TranspositionTableElement* bucket, ushort key, int age)
+    {
+        TranspositionTableElement* selectedEntry = bucket;
+        int minValue = int.MaxValue;
+
+        for (int i = 0; i < Constants.TranspositionTableEntriesPerBucket; ++i)
+        {
+            TranspositionTableElement* candidate = bucket + i;
+
+            // Same position or empty entry
+            // In empty entires, some FP: positions with Key == 0 and only static eval saved. Hopefully rare enough?
+            if (candidate->Key == key
+                || (candidate->Key == 0 && candidate->Type == NodeType.Unknown))
+            {
+                return candidate;
+            }
+
+            // Negative values are fixed by the mask, since AgeMask + 1 is a power of 2
+            var relativeAge = (age - candidate->Age) & TranspositionTableElement.AgeMask;
+
+            // Formula from Stormphrax
+            var value = candidate->Depth - (2 * relativeAge);
+
+            if (value < minValue)
+            {
+                minValue = value;
+                selectedEntry = candidate;
+            }
+        }
+
+        return selectedEntry;
     }
 
     /// <summary>
@@ -184,7 +239,7 @@ public unsafe readonly struct TranspositionTable
         _logger.Debug("Zeroing TT using {ThreadCount} thread(s)", threadCount);
         var sw = Stopwatch.StartNew();
 
-        var tt = _tt;
+        var tt = _buckets;
         var ttLength = Length;
         var sizePerThread = ttLength / (nuint)threadCount;
 
@@ -197,7 +252,7 @@ public unsafe readonly struct TranspositionTable
                 : sizePerThread;
 
             var ttPtr = tt + start;
-            var bytesToClear = (nuint)sizeof(TranspositionTableElement) * length;
+            var bytesToClear = (nuint)sizeof(TranspositionTableBucket) * length;
 
             NativeMemory.Clear(ttPtr, bytesToClear);
         });
@@ -214,7 +269,7 @@ public unsafe readonly struct TranspositionTable
         {
             var index = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
 
-            Sse.Prefetch0(_tt + index);
+            Sse.Prefetch0(_buckets + index);
         }
     }
 
@@ -234,13 +289,13 @@ public unsafe readonly struct TranspositionTable
 #pragma warning disable S4144 // Methods should not have identical implementations
 
     /// <summary>
-    /// Get a reference to a transposition table entry for the given position
+    /// Get a pointer to the first entry of the bucket for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private TranspositionTableElement* GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    private TranspositionTableElement* GetBucket(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return &_tt[(nint)ttIndex];
+        return (TranspositionTableElement*)&_buckets[(nint)ttIndex];
     }
 
     /// <summary>
@@ -277,7 +332,7 @@ public unsafe readonly struct TranspositionTable
     /// <summary>
     /// Exact transposition table occupancy per mill (0-1000)
     /// </summary>
-    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)Length));
+    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / ((double)Length * Constants.TranspositionTableEntriesPerBucket)));
 
     /// <summary>
     /// Orders of magnitude faster than <see cref="HashfullPermill"/>
@@ -288,27 +343,37 @@ public unsafe readonly struct TranspositionTable
 
         for (int i = 0; i < 1_000; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = (TranspositionTableElement*)&_buckets[i];
+
+            for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                ++items;
+                if (bucket[j].Key != default)
+                {
+                    ++items;
+                }
             }
         }
 
         //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
-        return items;
+        return items / Constants.TranspositionTableEntriesPerBucket;
     }
 
+    /// <summary>
+    /// Number of buckets that fit in <paramref name="sizeMBs"/>
+    /// </summary>
     internal static nuint CalculateLength(int sizeMBs)
     {
         nuint ttEntrySize = (nuint)sizeof(TranspositionTableElement);
+        nuint ttBucketSize = (nuint)sizeof(TranspositionTableBucket);
 
         nuint sizeBytes = (nuint)sizeMBs * 1024 * 1024;
-        nuint ttLength = sizeBytes / ttEntrySize;
-        double ttLengthMB = (double)(ttLength * ttEntrySize) / (1024 * 1024);
+        nuint ttLength = sizeBytes / ttBucketSize;
+        double ttLengthMB = (double)(ttLength * ttBucketSize) / (1024 * 1024);
 
         _logger.Info("Hash value:\t{0} MB", sizeMBs);
         _logger.Info("TT memory:\t{0} MB", ttLengthMB.ToString("F"));
-        _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT length:\t{0} buckets, {1} items", ttLength, ttLength * Constants.TranspositionTableEntriesPerBucket);
+        _logger.Info("TT bucket:\t{0} bytes, {1} items", ttBucketSize, Constants.TranspositionTableEntriesPerBucket);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return ttLength;
@@ -320,9 +385,14 @@ public unsafe readonly struct TranspositionTable
         ulong items = 0;
         for (nuint i = 0; i < Length; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = (TranspositionTableElement*)&_buckets[i];
+
+            for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                ++items;
+                if (bucket[j].Key != default)
+                {
+                    ++items;
+                }
             }
         }
 
@@ -330,22 +400,19 @@ public unsafe readonly struct TranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal TranspositionTableElement* Get(int index) => &_tt[index];
+    internal TranspositionTableElement* Get(int bucketIndex, int entryIndex = 0)
+    {
+        Debug.Assert((uint)entryIndex < Constants.TranspositionTableEntriesPerBucket);
+
+        return (TranspositionTableElement*)&_buckets[bucketIndex] + entryIndex;
+    }
 
     [Conditional("DEBUG")]
     private void Stats()
     {
-        nuint items = 0;
-        for (nuint i = 0; i < Length; ++i)
-        {
-            if (_tt[i].Key != default)
-            {
-                ++items;
-            }
-        }
         _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
-            100 * PopulatedItemsCount() / Length,
-            Length * (nuint)Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
+            100 * PopulatedItemsCount() / (Length * Constants.TranspositionTableEntriesPerBucket),
+            Length * (nuint)sizeof(TranspositionTableBucket) / 1024 / 1024);
     }
 
     [Conditional("DEBUG")]
@@ -354,9 +421,16 @@ public unsafe readonly struct TranspositionTable
         Console.WriteLine("Transposition table content:");
         for (nuint i = 0; i < Length; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = (TranspositionTableElement*)&_buckets[i];
+
+            for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                Console.WriteLine($"{i}: Key = {_tt[i].Key}, Depth: {_tt[i].Depth}, Score: {_tt[i].Score}, Move: {(_tt[i].Move != 0 ? ((Move)_tt[i].Move).UCIString() : "-")} {_tt[i].Type}");
+                ref var entry = ref bucket[j];
+
+                if (entry.Key != default)
+                {
+                    Console.WriteLine($"{i}.{j}: Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : "-")} {entry.Type}, Age: {entry.Age}");
+                }
             }
         }
         Console.WriteLine("");
