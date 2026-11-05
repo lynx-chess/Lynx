@@ -376,8 +376,8 @@ public unsafe readonly struct TranspositionTable
 
         _logger.Info("Hash value:\t{0} MB", sizeMBs);
         _logger.Info("TT memory:\t{0} MB", ttLengthMB.ToString("F"));
-        _logger.Info("TT length:\t{0} buckets, {1} items", ttLength, ttLength * Constants.TranspositionTableEntriesPerBucket);
-        _logger.Info("TT bucket:\t{0} bytes, {1} items", ttBucketSize, Constants.TranspositionTableEntriesPerBucket);
+        _logger.Info("TT length:\t{0} buckets, {1} entries", ttLength, ttLength * Constants.TranspositionTableEntriesPerBucket);
+        _logger.Info("TT bucket:\t{0} bytes, {1} entries", ttBucketSize, Constants.TranspositionTableEntriesPerBucket);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return ttLength;

@@ -170,7 +170,7 @@ public sealed class Searcher : IDisposable
 
         BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder);
 
-        // Before the search instead of after to prevent empty entries from competing in age vs depth 0 ones
+        // Originally before the search (instead of after) to prevent empty entries from competing in age vs depth 0 ones, altough that reason no longer applies
         _tt.BumpAge();
 
         if (_searchThreadsCount == 1)
