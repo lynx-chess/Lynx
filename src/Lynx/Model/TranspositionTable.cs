@@ -177,16 +177,21 @@ public unsafe readonly struct TranspositionTable
         var key = GenerateTTKey(position.UniqueIdentifier);
         var age = *_age;
 
-        TranspositionTableElement* entry = SelectEntry(bucket, key, age);
+        TranspositionTableElement* entry = SelectEntry(bucket, key, age, excludeCurrentSearchFullEntries: true);
+
+        if (entry is null || (entry->Type != NodeType.Unknown && entry->Age == age))
+        {
+            return;
+        }
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
         entry->Update(key, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, age);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static TranspositionTableElement* SelectEntry(TranspositionTableElement* bucket, ushort key, int age)
+    internal static TranspositionTableElement* SelectEntry(TranspositionTableElement* bucket, ushort key, int age, bool excludeCurrentSearchFullEntries = false)
     {
-        TranspositionTableElement* selectedEntry = bucket;
+        TranspositionTableElement* selectedEntry = null;
         int minValue = int.MaxValue;
 
         for (int i = 0; i < Constants.TranspositionTableEntriesPerBucket; ++i)
@@ -199,6 +204,11 @@ public unsafe readonly struct TranspositionTable
                 || (candidate->Key == 0 && candidate->Type == NodeType.Unknown))
             {
                 return candidate;
+            }
+
+            if (excludeCurrentSearchFullEntries && candidate->Type != NodeType.Unknown && candidate->Age == age)
+            {
+                continue;
             }
 
             // Negative values are fixed by the mask, since AgeMask + 1 is a power of 2
