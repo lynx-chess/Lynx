@@ -179,6 +179,11 @@ public unsafe readonly struct TranspositionTable
 
         TranspositionTableElement* entry = SelectEntry(bucket, key, age);
 
+        if (entry->Key == key && entry->Type != NodeType.Unknown && entry->Age == age)
+        {
+            return;
+        }
+
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
         entry->Update(key, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, age);
     }
@@ -204,8 +209,13 @@ public unsafe readonly struct TranspositionTable
             // Negative values are fixed by the mask, since AgeMask + 1 is a power of 2
             var relativeAge = (age - candidate->Age) & TranspositionTableElement.AgeMask;
 
+            // Rank static-eval-only entries below any searched ones (incluidng QS, with depth 0). Idea from Stormphrax too
+            var depth = candidate->Type == NodeType.Unknown
+                ? Constants.TranspositionTableStaticEvalOnlyEntryDepth
+                : candidate->Depth;
+
             // Formula from Stormphrax
-            var value = candidate->Depth - (2 * relativeAge);
+            var value = depth - (2 * relativeAge);
 
             if (value < minValue)
             {

@@ -381,6 +381,58 @@ public class TranspositionTableTests
         Assert.AreEqual(1, SelectEntryIndex(entries, key: 99, currentAge: 4));
     }
 
+    [TestCase(0)]
+    [TestCase(1)]
+    [TestCase(2)]
+    public void SelectEntry_DifferentKey_PrefersStaticEvalOnlyEntriesOverQSearchOnes_RegardlessOfTheirPosition(int staticEvalOnlyIndex)
+    {
+        var entries = new TranspositionTableElement[Constants.TranspositionTableEntriesPerBucket];
+        for (int i = 0; i < entries.Length; ++i)
+        {
+            // Real entries with depth 0, which is what QSearch records
+            entries[i] = i == staticEvalOnlyIndex
+                ? CreateEntry(key: (ushort)(i + 1), depth: 0, age: 4, NodeType.Unknown)
+                : CreateEntry(key: (ushort)(i + 1), depth: 0, age: 4, NodeType.Exact);
+        }
+
+        Assert.AreEqual(staticEvalOnlyIndex, SelectEntryIndex(entries, key: 99, currentAge: 4));
+    }
+
+    [TestCase(0, 1)]
+    [TestCase(1, 1)]
+    [TestCase(3, 1)]
+    [TestCase(4, 0)]
+    [TestCase(5, 0)]
+    public void SelectEntry_DifferentKey_StaticEvalOnlyEntriesOnlyOutrankRealOnesThatAreOldEnough(int realEntryRelativeAge, int expectedIndex)
+    {
+        Assert.AreEqual(-6, Constants.TranspositionTableStaticEvalOnlyEntryDepth, "Test written for a static eval only depth of -6");
+
+        const int currentAge = 10;
+
+        var entries = new[]
+        {
+            // 1 - 2*relativeAge: -5 when it's 3 searches old, -7 when it's 4. A static eval only entry from this search is -6
+            CreateEntry(key: 1, depth: 1, age: currentAge - realEntryRelativeAge),
+            CreateEntry(key: 2, depth: 0, age: currentAge, NodeType.Unknown),
+            CreateEntry(key: 3, depth: 30, age: currentAge)
+        };
+
+        Assert.AreEqual(expectedIndex, SelectEntryIndex(entries, key: 99, currentAge));
+    }
+
+    [Test]
+    public void SelectEntry_DifferentKey_OlderStaticEvalOnlyEntriesRankLowerThanRecentOnes()
+    {
+        var entries = new[]
+        {
+            CreateEntry(key: 1, depth: 0, age: 4, NodeType.Unknown),
+            CreateEntry(key: 2, depth: 0, age: 3, NodeType.Unknown),    // One search older
+            CreateEntry(key: 3, depth: 0, age: 4, NodeType.Unknown)
+        };
+
+        Assert.AreEqual(1, SelectEntryIndex(entries, key: 99, currentAge: 4));
+    }
+
     [Test]
     public void SelectEntry_DifferentKey_OldDeeperEntryLosesToRecentShallowOnes()
     {
@@ -446,8 +498,8 @@ public class TranspositionTableTests
     {
         var entries = new[]
         {
-            CreateEntry(key: 1, depth: 0, age: 4, NodeType.Unknown),    // value: 0
-            CreateEntry(key: 2, depth: 0, age: 1),                      // value: 0 - 2*3 = -6
+            CreateEntry(key: 1, depth: 0, age: 4, NodeType.Unknown),    // value: -6 (static eval only)
+            CreateEntry(key: 2, depth: 0, age: 0),                      // value: 0 - 2*4 = -8
             CreateEntry(key: 3, depth: 5, age: 4)
         };
 
@@ -552,6 +604,157 @@ public class TranspositionTableTests
         {
             tt.Release();
         }
+    }
+
+    [Test]
+    public unsafe void SaveStaticEval_DoesNotOverwriteRealEntryOfTheSamePositionFromTheCurrentSearch()
+    {
+        var tt = new TranspositionTable();
+        try
+        {
+            tt.Clear();
+            var position = new Position(Constants.InitialPositionFEN);
+
+            tt.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 7, depth: 5, ply: 0, score: 10, NodeType.Exact, wasPv: false, move: 1234);
+            tt.SaveStaticEval(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 99, wasPv: false);
+
+            var entry = FindOnlyRecordedEntry(tt);
+            Assert.AreEqual(5, entry->Depth);
+            Assert.AreEqual(NodeType.Exact, entry->Type);
+            Assert.AreEqual(10, entry->Score);
+            Assert.AreEqual(7, entry->StaticEval);
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
+    [Test]
+    public unsafe void SaveStaticEval_OverwritesRealEntryOfTheSamePositionFromPreviousSearches()
+    {
+        var tt = new TranspositionTable();
+        try
+        {
+            tt.Clear();
+            var position = new Position(Constants.InitialPositionFEN);
+
+            tt.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 7, depth: 5, ply: 0, score: 10, NodeType.Exact, wasPv: false, move: 1234);
+            tt.BumpAge();
+            tt.SaveStaticEval(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 99, wasPv: false);
+
+            var entry = FindOnlyRecordedEntry(tt);
+            Assert.AreEqual(0, entry->Depth);
+            Assert.AreEqual(NodeType.Unknown, entry->Type);
+            Assert.AreEqual(99, entry->StaticEval);
+            Assert.AreEqual(1, entry->Age);
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
+    [Test]
+    public unsafe void SaveStaticEval_ReplacesStaticEvalOnlyEntriesBeforeQSearchOnes()
+    {
+        var tt = new TranspositionTable();
+        try
+        {
+            var position = new Position(Constants.InitialPositionFEN);
+            var bucketIndex = PrepareBucketOf(tt, position, currentAge: 3,
+                (Depth: 0, Age: 3, NodeType.Exact),     // QSearch
+                (Depth: 0, Age: 3, NodeType.Unknown),
+                (Depth: 5, Age: 3, NodeType.Beta));
+
+            tt.SaveStaticEval(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 7, wasPv: false);
+
+            Assert.IsTrue(tt.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 0, out var result));
+            Assert.AreEqual(7, result.StaticEval);
+            Assert.AreEqual(NodeType.Exact, tt.Get(bucketIndex, 0)->Type);
+            Assert.AreEqual(NodeType.Beta, tt.Get(bucketIndex, 2)->Type);
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
+    [Test]
+    public unsafe void SaveStaticEval_EvictsTheLeastValuableEntryOfOtherPositions_EvenIfItIsARealOneOfTheCurrentSearch()
+    {
+        var tt = new TranspositionTable();
+        try
+        {
+            var position = new Position(Constants.InitialPositionFEN);
+            var bucketIndex = PrepareBucketOf(tt, position, currentAge: 3,
+                (Depth: 4, Age: 3, NodeType.Beta),
+                (Depth: 0, Age: 3, NodeType.Exact),     // Least valuable
+                (Depth: 9, Age: 3, NodeType.Alpha));
+
+            tt.SaveStaticEval(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 7, wasPv: false);
+
+            Assert.IsTrue(tt.ProbeHash(position, halfMovesWithoutCaptureOrPawnMove: 0, ply: 0, out var result));
+            Assert.AreEqual(7, result.StaticEval);
+            Assert.AreEqual(NodeType.Unknown, tt.Get(bucketIndex, 1)->Type);
+            Assert.AreEqual(4, tt.Get(bucketIndex, 0)->Depth);
+            Assert.AreEqual(9, tt.Get(bucketIndex, 2)->Depth);
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
+    /// <summary>
+    /// Clears <paramref name="tt"/>, sets its age to <paramref name="currentAge"/> and fills the bucket <paramref name="position"/> belongs to
+    /// with <paramref name="entries"/>, all of them from other positions
+    /// </summary>
+    /// <returns>Index of the bucket</returns>
+    private static unsafe int PrepareBucketOf(TranspositionTable tt, Position position, int currentAge, params (int Depth, int Age, NodeType Type)[] entries)
+    {
+        Assert.AreEqual(Constants.TranspositionTableEntriesPerBucket, entries.Length);
+
+        tt.Clear();
+
+        // Finding out which bucket the position belongs to, and its key
+        tt.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 0, depth: 1, ply: 0, score: 0, NodeType.Beta, wasPv: false, move: 1234);
+
+        var bucketIndex = -1;
+        ushort positionKey = 0;
+        for (int index = 0; index < (int)tt.Length && bucketIndex == -1; ++index)
+        {
+            for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
+            {
+                var entry = tt.Get(index, entryIndex);
+                if (entry->Key != 0)
+                {
+                    bucketIndex = index;
+                    positionKey = entry->Key;
+                    break;
+                }
+            }
+        }
+
+        Assert.GreaterOrEqual(bucketIndex, 0, "The position wasn't recorded");
+
+        ushort otherKey = 1;
+        for (int i = 0; i < entries.Length; ++i)
+        {
+            if (otherKey == positionKey)
+            {
+                ++otherKey;
+            }
+
+            tt.Get(bucketIndex, i)->Update(otherKey++, score: 0, staticEval: 0, entries[i].Depth, entries[i].Type, wasPv: 0, move: null, entries[i].Age);
+        }
+
+        for (int i = 0; i < currentAge; ++i)
+        {
+            tt.BumpAge();
+        }
+
+        return bucketIndex;
     }
 
     [TestCase(1, 333)]
