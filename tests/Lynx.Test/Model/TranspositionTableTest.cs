@@ -246,9 +246,9 @@ public class TranspositionTableTests
     }
 
     [Test]
-    public void AgeMask_PowerOfTwo()
+    public void MaxAge_PowerOfTwo()
     {
-        Assert.Zero(TranspositionTableElement.AgeMask & (TranspositionTableElement.AgeMask - 1));
+        Assert.Zero(TranspositionTableElement.MaxAge & (TranspositionTableElement.MaxAge - 1));
     }
 
     [Test]

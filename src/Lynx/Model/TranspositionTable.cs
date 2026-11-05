@@ -205,7 +205,7 @@ public unsafe readonly struct TranspositionTable
             // Equivalent of:
             // relativeAge = age - candidate->Age;
             // if (relativeAge < 0) relativeAge += MaxAge
-            // No need to worry about negative numbers as long as the mask is a power of 2
+            // No need to worry about negative numbers as long as TranspositionTableElement.MaxAge is a power of two 
             var relativeAge = (age - candidate->Age) & TranspositionTableElement.AgeMask;
 
             // Formula from Stormphrax
