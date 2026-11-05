@@ -801,6 +801,8 @@ public sealed class Searcher : IDisposable
             var startposFEN = GenerateDatagenStartpos(rnd, sourceFEN, randomMovesCount);
 
             engine.AdjustPosition($"position fen {startposFEN}");
+            _tt.BumpAge();
+
             var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
             if (searchResult is null || Math.Abs(searchResult.Score) > maxAllowedEval)
