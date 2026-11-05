@@ -381,6 +381,58 @@ public class TranspositionTableTests
         Assert.AreEqual(1, SelectEntryIndex(entries, key: 99, currentAge: 4));
     }
 
+    [TestCase(0)]
+    [TestCase(1)]
+    [TestCase(2)]
+    public void SelectEntry_DifferentKey_PrefersStaticEvalOnlyEntriesOverQSearchOnes_RegardlessOfTheirPosition(int staticEvalOnlyIndex)
+    {
+        var entries = new TranspositionTableElement[Constants.TranspositionTableEntriesPerBucket];
+        for (int i = 0; i < entries.Length; ++i)
+        {
+            // Real entries with depth 0, which is what QSearch records
+            entries[i] = i == staticEvalOnlyIndex
+                ? CreateEntry(key: (ushort)(i + 1), depth: 0, age: 4, NodeType.Unknown)
+                : CreateEntry(key: (ushort)(i + 1), depth: 0, age: 4, NodeType.Exact);
+        }
+
+        Assert.AreEqual(staticEvalOnlyIndex, SelectEntryIndex(entries, key: 99, currentAge: 4));
+    }
+
+    [TestCase(0, 1)]
+    [TestCase(1, 1)]
+    [TestCase(3, 1)]
+    [TestCase(4, 0)]
+    [TestCase(5, 0)]
+    public void SelectEntry_DifferentKey_StaticEvalOnlyEntriesOnlyOutrankRealOnesThatAreOldEnough(int realEntryRelativeAge, int expectedIndex)
+    {
+        Assert.AreEqual(-6, Constants.TranspositionTableStaticEvalOnlyEntryDepth, "Test written for a static eval only depth of -6");
+
+        const int currentAge = 10;
+
+        var entries = new[]
+        {
+            // 1 - 2*relativeAge: -5 when it's 3 searches old, -7 when it's 4. A static eval only entry from this search is -6
+            CreateEntry(key: 1, depth: 1, age: currentAge - realEntryRelativeAge),
+            CreateEntry(key: 2, depth: 0, age: currentAge, NodeType.Unknown),
+            CreateEntry(key: 3, depth: 30, age: currentAge)
+        };
+
+        Assert.AreEqual(expectedIndex, SelectEntryIndex(entries, key: 99, currentAge));
+    }
+
+    [Test]
+    public void SelectEntry_DifferentKey_OlderStaticEvalOnlyEntriesRankLowerThanRecentOnes()
+    {
+        var entries = new[]
+        {
+            CreateEntry(key: 1, depth: 0, age: 4, NodeType.Unknown),
+            CreateEntry(key: 2, depth: 0, age: 3, NodeType.Unknown),    // One search older
+            CreateEntry(key: 3, depth: 0, age: 4, NodeType.Unknown)
+        };
+
+        Assert.AreEqual(1, SelectEntryIndex(entries, key: 99, currentAge: 4));
+    }
+
     [Test]
     public void SelectEntry_DifferentKey_OldDeeperEntryLosesToRecentShallowOnes()
     {
@@ -446,8 +498,8 @@ public class TranspositionTableTests
     {
         var entries = new[]
         {
-            CreateEntry(key: 1, depth: 0, age: 4, NodeType.Unknown),    // value: 0
-            CreateEntry(key: 2, depth: 0, age: 1),                      // value: 0 - 2*3 = -6
+            CreateEntry(key: 1, depth: 0, age: 4, NodeType.Unknown),    // value: -6 (static eval only)
+            CreateEntry(key: 2, depth: 0, age: 0),                      // value: 0 - 2*4 = -8
             CreateEntry(key: 3, depth: 5, age: 4)
         };
 

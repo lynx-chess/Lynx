@@ -204,8 +204,13 @@ public unsafe readonly struct TranspositionTable
             // Negative values are fixed by the mask, since AgeMask + 1 is a power of 2
             var relativeAge = (age - candidate->Age) & TranspositionTableElement.AgeMask;
 
+            // Rank static-eval-only entries below any searched ones (incluidng QS, with depth 0). Idea from Stormphrax too
+            var depth = candidate->Type == NodeType.Unknown
+                ? Constants.TranspositionTableStaticEvalOnlyEntryDepth
+                : candidate->Depth;
+
             // Formula from Stormphrax
-            var value = candidate->Depth - (2 * relativeAge);
+            var value = depth - (2 * relativeAge);
 
             if (value < minValue)
             {

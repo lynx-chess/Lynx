@@ -339,6 +339,8 @@ public static class Constants
 
     public const int TranspositionTableBucketSize = 32;
 
+    public const int TranspositionTableStaticEvalOnlyEntryDepth = -6;
+
     public static readonly int MaxThreadCount = Array.MaxLength + 1;
 
     public static readonly int MaxMoveOverhead = 60_000;
