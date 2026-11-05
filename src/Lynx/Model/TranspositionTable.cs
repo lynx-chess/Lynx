@@ -195,8 +195,7 @@ public unsafe readonly struct TranspositionTable
 
             // Same position or empty entry
             // In empty entires, some FP: positions with Key == 0 and only static eval saved. Hopefully rare enough?
-            if (candidate->Key == key
-                || (candidate->Key == 0 && candidate->Type == NodeType.Unknown))
+            if (candidate->Key == key || candidate->Type == NodeType.Unknown)
             {
                 return candidate;
             }
