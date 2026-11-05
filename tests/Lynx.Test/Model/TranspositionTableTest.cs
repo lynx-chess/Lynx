@@ -598,7 +598,7 @@ public class TranspositionTableTests
             for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
             {
                 var entry = tt.Get(bucketIndex, entryIndex);
-                if (entry->Key != 0)
+                if (!entry->IsEmpty)
                 {
                     Assert.IsTrue(found is null, "More than one entry recorded");
                     found = entry;

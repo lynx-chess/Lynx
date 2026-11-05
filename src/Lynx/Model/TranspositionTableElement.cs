@@ -70,6 +70,16 @@ public struct TranspositionTableElement
     }
 
     /// <summary>
+    /// True for entries that have never been written (zeroed memory).
+    /// Relies on <see cref="TranspositionTable.GenerateTTKey(ulong)"/> never generating 0 as a key for a written entry
+    /// </summary>
+    public readonly bool IsEmpty
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _key == 0;
+    }
+
+    /// <summary>
     /// Best move found in the position. 0 if the search failed low (score <= alpha)
     /// </summary>
     public readonly ShortMove Move
@@ -145,6 +155,7 @@ public struct TranspositionTableElement
     public void Update(ushort key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move, int age)
     {
         Debug.Assert((uint)age < MaxAge);
+        Debug.Assert(key != 0, "Key 0 is reserved for empty TT entries");
 
         _key = key;
         _score = (short)score;
