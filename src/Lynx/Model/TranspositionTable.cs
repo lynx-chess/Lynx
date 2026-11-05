@@ -179,6 +179,11 @@ public unsafe readonly struct TranspositionTable
 
         TranspositionTableElement* entry = SelectEntry(bucket, key, age);
 
+        if (entry->Type != NodeType.Unknown && entry->Age == age && entry->Depth > 0)
+        {
+            return;
+        }
+
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
         entry->Update(key, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, age);
     }
