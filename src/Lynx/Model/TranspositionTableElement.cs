@@ -124,7 +124,7 @@ public struct TranspositionTableElement
     }
 
     /// <summary>
-    /// Circular buffer, [0, <see cref="MaxAge"/> - 1]
+    /// [0, <see cref="MaxAge"/> - 1]
     /// </summary>
     public readonly int Age
     {

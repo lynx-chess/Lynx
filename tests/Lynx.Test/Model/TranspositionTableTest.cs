@@ -246,6 +246,12 @@ public class TranspositionTableTests
     }
 
     [Test]
+    public void AgeMask_PowerOfTwo()
+    {
+        Assert.Zero(TranspositionTableElement.AgeMask & (TranspositionTableElement.AgeMask - 1));
+    }
+
+    [Test]
     public unsafe void Bucket_NeverStraddlesCacheLines()
     {
         Assert.AreEqual(Constants.TranspositionTableBucketSize, sizeof(TranspositionTableBucket));

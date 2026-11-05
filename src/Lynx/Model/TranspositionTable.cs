@@ -9,7 +9,7 @@ namespace Lynx.Model;
 /// <summary>
 /// Transposition table
 /// Every engine receives its own instance of this struct, but they all point to the same native memory block.
-/// [ age (<see cref="Alignment"/> bytes) | <see cref="Length"/> buckets ]
+/// [ age (<see cref="Alignment"/> bytes) | <see cref="Length"/> buckets (<see cref="SizeMBs"/> MB) ]
 /// Each bucket holds <see cref="Constants.TranspositionTableEntriesPerBucket"/> entries, see <see cref="TranspositionTableBucket"/>
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
@@ -53,8 +53,9 @@ public unsafe readonly struct TranspositionTable
             try
             {
                 _nativeMemoryPointer = (byte*)NativeMemory.AlignedAlloc(Alignment + totalSizeBytes, Alignment);
-                _buckets = (TranspositionTableBucket*)(_nativeMemoryPointer + Alignment);
                 _age = (int*)_nativeMemoryPointer;
+                _buckets = (TranspositionTableBucket*)(_nativeMemoryPointer + Alignment);
+
                 *_age = 0;
                 break;
             }
@@ -194,14 +195,17 @@ public unsafe readonly struct TranspositionTable
             TranspositionTableElement* candidate = bucket + i;
 
             // Same position or empty entry
-            // In empty entires, some FP: positions with Key == 0 and only static eval saved. Hopefully rare enough?
+            // In empty entries, some FP: positions with Key == 0 and only static eval saved. Hopefully rare enough?
             if (candidate->Key == key
                 || (candidate->Key == 0 && candidate->Type == NodeType.Unknown))
             {
                 return candidate;
             }
 
-            // Negative values are fixed by the mask, since AgeMask + 1 is a power of 2
+            // Equivalent of:
+            // relativeAge = age - candidate->Age;
+            // if (relativeAge < 0) relativeAge += MaxAge
+            // No need to worry about negative numbers as long as the mask is a power of 2
             var relativeAge = (age - candidate->Age) & TranspositionTableElement.AgeMask;
 
             // Formula from Stormphrax
@@ -217,15 +221,15 @@ public unsafe readonly struct TranspositionTable
         return selectedEntry;
     }
 
-    /// <summary>
-    /// Circular buffer [0, <see cref="TranspositionTableElement.MaxAge"/> - 1]
-    /// </summary>
     public int Age
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => *_age;
     }
 
+    /// <summary>
+    /// Maakes <see cref="Age"/> a circular buffer [0, <see cref="TranspositionTableElement.MaxAge"/> - 1]
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void BumpAge() => *_age = (*_age + 1) & TranspositionTableElement.AgeMask;
 
