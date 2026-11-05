@@ -156,7 +156,7 @@ public struct TranspositionTableElement
             ? (ShortMove)move
             : (_key == key
                 ? _move     // Leaving the move originally suggested by cj5716, tweaked later to only do it if keys match
-                : (ShortMove)MoveExtensions.NullMove);
+                : default);
 #pragma warning restore S3358 // Ternary operators should not be nested
 
         _key = key;
