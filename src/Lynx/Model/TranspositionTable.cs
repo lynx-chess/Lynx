@@ -143,10 +143,11 @@ public unsafe readonly struct TranspositionTable
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            entry->Key != newKey                // Different key: collision or no actual entry, entry is the least valuable one in the bucket
-            || nodeType == NodeType.Exact       // Entering PV data
-            || entry->Age != age                // Entry from a previous search
-            || depth                            // Higher depth
+            entry->Key != newKey                    // Different key: collision or no actual entry, entry is the least valuable one in the bucket
+            || (nodeType == NodeType.Exact          // Entering PV data
+                && entry->Type != NodeType.Exact)
+            || entry->Age != age                    // Entry from a previous search
+            || depth                                // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
                     + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
                 >= entry->Depth;
