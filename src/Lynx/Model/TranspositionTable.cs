@@ -337,16 +337,17 @@ public unsafe readonly struct TranspositionTable
 #pragma warning restore S4144 // Methods should not have identical implementations
 
     /// <summary>
-    /// Exact transposition table occupancy per mill (0-1000)
+    /// Exact transposition table occupancy per mill (0-1000), counting only current age entries
     /// </summary>
     public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / ((double)Length * Constants.TranspositionTableEntriesPerBucket)));
 
     /// <summary>
-    /// Orders of magnitude faster than <see cref="HashfullPermill"/>
+    /// Samples only the first 1000 buckets, being orders of magnitude faster than <see cref="HashfullPermill"/>
     /// </summary>
     public readonly int HashfullPermillApprox()
     {
         int items = 0;
+        var age = *_age;
 
         for (int i = 0; i < 1_000; ++i)
         {
@@ -354,7 +355,7 @@ public unsafe readonly struct TranspositionTable
 
             for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                if (!bucket[j].IsEmpty)
+                if (IsCurrentAgeEntry(bucket + j, age))
                 {
                     ++items;
                 }
@@ -364,6 +365,9 @@ public unsafe readonly struct TranspositionTable
         //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
         return items / Constants.TranspositionTableEntriesPerBucket;
     }
+
+    private static bool IsCurrentAgeEntry(TranspositionTableElement* entry, int age)
+        => !entry->Key.IsEmpty != default && entry->Age == age;
 
     /// <summary>
     /// Number of buckets that fit in <paramref name="sizeMBs"/>
@@ -390,13 +394,15 @@ public unsafe readonly struct TranspositionTable
     private readonly ulong PopulatedItemsCount()
     {
         ulong items = 0;
+        var age = *_age;
+
         for (nuint i = 0; i < Length; ++i)
         {
             var bucket = (TranspositionTableElement*)&_buckets[i];
 
             for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                if (!bucket[j].IsEmpty)
+                if (IsCurrentAgeEntry(bucket + j, age))
                 {
                     ++items;
                 }
