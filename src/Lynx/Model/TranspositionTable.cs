@@ -195,9 +195,7 @@ public unsafe readonly struct TranspositionTable
             TranspositionTableElement* candidate = bucket + i;
 
             // Same position or empty entry
-            // In empty entries, some FP: positions with Key == 0 and only static eval saved. Hopefully rare enough?
-            if (candidate->Key == key
-                || (candidate->Key == 0 && candidate->Type == NodeType.Unknown))
+            if (candidate->Key == key || candidate->IsEmpty)
             {
                 return candidate;
             }
@@ -303,11 +301,16 @@ public unsafe readonly struct TranspositionTable
     }
 
     /// <summary>
-    /// Use lowest 16 bits of the position unique identifier as the key
+    /// Use lowest 16 bits of the position unique identifier as the key.
+    /// 0 is reserved for empty (zeroed) entries, so 1 is returned instead
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static ushort GenerateTTKey(ulong positionUniqueIdentifier)
-        => (ushort)positionUniqueIdentifier;
+    {
+        var key = (ushort)positionUniqueIdentifier;
+
+        return key == 0 ? (ushort)1 : key;
+    }
 
     /// <summary>
     /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
@@ -364,7 +367,7 @@ public unsafe readonly struct TranspositionTable
     }
 
     private static bool IsCurrentAgeEntry(TranspositionTableElement* entry, int age)
-        => entry->Key != default && entry->Age == age;
+        => !entry->IsEmpty != default && entry->Age == age;
 
     /// <summary>
     /// Number of buckets that fit in <paramref name="sizeMBs"/>
@@ -437,7 +440,7 @@ public unsafe readonly struct TranspositionTable
             {
                 ref var entry = ref bucket[j];
 
-                if (entry.Key != default)
+                if (!entry.IsEmpty)
                 {
                     Console.WriteLine($"{i}.{j}: Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : "-")} {entry.Type}, Age: {entry.Age}");
                 }
