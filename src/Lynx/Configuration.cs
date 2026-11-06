@@ -430,10 +430,7 @@ public sealed class EngineSettings
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
 
     [SPSA<int>(enabled: false)]
-    public int TTReplacement_DepthOffset { get; set; } = 4;
-
-    [SPSA<int>(enabled: false)]
-    public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
+    public int TTReplacement_TTPVDepthOffset { get; set; } = 1;
 
     [SPSA<int>(-100, -10, 10)]
     public int PVS_SEE_Threshold_Quiet { get; set; } = -46;
