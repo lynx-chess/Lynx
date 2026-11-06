@@ -153,7 +153,6 @@ public unsafe readonly struct TranspositionTable
         bool shouldReplace =
             entry->Key != newKey                // Different key: collision or no actual entry, entry is the least valuable one in the bucket
             || nodeType == NodeType.Exact       // Entering PV data
-            || relativeAge != 0                 // Entry from a previous search
             || ((3 * candidateEntryPriority) >= (2 * existingEntryPriority));
 
         if (!shouldReplace)
