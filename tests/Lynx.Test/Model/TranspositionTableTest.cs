@@ -538,6 +538,42 @@ public class TranspositionTableTests
         }
     }
 
+    /// <summary>
+    /// Same position, same search: a shallower non-Exact write replaces the old entry if
+    /// newDepth + DepthOffset (4) + bonus(newType) &gt;= oldDepth + bonus(oldType), with the default bonuses Exact 3, Beta 2, Alpha 1.
+    /// Without bonuses, the first two cases would flip.
+    /// </summary>
+    [TestCase(NodeType.Beta, 10, NodeType.Alpha, 6, false, Description = "Beta is kept over an Alpha 4 plies shallower (the old rule replaced it)")]
+    [TestCase(NodeType.Alpha, 10, NodeType.Beta, 5, true, Description = "Beta replaces an Alpha 5 plies deeper (the old rule kept it)")]
+    [TestCase(NodeType.Exact, 10, NodeType.Alpha, 6, false, Description = "Exact is kept over an Alpha 4 plies shallower (the old rule replaced it)")]
+    [TestCase(NodeType.Exact, 10, NodeType.Alpha, 8, true)]
+    [TestCase(NodeType.Beta, 10, NodeType.Beta, 6, true)]
+    [TestCase(NodeType.Beta, 10, NodeType.Beta, 5, false)]
+    [TestCase(NodeType.Alpha, 10, NodeType.Alpha, 6, true)]
+    [TestCase(NodeType.Alpha, 10, NodeType.Alpha, 5, false)]
+    [TestCase(NodeType.Exact, 10, NodeType.Beta, 10, true, Description = "Same depth always replaces")]
+    public unsafe void RecordHash_SameKeySameAge_ShallowerWriteReplacementDependsOnBoundTypes(NodeType oldType, int oldDepth, NodeType newType, int newDepth, bool expectedReplaced)
+    {
+        var tt = new TranspositionTable();
+        try
+        {
+            tt.Clear();
+            var position = new Position(Constants.InitialPositionFEN);
+
+            tt.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 7, oldDepth, ply: 0, score: 10, oldType, wasPv: false, move: oldType == NodeType.Alpha ? null : 1234);
+            tt.RecordHash(position, halfMovesWithoutCaptureOrPawnMove: 0, staticEval: 7, newDepth, ply: 0, score: 20, newType, wasPv: false, move: newType == NodeType.Alpha ? null : 4321);
+
+            var entry = FindOnlyRecordedEntry(tt);
+            Assert.AreEqual(expectedReplaced ? newDepth : oldDepth, entry->Depth);
+            Assert.AreEqual(expectedReplaced ? newType : oldType, entry->Type);
+            Assert.AreEqual(expectedReplaced ? 20 : 10, entry->Score);
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
     [Test]
     public unsafe void SaveStaticEval_AfterRecordHash_ReusesTheEntryOfTheSamePosition()
     {
