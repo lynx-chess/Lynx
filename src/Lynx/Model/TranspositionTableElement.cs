@@ -146,11 +146,19 @@ public struct TranspositionTableElement
     {
         Debug.Assert((uint)age < MaxAge);
 
-        _key = key;
         _score = (short)score;
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
         _age_type_WasPv = (byte)(wasPv | ((int)nodeType << NodeTypeOffset) | (age << AgeOffset));
-        _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+
+#pragma warning disable S3358 // Ternary operators should not be nested
+        _move = move != null
+            ? (ShortMove)move
+            : (_key == key
+                ? _move     // Leaving the move originally suggested by cj5716, tweaked later to only do it if keys match
+                : default);
+#pragma warning restore S3358 // Ternary operators should not be nested
+
+        _key = key;
     }
 }
