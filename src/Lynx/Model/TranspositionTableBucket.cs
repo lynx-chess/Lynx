@@ -18,6 +18,12 @@ public struct TranspositionTableBucket
 
     private TranspositionTableElement _entry2;      // 10 bytes
 
-    private readonly short _padding;                // 2 bytes
+    private TranspositionTableElement _entry3;      // 10 bytes
+
+    private TranspositionTableElement _entry4;      // 10 bytes
+
+    private TranspositionTableElement _entry5;      // 10 bytes
+
+    private readonly int _padding;                  // 4 bytes
 #pragma warning restore S1144, RCS1213
 }

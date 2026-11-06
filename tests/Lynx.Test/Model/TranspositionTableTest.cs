@@ -334,13 +334,24 @@ public class TranspositionTableTests
     }
 
     /// <summary>
-    /// Index of the entry <see cref="TranspositionTable.SelectEntry"/> selects out of <paramref name="entries"/>
+    /// Index of the entry <see cref="TranspositionTable.SelectEntry"/> selects out of <paramref name="entries"/>.
+    /// Tests only list the entries that matter: if there are fewer than <see cref="Constants.TranspositionTableEntriesPerBucket"/>,
+    /// the remaining slots are filled with entries that can never be selected (different key, maximum depth, current age),
+    /// so the tests don't depend on the bucket size.
     /// </summary>
     private static unsafe int SelectEntryIndex(TranspositionTableElement[] entries, ushort key, int currentAge)
     {
-        Assert.AreEqual(Constants.TranspositionTableEntriesPerBucket, entries.Length);
+        Assert.LessOrEqual(entries.Length, Constants.TranspositionTableEntriesPerBucket);
 
-        fixed (TranspositionTableElement* bucket = entries)
+        var bucketEntries = new TranspositionTableElement[Constants.TranspositionTableEntriesPerBucket];
+        for (int i = 0; i < bucketEntries.Length; ++i)
+        {
+            bucketEntries[i] = i < entries.Length
+                ? entries[i]
+                : CreateEntry(key: (ushort)(0xF000 + i), depth: byte.MaxValue, currentAge);
+        }
+
+        fixed (TranspositionTableElement* bucket = bucketEntries)
         {
             return (int)(TranspositionTable.SelectEntry(bucket, key, currentAge) - bucket);
         }
@@ -560,12 +571,12 @@ public class TranspositionTableTests
         }
     }
 
-    [TestCase(1, 333)]
-    [TestCase(2, 666)]
-    [TestCase(3, 1000)]
+    [TestCase(1, 166)]
+    [TestCase(3, 500)]
+    [TestCase(6, 1000)]
     public unsafe void HashfullPermillApprox_CountsEntriesNotBuckets(int populatedEntriesPerBucket, int expectedPermill)
     {
-        Assert.AreEqual(3, Constants.TranspositionTableEntriesPerBucket, "Test written for 3 entries per bucket");
+        Assert.AreEqual(6, Constants.TranspositionTableEntriesPerBucket, "Test written for 6 entries per bucket");
 
         var tt = new TranspositionTable();
         try
