@@ -367,7 +367,7 @@ public unsafe readonly struct TranspositionTable
     }
 
     private static bool IsCurrentAgeEntry(TranspositionTableElement* entry, int age)
-        => !entry->Key.IsEmpty != default && entry->Age == age;
+        => !entry->IsEmpty != default && entry->Age == age;
 
     /// <summary>
     /// Number of buckets that fit in <paramref name="sizeMBs"/>
