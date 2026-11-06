@@ -209,7 +209,7 @@ public unsafe readonly struct TranspositionTable
             var relativeAge = (age - candidate->Age) & TranspositionTableElement.AgeMask;
 
             // Formula from Stormphrax
-            var value = candidate->Depth - (2 * relativeAge);
+            var value = candidate->Depth - (4 * relativeAge);
 
             if (value < minValue)
             {
