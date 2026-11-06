@@ -600,6 +600,99 @@ public class TranspositionTableTests
         }
     }
 
+    [TestCase(0, 3, 0)]
+    [TestCase(1, 2, 333)]
+    [TestCase(2, 1, 666)]
+    [TestCase(3, 0, 1000)]
+    public unsafe void HashfullPermillApprox_IgnoresEntriesFromPreviousSearches(int currentAgeEntriesPerBucket, int previousAgeEntriesPerBucket, int expectedPermill)
+    {
+        Assert.AreEqual(3, Constants.TranspositionTableEntriesPerBucket, "Test written for 3 entries per bucket");
+        Assert.AreEqual(Constants.TranspositionTableEntriesPerBucket, currentAgeEntriesPerBucket + previousAgeEntriesPerBucket);
+
+        var tt = new TranspositionTable();
+        try
+        {
+            tt.Clear();
+            tt.BumpAge();
+            tt.BumpAge();
+
+            var currentAge = tt.Age;
+            var previousAge = (currentAge - 1) & TranspositionTableElement.AgeMask;
+            Assert.AreNotEqual(0, currentAge, "Age 0 would be indistinguishable from zeroed entries");
+
+            for (int bucketIndex = 0; bucketIndex < 1_000; ++bucketIndex)
+            {
+                for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
+                {
+                    var age = entryIndex < currentAgeEntriesPerBucket ? currentAge : previousAge;
+                    tt.Get(bucketIndex, entryIndex)->Update(key: 1, score: 0, staticEval: 0, depth: 1, NodeType.Beta, wasPv: 0, move: null, age);
+                }
+            }
+
+            Assert.AreEqual(expectedPermill, tt.HashfullPermillApprox());
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
+    [Test]
+    public unsafe void HashfullPermillApprox_BumpingAgeStartsFromScratch()
+    {
+        var tt = new TranspositionTable();
+        try
+        {
+            tt.Clear();
+
+            for (int bucketIndex = 0; bucketIndex < 1_000; ++bucketIndex)
+            {
+                for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
+                {
+                    tt.Get(bucketIndex, entryIndex)->Update(key: 1, score: 0, staticEval: 0, depth: 1, NodeType.Beta, wasPv: 0, move: null, age: tt.Age);
+                }
+            }
+
+            Assert.AreEqual(1000, tt.HashfullPermillApprox());
+
+            tt.BumpAge();
+
+            Assert.AreEqual(0, tt.HashfullPermillApprox());
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
+    [Test]
+    public unsafe void HashfullPermill_Exact_IgnoresEntriesFromPreviousSearches()
+    {
+        var tt = new TranspositionTable();
+        try
+        {
+            tt.Clear();
+            tt.BumpAge();
+
+            var currentAge = tt.Age;
+            var previousAge = (currentAge - 1) & TranspositionTableElement.AgeMask;
+
+            // Populate every bucket: 1 current-age entry, 1 previous-age entry and 1 empty entry
+            for (int bucketIndex = 0; bucketIndex < (int)tt.Length; ++bucketIndex)
+            {
+                tt.Get(bucketIndex, 0)->Update(key: 1, score: 0, staticEval: 0, depth: 1, NodeType.Beta, wasPv: 0, move: null, currentAge);
+                tt.Get(bucketIndex, 1)->Update(key: 1, score: 0, staticEval: 0, depth: 1, NodeType.Beta, wasPv: 0, move: null, previousAge);
+            }
+
+            Assert.AreEqual(333, tt.HashfullPermill());
+            Assert.AreEqual(333, tt.HashfullPermillApprox());
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
     private static unsafe TranspositionTableElement* FindOnlyRecordedEntry(TranspositionTable tt)
     {
         TranspositionTableElement* found = null;
