@@ -149,7 +149,8 @@ public unsafe readonly struct TranspositionTable
             || depth                            // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
                     + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
-                >= entry->Depth;
+                    + ReplacementBoundBonus(nodeType)
+                >= entry->Depth + ReplacementBoundBonus(entry->Type);
 
         if (!shouldReplace)
         {
@@ -162,6 +163,18 @@ public unsafe readonly struct TranspositionTable
 
         entry->Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, age);
     }
+
+    /// <summary>
+    /// Idea from Clockwork
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ReplacementBoundBonus(NodeType nodeType) => nodeType switch
+    {
+        NodeType.Exact => Configuration.EngineSettings.TTReplacement_ExactBonus,
+        NodeType.Beta => Configuration.EngineSettings.TTReplacement_BetaBonus,
+        NodeType.Alpha => Configuration.EngineSettings.TTReplacement_AlphaBonus,
+        _ => 0
+    };
 
     /// <summary>
     /// Save only the static evaluation for a position in the transposition table

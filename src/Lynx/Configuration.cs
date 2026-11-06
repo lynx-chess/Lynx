@@ -435,6 +435,15 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
 
+    [SPSA<int>(enabled: false)]
+    public int TTReplacement_ExactBonus { get; set; } = 3;
+
+    [SPSA<int>(enabled: false)]
+    public int TTReplacement_BetaBonus { get; set; } = 2;
+
+    [SPSA<int>(enabled: false)]
+    public int TTReplacement_AlphaBonus { get; set; } = 1;
+
     [SPSA<int>(-100, -10, 10)]
     public int PVS_SEE_Threshold_Quiet { get; set; } = -46;
 
