@@ -376,18 +376,18 @@ public static class OnlineTablebaseProber
         return result?.Category switch
         {
             TablebaseEvaluationCategory.Unknown => NoResult,
-            TablebaseEvaluationCategory.Draw => 0,
-            TablebaseEvaluationCategory.BlessedLoss => 0,
-            TablebaseEvaluationCategory.CursedWin => 0,
+            TablebaseEvaluationCategory.Draw => EvaluationConstants.DrawScore,
+            TablebaseEvaluationCategory.BlessedLoss => EvaluationConstants.DrawScore,
+            TablebaseEvaluationCategory.CursedWin => EvaluationConstants.DrawScore,
             TablebaseEvaluationCategory.Win or TablebaseEvaluationCategory.MaybeWin =>
                 Math.Abs(result.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100
-                    ? 0
+                    ? EvaluationConstants.DrawScore
                     : result.DistanceToMate.HasValue
                         ? EvaluationConstants.CheckMateBaseEvaluation - (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value))
                     : EvaluationConstants.CheckMateBaseEvaluation - 49,
             TablebaseEvaluationCategory.Loss or TablebaseEvaluationCategory.MaybeLoss =>
                 Math.Abs(result.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100
-                    ? 0
+                    ? EvaluationConstants.DrawScore
                     : result.DistanceToMate.HasValue
                         ? -EvaluationConstants.CheckMateBaseEvaluation + (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value))
                         : -EvaluationConstants.CheckMateBaseEvaluation + 49,

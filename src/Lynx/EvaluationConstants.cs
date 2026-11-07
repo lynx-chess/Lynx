@@ -145,6 +145,11 @@ public static class EvaluationConstants
     public const int MinEval = -32_000;    // -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * 10;
 
     /// <summary>
+    /// Eval when the game is unavoidably drawn (threefold repetition, 50-move rule, insufficient material, etc.)
+    /// </summary>
+    public const int DrawScore = 0;
+
+    /// <summary>
     /// Minimum evaluation for a position to be White checkmate
     /// </summary>
     public const int PositiveCheckmateDetectionLimit = 26_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * 10;
