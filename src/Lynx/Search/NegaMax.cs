@@ -883,16 +883,6 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        // 🔍 Upcoming repetition detection (cuckoo), see NegaMax
-        if (alpha < EvaluationConstants.DrawScore && Game.HasUpcomingRepetition())
-        {
-            alpha = EvaluationConstants.DrawScore;
-            if (alpha >= beta)
-            {
-                return alpha;
-            }
-        }
-
         var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var ttProbeResult);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
