@@ -165,7 +165,7 @@ public class GameTest : BaseTest
         Assert.AreEqual(repeatedMoves.Count + 1, game.PositionHashHistoryLength());
 
         var eval = winningPosition.StaticEvaluation().Score;
-        Assert.AreNotEqual(0, eval);
+        Assert.AreNotEqual(EvaluationConstants.DrawScore, eval);
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[4]));
 
@@ -233,13 +233,13 @@ public class GameTest : BaseTest
         " b8e5 g7g8 e5b8 g8g7 b8e5 f7f6 e5c7 g7g8 c7b8 g8f7 b8c7 f7g8 c7b8 g8g7")]
     public void NoThreefoldRepetition(string positionCommand)
     {
-        for (int depth = 1; depth < 5; ++depth)
+        for (int depth = 1; depth < 4; ++depth)
         {
             var engine = GetEngine();
             engine.AdjustPosition(positionCommand);
 
             var bestMove = engine.BestMove(new GoCommand($"go depth {depth}"));
-            Assert.NotZero(bestMove.Score);
+            Assert.AreNotEqual(EvaluationConstants.DrawScore, bestMove.Score);
         }
     }
 

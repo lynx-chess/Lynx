@@ -380,7 +380,7 @@ public partial class Position
 
                             if (_pieceBitboards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
                             {
-                                return (0, gamePhase);
+                                return (EvaluationConstants.DrawScore, gamePhase);
                             }
 
                             // Rook vs a minor is a draw
@@ -397,7 +397,7 @@ public partial class Position
                             if (whiteKnightsCount + _pieceBitboards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
                                     || whiteKnightsCount + _pieceBitboards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
                             {
-                                return (0, gamePhase);
+                                return (EvaluationConstants.DrawScore, gamePhase);
                             }
 
                             break;
@@ -405,7 +405,7 @@ public partial class Position
                     case 1:
                     case 0:
                         {
-                            return (0, gamePhase);
+                            return (EvaluationConstants.DrawScore, gamePhase);
                         }
                 }
             }
@@ -420,7 +420,7 @@ public partial class Position
                     {
                         if (IsBishopPawnDraw(winningSideOffset))
                         {
-                            return (0, gamePhase);
+                            return (EvaluationConstants.DrawScore, gamePhase);
                         }
 
                         // We can reduce the rest of positions, i.e. if the king hasn't reached the corner
@@ -511,7 +511,7 @@ public partial class Position
             return MatedScore(ply);
         }
 
-        return 0;
+        return EvaluationConstants.DrawScore;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

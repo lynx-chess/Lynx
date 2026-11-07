@@ -71,6 +71,17 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
+            // 🔍 Upcoming repetition detection using Cuckoo
+            // If there is a move that draws by repetition, the draw score is a lower bound of the score
+            if (!isVerifyingSE && alpha < EvaluationConstants.DrawScore && Game.HasUpcomingRepetition())
+            {
+                alpha = EvaluationConstants.DrawScore;
+                if (alpha >= beta)
+                {
+                    return alpha;
+                }
+            }
+
             realttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out ttEntry);
             var ttNodeType = ttEntry.NodeType;
 
@@ -587,7 +598,7 @@ public sealed partial class Engine
 
             if (canBeRepetition && (Game.IsThreefoldRepetition(ply) || Game.Is50MovesRepetition()))
             {
-                score = 0;
+                score = EvaluationConstants.DrawScore;
 
                 // We don't need to evaluate further down to know it's a draw.
                 // Since we won't be evaluating further down, we need to clear the PV table because those moves there
