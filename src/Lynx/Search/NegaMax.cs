@@ -73,7 +73,7 @@ public sealed partial class Engine
         {
             // 🔍 Upcoming repetition detection using Cuckoo
             // If there is a move that draws by repetition, the draw score is a lower bound of the score
-            if (!isVerifyingSE && alpha < EvaluationConstants.DrawScore && Game.HasUpcomingRepetition())
+            if (alpha < EvaluationConstants.DrawScore && Game.HasUpcomingRepetition())
             {
                 alpha = EvaluationConstants.DrawScore;
                 if (alpha >= beta)
