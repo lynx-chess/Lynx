@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <StaticAnalysisCodeType>ProdLib</StaticAnalysisCodeType>
+    <CilicaAllMethods>true</CilicaAllMethods>
+    <CilicaExtraArgs>--pass-dump-path dump.txt</CilicaExtraArgs>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -23,6 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cilica.OptimizerTask">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+
     <PackageReference Include="ErrorProne.NET.Structs">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
