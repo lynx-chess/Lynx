@@ -42,7 +42,7 @@
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="$(BenchmarkDotnetVersion)" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="$(BenchmarkDotnetVersion)" />
-    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.12.37802.2" />
+    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.13.37903.2" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Update="Meziantou.Analyzer" Version="3.0.320" />
