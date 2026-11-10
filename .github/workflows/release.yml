@@ -178,21 +178,21 @@ jobs:
         $regex = "(?<=<Version>).*(?=</Version>)"
         (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
 
-    - name: Commit and push version increment
-      if: github.event.inputs.should_commit_new_version == 'true'
-      run: |
-        git switch ${{ env.GITHUB_REF_NAME }}
-        git status
-        git commit -am "🚀 Release v${{ github.event.inputs.new_engine_version }}"
-        git push
+    # - name: Commit and push version increment
+    #   if: github.event.inputs.should_commit_new_version == 'true'
+    #   run: |
+    #     git switch ${{ env.GITHUB_REF_NAME }}
+    #     git status
+    #     git commit -am "🚀 Release v${{ github.event.inputs.new_engine_version }}"
+    #     git push
 
-    - name: Create git tag
-      if: github.event.inputs.should_tag_new_version == 'true'
-      run: |
-        git switch ${{ env.GITHUB_REF_NAME }}
-        git status
-        git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
-        git push --tags
+    # - name: Create git tag
+    #   if: github.event.inputs.should_tag_new_version == 'true'
+    #   run: |
+    #     git switch ${{ env.GITHUB_REF_NAME }}
+    #     git status
+    #     git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
+    #     git push --tags
 
     - uses: actions/download-artifact@v8
       with:
@@ -204,30 +204,30 @@ jobs:
       with:
         user: ${{ secrets.NUGET_USER }}
 
-    - name: Push NuGet package to nuget.org
-      if: github.event.inputs.should_push_new_nuget_version == 'true'
-      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{steps.login.outputs.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
+    # - name: Push NuGet package to nuget.org
+    #   if: github.event.inputs.should_push_new_nuget_version == 'true'
+    #   run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{steps.login.outputs.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
 
-    - name: Push NuGet package to GitHub
-      if: github.event.inputs.should_push_new_nuget_version == 'true'
-      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
+    # - name: Push NuGet package to GitHub
+    #   if: github.event.inputs.should_push_new_nuget_version == 'true'
+    #   run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
 
-    - name: Compress artifacts again
-      if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
-      run: for i in artifacts/*[!-nuget]; do zip -0 -r -q -j "${i%/}.zip" "$i" & done; wait
+    # - name: Compress artifacts again
+    #   if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
+    #   run: for i in artifacts/*[!-nuget]; do zip -0 -r -q -j "${i%/}.zip" "$i" & done; wait
 
-    - name: Create GitHub release and upload assets
-      if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        set -x
-        assets=()
-        for asset in artifacts/*.zip; do
-          assets+=("-a" "$asset")
-        done
-        for asset in artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*; do
-          assets+=("-a" "$asset")
-        done
-        tag_name="v${{ github.event.inputs.new_engine_version }}"
-        hub release create "${assets[@]}" --draft --message "$tag_name" "$tag_name"
+    # - name: Create GitHub release and upload assets
+    #   if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   run: |
+    #     set -x
+    #     assets=()
+    #     for asset in artifacts/*.zip; do
+    #       assets+=("-a" "$asset")
+    #     done
+    #     for asset in artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*; do
+    #       assets+=("-a" "$asset")
+    #     done
+    #     tag_name="v${{ github.event.inputs.new_engine_version }}"
+    #     hub release create "${assets[@]}" --draft --message "$tag_name" "$tag_name"
