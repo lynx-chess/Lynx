@@ -5,7 +5,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftExtensionsVersion>11.0.0</MicrosoftExtensionsVersion>
-    <BenchmarkDotnetVersion>0.15.8</BenchmarkDotnetVersion>
+    <BenchmarkDotnetVersion>0.16.0-preview.2</BenchmarkDotnetVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="$(MicrosoftExtensionsVersion)" />
