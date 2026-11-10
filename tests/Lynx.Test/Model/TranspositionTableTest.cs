@@ -802,6 +802,12 @@ public class TranspositionTableTests
                 Assert.AreEqual(
                     (ulong)(((UInt128)position.UniqueIdentifier * (UInt128)tt.Length) >> 64),
                     Bmi2.X64.MultiplyNoFlags(position.UniqueIdentifier, tt.Length));
+
+                var high = Math.BigMul(position.UniqueIdentifier, tt.Length, out var _);
+
+                Assert.AreEqual(
+                    (ulong)(((UInt128)position.UniqueIdentifier * (UInt128)tt.Length) >> 64),
+                    high);
             }
         }
         finally
