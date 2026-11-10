@@ -5,19 +5,21 @@ on:
     inputs:
       fen:
         description: 'fen'
+        type: string
         required: true
         default: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       depth:
         description: 'depth'
+        type: string
         required: true
       divide:
         description: 'Run also divide'
+        type: boolean
         required: false
         default: false
-        type: boolean
 
 env:
-    DOTNET_VERSION: 10.0.x
+    DOTNET_VERSION: 11.0.x
     DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
 jobs:
