@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test.Model;
@@ -714,34 +715,41 @@ public class TranspositionTableTests
 
         var tt = new TranspositionTable();
 
-        Assert.AreNotEqual(0, (int)tt.Length % Configuration.EngineSettings.Threads, "We want to test the edge case where the last thread clears more items than the rest");
-
-        for (int index = 0; index < (int)tt.Length; ++index)
+        try
         {
-            for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
+            Assert.AreNotEqual(0, (int)tt.Length % Configuration.EngineSettings.Threads, "We want to test the edge case where the last thread clears more items than the rest");
+
+            for (int index = 0; index < (int)tt.Length; ++index)
             {
-                var ttEntry = tt.Get(index, entryIndex);
-                ttEntry->Update(1, 2, 3, 4, NodeType.Exact, 5, 6, 7);
+                for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
+                {
+                    var ttEntry = tt.Get(index, entryIndex);
+                    ttEntry->Update(1, 2, 3, 4, NodeType.Exact, 5, 6, 7);
+                }
+            }
+
+            tt.Clear();
+
+            for (int index = 0; index < (int)tt.Length; ++index)
+            {
+                for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
+                {
+                    var ttEntry = tt.Get(index, entryIndex);
+
+                    Assert.AreEqual(0, ttEntry->Age);
+                    Assert.AreEqual(0, ttEntry->Score);
+                    Assert.AreEqual(0, ttEntry->StaticEval);
+                    Assert.AreEqual(0, ttEntry->Depth);
+                    Assert.AreEqual(NodeType.Unknown, ttEntry->Type);
+                    Assert.AreEqual(false, ttEntry->WasPv);
+                    Assert.AreEqual(0, ttEntry->Move);
+                    Assert.AreEqual(0, ttEntry->Key);
+                }
             }
         }
-
-        tt.Clear();
-
-        for (int index = 0; index < (int)tt.Length; ++index)
+        finally
         {
-            for (int entryIndex = 0; entryIndex < Constants.TranspositionTableEntriesPerBucket; ++entryIndex)
-            {
-                var ttEntry = tt.Get(index, entryIndex);
-
-                Assert.AreEqual(0, ttEntry->Age);
-                Assert.AreEqual(0, ttEntry->Score);
-                Assert.AreEqual(0, ttEntry->StaticEval);
-                Assert.AreEqual(0, ttEntry->Depth);
-                Assert.AreEqual(NodeType.Unknown, ttEntry->Type);
-                Assert.AreEqual(false, ttEntry->WasPv);
-                Assert.AreEqual(0, ttEntry->Move);
-                Assert.AreEqual(0, ttEntry->Key);
-            }
+            tt.Release();
         }
     }
 
@@ -756,6 +764,49 @@ public class TranspositionTableTests
         Configuration.EngineSettings.TranspositionTableSize = 1;
         var tt = new TranspositionTable();
 
-        Assert.GreaterOrEqual(tt.Length, 1000);
+        try
+        {
+            Assert.GreaterOrEqual(tt.Length, 1000);
+        }
+        finally
+        {
+            tt.Release();
+        }
+    }
+
+    [Test]
+    public void CalculateTTIndex()
+    {
+        if (!Bmi2.X64.IsSupported)
+        {
+            return;
+        }
+
+        var positions = new List<string>
+        {
+            Constants.InitialPositionFEN,
+            Constants.TrickyTestPositionFEN,
+            Constants.TrickyTestPositionReversedFEN,
+            Constants.ComplexPositionFEN,
+            Constants.KillerTestPositionFEN,
+            Constants.CmkTestPositionFEN,
+        };
+
+        var tt = new TranspositionTable();
+        try
+        {
+            foreach (var fen in positions)
+            {
+                var position = new Position(fen);
+
+                Assert.AreEqual(
+                    (ulong)(((UInt128)position.UniqueIdentifier * (UInt128)tt.Length) >> 64),
+                    Bmi2.X64.MultiplyNoFlags(position.UniqueIdentifier, tt.Length));
+            }
+        }
+        finally
+        {
+            tt.Release();
+        }
     }
 }

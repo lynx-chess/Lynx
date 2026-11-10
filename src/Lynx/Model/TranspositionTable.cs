@@ -287,7 +287,7 @@ public unsafe readonly struct TranspositionTable
 
         return Bmi2.X64.IsSupported
             ? Bmi2.X64.MultiplyNoFlags(key, Length)
-            : (ulong)(((UInt128)key * (UInt128)Length) >> 64);
+            : (ulong)(((UInt128)key * (UInt128)Length) >> 64);  // TODO Math.BigMul
     }
 
 #pragma warning disable S4144 // Methods should not have identical implementations
