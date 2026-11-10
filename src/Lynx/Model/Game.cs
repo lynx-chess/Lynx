@@ -2,6 +2,7 @@
 using NLog;
 using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
@@ -280,6 +281,50 @@ public sealed class Game : IDisposable
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
+
+    /// <summary>
+    /// Algorithm that detects cycles one ply before they appear in the search of a game tree
+    /// Based on https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
+    /// Implementation inspired by Stockfish, Stormphrax and Viridithas
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasUpcomingRepetition()
+    {
+        var end = Math.Min(HalfMovesWithoutCaptureOrPawnMove, _positionHashHistoryPointer - 1 - _lastNullMoveHashHistoryPointer);
+
+        if (end < 3)
+        {
+            return false;
+        }
+
+        var occupancy = CurrentPosition.OccupancyBitboards[(int)Side.Both];
+
+        ref var current = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_positionHashHistory), _positionHashHistoryPointer - 1);
+
+        var originalKey = current;
+        var sideHash = ZobristTable.SideHash();
+
+        var other = originalKey ^ Unsafe.Subtract(ref current, 1) ^ sideHash;
+
+        for (int d = 3; d <= end; d += 2)
+        {
+            var previous = Unsafe.Subtract(ref current, d);
+
+            other ^= Unsafe.Subtract(ref current, d - 1) ^ previous ^ sideHash;
+            if (other != 0)
+            {
+                continue;
+            }
+
+            if (Cuckoo.TryGetMove(originalKey ^ previous, out var from, out var to)
+                && (occupancy & Attacks.RaysBetween[from][to]).Empty())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong PreviousPositionHash(int nPliesAgo)

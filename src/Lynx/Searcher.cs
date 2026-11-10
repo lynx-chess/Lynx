@@ -1028,6 +1028,7 @@ public sealed class Searcher : IDisposable
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();
         _ = MoveExtensions.UCIString(0);
+        _ = Cuckoo.Count;
     }
 
     private static void ForceGCCollection()

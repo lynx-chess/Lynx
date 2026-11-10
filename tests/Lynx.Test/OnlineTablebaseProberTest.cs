@@ -32,7 +32,7 @@ public class OnlineTablebaseProberTest
     public void EvaluationSearch_CursedWin(string fen, int distanceToMate, string bestMove)
     {
         var result = OnlineTablebaseProber.EvaluationSearch(new Position(fen), 0, default);
-        Assert.AreEqual(0, result);
+        Assert.AreEqual(DrawScore, result);
     }
 
     [TestCase("1N6/8/p7/8/4k3/8/K3N3/8 b - - 1 1", -114, "e4d3")]   // 114 moves to mate
@@ -50,7 +50,7 @@ public class OnlineTablebaseProberTest
     public void EvaluationSearch_BlessedLoss(string fen, int distanceToMate, string bestMove)
     {
         var result = OnlineTablebaseProber.EvaluationSearch(new Position(fen), 0, default);
-        Assert.AreEqual(0, result);
+        Assert.AreEqual(DrawScore, result);
     }
 
     [TestCase("7k/5Q2/3K4/8/8/8/8/8 b - - 0 1")]
@@ -67,7 +67,7 @@ public class OnlineTablebaseProberTest
     public void EvaluationSearch_Stalemate(string fen)
     {
         var result = OnlineTablebaseProber.EvaluationSearch(new Position(fen), 0, default);
-        Assert.AreEqual(0, result);
+        Assert.AreEqual(DrawScore, result);
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.AreEqual(0, result);
+        Assert.AreEqual(DrawScore, result);
     }
 
     [TestCase("8/8/8/8/8/2B3K1/8/6k1 b - - 1 1", 0)]   // B
@@ -135,7 +135,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.AreEqual(0, result);
+        Assert.AreEqual(DrawScore, result);
     }
 
     [TestCase("8/1q6/8/8/8/6K1/1RR5/6k1 b - - 1 1", 0, "b7g7")]
@@ -152,7 +152,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.AreEqual(0, result);
+        Assert.AreEqual(DrawScore, result);
     }
 
     [TestCase("8/4P3/8/8/8/2K1P3/k3p3/8 b - - 1 1", 14, "e2e1q")]   // Win or lose
