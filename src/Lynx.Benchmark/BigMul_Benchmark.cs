@@ -1,41 +1,85 @@
 ﻿/*
  * 
  * 
- *  ; Lynx.Benchmark.BigMul_Benchmark.BigMul() and Lynx.Benchmark.BigMul_Benchmark.Manual()
- *         push      rbx
- *         sub       rsp,10
+ *  ## .NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v4 (Job: DefaultJob)
+ *  
+ *  ```assembly
+ *  ; Lynx.Benchmark.BigMul_Benchmark.Manual()
+ *         push      rax
  *         xor       eax,eax
- *         mov       [rsp+8],rax
- *         xor       eax,eax
+ *         mov       [rsp],rax
  *         mov       r8,[rcx+8]
  *         mov       r10d,[r8+8]
  *         test      r10d,r10d
- *         jle       short M00_L01
+ *         jle       short 0000000000007565
+ *         mov       rcx,[rcx+10]
  *         add       r8,10
- *         nop
+ *         jmp       short 0000000000007544
+ *         xchg      ax,ax
  *  M00_L00:
+ *         mov       [rsp],rax
+ *  M00_L01:
  *         mov       rdx,[r8]
- *         mov       r9,[rcx+10]
- *         lea       r11,[rsp+8]
- *         mulx      rdx,rbx,r9
- *         mov       [r11],rbx
+ *         mov       r9,rcx
+ *         mov       rax,rdx
+ *         mul       r9
+ *         mov       rax,rdx
+ *         xor       rax,[rsp]
+ *         add       r8,8
+ *         dec       r10d
+ *         jne       short 0000000000007540
+ *  M00_L02:
+ *         add       rsp,8
+ *         ret
+ *  M00_L03:
+ *         mov       rax,[rsp]
+ *         jmp       short 0000000000007560
+ *  ; Total bytes of code 75
+ *  ```
+ *  
+ *  ## .NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v4 (Job: DefaultJob)
+ *  
+ *  ```assembly
+ *  ; Lynx.Benchmark.BigMul_Benchmark.BigMul()
+ *         push      rax
+ *         xor       eax,eax
+ *         mov       [rsp],rax
+ *         mov       r8,[rcx+8]
+ *         mov       r10d,[r8+8]
+ *         test      r10d,r10d
+ *         jle       short 0000000000007E5F
+ *         mov       rcx,[rcx+10]
+ *         add       r8,10
+ *         jmp       short 0000000000007E44
+ *         xchg      ax,ax
+ *  M00_L00:
+ *         mov       [rsp],rax
+ *  M00_L01:
+ *         mov       rax,rcx
+ *         mul       qword ptr [r8]
+ *         mov       rax,[rsp]
  *         xor       rax,rdx
  *         add       r8,8
  *         dec       r10d
- *         jne       short M00_L00
- *  M00_L01:
- *         add       rsp,10
- *         pop       rbx
+ *         jne       short 0000000000007E40
+ *  M00_L02:
+ *         add       rsp,8
  *         ret
- *  ; Total bytes of code 70
+ *  M00_L03:
+ *         mov       rax,[rsp]
+ *         jmp       short 0000000000007E5A
+ *  ; Total bytes of code 69
+ *  ```
  *  
+ *  ## .NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v4 (Job: DefaultJob)
  *  
- *   ; Lynx.Benchmark.BigMul_Benchmark.Intrinsics()
+ *  ```assembly
+ *  ; Lynx.Benchmark.BigMul_Benchmark.Intrinsics()
  *         xor       eax,eax
  *         mov       r8,[rcx+8]
  *         mov       r10d,[r8+8]
  *         test      r10d,r10d
- *         jle       short M00_L01
+ *         jle       short 0000000000007F34
  *         mov       rcx,[rcx+10]
  *         add       r8,10
  *         nop       word ptr [rax+rax]
@@ -45,10 +89,11 @@
  *         xor       rax,rdx
  *         add       r8,8
  *         dec       r10d
- *         jne       short M00_L00
+ *         jne       short 0000000000007F20
  *  M00_L01:
  *         ret
  *  ; Total bytes of code 53
+ *  
  * 
  * 
  *  BenchmarkDotNet v0.15.8, Windows 11 (10.0.26300.9711)

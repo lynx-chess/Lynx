@@ -5,6 +5,7 @@ on:
     inputs:
       test_pattern:
         description: 'Test --filter pattern'
+        type: string
         default: '*'
         required: false
 
@@ -19,7 +20,7 @@ jobs:
       fail-fast: false
 
     env:
-      DOTNET_VERSION: 10.0.x
+      DOTNET_VERSION: 11.0.x
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
     steps:
