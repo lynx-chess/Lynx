@@ -39,6 +39,7 @@ internal ref struct MovePicker
     private readonly Bitboard _evasionTargets;
     private readonly Span<Move> _moves;
     private readonly Span<int> _moveScores;
+    private readonly ReadOnlySpan<Bitboard> _oppositeSideAttacksByPiece;
 
     private Stage _stage;
     private int _count;
@@ -50,6 +51,10 @@ internal ref struct MovePicker
 
     internal readonly Stage Stage => _stage;
 
+    /// <summary>
+    /// Quiet moves don't use <see cref="LesserAttackers"/> for ordering.
+    /// To be used when opposite side attacks aren't guaranteed to be available
+    /// </summary>
     public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isInCheck, bool capturesOnly)
     {
         Debug.Assert(!(capturesOnly && isInCheck));
@@ -87,6 +92,15 @@ internal ref struct MovePicker
                 _evasionTargets = checkers | Attacks.RaysBetween[_oppositeSideKingSquare][_checkerSquare];
             }
         }
+    }
+
+    /// <summary>
+    /// Quiet moves use <see cref="LesserAttackers"/> for ordering
+    /// </summary>
+    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, ReadOnlySpan<Bitboard> oppositeSideAttacksByPiece, int ply, Span<Move> moves, Span<int> moveScores, bool isInCheck)
+        : this(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck, capturesOnly: false)
+    {
+        _oppositeSideAttacksByPiece = oppositeSideAttacksByPiece;
     }
 
     public bool TryGetNext(out Move move, out int score)
@@ -250,9 +264,13 @@ internal ref struct MovePicker
                             _moves[_count++] = quietMove;
                         }
 
+                        LesserAttackers lesserAttackers = _oppositeSideAttacksByPiece.IsEmpty
+                            ? default
+                            : new LesserAttackers(_oppositeSideAttacksByPiece);
+
                         for (int i = 0; i < _count; ++i)
                         {
-                            _moveScores[i] = _engine.ScoreQuietMove(_moves[i], _ply, _oppositeSideAttacks);
+                            _moveScores[i] = _engine.ScoreQuietMove(_moves[i], _ply, _oppositeSideAttacks, in lesserAttackers);
                         }
 
                         break;

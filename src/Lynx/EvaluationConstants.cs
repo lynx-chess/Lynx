@@ -216,6 +216,21 @@ public static class EvaluationConstants
     /// </summary>
     public const int BaseMoveScore = int.MinValue / 2;
 
+    /// <summary>
+    /// Ordering malus for knights and bishops attacked by pawns
+    /// </summary>
+    public const int LesserAttackerMinorScore = 4_096;
+
+    /// <summary>
+    /// Ordering malus for rooks attacked by pawns, knights or bishops
+    /// </summary>
+    public const int LesserAttackerRookScore = 7_168;
+
+    /// <summary>
+    /// Ordering malus for queens attacked by pawns, knights, bishops or rooks
+    /// </summary>
+    public const int LesserAttackerQueenScore = 14_336;
+
     #endregion
 
     public const int ContinuationHistoryPlyCount = 2;
