@@ -146,6 +146,9 @@ jobs:
 
     runs-on: ubuntu-22.04
 
+    permissions:
+      id-token: write
+
     steps:
 
     - name: Install hub tool
@@ -195,9 +198,15 @@ jobs:
       with:
         path: artifacts/
 
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
     - name: Push NuGet package to nuget.org
       if: github.event.inputs.should_push_new_nuget_version == 'true'
-      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{ secrets.NUGET_APIKEY }} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
+      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{steps.login.outputs.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
 
     - name: Push NuGet package to GitHub
       if: github.event.inputs.should_push_new_nuget_version == 'true'

@@ -480,6 +480,12 @@ public sealed partial class Engine
                 continue;
             }
 
+            var nextHalfMovesCounter = (isCapture || piece == (int)Piece.P || piece == (int)Piece.p)
+                ? 0
+                : Game.HalfMovesWithoutCaptureOrPawnMove + 1;
+
+            _tt.PrefetchTTEntry(position, nextHalfMovesCounter);
+
             int singularDepthExtensions = 0;
 
             // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
@@ -592,12 +598,6 @@ public sealed partial class Engine
             }
             else
             {
-                var nextHalfMovesCounter = (isCapture || piece == (int)Piece.P || piece == (int)Piece.p)
-                    ? 0
-                    : Game.HalfMovesWithoutCaptureOrPawnMove + 1;
-
-                _tt.PrefetchTTEntry(position, nextHalfMovesCounter);
-
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 
                 var newDepth = depth + depthExtension - 1 + singularDepthExtensions;

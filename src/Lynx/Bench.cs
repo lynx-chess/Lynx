@@ -159,6 +159,8 @@ public partial class Engine
             AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
+            _tt.BumpAge();
+
             var goCommand = new GoCommand($"go depth {depth}");
             var result = BestMove(goCommand);
 

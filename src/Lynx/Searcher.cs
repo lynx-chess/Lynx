@@ -170,6 +170,9 @@ public sealed class Searcher : IDisposable
 
         BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder);
 
+        // Originally before the search (instead of after) to prevent empty entries from competing in age vs depth 0 ones, altough that reason no longer applies
+        _tt.BumpAge();
+
         if (_searchThreadsCount == 1)
         {
             SingleThreadedSearch(goCommand);
@@ -798,6 +801,8 @@ public sealed class Searcher : IDisposable
             var startposFEN = GenerateDatagenStartpos(rnd, sourceFEN, randomMovesCount);
 
             engine.AdjustPosition($"position fen {startposFEN}");
+            _tt.BumpAge();
+
             var searchResult = engine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
             if (searchResult is null || Math.Abs(searchResult.Score) > maxAllowedEval)

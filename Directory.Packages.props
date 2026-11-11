@@ -15,7 +15,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.403" />
     <PackageVersion Include="NLog" Version="6.2.2" />
-    <PackageVersion Include="NLog.Extensions.Logging" Version="6.2.1" />
+    <PackageVersion Include="NLog.Extensions.Logging" Version="6.2.2" />
     <PackageVersion Include="Macross.Json.Extensions" Version="3.0.0" />
   </ItemGroup>
   <!-- Analyzers -->
@@ -36,13 +36,13 @@
     <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.5" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <PackageVersion Include="NUnit" Version="5.0.0" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
   </ItemGroup>
   <!-- Benchmarks -->
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="$(BenchmarkDotnetVersion)" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="$(BenchmarkDotnetVersion)" />
-    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.12.37802.2" />
+    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.13.37903.2" />
   </ItemGroup>
   <ItemGroup>
     <PackageVersion Update="Meziantou.Analyzer" Version="3.0.320" />
