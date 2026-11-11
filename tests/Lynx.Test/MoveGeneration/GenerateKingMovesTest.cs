@@ -58,7 +58,7 @@ public class GenerateKingMovesTest
     public void KingMoves_White()
     {
         var position = new Position("8/8/6k1/8/8/2N5/nKr5/bb6 w - - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingMoves(position);
 
@@ -112,7 +112,7 @@ public class GenerateKingMovesTest
     public void KingMoves_Black()
     {
         var position = new Position("8/6nQ/6k1/5PB1/8/8/8/K7 b - - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingMoves(position);
 
@@ -166,7 +166,7 @@ public class GenerateKingMovesTest
     public void KingMoves_CapturesOnly_White()
     {
         var position = new Position("8/8/6k1/8/8/2N5/nKr5/bb6 w - - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingCaptures(position);
 
@@ -208,7 +208,7 @@ public class GenerateKingMovesTest
     public void KingMoves_CapturesOnly_Black()
     {
         var position = new Position("8/6nQ/6k1/5PB1/8/8/8/K7 b - - 0 1");
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingCaptures(position);
 

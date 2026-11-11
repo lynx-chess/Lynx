@@ -135,8 +135,8 @@ public class MasksTest
     [TestCase(BoardSquare.h8)]
     public void DarkSquareMask(BoardSquare square)
     {
-        Assert.True(Masks.DarkSquaresMask.GetBit(square));
-        Assert.False(Masks.LightSquaresMask.GetBit(square));
+        Assert.True(Masks.DarkSquaresMask.GetBit((int)square));
+        Assert.False(Masks.LightSquaresMask.GetBit((int)square));
     }
 
     [TestCase(BoardSquare.a2)]
@@ -156,8 +156,8 @@ public class MasksTest
     [TestCase(BoardSquare.h7)]
     public void LightSquareMask(BoardSquare square)
     {
-        Assert.True(Masks.LightSquaresMask.GetBit(square));
-        Assert.False(Masks.DarkSquaresMask.GetBit(square));
+        Assert.True(Masks.LightSquaresMask.GetBit((int)square));
+        Assert.False(Masks.DarkSquaresMask.GetBit((int)square));
     }
 
     [Test]

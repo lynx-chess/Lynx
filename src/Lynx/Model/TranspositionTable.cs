@@ -1,4 +1,3 @@
-using Hezium.Memory;
 using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -8,36 +7,56 @@ using System.Runtime.Intrinsics.X86;
 namespace Lynx.Model;
 
 /// <summary>
-/// Transposition table based on Hezium.Memory.BigArray
+/// Transposition table
+/// Every engine receives its own instance of this struct, but they all point to the same native memory block.
+/// [ age (<see cref="Alignment"/> bytes) | <see cref="Length"/> buckets (<see cref="SizeMBs"/> MB) ]
+/// Each bucket holds <see cref="Constants.TranspositionTableEntriesPerBucket"/> entries, see <see cref="TranspositionTableBucket"/>
 /// </summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly struct TranspositionTable
+public unsafe readonly struct TranspositionTable
 {
+    private const nuint Alignment = 64;
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly BigArray<TranspositionTableElement> _tt = [];
+    private readonly byte* _nativeMemoryPointer;
+
+    private readonly TranspositionTableBucket* _buckets;
+
+    private readonly int* _age;
 
     public int RequestedSizeMBs { get; }
 
     public int SizeMBs { get; }
 
-    public ulong Length => (ulong)_tt.Length;
+    /// <summary>
+    /// Number of buckets
+    /// </summary>
+    public nuint Length { get; }
 
     public TranspositionTable()
     {
+        Debug.Assert(Constants.TranspositionTableEntriesPerBucket * sizeof(TranspositionTableElement) <= Constants.TranspositionTableBucketSize);
+        Debug.Assert(Alignment % Constants.TranspositionTableBucketSize == 0);
+
         _logger.Debug("Allocating TT");
         var sw = Stopwatch.StartNew();
 
         RequestedSizeMBs = Configuration.EngineSettings.TranspositionTableSize;
         SizeMBs = RequestedSizeMBs;
         var ttLength = CalculateLength(SizeMBs);
+        var totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableBucket);
 
         bool exceptionThrown = false;
-        while (SizeMBs > Constants.AbsoluteMinTTSize)
+        do
         {
             try
             {
-                _tt = GC.AllocateBigArray<TranspositionTableElement>((nint)ttLength, pinned: true);
+                _nativeMemoryPointer = (byte*)NativeMemory.AlignedAlloc(Alignment + totalSizeBytes, Alignment);
+                _age = (int*)_nativeMemoryPointer;
+                _buckets = (TranspositionTableBucket*)(_nativeMemoryPointer + Alignment);
+
+                *_age = 0;
                 break;
             }
             catch (OutOfMemoryException e)
@@ -47,8 +66,11 @@ public readonly struct TranspositionTable
 
                 SizeMBs /= 2;
                 ttLength = CalculateLength(SizeMBs);
+                totalSizeBytes = ttLength * (nuint)sizeof(TranspositionTableBucket);
             }
-        }
+        } while (SizeMBs > Constants.AbsoluteMinTTSize);
+
+        Length = ttLength;
 
         if (exceptionThrown)
         {
@@ -70,23 +92,28 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result)
     {
-        ref readonly var entry = ref GetTTEntryReadonly(position, halfMovesWithoutCaptureOrPawnMove);
+        TranspositionTableElement* bucket = GetBucket(position, halfMovesWithoutCaptureOrPawnMove);
 
         var key = GenerateTTKey(position.UniqueIdentifier);
 
-        if (key != entry.Key)
+        for (int i = 0; i < Constants.TranspositionTableEntriesPerBucket; ++i)
         {
-            result = default;
-            return false;
+            TranspositionTableElement* entry = bucket + i;
+
+            if (key == entry->Key)
+            {
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                var recalculatedScore = RecalculateMateScores(entry->Score, ply);
+
+                result = new TTProbeResult(recalculatedScore, entry->Move, entry->Type, entry->StaticEval, entry->Depth, entry->WasPv);
+
+                return true;
+            }
         }
 
-        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
-
-        result = new TTProbeResult(recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
-
-        return true;
+        result = default;
+        return false;
     }
 
     /// <summary>
@@ -106,19 +133,23 @@ public readonly struct TranspositionTable
     {
         Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overridden");
 
-        ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
+        TranspositionTableElement* bucket = GetBucket(position, halfMovesWithoutCaptureOrPawnMove);
 
         var newKey = GenerateTTKey(position.UniqueIdentifier);
+        var age = *_age;
+
+        TranspositionTableElement* entry = SelectEntry(bucket, newKey, age);
 
         var wasPvInt = wasPv ? 1 : 0;
 
         bool shouldReplace =
-            entry.Key != newKey                 // Different key: collision or no actual entry
+            entry->Key != newKey                // Different key: collision or no actual entry, entry is the least valuable one in the bucket
             || nodeType == NodeType.Exact       // Entering PV data
+            || entry->Age != age                // Entry from a previous search
             || depth                            // Higher depth
                     + Configuration.EngineSettings.TTReplacement_DepthOffset
                     + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt)
-                >= entry.Depth;
+                >= entry->Depth;
 
         if (!shouldReplace)
         {
@@ -129,7 +160,7 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+        entry->Update(newKey, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move, age);
     }
 
     /// <summary>
@@ -142,11 +173,65 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SaveStaticEval(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, bool wasPv)
     {
-        ref var entry = ref GetTTEntry(position, halfMovesWithoutCaptureOrPawnMove);
+        TranspositionTableElement* bucket = GetBucket(position, halfMovesWithoutCaptureOrPawnMove);
+
+        var key = GenerateTTKey(position.UniqueIdentifier);
+        var age = *_age;
+
+        TranspositionTableElement* entry = SelectEntry(bucket, key, age);
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
-        entry.Update(GenerateTTKey(position.UniqueIdentifier), EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null);
+        entry->Update(key, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, age);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static TranspositionTableElement* SelectEntry(TranspositionTableElement* bucket, ushort key, int age)
+    {
+        TranspositionTableElement* selectedEntry = bucket;
+        int minValue = int.MaxValue;
+
+        for (int i = 0; i < Constants.TranspositionTableEntriesPerBucket; ++i)
+        {
+            TranspositionTableElement* candidate = bucket + i;
+
+            // Same position or empty entry
+            // In empty entries, some FP: positions with Key == 0 and only static eval saved. Hopefully rare enough?
+            if (candidate->Key == key
+                || (candidate->Key == 0 && candidate->Type == NodeType.Unknown))
+            {
+                return candidate;
+            }
+
+            // Equivalent of:
+            // relativeAge = age - candidate->Age;
+            // if (relativeAge < 0) relativeAge += MaxAge
+            // No need to worry about negative numbers as long as TranspositionTableElement.MaxAge is a power of two 
+            var relativeAge = (age - candidate->Age) & TranspositionTableElement.AgeMask;
+
+            // Formula from Stormphrax
+            var value = candidate->Depth - (2 * relativeAge);
+
+            if (value < minValue)
+            {
+                minValue = value;
+                selectedEntry = candidate;
+            }
+        }
+
+        return selectedEntry;
+    }
+
+    public int Age
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => *_age;
+    }
+
+    /// <summary>
+    /// Maakes <see cref="Age"/> a circular buffer [0, <see cref="TranspositionTableElement.MaxAge"/> - 1]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void BumpAge() => *_age = (*_age + 1) & TranspositionTableElement.AgeMask;
 
     /// <summary>
     /// Multithreaded clearing of the transposition table
@@ -158,21 +243,25 @@ public readonly struct TranspositionTable
         _logger.Debug("Zeroing TT using {ThreadCount} thread(s)", threadCount);
         var sw = Stopwatch.StartNew();
 
-        var tt = _tt;
-        var ttLength = tt.Length;
-        var sizePerThread = ttLength / threadCount;
+        var tt = _buckets;
+        var ttLength = Length;
+        var sizePerThread = ttLength / (nuint)threadCount;
 
         // Instead of just doing _tt.Clear():
         Parallel.For(0, threadCount, i =>
         {
-            var start = i * sizePerThread;
+            var start = (nuint)i * sizePerThread;
             var length = (i == threadCount - 1)
                 ? ttLength - start
                 : sizePerThread;
 
-            var span = tt.AsSpan(start, (int)length);
-            span.Clear();
+            var ttPtr = tt + start;
+            var bytesToClear = (nuint)sizeof(TranspositionTableBucket) * length;
+
+            NativeMemory.Clear(ttPtr, bytesToClear);
         });
+
+        *_age = 0;
 
         _logger.Info("TT clearing/zeroing time using {0} threads:\t{1} ms", threadCount, sw.ElapsedMilliseconds);
     }
@@ -184,16 +273,7 @@ public readonly struct TranspositionTable
         {
             var index = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
 
-            unsafe
-            {
-                // Since _tt is a pinned array
-                // This is no-op pinning as it does not influence the GC compaction
-                // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _tt)
-                {
-                    Sse.Prefetch0(ttPtr + index);
-                }
-            }
+            Sse.Prefetch0(_buckets + index);
         }
     }
 
@@ -206,30 +286,20 @@ public readonly struct TranspositionTable
         var key = positionUniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
 
         return Bmi2.X64.IsSupported
-            ? Bmi2.X64.MultiplyNoFlags(key, (ulong)_tt.Length)
-            : (ulong)(((UInt128)key * (UInt128)_tt.Length) >> 64);
+            ? Bmi2.X64.MultiplyNoFlags(key, Length)
+            : Math.BigMul(key, Length, out var _);
     }
 
 #pragma warning disable S4144 // Methods should not have identical implementations
 
     /// <summary>
-    /// Get a reference to a transposition table entry for the given position
+    /// Get a pointer to the first entry of the bucket for the given position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref TranspositionTableElement GetTTEntry(Position position, int halfMovesWithoutCaptureOrPawnMove)
+    private TranspositionTableElement* GetBucket(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return ref _tt[(nint)ttIndex];
-    }
-
-    /// <summary>
-    /// Get a readonly reference to a transposition table entry for the given position
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref readonly TranspositionTableElement GetTTEntryReadonly(Position position, int halfMovesWithoutCaptureOrPawnMove)
-    {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return ref _tt[(nint)ttIndex];
+        return (TranspositionTableElement*)&_buckets[(nint)ttIndex];
     }
 
     /// <summary>
@@ -264,46 +334,54 @@ public readonly struct TranspositionTable
 #pragma warning restore S4144 // Methods should not have identical implementations
 
     /// <summary>
-    /// Exact transposition table occupancy per mill (0-1000)
+    /// Exact transposition table occupancy per mill (0-1000), counting only current age entries
     /// </summary>
-    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / (double)_tt.Length));
+    public int HashfullPermill() => (int)(1000L * (PopulatedItemsCount() / ((double)Length * Constants.TranspositionTableEntriesPerBucket)));
 
     /// <summary>
-    /// Orders of magnitude faster than <see cref="HashfullPermill"/>
+    /// Samples only the first 1000 buckets, being orders of magnitude faster than <see cref="HashfullPermill"/>
     /// </summary>
     public readonly int HashfullPermillApprox()
     {
         int items = 0;
+        var age = *_age;
 
         for (int i = 0; i < 1_000; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = (TranspositionTableElement*)&_buckets[i];
+
+            for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                ++items;
+                if (IsCurrentAgeEntry(bucket + j, age))
+                {
+                    ++items;
+                }
             }
         }
 
         //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
-        return items;
+        return items / Constants.TranspositionTableEntriesPerBucket;
     }
 
-    internal static ulong CalculateLength(int sizeMBs)
+    private static bool IsCurrentAgeEntry(TranspositionTableElement* entry, int age)
+        => entry->Key != default && entry->Age == age;
+
+    /// <summary>
+    /// Number of buckets that fit in <paramref name="sizeMBs"/>
+    /// </summary>
+    internal static nuint CalculateLength(int sizeMBs)
     {
-        var ttEntrySize = TranspositionTableElement.Size;
+        nuint ttEntrySize = (nuint)sizeof(TranspositionTableElement);
+        nuint ttBucketSize = (nuint)sizeof(TranspositionTableBucket);
 
-        ulong sizeBytes = (ulong)sizeMBs * 1024ul * 1024ul;
-        ulong ttLength = sizeBytes / ttEntrySize;
-        var ttLengthMB = ttEntrySize * (double)ttLength / 1024 / 1024;
-
-        if (ttLength > (ulong)Array.MaxLength)
-        {
-            _logger.Info("Requested large hash size: {RequestedHashSize} GB, {TTLength} values (> {TTArraySizeGBs} GB, {ArrayMaxLength} items, what would fit in a normal array)",
-                (ttLengthMB / 1024).ToString("F2"), ttLength, ((double)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024 * 1024)).ToString("F2"), Array.MaxLength);
-        }
+        nuint sizeBytes = (nuint)sizeMBs * 1024 * 1024;
+        nuint ttLength = sizeBytes / ttBucketSize;
+        double ttLengthMB = (double)(ttLength * ttBucketSize) / (1024 * 1024);
 
         _logger.Info("Hash value:\t{0} MB", sizeMBs);
         _logger.Info("TT memory:\t{0} MB", ttLengthMB.ToString("F"));
-        _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT length:\t{0} buckets, {1} entries", ttLength, ttLength * Constants.TranspositionTableEntriesPerBucket);
+        _logger.Info("TT bucket:\t{0} bytes, {1} entries", ttBucketSize, Constants.TranspositionTableEntriesPerBucket);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
         return ttLength;
@@ -313,11 +391,18 @@ public readonly struct TranspositionTable
     private readonly ulong PopulatedItemsCount()
     {
         ulong items = 0;
-        for (int i = 0; i < _tt.Length; ++i)
+        var age = *_age;
+
+        for (nuint i = 0; i < Length; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = (TranspositionTableElement*)&_buckets[i];
+
+            for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                ++items;
+                if (IsCurrentAgeEntry(bucket + j, age))
+                {
+                    ++items;
+                }
             }
         }
 
@@ -325,35 +410,47 @@ public readonly struct TranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal ref TranspositionTableElement Get(int index) => ref _tt[index];
+    internal TranspositionTableElement* Get(int bucketIndex, int entryIndex = 0)
+    {
+        Debug.Assert((uint)entryIndex < Constants.TranspositionTableEntriesPerBucket);
+
+        return (TranspositionTableElement*)&_buckets[bucketIndex] + entryIndex;
+    }
 
     [Conditional("DEBUG")]
     private void Stats()
     {
-        ulong items = 0;
-        for (int i = 0; i < _tt.Length; ++i)
-        {
-            if (_tt[i].Key != default)
-            {
-                ++items;
-            }
-        }
         _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
-            100 * PopulatedItemsCount() / (ulong)_tt.Length,
-            (ulong)_tt.Length * (ulong)Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
+            100 * PopulatedItemsCount() / (Length * Constants.TranspositionTableEntriesPerBucket),
+            Length * (nuint)sizeof(TranspositionTableBucket) / 1024 / 1024);
     }
 
     [Conditional("DEBUG")]
     private readonly void Print()
     {
         Console.WriteLine("Transposition table content:");
-        for (int i = 0; i < _tt.Length; ++i)
+        for (nuint i = 0; i < Length; ++i)
         {
-            if (_tt[i].Key != default)
+            var bucket = (TranspositionTableElement*)&_buckets[i];
+
+            for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
-                Console.WriteLine($"{i}: Key = {_tt[i].Key}, Depth: {_tt[i].Depth}, Score: {_tt[i].Score}, Move: {(_tt[i].Move != 0 ? ((Move)_tt[i].Move).UCIString() : "-")} {_tt[i].Type}");
+                ref var entry = ref bucket[j];
+
+                if (entry.Key != default)
+                {
+                    Console.WriteLine($"{i}.{j}: Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : "-")} {entry.Type}, Age: {entry.Age}");
+                }
             }
         }
         Console.WriteLine("");
+    }
+
+    public void Release()
+    {
+        if (_nativeMemoryPointer != null)
+        {
+            NativeMemory.AlignedFree(_nativeMemoryPointer);
+        }
     }
 }

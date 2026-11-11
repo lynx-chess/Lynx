@@ -168,13 +168,12 @@ class Position_Threats_Benchmark
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             attacksByWhite |= existingAttacks;
@@ -183,13 +182,12 @@ class Position_Threats_Benchmark
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
-            var attacks = MoveGenerator._pieceAttacks[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board != 0)
             {
                 board = board.WithoutLS1B(out var square);
-                existingAttacks |= attacks(square, occupancy);
+                existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
             attacksByBlack |= existingAttacks;

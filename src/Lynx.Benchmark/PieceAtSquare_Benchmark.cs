@@ -203,7 +203,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
     {
         int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
         var oppositePawnIndex = (int)Piece.p - offset;
 
         var limit = (int)Piece.k - offset;
@@ -241,7 +241,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
             return (int)Piece.None;
         }
 
-        var offset = Utils.PieceOffset(color);
+        var offset = Utils.PieceOffset((int)color);
 
         for (int pieceIndex = offset; pieceIndex < 6 + offset; ++pieceIndex)
         {

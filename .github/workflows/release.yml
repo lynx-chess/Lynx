@@ -6,6 +6,7 @@ on:
     inputs:
       new_engine_version:
         description: 'New engine version. If empty, run number will be used and no commit/tag/release will be created'
+        type: string
         default: ''
         required: false
       should_push_new_nuget_version:
@@ -48,12 +49,12 @@ jobs:
             os: windows-latest
           - runtime-identifier: linux-x64
             os: ubuntu-latest
-          - runtime-identifier: linux-arm64
-            os: ubuntu-latest
-          - runtime-identifier: linux-arm
-            os: ubuntu-latest
           - runtime-identifier: linux-musl-x64
             os: ubuntu-latest
+          - runtime-identifier: linux-arm64
+            os: ubuntu-26.04-arm
+          - runtime-identifier: linux-arm
+            os: ubuntu-26.04-arm
           - runtime-identifier: osx-x64
             os: macOS-15-intel
           - runtime-identifier: osx-arm64
@@ -145,6 +146,9 @@ jobs:
 
     runs-on: ubuntu-22.04
 
+    permissions:
+      id-token: write
+
     steps:
 
     - name: Install hub tool
@@ -194,9 +198,15 @@ jobs:
       with:
         path: artifacts/
 
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
     - name: Push NuGet package to nuget.org
       if: github.event.inputs.should_push_new_nuget_version == 'true'
-      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{ secrets.NUGET_APIKEY }} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
+      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{steps.login.outputs.NUGET_API_KEY}} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
 
     - name: Push NuGet package to GitHub
       if: github.event.inputs.should_push_new_nuget_version == 'true'

@@ -1,11 +1,10 @@
 /*
- *
  *  BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
  *  Intel Xeon Platinum 8370C CPU 2.80GHz, 1 CPU, 4 logical and 2 physical cores
  *  .NET SDK 10.0.103
  *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v4
  *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), X64 RyuJIT x86-64-v4
- *  
+ *
  *  | Method           | position            | Mean     | Error    | StdDev   | Ratio | Allocated | Alloc Ratio |
  *  |----------------- |-------------------- |---------:|---------:|---------:|------:|----------:|------------:|
  *  | Jagged           | Lynx.Model.Position | 29.56 ns | 0.057 ns | 0.048 ns |  1.00 |         - |          NA |
@@ -26,8 +25,8 @@
  *  | FlatUnsafe       | Lynx.Model.Position | 25.78 ns | 0.019 ns | 0.017 ns |  0.87 |         - |          NA |
  *  | FlatUnsafe       | Lynx.Model.Position | 27.11 ns | 0.300 ns | 0.266 ns |  0.92 |         - |          NA |
  *  | FlatUnsafe       | Lynx.Model.Position | 27.92 ns | 0.267 ns | 0.208 ns |  0.94 |         - |          NA |
- *  
- *  
+ *
+ *
  *   BenchmarkDotNet v0.15.8, Windows 11 (10.0.26100.32370/24H2/2024Update/HudsonValley) (Hyper-V)
  *  Intel Xeon Platinum 8370C CPU 2.80GHz (Max: 2.79GHz), 1 CPU, 4 logical and 2 physical cores
  *  .NET SDK 10.0.103
@@ -82,14 +81,14 @@
  *  | FlatUnsafe       | Lynx.Model.Position | 31.21 ns | 0.154 ns | 0.144 ns |  0.62 |         - |          NA |
  *  | FlatUnsafe       | Lynx.Model.Position | 31.56 ns | 0.205 ns | 0.192 ns |  0.62 |         - |          NA |
  *  | FlatUnsafe       | Lynx.Model.Position | 31.20 ns | 0.178 ns | 0.167 ns |  0.62 |         - |          NA |
- *  
- *  
+ *
+ *
  *  BenchmarkDotNet v0.15.8, macOS Sequoia 15.7.4 (24G517) [Darwin 24.6.0]
  *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
  *  .NET SDK 10.0.103
  *    [Host]     : .NET 10.0.3 (10.0.3, 10.0.326.7603), Arm64 RyuJIT armv8.0-a
  *    DefaultJob : .NET 10.0.3 (10.0.3, 10.0.326.7603), Arm64 RyuJIT armv8.0-a
- *  
+ *
  *  | Method           | position            | Mean     | Error    | StdDev   | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |----------------- |-------------------- |---------:|---------:|---------:|---------:|------:|--------:|----------:|------------:|
  *  | Jagged           | Lynx.Model.Position | 30.20 ns | 0.623 ns | 1.258 ns | 30.08 ns |  1.00 |    0.06 |         - |          NA |
@@ -110,7 +109,7 @@
  *  | FlatUnsafe       | Lynx.Model.Position | 22.52 ns | 0.461 ns | 0.599 ns | 22.67 ns |  0.75 |    0.04 |         - |          NA |
  *  | FlatUnsafe       | Lynx.Model.Position | 22.30 ns | 0.458 ns | 0.510 ns | 22.58 ns |  0.74 |    0.03 |         - |          NA |
  *  | FlatUnsafe       | Lynx.Model.Position | 26.46 ns | 0.549 ns | 0.917 ns | 26.45 ns |  0.88 |    0.05 |         - |          NA |
- *  
+ *
  *
  */
 
@@ -123,10 +122,10 @@ namespace Lynx.Benchmark;
 
 /// <summary>
 /// Benchmarks <see cref="ZobristTable.PieceHash(int, int)"/> table layout alternatives:
-/// the original jagged <c>ulong[][]</c> vs a flat <c>ulong[]</c> with bounds-checked access
-/// vs a flat <c>ulong[]</c> with <see cref="Unsafe.Add"/> (what is currently implemented).
-/// The <c>CurrentPieceHash</c> method calls <see cref="ZobristTable.PieceHash"/> directly to
-/// confirm it matches the <c>FlatUnsafe</c> baseline.
+/// the original jagged ulong[][] vs a flat ulong[] with bounds-checked access
+/// vs a flat ulong[] with <see cref="Unsafe.Add"/> (what is currently implemented).
+/// The CurrentPieceHash method calls <see cref="ZobristTable.PieceHash"/> directly to
+/// confirm it matches the FlatUnsafe baseline.
 /// </summary>
 public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
 {
@@ -150,7 +149,7 @@ public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
     }
 
     /// <summary>
-    /// Original layout: <c>_table[square][piece]</c> — two pointer dereferences per lookup.
+    /// Original layout: _table[square][piece] - two pointer dereferences per lookup.
     /// </summary>
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -173,7 +172,7 @@ public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
     }
 
     /// <summary>
-    /// Flat layout: <c>_table[square * 12 + piece]</c> — single bounds-checked array access.
+    /// Flat layout: _table[square * 12 + piece] - single bounds-checked array access.
     /// </summary>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
@@ -196,7 +195,7 @@ public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
     }
 
     /// <summary>
-    /// Flat layout with <see cref="Unsafe.Add"/> on a pinned array — no bounds check.
+    /// Flat layout with <see cref="Unsafe.Add"/> on a pinned array - no bounds check.
     /// This is what <see cref="ZobristTable.PieceHash"/> currently uses.
     /// </summary>
     [Benchmark]

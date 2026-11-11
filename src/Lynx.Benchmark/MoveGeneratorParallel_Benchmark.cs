@@ -109,7 +109,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IOrderedEnumerable<Move> GenerateAllMoves_SingleThread(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         var moves = new List<Move>(150);
         moves.AddRange(GeneratePawnMoves(position, offset, capturesOnly));
@@ -126,7 +126,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async Task<IOrderedEnumerable<Move>> GenerateAllMoves_WhenAll(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         var taskList = new List<Task<IEnumerable<Move>>>
                 {
@@ -147,7 +147,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IOrderedEnumerable<Move> GenerateAllMoves_ParallelForEach(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         var concurrentBag = new ConcurrentBag<Move>();
         var actionList = new Func<int, Position, bool, IEnumerable<Move>>[]
@@ -200,8 +200,8 @@ file static class CustomMoveGenerator
         int sourceSquare, targetSquare;
 
         var piece = (int)Piece.P + offset;
-        var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
-        int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+        var pawnPush = Utils.PawhPushSquare((int)position.Side);
+        int oppositeSide = Utils.OppositeSide((int)position.Side);
         var bitboard = position.PieceBitboards[piece];
 
         while (bitboard != default)
@@ -250,7 +250,7 @@ file static class CustomMoveGenerator
             var attacks = LocalAttacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
             // We assume that position.OccupancyBitboards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
                 yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece);
@@ -283,7 +283,7 @@ file static class CustomMoveGenerator
     internal static IEnumerable<Move> GenerateCastlingMoves(Position position, int offset)
     {
         var piece = (int)Piece.K + offset;
-        var oppositeSide = (Side)Utils.OppositeSide(position.Side);
+        var oppositeSide = (Side)Utils.OppositeSide((int)position.Side);
 
         int sourceSquare = position.PieceBitboards[piece].GetLS1BIndex(); // There's for sure only one
 
@@ -293,8 +293,8 @@ file static class CustomMoveGenerator
             if (position.Side == Side.White)
             {
                 if (((position.Castle & (int)CastlingRights.WK) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f1)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.f1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.g1)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
@@ -303,9 +303,9 @@ file static class CustomMoveGenerator
                 }
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d1)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c1)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.d1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.c1)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.b1)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
@@ -316,8 +316,8 @@ file static class CustomMoveGenerator
             else
             {
                 if (((position.Castle & (int)CastlingRights.BK) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.f8)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.g8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.f8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.g8)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
@@ -326,9 +326,9 @@ file static class CustomMoveGenerator
                 }
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.d8)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.c8)
-                    && !position.OccupancyBitboards[(int)Side.Both].GetBit(BoardSquare.b8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.d8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.c8)
+                    && !position.OccupancyBitboards[(int)Side.Both].GetBit((int)BoardSquare.b8)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                     && !LocalAttacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
@@ -373,7 +373,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IEnumerable<Move> GenerateKingMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMoves((int)Piece.K + offset, position, capturesOnly);
     }
@@ -381,7 +381,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IEnumerable<Move> GenerateKnightMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMoves((int)Piece.N + offset, position, capturesOnly);
     }
@@ -389,7 +389,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IEnumerable<Move> GenerateBishopMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMoves((int)Piece.B + offset, position, capturesOnly);
     }
@@ -397,7 +397,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IEnumerable<Move> GenerateRookMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly);
     }
@@ -405,7 +405,7 @@ file static class CustomMoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IEnumerable<Move> GenerateQueenMoves(Position position, bool capturesOnly = false)
     {
-        var offset = Utils.PieceOffset(position.Side);
+        var offset = Utils.PieceOffset((int)position.Side);
 
         return GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly);
     }
