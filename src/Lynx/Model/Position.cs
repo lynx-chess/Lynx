@@ -720,7 +720,7 @@ public partial class Position : IDisposable
         return gameState;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
         var oppositeSide = (int)_side;
@@ -1033,7 +1033,7 @@ public partial class Position : IDisposable
         return false;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public bool IsInCheck()
     {
         var oppositeSideInt = Utils.OppositeSide((int)_side);
