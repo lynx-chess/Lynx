@@ -52,7 +52,7 @@ public static class MoveGenerator
         return movePool[..localIndex];
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Move GenerateFullTTMove(ShortMove ttMove, Position position, Bitboard oppositeSideAttacks)
     {
         if (ttMove == 0)
@@ -210,7 +210,7 @@ public static class MoveGenerator
     /// Generates all pseudo-legal quiet moves from <paramref name="position"/>, castling included.
     /// Complements <see cref="GenerateAllCaptures(Position, Span{int}, Bitboard)"/>.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Span<Move> GenerateAllQuiets(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks)
     {
         Debug.Assert(position.Side != Side.Both);
@@ -234,7 +234,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>.
     /// Complements <see cref="GenerateAllQuiets(Position, Span{int}, ulong)"/>.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
     {
         Debug.Assert(position.Side != Side.Both);
@@ -682,7 +682,7 @@ public static class MoveGenerator
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static bool CanGenerateAtLeastAValidMove(Position position, Bitboard oppositeSideAttacks = 0)
     {
         Debug.Assert(position.Side != Side.Both);
@@ -937,7 +937,7 @@ public static class MoveGenerator
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     internal static bool IsValidMove(Position position, Move move)
     {
         var gameState = position.MakeMove(move);
@@ -948,7 +948,7 @@ public static class MoveGenerator
         return result;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static bool IsPseudoLegal(Position position, Move move, Bitboard oppositeSideAttacks)
     {
         var side = (int)position.Side;

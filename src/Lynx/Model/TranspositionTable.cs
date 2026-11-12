@@ -89,7 +89,7 @@ public unsafe readonly struct TranspositionTable
     /// <param name="ply">Current ply (distance from root)</param>
     /// <param name="result">The probe result if found</param>
     /// <returns>True if a valid entry was found, false otherwise</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public bool ProbeHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int ply, out TTProbeResult result)
     {
         TranspositionTableElement* bucket = GetBucket(position, halfMovesWithoutCaptureOrPawnMove);
@@ -128,7 +128,7 @@ public unsafe readonly struct TranspositionTable
     /// <param name="nodeType">Type of node (Alpha, Beta, Exact)</param>
     /// <param name="wasPv">Whether this position was part of the principal variation</param>
     /// <param name="move">Best move found (null for fail-low nodes)</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
         Debug.Assert(nodeType != NodeType.Alpha || move is null, "Assertion failed", "There's no 'best move' on fail-lows, so TT one won't be overridden");

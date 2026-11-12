@@ -174,7 +174,7 @@ public sealed partial class Engine
     /// <summary>
     /// Quiet history, continuation history, killers and counter moves
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
     {
         var piece = move.Piece();
@@ -265,7 +265,7 @@ public sealed partial class Engine
     /// <summary>
     /// Capture history
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
         var rawHistoryBonus = HistoryBonus[depth];
