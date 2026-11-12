@@ -279,13 +279,17 @@ public class MovePickerTest : BaseTest
 
         for (int moveIndex = 0; moveIndex < moves.Length; ++moveIndex)
         {
+            var bestIndex = moveIndex;
+
             for (int j = moveIndex + 1; j < moves.Length; j++)
             {
-                if (scores[j] > scores[moveIndex])
+                if (scores[j] > scores[bestIndex])
                 {
-                    (scores[moveIndex], scores[j], moves[moveIndex], moves[j]) = (scores[j], scores[moveIndex], moves[j], moves[moveIndex]);
+                    bestIndex = j;
                 }
             }
+
+            (scores[moveIndex], scores[bestIndex], moves[moveIndex], moves[bestIndex]) = (scores[bestIndex], scores[moveIndex], moves[bestIndex], moves[moveIndex]);
 
             result.Add((moves[moveIndex], scores[moveIndex]));
         }
