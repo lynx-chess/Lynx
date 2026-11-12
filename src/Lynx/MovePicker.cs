@@ -338,24 +338,38 @@ internal ref struct MovePicker
         ref var movesRef = ref MemoryMarshal.GetReference(_moves);
         ref var scoresRef = ref MemoryMarshal.GetReference(_moveScores);
 
-        while (_index < _count)
+        var count = _count;
+
+        while (_index < count)
         {
             var moveIndex = _index;
 
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
-            for (int j = moveIndex + 1; j < _count; j++)
+            var bestIndex = moveIndex;
+            var bestScore = Unsafe.Add(ref scoresRef, moveIndex);
+
+            for (int j = moveIndex + 1; j < count; j++)
+            {
+                var scoreJ = Unsafe.Add(ref scoresRef, j);
+
+                if (scoreJ > bestScore)
+                {
+                    bestScore = scoreJ;
+                    bestIndex = j;
+                }
+            }
+
+            // Swap only once, at the end: perf improvement over original implementation
+            if (bestIndex != moveIndex)
             {
                 ref var moveI = ref Unsafe.Add(ref movesRef, moveIndex);
-                ref var moveJ = ref Unsafe.Add(ref movesRef, j);
+                ref var moveJ = ref Unsafe.Add(ref movesRef, bestIndex);
                 ref var scoreI = ref Unsafe.Add(ref scoresRef, moveIndex);
-                ref var scoreJ = ref Unsafe.Add(ref scoresRef, j);
+                ref var scoreB = ref Unsafe.Add(ref scoresRef, bestIndex);
 
-                if (scoreJ > scoreI)
-                {
-                    (scoreI, scoreJ, moveI, moveJ) = (scoreJ, scoreI, moveJ, moveI);
-                }
+                (scoreI, scoreB, moveI, moveJ) = (scoreB, scoreI, moveJ, moveI);
             }
 
             // We save this move for the next stage where .TrySelectNext() is used (bad captures), which will continue from this _index
