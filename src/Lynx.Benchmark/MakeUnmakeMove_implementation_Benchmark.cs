@@ -145,7 +145,7 @@ using System.Runtime.CompilerServices;
 namespace Lynx.Benchmark;
 public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<(string, int)> Data =>
+    public static IEnumerable<(string Fen, int Depth)> Data =>
     [
         (Constants.InitialPositionFEN, 4),
         (Constants.TrickyTestPositionFEN, 4),
