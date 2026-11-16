@@ -4,7 +4,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <PropertyGroup>
-    <MicrosoftExtensionsVersion>10.0.14</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion>11.0.0</MicrosoftExtensionsVersion>
     <BenchmarkDotnetVersion>0.15.8</BenchmarkDotnetVersion>
   </PropertyGroup>
   <ItemGroup>
