@@ -204,7 +204,7 @@ public sealed partial class Engine
         return ref _counterMoves[index];
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
     {
         var side = (ulong)position.Side;
@@ -334,7 +334,7 @@ public sealed partial class Engine
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private int CorrectStaticEvaluation(Position position, int staticEvaluation)
     {
         var side = (ulong)position.Side;

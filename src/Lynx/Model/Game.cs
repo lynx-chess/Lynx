@@ -251,6 +251,12 @@ public sealed class Game : IDisposable
             return false;
         }
 
+        return Is50MovesRepetitionOrCheckmate();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private bool Is50MovesRepetitionOrCheckmate()
+    {
         return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
     }
 
