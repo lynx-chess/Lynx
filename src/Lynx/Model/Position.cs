@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -14,6 +15,12 @@ public unsafe partial class Position : IDisposable
     /// Backs up internal arrays: <see cref="_pieceBitboards"/>, <see cref="_occupancyBitboards"/> and <see cref="_nonPawnHash"/>
     /// </summary>
     private readonly ulong[] _internalArrayStorage;
+
+    /// <summary>
+    /// Pinned storage blocks of disposed positions, reused by new ones.
+    /// Pinned allocations are slower than regular ones and only freed by gen2 GCs
+    /// </summary>
+    private static readonly ConcurrentBag<ulong[]> _storagePool = [];
 
     private const int OccupancyBitboardsOffset = PieceBitboardsLength;
     private const int NonPawnHashOffset = OccupancyBitboardsOffset + OccupancyBitboardsLength;
@@ -133,8 +140,14 @@ public unsafe partial class Position : IDisposable
 
     private Position()
     {
-        // Allocate _internalArrayStorage backing all arrays (independent copy, avoids sharing state)
-        _internalArrayStorage = GC.AllocateArray<ulong>(StorageLength, pinned: true);
+        // Rent or allocate _internalArrayStorage backing all arrays (independent copy, avoids sharing state).
+        // No need to clear a reused block: every constructor fully overwrites it (PopulateFrom or ResetTo)
+        if (!_storagePool.TryTake(out var storageArray))
+        {
+            storageArray = GC.AllocateArray<ulong>(StorageLength, pinned: true);
+        }
+
+        _internalArrayStorage = storageArray;
         var storage = (ulong*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_internalArrayStorage));
         _pieceBitboards = storage;
         _occupancyBitboards = storage + OccupancyBitboardsOffset;
@@ -1625,6 +1638,8 @@ public unsafe partial class Position : IDisposable
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares);
 
                 ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants);
+
+                _storagePool.Add(_internalArrayStorage);
 
 #if DEBUG
                 ArrayPool<int>.Shared.Return(_initialKingSquares);
