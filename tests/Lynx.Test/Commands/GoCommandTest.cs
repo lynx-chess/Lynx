@@ -1,6 +1,5 @@
 ﻿using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace Lynx.Test.Commands;
 

@@ -28,7 +28,6 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.UCI.Commands;
 using System.Text;
 
 namespace Lynx.Benchmark;
