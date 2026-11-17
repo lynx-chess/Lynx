@@ -17,10 +17,13 @@ public static unsafe class Attacks
         public Bitboard* Attacks;
     }
 
+#pragma warning disable IDE1006 // Naming Styles
     /// <summary>
-    /// [0..63] bishop, [64..127] rook
+    /// Backs up bishop and rook arrays: [0..63] bishop, [64..127] rook
     /// </summary>
+#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
     private static readonly PEXTEntry[] _PEXTEntries;
+#pragma warning restore S1450 // Private fields only used as local variables in methods should become local variables
     private static readonly PEXTEntry* _bishopPEXTEntries;
     private static readonly PEXTEntry* _rookPEXTEntries;
 
@@ -42,6 +45,7 @@ public static unsafe class Attacks
     private static readonly ulong[] _PEXTAttacks;
     private static readonly ulong[] _PEXTBishopOffset;
     private static readonly ulong[] _PEXTRookOffset;
+#pragma warning restore IDE1006 // Naming Styles
 
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
@@ -120,7 +124,7 @@ public static unsafe class Attacks
 
             for (var square2 = 0; square2 < 64; ++square2)
             {
-                if(square1 == square2)
+                if (square1 == square2)
                 {
                     continue;
                 }
