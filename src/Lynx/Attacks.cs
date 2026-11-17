@@ -1,11 +1,29 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx;
 
-public static class Attacks
+public static unsafe class Attacks
 {
+    /// <summary>
+    /// Stores both the mask and the attack for a certain piece type
+    /// </summary>
+    [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
+    private struct PEXTEntry
+    {
+        public Bitboard Mask;
+        public Bitboard* Attacks;
+    }
+
+    /// <summary>
+    /// [0..63] bishop, [64..127] rook
+    /// </summary>
+    private static readonly PEXTEntry[] _PEXTEntries;
+    private static readonly PEXTEntry* _bishopPEXTEntries;
+    private static readonly PEXTEntry* _rookPEXTEntries;
+
     private static readonly Bitboard[] _bishopOccupancyMasks;
     private static readonly Bitboard[] _rookOccupancyMasks;
 
@@ -21,9 +39,9 @@ public static class Attacks
     /// </summary>
     private static readonly Bitboard[][] _rookAttacks;
 
-    private static readonly ulong[] _pextAttacks;
-    private static readonly ulong[] _pextBishopOffset;
-    private static readonly ulong[] _pextRookOffset;
+    private static readonly ulong[] _PEXTAttacks;
+    private static readonly ulong[] _PEXTBishopOffset;
+    private static readonly ulong[] _PEXTRookOffset;
 
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
@@ -67,17 +85,31 @@ public static class Attacks
 
         if (Bmi2.X64.IsSupported)
         {
-            _pextAttacks = GC.AllocateArray<Bitboard>(5248 + 102400, pinned: true);
-            _pextBishopOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
-            _pextRookOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
+            _PEXTAttacks = GC.AllocateArray<Bitboard>(5248 + 102400, pinned: true);
+            _PEXTBishopOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
+            _PEXTRookOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
 
-            InitializeBishopAndRookPextAttacks();
+            InitializeBishopAndRookPEXTAttacks();
+
+            _PEXTEntries = GC.AllocateArray<PEXTEntry>(128, pinned: true);
+            _bishopPEXTEntries = (PEXTEntry*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_PEXTEntries));
+            _rookPEXTEntries = _bishopPEXTEntries + 64;
+
+            var PEXTAttacks = (Bitboard*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_PEXTAttacks));
+            for (int square = 0; square < 64; ++square)
+            {
+                _bishopPEXTEntries[square] = new PEXTEntry { Mask = _bishopOccupancyMasks[square], Attacks = PEXTAttacks + _PEXTBishopOffset[square] };
+                _rookPEXTEntries[square] = new PEXTEntry { Mask = _rookOccupancyMasks[square], Attacks = PEXTAttacks + _PEXTRookOffset[square] };
+            }
         }
         else
         {
-            _pextAttacks = [];
-            _pextBishopOffset = [];
-            _pextRookOffset = [];
+            _PEXTAttacks = [];
+            _PEXTBishopOffset = [];
+            _PEXTRookOffset = [];
+            _PEXTEntries = [];
+            _bishopPEXTEntries = null;
+            _rookPEXTEntries = null;
         }
 
         RaysBetween = new Bitboard[64][];
@@ -116,9 +148,13 @@ public static class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard BishopAttacks(int squareIndex, Bitboard occupancy)
     {
-        return Bmi2.X64.IsSupported
-            ? _pextAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
-            : MagicNumbersBishopAttacks(squareIndex, occupancy);
+        if (Bmi2.X64.IsSupported)
+        {
+            var entry = _bishopPEXTEntries + squareIndex;
+            return entry->Attacks[Bmi2.X64.ParallelBitExtract(occupancy, entry->Mask)];
+        }
+
+        return MagicNumbersBishopAttacks(squareIndex, occupancy);
     }
 
     /// <summary>
@@ -142,9 +178,13 @@ public static class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard RookAttacks(int squareIndex, Bitboard occupancy)
     {
-        return Bmi2.IsSupported
-            ? _pextAttacks[_pextRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])]
-            : MagicNumbersRookAttacks(squareIndex, occupancy);
+        if (Bmi2.X64.IsSupported)
+        {
+            var entry = _rookPEXTEntries + squareIndex;
+            return entry->Attacks[Bmi2.X64.ParallelBitExtract(occupancy, entry->Mask)];
+        }
+
+        return MagicNumbersRookAttacks(squareIndex, occupancy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -177,17 +217,17 @@ public static class Attacks
     public static Bitboard QueenAttacks(Bitboard rookAttacks, Bitboard bishopAttacks) => rookAttacks | bishopAttacks;
 
     /// <summary>
-    /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/Pext.cs)
+    /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/PEXT.cs)
     /// Based on https://www.chessprogramming.org/BMI2#PEXT_Bitboards
     /// </summary>
-    private static void InitializeBishopAndRookPextAttacks()
+    private static void InitializeBishopAndRookPEXTAttacks()
     {
         ulong index = 0;
 
         // Bishop-Attacks
         for (int square = 0; square < 64; square++)
         {
-            _pextBishopOffset[square] = index;
+            _PEXTBishopOffset[square] = index;
             ulong bishopMask = _bishopOccupancyMasks[square];
 
             ulong patterns = 1UL << BitOperations.PopCount(bishopMask);
@@ -195,21 +235,21 @@ public static class Attacks
             for (ulong i = 0; i < patterns; i++)
             {
                 ulong occupation = Bmi2.X64.ParallelBitDeposit(i, bishopMask);
-                _pextAttacks[index++] = MagicNumbersBishopAttacks(square, occupation);
+                _PEXTAttacks[index++] = MagicNumbersBishopAttacks(square, occupation);
             }
         }
 
         // Rook-Attacks
         for (int square = 0; square < 64; square++)
         {
-            _pextRookOffset[square] = index;
+            _PEXTRookOffset[square] = index;
             ulong rookMask = _rookOccupancyMasks[square];
             ulong patterns = 1UL << BitOperations.PopCount(rookMask);
 
             for (ulong i = 0; i < patterns; i++)
             {
                 ulong occupation = Bmi2.X64.ParallelBitDeposit(i, rookMask);
-                _pextAttacks[index++] = MagicNumbersRookAttacks(square, occupation);
+                _PEXTAttacks[index++] = MagicNumbersRookAttacks(square, occupation);
             }
         }
     }
