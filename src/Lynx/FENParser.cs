@@ -18,17 +18,17 @@ public static class FENParser
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen)
+    public static ParseFENResult ParseFEN(ReadOnlySpan<char> fen, Span<Bitboard> pieceBitboards, Span<Bitboard> occupancyBitboards, Span<int> board)
     {
+        Debug.Assert(pieceBitboards.Length == Position.PieceBitboardsLength);
+        Debug.Assert(occupancyBitboards.Length == Position.OccupancyBitboardsLength);
+        Debug.Assert(board.Length == Position.BoardLength);
+
         fen = fen.Trim();
 
-        // Arrays will be be returned as part of Position cleanup
-        var pieceBitboards = ArrayPool<Bitboard>.Shared.Rent(12);
-        Array.Clear(pieceBitboards, 0, 12);
-        var occupancyBitboards = ArrayPool<Bitboard>.Shared.Rent(3);
-        Array.Clear(occupancyBitboards, 0, 3);
-        var board = ArrayPool<int>.Shared.Rent(64);
-        Array.Fill(board, (int)Piece.None);
+        pieceBitboards.Clear();
+        occupancyBitboards.Clear();
+        board.Fill((int)Piece.None);
 
         bool success;
         Side side;
@@ -85,14 +85,14 @@ public static class FENParser
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? new(pieceBitboards, occupancyBitboards, board, side, castlingRights, enPassant,
+            ? new(side, castlingRights, enPassant,
                 castlingData,
                 halfMoveClock, fullMoveCounter)
             : throw new LynxException($"Error parsing {fen}");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ParseBoard(ReadOnlySpan<char> fen, Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards, int[] board)
+    private static void ParseBoard(ReadOnlySpan<char> fen, Span<Bitboard> pieceBitboards, Span<Bitboard> occupancyBitboards, Span<int> board)
     {
         var rankIndex = 0;
         var end = fen.IndexOf('/');
@@ -120,7 +120,7 @@ public static class FENParser
         occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ParseBoardSection(Bitboard[] pieceBitboards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
+        static void ParseBoardSection(Span<Bitboard> pieceBitboards, Span<int> board, int rankIndex, ReadOnlySpan<char> boardfenSection)
         {
             int fileIndex = 0;
 
@@ -374,7 +374,7 @@ public static class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, Bitboard[] PieceBitboards, Side side)
+    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, ReadOnlySpan<Bitboard> PieceBitboards, Side side)
     {
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;

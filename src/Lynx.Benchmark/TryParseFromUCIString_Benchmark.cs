@@ -189,8 +189,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
         public TryParseFromUCIString_Benchmark_Game(ReadOnlySpan<char> fen)
         {
             CurrentPosition = new Position(Constants.InitialPositionFEN);
-            var parsedFen = FENParser.ParseFEN(fen);
-            CurrentPosition.PopulateFrom(parsedFen);
+            var parsedFen = CurrentPosition.PopulateFrom(fen);
 
             if (!CurrentPosition.IsValid())
             {

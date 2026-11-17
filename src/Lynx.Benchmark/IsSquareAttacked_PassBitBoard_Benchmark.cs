@@ -223,7 +223,7 @@ public class IsSquareInCheck_PassBitboard_Benchmark : BaseBenchmark
 file static class Attacks_PassingArray
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
+    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -241,7 +241,7 @@ file static class Attacks_PassingArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
+    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -258,7 +258,7 @@ file static class Attacks_PassingArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset, Bitboard[] pieces)
+    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset, ReadOnlySpan<Bitboard> pieces)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
@@ -266,33 +266,33 @@ file static class Attacks_PassingArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKnights(int squareIndex, int offset, Bitboard[] piecePosition)
+    private static bool IsSquareAttackedByKnights(int squareIndex, int offset, ReadOnlySpan<Bitboard> piecePosition)
     {
         return (Attacks.KnightAttacks[squareIndex] & piecePosition[(int)Piece.N + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByKing(int squareIndex, int offset, Bitboard[] piecePosition)
+    private static bool IsSquareAttackedByKing(int squareIndex, int offset, ReadOnlySpan<Bitboard> piecePosition)
     {
         return (Attacks.KingAttacks[squareIndex] & piecePosition[(int)Piece.K + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByBishops(int squareIndex, int offset, Bitboard[] piecePosition, Bitboard[] occupancy, out Bitboard bishopAttacks)
+    private static bool IsSquareAttackedByBishops(int squareIndex, int offset, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy, out Bitboard bishopAttacks)
     {
         bishopAttacks = Attacks.BishopAttacks(squareIndex, occupancy[(int)Side.Both]);
         return (bishopAttacks & piecePosition[(int)Piece.B + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByRooks(int squareIndex, int offset, Bitboard[] piecePosition, Bitboard[] occupancy, out Bitboard rookAttacks)
+    private static bool IsSquareAttackedByRooks(int squareIndex, int offset, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy, out Bitboard rookAttacks)
     {
         rookAttacks = Attacks.RookAttacks(squareIndex, occupancy[(int)Side.Both]);
         return (rookAttacks & piecePosition[(int)Piece.R + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByQueens(int offset, Bitboard bishopAttacks, Bitboard rookAttacks, Bitboard[] piecePosition)
+    private static bool IsSquareAttackedByQueens(int offset, Bitboard bishopAttacks, Bitboard rookAttacks, ReadOnlySpan<Bitboard> piecePosition)
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
         return (queenAttacks & piecePosition[(int)Piece.Q + offset]) != default;
@@ -302,7 +302,7 @@ file static class Attacks_PassingArray
 file static class Attacks_PassBitboard
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
+    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -321,7 +321,7 @@ file static class Attacks_PassBitboard
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
+    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 

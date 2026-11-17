@@ -129,18 +129,12 @@ class Position_CalculateThreats_Benchmark
 
 #pragma warning restore RCS1085 // Use auto-implemented property
 
-    /// <summary>
-    /// Beware, half move counter isn't take into account
-    /// Use alternative constructor instead and set it externally if relevant
-    /// </summary>
-    public Position_CalculateThreats_Benchmark(string fen) : this(FENParser.ParseFEN(fen))
+    public Position_CalculateThreats_Benchmark(string fen)
     {
-    }
+        _pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        _occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
 
-    public Position_CalculateThreats_Benchmark(ParseFENResult parsedFEN)
-    {
-        _pieceBitboards = parsedFEN.PieceBitboards;
-        _occupancyBitboards = parsedFEN.OccupancyBitboards;
+        _ = FENParser.ParseFEN(fen, _pieceBitboards, _occupancyBitboards, stackalloc int[Position.BoardLength]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

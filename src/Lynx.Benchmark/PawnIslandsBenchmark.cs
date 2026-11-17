@@ -80,8 +80,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         foreach (var fen in Engine._benchmarkFens)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
-            Bitboard whitePawns = pieces[(int)Piece.P];
+            Bitboard whitePawns = WhitePawns(fen);
             sum += Original(whitePawns);
         }
 
@@ -95,8 +94,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         foreach (var fen in Engine._benchmarkFens)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
-            Bitboard whitePawns = pieces[(int)Piece.P];
+            Bitboard whitePawns = WhitePawns(fen);
             sum += Original_SkipLocalsInit(whitePawns);
         }
 
@@ -110,8 +108,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         foreach (var fen in Data)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
-            Bitboard whitePawns = pieces[(int)Piece.P];
+            Bitboard whitePawns = WhitePawns(fen);
             sum += Bitboard(whitePawns);
         }
 
@@ -125,8 +122,7 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         foreach (var fen in Data)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
-            Bitboard whitePawns = pieces[(int)Piece.P];
+            Bitboard whitePawns = WhitePawns(fen);
             sum += Bitboard_NoFileArray(whitePawns);
         }
 
@@ -140,12 +136,19 @@ public class PawnIslandsBenchmark : BaseBenchmark
 
         foreach (var fen in Data)
         {
-            var pieces = FENParser.ParseFEN(fen).PieceBitboards;
-            Bitboard whitePawns = pieces[(int)Piece.P];
+            Bitboard whitePawns = WhitePawns(fen);
             sum += Bitboard_NoPawnCountArray(whitePawns);
         }
 
         return sum;
+    }
+
+    private static Bitboard WhitePawns(string fen)
+    {
+        Span<Bitboard> pieceBitboards = stackalloc Bitboard[Position.PieceBitboardsLength];
+        _ = FENParser.ParseFEN(fen, pieceBitboards, stackalloc Bitboard[Position.OccupancyBitboardsLength], stackalloc int[Position.BoardLength]);
+
+        return pieceBitboards[(int)Piece.P];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

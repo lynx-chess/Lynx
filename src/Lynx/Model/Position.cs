@@ -1,6 +1,7 @@
-using System.Buffers;
+﻿using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using static Lynx.EvaluationConstants;
@@ -8,25 +9,40 @@ using static Lynx.EvaluationPSQTs;
 
 namespace Lynx.Model;
 
-public partial class Position : IDisposable
+public unsafe partial class Position : IDisposable
 {
+    private readonly ulong[] _internalArrayStorage;
+
+    private const int OccupancyBitboardsOffset = PieceBitboardsLength;
+    private const int NonPawnHashOffset = OccupancyBitboardsOffset + OccupancyBitboardsLength;
+    private const int BoardOffset = NonPawnHashOffset + NonPawnHashLength;
+    private const int StorageLength = BoardOffset + (BoardLength * sizeof(int) / sizeof(ulong));
+
     private bool _disposedValue;
 
-#pragma warning disable IDE1006 // Naming Styles
+    #pragma warning disable IDE1006 // Naming Styles
     internal int IncrementalEvalAccumulator;
     internal int IncrementalPhaseAccumulator;
     internal bool IsIncrementalEval;
-#pragma warning restore IDE1006 // Naming Styles
+    #pragma warning restore IDE1006 // Naming Styles
 
     private ulong _uniqueIdentifier;
     private ulong _kingPawnUniqueIdentifier;
-    private readonly ulong[] _nonPawnHash;
+
+    public const int NonPawnHashLength = 2;
+    private readonly ulong* _nonPawnHash;
+
     private ulong _minorHash;
     private ulong _majorHash;
 
-    private ulong[] _pieceBitboards;
-    private ulong[] _occupancyBitboards;
-    private int[] _board;
+    public const int PieceBitboardsLength = 12;
+    private readonly Bitboard* _pieceBitboards;
+
+    public const int OccupancyBitboardsLength = 3;
+    private readonly Bitboard* _occupancyBitboards;
+
+    public const int BoardLength = 64;
+    private readonly int* _board;
 
     private byte _castle;
 
@@ -58,13 +74,13 @@ public partial class Position : IDisposable
 
     public ulong UniqueIdentifier => _uniqueIdentifier;
     public ulong KingPawnUniqueIdentifier => _kingPawnUniqueIdentifier;
-    public ulong[] NonPawnHash => _nonPawnHash;
+    public Span<ulong> NonPawnHash => new(_nonPawnHash, NonPawnHashLength);
     public ulong MinorHash => _minorHash;
     public ulong MajorHash => _majorHash;
 
-    public Bitboard[] PieceBitboards => _pieceBitboards;
-    public Bitboard[] OccupancyBitboards => _occupancyBitboards;
-    public int[] Board => _board;
+    public Span<Bitboard> PieceBitboards => new(_pieceBitboards, PieceBitboardsLength);
+    public Span<Bitboard> OccupancyBitboards => new(_occupancyBitboards, OccupancyBitboardsLength);
+    public Span<int> Board => new(_board, BoardLength);
     public Side Side => _side;
     public BoardSquare EnPassant => _enPassant;
 
@@ -115,11 +131,13 @@ public partial class Position : IDisposable
 
     private Position()
     {
-        // Allocate all required backing arrays (independent copy, avoids sharing state)
-        _pieceBitboards = ArrayPool<Bitboard>.Shared.Rent(12);
-        _occupancyBitboards = ArrayPool<Bitboard>.Shared.Rent(3);
-        _board = ArrayPool<int>.Shared.Rent(64);
-        _nonPawnHash = ArrayPool<ulong>.Shared.Rent(2);
+        // Allocate _internalArrayStorage backing all arrays (independent copy, avoids sharing state)
+        _internalArrayStorage = GC.AllocateArray<ulong>(StorageLength, pinned: true);
+        var storage = (ulong*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_internalArrayStorage));
+        _pieceBitboards = storage;
+        _occupancyBitboards = storage + OccupancyBitboardsOffset;
+        _nonPawnHash = storage + NonPawnHashOffset;
+        _board = (int*)(storage + BoardOffset);
         _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
 
         // Always allocate length 2 so ResetTo can index safely regardless of castling rights
@@ -142,7 +160,7 @@ public partial class Position : IDisposable
     public Position(string fen)
         : this()
     {
-        PopulateFrom(FENParser.ParseFEN(fen));
+        PopulateFrom(fen);
     }
 
     /// <summary>
@@ -154,11 +172,9 @@ public partial class Position : IDisposable
         ResetTo(position);
     }
 
-    public void PopulateFrom(ParseFENResult parsedFEN)
+    public ParseFENResult PopulateFrom(ReadOnlySpan<char> fen)
     {
-        _pieceBitboards = parsedFEN.PieceBitboards;
-        _occupancyBitboards = parsedFEN.OccupancyBitboards;
-        _board = parsedFEN.Board;
+        var parsedFEN = FENParser.ParseFEN(fen, PieceBitboards, OccupancyBitboards, Board);
 
         _side = parsedFEN.Side;
         _castle = parsedFEN.Castle;
@@ -331,6 +347,8 @@ public partial class Position : IDisposable
 #endif
 
         Validate();
+
+        return parsedFEN;
     }
 
     public void ResetTo(Position position)
@@ -340,12 +358,7 @@ public partial class Position : IDisposable
         _minorHash = position._minorHash;
         _majorHash = position._majorHash;
 
-        _nonPawnHash[(int)Side.White] = position._nonPawnHash[(int)Side.White];
-        _nonPawnHash[(int)Side.Black] = position._nonPawnHash[(int)Side.Black];
-
-        Array.Copy(position._pieceBitboards, _pieceBitboards, 12);
-        Array.Copy(position._occupancyBitboards, _occupancyBitboards, 3);
-        Array.Copy(position._board, _board, 64);
+        position._internalArrayStorage.AsSpan().CopyTo(_internalArrayStorage);
 
         _side = position._side;
         _castle = position._castle;
@@ -417,6 +430,11 @@ public partial class Position : IDisposable
             newPiece = promotedPiece;
             extraPhaseIfIncremental = GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
         }
+
+        Debug.Assert((uint)sourceSquare < BoardLength);
+        Debug.Assert((uint)targetSquare < BoardLength);
+        Debug.Assert((uint)piece < PieceBitboardsLength);
+        Debug.Assert((uint)newPiece < PieceBitboardsLength);
 
         _pieceBitboards[piece].PopBit(sourceSquare);
         _occupancyBitboards[oldSide].PopBit(sourceSquare);
@@ -518,6 +536,8 @@ public partial class Position : IDisposable
 
                     if (capturedPiece != (int)Piece.None)
                     {
+                        Debug.Assert((uint)capturedPiece < PieceBitboardsLength);
+
                         capturedSquare = targetSquare;
 
                         _pieceBitboards[capturedPiece].PopBit(capturedSquare);
@@ -739,6 +759,11 @@ public partial class Position : IDisposable
             newPiece = promotedPiece;
         }
 
+        Debug.Assert((uint)sourceSquare < BoardLength);
+        Debug.Assert((uint)targetSquare < BoardLength);
+        Debug.Assert((uint)piece < PieceBitboardsLength);
+        Debug.Assert((uint)newPiece < PieceBitboardsLength);
+
         _pieceBitboards[newPiece].PopBit(targetSquare);
         _occupancyBitboards[side].PopBit(targetSquare);
         _board[targetSquare] = (int)Piece.None;
@@ -753,6 +778,8 @@ public partial class Position : IDisposable
 
                     if (capturedPiece != (int)Piece.None)
                     {
+                        Debug.Assert((uint)capturedPiece < PieceBitboardsLength);
+
                         _pieceBitboards[capturedPiece].SetBit(targetSquare);
                         _occupancyBitboards[oppositeSide].SetBit(targetSquare);
                         _board[targetSquare] = capturedPiece;
@@ -1261,7 +1288,7 @@ public partial class Position : IDisposable
 
                 var piece = -1;
 
-                for (int bbIndex = 0; bbIndex < _pieceBitboards.Length; ++bbIndex)
+                for (int bbIndex = 0; bbIndex < PieceBitboardsLength; ++bbIndex)
                 {
                     if (_pieceBitboards[bbIndex].GetBit(squareIndex))
                     {
@@ -1590,10 +1617,6 @@ public partial class Position : IDisposable
         {
             if (disposing)
             {
-                ArrayPool<Bitboard>.Shared.Return(_pieceBitboards);
-                ArrayPool<Bitboard>.Shared.Return(_occupancyBitboards);
-
-                ArrayPool<ulong>.Shared.Return(_nonPawnHash);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares);
                 ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares);
                 ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares);
@@ -1607,9 +1630,6 @@ public partial class Position : IDisposable
                 ArrayPool<int>.Shared.Return(_initialQueensideRookSquares);
 #endif
 
-#pragma warning disable S3254 // Default parameter values should not be passed as arguments
-                ArrayPool<int>.Shared.Return(_board);
-#pragma warning restore S3254 // Default parameter values should not be passed as arguments
             }
             _disposedValue = true;
         }
