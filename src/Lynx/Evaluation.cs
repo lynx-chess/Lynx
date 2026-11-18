@@ -10,26 +10,6 @@ namespace Lynx.Model;
 
 public unsafe partial class Position
 {
-    private static readonly int[][] _defendedThreatsBonus =
-    [
-        [],
-        KnightThreatsBonus_Defended,
-        BishopThreatsBonus_Defended,
-        RookThreatsBonus_Defended,
-        QueenThreatsBonus_Defended,
-        KingThreatsBonus_Defended,
-    ];
-
-    private static readonly int[][] _undefendedThreatsBonus =
-    [
-        [],
-        KnightThreatsBonus,
-        BishopThreatsBonus,
-        RookThreatsBonus,
-        QueenThreatsBonus,
-        KingThreatsBonus,
-    ];
-
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="_side"/>.
@@ -84,10 +64,10 @@ public unsafe partial class Position
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
-        int whitePawnKingRingAttacks = (whitePawnAttacks & KingRing[blackKing]).CountBits();
+        int whitePawnKingRingAttacks = (whitePawnAttacks & EvaluationTablesPinned.KingRing[blackKing]).CountBits();
         evaluationContext.IncreaseKingRingAttacks((int)Side.White, whitePawnKingRingAttacks);
 
-        int blackPawnKingRingAttacks = (blackPawnAttacks & KingRing[whiteKing]).CountBits();
+        int blackPawnKingRingAttacks = (blackPawnAttacks & EvaluationTablesPinned.KingRing[whiteKing]).CountBits();
         evaluationContext.IncreaseKingRingAttacks((int)Side.Black, blackPawnKingRingAttacks);
 
         if (IsIncrementalEval)
@@ -134,7 +114,7 @@ public unsafe partial class Position
                 // Bitboard copy that we 'empty'
                 var bitboard = _pieceBitboards[pieceIndex];
 
-                packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+                packedScore += EvaluationTablesPinned.PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
                 while (bitboard.NotEmpty())
                 {
@@ -151,7 +131,7 @@ public unsafe partial class Position
                 var bitboard = _pieceBitboards[pieceIndex];
 
                 // Pieces protected by pawns bonus
-                packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+                packedScore -= EvaluationTablesPinned.PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
 
                 while (bitboard.NotEmpty())
                 {
@@ -230,7 +210,7 @@ public unsafe partial class Position
                 // Bitboard copy that we 'empty'
                 var bitboard = _pieceBitboards[pieceIndex];
 
-                packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+                packedScore += EvaluationTablesPinned.PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
                 while (bitboard.NotEmpty())
                 {
@@ -251,7 +231,7 @@ public unsafe partial class Position
                 var bitboard = _pieceBitboards[pieceIndex];
 
                 // Pieces protected by pawns bonus
-                packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+                packedScore -= EvaluationTablesPinned.PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
 
                 while (bitboard.NotEmpty())
                 {
@@ -279,11 +259,11 @@ public unsafe partial class Position
             KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
-        var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
+        var whiteKingAttacks = EvaluationTablesPinned.KingAttacks[whiteKing];
         evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
         evaluationContext.AttacksBySide[(int)Side.White] |= whiteKingAttacks;
 
-        var blackKingAttacks = Attacks.KingAttacks[blackKing];
+        var blackKingAttacks = EvaluationTablesPinned.KingAttacks[blackKing];
         evaluationContext.Attacks[(int)Piece.k] |= blackKingAttacks;
         evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;
 
@@ -298,15 +278,15 @@ public unsafe partial class Position
                 & (~(blackPawns | whitePawnAttacks)))
             .CountBits();
 
-        packedScore += KingMobilityBonus[whiteKingAttacksCount]
-            - KingMobilityBonus[blackKingAttacksCount];
+        packedScore += EvaluationTablesPinned.KingMobilityBonus[whiteKingAttacksCount]
+            - EvaluationTablesPinned.KingMobilityBonus[blackKingAttacksCount];
 
         AssertAttackPopulation(ref evaluationContext);
 
         // Total king rings attacks
         packedScore +=
-            TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
-            - TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
+            EvaluationTablesPinned.TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.WhiteKingRingAttacks)]
+            - EvaluationTablesPinned.TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
 
         // Bishop pair bonus
         if (_pieceBitboards[(int)Piece.B].CountBits() >= 2)
@@ -547,28 +527,28 @@ public unsafe partial class Position
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
-            passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
+            passedPawnsMask = EvaluationTablesPinned.BlackPassedPawnMasks[squareIndex];
             pushSquare = squareIndex + 8;
         }
         else
         {
-            passedPawnsMask = Masks.WhitePassedPawnMasks[squareIndex];
+            passedPawnsMask = EvaluationTablesPinned.WhitePassedPawnMasks[squareIndex];
             pushSquare = squareIndex - 8;
         }
 
         var oppositeSidePawns = _pieceBitboards[(int)Piece.p - pieceIndex];
 
         // Isolated pawn
-        if ((_pieceBitboards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]).Empty())
+        if ((_pieceBitboards[pieceIndex] & EvaluationTablesPinned.IsolatedPawnMasks[squareIndex]).Empty())
         {
-            packedBonus += IsolatedPawnPenalty[Constants.File(squareIndex)];
+            packedBonus += EvaluationTablesPinned.IsolatedPawnPenalty[Constants.File(squareIndex)];
         }
         // Backwards pawn
         else if (!evaluationContext.Attacks[pieceIndex].GetBit(squareIndex)
             && (oppositeSidePawns.GetBit(pushSquare)                                            // Blocked
                 || evaluationContext.Attacks[(int)Piece.p - pieceIndex].GetBit(pushSquare)))    // Push square attacked by opponent pawns
         {
-            packedBonus += BackwardsPawnPenalty[rank];
+            packedBonus += EvaluationTablesPinned.BackwardsPawnPenalty[rank];
         }
 
         // Passed pawn
@@ -577,26 +557,26 @@ public unsafe partial class Position
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & _occupancyBitboards[oppositeSide]).Empty())
             {
-                packedBonus += PassedPawnNoEnemiesAheadBonus[bucket][rank];
-                packedBonus += PassedPawnNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
+                packedBonus += EvaluationTablesPinned.PassedPawnNoEnemiesAheadBonus[((bucket) * 8) + (rank)];
+                packedBonus += EvaluationTablesPinned.PassedPawnNoEnemiesAheadEnemyBonus[((oppositeSideBucket) * 8) + (rank)];
             }
 
             // King distance to passed pawn
-            var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+            var friendlyKingDistance = EvaluationTablesPinned.ChebyshevDistance[((squareIndex) * 64) + (sameSideKingSquare)];
 
             // Enemy king distance to passed pawn
-            var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
+            var enemyKingDistance = EvaluationTablesPinned.ChebyshevDistance[((squareIndex) * 64) + (oppositeSideKingSquare)];
 
-            packedBonus += PassedPawnBonus[bucket][rank]
-                + PassedPawnEnemyBonus[oppositeSideBucket][rank]
-                + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
-                + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+            packedBonus += EvaluationTablesPinned.PassedPawnBonus[((bucket) * 8) + (rank)]
+                + EvaluationTablesPinned.PassedPawnEnemyBonus[((oppositeSideBucket) * 8) + (rank)]
+                + EvaluationTablesPinned.FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
+                + EvaluationTablesPinned.EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
 
         // Pawn phalanx
         if (Constants.File(squareIndex) != 7 && _pieceBitboards[pieceIndex].GetBit(squareIndex + 1))
         {
-            packedBonus += PawnPhalanxBonus[rank];
+            packedBonus += EvaluationTablesPinned.PawnPhalanxBonus[rank];
         }
 
         return packedBonus;
@@ -619,8 +599,8 @@ public unsafe partial class Position
         pawnScore -= KingPawnShield(blackKing, blackPawns, whitePawnAttacks);
 
         // Pieces protected by pawns bonus
-        pawnScore += PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
-        pawnScore -= PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
+        pawnScore += EvaluationTablesPinned.PieceProtectedByPawnBonus[(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
+        pawnScore -= EvaluationTablesPinned.PieceProtectedByPawnBonus[(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
 
         // King ring attacks
         pawnScore += PawnKingRingAttacksBonus * whitePawnKingRingAttacks;
@@ -642,17 +622,17 @@ public unsafe partial class Position
         const int pawnToKnightOffset = (int)Piece.N - (int)Piece.P;
         var sameSidePawns = _pieceBitboards[pieceIndex - pawnToKnightOffset];
 
-        var attacks = Attacks.KnightAttacks[squareIndex];
+        var attacks = EvaluationTablesPinned.KnightAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
         var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
-        var packedBonus = KnightMobilityBonus[mobility];
+        var packedBonus = EvaluationTablesPinned.KnightMobilityBonus[mobility];
 
         // King ring attacks
-        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRing = EvaluationTablesPinned.KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += KnightKingRingAttacksBonus * kingRingAttacksCount;
 
@@ -677,10 +657,10 @@ public unsafe partial class Position
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
         var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
-        var packedBonus = BishopMobilityBonus[mobility];
+        var packedBonus = EvaluationTablesPinned.BishopMobilityBonus[mobility];
 
         // King ring attacks
-        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRing = EvaluationTablesPinned.KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += BishopKingRingAttacksBonus * kingRingAttacksCount;
 
@@ -695,7 +675,7 @@ public unsafe partial class Position
         // Allowing playing positions with > 8 pawns
         var sameColorPawnsCount = sameColorPawns.CountBits() % 9;
 
-        packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawnsCount];
+        packedBonus += EvaluationTablesPinned.BadBishop_SameColorPawnsPenalty[sameColorPawnsCount];
 
         // Blocked central pawns
         var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
@@ -706,7 +686,7 @@ public unsafe partial class Position
 
         var pawnBlockers = pawnBlockerSquares & _occupancyBitboards[Utils.OppositeSide(pieceSide)];
 
-        packedBonus += BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
+        packedBonus += EvaluationTablesPinned.BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
 
         // Bishop in unblocked long diagonals
         if ((attacks & Constants.CentralSquares).CountBits() == 2)
@@ -789,10 +769,10 @@ public unsafe partial class Position
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
         var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
-        var packedBonus = RookMobilityBonus[mobility];
+        var packedBonus = EvaluationTablesPinned.RookMobilityBonus[mobility];
 
         // King ring attacks
-        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRing = EvaluationTablesPinned.KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += RookKingRingAttacksBonus * kingRingAttacksCount;
 
@@ -804,15 +784,15 @@ public unsafe partial class Position
         if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & fileMask).Empty())
         {
             var file = Constants.File(squareIndex);
-            packedBonus += OpenFileRookBonus[bucket][file];
-            packedBonus += OpenFileRookEnemyBonus[oppositeSideBucket][file];
+            packedBonus += EvaluationTablesPinned.OpenFileRookBonus[((bucket) * 8) + (file)];
+            packedBonus += EvaluationTablesPinned.OpenFileRookEnemyBonus[((oppositeSideBucket) * 8) + (file)];
         }
         // Rook on semi-open file
         else if ((sameSidePawns & fileMask).Empty())
         {
             var file = Constants.File(squareIndex);
-            packedBonus += SemiOpenFileRookBonus[bucket][file];
-            packedBonus += SemiOpenFileRookEnemyBonus[oppositeSideBucket][file];
+            packedBonus += EvaluationTablesPinned.SemiOpenFileRookBonus[((bucket) * 8) + (file)];
+            packedBonus += EvaluationTablesPinned.SemiOpenFileRookEnemyBonus[((oppositeSideBucket) * 8) + (file)];
         }
 
         // Connected rooks
@@ -825,7 +805,7 @@ public unsafe partial class Position
                 rank = 7 - rank;
             }
 
-            packedBonus += ConnectedRooksBonus[rank];
+            packedBonus += EvaluationTablesPinned.ConnectedRooksBonus[rank];
         }
 
         return packedBonus;
@@ -845,10 +825,10 @@ public unsafe partial class Position
         // Mobility
         var squaresToExcludeFromMobility = ~(sameSidePawns | enemyPawnAttacks);
         var mobility = (attacks & squaresToExcludeFromMobility).CountBits();
-        var packedBonus = QueenMobilityBonus[mobility];
+        var packedBonus = EvaluationTablesPinned.QueenMobilityBonus[mobility];
 
         // King ring attacks
-        var kingRing = KingRing[oppositeSideKingSquare];
+        var kingRing = EvaluationTablesPinned.KingRing[oppositeSideKingSquare];
         var kingRingAttacksCount = (attacks & kingRing).CountBits();
         packedBonus += QueenKingRingAttacksBonus * kingRingAttacksCount;
 
@@ -864,7 +844,7 @@ public unsafe partial class Position
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, _occupancyBitboards[(int)Side.Both])
             & ~(_occupancyBitboards[pieceSide] | enemyPawnAttacks)).CountBits();
-        int packedBonus = VirtualKingMobilityBonus[attacksCount];
+        int packedBonus = EvaluationTablesPinned.VirtualKingMobilityBonus[attacksCount];
 
         var kingSideOffset = Utils.PieceOffset(pieceSide);
 
@@ -876,12 +856,12 @@ public unsafe partial class Position
             // King on open file
             if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & file).Empty())
             {
-                packedBonus += OpenFileKingPenalty[bucket][Constants.File(squareIndex)];
+                packedBonus += EvaluationTablesPinned.OpenFileKingPenalty[((bucket) * 8) + (Constants.File(squareIndex))];
             }
             // King on semi-open file
             else if ((_pieceBitboards[(int)Piece.P + kingSideOffset] & file).Empty())
             {
-                packedBonus += SemiOpenFileKingPenalty[bucket][Constants.File(squareIndex)];
+                packedBonus += EvaluationTablesPinned.SemiOpenFileKingPenalty[((bucket) * 8) + (Constants.File(squareIndex))];
             }
         }
 
@@ -893,7 +873,7 @@ public unsafe partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int KingPawnShield(int squareIndex, Bitboard sameSidePawns, Bitboard oppositeSidePawnAttacks)
     {
-        var kingShield = Attacks.KingAttacks[squareIndex] & sameSidePawns;
+        var kingShield = EvaluationTablesPinned.KingAttacks[squareIndex] & sameSidePawns;
         var kingShieldCount = kingShield.CountBits();
 
         var nonAttackedShieldCount = (kingShield & (~oppositeSidePawnAttacks)).CountBits();
@@ -911,7 +891,7 @@ public unsafe partial class Position
         while (doubledPawns.NotEmpty())
         {
             doubledPawns = doubledPawns.WithoutLS1B(out var pieceSquareIndex);
-            packedBonus += DoubledPawnPenalty[Constants.File(pieceSquareIndex)];
+            packedBonus += EvaluationTablesPinned.DoubledPawnPenalty[Constants.File(pieceSquareIndex)];
         }
 
         return packedBonus;
@@ -923,7 +903,7 @@ public unsafe partial class Position
         var whiteIslandCount = CountPawnIslands(whitePawns);
         var blackIslandCount = CountPawnIslands(blackPawns);
 
-        return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
+        return EvaluationTablesPinned.PawnIslandsBonus[whiteIslandCount] - EvaluationTablesPinned.PawnIslandsBonus[blackIslandCount];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int CountPawnIslands(Bitboard pawns)
@@ -1016,8 +996,6 @@ public unsafe partial class Position
         var attacks = evaluationContext.Attacks;
         var attacksBySide = evaluationContext.AttacksBySide;
         var board = _board;
-        var defendedThreatsBonus = _defendedThreatsBonus;
-        var undefendedThreatsBonus = _undefendedThreatsBonus;
 
         // Equivalent to just attacks[oppositeSidePawnIndex] due to how it's currently used,
         // since ~attacksBySide[(int)side] is always false given we're evaluation threats
@@ -1035,7 +1013,7 @@ public unsafe partial class Position
                 defended = defended.WithoutLS1B(out var square);
                 var attackedPiece = board[square];
 
-                packedBonus += defendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += EvaluationTablesPinned.DefendedThreatsBonus[(i * 8) + (attackedPiece - oppositeSideOffset)];
             }
 
             var undefended = threats & ~defendedSquares;
@@ -1044,7 +1022,7 @@ public unsafe partial class Position
                 undefended = undefended.WithoutLS1B(out var square);
                 var attackedPiece = board[square];
 
-                packedBonus += undefendedThreatsBonus[i][attackedPiece - oppositeSideOffset];
+                packedBonus += EvaluationTablesPinned.UndefendedThreatsBonus[(i * 8) + (attackedPiece - oppositeSideOffset)];
             }
         }
 
@@ -1058,7 +1036,7 @@ public unsafe partial class Position
         var pushes = ~occupancy & ourPawns.PawnPush(side);
 
         // Double pushes
-        var thirdRank = Masks.RankMasks[side == Side.White ? (int)BoardSquare.a3 : (int)BoardSquare.a6];
+        var thirdRank = EvaluationTablesPinned.RankMasks[side == Side.White ? (int)BoardSquare.a3 : (int)BoardSquare.a6];
         var doublePushes = ~occupancy & (pushes & thirdRank).PawnPush(side);
         pushes |= doublePushes;
 
@@ -1072,12 +1050,12 @@ public unsafe partial class Position
         {
             safePushes = safePushes.WithoutLS1B(out var safePush);
             var isWhite = side == Side.White;
-            var passedPawnMask = isWhite ? Masks.WhitePassedPawnMasks[safePush] : Masks.BlackPassedPawnMasks[safePush];
+            var passedPawnMask = isWhite ? EvaluationTablesPinned.WhitePassedPawnMasks[safePush] : EvaluationTablesPinned.BlackPassedPawnMasks[safePush];
 
             if ((passedPawnMask & theirPawns).Empty())
             {
                 var rank = isWhite ? Constants.Rank(safePush) : 7 - Constants.Rank(safePush);
-                packedBonus += PassedPawnPushBonus[rank];
+                packedBonus += EvaluationTablesPinned.PassedPawnPushBonus[rank];
             }
         }
 
@@ -1100,7 +1078,7 @@ public unsafe partial class Position
 
         var attacks = evaluationContext.Attacks;
 
-        packedBonus += CheckBonus((int)Piece.N, attacks[(int)Piece.N + offset] & Attacks.KnightAttacks[oppositeSideKingSquare], oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.N, attacks[(int)Piece.N + offset] & EvaluationTablesPinned.KnightAttacks[oppositeSideKingSquare], oppositeSideAttacks);
         packedBonus += CheckBonus((int)Piece.B, attacks[(int)Piece.B + offset] & bishopAttacks, oppositeSideAttacks);
         packedBonus += CheckBonus((int)Piece.R, attacks[(int)Piece.R + offset] & rookAttacks, oppositeSideAttacks);
         packedBonus += CheckBonus((int)Piece.Q, attacks[(int)Piece.Q + offset] & Attacks.QueenAttacks(rookAttacks, bishopAttacks), oppositeSideAttacks);
@@ -1113,7 +1091,7 @@ public unsafe partial class Position
             var unsafeChecksCount = (checks & oppositeSideAttacks).CountBits();
             var safeChecksCount = checksCount - unsafeChecksCount;
 
-            return (SafeCheckBonus[piece] * safeChecksCount) + (UnsafeCheckBonus[piece] * unsafeChecksCount);
+            return (EvaluationTablesPinned.SafeCheckBonus[piece] * safeChecksCount) + (EvaluationTablesPinned.UnsafeCheckBonus[piece] * unsafeChecksCount);
         }
 
         return packedBonus;
@@ -1161,7 +1139,7 @@ public unsafe partial class Position
         var defendingKingSquare = _pieceBitboards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
 
         // Not in the corner or adjacent squares
-        if (Constants.ChebyshevDistance[defendingKingSquare][promotionCornerSquare] > 1)
+        if (EvaluationTablesPinned.ChebyshevDistance[((defendingKingSquare) * 64) + (promotionCornerSquare)] > 1)
         {
             return false;
         }
