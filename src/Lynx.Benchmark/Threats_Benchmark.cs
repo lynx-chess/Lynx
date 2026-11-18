@@ -104,7 +104,7 @@ public class Threats_Benchmark : BaseBenchmark
     }
 }
 
-class Position_Threats_Benchmark
+unsafe class Position_Threats_Benchmark
 {
     private readonly ulong[] _pieceBitboards;
     private readonly ulong[] _occupancyBitboards;

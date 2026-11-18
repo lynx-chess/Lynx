@@ -92,7 +92,7 @@ using System.Runtime.InteropServices;
 
 namespace Lynx.Benchmark;
 
-public class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
+public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
 {
     private readonly Position[] _positions;
 
