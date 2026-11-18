@@ -8,7 +8,7 @@ namespace Lynx;
 public static unsafe class Attacks
 {
     /// <summary>
-    /// Stores both the mask and the attack pointer for every square, and for each sliding piece type
+    /// Stores both the mask and the attack pointer for every square
     /// </summary>
     [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
     private struct PEXTEntry
@@ -16,15 +16,6 @@ public static unsafe class Attacks
         public Bitboard Mask;
         public Bitboard* Attacks;
     }
-
-    #pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
-    /// <summary>
-    /// [0..63] bishop, [64..127] rook
-    /// </summary>
-    private static readonly PEXTEntry[] _PEXTEntries;
-    private static readonly PEXTEntry* _bishopPEXTEntries;
-    private static readonly PEXTEntry* _rookPEXTEntries;
-#pragma warning restore S1450 // Private fields only used as local variables in methods should become local variables
 
     /// <summary>
     /// Stores mask, magic, shift and attack pointer for every square.
@@ -39,12 +30,24 @@ public static unsafe class Attacks
         public int Shift;
     }
 
+#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
+
     /// <summary>
-    /// [0..63] bishop, [64..127] rook
+    /// Backs up bishop and rook arrays of <see cref="PEXTEntry"/>: [0..63] bishop, [64..127] rook
+    /// </summary>
+    private static readonly PEXTEntry[] _PEXTEntries;
+    private static readonly PEXTEntry* _bishopPEXTEntries;
+    private static readonly PEXTEntry* _rookPEXTEntries;
+
+    /// <summary>
+    /// Backs up bishop and rook arrays of <see cref="MagicEntry"/>: [0..63] bishop, [64..127] rook
     /// </summary>
     private static readonly MagicEntry[] _magicEntries;
     private static readonly MagicEntry* _bishopMagicEntries;
     private static readonly MagicEntry* _rookMagicEntries;
+
+    #pragma warning restore S1450 // Private fields only used as local variables in methods should become local variables
 
     /// <summary>
     /// Packed bishop (5248) and rook (102400) magic attacks
@@ -140,7 +143,7 @@ public static unsafe class Attacks
 
             for (var square2 = 0; square2 < 64; ++square2)
             {
-                if(square1 == square2)
+                if (square1 == square2)
                 {
                     continue;
                 }

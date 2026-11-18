@@ -24,7 +24,6 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.UCI.Commands;
 
 namespace Lynx.Benchmark;
 public class DebugCommand_Benchmark : BaseBenchmark

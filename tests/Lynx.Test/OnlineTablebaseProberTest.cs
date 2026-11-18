@@ -3,7 +3,6 @@
 #pragma warning disable IDE0060 // Remove unused parameter -  RootSearch_ and EvaluationSearch_ methods have the same fen input, so they're just duplicated (too lazy to create data input collections)
 
 using Lynx.Model;
-using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 using static Lynx.EvaluationConstants;
 
