@@ -7,7 +7,7 @@ namespace Lynx.Test.PregeneratedAttacks;
 public class QueenAttacksTest
 {
     /// <summary>
-    /// Implicitly tests <see cref="AttackGenerator.InitializeBishopMagicAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
+    /// Implicitly tests <see cref="AttackGenerator.InitializeBishopAndRookMagicAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
     /// </summary>
     [TestCase(BS.a8, new BS[] { }, new[] {
             BS.b7, BS.c6, BS.d5, BS.e4, BS.f3, BS.g2, BS.h1,    // Bishop

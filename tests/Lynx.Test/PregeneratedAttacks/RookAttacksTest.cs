@@ -42,7 +42,7 @@ public class RookAttacksTest
     }
 
     /// <summary>
-    /// Implicitly tests <see cref="AttackGenerator.InitializeRookMagicAttacks"/> and <see cref="Constants.RookMagicNumbers"/>
+    /// Implicitly tests <see cref="AttackGenerator.InitializeBishopAndRookMagicAttacks"/> and <see cref="Constants.RookMagicNumbers"/>
     /// </summary>
     [TestCase(BS.a8, new BS[] { }, new[] { BS.b8, BS.c8, BS.d8, BS.e8, BS.f8, BS.g8, BS.h8, BS.a7, BS.a6, BS.a5, BS.a4, BS.a3, BS.a2, BS.a1 })]
     [TestCase(BS.a8, new[] { BS.g8, BS.a2 }, new[] { BS.b8, BS.c8, BS.d8, BS.e8, BS.f8, BS.g8, BS.a7, BS.a6, BS.a5, BS.a4, BS.a3, BS.a2 })]
