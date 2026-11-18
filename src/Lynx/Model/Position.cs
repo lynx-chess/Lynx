@@ -10,6 +10,9 @@ namespace Lynx.Model;
 
 public unsafe partial class Position : IDisposable
 {
+    /// <summary>
+    /// Backs up internal arrays: <see cref="_pieceBitboards"/>, <see cref="_occupancyBitboards"/> and <see cref="_nonPawnHash"/>
+    /// </summary>
     private readonly ulong[] _internalArrayStorage;
 
     private const int OccupancyBitboardsOffset = PieceBitboardsLength;
