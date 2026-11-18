@@ -2,7 +2,7 @@
 using NUnit.Framework;
 namespace Lynx.Test;
 
-public class RaysBetweenTest
+public unsafe class RaysBetweenTest
 {
     [Test]
     public void RaysBetween_ContainsSquaresStrictlyBetween()
@@ -13,7 +13,7 @@ public class RaysBetweenTest
             {
                 if (square1 == square2)
                 {
-                    Assert.AreEqual(0, Attacks.RaysBetween[square1][square2]);
+                    Assert.AreEqual(0, Attacks.RaysBetween[(square1 * 64) + square2]);
                     continue;
                 }
 
@@ -37,7 +37,7 @@ public class RaysBetweenTest
                     }
                 }
 
-                Assert.AreEqual(expected, Attacks.RaysBetween[square1][square2], $"RaysBetween[{square1}][{square2}]");
+                Assert.AreEqual(expected, Attacks.RaysBetween[(square1 * 64) + square2], $"RaysBetween[{square1}][{square2}]");
             }
         }
     }

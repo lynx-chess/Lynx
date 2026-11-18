@@ -274,7 +274,7 @@ static void _16_InitializingSliderPiecesAttackTables()
     rookAttacks.Print();
 }
 
-static void _17_Defining_variables()
+static unsafe void _17_Defining_variables()
 {
     var position = new Position(Constants.EmptyBoardFEN);
 
@@ -298,18 +298,18 @@ static void _17_Defining_variables()
     }
 }
 
-static void _18_Printing_Chess_Board()
+static unsafe void _18_Printing_Chess_Board()
 {
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
 
-    for (int bbIndex = 0; bbIndex < position.PieceBitboards.Length; ++bbIndex)
+    for (int bbIndex = 0; bbIndex < Position.PieceBitboardsLength; ++bbIndex)
     {
         position.PieceBitboards[bbIndex].Print();
     }
 }
 
-static void _19_Parse_FEN()
+static unsafe void _19_Parse_FEN()
 {
     var position = new Position(CmkPosition);
 
@@ -321,23 +321,23 @@ static void _19_Parse_FEN()
     position.OccupancyBitboards[(int)Side.Both].Print();
 }
 
-static void _20_QueenAttacks()
+static unsafe void _20_QueenAttacks()
 {
     var position = new Position(Constants.InitialPositionFEN);
     Attacks.QueenAttacks((int)BoardSquare.e4, position.OccupancyBitboards[(int)Side.Both]).Print();
 }
 
-static void _21_IsSquareAttacked()
+static unsafe void _21_IsSquareAttacked()
 {
     var position = new Position("8/8/8/3p4/8/8/8/8 w - - 0 1");
 
     position.PieceBitboards[(int)Piece.p].Print();
 
-    Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4].Print();
+    Attacks.PawnAttacks[((int)Side.White * 64) + (int)BoardSquare.e4].Print();
 
     var and =
         position.PieceBitboards[(int)Piece.p]
-        & Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4];
+        & Attacks.PawnAttacks[((int)Side.White * 64) + (int)BoardSquare.e4];
     and.Print();
 
     Console.WriteLine("=====================================");
@@ -380,7 +380,7 @@ static void _21_IsSquareAttacked()
     position.PrintAttackedSquares(Side.Black);
 }
 
-static void _22_Generate_Moves()
+static unsafe void _22_Generate_Moves()
 {
     var position = new Position("r1P1k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ");
     position.Print();
@@ -501,7 +501,7 @@ static void _29_Move_List()
     PrintMoveList(moves);
 }
 
-static void _32_Make_Move()
+static unsafe void _32_Make_Move()
 {
     // Arrange
     var position = new Position("r3k2r/1r6/8/3B4/8/8/8/R3K2R w KQkq - 0 1");
@@ -749,7 +749,7 @@ static long[,] InitializeZobristTable()
     return zobristTable;
 }
 
-static long CalculatePositionHash(long[,] zobristTable, Position position)
+static unsafe long CalculatePositionHash(long[,] zobristTable, Position position)
 {
     long positionHash = 0;
 
@@ -819,7 +819,7 @@ $"                                   {pvTable[150], -6} {pvTable[151], -6}" + $"
      */
 }
 
-static void CountBits()
+static unsafe void CountBits()
 {
     var Data = new[] {
         new Position(Constants.InitialPositionFEN),
@@ -843,12 +843,12 @@ static void CountBits()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.PieceBitboards, Position.PieceBitboardsLength))
         {
             counter += CountBits_Naive(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.OccupancyBitboards, Position.OccupancyBitboardsLength))
         {
             counter += CountBits_Naive(bitboard);
         }
@@ -860,12 +860,12 @@ static void CountBits()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.PieceBitboards, Position.PieceBitboardsLength))
         {
             counter += CountBits_PopCount(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.OccupancyBitboards, Position.OccupancyBitboardsLength))
         {
             counter += CountBits_PopCount(bitboard);
         }
@@ -898,7 +898,7 @@ static void CountBits()
     }
 }
 
-static void GetLS1BIndex()
+static unsafe void GetLS1BIndex()
 {
     var Data = new[] {
         new Position(Constants.InitialPositionFEN),
@@ -922,12 +922,12 @@ static void GetLS1BIndex()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.PieceBitboards, Position.PieceBitboardsLength))
         {
             counter += Original_GetLS1BIndex_Impl(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.OccupancyBitboards, Position.OccupancyBitboardsLength))
         {
             counter += Original_GetLS1BIndex_Impl(bitboard);
         }
@@ -939,12 +939,12 @@ static void GetLS1BIndex()
     {
         int counter = 0;
 
-        foreach (var bitboard in position.PieceBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.PieceBitboards, Position.PieceBitboardsLength))
         {
             counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }
 
-        foreach (var bitboard in position.OccupancyBitboards)
+        foreach (var bitboard in new ReadOnlySpan<Bitboard>(position.OccupancyBitboards, Position.OccupancyBitboardsLength))
         {
             counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }

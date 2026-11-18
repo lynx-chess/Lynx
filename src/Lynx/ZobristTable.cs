@@ -9,7 +9,7 @@ namespace Lynx;
 /// White pawns in file 1 are used to encode en-passant pawns
 /// Black pawns in file 8 are used to encode castling rights and side
 /// </summary>
-public static class ZobristTable
+public static unsafe class ZobristTable
 {
     private static readonly LynxRandom _random = new(int.MaxValue);
 

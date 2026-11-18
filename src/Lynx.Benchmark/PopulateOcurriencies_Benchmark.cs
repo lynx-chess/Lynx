@@ -49,11 +49,11 @@ public class PopulateOcurriencies_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Positions))]
-    public Bitboard TwoLoops(Position position) => PopulateOccupancies_TwoLoops(position.PieceBitboards, position.OccupancyBitboards);
+    public Bitboard TwoLoops(Position position) => PopulateOccupancies_TwoLoops(position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan());
 
     [Benchmark]
     [ArgumentsSource(nameof(Positions))]
-    public Bitboard OneLoop(Position position) => PopulateOccupancies_OneLoop(position.PieceBitboards, position.OccupancyBitboards);
+    public Bitboard OneLoop(Position position) => PopulateOccupancies_OneLoop(position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan());
 
     private static Bitboard PopulateOccupancies_TwoLoops(ReadOnlySpan<Bitboard> pieceBitboards, Span<Bitboard> occupancyBitboards)
     {

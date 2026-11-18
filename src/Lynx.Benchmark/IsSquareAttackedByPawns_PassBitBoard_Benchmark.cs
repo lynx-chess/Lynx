@@ -41,7 +41,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
-public class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchmark
+public unsafe class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchmark
 {
     private readonly Position[] _positions =
     [
@@ -64,7 +64,7 @@ public class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchmark
                 var sideToMoveInt = (int)position.Side;
                 var offset = Utils.PieceOffset(sideToMoveInt);
 
-                if (IsSquaredAttackedByPawns_PassBitboards(squareIndex, sideToMoveInt, offset, position.PieceBitboards))
+                if (IsSquaredAttackedByPawns_PassBitboards(squareIndex, sideToMoveInt, offset, position.PieceBitboardsSpan()))
                 {
                     b = true;
                 }
@@ -100,7 +100,7 @@ public class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchmark
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
+        return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pieces[offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -108,6 +108,6 @@ public class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchmark
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitboard) != default;
+        return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pawnBitboard) != default;
     }
 }

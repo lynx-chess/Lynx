@@ -5,7 +5,7 @@ namespace Lynx.Test.Model;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
-public class PositionMakeMoveTest
+public unsafe class PositionMakeMoveTest
 {
     #region Captures
 

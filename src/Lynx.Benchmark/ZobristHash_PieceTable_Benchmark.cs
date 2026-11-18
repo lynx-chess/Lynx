@@ -127,7 +127,7 @@ namespace Lynx.Benchmark;
 /// The CurrentPieceHash method calls <see cref="ZobristTable.PieceHash"/> directly to
 /// confirm it matches the FlatUnsafe baseline.
 /// </summary>
-public class ZobristHash_PieceTable_Benchmark : BaseBenchmark
+public unsafe class ZobristHash_PieceTable_Benchmark : BaseBenchmark
 {
     public static IEnumerable<Position> Data =>
     [

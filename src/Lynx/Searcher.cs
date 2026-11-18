@@ -1018,7 +1018,7 @@ public sealed class Searcher : IDisposable
         }
     }
 
-    private static void InitializeStaticClasses()
+    private static unsafe void InitializeStaticClasses()
     {
         _ = PVTable.Indexes[0];
         _ = Attacks.KingAttacks;

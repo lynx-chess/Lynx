@@ -7,7 +7,7 @@ using static Lynx.Utils;
 
 namespace Lynx.Test.Model;
 
-public class PositionTest
+public unsafe class PositionTest
 {
     [TestCase(Constants.InitialPositionFEN)]
     [TestCase(Constants.TrickyTestPositionFEN)]
@@ -92,36 +92,36 @@ public class PositionTest
         Assert.AreEqual(position.Castle, clonedPosition.Castle);
         Assert.AreEqual(position.EnPassant, clonedPosition.EnPassant);
 
-        for (int piece = 0; piece < position.PieceBitboards.Length; ++piece)
+        for (int piece = 0; piece < Position.PieceBitboardsLength; ++piece)
         {
             Assert.AreEqual(position.PieceBitboards[piece], clonedPosition.PieceBitboards[piece]);
         }
 
-        for (int occupancy = 0; occupancy < position.OccupancyBitboards.Length; ++occupancy)
+        for (int occupancy = 0; occupancy < Position.OccupancyBitboardsLength; ++occupancy)
         {
             Assert.AreEqual(position.OccupancyBitboards[occupancy], clonedPosition.OccupancyBitboards[occupancy]);
         }
 
         // Act: modify original, to ensure they're not sharing references to the same memory object
-        for (int piece = 0; piece < position.PieceBitboards.Length; ++piece)
+        for (int piece = 0; piece < Position.PieceBitboardsLength; ++piece)
         {
             position.PieceBitboards[piece].ResetLS1B();
             position.PieceBitboards[piece].SetBit((int)BoardSquare.e5 + piece);
         }
 
-        for (int occupancy = 0; occupancy < position.OccupancyBitboards.Length; ++occupancy)
+        for (int occupancy = 0; occupancy < Position.OccupancyBitboardsLength; ++occupancy)
         {
             position.OccupancyBitboards[occupancy].ResetLS1B();
             position.OccupancyBitboards[occupancy].SetBit((int)BoardSquare.g7 + occupancy);
         }
 
         // Assert
-        for (int piece = 0; piece < position.PieceBitboards.Length; ++piece)
+        for (int piece = 0; piece < Position.PieceBitboardsLength; ++piece)
         {
             Assert.AreNotEqual(position.PieceBitboards[piece], clonedPosition.PieceBitboards[piece]);
         }
 
-        for (int occupancy = 0; occupancy < position.OccupancyBitboards.Length; ++occupancy)
+        for (int occupancy = 0; occupancy < Position.OccupancyBitboardsLength; ++occupancy)
         {
             Assert.AreNotEqual(position.OccupancyBitboards[occupancy], clonedPosition.OccupancyBitboards[occupancy]);
         }
@@ -1322,7 +1322,7 @@ public class PositionTest
         {
             var position = new Position(fen);
 
-            var pieceCount = position.PieceBitboards.ToArray().Sum(b => b.CountBits());
+            var pieceCount = new ReadOnlySpan<Bitboard>(position.PieceBitboards, Position.PieceBitboardsLength).ToArray().Sum(b => b.CountBits());
             Assert.AreEqual(pieceCount, position.CountPieces());
         }
     }

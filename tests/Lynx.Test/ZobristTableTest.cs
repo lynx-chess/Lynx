@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test;
 
-public class ZobristTableTest
+public unsafe class ZobristTableTest
 {
     [Test]
     public void XorBehavior()

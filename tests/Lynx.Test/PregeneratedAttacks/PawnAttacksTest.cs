@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test.PregeneratedAttacks;
 
-public class PawnAttacksTest
+public unsafe class PawnAttacksTest
 {
     [TestCase(BoardSquare.a1, true, 1UL << (int)BoardSquare.b2)]
     [TestCase(BoardSquare.a1, false, 0UL)]
@@ -28,7 +28,7 @@ public class PawnAttacksTest
         Assert.AreEqual(expectedResult, attacks);
 
         // Act
-        attacks = Attacks.PawnAttacks[isWhite ? 1 : 0][(int)square];
+        attacks = Attacks.PawnAttacks[((isWhite ? 1 : 0) * 64) + (int)square];
 
         // Assert
         Assert.AreEqual(expectedResult, attacks);

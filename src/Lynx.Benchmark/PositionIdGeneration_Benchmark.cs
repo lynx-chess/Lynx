@@ -69,7 +69,7 @@ public class PositionIdGeneration_Benchmark : BaseBenchmark
     ];
 }
 
-internal static class PositionExtensions
+internal static unsafe class PositionExtensions
 {
     public static Position ClonePositionAndMakeMove(this Position position, Move move)
     {
@@ -86,7 +86,7 @@ internal static class PositionExtensions
     {
         var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
 
-        for (int index = 0; index < position.PieceBitboards.Length; ++index)
+        for (int index = 0; index < Position.PieceBitboardsLength; ++index)
         {
             sb.Append(position.PieceBitboards[index]);
 #if DEBUG

@@ -4,7 +4,7 @@ using BS = Lynx.Model.BoardSquare;
 
 namespace Lynx.Test.PregeneratedAttacks;
 
-public class KingAttacksTest
+public unsafe class KingAttacksTest
 {
     [TestCase(BS.a8, new[] { BS.b8, BS.a7, BS.b7 })]
     [TestCase(BS.h8, new[] { BS.g8, BS.g7, BS.h7 })]

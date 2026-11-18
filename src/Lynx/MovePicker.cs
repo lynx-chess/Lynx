@@ -24,7 +24,7 @@ internal enum Stage
     EndStage,
 }
 
-internal ref struct MovePicker
+internal unsafe ref struct MovePicker
 {
     private readonly Engine _engine;
     private readonly Position _position;
@@ -84,7 +84,7 @@ internal ref struct MovePicker
                 _checkerSquare = checkers.GetLS1BIndex();
 
                 // Capturing the attacker or blocking its ray (only B, R and Q)
-                _evasionTargets = checkers | Attacks.RaysBetween[_oppositeSideKingSquare][_checkerSquare];
+                _evasionTargets = checkers | Attacks.RaysBetween[((_oppositeSideKingSquare) * 64) + (_checkerSquare)];
             }
         }
     }

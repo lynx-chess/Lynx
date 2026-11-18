@@ -205,7 +205,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
+    private unsafe void UpdateCorrectionHistory(Position position, int evaluationDelta, int depth)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -226,7 +226,7 @@ public sealed partial class Engine
         pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
 
         // Non-pawn correction history - side to move
-        var nonPawnSTMIndex = position.NonPawnHash[(int)side] & Constants.NonPawnCorrHistoryHashMask;
+        var nonPawnSTMIndex = position.NonPawnHash[side] & Constants.NonPawnCorrHistoryHashMask;
 
         var nonPawnCorrHistSTMIndex =
             (nonPawnSTMIndex * 2 * 2)
@@ -335,7 +335,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private int CorrectStaticEvaluation(Position position, int staticEvaluation)
+    private unsafe int CorrectStaticEvaluation(Position position, int staticEvaluation)
     {
         var side = (ulong)position.Side;
         var oppositeSide = Utils.OppositeSide((int)side);
@@ -352,7 +352,7 @@ public sealed partial class Engine
         var pawnCorrHist = _pawnCorrHistory[pawnCorrHistIndex];
 
         // Non-pawn correction history - side to move
-        var nonPawnSTMoveIndex = position.NonPawnHash[(int)side] & Constants.NonPawnCorrHistoryHashMask;
+        var nonPawnSTMoveIndex = position.NonPawnHash[side] & Constants.NonPawnCorrHistoryHashMask;
 
         var nonPawnSTMoveCorrHistIndex = (nonPawnSTMoveIndex * 2 * 2)
             + (side * 2)

@@ -42,7 +42,7 @@ using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
 namespace Lynx.Benchmark;
-public class PEXTBenchmark_Benchmark : BaseBenchmark
+public unsafe class PEXTBenchmark_Benchmark : BaseBenchmark
 {
     private readonly Position _position = new(Constants.TrickyTestPositionFEN);
 

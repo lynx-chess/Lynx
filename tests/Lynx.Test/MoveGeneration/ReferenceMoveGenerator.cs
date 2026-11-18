@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Test.MoveGeneration;
-public static class ReferenceMoveGenerator
+public static unsafe class ReferenceMoveGenerator
 {
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
@@ -11,14 +11,14 @@ public static class ReferenceMoveGenerator
     private static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
     [
 #pragma warning disable IDE0350 // Use implicitly typed lambda
-        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks[((int)Side.White * 64) + origin],
         (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
         (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks[((int)Side.Black * 64) + origin],
         (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
@@ -26,6 +26,11 @@ public static class ReferenceMoveGenerator
         (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 #pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
+
+    // Iterator bodies can't be unsafe contexts, so they read Position and Attacks pointers through these
+    private static Bitboard PieceBitboard(Position position, int piece) => position.PieceBitboards[piece];
+    private static Bitboard Occupancy(Position position, int side) => position.OccupancyBitboards[side];
+    private static Bitboard PawnAttacks(int side, int square) => Attacks.PawnAttacks[(side * 64) + square];
 
     /// <summary>
     /// Sames as <see cref="GeneratePawnMoves(Position, int, bool)"/> but returning them
@@ -37,7 +42,7 @@ public static class ReferenceMoveGenerator
         var piece = (int)Piece.P + offset;
         var pawnPush = Utils.PawhPushSquare((int)position.Side);
         int oppositeSide = Utils.OppositeSide((int)position.Side);
-        var bitboard = position.PieceBitboards[piece];
+        var bitboard = PieceBitboard(position, piece);
 
         while (bitboard != default)
         {
@@ -53,7 +58,7 @@ public static class ReferenceMoveGenerator
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitboards[2].GetBit(singlePushSquare))
+            if (!Occupancy(position, 2).GetBit(singlePushSquare))
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
@@ -74,7 +79,7 @@ public static class ReferenceMoveGenerator
                 if (!capturesOnly)
                 {
                     var doublePushSquare = sourceSquare + (2 * pawnPush);
-                    if (!position.OccupancyBitboards[2].GetBit(doublePushSquare)
+                    if (!Occupancy(position, 2).GetBit(doublePushSquare)
                         && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                     {
                         yield return MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
@@ -82,7 +87,7 @@ public static class ReferenceMoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+            var attacks = PawnAttacks((int)position.Side, sourceSquare);
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))
@@ -92,7 +97,7 @@ public static class ReferenceMoveGenerator
             }
 
             // Captures
-            var attackedSquares = attacks & position.OccupancyBitboards[oppositeSide];
+            var attackedSquares = attacks & Occupancy(position, oppositeSide);
             while (attackedSquares != default)
             {
                 targetSquare = attackedSquares.GetLS1BIndex();
@@ -156,7 +161,7 @@ public static class ReferenceMoveGenerator
     /// <param name="piece"><see cref="Piece"/></param>
     private static IEnumerable<Move> GeneratePieceMovesForReference(int piece, Position position, int offset, bool capturesOnly = false)
     {
-        var bitboard = position.PieceBitboards[piece];
+        var bitboard = PieceBitboard(position, piece);
         int sourceSquare, targetSquare;
 
         while (bitboard != default)
@@ -164,15 +169,15 @@ public static class ReferenceMoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitboards[(int)Side.Both])
-                & ~position.OccupancyBitboards[(int)position.Side];
+            var attacks = _pieceAttacks[piece](sourceSquare, Occupancy(position, (int)Side.Both))
+                & ~Occupancy(position, (int)position.Side);
 
             while (attacks != default)
             {
                 targetSquare = attacks.GetLS1BIndex();
                 attacks.ResetLS1B();
 
-                if (position.OccupancyBitboards[(int)Side.Both].GetBit(targetSquare))
+                if (Occupancy(position, (int)Side.Both).GetBit(targetSquare))
                 {
                     var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
                     yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
