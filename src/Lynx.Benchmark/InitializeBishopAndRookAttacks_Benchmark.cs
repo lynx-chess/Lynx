@@ -28,14 +28,16 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
         private readonly Bitboard[][] _bishopAttacks = new Bitboard[64][];
         private readonly Bitboard[][] _rookAttacks = new Bitboard[64][];
 
+        private readonly Bitboard[] _magicAttacks = [];
+        private readonly Attacks.MagicEntry[] _magicEntries = [];
+
         public CustomPosition()
         {
             _kingAttacks = AttackGenerator.InitializeKingAttacks();
             _pawnAttacks = AttackGenerator.InitializePawnAttacks();
             _knightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
+            (_magicAttacks, _magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
         }
 
         /// <summary>
@@ -45,8 +47,7 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
         {
             InitializePawnKnightAndKingAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
+            (_magicAttacks, _magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
         }
 
         /// <summary>

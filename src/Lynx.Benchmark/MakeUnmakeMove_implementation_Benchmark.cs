@@ -141,6 +141,7 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Benchmark;
 public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
@@ -1749,22 +1750,20 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         }
     }
 
-    public static class MakeMoveAttacks
+    public static unsafe class MakeMoveAttacks
     {
-        private static readonly Bitboard[] _bishopOccupancyMasks;
-        private static readonly Bitboard[] _rookOccupancyMasks;
+        /// <summary>
+        /// [0..63] bishop, [64..127] rook
+        /// </summary>
+        private static readonly Attacks.MagicEntry[] _magicEntries;
+        private static readonly Attacks.MagicEntry* _bishopMagicEntries;
+        private static readonly Attacks.MagicEntry* _rookMagicEntries;
 
         /// <summary>
-        /// [64 (Squares), 512 (Occupancies)]
-        /// Use <see cref="BishopAttacks(int, Bitboard)"/>
+        /// Packed bishop and rook attacks, see <see cref="AttackGenerator.InitializeBishopAndRookMagicAttacks"/>
+        /// Use <see cref="BishopAttacks(int, Bitboard)"/> and <see cref="RookAttacks(int, Bitboard)"/>
         /// </summary>
-        private static readonly Bitboard[][] _bishopAttacks;
-
-        /// <summary>
-        /// [64 (Squares), 4096 (Occupancies)]
-        /// Use <see cref="RookAttacks(int, Bitboard)"/>
-        /// </summary>
-        private static readonly Bitboard[][] _rookAttacks;
+        private static readonly Bitboard[] _magicAttacks;
 
         /// <summary>
         /// [2 (B|W), 64 (Squares)]
@@ -1779,8 +1778,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             PawnAttacks = AttackGenerator.InitializePawnAttacks();
             KnightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
+            (_magicAttacks, _magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
+            _bishopMagicEntries = (Attacks.MagicEntry*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_magicEntries));
+            _rookMagicEntries = _bishopMagicEntries + 64;
         }
 
         /// <summary>
@@ -1790,11 +1790,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Bitboard BishopAttacks(int squareIndex, Bitboard occupancy)
         {
-            var occ = occupancy & _bishopOccupancyMasks[squareIndex];
-            occ *= Constants.BishopMagicNumbers[squareIndex];
-            occ >>= (64 - Constants.BishopRelevantOccupancyBits[squareIndex]);
+            var entry = _bishopMagicEntries + squareIndex;
 
-            return _bishopAttacks[squareIndex][occ];
+            return entry->Attacks[((occupancy & entry->Mask) * entry->Magic) >> entry->Shift];
         }
 
         /// <summary>
@@ -1804,11 +1802,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Bitboard RookAttacks(int squareIndex, Bitboard occupancy)
         {
-            var occ = occupancy & _rookOccupancyMasks[squareIndex];
-            occ *= Constants.RookMagicNumbers[squareIndex];
-            occ >>= (64 - Constants.RookRelevantOccupancyBits[squareIndex]);
+            var entry = _rookMagicEntries + squareIndex;
 
-            return _rookAttacks[squareIndex][occ];
+            return entry->Attacks[((occupancy & entry->Mask) * entry->Magic) >> entry->Shift];
         }
 
         /// <summary>
