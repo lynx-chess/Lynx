@@ -18,10 +18,10 @@ public static unsafe class Attacks
     }
 
 #pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
     /// <summary>
     /// Backs up bishop and rook arrays: [0..63] bishop, [64..127] rook
     /// </summary>
-#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
     private static readonly PEXTEntry[] _PEXTEntries;
 #pragma warning restore S1450 // Private fields only used as local variables in methods should become local variables
     private static readonly PEXTEntry* _bishopPEXTEntries;
