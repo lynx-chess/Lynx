@@ -84,7 +84,7 @@ internal unsafe ref struct MovePicker
                 _checkerSquare = checkers.GetLS1BIndex();
 
                 // Capturing the attacker or blocking its ray (only B, R and Q)
-                _evasionTargets = checkers | Attacks.RaysBetween[((_oppositeSideKingSquare) * 64) + (_checkerSquare)];
+                _evasionTargets = checkers | Attacks.RaysBetween(_oppositeSideKingSquare, _checkerSquare);
             }
         }
     }

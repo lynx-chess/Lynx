@@ -112,7 +112,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pieces[offset]) != default;
+            return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
         }
 
         private static bool IsSquareAttackedByKnights(int squareIndex, int offset, ReadOnlySpan<Bitboard> piecePosition)
@@ -163,11 +163,11 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
             return (await Task.WhenAll(tasks)).Any(boolean => boolean);
         }
 
-        private static unsafe bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, Bitboard[] pieces)
+        private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, Bitboard[] pieces)
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pieces[offset]) != default;
+            return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
         }
 
         private static unsafe bool IsSquareAttackedByKnights(int squareIndex, int offset, Bitboard[] piecePosition)
@@ -234,11 +234,11 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
             return false;
         }
 
-        private static unsafe bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, Bitboard[] pieces)
+        private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, Bitboard[] pieces)
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pieces[offset]) != default;
+            return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
         }
 
         private static unsafe bool IsSquareAttackedByKnights(int squareIndex, int offset, Bitboard[] piecePosition)

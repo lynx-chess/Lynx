@@ -333,11 +333,11 @@ static unsafe void _21_IsSquareAttacked()
 
     position.PieceBitboards[(int)Piece.p].Print();
 
-    Attacks.PawnAttacks[((int)Side.White * 64) + (int)BoardSquare.e4].Print();
+    Attacks.PawnAttacks((int)Side.White, (int)BoardSquare.e4).Print();
 
     var and =
         position.PieceBitboards[(int)Piece.p]
-        & Attacks.PawnAttacks[((int)Side.White * 64) + (int)BoardSquare.e4];
+        & Attacks.PawnAttacks((int)Side.White, (int)BoardSquare.e4);
     and.Print();
 
     Console.WriteLine("=====================================");

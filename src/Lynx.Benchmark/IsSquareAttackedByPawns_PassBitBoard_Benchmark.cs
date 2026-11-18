@@ -100,7 +100,7 @@ public unsafe class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchma
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pieces[offset]) != default;
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -108,6 +108,6 @@ public unsafe class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchma
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pawnBitboard) != default;
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pawnBitboard) != default;
     }
 }

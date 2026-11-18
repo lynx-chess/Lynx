@@ -980,8 +980,8 @@ public unsafe partial class Position : IDisposable
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks[(((int)Side.White) * 64) + (square)])
-            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks[(((int)Side.Black) * 64) + (square)])
+            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
+            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -998,8 +998,8 @@ public unsafe partial class Position : IDisposable
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks[(((int)Side.White) * 64) + (square)])
-            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks[(((int)Side.Black) * 64) + (square)])
+            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
+            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -1020,7 +1020,7 @@ public unsafe partial class Position : IDisposable
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p - offset] & Attacks.PawnAttacks[((side) * 64) + (square)])
+            | (_pieceBitboards[(int)Piece.p - offset] & Attacks.PawnAttacks(side, square))
             | (_pieceBitboards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
     }
 
@@ -1089,7 +1089,7 @@ public unsafe partial class Position : IDisposable
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[((oppositeColorIndex) * 64) + (squareIndex)] & _pieceBitboards[offset]).NotEmpty();
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & _pieceBitboards[offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1252,7 +1252,7 @@ public unsafe partial class Position : IDisposable
 
         sb.Append(
             (_enPassant == BoardSquare.noSquare
-                || (Attacks.PawnAttacks[((Utils.OppositeSide((int)_side)) * 64) + ((int)_enPassant)]
+                || (Attacks.PawnAttacks(Utils.OppositeSide((int)_side), (int)_enPassant)
                     & _pieceBitboards[(int)Piece.P + Utils.PieceOffset((int)_side)]) == 0)
             ? "-"
             : Constants.Coordinates[(int)_enPassant]);

@@ -106,7 +106,7 @@ public static unsafe class MoveGenerator
                 {
                     var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
-                    if ((occupancy & Attacks.RaysBetween[((sourceSquare) * 64) + (targetSquare)]).NotEmpty())
+                    if ((occupancy & Attacks.RaysBetween(sourceSquare, targetSquare)).NotEmpty())
                     {
                         // This would imply jumping over a piece
                         return 0;
@@ -262,7 +262,7 @@ public static unsafe class MoveGenerator
         int oppositeSide = Utils.OppositeSide((int)position.Side);
         var bitboard = position.PieceBitboards[piece];
 
-        var pawnAttacks = Attacks.PawnAttacks + (((int)position.Side) * 64);
+        var pawnAttacks = Attacks.PawnAttacks((int)position.Side);
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
@@ -408,7 +408,7 @@ public static unsafe class MoveGenerator
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
         var oppositeSidePieces = position.OccupancyBitboards[oppositeSide];
 
-        var pawnAttacks = Attacks.PawnAttacks + (((int)position.Side) * 64);
+        var pawnAttacks = Attacks.PawnAttacks((int)position.Side);
 
         ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
@@ -766,7 +766,7 @@ public static unsafe class MoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(((int)position.Side) * 64) + (sourceSquare)];
+            var attacks = Attacks.PawnAttacks((int)position.Side, sourceSquare);
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)
@@ -927,8 +927,8 @@ public static unsafe class MoveGenerator
 
         return piece switch
         {
-            (int)Piece.P => Attacks.PawnAttacks[(((int)Side.White) * 64) + (square)],
-            (int)Piece.p => Attacks.PawnAttacks[(((int)Side.Black) * 64) + (square)],
+            (int)Piece.P => Attacks.PawnAttacks((int)Side.White, square),
+            (int)Piece.p => Attacks.PawnAttacks((int)Side.Black, square),
             (int)Piece.N or (int)Piece.n => Attacks.KnightAttacks[square],
             (int)Piece.B or (int)Piece.b => Attacks.BishopAttacks(square, occupancy),
             (int)Piece.R or (int)Piece.r => Attacks.RookAttacks(square, occupancy),
@@ -1056,7 +1056,7 @@ public static unsafe class MoveGenerator
             return false;
         }
 
-        var attackMask = Attacks.PawnAttacks[((side) * 64) + (sourceSquare)];
+        var attackMask = Attacks.PawnAttacks(side, sourceSquare);
         if (attackMask.GetBit(targetSquare))
         {
             if (allowOnlyEnPassant)

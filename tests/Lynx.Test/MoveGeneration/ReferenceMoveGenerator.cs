@@ -11,14 +11,14 @@ public static unsafe class ReferenceMoveGenerator
     private static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
     [
 #pragma warning disable IDE0350 // Use implicitly typed lambda
-        (int origin, Bitboard _) => Attacks.PawnAttacks[((int)Side.White * 64) + origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.White, origin),
         (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
         (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        (int origin, Bitboard _) => Attacks.PawnAttacks[((int)Side.Black * 64) + origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.Black, origin),
         (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
@@ -27,10 +27,9 @@ public static unsafe class ReferenceMoveGenerator
 #pragma warning restore IDE0350 // Use implicitly typed lambda
     ];
 
-    // Iterator bodies can't be unsafe contexts, so they read Position and Attacks pointers through these
+    // Iterator bodies can't be unsafe contexts, so they read Position pointers through these
     private static Bitboard PieceBitboard(Position position, int piece) => position.PieceBitboards[piece];
     private static Bitboard Occupancy(Position position, int side) => position.OccupancyBitboards[side];
-    private static Bitboard PawnAttacks(int side, int square) => Attacks.PawnAttacks[(side * 64) + square];
 
     /// <summary>
     /// Sames as <see cref="GeneratePawnMoves(Position, int, bool)"/> but returning them
@@ -87,7 +86,7 @@ public static unsafe class ReferenceMoveGenerator
                 }
             }
 
-            var attacks = PawnAttacks((int)position.Side, sourceSquare);
+            var attacks = Attacks.PawnAttacks((int)position.Side, sourceSquare);
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant))

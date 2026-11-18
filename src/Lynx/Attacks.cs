@@ -67,12 +67,12 @@ public static unsafe class Attacks
     /// <summary>
     /// [2 x 64], index : (side x 64) + square
     /// </summary>
-    public static readonly Bitboard* PawnAttacks;
+    private static readonly Bitboard* _pawnAttacks;
 
     /// <summary>
     /// [64 x 64]: index: (square1 x 64) + square2
     /// </summary>
-    public static readonly Bitboard* RaysBetween;
+    private static readonly Bitboard* _raysBetween;
 
     private static Bitboard* Pin(Bitboard[] source)
     {
@@ -119,7 +119,7 @@ public static unsafe class Attacks
     {
         KingAttacks = Pin(AttackGenerator.InitializeKingAttacks());
         KnightAttacks = Pin(AttackGenerator.InitializeKnightAttacks());
-        PawnAttacks = Pin(AttackGenerator.InitializePawnAttacks(), 64);
+        _pawnAttacks = Pin(AttackGenerator.InitializePawnAttacks(), 64);
 
         _bishopOccupancyMasks = AttackGenerator.InitializeBishopOccupancy();
         _rookOccupancyMasks = AttackGenerator.InitializeRookOccupancy();
@@ -157,7 +157,7 @@ public static unsafe class Attacks
             _rookPEXTEntries = null;
         }
 
-        RaysBetween = KeepAlive(GC.AllocateArray<Bitboard>(64 * 64, pinned: true));
+        _raysBetween = KeepAlive(GC.AllocateArray<Bitboard>(64 * 64, pinned: true));
 
         for (int square1 = 0; square1 < 64; ++square1)
         {
@@ -177,16 +177,25 @@ public static unsafe class Attacks
 
                 if (file1 == file2 || rank1 == rank2)
                 {
-                    RaysBetween[(square1 * 64) + square2] = RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
+                    _raysBetween[(square1 * 64) + square2] =RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
                 }
                 else if (file1 - rank1 == file2 - rank2
                     || file1 + rank1 == file2 + rank2)
                 {
-                    RaysBetween[(square1 * 64) + square2] = BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
+                    _raysBetween[(square1 * 64) + square2] =BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
                 }
             }
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Bitboard PawnAttacks(int side, int square) => _pawnAttacks[(side * 64) + square];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Bitboard* PawnAttacks(int side) => _pawnAttacks + (side * 64);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Bitboard RaysBetween(int square1, int square2) => _raysBetween[(square1 * 64) + square2];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard BishopAttacks(int squareIndex, Bitboard occupancy)

@@ -262,7 +262,7 @@ file static unsafe class Attacks_PassingArray
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pieces[offset]) != default;
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -343,7 +343,7 @@ file static unsafe class Attacks_PassBitboard
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[(oppositeColorIndex * 64) + squareIndex] & pawnBitboard) != default;
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pawnBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
