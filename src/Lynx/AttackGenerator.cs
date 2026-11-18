@@ -1,4 +1,6 @@
 ﻿using Lynx.Model;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx;
 
@@ -70,67 +72,49 @@ public static class AttackGenerator
     }
 
     /// <summary>
-    /// Returns bishop occupancy masks and attacks
+    /// Returns pinned arrays for the packed bishop and rook magic attacks and magic entries with the information needed to look them up.
     /// </summary>
-    /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
-    public static (Bitboard[] BishopOccupancyMasks, Bitboard[][] BishopAttacks) InitializeBishopMagicAttacks()
+    /// <returns>(Bitboard[5248 + 102400], MagicEntry[128]: [0..63] bishop, [64..127] rook)</returns>
+    internal static unsafe (Bitboard[] Attacks, Attacks.MagicEntry[] MagicEntries) InitializeBishopAndRookMagicAttacks()
     {
-        Bitboard[] occupancyMasks = GC.AllocateArray<Bitboard>(64, pinned: true);
-        Bitboard[][] attacks = new Bitboard[64][];  // 64x512
+        Bitboard[] attacks = GC.AllocateArray<Bitboard>(5248 + 102400, pinned: true);
+        Attacks.MagicEntry[] entries = GC.AllocateArray<Attacks.MagicEntry>(128, pinned: true);
+
+        var table = (Bitboard*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(attacks));
 
         for (int square = 0; square < 64; ++square)
         {
-            attacks[square] = new Bitboard[512];
-
-            occupancyMasks[square] = MaskBishopOccupancy(square);
-
+            var mask = MaskBishopOccupancy(square);
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+            var entry = new Attacks.MagicEntry { Mask = mask, Magic = Constants.BishopMagicNumbers[square], Shift = 64 - relevantBitsCount, Attacks = table };
 
-            int occupancyIndexes = (1 << relevantBitsCount);
-
-            for (int index = 0; index < occupancyIndexes; ++index)
+            for (int index = 0; index < (1 << relevantBitsCount); ++index)
             {
-                var occupancy = SetBishopOrRookOccupancy(index, occupancyMasks[square]);
-
-                var magicIndex = (occupancy * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
-
-                attacks[square][magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
+                var occupancy = SetBishopOrRookOccupancy(index, mask);
+                entry.Attacks[(occupancy * entry.Magic) >> entry.Shift] = GenerateBishopAttacksOnTheFly(square, occupancy);
             }
+
+            entries[square] = entry;
+            table += 1 << relevantBitsCount;
         }
-
-        return (occupancyMasks, attacks);
-    }
-
-    /// <summary>
-    /// Returns rook occupancy masks and attacks
-    /// </summary>
-    /// <returns>(Bitboard[64], Bitboard[64, 512])</returns>
-    public static (Bitboard[] RookOccupancyMasks, Bitboard[][] RookAttacks) InitializeRookMagicAttacks()
-    {
-        Bitboard[] occupancyMasks = GC.AllocateArray<Bitboard>(64, pinned: true);
-        Bitboard[][] attacks = new Bitboard[64][];   // 64x4096
 
         for (int square = 0; square < 64; ++square)
         {
-            attacks[square] = new Bitboard[4096];
-
-            occupancyMasks[square] = MaskRookOccupancy(square);
-
+            var mask = MaskRookOccupancy(square);
             var relevantBitsCount = Constants.RookRelevantOccupancyBits[square];
+            var entry = new Attacks.MagicEntry { Mask = mask, Magic = Constants.RookMagicNumbers[square], Shift = 64 - relevantBitsCount, Attacks = table };
 
-            int occupancyIndexes = (1 << relevantBitsCount);
-
-            for (int index = 0; index < occupancyIndexes; ++index)
+            for (int index = 0; index < (1 << relevantBitsCount); ++index)
             {
-                var occupancy = SetBishopOrRookOccupancy(index, occupancyMasks[square]);
-
-                var magicIndex = (occupancy * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
-
-                attacks[square][magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
+                var occupancy = SetBishopOrRookOccupancy(index, mask);
+                entry.Attacks[(occupancy * entry.Magic) >> entry.Shift] = GenerateRookAttacksOnTheFly(square, occupancy);
             }
+
+            entries[64 + square] = entry;
+            table += 1 << relevantBitsCount;
         }
 
-        return (occupancyMasks, attacks);
+        return (attacks, entries);
     }
 
     public static Bitboard MaskPawnAttacks(int squareIndex, bool isWhite)

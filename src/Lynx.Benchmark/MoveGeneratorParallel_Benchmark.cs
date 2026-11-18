@@ -45,6 +45,7 @@ using NLog;
 using System.Collections.Concurrent;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Benchmark;
@@ -413,22 +414,23 @@ file static class CustomMoveGenerator
     #endregion
 }
 
-file static class LocalAttacks
+file static unsafe class LocalAttacks
 {
     private static readonly Bitboard[] _bishopOccupancyMasks;
     private static readonly Bitboard[] _rookOccupancyMasks;
 
     /// <summary>
-    /// [64 (Squares), 512 (Occupancies)]
-    /// Use <see cref="BishopLocalAttacks(int, Bitboard)"/>
+    /// [0..63] bishop, [64..127] rook
     /// </summary>
-    private static readonly Bitboard[][] _bishopLocalAttacks;
+    private static readonly Attacks.MagicEntry[] _magicEntries;
+    private static readonly Attacks.MagicEntry* _bishopMagicEntries;
+    private static readonly Attacks.MagicEntry* _rookMagicEntries;
 
     /// <summary>
-    /// [64 (Squares), 4096 (Occupancies)]
-    /// Use <see cref="RookLocalAttacks(int, Bitboard)"/>
+    /// Packed bishop and rook attacks, see <see cref="AttackGenerator.InitializeBishopAndRookMagicAttacks"/>
+    /// Use <see cref="BishopLocalAttacks(int, Bitboard)"/> and <see cref="RookLocalAttacks(int, Bitboard)"/>
     /// </summary>
-    private static readonly Bitboard[][] _rookLocalAttacks;
+    private static readonly Bitboard[] _magicLocalAttacks;
 
     private static readonly ulong[] _PEXTLocalAttacks;
     private static readonly ulong[] _PEXTBishopOffset;
@@ -447,8 +449,12 @@ file static class LocalAttacks
         PawnAttacks = AttackGenerator.InitializePawnAttacks();
         KnightLocalAttacks = AttackGenerator.InitializeKnightAttacks();
 
-        (_bishopOccupancyMasks, _bishopLocalAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
-        (_rookOccupancyMasks, _rookLocalAttacks) = AttackGenerator.InitializeRookMagicAttacks();
+        _bishopOccupancyMasks = AttackGenerator.InitializeBishopOccupancy();
+        _rookOccupancyMasks = AttackGenerator.InitializeRookOccupancy();
+
+        (_magicLocalAttacks, _magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
+        _bishopMagicEntries = (Attacks.MagicEntry*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_magicEntries));
+        _rookMagicEntries = _bishopMagicEntries + 64;
 
         if (Bmi2.X64.IsSupported)
         {
@@ -481,11 +487,9 @@ file static class LocalAttacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard MagicNumbersBishopLocalAttacks(int squareIndex, Bitboard occupancy)
     {
-        var occ = occupancy & _bishopOccupancyMasks[squareIndex];
-        occ *= Constants.BishopMagicNumbers[squareIndex];
-        occ >>= (64 - Constants.BishopRelevantOccupancyBits[squareIndex]);
+        var entry = _bishopMagicEntries + squareIndex;
 
-        return _bishopLocalAttacks[squareIndex][occ];
+        return entry->Attacks[((occupancy & entry->Mask) * entry->Magic) >> entry->Shift];
     }
 
     /// <summary>
@@ -502,11 +506,9 @@ file static class LocalAttacks
 
     public static Bitboard MagicNumbersRookLocalAttacks(int squareIndex, Bitboard occupancy)
     {
-        var occ = occupancy & _rookOccupancyMasks[squareIndex];
-        occ *= Constants.RookMagicNumbers[squareIndex];
-        occ >>= (64 - Constants.RookRelevantOccupancyBits[squareIndex]);
+        var entry = _rookMagicEntries + squareIndex;
 
-        return _rookLocalAttacks[squareIndex][occ];
+        return entry->Attacks[((occupancy & entry->Mask) * entry->Magic) >> entry->Shift];
     }
 
     /// <summary>
