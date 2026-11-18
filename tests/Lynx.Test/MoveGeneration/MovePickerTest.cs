@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test.MoveGeneration;
 
-public class MovePickerTest : BaseTest
+public unsafe class MovePickerTest : BaseTest
 {
     private static readonly string[] _inCheckFens =
     [

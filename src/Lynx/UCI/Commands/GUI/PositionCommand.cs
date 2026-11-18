@@ -21,7 +21,7 @@ public sealed class PositionCommand
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
+    public static unsafe bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
     {
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];

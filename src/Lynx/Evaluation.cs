@@ -983,35 +983,32 @@ public unsafe partial class Position
     {
         var occupancy = _occupancyBitboards[(int)Side.Both];
 
-        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
-        ref var attacksBySideRef = ref MemoryMarshal.GetReference(evaluationContext.AttacksBySide);
-
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
 
-            ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
+            ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board.NotEmpty())
             {
                 board = board.WithoutLS1B(out var square);
                 existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
-            Unsafe.Add(ref attacksBySideRef, (int)Side.White) |= existingAttacks;
+            evaluationContext.AttacksBySide[(int)Side.White] |= existingAttacks;
         }
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var board = _pieceBitboards[pieceIndex];
 
-            ref var existingAttacks = ref Unsafe.Add(ref attacksRef, pieceIndex);
+            ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board.NotEmpty())
             {
                 board = board.WithoutLS1B(out var square);
                 existingAttacks |= MoveGenerator.PieceAttacks(pieceIndex, square, occupancy);
             }
 
-            Unsafe.Add(ref attacksBySideRef, (int)Side.Black) |= existingAttacks;
+            evaluationContext.AttacksBySide[(int)Side.Black] |= existingAttacks;
         }
     }
 
@@ -1135,13 +1132,14 @@ public unsafe partial class Position
         var bishopAttacks = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var rookAttacks = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
 
-        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
+        var attacks = evaluationContext.Attacks;
 
         Debug.Assert((uint)oppositeSideKingSquare < Attacks.KnightAttacks.Length);
-        packedBonus += CheckBonus((int)Piece.N, Unsafe.Add(ref attacksRef, (int)Piece.N + offset) & EvaluationTablesPinned.KnightAttacks[oppositeSideKingSquare], oppositeSideAttacks);
-        packedBonus += CheckBonus((int)Piece.B, Unsafe.Add(ref attacksRef, (int)Piece.B + offset) & bishopAttacks, oppositeSideAttacks);
-        packedBonus += CheckBonus((int)Piece.R, Unsafe.Add(ref attacksRef, (int)Piece.R + offset) & rookAttacks, oppositeSideAttacks);
-        packedBonus += CheckBonus((int)Piece.Q, Unsafe.Add(ref attacksRef, (int)Piece.Q + offset) & Attacks.QueenAttacks(rookAttacks, bishopAttacks), oppositeSideAttacks);
+
+        packedBonus += CheckBonus((int)Piece.N, attacks[(int)Piece.N + offset] & EvaluationTablesPinned.KnightAttacks[oppositeSideKingSquare], oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.B, attacks[(int)Piece.B + offset] & bishopAttacks, oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.R, attacks[(int)Piece.R + offset] & rookAttacks, oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.Q, attacks[(int)Piece.Q + offset] & Attacks.QueenAttacks(rookAttacks, bishopAttacks), oppositeSideAttacks);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int CheckBonus(int piece, Bitboard checks, Bitboard oppositeSideAttacks)

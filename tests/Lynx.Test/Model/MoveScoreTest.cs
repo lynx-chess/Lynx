@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test.Model;
 
-public class MoveScoreTest : BaseTest
+public unsafe class MoveScoreTest : BaseTest
 {
     /// <summary>
     /// 'Tricky position'

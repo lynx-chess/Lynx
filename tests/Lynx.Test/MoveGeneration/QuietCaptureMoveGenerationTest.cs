@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test.MoveGeneration;
 
-public class QuietCaptureMoveGenerationTest
+public unsafe class QuietCaptureMoveGenerationTest
 {
     [TestCase(Constants.InitialPositionFEN)]
     [TestCase("r3k2r/pppq1ppp/2npbn2/3Np3/2P1P3/2N1B3/PP3PPP/R2QKB1R w KQkq - 0 1")]

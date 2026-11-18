@@ -7,7 +7,7 @@ namespace Lynx.Test;
 /// To make the TT, killer and counter move stages kick in, the picker is fed with stale moves from previously visited nodes of the same ply.
 /// Not thread safe, create one per test.
 /// </summary>
-internal sealed class PerftMovePickerWalker
+internal sealed unsafe class PerftMovePickerWalker
 {
     private const int MaxPly = 16;
 

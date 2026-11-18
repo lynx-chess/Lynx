@@ -7,15 +7,15 @@ namespace Lynx.Model;
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
 [StructLayout(LayoutKind.Sequential)]
-public ref struct EvaluationContext
+public unsafe ref struct EvaluationContext
 {
     private const int AttacksCount = 12;
     private const int AttacksBySideCount = 2;
 
     public const int RequiredBufferSize = AttacksCount + AttacksBySideCount;
 
-    public Span<Bitboard> Attacks;
-    public Span<Bitboard> AttacksBySide;
+    public readonly Bitboard* Attacks;
+    public readonly Bitboard* AttacksBySide;
 
     public int WhiteKingRingAttacks;
     public int BlackKingRingAttacks;
@@ -26,14 +26,14 @@ public ref struct EvaluationContext
 
         buffer.Clear();
 
-        Attacks = buffer[..AttacksCount];
-        AttacksBySide = buffer.Slice(AttacksCount, AttacksBySideCount);
+        // buffer comes from the stack, so it's guaranteed not to be moved
+        Attacks = (Bitboard*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(buffer));
+        AttacksBySide = Attacks + AttacksCount;
     }
 
     public void Reset()
     {
-        Attacks.Clear();
-        AttacksBySide.Clear();
+        new Span<Bitboard>(Attacks, RequiredBufferSize).Clear();
 
         WhiteKingRingAttacks = 0;
         BlackKingRingAttacks = 0;
