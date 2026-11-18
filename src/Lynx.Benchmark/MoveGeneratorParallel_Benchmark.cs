@@ -538,7 +538,7 @@ file static unsafe class LocalAttacks
         IsSquareAttacked(squaredIndex, sideToMove, position.PieceBitboards, position.OccupancyBitboards);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
+    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -557,7 +557,7 @@ file static unsafe class LocalAttacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, Bitboard[] piecePosition, Bitboard[] occupancy)
+    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 

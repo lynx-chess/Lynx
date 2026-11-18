@@ -144,19 +144,13 @@ class Position_Threats_Benchmark
         KingThreatsBonus
     ];
 
-    /// <summary>
-    /// Beware, half move counter isn't take into account
-    /// Use alternative constructor instead and set it externally if relevant
-    /// </summary>
-    public Position_Threats_Benchmark(string fen) : this(FENParser.ParseFEN(fen))
+    public Position_Threats_Benchmark(string fen)
     {
-    }
+        _pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        _occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        _board = new int[Position.BoardLength];
 
-    public Position_Threats_Benchmark(ParseFENResult parsedFEN)
-    {
-        _pieceBitboards = parsedFEN.PieceBitboards;
-        _occupancyBitboards = parsedFEN.OccupancyBitboards;
-        _board = parsedFEN.Board;
+        _ = FENParser.ParseFEN(fen, _pieceBitboards, _occupancyBitboards, _board);
     }
 
     public void CalculateThreats(ref EvaluationContext evaluationContext)

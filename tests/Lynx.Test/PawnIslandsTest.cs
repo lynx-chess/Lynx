@@ -47,7 +47,8 @@ public class PawnIslandsTest
     [TestCase("5k1K/8/8/8/8/8/P6P/8 w - - 0 1", 2)]
     public void PawnIslandsCount(string fen, int expectedPawnIslands)
     {
-        var pieces = FENParser.ParseFEN(fen).PieceBitboards;
+        Span<Bitboard> pieces = stackalloc Bitboard[Position.PieceBitboardsLength];
+        _ = FENParser.ParseFEN(fen, pieces, stackalloc Bitboard[Position.OccupancyBitboardsLength], stackalloc int[Position.BoardLength]);
         Bitboard whitePawns = pieces[(int)Piece.P];
 
         // Original method test

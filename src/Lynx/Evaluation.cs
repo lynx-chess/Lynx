@@ -8,7 +8,7 @@ using static Lynx.EvaluationPSQTs;
 
 namespace Lynx.Model;
 
-public partial class Position
+public unsafe partial class Position
 {
     private static readonly int[][] _defendedThreatsBonus =
     [

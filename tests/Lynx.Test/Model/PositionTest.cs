@@ -1322,7 +1322,7 @@ public class PositionTest
         {
             var position = new Position(fen);
 
-            var pieceCount = position.PieceBitboards.Sum(b => b.CountBits());
+            var pieceCount = position.PieceBitboards.ToArray().Sum(b => b.CountBits());
             Assert.AreEqual(pieceCount, position.CountPieces());
         }
     }

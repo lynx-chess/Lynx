@@ -310,15 +310,16 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
         public byte Castle { get; private set; }
 
-        public MakeMovePosition(string fen) : this(FENParser.ParseFEN(fen))
+        public MakeMovePosition(string fen)
         {
-        }
+            var pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+            var occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+            var board = new int[Position.BoardLength];
+            var parsedFEN = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, board);
 
-        public MakeMovePosition(ParseFENResult parsedFEN)
-        {
-            PieceBitboards = parsedFEN.PieceBitboards;
-            OccupancyBitboards = parsedFEN.OccupancyBitboards;
-            Board = parsedFEN.Board;
+            PieceBitboards = pieceBitboards;
+            OccupancyBitboards = occupancyBitboards;
+            Board = board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
