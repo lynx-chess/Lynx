@@ -42,8 +42,12 @@ public static unsafe class EvaluationTablesPinned
     public static readonly int* OpenFileRookEnemyBonus = FlattenToPinnedArray(EvaluationParams.OpenFileRookEnemyBonus, stride: 8);
     public static readonly int* OpenFileRookBonus = FlattenToPinnedArray(EvaluationParams.OpenFileRookBonus, stride: 8);
     public static readonly int* OpenFileKingPenalty = FlattenToPinnedArray(EvaluationParams.OpenFileKingPenalty, stride: 8);
-    public static readonly int* DefendedThreatsBonus = FlattenToPinnedArray([[], EvaluationParams.KnightThreatsBonus_Defended, EvaluationParams.BishopThreatsBonus_Defended, EvaluationParams.RookThreatsBonus_Defended, EvaluationParams.QueenThreatsBonus_Defended, EvaluationParams.KingThreatsBonus_Defended], stride: 8);
-    public static readonly int* UndefendedThreatsBonus = FlattenToPinnedArray([[], EvaluationParams.KnightThreatsBonus, EvaluationParams.BishopThreatsBonus, EvaluationParams.RookThreatsBonus, EvaluationParams.QueenThreatsBonus, EvaluationParams.KingThreatsBonus], stride: 8);
+
+    public static readonly int[][] DefendedThreatsBonusByPiece = [[], EvaluationParams.KnightThreatsBonus_Defended, EvaluationParams.BishopThreatsBonus_Defended, EvaluationParams.RookThreatsBonus_Defended, EvaluationParams.QueenThreatsBonus_Defended, EvaluationParams.KingThreatsBonus_Defended];
+    public static readonly int* DefendedThreatsBonus = FlattenToPinnedArray(DefendedThreatsBonusByPiece, stride: 8);
+
+    public static readonly int[][] UndefendedThreatsBonusByPiece = [[], EvaluationParams.KnightThreatsBonus, EvaluationParams.BishopThreatsBonus, EvaluationParams.RookThreatsBonus, EvaluationParams.QueenThreatsBonus, EvaluationParams.KingThreatsBonus];
+    public static readonly int* UndefendedThreatsBonus = FlattenToPinnedArray(UndefendedThreatsBonusByPiece, stride: 8);
 
     public static readonly ulong* KingRing = CopyToPinnedArray(EvaluationConstants.KingRing);
 
