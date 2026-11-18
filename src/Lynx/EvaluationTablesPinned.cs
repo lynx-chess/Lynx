@@ -51,9 +51,6 @@ public static unsafe class EvaluationTablesPinned
 
     public static readonly ulong* KingRing = CopyToPinnedArray(EvaluationConstants.KingRing);
 
-    public static readonly ulong* KingAttacks = CopyToPinnedArray(Attacks.KingAttacks);
-    public static readonly ulong* KnightAttacks = CopyToPinnedArray(Attacks.KnightAttacks);
-
     public static readonly ulong* WhitePassedPawnMasks = CopyToPinnedArray(Masks.WhitePassedPawnMasks);
     public static readonly ulong* BlackPassedPawnMasks = CopyToPinnedArray(Masks.BlackPassedPawnMasks);
     public static readonly ulong* RankMasks = CopyToPinnedArray(Masks.RankMasks);
