@@ -7,12 +7,6 @@ namespace Lynx.Model;
 [StructLayout(LayoutKind.Sequential)]
 public readonly ref struct ParseFENResult
 {
-#pragma warning disable S3887 // Mutable, non-private fields should not be "readonly"
-    public readonly Bitboard[] PieceBitboards;
-    public readonly Bitboard[] OccupancyBitboards;
-    public readonly int[] Board;
-#pragma warning restore S3887 // Mutable, non-private fields should not be "readonly"
-
     public readonly int HalfMoveClock;
     public readonly int FullMoveCounter;
     public readonly BoardSquare EnPassant;
@@ -23,9 +17,6 @@ public readonly ref struct ParseFENResult
     public readonly byte Castle;
 
     public ParseFENResult(
-        Bitboard[] pieceBitboards,
-        Bitboard[] occupancyBitboards,
-        int[] board,
         Side side,
         byte castle,
         BoardSquare enPassant,
@@ -33,9 +24,6 @@ public readonly ref struct ParseFENResult
         int halfMoveClock,
         int fullMoveCounter)
     {
-        PieceBitboards = pieceBitboards;
-        OccupancyBitboards = occupancyBitboards;
-        Board = board;
         Side = side;
         Castle = castle;
         EnPassant = enPassant;

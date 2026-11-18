@@ -58,10 +58,14 @@ file readonly struct Position
     public Position(string fen)
     {
         FEN = fen;
-        var parsedFEN = FENParser.ParseFEN(fen);
 
-        PieceBitboards = parsedFEN.PieceBitboards;
-        OccupancyBitboards = parsedFEN.OccupancyBitboards;
+        // Lynx.Model.Position, since this file's Position hides it
+        var pieceBitboards = new Bitboard[Lynx.Model.Position.PieceBitboardsLength];
+        var occupancyBitboards = new Bitboard[Lynx.Model.Position.OccupancyBitboardsLength];
+        var parsedFEN = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, stackalloc int[Lynx.Model.Position.BoardLength]);
+
+        PieceBitboards = pieceBitboards;
+        OccupancyBitboards = occupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;

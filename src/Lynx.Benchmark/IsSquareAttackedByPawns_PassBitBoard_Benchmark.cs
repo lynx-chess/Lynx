@@ -96,7 +96,7 @@ public class IsSquareAttackedByPawns_PassBitboard_Benchmark : BaseBenchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquaredAttackedByPawns_PassBitboards(int squareIndex, int sideToMove, int offset, Bitboard[] pieces)
+    private static bool IsSquaredAttackedByPawns_PassBitboards(int squareIndex, int sideToMove, int offset, ReadOnlySpan<Bitboard> pieces)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 

@@ -49,13 +49,13 @@ public class PopulateOcurriencies_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Positions))]
-    public Bitboard[] TwoLoops(Position position) => PopulateOccupancies_TwoLoops(position.PieceBitboards, position.OccupancyBitboards);
+    public Bitboard TwoLoops(Position position) => PopulateOccupancies_TwoLoops(position.PieceBitboards, position.OccupancyBitboards);
 
     [Benchmark]
     [ArgumentsSource(nameof(Positions))]
-    public Bitboard[] OneLoop(Position position) => PopulateOccupancies_OneLoop(position.PieceBitboards, position.OccupancyBitboards);
+    public Bitboard OneLoop(Position position) => PopulateOccupancies_OneLoop(position.PieceBitboards, position.OccupancyBitboards);
 
-    private static Bitboard[] PopulateOccupancies_TwoLoops(Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards)
+    private static Bitboard PopulateOccupancies_TwoLoops(ReadOnlySpan<Bitboard> pieceBitboards, Span<Bitboard> occupancyBitboards)
     {
         var limit = (int)Piece.K;
         for (int piece = (int)Piece.P; piece <= limit; ++piece)
@@ -71,10 +71,10 @@ public class PopulateOcurriencies_Benchmark : BaseBenchmark
 
         occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
 
-        return occupancyBitboards;
+        return occupancyBitboards[(int)Side.Both];
     }
 
-    private static Bitboard[] PopulateOccupancies_OneLoop(Bitboard[] pieceBitboards, Bitboard[] occupancyBitboards)
+    private static Bitboard PopulateOccupancies_OneLoop(ReadOnlySpan<Bitboard> pieceBitboards, Span<Bitboard> occupancyBitboards)
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
@@ -83,6 +83,6 @@ public class PopulateOcurriencies_Benchmark : BaseBenchmark
 
         occupancyBitboards[(int)Side.Both] = occupancyBitboards[(int)Side.White] | occupancyBitboards[(int)Side.Black];
 
-        return occupancyBitboards;
+        return occupancyBitboards[(int)Side.Both];
     }
 }

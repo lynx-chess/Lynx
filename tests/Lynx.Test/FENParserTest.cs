@@ -10,16 +10,18 @@ public class FENParserTest
     public void PieceBitboards_InitialPosition()
     {
         // Arrange
+        Span<Bitboard> pieceBitboards = stackalloc Bitboard[Position.PieceBitboardsLength];
+        Span<Bitboard> occupancyBitboards = stackalloc Bitboard[Position.OccupancyBitboardsLength];
+        Span<int> board = stackalloc int[Position.BoardLength];
 
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        _ = FENParser.ParseFEN(previuosFen);
+        _ = FENParser.ParseFEN(previuosFen, pieceBitboards, occupancyBitboards, board);
 
         const string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
         // Act
-        var result = FENParser.ParseFEN(fen);
-        Bitboard[] pieceBitboards = result.PieceBitboards;
+        _ = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, board);
 
         // Assert
 
@@ -59,10 +61,10 @@ public class FENParserTest
     {
         // Arrange
         const string fen = Constants.TrickyTestPositionFEN;
+        Span<Bitboard> pieceBitboards = stackalloc Bitboard[Position.PieceBitboardsLength];
 
         // Act
-        var result = FENParser.ParseFEN(fen);
-        Bitboard[] pieceBitboards = result.PieceBitboards;
+        _ = FENParser.ParseFEN(fen, pieceBitboards, stackalloc Bitboard[Position.OccupancyBitboardsLength], stackalloc int[Position.BoardLength]);
 
         // Assert
 
@@ -117,14 +119,16 @@ public class FENParserTest
     public void OccupancyBitboards(string fen)
     {
         // Arrange
+        Span<Bitboard> pieceBitboards = stackalloc Bitboard[Position.PieceBitboardsLength];
+        Span<Bitboard> occupancyBitboards = stackalloc Bitboard[Position.OccupancyBitboardsLength];
+        Span<int> board = stackalloc int[Position.BoardLength];
+
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        _ = FENParser.ParseFEN(previuosFen);
+        _ = FENParser.ParseFEN(previuosFen, pieceBitboards, occupancyBitboards, board);
 
         // Act
-        var result = FENParser.ParseFEN(fen);
-        Bitboard[] pieceBitboards = result.PieceBitboards;
-        Bitboard[] occupancyBitboards = result.OccupancyBitboards;
+        _ = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, board);
 
         // Assert
 
@@ -153,6 +157,33 @@ public class FENParserTest
         Assert.AreEqual(expectedCombinedOccupancy, occupancyBitboards[(int)Side.Both]);
     }
 
+    [Test]
+    public void BuffersAreClearedBeforeParsing()
+    {
+        // Arrange
+        const string fen = Constants.TrickyTestPositionFEN;
+
+        var expectedPieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        var expectedOccupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        var expectedBoard = new int[Position.BoardLength];
+        _ = FENParser.ParseFEN(fen, expectedPieceBitboards, expectedOccupancyBitboards, expectedBoard);
+
+        var pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        var occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        var board = new int[Position.BoardLength];
+        Array.Fill(pieceBitboards, ulong.MaxValue);
+        Array.Fill(occupancyBitboards, ulong.MaxValue);
+        Array.Fill(board, int.MaxValue);
+
+        // Act
+        _ = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, board);
+
+        // Assert
+        Assert.AreEqual(expectedPieceBitboards, pieceBitboards);
+        Assert.AreEqual(expectedOccupancyBitboards, occupancyBitboards);
+        Assert.AreEqual(expectedBoard, board);
+    }
+
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Side.White)]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR W KQkq - 0 1", Side.White)]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Side.Black)]
@@ -163,11 +194,11 @@ public class FENParserTest
     {
         if (expectedSide != Side.Both)
         {
-            Assert.AreEqual(expectedSide, FENParser.ParseFEN(fen).Side);
+            Assert.AreEqual(expectedSide, ParseFEN(fen).Side);
         }
         else
         {
-            Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
+            Assert.Throws<LynxException>(() => ParseFEN(fen));
         }
     }
 
@@ -188,12 +219,12 @@ public class FENParserTest
         // Arrange
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "K15k/8/8/8/8/8/8/8 w KQkq - 0 1";
-        Assert.DoesNotThrow(() => FENParser.ParseFEN(previuosFen));
+        Assert.DoesNotThrow(() => ParseFEN(previuosFen));
 
         if (expectedCastleResult >= 0)
         {
             // Act
-            var result = FENParser.ParseFEN(fen);
+            var result = ParseFEN(fen);
 
             //Assert
             Assert.AreEqual(expectedCastleResult, result.Castle);
@@ -201,7 +232,7 @@ public class FENParserTest
         else
         {
             // Act and Assert
-            Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
+            Assert.Throws<LynxException>(() => ParseFEN(fen));
         }
     }
 
@@ -212,7 +243,7 @@ public class FENParserTest
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", BoardSquare.noSquare)]
     public void EnPassant(string fen, BoardSquare expectedEnPassantSquare)
     {
-        var result = FENParser.ParseFEN(fen);
+        var result = ParseFEN(fen);
 
         Assert.AreEqual(expectedEnPassantSquare, result.EnPassant);
     }
@@ -227,7 +258,7 @@ public class FENParserTest
     [TestCase("8/8/8/1P6/p7/q7/8/8 b - b6 0 1", Description = "Wrong EnPassant square")]
     public void EnPassant_Error(string fen)
     {
-        Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
+        Assert.Throws<LynxException>(() => ParseFEN(fen));
     }
 
     [TestCase("K6k/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
@@ -235,17 +266,23 @@ public class FENParserTest
     [TestCase("K6k/8/8/8/8/8/8/8 w KQkq - 51 1", 51)]
     public void HalfMoveClock(string fen, int expectedHalfMoves)
     {
-        var result = FENParser.ParseFEN(fen);
+        var result = ParseFEN(fen);
 
         Assert.AreEqual(expectedHalfMoves, result.HalfMoveClock);
     }
+
+    private static ParseFENResult ParseFEN(string fen) =>
+        FENParser.ParseFEN(fen,
+            new Bitboard[Position.PieceBitboardsLength],
+            new Bitboard[Position.OccupancyBitboardsLength],
+            new int[Position.BoardLength]);
 
     //[TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 1)]
     //[TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 50", 50)]
     //[TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 100", 100)]
     //public void FullMoveCounter(string fen, int expectedFullMoveCounter)
     //{
-    //    var result = FENParser.ParseFEN(fen);
+    //    var result = ParseFEN(fen);
 
     //    Assert.AreEqual(expectedFullMoveCounter, result.FullMoveCounter);
     //}

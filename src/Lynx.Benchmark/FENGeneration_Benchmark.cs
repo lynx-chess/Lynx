@@ -367,10 +367,12 @@ internal struct StructCustomPosition
     {
         _fen = fen;
 
-        var parsedFEN = FENParser.ParseFEN(fen);
+        var pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        var occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        var parsedFEN = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, stackalloc int[Position.BoardLength]);
 
-        PieceBitboards = parsedFEN.PieceBitboards;
-        OccupancyBitboards = parsedFEN.OccupancyBitboards;
+        PieceBitboards = pieceBitboards;
+        OccupancyBitboards = occupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -708,10 +710,12 @@ internal readonly struct ReadonlyStructCustomPosition
     {
         FEN = fen;
 
-        var parsedFEN = FENParser.ParseFEN(fen);
+        var pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        var occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        var parsedFEN = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, stackalloc int[Position.BoardLength]);
 
-        PieceBitboards = parsedFEN.PieceBitboards;
-        OccupancyBitboards = parsedFEN.OccupancyBitboards;
+        PieceBitboards = pieceBitboards;
+        OccupancyBitboards = occupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -1055,10 +1059,12 @@ internal class ClassCustomPosition
     {
         _fen = fen;
 
-        var parsedFEN = FENParser.ParseFEN(fen);
+        var pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        var occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        var parsedFEN = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, stackalloc int[Position.BoardLength]);
 
-        PieceBitboards = parsedFEN.PieceBitboards;
-        OccupancyBitboards = parsedFEN.OccupancyBitboards;
+        PieceBitboards = pieceBitboards;
+        OccupancyBitboards = occupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -1401,10 +1407,12 @@ internal record class RecordClassCustomPosition
     {
         _fen = fen;
 
-        var parsedFEN = FENParser.ParseFEN(fen);
+        var pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        var occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        var parsedFEN = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, stackalloc int[Position.BoardLength]);
 
-        PieceBitboards = parsedFEN.PieceBitboards;
-        OccupancyBitboards = parsedFEN.OccupancyBitboards;
+        PieceBitboards = pieceBitboards;
+        OccupancyBitboards = occupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -1747,10 +1755,12 @@ internal record struct RecordStructCustomPosition
     {
         _fen = fen;
 
-        var parsedFEN = FENParser.ParseFEN(fen);
+        var pieceBitboards = new Bitboard[Position.PieceBitboardsLength];
+        var occupancyBitboards = new Bitboard[Position.OccupancyBitboardsLength];
+        var parsedFEN = FENParser.ParseFEN(fen, pieceBitboards, occupancyBitboards, stackalloc int[Position.BoardLength]);
 
-        PieceBitboards = parsedFEN.PieceBitboards;
-        OccupancyBitboards = parsedFEN.OccupancyBitboards;
+        PieceBitboards = pieceBitboards;
+        OccupancyBitboards = occupancyBitboards;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;

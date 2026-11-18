@@ -1569,7 +1569,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 #pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
             return success
-                ? new(pieceBitboards, occupancyBitboards, board, side, castlingRights, enPassant,
+                ? new(side, castlingRights, enPassant,
                     castlingData,
                     halfMoveClock, fullMoveCounter)
                 : throw new LynxException($"Error parsing {fen}");
