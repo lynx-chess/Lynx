@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace Lynx.Test;
 

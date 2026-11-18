@@ -2,7 +2,6 @@ using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using System.Threading.Channels;
 
 namespace Lynx.Test;

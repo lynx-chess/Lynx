@@ -430,9 +430,9 @@ file static class LocalAttacks
     /// </summary>
     private static readonly Bitboard[][] _rookLocalAttacks;
 
-    private static readonly ulong[] _pextLocalAttacks;
-    private static readonly ulong[] _pextBishopOffset;
-    private static readonly ulong[] _pextRookOffset;
+    private static readonly ulong[] _PEXTLocalAttacks;
+    private static readonly ulong[] _PEXTBishopOffset;
+    private static readonly ulong[] _PEXTRookOffset;
 
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
@@ -452,17 +452,17 @@ file static class LocalAttacks
 
         if (Bmi2.X64.IsSupported)
         {
-            _pextLocalAttacks = new ulong[5248 + 102400];
-            _pextBishopOffset = new ulong[64];
-            _pextRookOffset = new ulong[64];
+            _PEXTLocalAttacks = new ulong[5248 + 102400];
+            _PEXTBishopOffset = new ulong[64];
+            _PEXTRookOffset = new ulong[64];
 
             InitializeBishopAndRookPextLocalAttacks();
         }
         else
         {
-            _pextLocalAttacks = [];
-            _pextBishopOffset = [];
-            _pextRookOffset = [];
+            _PEXTLocalAttacks = [];
+            _PEXTBishopOffset = [];
+            _PEXTRookOffset = [];
         }
     }
 
@@ -470,7 +470,7 @@ file static class LocalAttacks
     public static Bitboard BishopLocalAttacks(int squareIndex, Bitboard occupancy)
     {
         return Bmi2.X64.IsSupported
-            ? _pextLocalAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
+            ? _PEXTLocalAttacks[_PEXTBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
             : MagicNumbersBishopLocalAttacks(squareIndex, occupancy);
     }
 
@@ -496,7 +496,7 @@ file static class LocalAttacks
     public static Bitboard RookLocalAttacks(int squareIndex, Bitboard occupancy)
     {
         return Bmi2.IsSupported
-            ? _pextLocalAttacks[_pextRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])]
+            ? _PEXTLocalAttacks[_PEXTRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])]
             : MagicNumbersRookLocalAttacks(squareIndex, occupancy);
     }
 
@@ -624,7 +624,7 @@ file static class LocalAttacks
         // Bishop-LocalAttacks
         for (int square = 0; square < 64; square++)
         {
-            _pextBishopOffset[square] = index;
+            _PEXTBishopOffset[square] = index;
             ulong bishopMask = _bishopOccupancyMasks[square];
 
             ulong patterns = 1UL << BitOperations.PopCount(bishopMask);
@@ -632,21 +632,21 @@ file static class LocalAttacks
             for (ulong i = 0; i < patterns; i++)
             {
                 ulong occupation = Bmi2.X64.ParallelBitDeposit(i, bishopMask);
-                _pextLocalAttacks[index++] = MagicNumbersBishopLocalAttacks(square, occupation);
+                _PEXTLocalAttacks[index++] = MagicNumbersBishopLocalAttacks(square, occupation);
             }
         }
 
         // Rook-LocalAttacks
         for (int square = 0; square < 64; square++)
         {
-            _pextRookOffset[square] = index;
+            _PEXTRookOffset[square] = index;
             ulong rookMask = _rookOccupancyMasks[square];
             ulong patterns = 1UL << BitOperations.PopCount(rookMask);
 
             for (ulong i = 0; i < patterns; i++)
             {
                 ulong occupation = Bmi2.X64.ParallelBitDeposit(i, rookMask);
-                _pextLocalAttacks[index++] = MagicNumbersRookLocalAttacks(square, occupation);
+                _PEXTLocalAttacks[index++] = MagicNumbersRookLocalAttacks(square, occupation);
             }
         }
     }
