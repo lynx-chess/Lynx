@@ -77,9 +77,6 @@ public class IsPseudoLegalTest
                     continue;
                 }
 
-                Span<Bitboard> buffer = new Bitboard[EvaluationContext.RequiredBufferSize];
-                var evaluationContext = new EvaluationContext(buffer);
-
                 foreach (var foreignMove in moveLists[j])
                 {
                     if (currentMoveSet.Contains(foreignMove))

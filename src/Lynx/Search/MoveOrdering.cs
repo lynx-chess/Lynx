@@ -175,7 +175,7 @@ public sealed partial class Engine
     /// Quiet history, continuation history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
+    private unsafe void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(Position position, int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode, ref EvaluationContext evaluationContext)
     {
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();

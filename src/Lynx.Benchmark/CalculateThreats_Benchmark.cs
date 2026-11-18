@@ -54,7 +54,6 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Lynx.Benchmark;
 
@@ -110,7 +109,7 @@ public class CalculateThreats_Benchmark : BaseBenchmark
     }
 }
 
-class Position_CalculateThreats_Benchmark
+unsafe class Position_CalculateThreats_Benchmark
 {
     private readonly ulong[] _pieceBitboards;
     private readonly ulong[] _occupancyBitboards;
@@ -214,8 +213,8 @@ class Position_CalculateThreats_Benchmark
     {
         var occupancy = _occupancyBitboards[(int)Side.Both];
 
-        ref var attacksRef = ref MemoryMarshal.GetReference(evaluationContext.Attacks);
-        ref var attacksBySideRef = ref MemoryMarshal.GetReference(evaluationContext.AttacksBySide);
+        ref var attacksRef = ref *evaluationContext.Attacks;
+        ref var attacksBySideRef = ref *evaluationContext.AttacksBySide;
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {

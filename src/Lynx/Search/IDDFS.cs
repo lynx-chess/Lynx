@@ -847,7 +847,7 @@ public sealed partial class Engine
     /// <summary>
     /// Find the best move without searching, based on TT and <see cref="ScoreMove(int, int, short)"/>
     /// </summary>
-    private SearchResult BestMoveRoot(Move firstLegalMove)
+    private unsafe SearchResult BestMoveRoot(Move firstLegalMove)
     {
         var score = 0;
         ShortMove ttBestMove = default;

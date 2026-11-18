@@ -547,7 +547,7 @@ public sealed partial class Engine
 #pragma warning restore IDISP003 // Dispose previous before re-assigning
         }
 
-        static void TryParseMove(Position position, int i, int move)
+        static unsafe void TryParseMove(Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
