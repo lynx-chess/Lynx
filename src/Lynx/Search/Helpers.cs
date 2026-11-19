@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Lynx;
@@ -33,16 +32,20 @@ public sealed partial class Engine
 #pragma warning restore RCS1243 // Duplicate word in a comment
 #pragma warning restore RCS1226 // Add paragraph to documentation comment
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
+    private unsafe void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
-        if (_pVTable[source] == default)
+        var pvTable = _pVTable.Array;
+
+        Debug.Assert((uint)source < (uint)pvTable.Length);
+
+        if (_pVTable.Pointer[source] == default)
         {
-            Array.Clear(_pVTable, target, _pVTable.Length - target);
+            Array.Clear(pvTable, target, pvTable.Length - target);
             return;
         }
 
         //PrintPvTable(target: target, source: source, movesToCopy: moveCountToCopy);
-        Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
+        Array.Copy(pvTable, source, pvTable, target, moveCountToCopy);
         //PrintPvTable();
     }
 
@@ -50,7 +53,7 @@ public sealed partial class Engine
     /// [12][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short PieceToQuietHistoryEntry(int piece, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
+    private unsafe ref short PieceToQuietHistoryEntry(int piece, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
     {
         const int pieceOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
@@ -61,14 +64,14 @@ public sealed partial class Engine
             + (isStartSquareAttacked * startSquareAttackedOffset)
             + isTargetSquareAttacked;
 
-        return ref _pieceToQuietHistory[index];
+        return ref _pieceToQuietHistory.Pointer[index];
     }
 
     /// <summary>
     /// [64][64][2][2]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short ButterflyQuietHistoryEntry(int sourceSquare, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
+    private unsafe ref short ButterflyQuietHistoryEntry(int sourceSquare, int targetSquare, int isStartSquareAttacked, int isTargetSquareAttacked)
     {
         const int sourceSquareOffset = 64 * 2 * 2;
         const int targetSquareOffset = 2 * 2;
@@ -79,7 +82,7 @@ public sealed partial class Engine
             + (isStartSquareAttacked * startSquareAttackedOffset)
             + isTargetSquareAttacked;
 
-        return ref _butterflyQuietHistory[index];
+        return ref _butterflyQuietHistory.Pointer[index];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,7 +105,7 @@ public sealed partial class Engine
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref short CaptureHistoryEntry(int piece, int targetSquare, int capturedPiece)
+    private unsafe ref short CaptureHistoryEntry(int piece, int targetSquare, int capturedPiece)
     {
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
@@ -113,14 +116,14 @@ public sealed partial class Engine
 
         Debug.Assert(index < _captureHistory.Length);
 
-        return ref _captureHistory[index];
+        return ref _captureHistory.Pointer[index];
     }
 
     /// <summary>
     /// [12][64][12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
+    private unsafe int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
     {
         const int pieceOffset = 64 * 12 * 64;
         const int targetSquareOffset = 12 * 64;
@@ -140,7 +143,7 @@ public sealed partial class Engine
         var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
         Debug.Assert(ply2Index < _continuationHistory.Length);
 
-        return _continuationHistory[ply1Index] + _continuationHistory[ply2Index];
+        return _continuationHistory.Pointer[ply1Index] + _continuationHistory.Pointer[ply2Index];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -153,7 +156,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateContinuationHistory(int piece, int targetSquare, int ply, int rawHistoryBonus)
+    private unsafe void UpdateContinuationHistory(int piece, int targetSquare, int ply, int rawHistoryBonus)
     {
         const int pieceOffset = 64 * 12 * 64;
         const int targetSquareOffset = 12 * 64;
@@ -170,7 +173,7 @@ public sealed partial class Engine
             var ply1Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply1Move);
             Debug.Assert(ply1Index < _continuationHistory.Length);
 
-            ref var contHist1 = ref _continuationHistory[ply1Index];
+            ref var contHist1 = ref _continuationHistory.Pointer[ply1Index];
             contHist1 = (short)ScoreHistoryMove(contHist1, rawHistoryBonus);
 
             if (ply >= 2)
@@ -180,7 +183,7 @@ public sealed partial class Engine
                 var ply2Index = commonIndex + ContinuationHistoryPreviousMoveIndex(ply2Move);
                 Debug.Assert(ply2Index < _continuationHistory.Length);
 
-                ref var contHist2 = ref _continuationHistory[ply2Index];
+                ref var contHist2 = ref _continuationHistory.Pointer[ply2Index];
                 contHist2 = (short)ScoreHistoryMove(contHist2, rawHistoryBonus);
             }
         }
@@ -190,7 +193,7 @@ public sealed partial class Engine
     /// [12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ref Move CounterMove(int ply)
+    private unsafe ref Move CounterMove(int ply)
     {
         const int sourceSquareOffset = 64;
 
@@ -201,7 +204,7 @@ public sealed partial class Engine
 
         Debug.Assert(index < _counterMoves.Length);
 
-        return ref _counterMoves[index];
+        return ref _counterMoves.Pointer[index];
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -222,7 +225,7 @@ public sealed partial class Engine
         var pawnCorrHistIndex = (2 * pawnIndex) + side;
         Debug.Assert(pawnCorrHistIndex < (ulong)_pawnCorrHistory.Length);
 
-        ref var pawnCorrHistEntry = ref _pawnCorrHistory[pawnCorrHistIndex];
+        ref var pawnCorrHistEntry = ref _pawnCorrHistory.Pointer[pawnCorrHistIndex];
         pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
 
         // Non-pawn correction history - side to move
@@ -235,7 +238,7 @@ public sealed partial class Engine
 
         Debug.Assert(nonPawnCorrHistSTMIndex < (ulong)_nonPawnCorrHistory.Length);
 
-        ref var nonPawnSTMCorrHistEntry = ref _nonPawnCorrHistory[nonPawnCorrHistSTMIndex];
+        ref var nonPawnSTMCorrHistEntry = ref _nonPawnCorrHistory.Pointer[nonPawnCorrHistSTMIndex];
         nonPawnSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnSTMCorrHistEntry, scaledBonus, weight);
 
         // Non-pawn correction history - not side to move
@@ -247,7 +250,7 @@ public sealed partial class Engine
 
         Debug.Assert(nonPawnNoSTMCorrHistIndex < (ulong)_nonPawnCorrHistory.Length);
 
-        ref var nonPawnNoSTMCorrHistEntry = ref _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
+        ref var nonPawnNoSTMCorrHistEntry = ref _nonPawnCorrHistory.Pointer[nonPawnNoSTMCorrHistIndex];
 
         nonPawnNoSTMCorrHistEntry = UpdateCorrectionHistory(nonPawnNoSTMCorrHistEntry, scaledBonus, weight);
 
@@ -257,7 +260,7 @@ public sealed partial class Engine
         var minorCorrHistIndex = (2 * minorIndex) + side;
         Debug.Assert(minorCorrHistIndex < (ulong)_minorCorrHistory.Length);
 
-        ref var minorCorrHistEntry = ref _minorCorrHistory[minorCorrHistIndex];
+        ref var minorCorrHistEntry = ref _minorCorrHistory.Pointer[minorCorrHistIndex];
         minorCorrHistEntry = UpdateCorrectionHistory(minorCorrHistEntry, scaledBonus, weight);
 
         // Major correction history
@@ -266,7 +269,7 @@ public sealed partial class Engine
         var majorCorrHistIndex = (2 * majorIndex) + side;
         Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
 
-        ref var majorCorrHistEntry = ref _majorCorrHistory[majorCorrHistIndex];
+        ref var majorCorrHistEntry = ref _majorCorrHistory.Pointer[majorCorrHistIndex];
         majorCorrHistEntry = UpdateCorrectionHistory(majorCorrHistEntry, scaledBonus, weight);
 
         // Material correction history
@@ -275,7 +278,7 @@ public sealed partial class Engine
         var materialCorrHistIndex = (2 * materialIndex) + side;
         Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
 
-        ref var materialCorrHistEntry = ref _materialCorrHistory[materialCorrHistIndex];
+        ref var materialCorrHistEntry = ref _materialCorrHistory.Pointer[materialCorrHistIndex];
         materialCorrHistEntry = UpdateCorrectionHistory(materialCorrHistEntry, scaledBonus, weight);
 
         // Continuation correction history
@@ -287,7 +290,7 @@ public sealed partial class Engine
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            ref var continuationCorrHist = ref _continuationCorrHistory.Pointer[continuationCorrHistIndex];
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
@@ -299,7 +302,7 @@ public sealed partial class Engine
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            ref var continuationCorrHist = ref _continuationCorrHistory.Pointer[continuationCorrHistIndex];
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
@@ -311,7 +314,7 @@ public sealed partial class Engine
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            ref var continuationCorrHist = ref _continuationCorrHistory[continuationCorrHistIndex];
+            ref var continuationCorrHist = ref _continuationCorrHistory.Pointer[continuationCorrHistIndex];
             continuationCorrHist = UpdateCorrectionHistory(continuationCorrHist, scaledBonus, weight);
         }
 
@@ -349,7 +352,7 @@ public sealed partial class Engine
         var pawnCorrHistIndex = (2 * pawnIndex) + side;
         Debug.Assert(pawnCorrHistIndex < (ulong)_pawnCorrHistory.Length);
 
-        var pawnCorrHist = _pawnCorrHistory[pawnCorrHistIndex];
+        var pawnCorrHist = _pawnCorrHistory.Pointer[pawnCorrHistIndex];
 
         // Non-pawn correction history - side to move
         var nonPawnSTMoveIndex = position.NonPawnHash[side] & Constants.NonPawnCorrHistoryHashMask;
@@ -360,7 +363,7 @@ public sealed partial class Engine
 
         Debug.Assert(nonPawnSTMoveCorrHistIndex < (ulong)_nonPawnCorrHistory.Length);
 
-        var nonPawnSTMCorrHist = _nonPawnCorrHistory[nonPawnSTMoveCorrHistIndex];
+        var nonPawnSTMCorrHist = _nonPawnCorrHistory.Pointer[nonPawnSTMoveCorrHistIndex];
 
         // Non-pawn correction history - not side to move
         var nonPawnNoSTMIndex = position.NonPawnHash[oppositeSide] & Constants.NonPawnCorrHistoryHashMask;
@@ -371,7 +374,7 @@ public sealed partial class Engine
 
         Debug.Assert(nonPawnNoSTMCorrHistIndex < (ulong)_nonPawnCorrHistory.Length);
 
-        var nonPawnNoSTMCorrHist = _nonPawnCorrHistory[nonPawnNoSTMCorrHistIndex];
+        var nonPawnNoSTMCorrHist = _nonPawnCorrHistory.Pointer[nonPawnNoSTMCorrHistIndex];
 
         // Minor correction history - Sirius author original idea
         var minorHash = position.MinorHash ^ kingsHash;     // Add kings hash
@@ -379,7 +382,7 @@ public sealed partial class Engine
         var minorCorrHistIndex = (2 * minorIndex) + side;
         Debug.Assert(minorCorrHistIndex < (ulong)_minorCorrHistory.Length);
 
-        var minorCorrHist = _minorCorrHistory[minorCorrHistIndex];
+        var minorCorrHist = _minorCorrHistory.Pointer[minorCorrHistIndex];
 
         // Major correction history - Sirius author original idea
         var majorHash = position.MajorHash ^ kingsHash;     // Add kings hash
@@ -387,7 +390,7 @@ public sealed partial class Engine
         var majorCorrHistIndex = (2 * majorIndex) + side;
         Debug.Assert(majorCorrHistIndex < (ulong)_majorCorrHistory.Length);
 
-        var majorCorrHist = _majorCorrHistory[majorCorrHistIndex];
+        var majorCorrHist = _majorCorrHistory.Pointer[majorCorrHistIndex];
 
         // Material correction history - Caissa author original idea
         var materialHash = position.MaterialHash();
@@ -395,7 +398,7 @@ public sealed partial class Engine
         var materialCorrHistIndex = (2 * materialIndex) + side;
         Debug.Assert(materialCorrHistIndex < (ulong)_materialCorrHistory.Length);
 
-        var materialCorrHist = _materialCorrHistory[materialCorrHistIndex];
+        var materialCorrHist = _materialCorrHistory.Pointer[materialCorrHistIndex];
 
         // Continuation correction history - Motor author original idea
         int continuationCorrHist = 0;
@@ -410,7 +413,7 @@ public sealed partial class Engine
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            continuationCorrHist = _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist = _continuationCorrHistory.Pointer[continuationCorrHistIndex];
         }
 
         var previousPreviousPositionHash = Game.PreviousPositionHash(2);
@@ -421,7 +424,7 @@ public sealed partial class Engine
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            continuationCorrHist2 = _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist2 = _continuationCorrHistory.Pointer[continuationCorrHistIndex];
         }
 
         var previous4PositionsHash = Game.PreviousPositionHash(4);
@@ -432,7 +435,7 @@ public sealed partial class Engine
 
             Debug.Assert(continuationCorrHistIndex < _continuationCorrHistory.Length);
 
-            continuationCorrHist4 = _continuationCorrHistory[continuationCorrHistIndex];
+            continuationCorrHist4 = _continuationCorrHistory.Pointer[continuationCorrHistIndex];
         }
 
         // Correction aggregation
@@ -466,7 +469,7 @@ public sealed partial class Engine
         // Since history arrays are pinned arrays
         // These are no-op pinning as it does not influence the GC compaction
         // https://tooslowexception.com/pinned-object-heap-in-net-5/
-        fixed (short* histPtr = _pieceToQuietHistory)
+        fixed (short* histPtr = _pieceToQuietHistory.Array)
         {
             for (int i = 0; i < PieceToQuietHistoryLength; i += 4)
             {
@@ -488,7 +491,7 @@ public sealed partial class Engine
             }
         }
 
-        fixed (short* histPtr = _butterflyQuietHistory)
+        fixed (short* histPtr = _butterflyQuietHistory.Array)
         {
             for (int i = 0; i < ButterflyHistoryLength; i += 4)
             {
@@ -517,21 +520,21 @@ public sealed partial class Engine
 #pragma warning disable S1199 // Nested code blocks should not be used
 
     [Conditional("DEBUG")]
-    private void ValidatePVTable()
+    private unsafe void ValidatePVTable()
     {
         var position = Game.CurrentPosition;
         for (int i = 0; i < PVTable.Indexes[1]; ++i)
         {
-            if (_pVTable[i] == default)
+            if (_pVTable.Pointer[i] == default)
             {
                 for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
                 {
-                    Utils.Assert(_pVTable[j] == default, $"Not expecting a move in _pvTable[{j}]");
+                    Utils.Assert(_pVTable.Pointer[j] == default, $"Not expecting a move in _pvTable[{j}]");
                 }
                 break;
             }
 
-            var move = _pVTable[i];
+            var move = _pVTable.Pointer[i];
             TryParseMove(position, i, move);
 
 #pragma warning disable CA2000, IDISP001 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
@@ -547,7 +550,7 @@ public sealed partial class Engine
 #pragma warning restore IDISP003 // Dispose previous before re-assigning
         }
 
-        static unsafe void TryParseMove(Position position, int i, int move)
+        static void TryParseMove(Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
@@ -569,9 +572,11 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Move GetKillerMove(int ply, int index)
+    internal unsafe Move GetKillerMove(int ply, int index)
     {
-        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_killerMoves), (ply * 2) + index);
+        Debug.Assert((uint)((ply * 2) + index) < (uint)_killerMoves.Length);
+
+        return _killerMoves.Pointer[(ply * 2) + index];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -662,7 +667,7 @@ public sealed partial class Engine
     /// Assumes Configuration.EngineSettings.MaxDepth = 64
     /// </summary>
     [Conditional("DEBUG")]
-    private void PrintPvTable(int target = -1, int source = -1, int movesToCopy = 0, int depth = 0)
+    private unsafe void PrintPvTable(int target = -1, int source = -1, int movesToCopy = 0, int depth = 0)
     {
         if (depth != default)
         {
@@ -676,15 +681,15 @@ public sealed partial class Engine
 #pragma warning disable CS0618 // Type or member is obsolete
         Console.WriteLine(
 (target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
-$" {0,-3} {_pVTable[0].ToEPDString(),-6} {_pVTable[1].ToEPDString(),-6} {_pVTable[2].ToEPDString(),-6} {_pVTable[3].ToEPDString(),-6} {_pVTable[4].ToEPDString(),-6} {_pVTable[5].ToEPDString(),-6} {_pVTable[6].ToEPDString(),-6} {_pVTable[7].ToEPDString(),-6} {_pVTable[8].ToEPDString(),-6} {_pVTable[9].ToEPDString(),-6} {_pVTable[10].ToEPDString(),-6}" + Environment.NewLine +
-$" {64,-3}        {_pVTable[64].ToEPDString(),-6} {_pVTable[65].ToEPDString(),-6} {_pVTable[66].ToEPDString(),-6} {_pVTable[67].ToEPDString(),-6} {_pVTable[68].ToEPDString(),-6} {_pVTable[69].ToEPDString(),-6} {_pVTable[70].ToEPDString(),-6} {_pVTable[71].ToEPDString(),-6} {_pVTable[72].ToEPDString(),-6} {_pVTable[73].ToEPDString(),-6}" + Environment.NewLine +
-$" {127,-3}               {_pVTable[127].ToEPDString(),-6} {_pVTable[128].ToEPDString(),-6} {_pVTable[129].ToEPDString(),-6} {_pVTable[130].ToEPDString(),-6} {_pVTable[131].ToEPDString(),-6} {_pVTable[132].ToEPDString(),-6} {_pVTable[133].ToEPDString(),-6} {_pVTable[134].ToEPDString(),-6} {_pVTable[135].ToEPDString(),-6}" + Environment.NewLine +
-$" {189,-3}                      {_pVTable[189].ToEPDString(),-6} {_pVTable[190].ToEPDString(),-6} {_pVTable[191].ToEPDString(),-6} {_pVTable[192].ToEPDString(),-6} {_pVTable[193].ToEPDString(),-6} {_pVTable[194].ToEPDString(),-6} {_pVTable[195].ToEPDString(),-6} {_pVTable[196].ToEPDString(),-6}" + Environment.NewLine +
-$" {250,-3}                             {_pVTable[250].ToEPDString(),-6} {_pVTable[251].ToEPDString(),-6} {_pVTable[252].ToEPDString(),-6} {_pVTable[253].ToEPDString(),-6} {_pVTable[254].ToEPDString(),-6} {_pVTable[255].ToEPDString(),-6} {_pVTable[256].ToEPDString(),-6}" + Environment.NewLine +
-$" {310,-3}                                    {_pVTable[310].ToEPDString(),-6} {_pVTable[311].ToEPDString(),-6} {_pVTable[312].ToEPDString(),-6} {_pVTable[313].ToEPDString(),-6} {_pVTable[314].ToEPDString(),-6} {_pVTable[315].ToEPDString(),-6}" + Environment.NewLine +
-$" {369,-3}                                           {_pVTable[369].ToEPDString(),-6} {_pVTable[370].ToEPDString(),-6} {_pVTable[371].ToEPDString(),-6} {_pVTable[372].ToEPDString(),-6} {_pVTable[373].ToEPDString(),-6}" + Environment.NewLine +
-$" {427,-3}                                                  {_pVTable[427].ToEPDString(),-6} {_pVTable[428].ToEPDString(),-6} {_pVTable[429].ToEPDString(),-6} {_pVTable[430].ToEPDString(),-6}" + Environment.NewLine +
-$" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
+$" {0,-3} {_pVTable.Pointer[0].ToEPDString(),-6} {_pVTable.Pointer[1].ToEPDString(),-6} {_pVTable.Pointer[2].ToEPDString(),-6} {_pVTable.Pointer[3].ToEPDString(),-6} {_pVTable.Pointer[4].ToEPDString(),-6} {_pVTable.Pointer[5].ToEPDString(),-6} {_pVTable.Pointer[6].ToEPDString(),-6} {_pVTable.Pointer[7].ToEPDString(),-6} {_pVTable.Pointer[8].ToEPDString(),-6} {_pVTable.Pointer[9].ToEPDString(),-6} {_pVTable.Pointer[10].ToEPDString(),-6}" + Environment.NewLine +
+$" {64,-3}        {_pVTable.Pointer[64].ToEPDString(),-6} {_pVTable.Pointer[65].ToEPDString(),-6} {_pVTable.Pointer[66].ToEPDString(),-6} {_pVTable.Pointer[67].ToEPDString(),-6} {_pVTable.Pointer[68].ToEPDString(),-6} {_pVTable.Pointer[69].ToEPDString(),-6} {_pVTable.Pointer[70].ToEPDString(),-6} {_pVTable.Pointer[71].ToEPDString(),-6} {_pVTable.Pointer[72].ToEPDString(),-6} {_pVTable.Pointer[73].ToEPDString(),-6}" + Environment.NewLine +
+$" {127,-3}               {_pVTable.Pointer[127].ToEPDString(),-6} {_pVTable.Pointer[128].ToEPDString(),-6} {_pVTable.Pointer[129].ToEPDString(),-6} {_pVTable.Pointer[130].ToEPDString(),-6} {_pVTable.Pointer[131].ToEPDString(),-6} {_pVTable.Pointer[132].ToEPDString(),-6} {_pVTable.Pointer[133].ToEPDString(),-6} {_pVTable.Pointer[134].ToEPDString(),-6} {_pVTable.Pointer[135].ToEPDString(),-6}" + Environment.NewLine +
+$" {189,-3}                      {_pVTable.Pointer[189].ToEPDString(),-6} {_pVTable.Pointer[190].ToEPDString(),-6} {_pVTable.Pointer[191].ToEPDString(),-6} {_pVTable.Pointer[192].ToEPDString(),-6} {_pVTable.Pointer[193].ToEPDString(),-6} {_pVTable.Pointer[194].ToEPDString(),-6} {_pVTable.Pointer[195].ToEPDString(),-6} {_pVTable.Pointer[196].ToEPDString(),-6}" + Environment.NewLine +
+$" {250,-3}                             {_pVTable.Pointer[250].ToEPDString(),-6} {_pVTable.Pointer[251].ToEPDString(),-6} {_pVTable.Pointer[252].ToEPDString(),-6} {_pVTable.Pointer[253].ToEPDString(),-6} {_pVTable.Pointer[254].ToEPDString(),-6} {_pVTable.Pointer[255].ToEPDString(),-6} {_pVTable.Pointer[256].ToEPDString(),-6}" + Environment.NewLine +
+$" {310,-3}                                    {_pVTable.Pointer[310].ToEPDString(),-6} {_pVTable.Pointer[311].ToEPDString(),-6} {_pVTable.Pointer[312].ToEPDString(),-6} {_pVTable.Pointer[313].ToEPDString(),-6} {_pVTable.Pointer[314].ToEPDString(),-6} {_pVTable.Pointer[315].ToEPDString(),-6}" + Environment.NewLine +
+$" {369,-3}                                           {_pVTable.Pointer[369].ToEPDString(),-6} {_pVTable.Pointer[370].ToEPDString(),-6} {_pVTable.Pointer[371].ToEPDString(),-6} {_pVTable.Pointer[372].ToEPDString(),-6} {_pVTable.Pointer[373].ToEPDString(),-6}" + Environment.NewLine +
+$" {427,-3}                                                  {_pVTable.Pointer[427].ToEPDString(),-6} {_pVTable.Pointer[428].ToEPDString(),-6} {_pVTable.Pointer[429].ToEPDString(),-6} {_pVTable.Pointer[430].ToEPDString(),-6}" + Environment.NewLine +
+$" {484,-3}                                                         {_pVTable.Pointer[484].ToEPDString(),-6} {_pVTable.Pointer[485].ToEPDString(),-6} {_pVTable.Pointer[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
 #pragma warning restore CS0618 // Type or member is obsolete
     }

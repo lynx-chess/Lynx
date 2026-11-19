@@ -433,7 +433,9 @@ public unsafe partial class Position : IDisposable
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
-            extraPhaseIfIncremental = GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
+
+            Debug.Assert((uint)promotedPiece < 12);
+            extraPhaseIfIncremental = EvaluationTablesPinned.GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
         }
 
         Debug.Assert((uint)sourceSquare < BoardLength);
@@ -719,8 +721,10 @@ public unsafe partial class Position : IDisposable
         // For captures and en-passant
         if (IsIncrementalEval && capturedPiece != (int)Piece.None)
         {
+            Debug.Assert((uint)capturedPiece < 12);
+
             IncrementalEvalAccumulator -= PSQT(oppositeSideBucket, sameSideBucket, capturedPiece, capturedSquare);
-            IncrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
+            IncrementalPhaseAccumulator -= EvaluationTablesPinned.GamePhaseByPiece[capturedPiece];
         }
 
         _side = (Side)oppositeSide;

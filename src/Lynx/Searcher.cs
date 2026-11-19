@@ -1025,6 +1025,7 @@ public sealed class Searcher : IDisposable
         _ = ZobristTable.SideHash();
         _ = Masks.IsolatedPawnMasks;
         _ = EvaluationConstants.HistoryBonus[1];
+        _ = SearchTablesPinned.HistoryBonus;
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();
         _ = MoveExtensions.UCIString(0);

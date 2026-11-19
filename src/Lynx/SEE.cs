@@ -11,7 +11,7 @@ public static unsafe class SEE
 {
     #pragma warning disable IDE0055 // Discard formatting in this region
 
-    private static ReadOnlySpan<int> PieceValues =>
+    internal static ReadOnlySpan<int> PieceValues =>
     [
         100, 450, 450, 650, 1250, 0,
         100, 450, 450, 650, 1250, 0,
@@ -19,6 +19,14 @@ public static unsafe class SEE
     ];
 
     #pragma warning restore IDE0055
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int PieceValue(int piece)
+    {
+        Debug.Assert((uint)piece < 13);
+
+        return SearchTablesPinned.SEEPieceValues[piece];
+    }
 
     /// <summary>
     /// Doesn't handle non-captures, promotions and en-passants
@@ -32,8 +40,7 @@ public static unsafe class SEE
 
         var sideToMove = position.Side;
 
-        var pieceValues = PieceValues;
-        var score = pieceValues[move.CapturedPiece()] - threshold;    // Gain() - threshold
+        var score = PieceValue(move.CapturedPiece()) - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -42,7 +49,7 @@ public static unsafe class SEE
         }
 
         var next = move.Piece();
-        score -= pieceValues[next];
+        score -= PieceValue(next);
 
         // If risking our piece being fully lost and the exchange value is still >= 0
         if (score >= 0)
@@ -89,7 +96,7 @@ public static unsafe class SEE
             // Removing used pieces from attackers
             attackers &= occupancy;
 
-            score = -score - 1 - pieceValues[nextPiece];
+            score = -score - 1 - PieceValue(nextPiece);
             us = Utils.OppositeSide(us);
 
             if (score >= 0)
@@ -124,13 +131,11 @@ public static unsafe class SEE
             return false;
         }
 
-        var pieceValues = PieceValues;
-
         var next = move.PromotedPiece() != default
             ? move.PromotedPiece()
             : move.Piece();
 
-        score -= pieceValues[next];
+        score -= PieceValue(next);
 
         // If risking our piece being fully lost and the exchange value is still >= 0
         if (score >= 0)
@@ -177,7 +182,7 @@ public static unsafe class SEE
             // Removing used pieces from attackers
             attackers &= occupancy;
 
-            score = -score - 1 - pieceValues[nextPiece];
+            score = -score - 1 - PieceValue(nextPiece);
             us = Utils.OppositeSide(us);
 
             if (score >= 0)
@@ -206,17 +211,15 @@ public static unsafe class SEE
 
         if (move.IsEnPassant())
         {
-            return PieceValues[(int)Piece.P];
+            return PieceValue((int)Piece.P);
         }
 
         var promotedPiece = move.PromotedPiece();
 
-        var pieceValues = PieceValues;
-
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
-            ? pieceValues[move.CapturedPiece()]
-            : pieceValues[promotedPiece] - pieceValues[(int)Piece.P] + pieceValues[move.CapturedPiece()];
+            ? PieceValue(move.CapturedPiece())
+            : PieceValue(promotedPiece) - PieceValue((int)Piece.P) + PieceValue(move.CapturedPiece());
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 

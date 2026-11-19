@@ -38,13 +38,13 @@ internal sealed unsafe class PerftMovePickerWalker
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         // Stale moves from other nodes: they're valid here sometimes, so all stages (and their deduplication) get exercised
-        _engine._killerMoves[ply * 2] = _lastQuietMoves[ply];
-        _engine._killerMoves[(ply * 2) + 1] = _beforeLastQuietMoves[ply];
+        _engine._killerMoves.Pointer[ply * 2] = _lastQuietMoves[ply];
+        _engine._killerMoves.Pointer[(ply * 2) + 1] = _beforeLastQuietMoves[ply];
 
         if (ply >= 1)
         {
             var previousMove = _engine.Game.Stack(ply - 1).Move;
-            _engine._counterMoves[(previousMove.Piece() * 64) + previousMove.TargetSquare()] = _lastQuietMoves[ply];
+            _engine._counterMoves.Pointer[(previousMove.Piece() * 64) + previousMove.TargetSquare()] = _lastQuietMoves[ply];
         }
 
         var movePicker = new MovePicker(_engine, position, (ShortMove)_lastMoves[ply], oppositeSideAttacks, ply, moves, moveScores, isInCheck: position.IsInCheck(), capturesOnly: false);
