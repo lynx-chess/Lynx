@@ -25,7 +25,7 @@ public static class AttackGenerator
 
     public static Bitboard[] InitializeKnightAttacks()
     {
-        Bitboard[] knightAttacks = GC.AllocateArray<Bitboard>(64, pinned: true);
+        Bitboard[] knightAttacks = new Bitboard[64];
 
         for (int square = 0; square < 64; ++square)
         {
@@ -37,7 +37,7 @@ public static class AttackGenerator
 
     public static Bitboard[] InitializeKingAttacks()
     {
-        Bitboard[] kingAttacks = GC.AllocateArray<Bitboard>(64, pinned: true);
+        Bitboard[] kingAttacks = new Bitboard[64];
 
         for (int square = 0; square < 64; ++square)
         {

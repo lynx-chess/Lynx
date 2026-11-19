@@ -1,7 +1,10 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
+
+using static Lynx.PinnedArrays;
 
 namespace Lynx;
 
@@ -30,12 +33,6 @@ public static unsafe class Attacks
         public int Shift;
     }
 
-    /// <summary>
-    /// Keeps alive the pinned arrays that the pointers in this class point into:
-    /// knight, king and pawn attacks, rays between squares, packed magic and PEXT attacks and their entries
-    /// </summary>
-    private static readonly List<Array> _keepAlive = [];
-
     private static readonly PEXTEntry* _bishopPEXTEntries;
     private static readonly PEXTEntry* _rookPEXTEntries;
 
@@ -59,12 +56,12 @@ public static unsafe class Attacks
     static Attacks()
 #pragma warning restore CA1810 // Initialize reference type static fields inline
     {
-        KingAttacks = Pin(AttackGenerator.InitializeKingAttacks());
-        KnightAttacks = Pin(AttackGenerator.InitializeKnightAttacks());
-        _pawnAttacks = Pin(AttackGenerator.InitializePawnAttacks(), 64);
+        KingAttacks = CopyToPinnedArray(AttackGenerator.InitializeKingAttacks());
+        KnightAttacks = CopyToPinnedArray(AttackGenerator.InitializeKnightAttacks());
+        _pawnAttacks = FlattenToPinnedArray(AttackGenerator.InitializePawnAttacks(), stride: 64);
 
         var (magicAttacks, magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
-        _keepAlive.Add(magicAttacks);
+        KeepAlive(magicAttacks);
 
         _bishopMagicEntries = KeepAlive(magicEntries);
         _rookMagicEntries = _bishopMagicEntries + 64;
@@ -80,7 +77,7 @@ public static unsafe class Attacks
             _rookPEXTEntries = null;
         }
 
-        _raysBetween = KeepAlive(GC.AllocateArray<Bitboard>(64 * 64, pinned: true));
+        _raysBetween = AllocatePinnedArray(64 * 64, out Bitboard[] raysBetween);
 
         for (int square1 = 0; square1 < 64; ++square1)
         {
@@ -100,56 +97,48 @@ public static unsafe class Attacks
 
                 if (file1 == file2 || rank1 == rank2)
                 {
-                    _raysBetween[(square1 * 64) + square2] = RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
+                    raysBetween[(square1 * 64) + square2] = RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
                 }
                 else if (file1 - rank1 == file2 - rank2
                     || file1 + rank1 == file2 + rank2)
                 {
-                    _raysBetween[(square1 * 64) + square2] = BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
+                    raysBetween[(square1 * 64) + square2] = BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
                 }
             }
         }
     }
 
-    private static Bitboard* Pin(Bitboard[] source)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Bitboard PawnAttacks(int side, int square)
     {
-        var pinned = GC.AllocateUninitializedArray<Bitboard>(source.Length, pinned: true);
-        source.CopyTo(pinned, 0);
+        Debug.Assert((uint)side < 2);
+        Debug.Assert((uint)square < 64);
 
-        return KeepAlive(pinned);
-    }
-
-    private static Bitboard* Pin(Bitboard[][] source, int stride)
-    {
-        var pinned = GC.AllocateArray<Bitboard>(source.Length * stride, pinned: true);
-        for (int i = 0; i < source.Length; ++i)
-        {
-            source[i].CopyTo(pinned, i * stride);
-        }
-
-        return KeepAlive(pinned);
-    }
-
-    private static T* KeepAlive<T>(T[] pinned)
-        where T : unmanaged
-    {
-        _keepAlive.Add(pinned);
-
-        return (T*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(pinned));
+        return _pawnAttacks[(side * 64) + square];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Bitboard PawnAttacks(int side, int square) => _pawnAttacks[(side * 64) + square];
+    public static Bitboard* PawnAttacks(int side)
+    {
+        Debug.Assert((uint)side < 2);
+
+        return _pawnAttacks + (side * 64);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Bitboard* PawnAttacks(int side) => _pawnAttacks + (side * 64);
+    public static Bitboard RaysBetween(int square1, int square2)
+    {
+        Debug.Assert((uint)square1 < 64);
+        Debug.Assert((uint)square2 < 64);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Bitboard RaysBetween(int square1, int square2) => _raysBetween[(square1 * 64) + square2];
+        return _raysBetween[(square1 * 64) + square2];
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard BishopAttacks(int squareIndex, Bitboard occupancy)
     {
+        Debug.Assert((uint)squareIndex < 64);
+
         if (Bmi2.X64.IsSupported)
         {
             var entry = _bishopPEXTEntries + squareIndex;
@@ -166,6 +155,8 @@ public static unsafe class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard MagicNumbersBishopAttacks(int squareIndex, Bitboard occupancy)
     {
+        Debug.Assert((uint)squareIndex < 64);
+
         var entry = _bishopMagicEntries + squareIndex;
 
         return entry->Attacks[((occupancy & entry->Mask) * entry->Magic) >> entry->Shift];
@@ -178,6 +169,8 @@ public static unsafe class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard RookAttacks(int squareIndex, Bitboard occupancy)
     {
+        Debug.Assert((uint)squareIndex < 64);
+
         if (Bmi2.X64.IsSupported)
         {
             var entry = _rookPEXTEntries + squareIndex;
@@ -190,6 +183,8 @@ public static unsafe class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard MagicNumbersRookAttacks(int squareIndex, Bitboard occupancy)
     {
+        Debug.Assert((uint)squareIndex < 64);
+
         var entry = _rookMagicEntries + squareIndex;
 
         return entry->Attacks[((occupancy & entry->Mask) * entry->Magic) >> entry->Shift];
@@ -220,8 +215,8 @@ public static unsafe class Attacks
     /// </summary>
     private static PEXTEntry* InitializeBishopAndRookPEXTAttacks()
     {
-        var attacks = KeepAlive(GC.AllocateArray<Bitboard>(5248 + 102400, pinned: true));
-        var entries = KeepAlive(GC.AllocateArray<PEXTEntry>(128, pinned: true));
+        var attacksPointer = AllocatePinnedArray(5248 + 102400, out Bitboard[] attacks);
+        var entriesPointer = AllocatePinnedArray(128, out PEXTEntry[] entries);
 
         var bishopOccupancyMasks = AttackGenerator.InitializeBishopOccupancy();
         var rookOccupancyMasks = AttackGenerator.InitializeRookOccupancy();
@@ -232,7 +227,7 @@ public static unsafe class Attacks
         for (int square = 0; square < 64; square++)
         {
             ulong bishopMask = bishopOccupancyMasks[square];
-            entries[square] = new PEXTEntry { Mask = bishopMask, Attacks = attacks + index };
+            entries[square] = new PEXTEntry { Mask = bishopMask, Attacks = attacksPointer + index };
 
             ulong patterns = 1UL << BitOperations.PopCount(bishopMask);
 
@@ -247,7 +242,7 @@ public static unsafe class Attacks
         for (int square = 0; square < 64; square++)
         {
             ulong rookMask = rookOccupancyMasks[square];
-            entries[64 + square] = new PEXTEntry { Mask = rookMask, Attacks = attacks + index };
+            entries[64 + square] = new PEXTEntry { Mask = rookMask, Attacks = attacksPointer + index };
 
             ulong patterns = 1UL << BitOperations.PopCount(rookMask);
 
@@ -258,6 +253,8 @@ public static unsafe class Attacks
             }
         }
 
-        return entries;
+        Debug.Assert(index == (ulong)attacks.Length);
+
+        return entriesPointer;
     }
 }

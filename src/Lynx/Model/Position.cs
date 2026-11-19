@@ -1095,12 +1095,16 @@ public unsafe partial class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByKnights(int squareIndex, int offset)
     {
+        Debug.Assert((uint)squareIndex < BoardLength);
+
         return (Attacks.KnightAttacks[squareIndex] & _pieceBitboards[(int)Piece.N + offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByKing(int squareIndex, int offset)
     {
+        Debug.Assert((uint)squareIndex < BoardLength);
+
         return (Attacks.KingAttacks[squareIndex] & _pieceBitboards[(int)Piece.K + offset]).NotEmpty();
     }
 

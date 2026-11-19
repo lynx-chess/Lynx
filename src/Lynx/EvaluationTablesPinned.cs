@@ -1,5 +1,4 @@
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using static Lynx.PinnedArrays;
 
 namespace Lynx;
 
@@ -9,8 +8,6 @@ namespace Lynx;
 /// </summary>
 public static unsafe class EvaluationTablesPinned
 {
-    private static readonly List<Array> _keepAlive = [];
-
     public static readonly int* PieceProtectedByPawnBonus = CopyToPinnedArray(EvaluationParams.PieceProtectedByPawnBonus);
     public static readonly int* TotalKingRingAttacksBonus = CopyToPinnedArray(EvaluationParams.TotalKingRingAttacksBonus);
     public static readonly int* PawnIslandsBonus = CopyToPinnedArray(EvaluationParams.PawnIslandsBonus);
@@ -57,34 +54,4 @@ public static unsafe class EvaluationTablesPinned
     public static readonly ulong* IsolatedPawnMasks = CopyToPinnedArray(Masks.IsolatedPawnMasks);
 
     public static readonly int* ChebyshevDistance = FlattenToPinnedArray(Constants.ChebyshevDistance, stride: 64);
-
-    private static T* CopyToPinnedArray<T>(T[] source)
-        where T : unmanaged
-    {
-        var pinned = GC.AllocateUninitializedArray<T>(source.Length, pinned: true);
-
-        source.CopyTo(pinned, 0);
-        _keepAlive.Add(pinned);
-
-        return (T*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(pinned));
-    }
-
-    private static T* FlattenToPinnedArray<T>(T[][] source, int stride)
-        where T : unmanaged
-    {
-        var pinned = GC.AllocateArray<T>(source.Length * stride, pinned: true);
-        for (int i = 0; i < source.Length; ++i)
-        {
-            if (source[i].Length > stride)
-            {
-                throw new LynxException($"A larger {nameof(stride)} is needed, since inner array length ({source[i].Length}) is greater than the specified one ({stride})");
-            }
-
-            source[i].CopyTo(pinned, i * stride);
-        }
-
-        _keepAlive.Add(pinned);
-
-        return (T*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(pinned));
-    }
 }
