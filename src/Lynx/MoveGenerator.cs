@@ -624,6 +624,8 @@ public static unsafe class MoveGenerator
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
+        Debug.Assert((uint)sourceSquare < Position.BoardLength);
+
         var attacks = Attacks.KingAttacks[sourceSquare]
             & ~position.OccupancyBitboards[(int)position.Side]
             & ~oppositeSideAttacks;
@@ -646,6 +648,8 @@ public static unsafe class MoveGenerator
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
+        Debug.Assert((uint)sourceSquare < Position.BoardLength);
+
         var attacks = Attacks.KingAttacks[sourceSquare]
             & ~occupancy
             & ~oppositeSideKingAttacks;
@@ -667,6 +671,8 @@ public static unsafe class MoveGenerator
     {
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var oppositeSide = Utils.OppositeSide((int)position.Side);
+
+        Debug.Assert((uint)sourceSquare < Position.BoardLength);
 
         var attacks = Attacks.KingAttacks[sourceSquare]
             & position.OccupancyBitboards[oppositeSide]
@@ -901,6 +907,8 @@ public static unsafe class MoveGenerator
         var sourceSquare = position.PieceBitboards[piece].GetLS1BIndex();
         var occupancy = position.OccupancyBitboards[(int)Side.Both];
 
+        Debug.Assert((uint)sourceSquare < Position.BoardLength);
+
         var attacks = Attacks.KingAttacks[sourceSquare]
             & ~position.OccupancyBitboards[(int)position.Side]
             & ~oppositeSideAttacks;
@@ -924,6 +932,7 @@ public static unsafe class MoveGenerator
     internal static Bitboard PieceAttacks(int piece, int square, Bitboard occupancy)
     {
         Debug.Assert(piece != (int)Piece.None && piece != (int)Piece.Unknown);
+        Debug.Assert((uint)square < Position.BoardLength);
 
         return piece switch
         {
