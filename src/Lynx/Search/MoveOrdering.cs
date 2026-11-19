@@ -105,11 +105,13 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreQuietMove(Move move, int ply, Bitboard oppositeSideAttacks)
+    internal int ScoreQuietMove(Move move, int ply, Bitboard oppositeSideAttacks, in LesserAttackers lesserAttackers)
     {
-        var score = BaseMoveScore + QuietHistoryEntry(move, oppositeSideAttacks);
+        var score = BaseMoveScore
+            + QuietHistoryEntry(move, oppositeSideAttacks)
+            + lesserAttackers.Score(move);
 
-        if(ply >= 1)
+        if (ply >= 1)
         {
             score += ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply);
         }

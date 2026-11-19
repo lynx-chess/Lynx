@@ -361,7 +361,9 @@ public sealed partial class Engine
 
         var ttBestMove = ttEntry.BestMove;
 
-        var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
+        var oppositeSide = Utils.OppositeSide((int)position.Side);
+        var oppositeSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
+        var oppositeSideAttacksByPiece = evaluationContext.Attacks.Slice(Utils.PieceOffset(oppositeSide), (int)Piece.K + 1);
 
         var nodeType = NodeType.Alpha;
         int bestScore = EvaluationConstants.MinEval;
@@ -375,7 +377,7 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: false);
+        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, oppositeSideAttacksByPiece, ply, moves, moveScores, isInCheck: isInCheck);
 
         while (movePicker.TryGetNext(out var move, out var moveScore))
         {
