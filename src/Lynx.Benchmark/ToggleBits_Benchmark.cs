@@ -113,7 +113,7 @@ using Lynx.Model;
 
 namespace Lynx.Benchmark;
 
-public class ToggleBits_Benchmark : BaseBenchmark
+public unsafe class ToggleBits_Benchmark : BaseBenchmark
 {
     public static IEnumerable<string> Data =>
     [
@@ -130,7 +130,7 @@ public class ToggleBits_Benchmark : BaseBenchmark
     public Position SetPop(string fen)
     {
         var position = new Position(fen);
-        for (int b = 0; b < position.PieceBitboards.Length; ++b)
+        for (int b = 0; b < Position.PieceBitboardsLength; ++b)
         {
             var bb = position.PieceBitboards[b];
             for (int i = 0; i < 32; ++i)
@@ -151,7 +151,7 @@ public class ToggleBits_Benchmark : BaseBenchmark
     public Position Toggle(string fen)
     {
         var position = new Position(fen);
-        for (int b = 0; b < position.PieceBitboards.Length; ++b)
+        for (int b = 0; b < Position.PieceBitboardsLength; ++b)
         {
             var bb = position.PieceBitboards[b];
             for (int i = 0; i < 32; ++i)

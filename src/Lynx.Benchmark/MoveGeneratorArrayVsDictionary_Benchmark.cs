@@ -24,7 +24,7 @@ using Lynx.Model;
 
 namespace Lynx.Benchmark;
 
-public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
+public unsafe class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
 {
     public static IEnumerable<string> Data =>
         [
@@ -88,14 +88,14 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
 #pragma warning disable IDE0350 // Use implicitly typed lambda
     private static readonly Func<int, Bitboard, ulong>[] _pieceAttacksArray =
     [
-        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.White, origin),
         (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
         (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-        (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+        (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.Black, origin),
         (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
@@ -105,8 +105,8 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
 
     private static readonly Dictionary<int, Func<int, Bitboard, ulong>> _pieceAttacksDictionary = new()
     {
-        [(int)Piece.P] = (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
-        [(int)Piece.p] = (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+        [(int)Piece.P] = (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.White, origin),
+        [(int)Piece.p] = (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.Black, origin),
 
         [(int)Piece.K] = (int origin, Bitboard _) => Attacks.KingAttacks[origin],
         [(int)Piece.k] = (int origin, Bitboard _) => Attacks.KingAttacks[origin],

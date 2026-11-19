@@ -71,7 +71,7 @@ using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
 namespace Lynx.Benchmark;
-public class ZobristPositionHash_Benchmark : BaseBenchmark
+public unsafe class ZobristPositionHash_Benchmark : BaseBenchmark
 {
     public static IEnumerable<Position> Data =>
     [

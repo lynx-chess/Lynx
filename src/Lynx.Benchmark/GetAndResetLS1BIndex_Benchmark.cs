@@ -144,7 +144,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
-public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
+public unsafe class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
 {
     public static IEnumerable<Position> Data =>
     [

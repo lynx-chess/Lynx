@@ -76,13 +76,13 @@ public unsafe partial class Position : IDisposable
 
     public ulong UniqueIdentifier => _uniqueIdentifier;
     public ulong KingPawnUniqueIdentifier => _kingPawnUniqueIdentifier;
-    public Span<ulong> NonPawnHash => new(_nonPawnHash, NonPawnHashLength);
     public ulong MinorHash => _minorHash;
     public ulong MajorHash => _majorHash;
 
-    public Span<Bitboard> PieceBitboards => new(_pieceBitboards, PieceBitboardsLength);
-    public Span<Bitboard> OccupancyBitboards => new(_occupancyBitboards, OccupancyBitboardsLength);
-    public Span<int> Board => new(_board, BoardLength);
+    public ulong* NonPawnHash => _nonPawnHash;
+    public Bitboard* PieceBitboards => _pieceBitboards;
+    public Bitboard* OccupancyBitboards => _occupancyBitboards;
+    public int* Board => _board;
     public Side Side => _side;
     public BoardSquare EnPassant => _enPassant;
 
@@ -176,7 +176,10 @@ public unsafe partial class Position : IDisposable
 
     public ParseFENResult PopulateFrom(ReadOnlySpan<char> fen)
     {
-        var parsedFEN = FENParser.ParseFEN(fen, PieceBitboards, OccupancyBitboards, Board);
+        var parsedFEN = FENParser.ParseFEN(fen,
+            new Span<Bitboard>(_pieceBitboards, PieceBitboardsLength),
+            new Span<Bitboard>(_occupancyBitboards, OccupancyBitboardsLength),
+            new Span<int>(_board, BoardLength));
 
         _side = parsedFEN.Side;
         _castle = parsedFEN.Castle;
@@ -977,8 +980,8 @@ public unsafe partial class Position : IDisposable
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
-            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
+            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
+            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -995,8 +998,8 @@ public unsafe partial class Position : IDisposable
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
-            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
+            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
+            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -1017,7 +1020,7 @@ public unsafe partial class Position : IDisposable
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p - offset] & Attacks.PawnAttacks[side][square])
+            | (_pieceBitboards[(int)Piece.p - offset] & Attacks.PawnAttacks(side, square))
             | (_pieceBitboards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
     }
 
@@ -1086,7 +1089,7 @@ public unsafe partial class Position : IDisposable
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & _pieceBitboards[offset]).NotEmpty();
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & _pieceBitboards[offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1249,7 +1252,7 @@ public unsafe partial class Position : IDisposable
 
         sb.Append(
             (_enPassant == BoardSquare.noSquare
-                || (Attacks.PawnAttacks[Utils.OppositeSide((int)_side)][(int)_enPassant]
+                || (Attacks.PawnAttacks(Utils.OppositeSide((int)_side), (int)_enPassant)
                     & _pieceBitboards[(int)Piece.P + Utils.PieceOffset((int)_side)]) == 0)
             ? "-"
             : Constants.Coordinates[(int)_enPassant]);

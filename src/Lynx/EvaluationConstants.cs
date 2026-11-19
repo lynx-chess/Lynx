@@ -40,7 +40,7 @@ public static class EvaluationConstants
 
     public const int CorrHistScaleFactor = 100;
 
-    static EvaluationConstants()
+    static unsafe EvaluationConstants()
     {
         var quietReductions = LMRReductions[0] = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
         var noisyReductions = LMRReductions[1] = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];

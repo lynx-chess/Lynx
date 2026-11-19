@@ -92,7 +92,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
-public class GetBit_Benchmark : BaseBenchmark
+public unsafe class GetBit_Benchmark : BaseBenchmark
 {
     public static IEnumerable<Position> Data =>
     [

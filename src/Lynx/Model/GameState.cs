@@ -5,7 +5,7 @@ namespace Lynx.Model;
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
 [StructLayout(LayoutKind.Sequential)]
-public readonly struct GameState
+public readonly unsafe struct GameState
 {
     public readonly ulong ZobristKey;
 

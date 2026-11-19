@@ -29,7 +29,7 @@ public static class BenchmarkExtensions
     public static Bitboard WithoutLS1BBenchmark(this Bitboard board) => board & (board - 1);
 }
 
-public class ResetLS1BvsWithoutLS1B_Benchmark : BaseBenchmark
+public unsafe class ResetLS1BvsWithoutLS1B_Benchmark : BaseBenchmark
 {
     public static IEnumerable<Position> Data =>
     [
@@ -47,14 +47,14 @@ public class ResetLS1BvsWithoutLS1B_Benchmark : BaseBenchmark
     {
         ulong counter = 0;
 
-        for (int i = 0; i < position.PieceBitboards.Length; ++i)
+        for (int i = 0; i < Position.PieceBitboardsLength; ++i)
         {
             var bitboard = position.PieceBitboards[i];
             bitboard.ResetLS1BBenchmark();
             counter += bitboard;
         }
 
-        for (int i = 0; i < position.OccupancyBitboards.Length; ++i)
+        for (int i = 0; i < Position.OccupancyBitboardsLength; ++i)
         {
             var bitboard = position.OccupancyBitboards[i];
             bitboard.ResetLS1BBenchmark();
@@ -70,13 +70,13 @@ public class ResetLS1BvsWithoutLS1B_Benchmark : BaseBenchmark
     {
         ulong counter = 0;
 
-        for (int i = 0; i < position.PieceBitboards.Length; ++i)
+        for (int i = 0; i < Position.PieceBitboardsLength; ++i)
         {
             var bitboard = position.PieceBitboards[i];
             counter += bitboard.WithoutLS1BBenchmark();
         }
 
-        for (int i = 0; i < position.OccupancyBitboards.Length; ++i)
+        for (int i = 0; i < Position.OccupancyBitboardsLength; ++i)
         {
             var bitboard = position.OccupancyBitboards[i];
             counter += bitboard.WithoutLS1BBenchmark();

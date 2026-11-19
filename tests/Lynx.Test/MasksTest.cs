@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test;
 
-public class MasksTest
+public unsafe class MasksTest
 {
     [Explicit]
     [Category(Categories.LongRunning)]  // Can't run on debug due to position validation

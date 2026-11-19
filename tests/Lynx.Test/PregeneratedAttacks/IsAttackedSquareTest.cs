@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test.PregeneratedAttacks;
 
-public class IsAttackedSquareTest
+public unsafe class IsAttackedSquareTest
 {
     private const string ValidFEN = "K1k5/8/8/8/8/8/8/8 w - - 0 1";
 

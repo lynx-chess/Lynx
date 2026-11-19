@@ -31,7 +31,7 @@ using Lynx.Model;
 
 namespace Lynx.Benchmark;
 
-public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
+public unsafe class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
 {
     private readonly Position[] _positions =
         [
@@ -49,7 +49,7 @@ public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (LocalMethodsImpl.IsSquaredAttacked_LocalMethods(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
+                if (LocalMethodsImpl.IsSquaredAttacked_LocalMethods(squareIndex, position.Side, position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan()))
                 {
                     b = true;
                 }
@@ -67,7 +67,7 @@ public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (ExternalMethodsImpl.IsSquaredAttacked_ExternalMethods(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
+                if (ExternalMethodsImpl.IsSquaredAttacked_ExternalMethods(squareIndex, position.Side, position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan()))
                 {
                     b = true;
                 }
@@ -97,7 +97,7 @@ public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
+            return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
         }
 
         private static bool IsSquareAttackedByKnights(int squareIndex, int offset, ReadOnlySpan<Bitboard> piecePosition)
@@ -147,7 +147,7 @@ public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
             {
                 var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-                return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
+                return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
             }
 
             static bool IsSquareAttackedByKnights(int squareIndex, int offset, ReadOnlySpan<Bitboard> piecePosition)

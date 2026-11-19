@@ -106,7 +106,7 @@ public class IsSquareAttacked_PassBitboard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassingArray.IsSquareAttacked(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
+                if (Attacks_PassingArray.IsSquareAttacked(squareIndex, position.Side, position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan()))
                 {
                     b = true;
                 }
@@ -124,7 +124,7 @@ public class IsSquareAttacked_PassBitboard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassBitboard.IsSquareAttacked(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
+                if (Attacks_PassBitboard.IsSquareAttacked(squareIndex, position.Side, position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan()))
                 {
                     b = true;
                 }
@@ -173,7 +173,7 @@ public class IsSquareInCheck_PassBitboard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassingArray.IsSquareInCheck(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
+                if (Attacks_PassingArray.IsSquareInCheck(squareIndex, position.Side, position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan()))
                 {
                     b = true;
                 }
@@ -191,7 +191,7 @@ public class IsSquareInCheck_PassBitboard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                if (Attacks_PassBitboard.IsSquareInCheck(squareIndex, position.Side, position.PieceBitboards, position.OccupancyBitboards))
+                if (Attacks_PassBitboard.IsSquareInCheck(squareIndex, position.Side, position.PieceBitboardsSpan(), position.OccupancyBitboardsSpan()))
                 {
                     b = true;
                 }
@@ -220,7 +220,7 @@ public class IsSquareInCheck_PassBitboard_Benchmark : BaseBenchmark
     }
 }
 
-file static class Attacks_PassingArray
+file static unsafe class Attacks_PassingArray
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsSquareAttacked(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
@@ -262,7 +262,7 @@ file static class Attacks_PassingArray
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pieces[offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -299,7 +299,7 @@ file static class Attacks_PassingArray
     }
 }
 
-file static class Attacks_PassBitboard
+file static unsafe class Attacks_PassBitboard
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsSquareAttacked(int squareIndex, Side sideToMove, ReadOnlySpan<Bitboard> piecePosition, ReadOnlySpan<Bitboard> occupancy)
@@ -343,7 +343,7 @@ file static class Attacks_PassBitboard
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitboard) != default;
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & pawnBitboard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

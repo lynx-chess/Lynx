@@ -58,7 +58,7 @@ public class LocalVariableIn_vs_NoIn_Benchmark : BaseBenchmark
     private int Score(Move move, in Position position) => move.OldScore(in position);
 }
 
-public static class BenchmarkLegacyMoveExtensions
+public static unsafe class BenchmarkLegacyMoveExtensions
 {
     /// <summary>
     /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValuableVictimLeastValuableAttacker"/>

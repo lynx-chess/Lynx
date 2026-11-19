@@ -266,13 +266,13 @@ public unsafe partial class Position
             KingAdditionalEvaluation(whiteKing, whiteBucket, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, blackBucket, (int)Side.Black, whitePawnAttacks);
 
-        Debug.Assert((uint)whiteKing < Attacks.KingAttacks.Length);
-        var whiteKingAttacks = EvaluationTablesPinned.KingAttacks[whiteKing];
+        Debug.Assert((uint)whiteKing < BoardLength);
+        var whiteKingAttacks = Attacks.KingAttacks[whiteKing];
         evaluationContext.Attacks[(int)Piece.K] |= whiteKingAttacks;
         evaluationContext.AttacksBySide[(int)Side.White] |= whiteKingAttacks;
 
-        Debug.Assert((uint)blackKing < Attacks.KingAttacks.Length);
-        var blackKingAttacks = EvaluationTablesPinned.KingAttacks[blackKing];
+        Debug.Assert((uint)blackKing < BoardLength);
+        var blackKingAttacks = Attacks.KingAttacks[blackKing];
         evaluationContext.Attacks[(int)Piece.k] |= blackKingAttacks;
         evaluationContext.AttacksBySide[(int)Side.Black] |= blackKingAttacks;
 
@@ -650,8 +650,8 @@ public unsafe partial class Position
         const int pawnToKnightOffset = (int)Piece.N - (int)Piece.P;
         var sameSidePawns = _pieceBitboards[pieceIndex - pawnToKnightOffset];
 
-        Debug.Assert((uint)squareIndex < Attacks.KnightAttacks.Length);
-        var attacks = EvaluationTablesPinned.KnightAttacks[squareIndex];
+        Debug.Assert((uint)squareIndex < BoardLength);
+        var attacks = Attacks.KnightAttacks[squareIndex];
         evaluationContext.Attacks[(int)Piece.N + Utils.PieceOffset(pieceSide)] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
 
@@ -920,8 +920,8 @@ public unsafe partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int KingPawnShield(int squareIndex, Bitboard sameSidePawns, Bitboard oppositeSidePawnAttacks)
     {
-        Debug.Assert((uint)squareIndex < Attacks.KingAttacks.Length);
-        var kingShield = EvaluationTablesPinned.KingAttacks[squareIndex] & sameSidePawns;
+        Debug.Assert((uint)squareIndex < BoardLength);
+        var kingShield = Attacks.KingAttacks[squareIndex] & sameSidePawns;
         var kingShieldCount = kingShield.CountBits();
 
         var nonAttackedShieldCount = (kingShield & (~oppositeSidePawnAttacks)).CountBits();
@@ -1134,9 +1134,9 @@ public unsafe partial class Position
 
         var attacks = evaluationContext.Attacks;
 
-        Debug.Assert((uint)oppositeSideKingSquare < Attacks.KnightAttacks.Length);
+        Debug.Assert((uint)oppositeSideKingSquare < BoardLength);
 
-        packedBonus += CheckBonus((int)Piece.N, attacks[(int)Piece.N + offset] & EvaluationTablesPinned.KnightAttacks[oppositeSideKingSquare], oppositeSideAttacks);
+        packedBonus += CheckBonus((int)Piece.N, attacks[(int)Piece.N + offset] & Attacks.KnightAttacks[oppositeSideKingSquare], oppositeSideAttacks);
         packedBonus += CheckBonus((int)Piece.B, attacks[(int)Piece.B + offset] & bishopAttacks, oppositeSideAttacks);
         packedBonus += CheckBonus((int)Piece.R, attacks[(int)Piece.R + offset] & rookAttacks, oppositeSideAttacks);
         packedBonus += CheckBonus((int)Piece.Q, attacks[(int)Piece.Q + offset] & Attacks.QueenAttacks(rookAttacks, bishopAttacks), oppositeSideAttacks);

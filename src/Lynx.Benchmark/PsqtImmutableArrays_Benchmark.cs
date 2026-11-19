@@ -148,7 +148,7 @@ using Lynx.Model;
 using System.Collections.Immutable;
 
 namespace Lynx.Benchmark;
-public class PsqtImmutableArrays_Benchmark : BaseBenchmark
+public unsafe class PsqtImmutableArrays_Benchmark : BaseBenchmark
 {
     public static IEnumerable<int> Data => [1, 10, 1_000, 10_000, 100_000,];
 

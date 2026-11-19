@@ -171,14 +171,14 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         public static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
         [
     #pragma warning disable IDE0350 // Use implicitly typed lambda
-                (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+            (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.White, origin),
             (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
             Attacks.BishopAttacks,
             Attacks.RookAttacks,
             Attacks.QueenAttacks,
             (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-            (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+            (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.Black, origin),
             (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
             Attacks.BishopAttacks,
             Attacks.RookAttacks,
@@ -242,7 +242,7 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
             int oppositeSide = Utils.OppositeSide((int)position.Side);
             var bitboard = position.PieceBitboards[piece];
 
-            var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
+            var pawnAttacks = Attacks.PawnAttacks((int)position.Side);
 
             while (bitboard != default)
             {
@@ -339,7 +339,7 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
             var occupancy = position.OccupancyBitboards[(int)Side.Both];
             var oppositeSidePieces = position.OccupancyBitboards[oppositeSide];
 
-            var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
+            var pawnAttacks = Attacks.PawnAttacks((int)position.Side);
 
             while (bitboard != default)
             {
@@ -644,7 +644,7 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                     }
                 }
 
-                var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+                var attacks = Attacks.PawnAttacks((int)position.Side, sourceSquare);
 
                 // En passant
                 if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)
@@ -821,14 +821,14 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
         public static readonly Func<int, Bitboard, Bitboard>[] _pieceAttacks =
         [
     #pragma warning disable IDE0350 // Use implicitly typed lambda
-                (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+                (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.White, origin),
             (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
             Attacks.BishopAttacks,
             Attacks.RookAttacks,
             Attacks.QueenAttacks,
             (int origin, Bitboard _) => Attacks.KingAttacks[origin],
 
-            (int origin, Bitboard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+            (int origin, Bitboard _) => Attacks.PawnAttacks((int)Side.Black, origin),
             (int origin, Bitboard _) => Attacks.KnightAttacks[origin],
             Attacks.BishopAttacks,
             Attacks.RookAttacks,
@@ -892,7 +892,7 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
             int oppositeSide = Utils.OppositeSide((int)position.Side);
             var bitboard = position.PieceBitboards[piece];
 
-            var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
+            var pawnAttacks = Attacks.PawnAttacks((int)position.Side);
 
             ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
@@ -987,7 +987,7 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
             var occupancy = position.OccupancyBitboards[(int)Side.Both];
             var oppositeSidePieces = position.OccupancyBitboards[oppositeSide];
 
-            var pawnAttacks = Attacks.PawnAttacks[(int)position.Side];
+            var pawnAttacks = Attacks.PawnAttacks((int)position.Side);
 
             ref Move movePoolRef = ref MemoryMarshal.GetReference(movePool);
 
@@ -1303,7 +1303,7 @@ public unsafe class MoveGenerator_SpanUnsafeAdd_Benchmark : BaseBenchmark
                     }
                 }
 
-                var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+                var attacks = Attacks.PawnAttacks((int)position.Side, sourceSquare);
 
                 // En passant
                 if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit((int)position.EnPassant)

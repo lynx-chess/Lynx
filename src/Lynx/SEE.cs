@@ -7,7 +7,7 @@ namespace Lynx;
 /// <summary>
 /// Implementation based on Stormphrax, some comments and clarifications from Altair
 /// </summary>
-public static class SEE
+public static unsafe class SEE
 {
     #pragma warning disable IDE0055 // Discard formatting in this region
 

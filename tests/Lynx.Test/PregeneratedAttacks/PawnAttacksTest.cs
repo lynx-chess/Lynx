@@ -28,7 +28,7 @@ public class PawnAttacksTest
         Assert.AreEqual(expectedResult, attacks);
 
         // Act
-        attacks = Attacks.PawnAttacks[isWhite ? 1 : 0][(int)square];
+        attacks = Attacks.PawnAttacks(isWhite ? 1 : 0, (int)square);
 
         // Assert
         Assert.AreEqual(expectedResult, attacks);

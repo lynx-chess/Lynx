@@ -51,7 +51,7 @@ namespace Lynx.Benchmark;
 
 #pragma warning disable RCS1058, IDE0054 // Use compound assignment
 
-public class PieceAtSquare_Benchmark : BaseBenchmark
+public unsafe class PieceAtSquare_Benchmark : BaseBenchmark
 {
     [Benchmark(Baseline = true)]
     public int KnowingColor()
@@ -60,7 +60,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitboards.Length; i++)
+        for (int i = 0; i < Position.PieceBitboardsLength; i++)
         {
             ulong bb = position.PieceBitboards[i];
 
@@ -83,7 +83,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitboards.Length; i += 4)
+        for (int i = 0; i < Position.PieceBitboardsLength; i += 4)
         {
             ulong bb1 = position.PieceBitboards[i];
             ulong bb2 = position.PieceBitboards[i + 1];
@@ -133,7 +133,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitboards.Length; i++)
+        for (int i = 0; i < Position.PieceBitboardsLength; i++)
         {
             ulong bb = position.PieceBitboards[i];
 
@@ -156,7 +156,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
 
         var position = new Position(Constants.TrickyTestPositionFEN);
 
-        for (int i = 0; i < position.PieceBitboards.Length; i += 4)
+        for (int i = 0; i < Position.PieceBitboardsLength; i += 4)
         {
             ulong bb1 = position.PieceBitboards[i];
             ulong bb2 = position.PieceBitboards[i + 1];

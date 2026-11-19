@@ -50,6 +50,57 @@ public static unsafe class Attacks
     #pragma warning restore S1450 // Private fields only used as local variables in methods should become local variables
 
     /// <summary>
+    /// Backs up the pinned arrays for attacks + RaysBetween
+    /// </summary>
+    private static readonly List<Array> _keepAlive = [];
+
+    /// <summary>
+    /// [64]
+    /// </summary>
+    public static readonly Bitboard* KnightAttacks;
+
+    /// <summary>
+    /// [64]
+    /// </summary>
+    public static readonly Bitboard* KingAttacks;
+
+    /// <summary>
+    /// [2 x 64], index : (side x 64) + square
+    /// </summary>
+    private static readonly Bitboard* _pawnAttacks;
+
+    /// <summary>
+    /// [64 x 64]: index: (square1 x 64) + square2
+    /// </summary>
+    private static readonly Bitboard* _raysBetween;
+
+    private static Bitboard* Pin(Bitboard[] source)
+    {
+        var pinned = GC.AllocateUninitializedArray<Bitboard>(source.Length, pinned: true);
+        source.CopyTo(pinned, 0);
+
+        return KeepAlive(pinned);
+    }
+
+    private static Bitboard* Pin(Bitboard[][] source, int stride)
+    {
+        var pinned = GC.AllocateArray<Bitboard>(source.Length * stride, pinned: true);
+        for (int i = 0; i < source.Length; ++i)
+        {
+            source[i].CopyTo(pinned, i * stride);
+        }
+
+        return KeepAlive(pinned);
+    }
+
+    private static Bitboard* KeepAlive(Bitboard[] pinned)
+    {
+        _keepAlive.Add(pinned);
+
+        return (Bitboard*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(pinned));
+    }
+
+    /// <summary>
     /// Packed bishop (5248) and rook (102400) magic attacks
     /// Use <see cref="BishopAttacks(int, Bitboard)"/> and <see cref="RookAttacks(int, Bitboard)"/>
     /// </summary>
@@ -62,42 +113,13 @@ public static unsafe class Attacks
     private static readonly ulong[] _PEXTBishopOffset;
     private static readonly ulong[] _PEXTRookOffset;
 
-    /// <summary>
-    /// [2 (B|W), 64 (Squares)]
-    /// </summary>
-    public static Bitboard[][] PawnAttacks
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get;
-    }
-
-    public static Bitboard[] KnightAttacks
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get;
-    }
-
-    public static Bitboard[] KingAttacks
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get;
-    }
-
-
-    /// <summary>
-    /// 64 x 64
-    /// </summary>
-#pragma warning disable S2386, S3887 // Mutable fields should not be "public static"
-    public static readonly Bitboard[][] RaysBetween;
-#pragma warning restore S2386, S3887 // Mutable fields should not be "public static"
-
 #pragma warning disable CA1810 // Initialize reference type static fields inline
     static Attacks()
 #pragma warning restore CA1810 // Initialize reference type static fields inline
     {
-        KingAttacks = AttackGenerator.InitializeKingAttacks();
-        PawnAttacks = AttackGenerator.InitializePawnAttacks();
-        KnightAttacks = AttackGenerator.InitializeKnightAttacks();
+        KingAttacks = Pin(AttackGenerator.InitializeKingAttacks());
+        KnightAttacks = Pin(AttackGenerator.InitializeKnightAttacks());
+        _pawnAttacks = Pin(AttackGenerator.InitializePawnAttacks(), 64);
 
         _bishopOccupancyMasks = AttackGenerator.InitializeBishopOccupancy();
         _rookOccupancyMasks = AttackGenerator.InitializeRookOccupancy();
@@ -135,12 +157,10 @@ public static unsafe class Attacks
             _rookPEXTEntries = null;
         }
 
-        RaysBetween = new Bitboard[64][];
+        _raysBetween = KeepAlive(GC.AllocateArray<Bitboard>(64 * 64, pinned: true));
 
         for (int square1 = 0; square1 < 64; ++square1)
         {
-            RaysBetween[square1] = new Bitboard[64];
-
             for (var square2 = 0; square2 < 64; ++square2)
             {
                 if (square1 == square2)
@@ -157,16 +177,25 @@ public static unsafe class Attacks
 
                 if (file1 == file2 || rank1 == rank2)
                 {
-                    RaysBetween[square1][square2] = RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
+                    _raysBetween[(square1 * 64) + square2] =RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
                 }
                 else if (file1 - rank1 == file2 - rank2
                     || file1 + rank1 == file2 + rank2)
                 {
-                    RaysBetween[square1][square2] = BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
+                    _raysBetween[(square1 * 64) + square2] =BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
                 }
             }
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Bitboard PawnAttacks(int side, int square) => _pawnAttacks[(side * 64) + square];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Bitboard* PawnAttacks(int side) => _pawnAttacks + (side * 64);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Bitboard RaysBetween(int square1, int square2) => _raysBetween[(square1 * 64) + square2];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Bitboard BishopAttacks(int squareIndex, Bitboard occupancy)
