@@ -234,7 +234,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        Assert.AreEqual(0, position.StaticEvaluation().Score);
+        Assert.AreEqual(DrawScore, position.StaticEvaluation().Score);
     }
 
     [TestCase("4k3/8/8/7Q/7q/8/4K3/8 w - - 0 1", "4k3/8/8/7Q/7q/8/8/4K3 w - - 0 1", Description = "King in 7th rank with queens > King in 8th rank with queens", IgnoreReason = "Can't understand PSQT any more")]
@@ -1307,11 +1307,11 @@ public class PositionTest
 
         if (isDrawExpected)
         {
-            Assert.AreEqual(0, score);
+            Assert.AreEqual(DrawScore, score);
         }
         else
         {
-            Assert.AreNotEqual(0, score);
+            Assert.AreNotEqual(DrawScore, score);
         }
     }
 
