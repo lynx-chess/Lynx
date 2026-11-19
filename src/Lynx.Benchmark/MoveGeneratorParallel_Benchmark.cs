@@ -45,7 +45,6 @@ using NLog;
 using System.Collections.Concurrent;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Benchmark;
@@ -422,7 +421,7 @@ file static unsafe class LocalAttacks
     /// <summary>
     /// [0..63] bishop, [64..127] rook
     /// </summary>
-    private static readonly Attacks.MagicEntry[] _magicEntries;
+    private static readonly PinnedArray<Attacks.MagicEntry> _magicEntries;
     private static readonly Attacks.MagicEntry* _bishopMagicEntries;
     private static readonly Attacks.MagicEntry* _rookMagicEntries;
 
@@ -430,7 +429,7 @@ file static unsafe class LocalAttacks
     /// Packed bishop and rook attacks, see <see cref="AttackGenerator.InitializeBishopAndRookMagicAttacks"/>
     /// Use <see cref="BishopLocalAttacks(int, Bitboard)"/> and <see cref="RookLocalAttacks(int, Bitboard)"/>
     /// </summary>
-    private static readonly Bitboard[] _magicLocalAttacks;
+    private static readonly PinnedArray<Bitboard> _magicLocalAttacks;
 
     private static readonly ulong[] _PEXTLocalAttacks;
     private static readonly ulong[] _PEXTBishopOffset;
@@ -453,7 +452,7 @@ file static unsafe class LocalAttacks
         _rookOccupancyMasks = AttackGenerator.InitializeRookOccupancy();
 
         (_magicLocalAttacks, _magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
-        _bishopMagicEntries = (Attacks.MagicEntry*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_magicEntries));
+        _bishopMagicEntries = _magicEntries.Pointer;
         _rookMagicEntries = _bishopMagicEntries + 64;
 
         if (Bmi2.X64.IsSupported)

@@ -28,8 +28,8 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
         private readonly Bitboard[][] _bishopAttacks = new Bitboard[64][];
         private readonly Bitboard[][] _rookAttacks = new Bitboard[64][];
 
-        private readonly Bitboard[] _magicAttacks = [];
-        private readonly Attacks.MagicEntry[] _magicEntries = [];
+        private readonly PinnedArray<Bitboard>? _magicAttacks;
+        private readonly PinnedArray<Attacks.MagicEntry>? _magicEntries;
 
         public CustomPosition()
         {

@@ -1,7 +1,4 @@
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
-namespace Lynx;
+﻿namespace Lynx;
 
 /// <summary>
 /// Pinned arrays exposed as pointers, for tables that live throughout the whole process
@@ -15,8 +12,8 @@ internal static unsafe class PinnedArrays
     public static T* CopyToPinnedArray<T>(T[] source)
         where T : unmanaged
     {
-        var pinned = GC.AllocateUninitializedArray<T>(source.Length, pinned: true);
-        source.CopyTo(pinned, 0);
+        var pinned = new PinnedArray<T>(source.Length);
+        source.CopyTo(pinned.Array, 0);
 
         return KeepAlive(pinned);
     }
@@ -27,7 +24,7 @@ internal static unsafe class PinnedArrays
     public static T* FlattenToPinnedArray<T>(T[][] source, int stride)
         where T : unmanaged
     {
-        var pinned = GC.AllocateArray<T>(source.Length * stride, pinned: true);
+        var pinned = new PinnedArray<T>(source.Length * stride);
 
         for (int i = 0; i < source.Length; ++i)
         {
@@ -36,7 +33,7 @@ internal static unsafe class PinnedArrays
                 throw new LynxException($"A larger {nameof(stride)} is needed, since inner array length ({source[i].Length}) is greater than the specified one ({stride})");
             }
 
-            source[i].CopyTo(pinned, i * stride);
+            source[i].CopyTo(pinned.Array, i * stride);
         }
 
         return KeepAlive(pinned);
@@ -48,23 +45,24 @@ internal static unsafe class PinnedArrays
     public static T* AllocatePinnedArray<T>(int length, out T[] array)
         where T : unmanaged
     {
-        array = GC.AllocateArray<T>(length, pinned: true);
+        var pinned = new PinnedArray<T>(length);
+        array = pinned.Array;
 
-        return KeepAlive(array);
+        return KeepAlive(pinned);
     }
 
     /// <summary>
-    /// Keeps alive a pre-allocated array.
-    /// Prefer <see cref="CopyToPinnedArray{T}(T[])"/> unless pointers into <paramref name="pinned"/> already exist
+    /// Keeps alive an already allocated <see cref="PinnedArray{T}"/> without copying it.
+    /// To be used instead of <see cref="CopyToPinnedArray{T}(T[])"/> when pointers into it already exist
     /// </summary>
-    public static T* KeepAlive<T>(T[] pinned)
+    public static T* KeepAlive<T>(PinnedArray<T> pinned)
         where T : unmanaged
     {
         lock (_keepAliveLock)
         {
-            _keepAlive.Add(pinned);
+            _keepAlive.Add(pinned.Array);
         }
 
-        return (T*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(pinned));
+        return pinned.Pointer;
     }
 }

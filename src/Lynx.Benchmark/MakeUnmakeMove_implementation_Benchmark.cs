@@ -141,7 +141,6 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Lynx.Benchmark;
 public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
@@ -1756,7 +1755,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// [0..63] bishop, [64..127] rook
         /// </summary>
-        private static readonly Attacks.MagicEntry[] _magicEntries;
+        private static readonly PinnedArray<Attacks.MagicEntry> _magicEntries;
         private static readonly Attacks.MagicEntry* _bishopMagicEntries;
         private static readonly Attacks.MagicEntry* _rookMagicEntries;
 
@@ -1764,7 +1763,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// Packed bishop and rook attacks, see <see cref="AttackGenerator.InitializeBishopAndRookMagicAttacks"/>
         /// Use <see cref="BishopAttacks(int, Bitboard)"/> and <see cref="RookAttacks(int, Bitboard)"/>
         /// </summary>
-        private static readonly Bitboard[] _magicAttacks;
+        private static readonly PinnedArray<Bitboard> _magicAttacks;
 
         /// <summary>
         /// [2 (B|W), 64 (Squares)]
@@ -1780,7 +1779,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             KnightAttacks = AttackGenerator.InitializeKnightAttacks();
 
             (_magicAttacks, _magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
-            _bishopMagicEntries = (Attacks.MagicEntry*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_magicEntries));
+            _bishopMagicEntries = _magicEntries.Pointer;
             _rookMagicEntries = _bishopMagicEntries + 64;
         }
 
