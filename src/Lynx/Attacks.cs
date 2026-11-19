@@ -30,38 +30,19 @@ public static unsafe class Attacks
         public int Shift;
     }
 
-#pragma warning disable IDE1006 // Naming Styles
-#pragma warning disable S1450 // Private fields only used as local variables in methods should become local variables
-
     /// <summary>
-    /// Backs up bishop and rook arrays of <see cref="PEXTEntry"/>: [0..63] bishop, [64..127] rook
-    /// </summary>
-    private static readonly PEXTEntry[] _PEXTEntries;
-    private static readonly PEXTEntry* _bishopPEXTEntries;
-    private static readonly PEXTEntry* _rookPEXTEntries;
-
-    /// <summary>
-    /// Backs up bishop and rook arrays of <see cref="MagicEntry"/>: [0..63] bishop, [64..127] rook
-    /// </summary>
-    private static readonly MagicEntry[] _magicEntries;
-    private static readonly MagicEntry* _bishopMagicEntries;
-    private static readonly MagicEntry* _rookMagicEntries;
-
-    #pragma warning restore S1450 // Private fields only used as local variables in methods should become local variables
-
-    /// <summary>
-    /// Backs up the pinned arrays for attacks + RaysBetween
+    /// Keeps alive the pinned arrays that the pointers in this class point into:
+    /// knight, king and pawn attacks, rays between squares, packed magic and PEXT attacks and their entries
     /// </summary>
     private static readonly List<Array> _keepAlive = [];
 
-    /// <summary>
-    /// [64]
-    /// </summary>
-    public static readonly Bitboard* KnightAttacks;
+    private static readonly PEXTEntry* _bishopPEXTEntries;
+    private static readonly PEXTEntry* _rookPEXTEntries;
 
-    /// <summary>
-    /// [64]
-    /// </summary>
+    private static readonly MagicEntry* _bishopMagicEntries;
+    private static readonly MagicEntry* _rookMagicEntries;
+
+    public static readonly Bitboard* KnightAttacks;
     public static readonly Bitboard* KingAttacks;
 
     /// <summary>
@@ -74,45 +55,6 @@ public static unsafe class Attacks
     /// </summary>
     private static readonly Bitboard* _raysBetween;
 
-    private static Bitboard* Pin(Bitboard[] source)
-    {
-        var pinned = GC.AllocateUninitializedArray<Bitboard>(source.Length, pinned: true);
-        source.CopyTo(pinned, 0);
-
-        return KeepAlive(pinned);
-    }
-
-    private static Bitboard* Pin(Bitboard[][] source, int stride)
-    {
-        var pinned = GC.AllocateArray<Bitboard>(source.Length * stride, pinned: true);
-        for (int i = 0; i < source.Length; ++i)
-        {
-            source[i].CopyTo(pinned, i * stride);
-        }
-
-        return KeepAlive(pinned);
-    }
-
-    private static Bitboard* KeepAlive(Bitboard[] pinned)
-    {
-        _keepAlive.Add(pinned);
-
-        return (Bitboard*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(pinned));
-    }
-
-    /// <summary>
-    /// Packed bishop (5248) and rook (102400) magic attacks
-    /// Use <see cref="BishopAttacks(int, Bitboard)"/> and <see cref="RookAttacks(int, Bitboard)"/>
-    /// </summary>
-    private static readonly Bitboard[] _magicAttacks;
-
-    private static readonly Bitboard[] _bishopOccupancyMasks;
-    private static readonly Bitboard[] _rookOccupancyMasks;
-
-    private static readonly ulong[] _PEXTAttacks;
-    private static readonly ulong[] _PEXTBishopOffset;
-    private static readonly ulong[] _PEXTRookOffset;
-
 #pragma warning disable CA1810 // Initialize reference type static fields inline
     static Attacks()
 #pragma warning restore CA1810 // Initialize reference type static fields inline
@@ -121,38 +63,19 @@ public static unsafe class Attacks
         KnightAttacks = Pin(AttackGenerator.InitializeKnightAttacks());
         _pawnAttacks = Pin(AttackGenerator.InitializePawnAttacks(), 64);
 
-        _bishopOccupancyMasks = AttackGenerator.InitializeBishopOccupancy();
-        _rookOccupancyMasks = AttackGenerator.InitializeRookOccupancy();
+        var (magicAttacks, magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
+        _keepAlive.Add(magicAttacks);
 
-        (_magicAttacks, _magicEntries) = AttackGenerator.InitializeBishopAndRookMagicAttacks();
-        _bishopMagicEntries = (MagicEntry*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_magicEntries));
+        _bishopMagicEntries = KeepAlive(magicEntries);
         _rookMagicEntries = _bishopMagicEntries + 64;
 
         if (Bmi2.X64.IsSupported)
         {
-            _PEXTAttacks = GC.AllocateArray<Bitboard>(5248 + 102400, pinned: true);
-            _PEXTBishopOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
-            _PEXTRookOffset = GC.AllocateArray<Bitboard>(64, pinned: true);
-
-            InitializeBishopAndRookPEXTAttacks();
-
-            _PEXTEntries = GC.AllocateArray<PEXTEntry>(128, pinned: true);
-            _bishopPEXTEntries = (PEXTEntry*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_PEXTEntries));
+            _bishopPEXTEntries = InitializeBishopAndRookPEXTAttacks();
             _rookPEXTEntries = _bishopPEXTEntries + 64;
-
-            var PEXTAttacks = (Bitboard*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_PEXTAttacks));
-            for (int square = 0; square < 64; ++square)
-            {
-                _bishopPEXTEntries[square] = new PEXTEntry { Mask = _bishopOccupancyMasks[square], Attacks = PEXTAttacks + _PEXTBishopOffset[square] };
-                _rookPEXTEntries[square] = new PEXTEntry { Mask = _rookOccupancyMasks[square], Attacks = PEXTAttacks + _PEXTRookOffset[square] };
-            }
         }
         else
         {
-            _PEXTAttacks = [];
-            _PEXTBishopOffset = [];
-            _PEXTRookOffset = [];
-            _PEXTEntries = [];
             _bishopPEXTEntries = null;
             _rookPEXTEntries = null;
         }
@@ -177,15 +100,42 @@ public static unsafe class Attacks
 
                 if (file1 == file2 || rank1 == rank2)
                 {
-                    _raysBetween[(square1 * 64) + square2] =RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
+                    _raysBetween[(square1 * 64) + square2] = RookAttacks(square1, occupancy) & RookAttacks(square2, occupancy);
                 }
                 else if (file1 - rank1 == file2 - rank2
                     || file1 + rank1 == file2 + rank2)
                 {
-                    _raysBetween[(square1 * 64) + square2] =BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
+                    _raysBetween[(square1 * 64) + square2] = BishopAttacks(square1, occupancy) & BishopAttacks(square2, occupancy);
                 }
             }
         }
+    }
+
+    private static Bitboard* Pin(Bitboard[] source)
+    {
+        var pinned = GC.AllocateUninitializedArray<Bitboard>(source.Length, pinned: true);
+        source.CopyTo(pinned, 0);
+
+        return KeepAlive(pinned);
+    }
+
+    private static Bitboard* Pin(Bitboard[][] source, int stride)
+    {
+        var pinned = GC.AllocateArray<Bitboard>(source.Length * stride, pinned: true);
+        for (int i = 0; i < source.Length; ++i)
+        {
+            source[i].CopyTo(pinned, i * stride);
+        }
+
+        return KeepAlive(pinned);
+    }
+
+    private static T* KeepAlive<T>(T[] pinned)
+        where T : unmanaged
+    {
+        _keepAlive.Add(pinned);
+
+        return (T*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(pinned));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -268,37 +218,46 @@ public static unsafe class Attacks
     /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/PEXT.cs)
     /// Based on https://www.chessprogramming.org/BMI2#PEXT_Bitboards
     /// </summary>
-    private static void InitializeBishopAndRookPEXTAttacks()
+    private static PEXTEntry* InitializeBishopAndRookPEXTAttacks()
     {
+        var attacks = KeepAlive(GC.AllocateArray<Bitboard>(5248 + 102400, pinned: true));
+        var entries = KeepAlive(GC.AllocateArray<PEXTEntry>(128, pinned: true));
+
+        var bishopOccupancyMasks = AttackGenerator.InitializeBishopOccupancy();
+        var rookOccupancyMasks = AttackGenerator.InitializeRookOccupancy();
+
         ulong index = 0;
 
         // Bishop-Attacks
         for (int square = 0; square < 64; square++)
         {
-            _PEXTBishopOffset[square] = index;
-            ulong bishopMask = _bishopOccupancyMasks[square];
+            ulong bishopMask = bishopOccupancyMasks[square];
+            entries[square] = new PEXTEntry { Mask = bishopMask, Attacks = attacks + index };
 
             ulong patterns = 1UL << BitOperations.PopCount(bishopMask);
 
             for (ulong i = 0; i < patterns; i++)
             {
                 ulong occupation = Bmi2.X64.ParallelBitDeposit(i, bishopMask);
-                _PEXTAttacks[index++] = MagicNumbersBishopAttacks(square, occupation);
+                attacks[index++] = MagicNumbersBishopAttacks(square, occupation);
             }
         }
 
         // Rook-Attacks
         for (int square = 0; square < 64; square++)
         {
-            _PEXTRookOffset[square] = index;
-            ulong rookMask = _rookOccupancyMasks[square];
+            ulong rookMask = rookOccupancyMasks[square];
+            entries[64 + square] = new PEXTEntry { Mask = rookMask, Attacks = attacks + index };
+
             ulong patterns = 1UL << BitOperations.PopCount(rookMask);
 
             for (ulong i = 0; i < patterns; i++)
             {
                 ulong occupation = Bmi2.X64.ParallelBitDeposit(i, rookMask);
-                _PEXTAttacks[index++] = MagicNumbersRookAttacks(square, occupation);
+                attacks[index++] = MagicNumbersRookAttacks(square, occupation);
             }
         }
+
+        return entries;
     }
 }
