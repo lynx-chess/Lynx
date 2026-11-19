@@ -71,6 +71,16 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
+            // 🔍 Mate distance pruning
+            // Once a mate in X is detected, prune branches that can't deliver mate in at least X
+            alpha = Math.Max(alpha, -EvaluationConstants.CheckMateBaseEvaluation + ply);
+            beta = Math.Min(beta, +EvaluationConstants.CheckMateBaseEvaluation - ply - 1);
+
+            if (alpha >= beta)
+            {
+                return alpha;
+            }
+
             realttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out ttEntry);
             var ttNodeType = ttEntry.NodeType;
 
