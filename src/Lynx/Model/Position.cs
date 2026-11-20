@@ -1,4 +1,6 @@
-﻿using System.Buffers;
+﻿#if DEBUG
+using System.Buffers;
+#endif
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -11,14 +13,20 @@ namespace Lynx.Model;
 public unsafe partial class Position : IDisposable
 {
     /// <summary>
-    /// Backs up internal arrays: <see cref="_pieceBitboards"/>, <see cref="_occupancyBitboards"/> and <see cref="_nonPawnHash"/>
+    /// Backs up internal arrays: <see cref="PieceBitboards"/>, <see cref="OccupancyBitboards"/>, <see cref="NonPawnHash"/>, <see cref="Board"/>,
+    /// the castling masks (<see cref="KingsideCastlingFreeSquares"/>, etc.) and <see cref="_castlingRightsUpdateConstants"/>
     /// </summary>
     private readonly ulong[] _internalArrayStorage;
 
     private const int OccupancyBitboardsOffset = PieceBitboardsLength;
     private const int NonPawnHashOffset = OccupancyBitboardsOffset + OccupancyBitboardsLength;
     private const int BoardOffset = NonPawnHashOffset + NonPawnHashLength;
-    private const int StorageLength = BoardOffset + (BoardLength * sizeof(int) / sizeof(ulong));
+    private const int KingsideCastlingFreeSquaresOffset = BoardOffset + (BoardLength * sizeof(int) / sizeof(ulong));
+    private const int KingsideCastlingNonAttackedSquaresOffset = KingsideCastlingFreeSquaresOffset + CastlingSquaresLength;
+    private const int QueensideCastlingFreeSquaresOffset = KingsideCastlingNonAttackedSquaresOffset + CastlingSquaresLength;
+    private const int QueensideCastlingNonAttackedSquaresOffset = QueensideCastlingFreeSquaresOffset + CastlingSquaresLength;
+    private const int CastlingRightsUpdateConstantsOffset = QueensideCastlingNonAttackedSquaresOffset + CastlingSquaresLength;
+    private const int StorageLength = CastlingRightsUpdateConstantsOffset + (CastlingRightsUpdateConstantsLength * sizeof(byte) / sizeof(ulong));
 
     private bool _disposedValue;
 
@@ -31,29 +39,35 @@ public unsafe partial class Position : IDisposable
     private ulong _uniqueIdentifier;
     private ulong _kingPawnUniqueIdentifier;
 
+#pragma warning disable CA1051
     public const int NonPawnHashLength = 2;
-    private readonly ulong* _nonPawnHash;
+    public readonly ulong* NonPawnHash;
 
     private ulong _minorHash;
     private ulong _majorHash;
 
     public const int PieceBitboardsLength = 12;
-    private readonly Bitboard* _pieceBitboards;
+    public readonly Bitboard* PieceBitboards;
 
     public const int OccupancyBitboardsLength = 3;
-    private readonly Bitboard* _occupancyBitboards;
+    public readonly Bitboard* OccupancyBitboards;
 
     public const int BoardLength = 64;
-    private readonly int* _board;
+    public readonly int* Board;
+#pragma warning restore CA1051
 
     private byte _castle;
 
-#pragma warning disable S3887, CA1051
-    private readonly byte[] _castlingRightsUpdateConstants;
-    public readonly ulong[] KingsideCastlingFreeSquares;
-    public readonly ulong[] KingsideCastlingNonAttackedSquares;
-    public readonly ulong[] QueensideCastlingFreeSquares;
-    public readonly ulong[] QueensideCastlingNonAttackedSquares;
+    private const int CastlingRightsUpdateConstantsLength = 64;
+    private readonly byte* _castlingRightsUpdateConstants;
+
+    public const int CastlingSquaresLength = 2;
+
+#pragma warning disable CA1051
+    public readonly ulong* KingsideCastlingFreeSquares;
+    public readonly ulong* KingsideCastlingNonAttackedSquares;
+    public readonly ulong* QueensideCastlingFreeSquares;
+    public readonly ulong* QueensideCastlingNonAttackedSquares;
 
 #pragma warning disable IDE1006 // Naming Styles
     internal int WhiteShortCastle;
@@ -61,7 +75,7 @@ public unsafe partial class Position : IDisposable
     internal int BlackShortCastle;
     internal int BlackLongCastle;
 #pragma warning restore IDE1006 // Naming Styles
-#pragma warning restore S3887, CA1051
+#pragma warning restore CA1051
 
 #if DEBUG
     private readonly int[] _initialKingsideRookSquares;
@@ -79,10 +93,6 @@ public unsafe partial class Position : IDisposable
     public ulong MinorHash => _minorHash;
     public ulong MajorHash => _majorHash;
 
-    public ulong* NonPawnHash => _nonPawnHash;
-    public Bitboard* PieceBitboards => _pieceBitboards;
-    public Bitboard* OccupancyBitboards => _occupancyBitboards;
-    public int* Board => _board;
     public Side Side => _side;
     public BoardSquare EnPassant => _enPassant;
 
@@ -96,35 +106,35 @@ public unsafe partial class Position : IDisposable
     public Bitboard Queens
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitboards[(int)Piece.Q] | _pieceBitboards[(int)Piece.q];
+        get => PieceBitboards[(int)Piece.Q] | PieceBitboards[(int)Piece.q];
     }
 
     public Bitboard Rooks
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitboards[(int)Piece.R] | _pieceBitboards[(int)Piece.r];
+        get => PieceBitboards[(int)Piece.R] | PieceBitboards[(int)Piece.r];
     }
 
     public Bitboard Bishops
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitboards[(int)Piece.B] | _pieceBitboards[(int)Piece.b];
+        get => PieceBitboards[(int)Piece.B] | PieceBitboards[(int)Piece.b];
     }
 
     public Bitboard Knights
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitboards[(int)Piece.N] | _pieceBitboards[(int)Piece.n];
+        get => PieceBitboards[(int)Piece.N] | PieceBitboards[(int)Piece.n];
     }
 
     public Bitboard Kings
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _pieceBitboards[(int)Piece.K] | _pieceBitboards[(int)Piece.k];
+        get => PieceBitboards[(int)Piece.K] | PieceBitboards[(int)Piece.k];
     }
 
-    public int WhiteKingSquare => _pieceBitboards[(int)Piece.K].GetLS1BIndex();
-    public int BlackKingSquare => _pieceBitboards[(int)Piece.k].GetLS1BIndex();
+    public int WhiteKingSquare => PieceBitboards[(int)Piece.K].GetLS1BIndex();
+    public int BlackKingSquare => PieceBitboards[(int)Piece.k].GetLS1BIndex();
 
     public int InitialKingSquare(int side) =>
         side == (int)Side.White
@@ -136,17 +146,15 @@ public unsafe partial class Position : IDisposable
         // Allocate _internalArrayStorage backing all arrays (independent copy, avoids sharing state)
         _internalArrayStorage = GC.AllocateArray<ulong>(StorageLength, pinned: true);
         var storage = (ulong*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_internalArrayStorage));
-        _pieceBitboards = storage;
-        _occupancyBitboards = storage + OccupancyBitboardsOffset;
-        _nonPawnHash = storage + NonPawnHashOffset;
-        _board = (int*)(storage + BoardOffset);
-        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
-
-        // Always allocate length 2 so ResetTo can index safely regardless of castling rights
-        KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-        KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-        QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-        QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+        PieceBitboards = storage;
+        OccupancyBitboards = storage + OccupancyBitboardsOffset;
+        NonPawnHash = storage + NonPawnHashOffset;
+        Board = (int*)(storage + BoardOffset);
+        KingsideCastlingFreeSquares = storage + KingsideCastlingFreeSquaresOffset;
+        KingsideCastlingNonAttackedSquares = storage + KingsideCastlingNonAttackedSquaresOffset;
+        QueensideCastlingFreeSquares = storage + QueensideCastlingFreeSquaresOffset;
+        QueensideCastlingNonAttackedSquares = storage + QueensideCastlingNonAttackedSquaresOffset;
+        _castlingRightsUpdateConstants = (byte*)(storage + CastlingRightsUpdateConstantsOffset);
 
 #if DEBUG
         _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
@@ -177,30 +185,30 @@ public unsafe partial class Position : IDisposable
     public ParseFENResult PopulateFrom(ReadOnlySpan<char> fen)
     {
         var parsedFEN = FENParser.ParseFEN(fen,
-            new Span<Bitboard>(_pieceBitboards, PieceBitboardsLength),
-            new Span<Bitboard>(_occupancyBitboards, OccupancyBitboardsLength),
-            new Span<int>(_board, BoardLength));
+            new Span<Bitboard>(PieceBitboards, PieceBitboardsLength),
+            new Span<Bitboard>(OccupancyBitboards, OccupancyBitboardsLength),
+            new Span<int>(Board, BoardLength));
 
         _side = parsedFEN.Side;
         _castle = parsedFEN.Castle;
         _enPassant = parsedFEN.EnPassant;
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
-        _nonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
-        _nonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
+        NonPawnHash[(int)Side.White] = ZobristTable.NonPawnSideHash(this, (int)Side.White);
+        NonPawnHash[(int)Side.Black] = ZobristTable.NonPawnSideHash(this, (int)Side.Black);
 
         _minorHash = ZobristTable.MinorHash(this);
         _majorHash = ZobristTable.MajorHash(this);
         _kingPawnUniqueIdentifier = ZobristTable.KingPawnHash(this);
 
-        _uniqueIdentifier = ZobristTable.PositionHash(this, _kingPawnUniqueIdentifier, _nonPawnHash[(int)Side.White], _nonPawnHash[(int)Side.Black]);
+        _uniqueIdentifier = ZobristTable.PositionHash(this, _kingPawnUniqueIdentifier, NonPawnHash[(int)Side.White], NonPawnHash[(int)Side.Black]);
 
         Debug.Assert(_uniqueIdentifier == ZobristTable.PositionHash(this));
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         IsIncrementalEval = false;
 
-        Array.Fill(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
+        new Span<byte>(_castlingRightsUpdateConstants, CastlingRightsUpdateConstantsLength).Fill(Constants.NoUpdateCastlingRight);
 
         var whiteKingSquare = WhiteKingSquare;
         var blackKingSquare = BlackKingSquare;
@@ -217,7 +225,7 @@ public unsafe partial class Position : IDisposable
         var castlingData = parsedFEN.CastlingData;
 
         // Free masks could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
-        Array.Clear(KingsideCastlingFreeSquares, 0, 2);
+        new Span<ulong>(KingsideCastlingFreeSquares, CastlingSquaresLength).Clear();
 
         var whiteKingsideRook = castlingData.WhiteKingsideRook;
         if (whiteKingsideRook != CastlingData.DefaultValues)
@@ -373,20 +381,6 @@ public unsafe partial class Position : IDisposable
         IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;
         IncrementalPhaseAccumulator = position.IncrementalPhaseAccumulator;
 
-        Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
-
-        KingsideCastlingFreeSquares[(int)Side.White] = position.KingsideCastlingFreeSquares[(int)Side.White];
-        KingsideCastlingFreeSquares[(int)Side.Black] = position.KingsideCastlingFreeSquares[(int)Side.Black];
-
-        KingsideCastlingNonAttackedSquares[(int)Side.White] = position.KingsideCastlingNonAttackedSquares[(int)Side.White];
-        KingsideCastlingNonAttackedSquares[(int)Side.Black] = position.KingsideCastlingNonAttackedSquares[(int)Side.Black];
-
-        QueensideCastlingFreeSquares[(int)Side.White] = position.QueensideCastlingFreeSquares[(int)Side.White];
-        QueensideCastlingFreeSquares[(int)Side.Black] = position.QueensideCastlingFreeSquares[(int)Side.Black];
-
-        QueensideCastlingNonAttackedSquares[(int)Side.White] = position.QueensideCastlingNonAttackedSquares[(int)Side.White];
-        QueensideCastlingNonAttackedSquares[(int)Side.Black] = position.QueensideCastlingNonAttackedSquares[(int)Side.Black];
-
         WhiteShortCastle = position.WhiteShortCastle;
         WhiteLongCastle = position.WhiteLongCastle;
         BlackShortCastle = position.BlackShortCastle;
@@ -412,8 +406,8 @@ public unsafe partial class Position : IDisposable
     public GameState MakeMove(Move move)
     {
         Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
 
@@ -443,13 +437,13 @@ public unsafe partial class Position : IDisposable
         Debug.Assert((uint)piece < PieceBitboardsLength);
         Debug.Assert((uint)newPiece < PieceBitboardsLength);
 
-        _pieceBitboards[piece].PopBit(sourceSquare);
-        _occupancyBitboards[oldSide].PopBit(sourceSquare);
-        _board[sourceSquare] = (int)Piece.None;
+        PieceBitboards[piece].PopBit(sourceSquare);
+        OccupancyBitboards[oldSide].PopBit(sourceSquare);
+        Board[sourceSquare] = (int)Piece.None;
 
-        _pieceBitboards[newPiece].SetBit(targetSquare);
-        _occupancyBitboards[oldSide].SetBit(targetSquare);
-        _board[targetSquare] = newPiece;
+        PieceBitboards[newPiece].SetBit(targetSquare);
+        OccupancyBitboards[oldSide].SetBit(targetSquare);
+        Board[targetSquare] = newPiece;
 
         var sourcePieceHash = ZobristTable.PieceHash(sourceSquare, piece);
         var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
@@ -473,7 +467,7 @@ public unsafe partial class Position : IDisposable
             {
                 // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the KingPawn hash with it, just to remove the pawn (done right above)
                 // We do need to update the NonPawn hash
-                _nonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
+                NonPawnHash[oldSide] ^= targetPieceHash;       // We add piece piece to the end square
 
                 if (Utils.IsMinorPiece(newPiece))
                 {
@@ -487,7 +481,7 @@ public unsafe partial class Position : IDisposable
         }
         else
         {
-            _nonPawnHash[oldSide] ^= fullPieceMovementHash;
+            NonPawnHash[oldSide] ^= fullPieceMovementHash;
 
             if (piece == (int)Piece.K || piece == (int)Piece.k)
             {
@@ -514,8 +508,8 @@ public unsafe partial class Position : IDisposable
 
         if (IsIncrementalEval)
         {
-            var whiteKing = _pieceBitboards[(int)Piece.K].GetLS1BIndex();
-            var blackKing = _pieceBitboards[(int)Piece.k].GetLS1BIndex();
+            var whiteKing = PieceBitboards[(int)Piece.K].GetLS1BIndex();
+            var blackKing = PieceBitboards[(int)Piece.k].GetLS1BIndex();
             var whiteBucket = PSQTBucketLayout[whiteKing];
             var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
@@ -547,8 +541,8 @@ public unsafe partial class Position : IDisposable
 
                         capturedSquare = targetSquare;
 
-                        _pieceBitboards[capturedPiece].PopBit(capturedSquare);
-                        _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
+                        PieceBitboards[capturedPiece].PopBit(capturedSquare);
+                        OccupancyBitboards[oppositeSide].PopBit(capturedSquare);
 
                         var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                         _uniqueIdentifier ^= capturedPieceHash;
@@ -560,7 +554,7 @@ public unsafe partial class Position : IDisposable
                         }
                         else
                         {
-                            _nonPawnHash[oppositeSide] ^= capturedPieceHash;
+                            NonPawnHash[oppositeSide] ^= capturedPieceHash;
 
                             if (Utils.IsMinorPiece(capturedPiece))
                             {
@@ -594,7 +588,7 @@ public unsafe partial class Position : IDisposable
                     var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
                     var rookIndex = (int)Piece.R + offset;
 
-                    _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                    PieceBitboards[rookIndex].PopBit(rookSourceSquare);
 
                     var kingTargetSquare = Utils.KingShortCastleSquare(oldSide);
 
@@ -604,20 +598,20 @@ public unsafe partial class Position : IDisposable
                         // We need to revert the incorrect changes + apply the right ones
                         // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                         // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                        _pieceBitboards[newPiece].PopBit(targetSquare);
-                        _occupancyBitboards[oldSide].PopBit(targetSquare);
-                        _board[targetSquare] = (int)Piece.None;
+                        PieceBitboards[newPiece].PopBit(targetSquare);
+                        OccupancyBitboards[oldSide].PopBit(targetSquare);
+                        Board[targetSquare] = (int)Piece.None;
                         var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
 
-                        _pieceBitboards[newPiece].SetBit(kingTargetSquare);
-                        _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
-                        _board[kingTargetSquare] = newPiece;
+                        PieceBitboards[newPiece].SetBit(kingTargetSquare);
+                        OccupancyBitboards[oldSide].SetBit(kingTargetSquare);
+                        Board[kingTargetSquare] = newPiece;
                         var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
 
                         var hashFix = hashToRevert ^ hashToApply;
 
                         _uniqueIdentifier ^= hashFix;
-                        _nonPawnHash[oldSide] ^= hashFix;
+                        NonPawnHash[oldSide] ^= hashFix;
                         _kingPawnUniqueIdentifier ^= hashFix;
                     }
 
@@ -625,19 +619,19 @@ public unsafe partial class Position : IDisposable
                     // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                     if (rookSourceSquare != kingTargetSquare)
                     {
-                        _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
+                        OccupancyBitboards[oldSide].PopBit(rookSourceSquare);
+                        Board[rookSourceSquare] = (int)Piece.None;
                     }
 
-                    _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
-                    _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
-                    _board[rookTargetSquare] = rookIndex;
+                    PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                    OccupancyBitboards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
                     _uniqueIdentifier ^= hashChange;
-                    _nonPawnHash[oldSide] ^= hashChange;
+                    NonPawnHash[oldSide] ^= hashChange;
                     _majorHash ^= hashChange;
 
                     break;
@@ -650,7 +644,7 @@ public unsafe partial class Position : IDisposable
                     var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
                     var rookIndex = (int)Piece.R + offset;
 
-                    _pieceBitboards[rookIndex].PopBit(rookSourceSquare);
+                    PieceBitboards[rookIndex].PopBit(rookSourceSquare);
 
                     var kingTargetSquare = Utils.KingLongCastleSquare(oldSide);
 
@@ -660,20 +654,20 @@ public unsafe partial class Position : IDisposable
                         // We need to revert the incorrect changes + apply the right ones
                         // This could be avoided by adding a branch above for all moves and set the right target square for DFRC
                         // But that hurts performance, see https://github.com/lynx-chess/Lynx/pull/2043
-                        _pieceBitboards[newPiece].PopBit(targetSquare);
-                        _occupancyBitboards[oldSide].PopBit(targetSquare);
-                        _board[targetSquare] = (int)Piece.None;
+                        PieceBitboards[newPiece].PopBit(targetSquare);
+                        OccupancyBitboards[oldSide].PopBit(targetSquare);
+                        Board[targetSquare] = (int)Piece.None;
                         var hashToRevert = ZobristTable.PieceHash(targetSquare, newPiece);
 
-                        _pieceBitboards[newPiece].SetBit(kingTargetSquare);
-                        _occupancyBitboards[oldSide].SetBit(kingTargetSquare);
-                        _board[kingTargetSquare] = newPiece;
+                        PieceBitboards[newPiece].SetBit(kingTargetSquare);
+                        OccupancyBitboards[oldSide].SetBit(kingTargetSquare);
+                        Board[kingTargetSquare] = newPiece;
                         var hashToApply = ZobristTable.PieceHash(kingTargetSquare, newPiece);
 
                         var hashFix = hashToRevert ^ hashToApply;
 
                         _uniqueIdentifier ^= hashFix;
-                        _nonPawnHash[oldSide] ^= hashFix;
+                        NonPawnHash[oldSide] ^= hashFix;
                         _kingPawnUniqueIdentifier ^= hashFix;
                     }
 
@@ -681,19 +675,19 @@ public unsafe partial class Position : IDisposable
                     // This guard could maybe be removed if we ever move the Sets after the switch, same as we did in Unmake
                     if (rookSourceSquare != kingTargetSquare)
                     {
-                        _occupancyBitboards[oldSide].PopBit(rookSourceSquare);
-                        _board[rookSourceSquare] = (int)Piece.None;
+                        OccupancyBitboards[oldSide].PopBit(rookSourceSquare);
+                        Board[rookSourceSquare] = (int)Piece.None;
                     }
 
-                    _pieceBitboards[rookIndex].SetBit(rookTargetSquare);
-                    _occupancyBitboards[oldSide].SetBit(rookTargetSquare);
-                    _board[rookTargetSquare] = rookIndex;
+                    PieceBitboards[rookIndex].SetBit(rookTargetSquare);
+                    OccupancyBitboards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     var hashChange = ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
                     _uniqueIdentifier ^= hashChange;
-                    _nonPawnHash[oldSide] ^= hashChange;
+                    NonPawnHash[oldSide] ^= hashChange;
                     _majorHash ^= hashChange;
 
                     break;
@@ -704,11 +698,11 @@ public unsafe partial class Position : IDisposable
 
                     capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
                     capturedPiece = oppositePawnIndex;
-                    Utils.Assert(_pieceBitboards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
+                    Utils.Assert(PieceBitboards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
 
-                    _pieceBitboards[capturedPiece].PopBit(capturedSquare);
-                    _occupancyBitboards[oppositeSide].PopBit(capturedSquare);
-                    _board[capturedSquare] = (int)Piece.None;
+                    PieceBitboards[capturedPiece].PopBit(capturedSquare);
+                    OccupancyBitboards[oppositeSide].PopBit(capturedSquare);
+                    Board[capturedSquare] = (int)Piece.None;
 
                     var capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                     _uniqueIdentifier ^= capturedPawnHash;
@@ -728,17 +722,20 @@ public unsafe partial class Position : IDisposable
         }
 
         _side = (Side)oppositeSide;
-        _occupancyBitboards[2] = _occupancyBitboards[1] | _occupancyBitboards[0];
+        OccupancyBitboards[2] = OccupancyBitboards[1] | OccupancyBitboards[0];
 
         // Updating castling rights
+        Debug.Assert((uint)sourceSquare < CastlingRightsUpdateConstantsLength);
+        Debug.Assert((uint)targetSquare < CastlingRightsUpdateConstantsLength);
+
         _castle &= _castlingRightsUpdateConstants[sourceSquare];
         _castle &= _castlingRightsUpdateConstants[targetSquare];
 
         _uniqueIdentifier ^= ZobristTable.CastleHash(_castle);
 
         Debug.Assert(ZobristTable.PositionHash(this) == _uniqueIdentifier);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == _nonPawnHash[(int)Side.White]);
-        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == _nonPawnHash[(int)Side.Black]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.White) == NonPawnHash[(int)Side.White]);
+        Debug.Assert(ZobristTable.NonPawnSideHash(this, (int)Side.Black) == NonPawnHash[(int)Side.Black]);
         Debug.Assert(ZobristTable.MinorHash(this) == _minorHash);
         Debug.Assert(ZobristTable.MajorHash(this) == _majorHash);
         Debug.Assert(Math.Min(MaxPhase, PhaseFromScratch()) == Phase());
@@ -773,9 +770,9 @@ public unsafe partial class Position : IDisposable
         Debug.Assert((uint)piece < PieceBitboardsLength);
         Debug.Assert((uint)newPiece < PieceBitboardsLength);
 
-        _pieceBitboards[newPiece].PopBit(targetSquare);
-        _occupancyBitboards[side].PopBit(targetSquare);
-        _board[targetSquare] = (int)Piece.None;
+        PieceBitboards[newPiece].PopBit(targetSquare);
+        OccupancyBitboards[side].PopBit(targetSquare);
+        Board[targetSquare] = (int)Piece.None;
 
         // We purposely delay the sets here until after the switch
 
@@ -789,9 +786,9 @@ public unsafe partial class Position : IDisposable
                     {
                         Debug.Assert((uint)capturedPiece < PieceBitboardsLength);
 
-                        _pieceBitboards[capturedPiece].SetBit(targetSquare);
-                        _occupancyBitboards[oppositeSide].SetBit(targetSquare);
-                        _board[targetSquare] = capturedPiece;
+                        PieceBitboards[capturedPiece].SetBit(targetSquare);
+                        OccupancyBitboards[oppositeSide].SetBit(targetSquare);
+                        Board[targetSquare] = capturedPiece;
                     }
 
                     break;
@@ -818,9 +815,9 @@ public unsafe partial class Position : IDisposable
                         //if (kingTargetSquare != sourceSquare)
                         //{
 
-                        _pieceBitboards[newPiece].PopBit(kingTargetSquare);
-                        _occupancyBitboards[side].PopBit(kingTargetSquare);
-                        _board[kingTargetSquare] = (int)Piece.None;
+                        PieceBitboards[newPiece].PopBit(kingTargetSquare);
+                        OccupancyBitboards[side].PopBit(kingTargetSquare);
+                        Board[kingTargetSquare] = (int)Piece.None;
                         //}
 
                         rookSourceSquare = targetSquare;
@@ -838,19 +835,19 @@ public unsafe partial class Position : IDisposable
                     var rookIndex = (int)Piece.R + offset;
 
                     // Popping before setting, because in DFRC they can be the same square
-                    _pieceBitboards[rookIndex].PopBit(rookTargetSquare);
+                    PieceBitboards[rookIndex].PopBit(rookTargetSquare);
 
                     // In DFRC the square where the rook ended could be occupied by the king before castling
                     // Since we set the king squares after the switch, we don't need the guard here
                     //if (rookTargetSquare != InitialKingSquares[side])
                     //{
-                    _occupancyBitboards[side].PopBit(rookTargetSquare);
-                    _board[rookTargetSquare] = (int)Piece.None;
+                    OccupancyBitboards[side].PopBit(rookTargetSquare);
+                    Board[rookTargetSquare] = (int)Piece.None;
                     //}
 
-                    _pieceBitboards[rookIndex].SetBit(rookSourceSquare);
-                    _occupancyBitboards[side].SetBit(rookSourceSquare);
-                    _board[rookSourceSquare] = rookIndex;
+                    PieceBitboards[rookIndex].SetBit(rookSourceSquare);
+                    OccupancyBitboards[side].SetBit(rookSourceSquare);
+                    Board[rookSourceSquare] = rookIndex;
 
                     break;
                 }
@@ -861,22 +858,22 @@ public unsafe partial class Position : IDisposable
                     var oppositePawnIndex = (int)Piece.p - offset;
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
 
-                    Utils.Assert(_occupancyBitboards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    Utils.Assert(OccupancyBitboards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
                         $"Expected empty {capturedPawnSquare}");
 
-                    _pieceBitboards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                    _occupancyBitboards[oppositeSide].SetBit(capturedPawnSquare);
-                    _board[capturedPawnSquare] = oppositePawnIndex;
+                    PieceBitboards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    OccupancyBitboards[oppositeSide].SetBit(capturedPawnSquare);
+                    Board[capturedPawnSquare] = oppositePawnIndex;
 
                     break;
                 }
         }
 
-        _pieceBitboards[piece].SetBit(sourceSquare);
-        _occupancyBitboards[side].SetBit(sourceSquare);
-        _board[sourceSquare] = piece;
+        PieceBitboards[piece].SetBit(sourceSquare);
+        OccupancyBitboards[side].SetBit(sourceSquare);
+        Board[sourceSquare] = piece;
 
-        _occupancyBitboards[2] = _occupancyBitboards[1] | _occupancyBitboards[0];
+        OccupancyBitboards[2] = OccupancyBitboards[1] | OccupancyBitboards[0];
 
         // Updating saved values
         _castle = gameState.Castle;
@@ -886,8 +883,8 @@ public unsafe partial class Position : IDisposable
         _kingPawnUniqueIdentifier = gameState.KingPawnKey;
         _minorHash = gameState.MinorKey;
         _majorHash = gameState.MajorKey;
-        _nonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
-        _nonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
+        NonPawnHash[(int)Side.White] = gameState.NonPawnWhiteKey;
+        NonPawnHash[(int)Side.Black] = gameState.NonPawnBlackKey;
 
         IncrementalEvalAccumulator = gameState.IncrementalEvalAccumulator;
         IncrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
@@ -931,10 +928,10 @@ public unsafe partial class Position : IDisposable
     {
         var offset = Utils.PieceOffset((int)_side);
 
-        var kingBitboard = _pieceBitboards[(int)Piece.K + offset];
+        var kingBitboard = PieceBitboards[(int)Piece.K + offset];
         var kingSquare = kingBitboard.Empty() ? -1 : kingBitboard.GetLS1BIndex();
 
-        var oppositeKingBitboard = _pieceBitboards[(int)Piece.k - offset];
+        var oppositeKingBitboard = PieceBitboards[(int)Piece.k - offset];
         var oppositeKingSquare = oppositeKingBitboard.Empty() ? -1 : oppositeKingBitboard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
@@ -950,9 +947,9 @@ public unsafe partial class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
-        Debug.Assert(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
+        Debug.Assert(PieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].CountBits() == 1);
 
-        var oppositeKingSquare = _pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
+        var oppositeKingSquare = PieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex();
 
 #if DEBUG
         var isValid = !IsSquareAttacked(oppositeKingSquare, _side);
@@ -984,8 +981,8 @@ public unsafe partial class Position : IDisposable
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
-            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
+            | (PieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
+            | (PieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -995,15 +992,15 @@ public unsafe partial class Position : IDisposable
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
         var queens = Queens;
         var rooks = queens | Rooks;
         var bishops = queens | Bishops;
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
-            | (_pieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
+            | (PieceBitboards[(int)Piece.p] & Attacks.PawnAttacks((int)Side.White, square))
+            | (PieceBitboards[(int)Piece.P] & Attacks.PawnAttacks((int)Side.Black, square))
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -1016,16 +1013,16 @@ public unsafe partial class Position : IDisposable
 
         var offset = Utils.PieceOffset(side);
 
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
 
-        var queens = _pieceBitboards[(int)Piece.q - offset];
-        var rooks = queens | _pieceBitboards[(int)Piece.r - offset];
-        var bishops = queens | _pieceBitboards[(int)Piece.b - offset];
+        var queens = PieceBitboards[(int)Piece.q - offset];
+        var rooks = queens | PieceBitboards[(int)Piece.r - offset];
+        var bishops = queens | PieceBitboards[(int)Piece.b - offset];
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (_pieceBitboards[(int)Piece.p - offset] & Attacks.PawnAttacks(side, square))
-            | (_pieceBitboards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
+            | (PieceBitboards[(int)Piece.p - offset] & Attacks.PawnAttacks(side, square))
+            | (PieceBitboards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1035,7 +1032,7 @@ public unsafe partial class Position : IDisposable
 
         var sideToMoveInt = (int)sideToMove;
         var offset = Utils.PieceOffset(sideToMoveInt);
-        var bothSidesOccupancy = _occupancyBitboards[(int)Side.Both];
+        var bothSidesOccupancy = OccupancyBitboards[(int)Side.Both];
 
         // I tried to order them from most to least likely - not tested
         return
@@ -1075,9 +1072,9 @@ public unsafe partial class Position : IDisposable
         var oppositeSideInt = Utils.OppositeSide((int)_side);
         var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
 
-        var kingSquare = _pieceBitboards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
+        var kingSquare = PieceBitboards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
 
-        var bothSidesOccupancy = _occupancyBitboards[(int)Side.Both];
+        var bothSidesOccupancy = OccupancyBitboards[(int)Side.Both];
 
         // I tried to order them from most to least likely - not tested
         return
@@ -1093,7 +1090,7 @@ public unsafe partial class Position : IDisposable
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & _pieceBitboards[offset]).NotEmpty();
+        return (Attacks.PawnAttacks(oppositeColorIndex, squareIndex) & PieceBitboards[offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1101,7 +1098,7 @@ public unsafe partial class Position : IDisposable
     {
         Debug.Assert((uint)squareIndex < BoardLength);
 
-        return (Attacks.KnightAttacks[squareIndex] & _pieceBitboards[(int)Piece.N + offset]).NotEmpty();
+        return (Attacks.KnightAttacks[squareIndex] & PieceBitboards[(int)Piece.N + offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1109,28 +1106,28 @@ public unsafe partial class Position : IDisposable
     {
         Debug.Assert((uint)squareIndex < BoardLength);
 
-        return (Attacks.KingAttacks[squareIndex] & _pieceBitboards[(int)Piece.K + offset]).NotEmpty();
+        return (Attacks.KingAttacks[squareIndex] & PieceBitboards[(int)Piece.K + offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByBishops(int squareIndex, int offset, Bitboard bothSidesOccupancy, out Bitboard bishopAttacks)
     {
         bishopAttacks = Attacks.BishopAttacks(squareIndex, bothSidesOccupancy);
-        return (bishopAttacks & _pieceBitboards[(int)Piece.B + offset]).NotEmpty();
+        return (bishopAttacks & PieceBitboards[(int)Piece.B + offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByRooks(int squareIndex, int offset, Bitboard bothSidesOccupancy, out Bitboard rookAttacks)
     {
         rookAttacks = Attacks.RookAttacks(squareIndex, bothSidesOccupancy);
-        return (rookAttacks & _pieceBitboards[(int)Piece.R + offset]).NotEmpty();
+        return (rookAttacks & PieceBitboards[(int)Piece.R + offset]).NotEmpty();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByQueens(int offset, Bitboard bishopAttacks, Bitboard rookAttacks)
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-        return (queenAttacks & _pieceBitboards[(int)Piece.Q + offset]).NotEmpty();
+        return (queenAttacks & PieceBitboards[(int)Piece.Q + offset]).NotEmpty();
     }
 
     #endregion
@@ -1140,7 +1137,7 @@ public unsafe partial class Position : IDisposable
     {
         ulong hash = 0;
 
-        var pieces = _pieceBitboards;
+        var pieces = PieceBitboards;
 
 #pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand - CountBits always returns a positive value
         hash |= (ulong)pieces[(int)Piece.P].CountBits();
@@ -1159,7 +1156,7 @@ public unsafe partial class Position : IDisposable
         return Utils.Murmur3(hash);
     }
 
-    public int CountPieces() => _occupancyBitboards[(int)Side.Both].CountBits();
+    public int CountPieces() => OccupancyBitboards[(int)Side.Both].CountBits();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
@@ -1173,7 +1170,7 @@ public unsafe partial class Position : IDisposable
             for (var file = 0; file < 8; ++file)
             {
                 var square = (rank * 8) + file;
-                var foundPiece = _board[square];
+                var foundPiece = Board[square];
 
                 if (foundPiece == (int)Piece.None)
                 {
@@ -1261,7 +1258,7 @@ public unsafe partial class Position : IDisposable
         sb.Append(
             (_enPassant == BoardSquare.noSquare
                 || (Attacks.PawnAttacks(Utils.OppositeSide((int)_side), (int)_enPassant)
-                    & _pieceBitboards[(int)Piece.P + Utils.PieceOffset((int)_side)]) == 0)
+                    & PieceBitboards[(int)Piece.P + Utils.PieceOffset((int)_side)]) == 0)
             ? "-"
             : Constants.Coordinates[(int)_enPassant]);
 
@@ -1280,7 +1277,7 @@ public unsafe partial class Position : IDisposable
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
 
     /// <summary>
-    /// Combines <see cref="_pieceBitboards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
+    /// Combines <see cref="PieceBitboards"/>, <see cref="_side"/>, <see cref="_castle"/> and <see cref="_enPassant"/>
     /// into a human-friendly representation
     /// </summary>
     public void Print(int halfMovesWithoutCaptureOrPawnMove = -1, int fullMoves = 1)
@@ -1303,7 +1300,7 @@ public unsafe partial class Position : IDisposable
 
                 for (int bbIndex = 0; bbIndex < PieceBitboardsLength; ++bbIndex)
                 {
-                    if (_pieceBitboards[bbIndex].GetBit(squareIndex))
+                    if (PieceBitboards[bbIndex].GetBit(squareIndex))
                     {
                         piece = bbIndex;
                         break;
@@ -1417,28 +1414,28 @@ public unsafe partial class Position : IDisposable
 
         Debug.Assert(_side != Side.Both, failureMessage, "Side == Side.Both");
 
-        var whitePawns = _pieceBitboards[(int)Piece.P];
-        var blackPawns = _pieceBitboards[(int)Piece.p];
-        var whiteKnights = _pieceBitboards[(int)Piece.N];
-        var whiteBishops = _pieceBitboards[(int)Piece.B];
-        var whiteRooks = _pieceBitboards[(int)Piece.R];
-        var whiteQueens = _pieceBitboards[(int)Piece.Q];
-        var whiteKings = _pieceBitboards[(int)Piece.K];
-        var blackKnights = _pieceBitboards[(int)Piece.n];
-        var blackBishops = _pieceBitboards[(int)Piece.b];
-        var blackRooks = _pieceBitboards[(int)Piece.r];
-        var blackQueens = _pieceBitboards[(int)Piece.q];
-        var blackKings = _pieceBitboards[(int)Piece.k];
+        var whitePawns = PieceBitboards[(int)Piece.P];
+        var blackPawns = PieceBitboards[(int)Piece.p];
+        var whiteKnights = PieceBitboards[(int)Piece.N];
+        var whiteBishops = PieceBitboards[(int)Piece.B];
+        var whiteRooks = PieceBitboards[(int)Piece.R];
+        var whiteQueens = PieceBitboards[(int)Piece.Q];
+        var whiteKings = PieceBitboards[(int)Piece.K];
+        var blackKnights = PieceBitboards[(int)Piece.n];
+        var blackBishops = PieceBitboards[(int)Piece.b];
+        var blackRooks = PieceBitboards[(int)Piece.r];
+        var blackQueens = PieceBitboards[(int)Piece.q];
+        var blackKings = PieceBitboards[(int)Piece.k];
 
         // No pawns in 1 and 8 ranks
         Debug.Assert((whitePawns & Constants.PawnSquares) == whitePawns, failureMessage, "White pawn(s) un 1-8");
         Debug.Assert((blackPawns & Constants.PawnSquares) == blackPawns, failureMessage, "Black pawn(s) un 1-8");
 
         // No side occupancy overlap
-        Debug.Assert((_occupancyBitboards[(int)Side.White] & _occupancyBitboards[(int)Side.Black]).Empty(), failureMessage, "White and Black overlap");
+        Debug.Assert((OccupancyBitboards[(int)Side.White] & OccupancyBitboards[(int)Side.Black]).Empty(), failureMessage, "White and Black overlap");
 
         // Side.Both occupancy overlap
-        Debug.Assert((_occupancyBitboards[(int)Side.White] | _occupancyBitboards[(int)Side.Black]) == _occupancyBitboards[(int)Side.Both], failureMessage, "Occupancy not correct");
+        Debug.Assert((OccupancyBitboards[(int)Side.White] | OccupancyBitboards[(int)Side.Black]) == OccupancyBitboards[(int)Side.Both], failureMessage, "Occupancy not correct");
 
         // No piece overlap
         const string pieceOverlapMessage = "Piece overlap";
@@ -1579,7 +1576,7 @@ public unsafe partial class Position : IDisposable
         // En-passant and pawn to be captured position
         if (_enPassant != BoardSquare.noSquare)
         {
-            Debug.Assert(!_occupancyBitboards[(int)Side.Both].GetBit((int)_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
+            Debug.Assert(!OccupancyBitboards[(int)Side.Both].GetBit((int)_enPassant), failureMessage, $"Non-empty en passant square {_enPassant}");
 
             var rank = Constants.Rank((int)_enPassant);
             Debug.Assert(rank == 2 || rank == 5, failureMessage, $"Wrong en-passant rank for {_enPassant}");
@@ -1597,7 +1594,7 @@ public unsafe partial class Position : IDisposable
         }
 
         // Can't capture opponent's king
-        Debug.Assert(!IsSquareAttacked(_pieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), _side), failureMessage, "Can't capture opponent's king");
+        Debug.Assert(!IsSquareAttacked(PieceBitboards[(int)Piece.k - Utils.PieceOffset((int)_side)].GetLS1BIndex(), _side), failureMessage, "Can't capture opponent's king");
 
         Debug.Assert(Math.Min(MaxPhase, PhaseFromScratch()) == Phase(), failureMessage, $"Wrong incremental phase: {Phase()} vs from scratch {Math.Min(MaxPhase, PhaseFromScratch())}");
     }
@@ -1607,19 +1604,19 @@ public unsafe partial class Position : IDisposable
     {
         var attacks = evaluationContext.Attacks;
 
-        Debug.Assert(_pieceBitboards[(int)Piece.P].Empty() || attacks[(int)Piece.P].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.N].Empty() || attacks[(int)Piece.N].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.B].Empty() || attacks[(int)Piece.B].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.R].Empty() || attacks[(int)Piece.R].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.Q].Empty() || attacks[(int)Piece.Q].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.P].Empty() || attacks[(int)Piece.P].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.N].Empty() || attacks[(int)Piece.N].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.B].Empty() || attacks[(int)Piece.B].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.R].Empty() || attacks[(int)Piece.R].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.Q].Empty() || attacks[(int)Piece.Q].NotEmpty());
         Debug.Assert(attacks[(int)Piece.K].NotEmpty());
         Debug.Assert(evaluationContext.AttacksBySide[(int)Side.White].NotEmpty());
 
-        Debug.Assert(_pieceBitboards[(int)Piece.p].Empty() || attacks[(int)Piece.p].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.n].Empty() || attacks[(int)Piece.n].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.b].Empty() || attacks[(int)Piece.b].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.r].Empty() || attacks[(int)Piece.r].NotEmpty());
-        Debug.Assert(_pieceBitboards[(int)Piece.q].Empty() || attacks[(int)Piece.q].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.p].Empty() || attacks[(int)Piece.p].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.n].Empty() || attacks[(int)Piece.n].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.b].Empty() || attacks[(int)Piece.b].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.r].Empty() || attacks[(int)Piece.r].NotEmpty());
+        Debug.Assert(PieceBitboards[(int)Piece.q].Empty() || attacks[(int)Piece.q].NotEmpty());
         Debug.Assert(attacks[(int)Piece.k].NotEmpty());
         Debug.Assert(evaluationContext.AttacksBySide[(int)Side.Black].NotEmpty());
     }
@@ -1630,13 +1627,6 @@ public unsafe partial class Position : IDisposable
         {
             if (disposing)
             {
-                ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares);
-                ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares);
-                ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares);
-                ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares);
-
-                ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants);
-
 #if DEBUG
                 ArrayPool<int>.Shared.Return(_initialKingSquares);
                 ArrayPool<int>.Shared.Return(_initialKingsideRookSquares);

@@ -50,8 +50,8 @@ public unsafe partial class Position
         int packedScore = 0;
         int gamePhase = 0;
 
-        var whitePawns = _pieceBitboards[(int)Piece.P];
-        var blackPawns = _pieceBitboards[(int)Piece.p];
+        var whitePawns = PieceBitboards[(int)Piece.P];
+        var blackPawns = PieceBitboards[(int)Piece.p];
 
         Bitboard whitePawnAttacks = whitePawns.ShiftUpRightAndLeft();
         Bitboard blackPawnAttacks = blackPawns.ShiftDownRightAndLeft();
@@ -59,8 +59,8 @@ public unsafe partial class Position
         evaluationContext.AttacksBySide[(int)Side.White] = evaluationContext.Attacks[(int)Piece.P] = whitePawnAttacks;
         evaluationContext.AttacksBySide[(int)Side.Black] = evaluationContext.Attacks[(int)Piece.p] = blackPawnAttacks;
 
-        var whiteKing = _pieceBitboards[(int)Piece.K].GetLS1BIndex();
-        var blackKing = _pieceBitboards[(int)Piece.k].GetLS1BIndex();
+        var whiteKing = PieceBitboards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = PieceBitboards[(int)Piece.k].GetLS1BIndex();
 
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
@@ -115,7 +115,7 @@ public unsafe partial class Position
             for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
-                var bitboard = _pieceBitboards[pieceIndex];
+                var bitboard = PieceBitboards[pieceIndex];
 
                 Debug.Assert((uint)pieceIndex < PieceProtectedByPawnBonus.Length);
                 packedScore += EvaluationTablesPinned.PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
@@ -132,7 +132,7 @@ public unsafe partial class Position
             for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
-                var bitboard = _pieceBitboards[pieceIndex];
+                var bitboard = PieceBitboards[pieceIndex];
 
                 // Pieces protected by pawns bonus
                 Debug.Assert((uint)(pieceIndex - 6) < PieceProtectedByPawnBonus.Length);
@@ -160,7 +160,7 @@ public unsafe partial class Position
                 packedScore += entry.PackedScore;
 
                 // White pawns
-                var whitePawnsCopy = _pieceBitboards[(int)Piece.P];
+                var whitePawnsCopy = PieceBitboards[(int)Piece.P];
                 while (whitePawnsCopy.NotEmpty())
                 {
                     whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
@@ -169,7 +169,7 @@ public unsafe partial class Position
                 }
 
                 // Black pawns
-                var blackPawnsCopy = _pieceBitboards[(int)Piece.p];
+                var blackPawnsCopy = PieceBitboards[(int)Piece.p];
                 while (blackPawnsCopy.NotEmpty())
                 {
                     blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
@@ -213,7 +213,7 @@ public unsafe partial class Position
             for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
-                var bitboard = _pieceBitboards[pieceIndex];
+                var bitboard = PieceBitboards[pieceIndex];
 
                 Debug.Assert((uint)pieceIndex < PieceProtectedByPawnBonus.Length);
                 packedScore += EvaluationTablesPinned.PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
@@ -234,7 +234,7 @@ public unsafe partial class Position
             for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
-                var bitboard = _pieceBitboards[pieceIndex];
+                var bitboard = PieceBitboards[pieceIndex];
 
                 // Pieces protected by pawns bonus
                 Debug.Assert((uint)(pieceIndex - 6) < PieceProtectedByPawnBonus.Length);
@@ -302,20 +302,20 @@ public unsafe partial class Position
             - EvaluationTablesPinned.TotalKingRingAttacksBonus[Math.Min(13, evaluationContext.BlackKingRingAttacks)];
 
         // Bishop pair bonus
-        if (_pieceBitboards[(int)Piece.B].CountBits() >= 2)
+        if (PieceBitboards[(int)Piece.B].CountBits() >= 2)
         {
             packedScore += BishopPairBonus;
         }
 
-        if (_pieceBitboards[(int)Piece.b].CountBits() >= 2)
+        if (PieceBitboards[(int)Piece.b].CountBits() >= 2)
         {
             packedScore -= BishopPairBonus;
         }
 
         // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
-            * ((blackPawnAttacks & _occupancyBitboards[(int)Side.White] /* & (~whitePawns) */).CountBits()
-                - (whitePawnAttacks & _occupancyBitboards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
+            * ((blackPawnAttacks & OccupancyBitboards[(int)Side.White] /* & (~whitePawns) */).CountBits()
+                - (whitePawnAttacks & OccupancyBitboards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         // Threats
         packedScore += Threats(ref evaluationContext, side: Side.White, oppositeSide: (int)Side.Black)
@@ -349,7 +349,7 @@ public unsafe partial class Position
                     case 5:
                         {
                             // RB vs R, RN vs R - scale it down due to the chances of it being a draw
-                            if (_pieceBitboards[(int)Piece.R].CountBits() == 1 && _pieceBitboards[(int)Piece.r].CountBits() == 1)
+                            if (PieceBitboards[(int)Piece.R].CountBits() == 1 && PieceBitboards[(int)Piece.r].CountBits() == 1)
                             {
                                 eval >>= 1; // /2
                             }
@@ -359,8 +359,8 @@ public unsafe partial class Position
                     case 4:
                         {
                             // Rook vs 2 minors and R vs r should be a draw
-                            if ((_pieceBitboards[(int)Piece.R].NotEmpty() && (_pieceBitboards[(int)Piece.B] | _pieceBitboards[(int)Piece.N]).Empty())
-                                || (_pieceBitboards[(int)Piece.r].NotEmpty() && (_pieceBitboards[(int)Piece.b] | _pieceBitboards[(int)Piece.n]).Empty()))
+                            if ((PieceBitboards[(int)Piece.R].NotEmpty() && (PieceBitboards[(int)Piece.B] | PieceBitboards[(int)Piece.N]).Empty())
+                                || (PieceBitboards[(int)Piece.r].NotEmpty() && (PieceBitboards[(int)Piece.b] | PieceBitboards[(int)Piece.n]).Empty()))
                             {
                                 eval >>= 1; // /2
                             }
@@ -371,7 +371,7 @@ public unsafe partial class Position
                         {
                             var winningSideOffset = Utils.PieceOffset(eval >= 0);
 
-                            if (_pieceBitboards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
+                            if (PieceBitboards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
                             {
                                 return (0, gamePhase);
                             }
@@ -385,10 +385,10 @@ public unsafe partial class Position
                         }
                     case 2:
                         {
-                            var whiteKnightsCount = _pieceBitboards[(int)Piece.N].CountBits();
+                            var whiteKnightsCount = PieceBitboards[(int)Piece.N].CountBits();
 
-                            if (whiteKnightsCount + _pieceBitboards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
-                                    || whiteKnightsCount + _pieceBitboards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
+                            if (whiteKnightsCount + PieceBitboards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
+                                    || whiteKnightsCount + PieceBitboards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
                             {
                                 return (0, gamePhase);
                             }
@@ -408,8 +408,8 @@ public unsafe partial class Position
 
                 if (gamePhase == 1)
                 {
-                    if (_pieceBitboards[(int)Piece.B + winningSideOffset].NotEmpty()
-                        && (_pieceBitboards[(int)Piece.P + winningSideOffset] & Constants.NotAorH).Empty())
+                    if (PieceBitboards[(int)Piece.B + winningSideOffset].NotEmpty()
+                        && (PieceBitboards[(int)Piece.P + winningSideOffset] & Constants.NotAorH).Empty())
                     {
                         if (IsBishopPawnDraw(winningSideOffset))
                         {
@@ -428,8 +428,8 @@ public unsafe partial class Position
                         eval >>= 1; // /2
                     }
 
-                    var whiteBishops = _pieceBitboards[(int)Piece.B];
-                    var blackBishops = _pieceBitboards[(int)Piece.b];
+                    var whiteBishops = PieceBitboards[(int)Piece.B];
+                    var blackBishops = PieceBitboards[(int)Piece.b];
 
                     // Opposite color bishop endgame with pawns are even more drawish
                     if (whiteBishops > 0
@@ -551,11 +551,11 @@ public unsafe partial class Position
             pushSquare = squareIndex - 8;
         }
 
-        var oppositeSidePawns = _pieceBitboards[(int)Piece.p - pieceIndex];
+        var oppositeSidePawns = PieceBitboards[(int)Piece.p - pieceIndex];
 
         // Isolated pawn
         Debug.Assert((uint)squareIndex < Masks.IsolatedPawnMasks.Length);
-        if ((_pieceBitboards[pieceIndex] & EvaluationTablesPinned.IsolatedPawnMasks[squareIndex]).Empty())
+        if ((PieceBitboards[pieceIndex] & EvaluationTablesPinned.IsolatedPawnMasks[squareIndex]).Empty())
         {
             Debug.Assert((uint)Constants.File(squareIndex) < IsolatedPawnPenalty.Length);
             packedBonus += EvaluationTablesPinned.IsolatedPawnPenalty[Constants.File(squareIndex)];
@@ -573,7 +573,7 @@ public unsafe partial class Position
         if ((oppositeSidePawns & passedPawnsMask).Empty())
         {
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
-            if ((passedPawnsMask & _occupancyBitboards[oppositeSide]).Empty())
+            if ((passedPawnsMask & OccupancyBitboards[oppositeSide]).Empty())
             {
                 Debug.Assert((uint)bucket < PassedPawnNoEnemiesAheadBonus.Length && (uint)rank < PassedPawnNoEnemiesAheadBonus[bucket].Length);
                 Debug.Assert((uint)oppositeSideBucket < PassedPawnNoEnemiesAheadEnemyBonus.Length && (uint)rank < PassedPawnNoEnemiesAheadEnemyBonus[oppositeSideBucket].Length);
@@ -600,7 +600,7 @@ public unsafe partial class Position
         }
 
         // Pawn phalanx
-        if (Constants.File(squareIndex) != 7 && _pieceBitboards[pieceIndex].GetBit(squareIndex + 1))
+        if (Constants.File(squareIndex) != 7 && PieceBitboards[pieceIndex].GetBit(squareIndex + 1))
         {
             Debug.Assert((uint)rank < PawnPhalanxBonus.Length);
             packedBonus += EvaluationTablesPinned.PawnPhalanxBonus[rank];
@@ -648,7 +648,7 @@ public unsafe partial class Position
     private int KnightAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, Bitboard enemyPawnAttacks, int oppositeSideKingSquare)
     {
         const int pawnToKnightOffset = (int)Piece.N - (int)Piece.P;
-        var sameSidePawns = _pieceBitboards[pieceIndex - pawnToKnightOffset];
+        var sameSidePawns = PieceBitboards[pieceIndex - pawnToKnightOffset];
 
         Debug.Assert((uint)squareIndex < BoardLength);
         var attacks = Attacks.KnightAttacks[squareIndex];
@@ -676,11 +676,11 @@ public unsafe partial class Position
     private int BishopAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, Bitboard enemyPawnAttacks, int oppositeSideKingSquare)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
-        var sameSidePawns = _pieceBitboards[pieceIndex - pawnToBishopOffset];
+        var sameSidePawns = PieceBitboards[pieceIndex - pawnToBishopOffset];
 
         var offset = Utils.PieceOffset(pieceSide);
 
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
         evaluationContext.Attacks[(int)Piece.B + offset] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
@@ -718,7 +718,7 @@ public unsafe partial class Position
             ? sameSideCentralPawns.ShiftUp()
             : sameSideCentralPawns.ShiftDown();
 
-        var pawnBlockers = pawnBlockerSquares & _occupancyBitboards[Utils.OppositeSide(pieceSide)];
+        var pawnBlockers = pawnBlockerSquares & OccupancyBitboards[Utils.OppositeSide(pieceSide)];
 
         Debug.Assert((uint)pawnBlockers.CountBits() < BadBishop_BlockedCentralPawnsPenalty.Length);
         packedBonus += EvaluationTablesPinned.BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
@@ -738,9 +738,9 @@ public unsafe partial class Position
         // Cornered/trapped bishop
         if (pieceIndex == (int)Piece.B)
         {
-            if (squareIndex == (int)BoardSquare.a1 && _board[(int)BoardSquare.b2] == (int)Piece.P)
+            if (squareIndex == (int)BoardSquare.a1 && Board[(int)BoardSquare.b2] == (int)Piece.P)
             {
-                if (_board[(int)BoardSquare.b3] == (int)Piece.None)
+                if (Board[(int)BoardSquare.b3] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
@@ -749,9 +749,9 @@ public unsafe partial class Position
                     packedBonus += BishopCorneredAndBlockedPenalty;
                 }
             }
-            else if (squareIndex == (int)BoardSquare.h1 && _board[(int)BoardSquare.g2] == (int)Piece.P)
+            else if (squareIndex == (int)BoardSquare.h1 && Board[(int)BoardSquare.g2] == (int)Piece.P)
             {
-                if (_board[(int)BoardSquare.g3] == (int)Piece.None)
+                if (Board[(int)BoardSquare.g3] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
@@ -763,9 +763,9 @@ public unsafe partial class Position
         }
         else
         {
-            if (squareIndex == (int)BoardSquare.a8 && _board[(int)BoardSquare.b7] == (int)Piece.p)
+            if (squareIndex == (int)BoardSquare.a8 && Board[(int)BoardSquare.b7] == (int)Piece.p)
             {
-                if (_board[(int)BoardSquare.b6] == (int)Piece.None)
+                if (Board[(int)BoardSquare.b6] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
@@ -774,9 +774,9 @@ public unsafe partial class Position
                     packedBonus += BishopCorneredAndBlockedPenalty;
                 }
             }
-            else if (squareIndex == (int)BoardSquare.h8 && _board[(int)BoardSquare.g7] == (int)Piece.p)
+            else if (squareIndex == (int)BoardSquare.h8 && Board[(int)BoardSquare.g7] == (int)Piece.p)
             {
-                if (_board[(int)BoardSquare.g6] == (int)Piece.None)
+                if (Board[(int)BoardSquare.g6] == (int)Piece.None)
                 {
                     packedBonus += BishopCorneredPenalty;
                 }
@@ -794,9 +794,9 @@ public unsafe partial class Position
     private int RookAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int bucket, int oppositeSideBucket, int pieceIndex, int pieceSide, Bitboard enemyPawnAttacks, int oppositeSideKingSquare)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
-        var sameSidePawns = _pieceBitboards[pieceIndex - pawnToRookOffset];
+        var sameSidePawns = PieceBitboards[pieceIndex - pawnToRookOffset];
 
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
         evaluationContext.Attacks[(int)Piece.R + Utils.PieceOffset(pieceSide)] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
@@ -818,7 +818,7 @@ public unsafe partial class Position
         var fileMask = Masks.FileMask(squareIndex);
 
         // Rook on open file
-        if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & fileMask).Empty())
+        if (((PieceBitboards[(int)Piece.P] | PieceBitboards[(int)Piece.p]) & fileMask).Empty())
         {
             var file = Constants.File(squareIndex);
             Debug.Assert((uint)bucket < OpenFileRookBonus.Length && (uint)file < OpenFileRookBonus[bucket].Length);
@@ -837,7 +837,7 @@ public unsafe partial class Position
         }
 
         // Connected rooks
-        if ((attacks & _pieceBitboards[pieceIndex]).CountBits() >= 1)
+        if ((attacks & PieceBitboards[pieceIndex]).CountBits() >= 1)
         {
             var rank = Constants.Rank(squareIndex);
 
@@ -857,9 +857,9 @@ public unsafe partial class Position
     private int QueenAdditionalEvaluation(ref EvaluationContext evaluationContext, int squareIndex, int pieceIndex, int pieceSide, Bitboard enemyPawnAttacks, int oppositeSideKingSquare)
     {
         const int pawnToQueenOffset = (int)Piece.Q - (int)Piece.P;
-        var sameSidePawns = _pieceBitboards[pieceIndex - pawnToQueenOffset];
+        var sameSidePawns = PieceBitboards[pieceIndex - pawnToQueenOffset];
 
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
         evaluationContext.Attacks[(int)Piece.Q + Utils.PieceOffset(pieceSide)] |= attacks;
         evaluationContext.AttacksBySide[pieceSide] |= attacks;
@@ -886,26 +886,26 @@ public unsafe partial class Position
     {
         // Virtual mobility (as if Queen)
         var attacksCount =
-            (Attacks.QueenAttacks(squareIndex, _occupancyBitboards[(int)Side.Both])
-            & ~(_occupancyBitboards[pieceSide] | enemyPawnAttacks)).CountBits();
+            (Attacks.QueenAttacks(squareIndex, OccupancyBitboards[(int)Side.Both])
+            & ~(OccupancyBitboards[pieceSide] | enemyPawnAttacks)).CountBits();
         Debug.Assert((uint)attacksCount < VirtualKingMobilityBonus.Length);
         int packedBonus = EvaluationTablesPinned.VirtualKingMobilityBonus[attacksCount];
 
         var kingSideOffset = Utils.PieceOffset(pieceSide);
 
         // Opposite side rooks or queens on the board
-        if ((_pieceBitboards[(int)Piece.r - kingSideOffset] + _pieceBitboards[(int)Piece.q - kingSideOffset]).NotEmpty())
+        if ((PieceBitboards[(int)Piece.r - kingSideOffset] + PieceBitboards[(int)Piece.q - kingSideOffset]).NotEmpty())
         {
             var file = Masks.FileMask(squareIndex);
 
             // King on open file
-            if (((_pieceBitboards[(int)Piece.P] | _pieceBitboards[(int)Piece.p]) & file).Empty())
+            if (((PieceBitboards[(int)Piece.P] | PieceBitboards[(int)Piece.p]) & file).Empty())
             {
                 Debug.Assert((uint)bucket < OpenFileKingPenalty.Length && (uint)Constants.File(squareIndex) < OpenFileKingPenalty[bucket].Length);
                 packedBonus += EvaluationTablesPinned.OpenFileKingPenalty[((bucket) * 8) + (Constants.File(squareIndex))];
             }
             // King on semi-open file
-            else if ((_pieceBitboards[(int)Piece.P + kingSideOffset] & file).Empty())
+            else if ((PieceBitboards[(int)Piece.P + kingSideOffset] & file).Empty())
             {
                 Debug.Assert((uint)bucket < SemiOpenFileKingPenalty.Length && (uint)Constants.File(squareIndex) < SemiOpenFileKingPenalty[bucket].Length);
                 packedBonus += EvaluationTablesPinned.SemiOpenFileKingPenalty[((bucket) * 8) + (Constants.File(squareIndex))];
@@ -981,11 +981,11 @@ public unsafe partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void CalculateThreats(ref EvaluationContext evaluationContext)
     {
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
-            var board = _pieceBitboards[pieceIndex];
+            var board = PieceBitboards[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board.NotEmpty())
@@ -999,7 +999,7 @@ public unsafe partial class Position
 
         for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var board = _pieceBitboards[pieceIndex];
+            var board = PieceBitboards[pieceIndex];
 
             ref var existingAttacks = ref evaluationContext.Attacks[pieceIndex];
             while (board.NotEmpty())
@@ -1017,13 +1017,13 @@ public unsafe partial class Position
     {
         Bitboard oppositeSideAttacks = 0;
 
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
 
         var oppositeSideOffset = Utils.PieceOffset(Utils.OppositeSide((int)_side));
 
         for (int pieceIndex = (int)Piece.P + oppositeSideOffset; pieceIndex <= (int)Piece.K + oppositeSideOffset; ++pieceIndex)
         {
-            var board = _pieceBitboards[pieceIndex];
+            var board = PieceBitboards[pieceIndex];
 
             while (board.NotEmpty())
             {
@@ -1038,15 +1038,15 @@ public unsafe partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Threats(ref EvaluationContext evaluationContext, Side side, int oppositeSide)
     {
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
         var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-        var oppositeSidePieces = _occupancyBitboards[oppositeSide];
+        var oppositeSidePieces = OccupancyBitboards[oppositeSide];
         var oppositeSidePawnIndex = (int)Piece.P + oppositeSideOffset;
         int packedBonus = 0;
 
         var attacks = evaluationContext.Attacks;
         var attacksBySide = evaluationContext.AttacksBySide;
-        var board = _board;
+        var board = Board;
 
         // Equivalent to just attacks[oppositeSidePawnIndex] due to how it's currently used,
         // since ~attacksBySide[(int)side] is always false given we're evaluation threats
@@ -1080,8 +1080,8 @@ public unsafe partial class Position
         }
 
         // Pawn push threats
-        var ourPawns = _pieceBitboards[(int)Piece.p - oppositeSidePawnIndex];
-        var theirPawns = _pieceBitboards[oppositeSidePawnIndex];
+        var ourPawns = PieceBitboards[(int)Piece.p - oppositeSidePawnIndex];
+        var theirPawns = PieceBitboards[oppositeSidePawnIndex];
 
         var nonPawnEnemies = oppositeSidePieces & ~theirPawns;
         var safeSquaresToPush = ~defendedSquares;
@@ -1124,9 +1124,9 @@ public unsafe partial class Position
         int packedBonus = 0;
 
         var offset = Utils.PieceOffset(side);
-        var occupancy = _occupancyBitboards[(int)Side.Both];
+        var occupancy = OccupancyBitboards[(int)Side.Both];
 
-        var oppositeSideKingSquare = _pieceBitboards[(int)Piece.k - offset].GetLS1BIndex();
+        var oppositeSideKingSquare = PieceBitboards[(int)Piece.k - offset].GetLS1BIndex();
         var oppositeSideAttacks = evaluationContext.AttacksBySide[oppositeSide];
 
         var bishopAttacks = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
@@ -1174,7 +1174,7 @@ public unsafe partial class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsBishopPawnDraw(int winningSideOffset)
     {
-        var pawns = _pieceBitboards[(int)Piece.P + winningSideOffset];
+        var pawns = PieceBitboards[(int)Piece.P + winningSideOffset];
 
         bool hasAFilePawn = (pawns & Constants.AFile).NotEmpty();
         bool hasHFilePawn = (pawns & Constants.HFile).NotEmpty();
@@ -1196,7 +1196,7 @@ public unsafe partial class Position
                 : (int)BoardSquare.h8)
             + (inverseWinningSide * whiteBlackDiff);
 
-        var defendingKingSquare = _pieceBitboards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
+        var defendingKingSquare = PieceBitboards[(int)Piece.k - winningSideOffset].GetLS1BIndex();
 
         // Not in the corner or adjacent squares
         Debug.Assert((uint)defendingKingSquare < Constants.ChebyshevDistance.Length && (uint)promotionCornerSquare < Constants.ChebyshevDistance[defendingKingSquare].Length);
@@ -1205,7 +1205,7 @@ public unsafe partial class Position
             return false;
         }
 
-        var bishopSquare = _pieceBitboards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
+        var bishopSquare = PieceBitboards[(int)Piece.B + winningSideOffset].GetLS1BIndex();
 
         return BoardSquareExtensions.DifferentColor(bishopSquare, promotionCornerSquare);
     }
