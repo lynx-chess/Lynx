@@ -74,20 +74,20 @@ public sealed partial class Engine : IDisposable
             Array.Clear(_moveNodeCount[i]);
         }
 
-        Array.Clear(_pieceToQuietHistory);
-        Array.Clear(_butterflyQuietHistory);
-        Array.Clear(_captureHistory);
-        Array.Clear(_continuationHistory);
-        Array.Clear(_counterMoves);
+        _pieceToQuietHistory.Clear();
+        _butterflyQuietHistory.Clear();
+        _captureHistory.Clear();
+        _continuationHistory.Clear();
+        _counterMoves.Clear();
 
         Array.Clear(_pawnEvalTable);
 
-        Array.Clear(_pawnCorrHistory);
-        Array.Clear(_nonPawnCorrHistory);
-        Array.Clear(_minorCorrHistory);
-        Array.Clear(_majorCorrHistory);
-        Array.Clear(_materialCorrHistory);
-        Array.Clear(_continuationCorrHistory);
+        _pawnCorrHistory.Clear();
+        _nonPawnCorrHistory.Clear();
+        _minorCorrHistory.Clear();
+        _majorCorrHistory.Clear();
+        _materialCorrHistory.Clear();
+        _continuationCorrHistory.Clear();
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }

@@ -47,13 +47,13 @@ public sealed partial class Engine
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
         }
 
-        _maxDepthReached[ply] = ply;
+        _maxDepthReached.Pointer[ply] = ply;
 
         cancellationToken.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+        _pVTable.Pointer[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
@@ -592,7 +592,7 @@ public sealed partial class Engine
                 // We don't need to evaluate further down to know it's a draw.
                 // Since we won't be evaluating further down, we need to clear the PV table because those moves there
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
-                Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
+                Array.Clear(_pVTable.Array, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
             else
             {
@@ -618,12 +618,12 @@ public sealed partial class Engine
                         {
                             if (isCapture)
                             {
-                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter]
+                                reduction = SearchTablesPinned.NoisyLMRReduction(depth, visitedMovesCounter)
                                     - (EvaluationConstants.LMRScaleFactor * CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece) / Configuration.EngineSettings.LMR_History_Divisor_Noisy);
                             }
                             else
                             {
-                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
+                                reduction = SearchTablesPinned.QuietLMRReduction(depth, visitedMovesCounter)
                                     + Configuration.EngineSettings.LMR_Quiet    // Quiet LMR
                                     - (EvaluationConstants.LMRScaleFactor * quietHistory / Configuration.EngineSettings.LMR_History_Divisor_Quiet);
                             }
@@ -713,9 +713,10 @@ public sealed partial class Engine
                         }
 
                         // 🔍 Post-LMR continuation history update
+                        Debug.Assert((uint)depth < (uint)SearchTablesPinned.DepthCount);
                         var historyBonus = score > alpha
-                            ? EvaluationConstants.HistoryBonus[depth]
-                            : -EvaluationConstants.HistoryMalus[depth];
+                            ? SearchTablesPinned.HistoryBonus[depth]
+                            : -SearchTablesPinned.HistoryMalus[depth];
 
                         UpdateContinuationHistory(piece, targetSquare, ply, historyBonus);
                     }
@@ -753,7 +754,7 @@ public sealed partial class Engine
 
                     if (pvNode)
                     {
-                        _pVTable[pvIndex] = move;
+                        _pVTable.Pointer[pvIndex] = move;
                         CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
                     }
 
@@ -870,7 +871,7 @@ public sealed partial class Engine
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+        _pVTable.Pointer[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         var ttHit = _tt.ProbeHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, ply, out var ttProbeResult);
         var ttScore = ttProbeResult.Score;
@@ -890,7 +891,7 @@ public sealed partial class Engine
         }
 
         ShortMove ttBestMove = ttProbeResult.BestMove;
-        _maxDepthReached[ply] = ply;
+        _maxDepthReached.Pointer[ply] = ply;
 
         var rawStaticEval = ttHit
             ? ttProbeResult.StaticEval
@@ -1033,7 +1034,7 @@ public sealed partial class Engine
                     alpha = score;
                     bestMove = move;
 
-                    _pVTable[pvIndex] = move;
+                    _pVTable.Pointer[pvIndex] = move;
                     CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
                     nodeType = NodeType.Exact;

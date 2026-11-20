@@ -54,4 +54,6 @@ public static unsafe class EvaluationTablesPinned
     public static readonly ulong* IsolatedPawnMasks = CopyToPinnedArray(Masks.IsolatedPawnMasks);
 
     public static readonly int* ChebyshevDistance = FlattenToPinnedArray(Constants.ChebyshevDistance, stride: 64);
+
+    public static readonly int* GamePhaseByPiece = CopyToPinnedArray(EvaluationConstants.GamePhaseByPiece.ToArray());
 }

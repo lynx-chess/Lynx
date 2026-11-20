@@ -58,6 +58,11 @@ internal static unsafe class PinnedArrays
     public static T* KeepAlive<T>(PinnedArray<T> pinned)
         where T : unmanaged
     {
+        if (pinned.Array is null)
+        {
+            throw new ArgumentException("Uninitialized (default) PinnedArray", nameof(pinned));
+        }
+
         lock (_keepAliveLock)
         {
             _keepAlive.Add(pinned.Array);

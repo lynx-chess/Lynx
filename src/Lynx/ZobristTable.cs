@@ -1,7 +1,8 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+
+using static Lynx.PinnedArrays;
 
 namespace Lynx;
 
@@ -13,58 +14,73 @@ public static unsafe class ZobristTable
 {
     private static readonly LynxRandom _random = new(int.MaxValue);
 
+    private const int CastleHashesLength = 16;
+
     /// <summary>
-    /// 64x12
+    /// [64 x 12], index: (square x 12) + piece
     /// </summary>
-    private static readonly ulong[] _pieceTable;
+    private static readonly ulong* _pieceTable;
 
-    private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
+    private static readonly ulong* _50mrTable;
 
-    private static readonly ulong[] _castleHashes = GC.AllocateArray<ulong>(16, pinned: true);
+    private static readonly ulong* _castleHashes;
 
 #pragma warning disable CA1810 // Initialize reference type static fields inline
 
     static ZobristTable()
     {
-        _pieceTable = InitializeZobristTable();
-        Initialize50mrTable();
+        _pieceTable = CopyToPinnedArray(InitializeZobristTable());
+
+        _50mrTable = AllocatePinnedArray(Constants.MaxNumberMovesInAGame, out ulong[] fiftyMovesRuleTable);
+        Initialize50mrTable(fiftyMovesRuleTable);
+
+        _castleHashes = AllocatePinnedArray(CastleHashesLength, out ulong[] castleHashes);
 
         ulong WK_Hash = PieceHash((int)BoardSquare.a8, (int)Piece.p);
         ulong WQ_Hash = PieceHash((int)BoardSquare.b8, (int)Piece.p);
         ulong BK_Hash = PieceHash((int)BoardSquare.c8, (int)Piece.p);
         ulong BQ_Hash = PieceHash((int)BoardSquare.d8, (int)Piece.p);
 
-        _castleHashes[(int)CastlingRights.None] = 0;
+        castleHashes[(int)CastlingRights.None] = 0;
 
-        _castleHashes[(int)CastlingRights.WK] = WK_Hash;
-        _castleHashes[(int)CastlingRights.WQ] = WQ_Hash;
-        _castleHashes[(int)CastlingRights.BK] = BK_Hash;
-        _castleHashes[(int)CastlingRights.BQ] = BQ_Hash;
+        castleHashes[(int)CastlingRights.WK] = WK_Hash;
+        castleHashes[(int)CastlingRights.WQ] = WQ_Hash;
+        castleHashes[(int)CastlingRights.BK] = BK_Hash;
+        castleHashes[(int)CastlingRights.BQ] = BQ_Hash;
 
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ)] = WK_Hash ^ WQ_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK)] = WK_Hash ^ BK_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BQ)] = WK_Hash ^ BQ_Hash;
-        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK)] = WQ_Hash ^ BK_Hash;
-        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BQ)] = WQ_Hash ^ BQ_Hash;
-        _castleHashes[(int)(CastlingRights.BK | CastlingRights.BQ)] = BK_Hash ^ BQ_Hash;
+        castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ)] = WK_Hash ^ WQ_Hash;
+        castleHashes[(int)(CastlingRights.WK | CastlingRights.BK)] = WK_Hash ^ BK_Hash;
+        castleHashes[(int)(CastlingRights.WK | CastlingRights.BQ)] = WK_Hash ^ BQ_Hash;
+        castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK)] = WQ_Hash ^ BK_Hash;
+        castleHashes[(int)(CastlingRights.WQ | CastlingRights.BQ)] = WQ_Hash ^ BQ_Hash;
+        castleHashes[(int)(CastlingRights.BK | CastlingRights.BQ)] = BK_Hash ^ BQ_Hash;
 
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK)] = WK_Hash ^ WQ_Hash ^ BK_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BQ_Hash;
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ BK_Hash ^ BQ_Hash;
-        _castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WQ_Hash ^ BK_Hash ^ BQ_Hash;
+        castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK)] = WK_Hash ^ WQ_Hash ^ BK_Hash;
+        castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BQ_Hash;
+        castleHashes[(int)(CastlingRights.WK | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ BK_Hash ^ BQ_Hash;
+        castleHashes[(int)(CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WQ_Hash ^ BK_Hash ^ BQ_Hash;
 
-        _castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash;
+        castleHashes[(int)(CastlingRights.WK | CastlingRights.WQ | CastlingRights.BK | CastlingRights.BQ)] = WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash;
     }
 
 #pragma warning restore CA1810 // Initialize reference type static fields inline
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong HalfMovesWithoutCaptureOrPawnMoveHash(int counter)
-        => _50mrTable[counter];
+    {
+        Debug.Assert((uint)counter < Constants.MaxNumberMovesInAGame);
+
+        return _50mrTable[counter];
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece)
-        => Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_pieceTable), (boardSquare * 12) + piece);
+    {
+        Debug.Assert((uint)boardSquare < 64);
+        Debug.Assert((uint)piece < 12);
+
+        return _pieceTable[(boardSquare * 12) + piece];
+    }
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -112,7 +128,7 @@ public static unsafe class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong CastleHash(byte castle)
     {
-        Debug.Assert(castle <= _castleHashes.Length, $"Castle value {castle} is out of bounds for the castle hash table");
+        Debug.Assert(castle < CastleHashesLength, $"Castle value {castle} is out of bounds for the castle hash table");
 
         return _castleHashes[castle];
     }
@@ -272,7 +288,7 @@ public static unsafe class ZobristTable
     /// </summary>
     internal static ulong[] InitializeZobristTable(LynxRandom random)
     {
-        var zobristTable = GC.AllocateArray<ulong>(64 * 12, pinned: true);
+        var zobristTable = new ulong[64 * 12];
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
@@ -285,7 +301,7 @@ public static unsafe class ZobristTable
         return zobristTable;
     }
 
-    private static void Initialize50mrTable()
+    private static void Initialize50mrTable(ulong[] fiftyMovesRuleTable)
     {
         var initialMoves = Configuration.EngineSettings.TT_50MR_Start;
         var step = Configuration.EngineSettings.TT_50MR_Step;
@@ -293,16 +309,16 @@ public static unsafe class ZobristTable
         var initialVal = _random.NextUInt64();
         for (int i = 0; i < initialMoves; ++i)
         {
-            _50mrTable[i] = initialVal;
+            fiftyMovesRuleTable[i] = initialVal;
         }
 
-        for (int i = initialMoves; i < _50mrTable.Length; i += step)
+        for (int i = initialMoves; i < fiftyMovesRuleTable.Length; i += step)
         {
             var val = _random.NextUInt64();
 
-            for (int j = i; j < i + step && j < _50mrTable.Length; ++j)
+            for (int j = i; j < i + step && j < fiftyMovesRuleTable.Length; ++j)
             {
-                _50mrTable[j] = val;
+                fiftyMovesRuleTable[j] = val;
             }
         }
     }
