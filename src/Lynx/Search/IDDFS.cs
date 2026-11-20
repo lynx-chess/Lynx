@@ -9,17 +9,16 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1 + Constants.ArrayDepthMargin) / 2, pinned: true);
 
+    private readonly PinnedArray<Move> _pVTable = new(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1 + Constants.ArrayDepthMargin) / 2);
     /// <summary>
     /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
-    internal readonly int[] _killerMoves = GC.AllocateArray<int>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
-
+    internal readonly PinnedArray<int> _killerMoves = new(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin));
     /// <summary>
     /// 12 x 64
     /// </summary>
-    internal readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
+    internal readonly PinnedArray<int> _counterMoves = new(12 * 64);
 
     private const int PieceToQuietHistoryLength = 12 * 64 * 2 * 2;
 
@@ -29,19 +28,19 @@ public sealed partial class Engine
     /// 12 x 64 x 2 x 2
     /// piece x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly short[] _pieceToQuietHistory = GC.AllocateArray<short>(PieceToQuietHistoryLength, pinned: true);
+    private readonly PinnedArray<short> _pieceToQuietHistory = new(PieceToQuietHistoryLength);
 
     /// <summary>
     /// 64 x 64 x 2 x 2
     /// source square x target square x source is attacked x target is attacked
     /// </summary>
-    private readonly short[] _butterflyQuietHistory = GC.AllocateArray<short>(ButterflyHistoryLength, pinned: true);
+    private readonly PinnedArray<short> _butterflyQuietHistory = new(ButterflyHistoryLength);
 
     /// <summary>
     /// 12 x 64 x 12,
     /// piece x target square x captured piece
     /// </summary>
-    private readonly short[] _captureHistory = GC.AllocateArray<short>(12 * 64 * 12, pinned: true);
+    private readonly PinnedArray<short> _captureHistory = new(12 * 64 * 12);
 
     /// <summary>
     /// 12 x 64 x 12 x 64
@@ -49,42 +48,42 @@ public sealed partial class Engine
     /// ply - 1 -> Counter-move history
     /// ply - 2 -> Follow-up move history
     /// </summary>
-    private readonly short[] _continuationHistory = GC.AllocateArray<short>(12 * 64 * 12 * 64, pinned: true);
+    private readonly PinnedArray<short> _continuationHistory = new(12 * 64 * 12 * 64);
 
     /// <summary>
     /// <see cref="Constants.PawnCorrHistoryHashSize"/> x 2
     /// Pawn hash x side to move
     /// </summary>
-    private readonly short[] _pawnCorrHistory = GC.AllocateArray<short>(Constants.PawnCorrHistoryHashSize * 2, pinned: true);
+    private readonly PinnedArray<short> _pawnCorrHistory = new(Constants.PawnCorrHistoryHashSize * 2);
 
     /// <summary>
     /// <see cref="Constants.NonPawnCorrHistoryHashMask"/> x 2 x 2
     /// Non-pawn side hash x side to move x piece hash side
     /// </summary>
-    private readonly short[] _nonPawnCorrHistory = GC.AllocateArray<short>(Constants.NonPawnCorrHistoryHashSize * 2 * 2, pinned: true);
+    private readonly PinnedArray<short> _nonPawnCorrHistory = new(Constants.NonPawnCorrHistoryHashSize * 2 * 2);
 
     /// <summary>
     /// <see cref="Constants.MinorCorrHistoryHashSize"/> x 2
     /// Minor hash x side to move
     /// </summary>
-    private readonly short[] _minorCorrHistory = GC.AllocateArray<short>(Constants.MinorCorrHistoryHashSize * 2, pinned: true);
+    private readonly PinnedArray<short> _minorCorrHistory = new(Constants.MinorCorrHistoryHashSize * 2);
 
     /// <summary>
     /// <see cref="Constants.MajorCorrHistoryHashSize"/> x 2
     /// Major hash x side to move
     /// </summary>
-    private readonly short[] _majorCorrHistory = GC.AllocateArray<short>(Constants.MajorCorrHistoryHashSize * 2, pinned: true);
+    private readonly PinnedArray<short> _majorCorrHistory = new(Constants.MajorCorrHistoryHashSize * 2);
 
     /// <summary>
     /// <see cref="Constants.MaterialCorrHistoryHashSize"/> x 2
     /// Material hash x side to move
     /// </summary>
-    private readonly short[] _materialCorrHistory = GC.AllocateArray<short>(Constants.MaterialCorrHistoryHashSize * 2, pinned: true);
+    private readonly PinnedArray<short> _materialCorrHistory = new(Constants.MaterialCorrHistoryHashSize * 2);
 
     /// <summary>
     /// <see cref="Constants.ContinuationCorrHistoryHashSize"/>
     /// </summary>
-    private readonly short[] _continuationCorrHistory = GC.AllocateArray<short>(Constants.ContinuationCorrHistoryHashSize, pinned: true);
+    private readonly PinnedArray<short> _continuationCorrHistory = new(Constants.ContinuationCorrHistoryHashSize);
 
     /// <summary>
     /// 12 x 64
@@ -92,7 +91,7 @@ public sealed partial class Engine
     /// </summary>
     private readonly ulong[][] _moveNodeCount;
 
-    private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+    private readonly PinnedArray<int> _maxDepthReached = new(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin);
 
     /// <summary>
     /// <see cref="Constants.KingPawnHashSize"/>
@@ -143,14 +142,14 @@ public sealed partial class Engine
     /// </summary>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     [SkipLocalsInit]
-    private SearchResult IDDFS(bool isPondering, CancellationToken cancellationToken)
+    private unsafe SearchResult IDDFS(bool isPondering, CancellationToken cancellationToken)
     {
         // Cleanup
         _nodes = 0;
         _searchMoves = _searchConstraints.SearchMoves;
 
-        Array.Clear(_pVTable);
-        Array.Clear(_maxDepthReached);
+        _pVTable.Clear();
+        _maxDepthReached.Clear();
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_moveNodeCount[i]);
@@ -186,7 +185,7 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            Array.Clear(_killerMoves);
+            _killerMoves.Clear();
             // Not clearing quiet and capture histories here on purpose
 
             int mate = 0;
@@ -223,7 +222,7 @@ public sealed partial class Engine
                     var validLines = SearchRootLines(depth, logLevel, cancellationToken);
                     // We need to re-populate it with the best PV
 
-                    Array.Clear(_pVTable);
+                    _pVTable.Clear();
 
                     if (validLines > 0)
                     {
@@ -231,7 +230,7 @@ public sealed partial class Engine
 
                         // Before clearing it above, The PV table held the PV of the last line searched.
                         // However, it's the strongest line's PV the one we need for the rest of the logic
-                        _rootMoves[0].PV.CopyTo(_pVTable, 0);
+                        _rootMoves[0].PV.CopyTo(_pVTable.Array, 0);
 
                         extraLines = BuildExtraLines(validLines, depth);
                     }
@@ -299,10 +298,10 @@ public sealed partial class Engine
                 _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
-            Array.Clear(_pVTable);
+            _pVTable.Clear();
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
             {
-                _pVTable[i] = lastSearchResult.Moves[i];
+                _pVTable.Pointer[i] = lastSearchResult.Moves[i];
             }
         }
         catch (Exception e) when (e is not LynxException)
@@ -482,7 +481,7 @@ public sealed partial class Engine
 
             ValidatePVTable();
 
-            var pvTableSpan = _pVTable.AsSpan();
+            var pvTableSpan = _pVTable.Array.AsSpan();
             var pvLength = pvTableSpan.IndexOf(0);
             if (pvLength <= 0)
             {
@@ -570,7 +569,7 @@ public sealed partial class Engine
                 rootMove.PV[0], rootMove.Score, depth, rootMove.PV, CalculateMate(rootMove.Score))
             {
                 MultiPVIndex = i + 2,
-                DepthReached = _maxDepthReached.Max(),
+                DepthReached = _maxDepthReached.Array.Max(),
             };
         }
 
@@ -779,7 +778,7 @@ public sealed partial class Engine
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
         int bestScore, int depth, int mate, SearchResult[] extraLines)
     {
-        var pvTableSpan = _pVTable.AsSpan();
+        var pvTableSpan = _pVTable.Array.AsSpan();
         var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
 
         var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
@@ -791,7 +790,7 @@ public sealed partial class Engine
 #endif
             pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
         {
-            DepthReached = _maxDepthReached.Max(),
+            DepthReached = _maxDepthReached.Array.Max(),
             Nodes = _nodes,
             Time = Utils.CalculateUCITime(elapsedSeconds),
             NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds),
@@ -831,7 +830,7 @@ public sealed partial class Engine
 
         var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
 
-        finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
+        finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.Array.LastOrDefault(item => item != default));
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = Utils.CalculateUCITime(elapsedSeconds);
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);

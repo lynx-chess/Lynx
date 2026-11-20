@@ -257,16 +257,16 @@ public unsafe class MovePickerTest : BaseTest
 
     internal static void SetKillersAndCounterMove(Engine engine, int ply, Move firstKiller, Move secondKiller, Move counterMove, Move previousMove)
     {
-        Array.Clear(engine._killerMoves);
-        Array.Clear(engine._counterMoves);
+        engine._killerMoves.Clear();
+        engine._counterMoves.Clear();
 
-        engine._killerMoves[ply * 2] = firstKiller;
-        engine._killerMoves[(ply * 2) + 1] = secondKiller;
+        engine._killerMoves.Pointer[ply * 2] = firstKiller;
+        engine._killerMoves.Pointer[(ply * 2) + 1] = secondKiller;
 
         if (ply >= 1)
         {
             engine.Game.Stack(ply - 1).Move = previousMove;
-            engine._counterMoves[(previousMove.Piece() * 64) + previousMove.TargetSquare()] = counterMove;
+            engine._counterMoves.Pointer[(previousMove.Piece() * 64) + previousMove.TargetSquare()] = counterMove;
         }
     }
 

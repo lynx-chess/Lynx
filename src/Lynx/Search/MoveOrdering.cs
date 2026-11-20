@@ -13,7 +13,7 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate)
+    internal unsafe int ScoreMove(Position position, Move move, int ply, Bitboard oppositeSideAttacks, ShortMove bestMoveTTCandidate)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -27,17 +27,18 @@ public sealed partial class Engine
 
         if (!isCapture && !isPromotion)
         {
-            var thisPlyKillerMovesBaseIndex = ply * 2;
-            ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
+            Debug.Assert((uint)((ply * 2) + 1) < (uint)_killerMoves.Length);
+
+            var thisPlyKillerMoves = _killerMoves.Pointer + (ply * 2);
 
             // 1st killer move
-            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) == move)
+            if (thisPlyKillerMoves[0] == move)
             {
                 return FirstKillerMoveValue;
             }
 
             // 2nd killer move
-            if (Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) == move)
+            if (thisPlyKillerMoves[1] == move)
             {
                 return SecondKillerMoveValue;
             }
@@ -89,7 +90,7 @@ public sealed partial class Engine
                 : BadCaptureMoveBaseScoreValue;
 
             return baseCaptureScore
-                + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
+                + SearchTablesPinned.MostValuableVictimLeastValuableAttacker(piece, capturedPiece)
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
@@ -158,7 +159,7 @@ public sealed partial class Engine
                 $"{move.UCIString()} capturing king is generated in position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
 
             return baseCaptureScore
-                + MostValuableVictimLeastValuableAttacker[piece][capturedPiece]
+                + SearchTablesPinned.MostValuableVictimLeastValuableAttacker(piece, capturedPiece)
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + CaptureHistoryEntry(piece, move.TargetSquare(), capturedPiece);
         }
@@ -185,8 +186,10 @@ public sealed partial class Engine
         {
             // 🔍 Quiet history moves
             // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
-            int rawHistoryBonus = HistoryBonus[depth];
-            int rawHistoryMalus = HistoryMalus[depth];
+            Debug.Assert((uint)depth < (uint)SearchTablesPinned.DepthCount);
+
+            int rawHistoryBonus = SearchTablesPinned.HistoryBonus[depth];
+            int rawHistoryMalus = SearchTablesPinned.HistoryMalus[depth];
 
             var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
             Debug.Assert(oppositeSideAttacks.NotEmpty());
@@ -239,19 +242,20 @@ public sealed partial class Engine
             }
         }
 
-        var thisPlyKillerMovesBaseIndex = ply * 2;
-        ref var killerMovesBase = ref MemoryMarshal.GetArrayDataReference(_killerMoves);
-        var firstKillerMove = Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex);
+        Debug.Assert((uint)((ply * 2) + 1) < (uint)_killerMoves.Length);
+
+        var thisPlyKillerMoves = _killerMoves.Pointer + (ply * 2);
+        var firstKillerMove = thisPlyKillerMoves[0];
 
         if (move.PromotedPiece() == default && move != firstKillerMove)
         {
             // 🔍 Killer moves
-            if (move != Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1))
+            if (move != thisPlyKillerMoves[1])
             {
-                Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex + 1) = firstKillerMove;
+                thisPlyKillerMoves[1] = firstKillerMove;
             }
 
-            Unsafe.Add(ref killerMovesBase, thisPlyKillerMovesBaseIndex) = move;
+            thisPlyKillerMoves[0] = move;
 
             if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
@@ -266,10 +270,12 @@ public sealed partial class Engine
     /// Capture history
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
+    private unsafe void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
-        var rawHistoryBonus = HistoryBonus[depth];
-        var rawHistoryMalus = HistoryMalus[depth];
+        Debug.Assert((uint)depth < (uint)SearchTablesPinned.DepthCount);
+
+        var rawHistoryBonus = SearchTablesPinned.HistoryBonus[depth];
+        var rawHistoryMalus = SearchTablesPinned.HistoryMalus[depth];
 
         ref var captureHistoryEntry = ref CaptureHistoryEntry(move.Piece(), move.TargetSquare(), move.CapturedPiece());
         captureHistoryEntry = (short)ScoreHistoryMove(captureHistoryEntry, rawHistoryBonus);
