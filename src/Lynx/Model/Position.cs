@@ -1,4 +1,6 @@
-﻿using System.Buffers;
+﻿#if DEBUG
+using System.Buffers;
+#endif
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -11,14 +13,20 @@ namespace Lynx.Model;
 public unsafe partial class Position : IDisposable
 {
     /// <summary>
-    /// Backs up internal arrays: <see cref="_pieceBitboards"/>, <see cref="_occupancyBitboards"/> and <see cref="_nonPawnHash"/>
+    /// Backs up internal arrays: <see cref="_pieceBitboards"/>, <see cref="_occupancyBitboards"/>, <see cref="_nonPawnHash"/>, <see cref="_board"/>,
+    /// the castling masks (<see cref="KingsideCastlingFreeSquares"/>, etc.) and <see cref="_castlingRightsUpdateConstants"/>
     /// </summary>
     private readonly ulong[] _internalArrayStorage;
 
     private const int OccupancyBitboardsOffset = PieceBitboardsLength;
     private const int NonPawnHashOffset = OccupancyBitboardsOffset + OccupancyBitboardsLength;
     private const int BoardOffset = NonPawnHashOffset + NonPawnHashLength;
-    private const int StorageLength = BoardOffset + (BoardLength * sizeof(int) / sizeof(ulong));
+    private const int KingsideCastlingFreeSquaresOffset = BoardOffset + (BoardLength * sizeof(int) / sizeof(ulong));
+    private const int KingsideCastlingNonAttackedSquaresOffset = KingsideCastlingFreeSquaresOffset + CastlingSquaresLength;
+    private const int QueensideCastlingFreeSquaresOffset = KingsideCastlingNonAttackedSquaresOffset + CastlingSquaresLength;
+    private const int QueensideCastlingNonAttackedSquaresOffset = QueensideCastlingFreeSquaresOffset + CastlingSquaresLength;
+    private const int CastlingRightsUpdateConstantsOffset = QueensideCastlingNonAttackedSquaresOffset + CastlingSquaresLength;
+    private const int StorageLength = CastlingRightsUpdateConstantsOffset + (CastlingRightsUpdateConstantsLength * sizeof(byte) / sizeof(ulong));
 
     private bool _disposedValue;
 
@@ -48,12 +56,16 @@ public unsafe partial class Position : IDisposable
 
     private byte _castle;
 
-#pragma warning disable S3887, CA1051
-    private readonly byte[] _castlingRightsUpdateConstants;
-    public readonly ulong[] KingsideCastlingFreeSquares;
-    public readonly ulong[] KingsideCastlingNonAttackedSquares;
-    public readonly ulong[] QueensideCastlingFreeSquares;
-    public readonly ulong[] QueensideCastlingNonAttackedSquares;
+    private const int CastlingRightsUpdateConstantsLength = 64;
+    private readonly byte* _castlingRightsUpdateConstants;
+
+    public const int CastlingSquaresLength = 2;
+
+#pragma warning disable CA1051
+    public readonly ulong* KingsideCastlingFreeSquares;
+    public readonly ulong* KingsideCastlingNonAttackedSquares;
+    public readonly ulong* QueensideCastlingFreeSquares;
+    public readonly ulong* QueensideCastlingNonAttackedSquares;
 
 #pragma warning disable IDE1006 // Naming Styles
     internal int WhiteShortCastle;
@@ -61,7 +73,7 @@ public unsafe partial class Position : IDisposable
     internal int BlackShortCastle;
     internal int BlackLongCastle;
 #pragma warning restore IDE1006 // Naming Styles
-#pragma warning restore S3887, CA1051
+#pragma warning restore CA1051
 
 #if DEBUG
     private readonly int[] _initialKingsideRookSquares;
@@ -140,13 +152,11 @@ public unsafe partial class Position : IDisposable
         _occupancyBitboards = storage + OccupancyBitboardsOffset;
         _nonPawnHash = storage + NonPawnHashOffset;
         _board = (int*)(storage + BoardOffset);
-        _castlingRightsUpdateConstants = ArrayPool<byte>.Shared.Rent(64);
-
-        // Always allocate length 2 so ResetTo can index safely regardless of castling rights
-        KingsideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-        KingsideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
-        QueensideCastlingFreeSquares = ArrayPool<ulong>.Shared.Rent(2);
-        QueensideCastlingNonAttackedSquares = ArrayPool<ulong>.Shared.Rent(2);
+        KingsideCastlingFreeSquares = storage + KingsideCastlingFreeSquaresOffset;
+        KingsideCastlingNonAttackedSquares = storage + KingsideCastlingNonAttackedSquaresOffset;
+        QueensideCastlingFreeSquares = storage + QueensideCastlingFreeSquaresOffset;
+        QueensideCastlingNonAttackedSquares = storage + QueensideCastlingNonAttackedSquaresOffset;
+        _castlingRightsUpdateConstants = (byte*)(storage + CastlingRightsUpdateConstantsOffset);
 
 #if DEBUG
         _initialKingSquares = ArrayPool<int>.Shared.Rent(2);
@@ -200,7 +210,7 @@ public unsafe partial class Position : IDisposable
 
         IsIncrementalEval = false;
 
-        Array.Fill(_castlingRightsUpdateConstants, Constants.NoUpdateCastlingRight, 0, 64);
+        new Span<byte>(_castlingRightsUpdateConstants, CastlingRightsUpdateConstantsLength).Fill(Constants.NoUpdateCastlingRight);
 
         var whiteKingSquare = WhiteKingSquare;
         var blackKingSquare = BlackKingSquare;
@@ -217,7 +227,7 @@ public unsafe partial class Position : IDisposable
         var castlingData = parsedFEN.CastlingData;
 
         // Free masks could be simplified/hardcoded for standard chess, see FreeAndNonAttackedSquares
-        Array.Clear(KingsideCastlingFreeSquares, 0, 2);
+        new Span<ulong>(KingsideCastlingFreeSquares, CastlingSquaresLength).Clear();
 
         var whiteKingsideRook = castlingData.WhiteKingsideRook;
         if (whiteKingsideRook != CastlingData.DefaultValues)
@@ -372,20 +382,6 @@ public unsafe partial class Position : IDisposable
         IsIncrementalEval = position.IsIncrementalEval;
         IncrementalEvalAccumulator = position.IncrementalEvalAccumulator;
         IncrementalPhaseAccumulator = position.IncrementalPhaseAccumulator;
-
-        Array.Copy(position._castlingRightsUpdateConstants, _castlingRightsUpdateConstants, 64);
-
-        KingsideCastlingFreeSquares[(int)Side.White] = position.KingsideCastlingFreeSquares[(int)Side.White];
-        KingsideCastlingFreeSquares[(int)Side.Black] = position.KingsideCastlingFreeSquares[(int)Side.Black];
-
-        KingsideCastlingNonAttackedSquares[(int)Side.White] = position.KingsideCastlingNonAttackedSquares[(int)Side.White];
-        KingsideCastlingNonAttackedSquares[(int)Side.Black] = position.KingsideCastlingNonAttackedSquares[(int)Side.Black];
-
-        QueensideCastlingFreeSquares[(int)Side.White] = position.QueensideCastlingFreeSquares[(int)Side.White];
-        QueensideCastlingFreeSquares[(int)Side.Black] = position.QueensideCastlingFreeSquares[(int)Side.Black];
-
-        QueensideCastlingNonAttackedSquares[(int)Side.White] = position.QueensideCastlingNonAttackedSquares[(int)Side.White];
-        QueensideCastlingNonAttackedSquares[(int)Side.Black] = position.QueensideCastlingNonAttackedSquares[(int)Side.Black];
 
         WhiteShortCastle = position.WhiteShortCastle;
         WhiteLongCastle = position.WhiteLongCastle;
@@ -731,6 +727,9 @@ public unsafe partial class Position : IDisposable
         _occupancyBitboards[2] = _occupancyBitboards[1] | _occupancyBitboards[0];
 
         // Updating castling rights
+        Debug.Assert((uint)sourceSquare < CastlingRightsUpdateConstantsLength);
+        Debug.Assert((uint)targetSquare < CastlingRightsUpdateConstantsLength);
+
         _castle &= _castlingRightsUpdateConstants[sourceSquare];
         _castle &= _castlingRightsUpdateConstants[targetSquare];
 
@@ -1630,13 +1629,6 @@ public unsafe partial class Position : IDisposable
         {
             if (disposing)
             {
-                ArrayPool<ulong>.Shared.Return(KingsideCastlingFreeSquares);
-                ArrayPool<ulong>.Shared.Return(QueensideCastlingFreeSquares);
-                ArrayPool<ulong>.Shared.Return(KingsideCastlingNonAttackedSquares);
-                ArrayPool<ulong>.Shared.Return(QueensideCastlingNonAttackedSquares);
-
-                ArrayPool<byte>.Shared.Return(_castlingRightsUpdateConstants);
-
 #if DEBUG
                 ArrayPool<int>.Shared.Return(_initialKingSquares);
                 ArrayPool<int>.Shared.Return(_initialKingsideRookSquares);

@@ -6,7 +6,7 @@ using static Lynx.Model.BitboardExtensions;
 namespace Lynx.Test.Model;
 
 [TestFixture(Category = Categories.PerftFRC, Explicit = true)]
-public class PositionFRCCastlingTest
+public unsafe class PositionFRCCastlingTest
 {
     public PositionFRCCastlingTest()
     {
