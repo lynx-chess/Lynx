@@ -183,18 +183,77 @@ public static class FENParser
             return ParseDFRCCastlingRights(castlingChars, pieceBitboards, out castlingRights);
         }
 
+        var isWhiteKingOnInitialSquare = pieceBitboards[(int)Piece.K].GetBit(Constants.InitialWhiteKingSquare);
+        var isBlackKingOnInitialSquare = pieceBitboards[(int)Piece.k].GetBit(Constants.InitialBlackKingSquare);
+
         castlingRights = 0;
+
         for (int i = 0; i < castlingChars.Length; ++i)
         {
-            castlingRights |= castlingChars[i] switch
+            var ch = castlingChars[i];
+            switch (ch)
             {
-                'K' => (byte)CastlingRights.WK,
-                'Q' => (byte)CastlingRights.WQ,
-                'k' => (byte)CastlingRights.BK,
-                'q' => (byte)CastlingRights.BQ,
-                '-' => castlingRights,
-                _ => throw new LynxException($"Unrecognized castling char: {castlingChars[i]}"),
-            };
+                case 'K':
+                    {
+                        if (isWhiteKingOnInitialSquare && pieceBitboards[(int)Piece.R].GetBit(Constants.InitialWhiteKingsideRookSquare))
+                        {
+                            castlingRights |= (byte)CastlingRights.WK;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: no white king on e1 or no white rook on h1. Set UCI_Chess960 if this is a DFRC position", ch);
+                        }
+
+                        break;
+                    }
+                case 'Q':
+                    {
+                        if (isWhiteKingOnInitialSquare && pieceBitboards[(int)Piece.R].GetBit(Constants.InitialWhiteQueensideRookSquare))
+                        {
+                            castlingRights |= (byte)CastlingRights.WQ;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: no white king on e1 or no white rook on a1. Set UCI_Chess960 if this is a DFRC position", ch);
+                        }
+
+                        break;
+                    }
+                case 'k':
+                    {
+                        if (isBlackKingOnInitialSquare && pieceBitboards[(int)Piece.r].GetBit(Constants.InitialBlackKingsideRookSquare))
+                        {
+                            castlingRights |= (byte)CastlingRights.BK;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: no black king on e8 or no black rook on h8. Set UCI_Chess960 if this is a DFRC position", ch);
+                        }
+
+                        break;
+                    }
+                case 'q':
+                    {
+                        if (isBlackKingOnInitialSquare && pieceBitboards[(int)Piece.r].GetBit(Constants.InitialBlackQueensideRookSquare))
+                        {
+                            castlingRights |= (byte)CastlingRights.BQ;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: no black king on e8 or no black rook on a8. Set UCI_Chess960 if this is a DFRC position", ch);
+                        }
+
+                        break;
+                    }
+                case '-':
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        throw new LynxException($"Unrecognized castling char: {ch}");
+                    }
+            }
         }
 
         return new CastlingData(
@@ -215,6 +274,9 @@ public static class FENParser
         var whiteKing = pieceBitboards[(int)Piece.K].GetLS1BIndex();
         var blackKing = pieceBitboards[(int)Piece.k].GetLS1BIndex();
 
+        var isWhiteKingOnBackRank = Constants.Rank(whiteKing) == 0;
+        var isBlackKingOnBackRank = Constants.Rank(blackKing) == 7;
+
         castlingRights = 0;
 
         for (int i = 0; i < castlingChars.Length; ++i)
@@ -226,20 +288,25 @@ public static class FENParser
                     {
                         Debug.Assert(whiteKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
 
-                        castlingRights |= (byte)CastlingRights.WK;
-
-                        for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > whiteKing; --potentialRookSquareIndex)
+                        if (isWhiteKingOnBackRank)
                         {
-                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                            for (int potentialRookSquareIndex = Constants.InitialWhiteKingsideRookSquare; potentialRookSquareIndex > whiteKing; --potentialRookSquareIndex)
                             {
-                                whiteKingsideRook = potentialRookSquareIndex;
-                                break;
+                                if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                                {
+                                    whiteKingsideRook = potentialRookSquareIndex;
+                                    break;
+                                }
                             }
                         }
 
-                        if (whiteKingsideRook == CastlingData.DefaultValues)
+                        if (whiteKingsideRook != CastlingData.DefaultValues)
                         {
-                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                            castlingRights |= (byte)CastlingRights.WK;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: white king not on the first rank or no white rook on its kingside", ch);
                         }
 
                         break;
@@ -248,20 +315,25 @@ public static class FENParser
                     {
                         Debug.Assert(whiteQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
 
-                        castlingRights |= (byte)CastlingRights.WQ;
-
-                        for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < whiteKing; ++potentialRookSquareIndex)
+                        if (isWhiteKingOnBackRank)
                         {
-                            if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                            for (int potentialRookSquareIndex = Constants.InitialWhiteQueensideRookSquare; potentialRookSquareIndex < whiteKing; ++potentialRookSquareIndex)
                             {
-                                whiteQueensideRook = potentialRookSquareIndex;
-                                break;
+                                if (pieceBitboards[(int)Piece.R].GetBit(potentialRookSquareIndex))
+                                {
+                                    whiteQueensideRook = potentialRookSquareIndex;
+                                    break;
+                                }
                             }
                         }
 
-                        if (whiteQueensideRook == CastlingData.DefaultValues)
+                        if (whiteQueensideRook != CastlingData.DefaultValues)
                         {
-                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                            castlingRights |= (byte)CastlingRights.WQ;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: white king not on the first rank or no white rook on its queenside", ch);
                         }
 
                         break;
@@ -270,20 +342,25 @@ public static class FENParser
                     {
                         Debug.Assert(blackKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
 
-                        castlingRights |= (byte)CastlingRights.BK;
-
-                        for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > blackKing; --potentialRookSquareIndex)
+                        if (isBlackKingOnBackRank)
                         {
-                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                            for (int potentialRookSquareIndex = Constants.InitialBlackKingsideRookSquare; potentialRookSquareIndex > blackKing; --potentialRookSquareIndex)
                             {
-                                blackKingsideRook = potentialRookSquareIndex;
-                                break;
+                                if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                                {
+                                    blackKingsideRook = potentialRookSquareIndex;
+                                    break;
+                                }
                             }
                         }
 
-                        if (blackKingsideRook == CastlingData.DefaultValues)
+                        if (blackKingsideRook != CastlingData.DefaultValues)
                         {
-                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                            castlingRights |= (byte)CastlingRights.BK;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: black king not on the eighth rank or no black rook on its kingside", ch);
                         }
 
                         break;
@@ -292,20 +369,25 @@ public static class FENParser
                     {
                         Debug.Assert(blackQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
 
-                        castlingRights |= (byte)CastlingRights.BQ;
-
-                        for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < blackKing; ++potentialRookSquareIndex)
+                        if (isBlackKingOnBackRank)
                         {
-                            if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                            for (int potentialRookSquareIndex = Constants.InitialBlackQueensideRookSquare; potentialRookSquareIndex < blackKing; ++potentialRookSquareIndex)
                             {
-                                blackQueensideRook = potentialRookSquareIndex;
-                                break;
+                                if (pieceBitboards[(int)Piece.r].GetBit(potentialRookSquareIndex))
+                                {
+                                    blackQueensideRook = potentialRookSquareIndex;
+                                    break;
+                                }
                             }
                         }
 
-                        if (blackQueensideRook == CastlingData.DefaultValues)
+                        if (blackQueensideRook != CastlingData.DefaultValues)
                         {
-                            throw new LynxException($"Invalid castling rights: {ch} specified, but no rook found");
+                            castlingRights |= (byte)CastlingRights.BQ;
+                        }
+                        else
+                        {
+                            _logger.Warn("Castling right {CastlingRight} ignored: black king not on the eighth rank or no black rook on its queenside", ch);
                         }
 
                         break;
@@ -321,21 +403,28 @@ public static class FENParser
                         {
                             var square = BitboardExtensions.SquareIndex(rank: 7, file: ch - 'A');
 
+                            if (square == whiteKing)
+                            {
+                                throw new LynxException($"Invalid castle character {ch}: it matches white king square ({square})");
+                            }
+
+                            if (!isWhiteKingOnBackRank || !pieceBitboards[(int)Piece.R].GetBit(square))
+                            {
+                                _logger.Warn("Castling right {CastlingRight} ignored: white king not on the first rank or no white rook on {Square}", ch, (BoardSquare)square);
+                                break;
+                            }
+
                             if (square < whiteKing)
                             {
                                 Debug.Assert(whiteQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white queenside rooks detected {whiteQueensideRook}");
                                 castlingRights |= (byte)CastlingRights.WQ;
                                 whiteQueensideRook = square;
                             }
-                            else if (square > whiteKing)
+                            else
                             {
                                 Debug.Assert(whiteKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple white kingside rooks detected {whiteKingsideRook}");
                                 castlingRights |= (byte)CastlingRights.WK;
                                 whiteKingsideRook = square;
-                            }
-                            else
-                            {
-                                throw new LynxException($"Invalid castle character {ch}: it matches white king square ({square})");
                             }
 
                             break;
@@ -345,21 +434,28 @@ public static class FENParser
                         {
                             var square = BitboardExtensions.SquareIndex(rank: 0, file: ch - 'a');
 
+                            if (square == blackKing)
+                            {
+                                throw new LynxException($"Invalid castle character {ch}: it matches black king square ({square})");
+                            }
+
+                            if (!isBlackKingOnBackRank || !pieceBitboards[(int)Piece.r].GetBit(square))
+                            {
+                                _logger.Warn("Castling right {CastlingRight} ignored: black king not on the eighth rank or no black rook on {Square}", ch, (BoardSquare)square);
+                                break;
+                            }
+
                             if (square < blackKing)
                             {
                                 Debug.Assert(blackQueensideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black queenside rooks detected {blackQueensideRook}");
                                 castlingRights |= (byte)CastlingRights.BQ;
                                 blackQueensideRook = square;
                             }
-                            else if (square > blackKing)
+                            else
                             {
                                 Debug.Assert(blackKingsideRook == CastlingData.DefaultValues, $"Invalid castle character {ch}", $"Multiple black kingside rooks detected {blackKingsideRook}");
                                 castlingRights |= (byte)CastlingRights.BK;
                                 blackKingsideRook = square;
-                            }
-                            else
-                            {
-                                throw new LynxException($"Invalid castle character {ch}: it matches black king square ({square})");
                             }
 
                             break;

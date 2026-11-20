@@ -212,6 +212,10 @@ public class FENParserTest
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Qq - 0 1", (int)CR.WQ | (int)CR.BQ)]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Kk - 0 1", (int)CR.WK | (int)CR.BK)]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1", 0)]
+    [TestCase("r3k3/8/8/8/8/8/8/4K2R w KQkq - 0 1", (int)CR.WK | (int)CR.BQ, Description = "Rights without rook are dropped")]
+    [TestCase("4k2r/8/8/8/8/8/8/R4K2 w KQkq - 0 1", (int)CR.BK, Description = "Rights without king on e1/e8 are dropped")]
+    [TestCase("4k3/8/8/8/8/8/8/4K3 w K - 0 1", 0, Description = "Rights without rook are dropped")]
+    [TestCase("rnkrbbqn/pppp1ppp/8/4p3/4P3/3P4/PPP2PPP/NNQRKRBB b KQkq - 0 1", 0, Description = "X-FEN DFRC position without UCI_Chess960")]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Z - 0 1", -1)]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w WZ - 0 1", -1)]
     public void CastlingRights(string fen, int expectedCastleResult)
