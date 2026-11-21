@@ -231,20 +231,47 @@ public unsafe class MovePickerTest : BaseTest
         }
     }
 
-    /// <summary>
-    /// <see cref="MovePicker.IndexOfFirstMax"/> returns the first index of the highest score, like a scalar search with strict '>',
-    /// for every count and start, with many ties and with extreme values.
-    /// Only the <see cref="Vector128{T}.Count"/> - 1 scores after count are padding (<see cref="int.MinValue"/>), the ones after them are <see cref="int.MaxValue"/>,
-    /// so reading past the padding would return a wrong index.
-    /// The scalar fallback runs with env var DOTNET_EnableHWIntrinsic=0
-    /// </summary>
-    [TestCase(0, 0)]
-    [TestCase(0, 3)]
-    [TestCase(-1_000, 1_000)]
-    [TestCase(int.MinValue, int.MaxValue)]
-    public void IndexOfFirstMax_ReturnsTheSameIndexAsAScalarSearch(int minScore, int maxScore)
+    public enum IndexOfFirstMaxImplementation
     {
-        var paddingLength = Vector128<int>.Count - 1;
+        Scalar,
+        Vector128,
+
+        /// <summary>
+        /// <see cref="MovePicker.IndexOfFirstMax"/>, which picks one of the others depending on the hardware
+        /// </summary>
+        HardwareDependent
+    }
+
+    private static readonly (int Min, int Max)[] _indexOfFirstMaxScoreRanges =
+    [
+        (0, 0),
+        (0, 3),
+        (-1_000, 1_000),
+        (int.MinValue, int.MaxValue),
+    ];
+
+    /// <summary>
+    /// Every <see cref="MovePicker.IndexOfFirstMax"/> implementation returns the first index of the highest score, like a scalar search with strict '>',
+    /// for every count and start, with many ties and with extreme values.
+    /// All of them run on any hardware (vectors are only slower when they aren't accelerated), so they're all tested in every environment.
+    /// Each implementation only gets the padding (<see cref="int.MinValue"/>) it needs after count, and the scores after it are <see cref="int.MaxValue"/>,
+    /// so reading past the padding would return a wrong index
+    /// </summary>
+    [Test]
+    public void IndexOfFirstMax_ReturnsTheSameIndexAsAScalarSearch(
+        [Values] IndexOfFirstMaxImplementation implementation,
+        [ValueSource(nameof(_indexOfFirstMaxScoreRanges))] (int Min, int Max) scoreRange)
+    {
+        var (minScore, maxScore) = scoreRange;
+
+        var paddingLength = implementation switch
+        {
+            IndexOfFirstMaxImplementation.Scalar => 0,
+            IndexOfFirstMaxImplementation.Vector128 => Vector128<int>.Count - 1,
+            IndexOfFirstMaxImplementation.HardwareDependent => Vector128<int>.Count - 1,   // The most any implementation needs
+            _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
+        };
+
         var random = new Random(42);
 
         for (int count = 1; count <= 64; ++count)
@@ -276,7 +303,15 @@ public unsafe class MovePickerTest : BaseTest
                         }
                     }
 
-                    Assert.AreEqual(expected, MovePicker.IndexOfFirstMax(scores, start, count), $"start {start}, {description}");
+                    var actual = implementation switch
+                    {
+                        IndexOfFirstMaxImplementation.Scalar => MovePicker.IndexOfFirstMaxScalar(scores, start, count),
+                        IndexOfFirstMaxImplementation.Vector128 => MovePicker.IndexOfFirstMaxVector128(scores, start, count),
+                        IndexOfFirstMaxImplementation.HardwareDependent => MovePicker.IndexOfFirstMax(scores, start, count),
+                        _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
+                    };
+
+                    Assert.AreEqual(expected, actual, $"start {start}, {description}");
                 }
             }
         }
