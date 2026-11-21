@@ -414,6 +414,7 @@ internal unsafe ref struct MovePicker
 
     /// <summary>
     /// Index of the first highest score in [<paramref name="start"/>, <paramref name="count"/>),
+    /// using the widest vector size that's hardware accelerated.
     /// The vectorized paths read up to (<see cref="Vector256{T}.Count"/> - 1) scores after <paramref name="count"/>,
     /// or (<see cref="Vector128{T}.Count"/> - 1) when <see cref="Vector256"/> isn't accelerated (i.e. ARM64),
     /// which are expected to be <see cref="int.MinValue"/> to never be chosen a highest score (see <see cref="PadScores"/>)
@@ -421,76 +422,109 @@ internal unsafe ref struct MovePicker
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int IndexOfFirstMax(ReadOnlySpan<int> scores, int start, int count)
     {
-        Debug.Assert(start >= 0 && start < count);
-
-        ref var scoresRef = ref MemoryMarshal.GetReference(scores);
-
         if (Vector256.IsHardwareAccelerated)
         {
-            Debug.Assert(count + Vector256<int>.Count - 1 <= scores.Length);
-            Debug.Assert(!scores.Slice(count, Vector256<int>.Count - 1).ContainsAnyExcept(int.MinValue), "Missing padding");
-
-            // Find the highest score in each lane
-            var max = Vector256.LoadUnsafe(ref scoresRef, (nuint)start);
-            for (int i = start + Vector256<int>.Count; i < count; i += Vector256<int>.Count)
-            {
-                max = Vector256.Max(max, Vector256.LoadUnsafe(ref scoresRef, (nuint)i));
-            }
-
-            // Copy the single highest score among all 8 lanes to all of them:
-            // fold the upper half into the lower one, reduce those 4 lanes like in the Vector128 path, and duplicate the result
-            var max128 = Vector128.Max(max.GetLower(), max.GetUpper());
-            max128 = Vector128.Max(max128, Vector128.Shuffle(max128, Vector128.Create(2, 3, 0, 1)));
-            max128 = Vector128.Max(max128, Vector128.Shuffle(max128, Vector128.Create(1, 0, 3, 2)));
-            max = Vector256.Create(max128, max128);
-
-            // Find the (first) index of the highest score
-            var index = start;
-            while (true)
-            {
-                var matches = Vector256.Equals(Vector256.LoadUnsafe(ref scoresRef, (nuint)index), max).ExtractMostSignificantBits();
-
-                if (matches != 0)
-                {
-                    return index
-                        + BitOperations.TrailingZeroCount(matches); // Lane that contained the highest score
-                }
-
-                index += Vector256<int>.Count;
-            }
+            return IndexOfFirstMaxVector256(scores, start, count);
         }
 
         if (Vector128.IsHardwareAccelerated)
         {
-            Debug.Assert(count + Vector128<int>.Count - 1 <= scores.Length);
-            Debug.Assert(!scores.Slice(count, Vector128<int>.Count - 1).ContainsAnyExcept(int.MinValue), "Missing padding");
-
-            // Find the highest score in each line
-            var max = Vector128.LoadUnsafe(ref scoresRef, (nuint)start);
-            for (int i = start + Vector128<int>.Count; i < count; i += Vector128<int>.Count)
-            {
-                max = Vector128.Max(max, Vector128.LoadUnsafe(ref scoresRef, (nuint)i));
-            }
-
-            // Copy the single highest score among all 4 lanes to all of them
-            max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(2, 3, 0, 1)));
-            max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(1, 0, 3, 2)));
-
-            // Find the (first) index of the highest score
-            var index = start;
-            while (true)
-            {
-                var matches = Vector128.Equals(Vector128.LoadUnsafe(ref scoresRef, (nuint)index), max).ExtractMostSignificantBits();
-
-                if (matches != 0)
-                {
-                    return index
-                        + BitOperations.TrailingZeroCount(matches); // Lane that contained the highest score
-                }
-
-                index += Vector128<int>.Count;
-            }
+            return IndexOfFirstMaxVector128(scores, start, count);
         }
+
+        return IndexOfFirstMaxScalar(scores, start, count);
+    }
+
+    /// <summary>
+    /// <see cref="IndexOfFirstMax"/> using <see cref="Vector256{T}"/>: reads up to (<see cref="Vector256{T}.Count"/> - 1) scores after <paramref name="count"/>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int IndexOfFirstMaxVector256(ReadOnlySpan<int> scores, int start, int count)
+    {
+        Debug.Assert(start >= 0 && start < count);
+        Debug.Assert(count + Vector256<int>.Count - 1 <= scores.Length);
+        Debug.Assert(!scores.Slice(count, Vector256<int>.Count - 1).ContainsAnyExcept(int.MinValue), "Missing padding");
+
+        ref var scoresRef = ref MemoryMarshal.GetReference(scores);
+
+        // Find the highest score in each lane
+        var max = Vector256.LoadUnsafe(ref scoresRef, (nuint)start);
+        for (int i = start + Vector256<int>.Count; i < count; i += Vector256<int>.Count)
+        {
+            max = Vector256.Max(max, Vector256.LoadUnsafe(ref scoresRef, (nuint)i));
+        }
+
+        // Copy the single highest score among all 8 lanes to all of them:
+        // fold the upper half into the lower one, reduce those 4 lanes like in the Vector128 path, and duplicate the result
+        var max128 = Vector128.Max(max.GetLower(), max.GetUpper());
+        max128 = Vector128.Max(max128, Vector128.Shuffle(max128, Vector128.Create(2, 3, 0, 1)));
+        max128 = Vector128.Max(max128, Vector128.Shuffle(max128, Vector128.Create(1, 0, 3, 2)));
+        max = Vector256.Create(max128, max128);
+
+        // Find the (first) index of the highest score
+        var index = start;
+        while (true)
+        {
+            var matches = Vector256.Equals(Vector256.LoadUnsafe(ref scoresRef, (nuint)index), max).ExtractMostSignificantBits();
+
+            if (matches != 0)
+            {
+                return index
+                    + BitOperations.TrailingZeroCount(matches); // Lane that contained the highest score
+            }
+
+            index += Vector256<int>.Count;
+        }
+    }
+
+    /// <summary>
+    /// <see cref="IndexOfFirstMax"/> using <see cref="Vector128{T}"/>: reads up to (<see cref="Vector128{T}.Count"/> - 1) scores after <paramref name="count"/>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int IndexOfFirstMaxVector128(ReadOnlySpan<int> scores, int start, int count)
+    {
+        Debug.Assert(start >= 0 && start < count);
+        Debug.Assert(count + Vector128<int>.Count - 1 <= scores.Length);
+        Debug.Assert(!scores.Slice(count, Vector128<int>.Count - 1).ContainsAnyExcept(int.MinValue), "Missing padding");
+
+        ref var scoresRef = ref MemoryMarshal.GetReference(scores);
+
+        // Find the highest score in each lane
+        var max = Vector128.LoadUnsafe(ref scoresRef, (nuint)start);
+        for (int i = start + Vector128<int>.Count; i < count; i += Vector128<int>.Count)
+        {
+            max = Vector128.Max(max, Vector128.LoadUnsafe(ref scoresRef, (nuint)i));
+        }
+
+        // Copy the single highest score among all 4 lanes to all of them
+        max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(2, 3, 0, 1)));
+        max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(1, 0, 3, 2)));
+
+        // Find the (first) index of the highest score
+        var index = start;
+        while (true)
+        {
+            var matches = Vector128.Equals(Vector128.LoadUnsafe(ref scoresRef, (nuint)index), max).ExtractMostSignificantBits();
+
+            if (matches != 0)
+            {
+                return index
+                    + BitOperations.TrailingZeroCount(matches); // Lane that contained the highest score
+            }
+
+            index += Vector128<int>.Count;
+        }
+    }
+
+    /// <summary>
+    /// Scalar implementation for <see cref="IndexOfFirstMax"/>: doesn't read anything after <paramref name="count"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int IndexOfFirstMaxScalar(ReadOnlySpan<int> scores, int start, int count)
+    {
+        Debug.Assert(start >= 0 && start < count);
+
+        ref var scoresRef = ref MemoryMarshal.GetReference(scores);
 
         var bestIndex = start;
         var bestScore = Unsafe.Add(ref scoresRef, start);

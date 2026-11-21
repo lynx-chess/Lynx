@@ -1,5 +1,6 @@
 using Lynx.Model;
 using NUnit.Framework;
+using System.Runtime.Intrinsics;
 
 namespace Lynx.Test.MoveGeneration;
 
@@ -225,6 +226,95 @@ public unsafe class MovePickerTest : BaseTest
                 for (int j = 1; j < returned.Count; ++j)
                 {
                     Assert.GreaterOrEqual(returned[j - 1].Score, returned[j].Score, $"Scores not sorted at {j}. {description}");
+                }
+            }
+        }
+    }
+
+    public enum IndexOfFirstMaxImplementation
+    {
+        Scalar,
+        Vector128,
+        Vector256,
+
+        /// <summary>
+        /// <see cref="MovePicker.IndexOfFirstMax"/>, which picks one of the others depending on the hardware
+        /// </summary>
+        HardwareDependent
+    }
+
+    private static readonly (int Min, int Max)[] _indexOfFirstMaxScoreRanges =
+    [
+        (0, 0),
+        (0, 3),
+        (-1_000, 1_000),
+        (int.MinValue, int.MaxValue),
+    ];
+
+    /// <summary>
+    /// Every <see cref="MovePicker.IndexOfFirstMax"/> implementation returns the first index of the highest score, like a scalar search with strict '>',
+    /// for every count and start, with many ties and with extreme values.
+    /// All of them run on any hardware (vectors are only slower when they aren't accelerated), so they're all tested in every environment.
+    /// Each implementation only gets the padding (<see cref="int.MinValue"/>) it needs after count, and the scores after it are <see cref="int.MaxValue"/>,
+    /// so reading past the padding would return a wrong index
+    /// </summary>
+    [Test]
+    public void IndexOfFirstMax_ReturnsTheSameIndexAsAScalarSearch(
+        [Values] IndexOfFirstMaxImplementation implementation,
+        [ValueSource(nameof(_indexOfFirstMaxScoreRanges))] (int Min, int Max) scoreRange)
+    {
+        var (minScore, maxScore) = scoreRange;
+
+        var paddingLength = implementation switch
+        {
+            IndexOfFirstMaxImplementation.Scalar => 0,
+            IndexOfFirstMaxImplementation.Vector128 => Vector128<int>.Count - 1,
+            IndexOfFirstMaxImplementation.Vector256 => Vector256<int>.Count - 1,
+            IndexOfFirstMaxImplementation.HardwareDependent => Vector256<int>.Count - 1,   // The most any implementation needs
+            _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
+        };
+
+        var random = new Random(42);
+
+        for (int count = 1; count <= 64; ++count)
+        {
+            for (int iteration = 0; iteration < 10; ++iteration)
+            {
+                var scores = new int[count + paddingLength + 16];
+                Array.Fill(scores, int.MaxValue);
+                Array.Fill(scores, int.MinValue, count, paddingLength);
+
+                for (int i = 0; i < count; ++i)
+                {
+                    scores[i] = random.Next(8) == 0
+                        ? (random.Next(2) == 0 ? minScore : maxScore)
+                        : (int)random.NextInt64(minScore, (long)maxScore + 1);
+                }
+
+                var description = $"count {count}, scores [{string.Join(", ", scores[..count])}]";
+
+                for (int start = 0; start < count; ++start)
+                {
+                    var expected = start;
+
+                    for (int i = start + 1; i < count; ++i)
+                    {
+                        if (scores[i] > scores[expected])
+                        {
+                            expected = i;
+                        }
+                    }
+
+                    var actual = implementation switch
+                    {
+                        IndexOfFirstMaxImplementation.Scalar => MovePicker.IndexOfFirstMaxScalar(scores, start, count),
+                        IndexOfFirstMaxImplementation.Vector128 => MovePicker.IndexOfFirstMaxVector128(scores, start, count),
+                        IndexOfFirstMaxImplementation.Vector256 => MovePicker.IndexOfFirstMaxVector256(scores, start, count),
+                        IndexOfFirstMaxImplementation.HardwareDependent => MovePicker.IndexOfFirstMax(scores, start, count),
+                        _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
+                    };
+
+                    Assert.AreEqual(expected, actual, $"start {start}, {description}");
                 }
             }
         }
