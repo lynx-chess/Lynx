@@ -1,5 +1,6 @@
 using Lynx.Model;
 using NUnit.Framework;
+using System.Runtime.Intrinsics;
 
 namespace Lynx.Test.MoveGeneration;
 
@@ -225,6 +226,57 @@ public unsafe class MovePickerTest : BaseTest
                 for (int j = 1; j < returned.Count; ++j)
                 {
                     Assert.GreaterOrEqual(returned[j - 1].Score, returned[j].Score, $"Scores not sorted at {j}. {description}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// <see cref="MovePicker.IndexOfFirstMax"/> returns the first index of the highest score, like a scalar search with strict '>',
+    /// for every count and start, with many ties and with extreme values.
+    /// Only the <see cref="Vector128{T}.Count"/> - 1 scores after count are padding (<see cref="int.MinValue"/>), the ones after them are <see cref="int.MaxValue"/>,
+    /// so reading past the padding would return a wrong index.
+    /// The scalar fallback runs with env var DOTNET_EnableHWIntrinsic=0
+    /// </summary>
+    [TestCase(0, 0)]
+    [TestCase(0, 3)]
+    [TestCase(-1_000, 1_000)]
+    [TestCase(int.MinValue, int.MaxValue)]
+    public void IndexOfFirstMax_ReturnsTheSameIndexAsAScalarSearch(int minScore, int maxScore)
+    {
+        var paddingLength = Vector128<int>.Count - 1;
+        var random = new Random(42);
+
+        for (int count = 1; count <= 64; ++count)
+        {
+            for (int iteration = 0; iteration < 10; ++iteration)
+            {
+                var scores = new int[count + paddingLength + 16];
+                Array.Fill(scores, int.MaxValue);
+                Array.Fill(scores, int.MinValue, count, paddingLength);
+
+                for (int i = 0; i < count; ++i)
+                {
+                    scores[i] = random.Next(8) == 0
+                        ? (random.Next(2) == 0 ? minScore : maxScore)
+                        : (int)random.NextInt64(minScore, (long)maxScore + 1);
+                }
+
+                var description = $"count {count}, scores [{string.Join(", ", scores[..count])}]";
+
+                for (int start = 0; start < count; ++start)
+                {
+                    var expected = start;
+
+                    for (int i = start + 1; i < count; ++i)
+                    {
+                        if (scores[i] > scores[expected])
+                        {
+                            expected = i;
+                        }
+                    }
+
+                    Assert.AreEqual(expected, MovePicker.IndexOfFirstMax(scores, start, count), $"start {start}, {description}");
                 }
             }
         }
