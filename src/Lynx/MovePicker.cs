@@ -1,7 +1,9 @@
 using Lynx.Model;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
 
 namespace Lynx;
 
@@ -132,6 +134,8 @@ internal unsafe ref struct MovePicker
                             _moveScores[i] = _engine.ScoreMoveQSearch(_position, _moves[i], _ttMove);
                         }
 
+                        PadScores();
+
                         break;
                     }
                 case Stage.GoodNoisyMovesStage:
@@ -255,6 +259,8 @@ internal unsafe ref struct MovePicker
                             _moveScores[i] = _engine.ScoreQuietMove(_moves[i], _ply, _oppositeSideAttacks);
                         }
 
+                        PadScores();
+
                         break;
                     }
                 case Stage.QuietMovesStage:
@@ -347,19 +353,7 @@ internal unsafe ref struct MovePicker
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
-            var bestIndex = moveIndex;
-            var bestScore = Unsafe.Add(ref scoresRef, moveIndex);
-
-            for (int j = moveIndex + 1; j < count; j++)
-            {
-                var scoreJ = Unsafe.Add(ref scoresRef, j);
-
-                if (scoreJ > bestScore)
-                {
-                    bestScore = scoreJ;
-                    bestIndex = j;
-                }
-            }
+            var bestIndex = IndexOfFirstMax(_moveScores, moveIndex, count);
 
             // Swap only once, at the end: perf improvement over original implementation
             if (bestIndex != moveIndex)
@@ -399,5 +393,77 @@ internal unsafe ref struct MovePicker
         score = default;
 
         return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private readonly void PadScores()
+    {
+        if (Vector128.IsHardwareAccelerated)
+        {
+            Debug.Assert(_count + Vector128<int>.Count <= _moveScores.Length);
+
+            Vector128.Create(int.MinValue).CopyTo(_moveScores[_count..]);
+        }
+    }
+
+    /// <summary>
+    /// Index of the first highest score in [<paramref name="start"/>, <paramref name="count"/>),
+    /// The vectorized path reads up to (<see cref="Vector128{T}.Count"/> - 1) scores after <paramref name="count"/>,
+    /// which are expected to be <see cref="int.MinValue"/> to never be chosen a highest score (see <see cref="PadScores"/>)
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int IndexOfFirstMax(ReadOnlySpan<int> scores, int start, int count)
+    {
+        Debug.Assert(start >= 0 && start < count);
+
+        ref var scoresRef = ref MemoryMarshal.GetReference(scores);
+
+        if (Vector128.IsHardwareAccelerated)
+        {
+            Debug.Assert(count + Vector128<int>.Count - 1 <= scores.Length);
+            Debug.Assert(!scores.Slice(count, Vector128<int>.Count - 1).ContainsAnyExcept(int.MinValue), "Missing padding");
+
+            // Find the highest score in each line
+            var max = Vector128.LoadUnsafe(ref scoresRef, (nuint)start);
+            for (int i = start + Vector128<int>.Count; i < count; i += Vector128<int>.Count)
+            {
+                max = Vector128.Max(max, Vector128.LoadUnsafe(ref scoresRef, (nuint)i));
+            }
+
+            // Copy the single highest score among all 4 lanes to all of them
+            max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(2, 3, 0, 1)));
+            max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(1, 0, 3, 2)));
+
+            // Find the (first) index of the highest score
+            var index = start;
+            while (true)
+            {
+                var matches = Vector128.Equals(Vector128.LoadUnsafe(ref scoresRef, (nuint)index), max).ExtractMostSignificantBits();
+
+                if (matches != 0)
+                {
+                    return index
+                        + BitOperations.TrailingZeroCount(matches); // Lane that contained the highest score
+                }
+
+                index += Vector128<int>.Count;
+            }
+        }
+
+        var bestIndex = start;
+        var bestScore = Unsafe.Add(ref scoresRef, start);
+
+        for (int i = start + 1; i < count; ++i)
+        {
+            var score = Unsafe.Add(ref scoresRef, i);
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestIndex = i;
+            }
+        }
+
+        return bestIndex;
     }
 }
