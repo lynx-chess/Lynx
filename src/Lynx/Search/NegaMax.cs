@@ -497,7 +497,9 @@ public sealed partial class Engine
                 && ttEntry.Depth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                 && Math.Abs(ttEntry.Score) < EvaluationConstants.PositiveCheckmateDetectionLimit
                 && ttEntry.NodeType != NodeType.Alpha
-                && ply < 3 * depth)     // Preventing search explosions
+                && ply < 3 * depth      // Preventing search explosions
+                // Guarding against TT score values close to checkmate scores (caused by aspiration windows limits), which can cause false mate reporting (very high/low mate values)
+                && ttEntry.Score > EvaluationConstants.NegativeCheckmateDetectionLimit + Configuration.EngineSettings.SE_TTScore_Margin)
             {
                 position.UnmakeMove(move, gameState);
 
@@ -510,13 +512,7 @@ public sealed partial class Engine
                     singularBeta -= Configuration.EngineSettings.SE_NoPV;
                 }
 
-                singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, singularBeta);
-
-                // Guarding against TT score values close to checkmate scores (caused by aspiration windows limits), which can cause false mate reporting (very high/low mate values)
-                if (singularBeta <= EvaluationConstants.NegativeCheckmateDetectionLimit)
-                {
-                    singularBeta = EvaluationConstants.MinEval;
-                }
+                Debug.Assert(singularBeta > EvaluationConstants.NegativeCheckmateDetectionLimit);
 
                 var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
 
