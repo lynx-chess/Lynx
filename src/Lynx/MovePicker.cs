@@ -407,8 +407,7 @@ internal unsafe ref struct MovePicker
     }
 
     /// <summary>
-    /// Index of the first highest score in [<paramref name="start"/>, <paramref name="count"/>),
-    /// using Vector128 when it's hardware accelerated.
+    /// Index of the first highest score in [<paramref name="start"/>, <paramref name="count"/>), using Vector128 when it's hardware accelerated.
     /// The vectorized path reads up to (<see cref="Vector128{T}.Count"/> - 1) scores after <paramref name="count"/>,
     /// which are expected to be <see cref="int.MinValue"/> to never be chosen a highest score (see <see cref="PadScores"/>)
     /// </summary>
