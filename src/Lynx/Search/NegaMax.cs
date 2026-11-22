@@ -1,4 +1,5 @@
 ﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
+#pragma warning disable CA1068 // CancellationToken parameters must come last - 
 
 using Lynx.Model;
 using System.Diagnostics;
@@ -19,7 +20,7 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private unsafe int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
+    private unsafe int NegaMax(CancellationToken cancellationToken, int depth, int ply, int alpha, int beta, bool cutnode,
         bool parentWasNullMove = false, bool isVerifyingSE = false)
     {
         var position = Game.CurrentPosition;
@@ -191,7 +192,7 @@ public sealed partial class Engine
             var localOppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position, localOppositeSideAttacks))
             {
-                return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                return QuiescenceSearch(cancellationToken, ply, alpha, beta, pvNode);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -285,7 +286,7 @@ public sealed partial class Engine
                                 // that corrected eval is at least as good as QSearch result would be
                                 var qSearchScore = ttCorrectedStaticEval != staticEval
                                     ? ttCorrectedStaticEval
-                                    : QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                    : QuiescenceSearch(cancellationToken, ply, alpha, beta, pvNode);
 
                                 return qSearchScore > score
                                     ? qSearchScore
@@ -296,7 +297,7 @@ public sealed partial class Engine
 
                             if (score < beta)               // Static evaluation indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                var qSearchScore = QuiescenceSearch(cancellationToken, ply, alpha, beta, pvNode);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
                                     return qSearchScore > score
@@ -324,7 +325,7 @@ public sealed partial class Engine
                     stack.Move = MoveExtensions.NullMove;
                     var previousNullMovePointer = Game.AddNullMoveToPositionHashHistory(position.UniqueIdentifier);
 
-                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+                    var nmpScore = -NegaMax(cancellationToken, depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, parentWasNullMove: true);
 
                     Game.RemoveNullMoveFromPositionHashHistory(previousNullMovePointer);
                     position.UnMakeNullMove(gameState);
@@ -518,7 +519,7 @@ public sealed partial class Engine
                     singularBeta = EvaluationConstants.MinEval;
                 }
 
-                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, isVerifyingSE: true);
+                var singularScore = NegaMax(cancellationToken, verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, isVerifyingSE: true);
 
                 // Singular extension
                 if (singularScore < singularBeta)
@@ -685,7 +686,7 @@ public sealed partial class Engine
                     var reducedDepth = newDepth - reduction;
 
                     // Search with reduced depth and zero window
-                    score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    score = -NegaMax(cancellationToken, reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true);
 
                     // 🔍 Principal Variation Search (PVS)
                     if (score > alpha && newDepth > reducedDepth)
@@ -709,7 +710,7 @@ public sealed partial class Engine
                         if (newDepth > reducedDepth)
                         {
                             // Search with full depth but narrowed score bandwidth (zero-window search)
-                            score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                            score = -NegaMax(cancellationToken, newDepth, ply + 1, -alpha - 1, -alpha, !cutnode);
                         }
 
                         // 🔍 Post-LMR continuation history update
@@ -727,7 +728,7 @@ public sealed partial class Engine
                 if (visitedMovesCounter == 0 || (score > alpha && score < beta))
                 {
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(newDepth, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
+                    score = -NegaMax(cancellationToken, newDepth, ply + 1, -beta, -alpha, cutnode: false);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
@@ -843,7 +844,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public unsafe int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
+    public unsafe int QuiescenceSearch(CancellationToken cancellationToken, int ply, int alpha, int beta, bool pvNode)
     {
         var position = Game.CurrentPosition;
 
@@ -1001,7 +1002,7 @@ public sealed partial class Engine
             stack.Move = move;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
+            int score = -QuiescenceSearch(cancellationToken, ply + 1, -beta, -alpha, pvNode);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
 
             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
@@ -1078,3 +1079,6 @@ public sealed partial class Engine
         return bestScore;
     }
 }
+
+#pragma warning restore S1192 // CancellationToken parameters must come last
+#pragma warning restore CA1068 // CancellationToken parameters must come last
