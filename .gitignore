@@ -393,3 +393,6 @@ Lynx.sln
 *.epd
 *.fen
 *.vf
+
+# Benchmark.NET intermediate dir
+.bdn

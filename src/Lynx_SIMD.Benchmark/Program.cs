@@ -19,20 +19,24 @@ IConfig config = DefaultConfig.Instance
 
 if(OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
 {
-    config.AddDiagnoser(new DisassemblyDiagnoser(new DisassemblyDiagnoserConfig
+    config = config.AddDiagnoser(new DisassemblyDiagnoser(new DisassemblyDiagnoserConfig
         (exportGithubMarkdown: true, printInstructionAddresses: false)));
+}
+
+if (Vector512.IsHardwareAccelerated)
+{
+    config = config.AddJob(enough.WithId("Vector512"));
 }
 
 if (Vector256.IsHardwareAccelerated)
 {
-    config = config
-        .AddJob(enough.WithId("Vector256"))
-        .AddJob(enough.WithEnvironmentVariable("DOTNET_EnableAVX2", "0").WithId("Vector128"));
-
+    // DOTNET_EnableAVX2=0 would not only affect Vector256.IsHardwareAccelerated but also disable stuff like BMI1's tzcnt
+    config = config.AddJob(enough.WithEnvironmentVariable("DOTNET_PreferredVectorBitWidth", "256").WithId("Vector256"));
 }
-else if (Vector128.IsHardwareAccelerated)
+
+if (Vector128.IsHardwareAccelerated)
 {
-    config = config.AddJob(enough.WithId("Vector128"));
+    config = config.AddJob(enough.WithEnvironmentVariable("DOTNET_PreferredVectorBitWidth", "128").WithId("Vector128"));
 }
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly)
