@@ -95,7 +95,7 @@ namespace Lynx_SIMD.Benchmark;
 /// So each invocation uses the next list of a small pool, and then rewrites it as its original scores XOR a new random salt.
 /// <see cref="Overhead"/> measures that rewrite alone: subtract it from <see cref="FirstPick"/> and <see cref="PickAll"/>
 /// </summary>
-public class IndexOfFirstMax_Vectorized_Benchmark : BaseBenchmark
+public class MoveOrdering_Vectorized_Benchmark : BaseBenchmark
 {
     /// <summary>
     /// <see cref="int.MinValue"/> scores after each list, like MovePicker.PadScores writes.
