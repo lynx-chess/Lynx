@@ -64,12 +64,9 @@ public static class FENParser
                 _logger.Debug("No half move clock detected");
             }
 
-            halfMoveClock = Math.Clamp(halfMoveClock, 0, Constants.MaxNumberOfHalfMovesInAGame);
-            if (halfMoveClock >= Constants.MaxNumberOfHalfMovesInAGame - Configuration.EngineSettings.MaxDepth - Constants.ArrayDepthMargin)
-            {
-                halfMoveClock = 0;
-                _logger.Warn("Half move clock too close to its maximum ({0}), resetting it to 0 to avoid issues during searches", Constants.MaxNumberOfHalfMovesInAGame);
-            }
+            halfMoveClock = Math.Clamp(halfMoveClock, 
+                0, 
+                Constants.MaxNumberOfHalfMovesInAGame - Configuration.EngineSettings.MaxDepth - Constants.ArrayDepthMargin);    // Enough to allow at least one search
 
             if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
             {
