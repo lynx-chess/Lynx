@@ -422,6 +422,8 @@ internal unsafe ref struct MovePicker
         return IndexOfFirstMaxScalar(scores, start, count);
     }
 
+    private const int ScoresPerMatchMask = 64;
+
     /// <summary>
     /// <see cref="IndexOfFirstMax"/> using <see cref="Vector128{T}"/>: reads up to (<see cref="Vector128{T}.Count"/> - 1) scores after <paramref name="count"/>.
     /// </summary>
@@ -445,19 +447,26 @@ internal unsafe ref struct MovePicker
         max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(2, 3, 0, 1)));
         max = Vector128.Max(max, Vector128.Shuffle(max, Vector128.Create(1, 0, 3, 2)));
 
-        // Find the (first) index of the highest score
+        // Find the (first) index of the highest score, checking up to ScoresPerMatchMask scores at once
         var index = start;
         while (true)
         {
-            var matches = Vector128.Equals(Vector128.LoadUnsafe(ref scoresRef, (nuint)index), max).ExtractMostSignificantBits();
+            var end = Math.Min(count, index + ScoresPerMatchMask);
+
+            ulong matches = 0;
+            for (int i = index; i < end; i += Vector128<int>.Count)
+            {
+                matches |= ((ulong)Vector128.Equals(Vector128.LoadUnsafe(ref scoresRef, (nuint)i), max).ExtractMostSignificantBits()
+                    << (i - index));
+            }
 
             if (matches != 0)
             {
                 return index
-                    + BitOperations.TrailingZeroCount(matches); // Lane that contained the highest score
+                    + BitOperations.TrailingZeroCount(matches); // Offset from index of the first score equal to the highest one
             }
 
-            index += Vector128<int>.Count;
+            index += ScoresPerMatchMask;
         }
     }
 
