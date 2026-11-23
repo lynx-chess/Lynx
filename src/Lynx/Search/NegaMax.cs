@@ -1,5 +1,5 @@
 ﻿#pragma warning disable S1192 // String literals should not be duplicated - it's assertion message strings
-#pragma warning disable CA1068 // CancellationToken parameters must come last - 
+#pragma warning disable CA1068 // CancellationToken parameters must come last - when too many params, CT being one of the last ones causes unwanted zeroing, see https://github.com/lynx-chess/Lynx/pull/2860
 
 using Lynx.Model;
 using System.Diagnostics;
