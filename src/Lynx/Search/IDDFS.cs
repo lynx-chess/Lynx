@@ -341,7 +341,7 @@ public sealed partial class Engine
         if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
             || expectedScore is null)
         {
-            return NegaMax(depth: depth, ply: 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, cutnode: false, cancellationToken);
+            return NegaMax(cancellationToken, depth: depth, ply: 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, cutnode: false);
         }
 
         // 🔍 Aspiration windows - search using a window around an expected score (the previous search one)
@@ -387,7 +387,7 @@ public sealed partial class Engine
                     _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _stopWatch.ElapsedMilliseconds, _nodes);
             }
 
-            bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
+            bestScore = NegaMax(cancellationToken, depth: depthToSearch, ply: 0, alpha, beta, cutnode: false);
             Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
 
             // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
