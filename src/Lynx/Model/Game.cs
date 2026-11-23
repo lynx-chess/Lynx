@@ -20,7 +20,7 @@ public sealed class Game : IDisposable
     private int _lastNullMoveHashHistoryPointer;
 
     /// <summary>
-    /// [Constants.MaxNumberMovesInAGame]
+    /// [<see cref="Constants.MaxNumberOfHalfMovesInAGame"/> + <see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>]
     /// </summary>
     private readonly ulong[] _positionHashHistory;
 
@@ -45,7 +45,7 @@ public sealed class Game : IDisposable
 
     private Game()
     {
-        _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberOfHalfMovesInAGame);
+        _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberOfHalfMovesInAGame + Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin);
 
         _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Configuration.EngineSettings.MaxDepth + EvaluationConstants.ContinuationHistoryPlyCount + Constants.ArrayDepthMargin);
         for (int i = 0; i < _stack.Length; ++i)
@@ -58,7 +58,7 @@ public sealed class Game : IDisposable
 
 #if DEBUG
 #pragma warning disable IDE0028 // Simplify collection initialization - suggested syntax causes issues for some .NET 10 SDK versions
-        MoveHistory = new(Constants.MaxNumberOfMovesInAGame);
+        MoveHistory = new(Constants.MaxNumberOfHalfMovesInAGame);
 #pragma warning restore IDE0028 // Simplify collection initialization
 #endif
     }
@@ -266,7 +266,7 @@ public sealed class Game : IDisposable
     /// To be used in online tb proving only, in combination with the result of <see cref="CopyPositionHashHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(ReadOnlySpan<ulong> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberOfMovesInAGame)
+    public static bool IsThreefoldRepetition(ReadOnlySpan<ulong> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberOfHalfMovesInAGame)
     {
         var currentHash = position.UniqueIdentifier;
 

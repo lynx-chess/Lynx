@@ -68,7 +68,7 @@ public static unsafe class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong HalfMovesWithoutCaptureOrPawnMoveHash(int counter)
     {
-        Debug.Assert((uint)counter < Constants.MaxNumberOfMovesInAGame);
+        Debug.Assert((uint)counter < Constants.MaxNumberOfHalfMovesInAGame);
 
         return _50mrTable[counter];
     }
