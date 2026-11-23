@@ -577,24 +577,24 @@ public unsafe partial class Position
             {
                 Debug.Assert((uint)bucket < PassedPawnNoEnemiesAheadBonus.Length && (uint)rank < PassedPawnNoEnemiesAheadBonus[bucket].Length);
                 Debug.Assert((uint)oppositeSideBucket < PassedPawnNoEnemiesAheadEnemyBonus.Length && (uint)rank < PassedPawnNoEnemiesAheadEnemyBonus[oppositeSideBucket].Length);
-                packedBonus += EvaluationTablesPinned.PassedPawnNoEnemiesAheadBonus[((bucket) * 8) + (rank)];
-                packedBonus += EvaluationTablesPinned.PassedPawnNoEnemiesAheadEnemyBonus[((oppositeSideBucket) * 8) + (rank)];
+                packedBonus += EvaluationTablesPinned.PassedPawnNoEnemiesAheadBonus[(bucket * 8) + rank];
+                packedBonus += EvaluationTablesPinned.PassedPawnNoEnemiesAheadEnemyBonus[(oppositeSideBucket * 8) + rank];
             }
 
             // King distance to passed pawn
             Debug.Assert((uint)squareIndex < Constants.ChebyshevDistance.Length && (uint)sameSideKingSquare < Constants.ChebyshevDistance[squareIndex].Length);
-            var friendlyKingDistance = EvaluationTablesPinned.ChebyshevDistance[((squareIndex) * 64) + (sameSideKingSquare)];
+            var friendlyKingDistance = EvaluationTablesPinned.ChebyshevDistance[(squareIndex * 64) + sameSideKingSquare];
 
             // Enemy king distance to passed pawn
             Debug.Assert((uint)squareIndex < Constants.ChebyshevDistance.Length && (uint)oppositeSideKingSquare < Constants.ChebyshevDistance[squareIndex].Length);
-            var enemyKingDistance = EvaluationTablesPinned.ChebyshevDistance[((squareIndex) * 64) + (oppositeSideKingSquare)];
+            var enemyKingDistance = EvaluationTablesPinned.ChebyshevDistance[(squareIndex * 64) + oppositeSideKingSquare];
 
             Debug.Assert((uint)bucket < PassedPawnBonus.Length && (uint)rank < PassedPawnBonus[bucket].Length);
             Debug.Assert((uint)oppositeSideBucket < PassedPawnEnemyBonus.Length && (uint)rank < PassedPawnEnemyBonus[oppositeSideBucket].Length);
             Debug.Assert((uint)friendlyKingDistance < FriendlyKingDistanceToPassedPawnBonus.Length);
             Debug.Assert((uint)enemyKingDistance < EnemyKingDistanceToPassedPawnPenalty.Length);
-            packedBonus += EvaluationTablesPinned.PassedPawnBonus[((bucket) * 8) + (rank)]
-                + EvaluationTablesPinned.PassedPawnEnemyBonus[((oppositeSideBucket) * 8) + (rank)]
+            packedBonus += EvaluationTablesPinned.PassedPawnBonus[(bucket * 8) + rank]
+                + EvaluationTablesPinned.PassedPawnEnemyBonus[(oppositeSideBucket * 8) + rank]
                 + EvaluationTablesPinned.FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EvaluationTablesPinned.EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
@@ -823,8 +823,8 @@ public unsafe partial class Position
             var file = Constants.File(squareIndex);
             Debug.Assert((uint)bucket < OpenFileRookBonus.Length && (uint)file < OpenFileRookBonus[bucket].Length);
             Debug.Assert((uint)oppositeSideBucket < OpenFileRookEnemyBonus.Length && (uint)file < OpenFileRookEnemyBonus[oppositeSideBucket].Length);
-            packedBonus += EvaluationTablesPinned.OpenFileRookBonus[((bucket) * 8) + (file)];
-            packedBonus += EvaluationTablesPinned.OpenFileRookEnemyBonus[((oppositeSideBucket) * 8) + (file)];
+            packedBonus += EvaluationTablesPinned.OpenFileRookBonus[(bucket * 8) + file];
+            packedBonus += EvaluationTablesPinned.OpenFileRookEnemyBonus[(oppositeSideBucket * 8) + file];
         }
         // Rook on semi-open file
         else if ((sameSidePawns & fileMask).Empty())
@@ -832,8 +832,8 @@ public unsafe partial class Position
             var file = Constants.File(squareIndex);
             Debug.Assert((uint)bucket < SemiOpenFileRookBonus.Length && (uint)file < SemiOpenFileRookBonus[bucket].Length);
             Debug.Assert((uint)oppositeSideBucket < SemiOpenFileRookEnemyBonus.Length && (uint)file < SemiOpenFileRookEnemyBonus[oppositeSideBucket].Length);
-            packedBonus += EvaluationTablesPinned.SemiOpenFileRookBonus[((bucket) * 8) + (file)];
-            packedBonus += EvaluationTablesPinned.SemiOpenFileRookEnemyBonus[((oppositeSideBucket) * 8) + (file)];
+            packedBonus += EvaluationTablesPinned.SemiOpenFileRookBonus[(bucket * 8) + file];
+            packedBonus += EvaluationTablesPinned.SemiOpenFileRookEnemyBonus[(oppositeSideBucket * 8) + file];
         }
 
         // Connected rooks
@@ -902,13 +902,13 @@ public unsafe partial class Position
             if (((PieceBitboards[(int)Piece.P] | PieceBitboards[(int)Piece.p]) & file).Empty())
             {
                 Debug.Assert((uint)bucket < OpenFileKingPenalty.Length && (uint)Constants.File(squareIndex) < OpenFileKingPenalty[bucket].Length);
-                packedBonus += EvaluationTablesPinned.OpenFileKingPenalty[((bucket) * 8) + (Constants.File(squareIndex))];
+                packedBonus += EvaluationTablesPinned.OpenFileKingPenalty[(bucket * 8) + (Constants.File(squareIndex))];
             }
             // King on semi-open file
             else if ((PieceBitboards[(int)Piece.P + kingSideOffset] & file).Empty())
             {
                 Debug.Assert((uint)bucket < SemiOpenFileKingPenalty.Length && (uint)Constants.File(squareIndex) < SemiOpenFileKingPenalty[bucket].Length);
-                packedBonus += EvaluationTablesPinned.SemiOpenFileKingPenalty[((bucket) * 8) + (Constants.File(squareIndex))];
+                packedBonus += EvaluationTablesPinned.SemiOpenFileKingPenalty[(bucket * 8) + (Constants.File(squareIndex))];
             }
         }
 
@@ -1200,7 +1200,7 @@ public unsafe partial class Position
 
         // Not in the corner or adjacent squares
         Debug.Assert((uint)defendingKingSquare < Constants.ChebyshevDistance.Length && (uint)promotionCornerSquare < Constants.ChebyshevDistance[defendingKingSquare].Length);
-        if (EvaluationTablesPinned.ChebyshevDistance[((defendingKingSquare) * 64) + (promotionCornerSquare)] > 1)
+        if (EvaluationTablesPinned.ChebyshevDistance[(defendingKingSquare * 64) + promotionCornerSquare] > 1)
         {
             return false;
         }
