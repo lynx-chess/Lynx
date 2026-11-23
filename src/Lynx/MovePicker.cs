@@ -26,10 +26,12 @@ internal enum Stage
     EndStage,
 }
 
+/// <summary>
+/// Staged move generation for <see cref="Engine.NegaMax"/> and <see cref="Engine.QuiescenceSearch"/>.
+/// Can't holds managed references or byrefs (<see cref="Span{T}"/>): to prevent JIT from zeroing the whole struct in their prologue, on every call.
+/// </summary>
 internal unsafe ref struct MovePicker
 {
-    private readonly Engine _engine;
-    private readonly Position _position;
     private readonly Bitboard _oppositeSideAttacks;
     private readonly ShortMove _ttMove;
     private readonly int _ply;
@@ -39,8 +41,9 @@ internal unsafe ref struct MovePicker
     private readonly int _oppositeSideKing;
     private readonly int _checkerSquare;
     private readonly Bitboard _evasionTargets;
-    private readonly Span<Move> _moves;
-    private readonly Span<int> _moveScores;
+    private readonly Move* _moves;
+    private readonly int* _moveScores;
+    private readonly int _bufferLength;
 
     private Stage _stage;
     private int _count;
@@ -52,12 +55,10 @@ internal unsafe ref struct MovePicker
 
     internal readonly Stage Stage => _stage;
 
-    public MovePicker(Engine engine, Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Span<Move> moves, Span<int> moveScores, bool isInCheck, bool capturesOnly)
+    public MovePicker(Position position, ShortMove ttMove, Bitboard oppositeSideAttacks, int ply, Move* moves, int* moveScores, int bufferLength, bool isInCheck, bool capturesOnly)
     {
         Debug.Assert(!(capturesOnly && isInCheck));
 
-        _engine = engine;
-        _position = position;
         _ttMove = ttMove;
         _oppositeSideAttacks = oppositeSideAttacks;
         _ply = ply;
@@ -65,6 +66,7 @@ internal unsafe ref struct MovePicker
         _stage = _capturesOnly ? Stage.GenerateNoisyMovesStage : Stage.TTMoveStage;
         _moves = moves;
         _moveScores = moveScores;
+        _bufferLength = bufferLength;
 
         // If enabled, we prepare to filter out most moves that can't get the king out of check
         if (isInCheck)
@@ -91,7 +93,7 @@ internal unsafe ref struct MovePicker
         }
     }
 
-    public bool TryGetNext(out Move move, out int score)
+    public bool TryGetNext(Engine engine, Position position, out Move move, out int score)
     {
         while (true)
         {
@@ -101,12 +103,12 @@ internal unsafe ref struct MovePicker
                     {
                         _stage = Stage.GenerateNoisyMovesStage;
 
-                        var fullTTMove = MoveGenerator.GenerateFullTTMove(_ttMove, _position, _oppositeSideAttacks);
+                        var fullTTMove = MoveGenerator.GenerateFullTTMove(_ttMove, position, _oppositeSideAttacks);
 
                         if (fullTTMove != 0
                             && (ShortMove)fullTTMove == _ttMove
-                            && MoveGenerator.IsPseudoLegal(_position, fullTTMove, _oppositeSideAttacks)
-                            && (!_isInCheck || IsEvasion(fullTTMove)))
+                            && MoveGenerator.IsPseudoLegal(position, fullTTMove, _oppositeSideAttacks)
+                            && (!_isInCheck || IsEvasion(fullTTMove, position)))
                         {
                             _ttMoveGenerated = true;
 
@@ -122,16 +124,16 @@ internal unsafe ref struct MovePicker
                     {
                         _stage = Stage.GoodNoisyMovesStage;
 
-                        _count = MoveGenerator.GenerateAllCaptures(_position, _moves, _oppositeSideAttacks).Length;
+                        _count = MoveGenerator.GenerateAllCaptures(position, new Span<Move>(_moves, _bufferLength), _oppositeSideAttacks).Length;
 
                         if (_isInCheck)
                         {
-                            _count = RemoveNonEvasions(_count);
+                            _count = RemoveNonEvasions(_count, position);
                         }
 
                         for (int i = 0; i < _count; ++i)
                         {
-                            _moveScores[i] = _engine.ScoreMoveQSearch(_position, _moves[i], _ttMove);
+                            _moveScores[i] = engine.ScoreMoveQSearch(position, _moves[i], _ttMove);
                         }
 
                         PadScores();
@@ -168,8 +170,8 @@ internal unsafe ref struct MovePicker
                     {
                         _stage = Stage.SecondKillerMoveStage;
 
-                        var killer = _engine.GetKillerMove(_ply, 0);
-                        if (IsValidQuietCandidate(killer))
+                        var killer = engine.GetKillerMove(_ply, 0);
+                        if (IsValidQuietCandidate(killer, position))
                         {
                             _firstKiller = killer;
 
@@ -185,8 +187,8 @@ internal unsafe ref struct MovePicker
                     {
                         _stage = Stage.CounterMoveStage;
 
-                        var killer = _engine.GetKillerMove(_ply, 1);
-                        if (killer != _firstKiller && IsValidQuietCandidate(killer))
+                        var killer = engine.GetKillerMove(_ply, 1);
+                        if (killer != _firstKiller && IsValidQuietCandidate(killer, position))
                         {
                             _secondKiller = killer;
 
@@ -204,8 +206,8 @@ internal unsafe ref struct MovePicker
 
                         if (_ply >= 1)
                         {
-                            var counterMove = _engine.GetCounterMove(_ply);
-                            if (counterMove != _firstKiller && counterMove != _secondKiller && IsValidQuietCandidate(counterMove))
+                            var counterMove = engine.GetCounterMove(_ply);
+                            if (counterMove != _firstKiller && counterMove != _secondKiller && IsValidQuietCandidate(counterMove, position))
                             {
                                 _counterMove = counterMove;
 
@@ -234,7 +236,7 @@ internal unsafe ref struct MovePicker
                         _stage = Stage.QuietMovesStage;
 
                         // No more noisy moves, so their buffers can be reused
-                        var quietMoves = MoveGenerator.GenerateAllQuiets(_position, _moves, _oppositeSideAttacks);
+                        var quietMoves = MoveGenerator.GenerateAllQuiets(position, new Span<Move>(_moves, _bufferLength), _oppositeSideAttacks);
 
                         // Removing moves already returned in previous stages, preserving the order of the rest
                         _count = 0;
@@ -246,7 +248,7 @@ internal unsafe ref struct MovePicker
                                 || quietMove == _secondKiller
                                 || quietMove == _counterMove
                                 || (_ttMoveGenerated && (ShortMove)quietMove == _ttMove)
-                                || (_isInCheck && !IsEvasion(quietMove)))
+                                || (_isInCheck && !IsEvasion(quietMove, position)))
                             {
                                 continue;
                             }
@@ -256,7 +258,7 @@ internal unsafe ref struct MovePicker
 
                         for (int i = 0; i < _count; ++i)
                         {
-                            _moveScores[i] = _engine.ScoreQuietMove(_moves[i], _ply, _oppositeSideAttacks);
+                            _moveScores[i] = engine.ScoreQuietMove(_moves[i], _ply, _oppositeSideAttacks);
                         }
 
                         PadScores();
@@ -286,12 +288,12 @@ internal unsafe ref struct MovePicker
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private readonly bool IsValidQuietCandidate(Move move)
+    private readonly bool IsValidQuietCandidate(Move move, Position position)
     {
         return move != 0
             && !(_ttMoveGenerated && (ShortMove)move == _ttMove)
-            && MoveGenerator.IsPseudoLegal(_position, move, _oppositeSideAttacks)
-            && (!_isInCheck || IsEvasion(move));
+            && MoveGenerator.IsPseudoLegal(position, move, _oppositeSideAttacks)
+            && (!_isInCheck || IsEvasion(move, position));
     }
 
     /// <summary>
@@ -300,7 +302,7 @@ internal unsafe ref struct MovePicker
     /// Only meant to be used when <see cref="_isInCheck"/> is true
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private readonly bool IsEvasion(Move move)
+    private readonly bool IsEvasion(Move move, Position position)
     {
         if (move.Piece() == _oppositeSideKing)
         {
@@ -315,14 +317,14 @@ internal unsafe ref struct MovePicker
         var targetSquare = move.TargetSquare();
 
         return _evasionTargets.GetBit(targetSquare)
-            || (move.IsEnPassant() && targetSquare - (+8 - ((int)_position.Side * 16)) == _checkerSquare);   // Captured pawn is the checker, which isn't in the target square
+            || (move.IsEnPassant() && targetSquare - (+8 - ((int)position.Side * 16)) == _checkerSquare);   // Captured pawn is the checker, which isn't in the target square
     }
 
     /// <summary>
-    /// Removes non-evasions (<see cref="IsEvasion(Move)"/>) from the first <paramref name="count"/> moves in _moves, keeping the order.
+    /// Removes non-evasions (<see cref="IsEvasion(Move, Position)"/>) from the first <paramref name="count"/> moves in _moves, keeping the order.
     /// </summary>
     /// <returns>New effective size of _moves</returns>
-    private readonly int RemoveNonEvasions(int count)
+    private readonly int RemoveNonEvasions(int count, Position position)
     {
         var kept = 0;
 
@@ -330,7 +332,7 @@ internal unsafe ref struct MovePicker
         {
             var move = _moves[i];
 
-            if (IsEvasion(move))
+            if (IsEvasion(move, position))
             {
                 _moves[kept++] = move;
             }
@@ -341,8 +343,8 @@ internal unsafe ref struct MovePicker
 
     private bool TrySelectNext(int minScore, out Move move, out int score)
     {
-        ref var movesRef = ref MemoryMarshal.GetReference(_moves);
-        ref var scoresRef = ref MemoryMarshal.GetReference(_moveScores);
+        ref var movesRef = ref *_moves;
+        ref var scoresRef = ref *_moveScores;
 
         var count = _count;
 
@@ -353,7 +355,7 @@ internal unsafe ref struct MovePicker
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
-            var bestIndex = IndexOfFirstMax(_moveScores, moveIndex, count);
+            var bestIndex = IndexOfFirstMax(new ReadOnlySpan<int>(_moveScores, _bufferLength), moveIndex, count);
 
             // Swap only once, at the end: perf improvement over original implementation
             if (bestIndex != moveIndex)
@@ -400,9 +402,9 @@ internal unsafe ref struct MovePicker
     {
         if (Vector128.IsHardwareAccelerated)
         {
-            Debug.Assert(_count + Vector128<int>.Count <= _moveScores.Length);
+            Debug.Assert(_count + Vector128<int>.Count <= _bufferLength);
 
-            Vector128.Create(int.MinValue).CopyTo(_moveScores[_count..]);
+            Vector128.Create(int.MinValue).Store(_moveScores + _count);
         }
     }
 
