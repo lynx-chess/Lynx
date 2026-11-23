@@ -18,6 +18,10 @@ public sealed class Game : IDisposable
     private int _positionHashHistoryPointerBeforeLastSearch;
     private int _positionHashHistoryPointer;
     private int _lastNullMoveHashHistoryPointer;
+
+    /// <summary>
+    /// [Constants.MaxNumberMovesInAGame]
+    /// </summary>
     private readonly ulong[] _positionHashHistory;
 
     /// <summary>
