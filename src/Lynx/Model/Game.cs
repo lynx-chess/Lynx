@@ -313,6 +313,8 @@ public sealed class Game : IDisposable
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay);
 
+            HalfMovesWithoutCaptureOrPawnMove = Math.Min(HalfMovesWithoutCaptureOrPawnMove, Constants.MaxNumberOfHalfMovesInAGame);
+
             if (CurrentPosition.Side == Side.White)
             {
                 ++FullMoves;
