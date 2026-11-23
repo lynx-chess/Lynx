@@ -266,15 +266,7 @@ public unsafe class MovePickerTest : BaseTest
     {
         var (minScore, maxScore) = scoreRange;
 
-        var paddingLength = implementation switch
-        {
-            IndexOfFirstMaxImplementation.Scalar => 0,
-            IndexOfFirstMaxImplementation.Vector128 => Vector128<int>.Count - 1,
-            IndexOfFirstMaxImplementation.Vector256 => Vector256<int>.Count - 1,
-            IndexOfFirstMaxImplementation.Vector512 => Vector512<int>.Count - 1,
-            IndexOfFirstMaxImplementation.HardwareDependent => Vector512<int>.Count - 1,   // The most any implementation needs
-            _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
-        };
+        var paddingLength = IndexOfFirstMaxPaddingLength(implementation);
 
         var random = new Random(42);
 
@@ -307,21 +299,75 @@ public unsafe class MovePickerTest : BaseTest
                         }
                     }
 
-                    var actual = implementation switch
-                    {
-                        IndexOfFirstMaxImplementation.Scalar => MovePicker.IndexOfFirstMaxScalar(scores, start, count),
-                        IndexOfFirstMaxImplementation.Vector128 => MovePicker.IndexOfFirstMaxVector128(scores, start, count),
-                        IndexOfFirstMaxImplementation.Vector256 => MovePicker.IndexOfFirstMaxVector256(scores, start, count),
-                        IndexOfFirstMaxImplementation.Vector512 => MovePicker.IndexOfFirstMaxVector512(scores, start, count),
-                        IndexOfFirstMaxImplementation.HardwareDependent => MovePicker.IndexOfFirstMax(scores, start, count),
-                        _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
-                    };
+                    var actual = IndexOfFirstMax(implementation, scores, start, count);
 
                     Assert.AreEqual(expected, actual, $"start {start}, {description}");
                 }
             }
         }
     }
+
+    /// <summary>
+    /// The vectorized <see cref="MovePicker.IndexOfFirstMax"/> implementations look for the highest score 64 scores at a time,
+    /// so this checks lists of up to 4 of those chunks, with the first highest score in every position (and a tie after it), from every start up to it
+    /// </summary>
+    [Test]
+    public void IndexOfFirstMax_FindsTheHighestScoreAfterTheFirst64Scores([Values] IndexOfFirstMaxImplementation implementation)
+    {
+        const int count = 218;      // Most legal moves in a chess position
+        const int highestScore = 1_000;
+
+        var paddingLength = IndexOfFirstMaxPaddingLength(implementation);
+
+        var random = new Random(42);
+
+        for (int highestScoreIndex = 0; highestScoreIndex < count; ++highestScoreIndex)
+        {
+            var scores = new int[count + paddingLength + 16];
+            Array.Fill(scores, int.MaxValue);
+            Array.Fill(scores, int.MinValue, count, paddingLength);
+
+            for (int i = 0; i < count; ++i)
+            {
+                scores[i] = random.Next(-highestScore, highestScore);
+            }
+
+            scores[highestScoreIndex] = highestScore;
+
+            if (highestScoreIndex + 1 < count)
+            {
+                scores[random.Next(highestScoreIndex + 1, count)] = highestScore;
+            }
+
+            for (int start = 0; start <= highestScoreIndex; ++start)
+            {
+                Assert.AreEqual(highestScoreIndex, IndexOfFirstMax(implementation, scores, start, count), $"start {start}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// <see cref="int.MinValue"/> scores that <paramref name="implementation"/> needs after count
+    /// </summary>
+    private static int IndexOfFirstMaxPaddingLength(IndexOfFirstMaxImplementation implementation) => implementation switch
+    {
+        IndexOfFirstMaxImplementation.Scalar => 0,
+        IndexOfFirstMaxImplementation.Vector128 => Vector128<int>.Count - 1,
+        IndexOfFirstMaxImplementation.Vector256 => Vector256<int>.Count - 1,
+        IndexOfFirstMaxImplementation.Vector512 => Vector512<int>.Count - 1,
+        IndexOfFirstMaxImplementation.HardwareDependent => Vector512<int>.Count - 1,   // The most any implementation needs
+        _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
+    };
+
+    private static int IndexOfFirstMax(IndexOfFirstMaxImplementation implementation, ReadOnlySpan<int> scores, int start, int count) => implementation switch
+    {
+        IndexOfFirstMaxImplementation.Scalar => MovePicker.IndexOfFirstMaxScalar(scores, start, count),
+        IndexOfFirstMaxImplementation.Vector128 => MovePicker.IndexOfFirstMaxVector128(scores, start, count),
+        IndexOfFirstMaxImplementation.Vector256 => MovePicker.IndexOfFirstMaxVector256(scores, start, count),
+        IndexOfFirstMaxImplementation.Vector512 => MovePicker.IndexOfFirstMaxVector512(scores, start, count),
+        IndexOfFirstMaxImplementation.HardwareDependent => MovePicker.IndexOfFirstMax(scores, start, count),
+        _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
+    };
 
     internal static Bitboard GetOppositeSideAttacks(Position position)
     {
