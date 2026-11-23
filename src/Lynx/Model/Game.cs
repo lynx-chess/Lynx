@@ -25,7 +25,7 @@ public sealed class Game : IDisposable
     private readonly ulong[] _positionHashHistory;
 
     /// <summary>
-    /// Indexed by ply
+    /// At least [Configuration.EngineSettings.MaxDepth + EvaluationConstants.ContinuationHistoryPlyCount + Constants.ArrayDepthMargin], indexed by ply
     /// </summary>
     private readonly PlyStackEntry[] _stack;
 
@@ -47,7 +47,7 @@ public sealed class Game : IDisposable
     {
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
-        _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
+        _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Configuration.EngineSettings.MaxDepth + EvaluationConstants.ContinuationHistoryPlyCount + Constants.ArrayDepthMargin);
         for (int i = 0; i < _stack.Length; ++i)
         {
             _stack[i].Reset();
