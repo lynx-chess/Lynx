@@ -7,7 +7,7 @@ namespace Lynx.Datagen;
 /// </summary>
 public class ViriformatFilter
 {
-    public const int MaxNumberOfPositionsPerGame = Constants.MaxNumberMovesInAGame * 2;
+    public const int MaxNumberOfPositionsPerGame = Constants.MaxNumberOfHalfMovesInAGame;
 
     private enum FilterWDL
     {
@@ -80,15 +80,15 @@ public class ViriformatFilter
 
     public uint DrawAdjudication_Score { get; set; } = uint.MaxValue;
 
-    public int DrawAdjudication_MoveCount { get; set; } = Constants.MaxNumberMovesInAGame;
+    public int DrawAdjudication_MoveCount { get; set; } = Constants.MaxNumberOfMovesInAGame;
 
-    public int DrawAdjudication_MoveNumber { get; set; } = Constants.MaxNumberMovesInAGame;
+    public int DrawAdjudication_MoveNumber { get; set; } = Constants.MaxNumberOfMovesInAGame;
 
     public bool WinAdjudication { get; set; }
 
     public uint WinAdjudication_Score { get; set; } = uint.MaxValue;
 
-    public int WinAdjudication_MoveCount { get; set; } = Constants.MaxNumberMovesInAGame;
+    public int WinAdjudication_MoveCount { get; set; } = Constants.MaxNumberOfMovesInAGame;
 
     public bool RandomFenSkipping { get; set; }
 
@@ -149,11 +149,11 @@ public class ViriformatFilter
         EvalGameResultMismatch_EvalDivisor = 400,
         DrawAdjudication = false,
         DrawAdjudication_Score = 0,
-        DrawAdjudication_MoveCount = Constants.MaxNumberMovesInAGame,
-        DrawAdjudication_MoveNumber = Constants.MaxNumberMovesInAGame,
+        DrawAdjudication_MoveCount = Constants.MaxNumberOfMovesInAGame,
+        DrawAdjudication_MoveNumber = Constants.MaxNumberOfMovesInAGame,
         WinAdjudication = false,
         WinAdjudication_Score = uint.MaxValue,
-        WinAdjudication_MoveCount = Constants.MaxNumberMovesInAGame,
+        WinAdjudication_MoveCount = Constants.MaxNumberOfMovesInAGame,
         RandomFenSkipping = false,
         RandomFenSkipProbability = 0.0,
         WdlFiltered = false,

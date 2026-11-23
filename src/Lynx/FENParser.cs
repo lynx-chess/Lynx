@@ -64,10 +64,14 @@ public static class FENParser
                 _logger.Debug("No half move clock detected");
             }
 
+            halfMoveClock = Math.Clamp(halfMoveClock, 0, Constants.MaxNumberOfHalfMovesInAGame);
+
             if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
             {
                 _logger.Debug("No full move counter detected");
             }
+
+            fullMoveCounter = Math.Clamp(fullMoveCounter, 1, Constants.MaxNumberOfMovesInAGame);
 
             if (pieceBitboards[(int)Piece.K].CountBits() != 1
                 || pieceBitboards[(int)Piece.k].CountBits() != 1)
