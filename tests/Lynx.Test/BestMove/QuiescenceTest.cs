@@ -46,7 +46,7 @@ public class QuiescenceTest : BaseTest
     {
         var engine = GetEngine("R5k1/5ppp/8/4p3/8/8/P3r3/6K1 b - - 0 1");
 
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+        var score = engine.QuiescenceSearch(CancellationToken.None, 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true);
 
         Assert.AreEqual(Position.EvaluateFinalPosition(0, isInCheck: true), score);
     }
@@ -60,7 +60,7 @@ public class QuiescenceTest : BaseTest
     {
         var engine = GetEngine("R5k1/5pp1/7p/8/8/8/P3r3/6K1 b - - 0 1");
 
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+        var score = engine.QuiescenceSearch(CancellationToken.None, 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true);
 
         Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
     }
@@ -74,7 +74,7 @@ public class QuiescenceTest : BaseTest
     {
         var engine = GetEngine("R5k1/5ppp/8/8/8/8/P3r3/6K1 b - - 0 1");
 
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+        var score = engine.QuiescenceSearch(CancellationToken.None, 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true);
 
         Assert.AreEqual(Position.EvaluateFinalPosition(2, isInCheck: true), score);
     }
@@ -87,7 +87,7 @@ public class QuiescenceTest : BaseTest
     {
         var engine = GetEngine("R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1");
 
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+        var score = engine.QuiescenceSearch(CancellationToken.None, 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true);
 
         Assert.AreEqual(Position.EvaluateFinalPosition(0, isInCheck: true), score);
     }
@@ -100,7 +100,7 @@ public class QuiescenceTest : BaseTest
     {
         var engine = GetEngine("R5k1/5pp1/7p/8/8/8/8/6K1 b - - 0 1");
 
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+        var score = engine.QuiescenceSearch(CancellationToken.None, 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true);
 
         Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
     }
@@ -113,7 +113,7 @@ public class QuiescenceTest : BaseTest
     {
         var engine = GetEngine("R5k1/5ppp/8/8/8/8/r7/6K1 b - - 0 1");
 
-        var score = engine.QuiescenceSearch(0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true, CancellationToken.None);
+        var score = engine.QuiescenceSearch(CancellationToken.None, 0, EvaluationConstants.MinEval, EvaluationConstants.MaxEval, pvNode: true);
 
         Assert.Less(Math.Abs(score), EvaluationConstants.PositiveCheckmateDetectionLimit);
         Assert.Greater(score, 0, "Black wins a rook");
