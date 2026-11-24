@@ -27,7 +27,7 @@
     <PackageVersion Include="IDisposableAnalyzers" Version="4.0.8" />
     <PackageVersion Include="Meziantou.Analyzer " Version="3.0.341" />
     <PackageVersion Include="Roslynator.Analyzers" Version="5.0.1" />
-    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.37.0.15768" />
   </ItemGroup>
   <!-- Tests -->
   <ItemGroup>
