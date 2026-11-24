@@ -87,16 +87,24 @@ public sealed class Searcher : IDisposable
         {
             while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
             {
-                try
+                if (_uciReader.TryRead(out var rawCommand))
                 {
-                    if (_uciReader.TryRead(out var rawCommand))
+                    try
                     {
-                        await OnGoCommand(new GoCommand(rawCommand));
+                        var goCommand = new GoCommand(rawCommand);
+
+                        BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder);
+
+                        await OnGoCommand(goCommand);
                     }
-                }
-                catch (Exception e)
-                {
-                    _logger.Error(e, "Error trying to read/parse UCI command");
+                    catch (Exception e)
+                    {
+                        _logger.Error(e, "Error processing UCI go command");
+                    }
+                    finally
+                    {
+                        EndGoCommand();
+                    }
                 }
             }
         }
@@ -164,11 +172,21 @@ public sealed class Searcher : IDisposable
         }
     }
 
+    private void EndGoCommand()
+    {
+        lock (_goCommandStateLock)
+        {
+            _isProcessingGoCommand = false;
+
+            // Not necessarily consumed already if the search threw
+            _isPondering = false;
+            _isPonderHit = false;
+        }
+    }
+
     private async Task OnGoCommand(GoCommand goCommand)
     {
         _firstRun = false;
-
-        BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder);
 
         // Originally before the search (instead of after) to prevent empty entries from competing in age vs depth 0 ones, altough that reason no longer applies
         _tt.BumpAge();
@@ -180,15 +198,6 @@ public sealed class Searcher : IDisposable
         else
         {
             await MultiThreadedSearch(goCommand);
-        }
-
-        lock (_goCommandStateLock)
-        {
-            _isProcessingGoCommand = false;
-
-            // Not necessarily consumed already if the search threw
-            _isPondering = false;
-            _isPonderHit = false;
         }
     }
 
