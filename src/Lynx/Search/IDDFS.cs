@@ -94,9 +94,10 @@ public sealed partial class Engine
     private readonly PinnedArray<int> _maxDepthReached = new(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin);
 
     /// <summary>
-    /// <see cref="Constants.KingPawnHashSize"/>
+    /// [<see cref="Constants.KingPawnHashSize"/>]
+    /// Cache-line aligned so that no 16-byte <see cref="PawnTableElement"/> spans over two lines
     /// </summary>
-    private readonly PawnTableElement[] _pawnEvalTable = GC.AllocateArray<PawnTableElement>(Constants.KingPawnHashSize, pinned: true);
+    private readonly AlignedPinnedArray<PawnTableElement> _pawnEvalTable = new(Constants.KingPawnHashSize);
 
     private ulong _nodes;
 

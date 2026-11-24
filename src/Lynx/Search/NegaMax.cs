@@ -45,7 +45,7 @@ public sealed partial class Engine
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             }
 #endif
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable.Pointer, ref evaluationContext).Score;
         }
 
         _maxDepthReached.Pointer[ply] = ply;
@@ -218,7 +218,7 @@ public sealed partial class Engine
             }
             else
             {
-                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext);
+                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable.Pointer, ref evaluationContext);
                 _tt.SaveStaticEval(position, Game.HalfMovesWithoutCaptureOrPawnMove, rawStaticEval, ttPv);
                 staticEval = CorrectStaticEvaluation(position, rawStaticEval);
             }
@@ -349,7 +349,7 @@ public sealed partial class Engine
         }
         else
         {
-            (rawStaticEval, _) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext);
+            (rawStaticEval, _) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable.Pointer, ref evaluationContext);
             staticEval = CorrectStaticEvaluation(position, rawStaticEval);
 
             if (!ttHit)
@@ -867,7 +867,7 @@ public sealed partial class Engine
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             }
 #endif
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable.Pointer, ref evaluationContext).Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -896,7 +896,7 @@ public sealed partial class Engine
 
         var rawStaticEval = ttHit
             ? ttProbeResult.StaticEval
-            : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable, ref evaluationContext).Score;
+            : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable.Pointer, ref evaluationContext).Score;
 
         Debug.Assert(rawStaticEval != EvaluationConstants.NoScore, "Assertion failed", "All TT entries should have a static eval");
 
