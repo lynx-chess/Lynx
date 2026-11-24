@@ -18,10 +18,14 @@ public sealed class Game : IDisposable
     private int _positionHashHistoryPointerBeforeLastSearch;
     private int _positionHashHistoryPointer;
     private int _lastNullMoveHashHistoryPointer;
+
+    /// <summary>
+    /// [<see cref="Constants.HalfMovesCounterLength"/>]
+    /// </summary>
     private readonly ulong[] _positionHashHistory;
 
     /// <summary>
-    /// Indexed by ply
+    /// At least [Configuration.EngineSettings.MaxDepth + EvaluationConstants.ContinuationHistoryPlyCount + Constants.ArrayDepthMargin], indexed by ply
     /// </summary>
     private readonly PlyStackEntry[] _stack;
 
@@ -41,9 +45,9 @@ public sealed class Game : IDisposable
 
     private Game()
     {
-        _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.HalfMovesCounterLength);
 
-        _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame + EvaluationConstants.ContinuationHistoryPlyCount);
+        _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Configuration.EngineSettings.MaxDepth + EvaluationConstants.ContinuationHistoryPlyCount + Constants.ArrayDepthMargin);
         for (int i = 0; i < _stack.Length; ++i)
         {
             _stack[i].Reset();
@@ -54,7 +58,7 @@ public sealed class Game : IDisposable
 
 #if DEBUG
 #pragma warning disable IDE0028 // Simplify collection initialization - suggested syntax causes issues for some .NET 10 SDK versions
-        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+        MoveHistory = new(Constants.MaxNumberOfHalfMovesInAGame);
 #pragma warning restore IDE0028 // Simplify collection initialization
 #endif
     }
@@ -262,7 +266,7 @@ public sealed class Game : IDisposable
     /// To be used in online tb proving only, in combination with the result of <see cref="CopyPositionHashHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(ReadOnlySpan<ulong> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
+    public static bool IsThreefoldRepetition(ReadOnlySpan<ulong> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberOfHalfMovesInAGame)
     {
         var currentHash = position.UniqueIdentifier;
 
@@ -308,6 +312,8 @@ public sealed class Game : IDisposable
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay);
+
+            HalfMovesWithoutCaptureOrPawnMove = Math.Min(Constants.MaxNumberOfHalfMovesInAGame, HalfMovesWithoutCaptureOrPawnMove);
 
             if (CurrentPosition.Side == Side.White)
             {
