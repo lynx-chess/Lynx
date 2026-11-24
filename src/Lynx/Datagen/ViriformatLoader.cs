@@ -79,7 +79,7 @@ public static class ViriformatLoader
             byte[] pairBufArr = new byte[4];
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-            PositionTuple[] validPositionsPerGame = new PositionTuple[Constants.MaxNumberMovesInAGame];
+            PositionTuple[] validPositionsPerGame = new PositionTuple[ViriformatFilter.MaxNumberOfPositionsPerGame];
 
             long lastSampledTime = 0;
 

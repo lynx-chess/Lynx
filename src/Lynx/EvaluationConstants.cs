@@ -25,7 +25,7 @@ public static class EvaluationConstants
     public const int MaxPhase = 24;
 
     /// <summary>
-    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/>
+    /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>) x <see cref="Constants.MaxNumberOfPseudolegalMovesInAPosition"/>
     /// </summary>
     public static readonly int[][][] LMRReductions = new int[2][][];
 
