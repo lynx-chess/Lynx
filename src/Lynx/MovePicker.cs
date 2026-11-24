@@ -28,7 +28,8 @@ internal enum Stage
 
 /// <summary>
 /// Staged move generation.
-/// Thie struct can't hold managed references or byrefs (<see cref="Span{T}"/>) to prevent JIT from zeroing the whole struct in their prologue on every call.
+/// This struct can't hold managed references or byrefs (<see cref="Span{T}"/>) to prevent JIT from zeroing the whole struct
+/// in <see cref="Engine.NegaMax"/> and <see cref="Engine.QuiescenceSearch"/> prologue on every call.
 /// </summary>
 internal unsafe ref struct MovePicker
 {
