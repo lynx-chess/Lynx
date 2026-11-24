@@ -637,7 +637,7 @@ public static class Constants
     ];
 
     /// <summary>
-    /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
+    /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 2 MB
     /// </summary>
     public const int KingPawnHashSize = 262_144;
     public const int KingPawnHashMask = KingPawnHashSize - 1;

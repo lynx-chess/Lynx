@@ -80,9 +80,10 @@ public unsafe partial class Position
 
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
+            var kingPawnKey = PawnTableElement.CalculateKey(_kingPawnUniqueIdentifier);
 
             // pawnEvalTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
-            if (entry.Key == _kingPawnUniqueIdentifier)
+            if (entry.Key == kingPawnKey)
             {
                 packedScore += entry.PackedScore;
             }
@@ -107,7 +108,7 @@ public unsafe partial class Position
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(kingPawnKey, pawnScore);
                 packedScore += pawnScore;
             }
 
@@ -153,9 +154,10 @@ public unsafe partial class Position
 
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
+            var kingPawnKey = PawnTableElement.CalculateKey(_kingPawnUniqueIdentifier);
 
             // pawnTable hit: We can reuse cached eval for pawn structure + each individual pawn additional evaluation
-            if (entry.Key == _kingPawnUniqueIdentifier)
+            if (entry.Key == kingPawnKey)
             {
                 packedScore += entry.PackedScore;
 
@@ -203,7 +205,7 @@ public unsafe partial class Position
                     pawnScore -= PawnAdditionalEvaluation(ref evaluationContext, blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(kingPawnKey, pawnScore);
                 packedScore += pawnScore;
             }
 

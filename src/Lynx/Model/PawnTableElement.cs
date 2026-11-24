@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
@@ -7,11 +8,19 @@ namespace Lynx.Model;
 [StructLayout(LayoutKind.Sequential)]
 public struct PawnTableElement
 {
-    public ulong Key;
+
+    public uint Key;
 
     public int PackedScore;
 
-    public void Update(ulong key, int packedScore)
+    /// <summary>
+    /// Upper 32 bits of the king-pawn hash.
+    /// Table index uses 18 lower bits, as per <see cref="Constants.KingPawnHashMask"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint CalculateKey(ulong kingPawnHash) => (uint)(kingPawnHash >> 32);
+
+    public void Update(uint key, int packedScore)
     {
         Key = key;
         PackedScore = packedScore;

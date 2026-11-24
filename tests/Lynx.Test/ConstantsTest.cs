@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 using static Lynx.Constants;
 
 namespace Lynx.Test;
@@ -140,6 +141,12 @@ public class ConstantsTest
         Assert.True(int.IsPow2(KingPawnHashSize));
         Assert.True(int.IsPow2(PawnCorrHistoryHashSize));
         Assert.True(int.IsPow2(NonPawnCorrHistoryHashSize));
+    }
+
+    [Test]
+    public void PawnTableElementSize()
+    {
+        Assert.AreEqual(8, Unsafe.SizeOf<PawnTableElement>());
     }
 
     [Test]
