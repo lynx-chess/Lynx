@@ -324,7 +324,7 @@ public sealed class Searcher : IDisposable
 
         if (!isPondering)
         {
-            var finalSearchResult = MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints);
+            await MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints);
         }
         else
         {
