@@ -8,7 +8,6 @@ namespace Lynx.Model;
 [StructLayout(LayoutKind.Sequential)]
 public struct PawnTableElement
 {
-
     public uint Key;
 
     public int PackedScore;
