@@ -28,6 +28,7 @@
     <PackageVersion Include="Meziantou.Analyzer " Version="3.0.341" />
     <PackageVersion Include="Roslynator.Analyzers" Version="5.0.1" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.37.0.15768" />
+    <PackageVersion Include="Singulink.CodeAnalysis.Analyzers" Version="0.7.5" />
   </ItemGroup>
   <!-- Tests -->
   <ItemGroup>

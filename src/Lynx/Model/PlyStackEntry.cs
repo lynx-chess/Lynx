@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using Singulink.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
+[NonCopyable]
 [StructLayout(LayoutKind.Sequential)]
 public struct PlyStackEntry
 {

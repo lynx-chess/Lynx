@@ -1,4 +1,5 @@
 using Lynx.Model;
+using Singulink.CodeAnalysis;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -26,6 +27,7 @@ internal enum Stage
     EndStage,
 }
 
+[NonCopyable]
 internal unsafe ref struct MovePicker
 {
     private readonly Engine _engine;

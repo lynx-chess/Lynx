@@ -1,9 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using Singulink.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
 
+[NonCopyable]
 [StructLayout(LayoutKind.Sequential)]
 public struct PawnTableElement
 {
