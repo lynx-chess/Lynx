@@ -13,11 +13,12 @@ public class GeneratePawnMovesTest
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
-    private static IEnumerable<Move> GeneratePawnCaptures(Position position)
+    private static unsafe IEnumerable<Move> GeneratePawnCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var count = MoveGenerator.GenerateAllCaptures(position, moves, Constants.MaxNumberOfPseudolegalMovesInAPosition);
 
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        return new Span<Move>(moves, count).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     [Test]

@@ -12,11 +12,12 @@ public class GenerateBishopMovesTest
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
-    private static IEnumerable<Move> GenerateBishopCaptures(Position position)
+    private static unsafe IEnumerable<Move> GenerateBishopCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var count = MoveGenerator.GenerateAllCaptures(position, moves, Constants.MaxNumberOfPseudolegalMovesInAPosition);
 
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        return new Span<Move>(moves, count).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
