@@ -99,7 +99,7 @@ public sealed class Searcher : IDisposable
                     }
                     catch (Exception e)
                     {
-                        _logger.Error(e, "Error trying to read/parse UCI command");
+                        _logger.Error(e, "Error processing UCI go command");
                     }
                     finally
                     {
