@@ -131,7 +131,7 @@ public class ConstantsTest
     public void MaxNumberMovesInAGame()
     {
         Assert.Less(MaxNumberOfMovesInAGame, 1024 * 1024, "We'd need to customize ArrayPool due to desired array size requirements");
-        Assert.Less(MaxNumberOfHalfMovesInAGame + Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, 1024 * 1024, "We'd need to customize ArrayPool due to desired array size requirements");
+        Assert.Less(HalfMovesCounterLength, 1024 * 1024, "We'd need to customize ArrayPool due to desired array size requirements");
     }
 
     [Test]

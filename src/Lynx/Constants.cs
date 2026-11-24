@@ -367,7 +367,7 @@ public static class Constants
     public const int MaxNumberOfMovesInAGame = 1024;
     public const int MaxNumberOfHalfMovesInAGame = MaxNumberOfMovesInAGame * 2;
 
-    public static int HalfMovesCounterLength => MaxNumberOfHalfMovesInAGame + Configuration.EngineSettings.MaxDepth   +  ArrayDepthMargin + 1;
+    public static int HalfMovesCounterLength => MaxNumberOfHalfMovesInAGame + Configuration.EngineSettings.MaxDepth + ArrayDepthMargin + 1;
 
     public static readonly int SideLimit = Enum.GetValues<Piece>().Length / 2;
 
