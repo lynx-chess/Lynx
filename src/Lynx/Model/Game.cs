@@ -20,7 +20,7 @@ public sealed class Game : IDisposable
     private int _lastNullMoveHashHistoryPointer;
 
     /// <summary>
-    /// [<see cref="Constants.MaxNumberOfHalfMovesInAGame"/> + <see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>]
+    /// [<see cref="Constants.HalfMovesCounterLength"/>]
     /// </summary>
     private readonly ulong[] _positionHashHistory;
 
@@ -45,7 +45,7 @@ public sealed class Game : IDisposable
 
     private Game()
     {
-        _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberOfHalfMovesInAGame + Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin);
+        _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.HalfMovesCounterLength);
 
         _stack = ArrayPool<PlyStackEntry>.Shared.Rent(Configuration.EngineSettings.MaxDepth + EvaluationConstants.ContinuationHistoryPlyCount + Constants.ArrayDepthMargin);
         for (int i = 0; i < _stack.Length; ++i)
@@ -313,7 +313,7 @@ public sealed class Game : IDisposable
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay);
 
-            HalfMovesWithoutCaptureOrPawnMove = Math.Min(HalfMovesWithoutCaptureOrPawnMove, Constants.MaxNumberOfHalfMovesInAGame);
+            HalfMovesWithoutCaptureOrPawnMove = Math.Min(Constants.MaxNumberOfHalfMovesInAGame, HalfMovesWithoutCaptureOrPawnMove);
 
             if (CurrentPosition.Side == Side.White)
             {

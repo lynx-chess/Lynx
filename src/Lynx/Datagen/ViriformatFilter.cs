@@ -7,7 +7,7 @@ namespace Lynx.Datagen;
 /// </summary>
 public class ViriformatFilter
 {
-    public const int MaxNumberOfPositionsPerGame = Constants.MaxNumberOfHalfMovesInAGame;
+    public static readonly int MaxNumberOfPositionsPerGame = Constants.MaxNumberOfHalfMovesInAGame;
 
     private enum FilterWDL
     {
