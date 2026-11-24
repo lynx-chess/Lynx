@@ -299,7 +299,7 @@ public unsafe readonly struct TranspositionTable
     private TranspositionTableElement* GetBucket(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return (TranspositionTableElement*)&_buckets[ttIndex];
+        return (TranspositionTableElement*)(_buckets + ttIndex);
     }
 
     /// <summary>
@@ -348,7 +348,7 @@ public unsafe readonly struct TranspositionTable
 
         for (int i = 0; i < 1_000; ++i)
         {
-            var bucket = (TranspositionTableElement*)&_buckets[i];
+            var bucket = (TranspositionTableElement*)(_buckets + i);
 
             for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
@@ -395,7 +395,7 @@ public unsafe readonly struct TranspositionTable
 
         for (nuint i = 0; i < Length; ++i)
         {
-            var bucket = (TranspositionTableElement*)&_buckets[i];
+            var bucket = (TranspositionTableElement*)(_buckets + i);
 
             for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
@@ -414,7 +414,7 @@ public unsafe readonly struct TranspositionTable
     {
         Debug.Assert((uint)entryIndex < Constants.TranspositionTableEntriesPerBucket);
 
-        return (TranspositionTableElement*)&_buckets[bucketIndex] + entryIndex;
+        return (TranspositionTableElement*)(_buckets + bucketIndex) + entryIndex;
     }
 
     [Conditional("DEBUG")]
@@ -431,7 +431,7 @@ public unsafe readonly struct TranspositionTable
         Console.WriteLine("Transposition table content:");
         for (nuint i = 0; i < Length; ++i)
         {
-            var bucket = (TranspositionTableElement*)&_buckets[i];
+            var bucket = (TranspositionTableElement*)(_buckets + i);
 
             for (int j = 0; j < Constants.TranspositionTableEntriesPerBucket; ++j)
             {
