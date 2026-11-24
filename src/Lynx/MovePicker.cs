@@ -125,7 +125,7 @@ internal unsafe ref struct MovePicker
                     {
                         _stage = Stage.GoodNoisyMovesStage;
 
-                        _count = MoveGenerator.GenerateAllCaptures(position, new Span<Move>(_moves, _bufferLength), _oppositeSideAttacks).Length;
+                        _count = MoveGenerator.GenerateAllCaptures(position, _moves, _bufferLength, _oppositeSideAttacks);
 
                         if (_isInCheck)
                         {
@@ -237,14 +237,16 @@ internal unsafe ref struct MovePicker
                         _stage = Stage.QuietMovesStage;
 
                         // No more noisy moves, so their buffers can be reused
-                        var quietMoves = MoveGenerator.GenerateAllQuiets(position, new Span<Move>(_moves, _bufferLength), _oppositeSideAttacks);
+                        var quietMovesCount = MoveGenerator.GenerateAllQuiets(position, _moves, _bufferLength, _oppositeSideAttacks);
 
                         // Removing moves already returned in previous stages, preserving the order of the rest
                         _count = 0;
                         _index = 0;
 
-                        foreach (var quietMove in quietMoves)
+                        for (int i = 0; i < quietMovesCount; ++i)
                         {
+                            var quietMove = _moves[i];
+
                             if (quietMove == _firstKiller
                                 || quietMove == _secondKiller
                                 || quietMove == _counterMove
