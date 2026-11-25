@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Experimental Satori GC: replaces the whole CoreCLR runtime (GC, JIT, CoreLib) on self-contained RID-specific publishes.
+    Inactive when no RuntimeIdentifier is set (build/run/test). Use -p:UseSatoriGC=false to publish with the stock runtime -->
+  <Sdk Name="PublishWithSatoriGC" Version="11.0.1-satori.44643583273.1" />
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
