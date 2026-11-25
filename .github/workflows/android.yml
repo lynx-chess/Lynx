@@ -160,20 +160,24 @@ jobs:
 
     - name: Write test scripts
       run: |
-        # Runs on the device: a UCI session that waits for each bestmove before sending the next command (Lynx doesn't exit on stdin EOF)
+        # A UCI session that waits for each bestmove before sending the next command (Lynx doesn't exit on stdin EOF).
+        # Arguments: the engine command, i.e. adb shell '<command>'.
+        # It runs on the host, and adb forwards the engine's stdin, since a FIFO can't be created on the device:
+        # Android 7 (API 24) has no mkfifo, and Android 16 (API 36) doesn't let adb's shell create FIFOs in /data/local/tmp (mkfifo: Permission denied)
         cat > "$RUNNER_TEMP/uci-session.sh" <<'EOF'
-        cd /data/local/tmp/lynx
-        mkfifo in
-        : > out
-        ./Lynx.Cli < in >> out 2>&1 &
+        set -u
+        dir=$(mktemp -d)
+        mkfifo "$dir/in"
+        : > "$dir/out"
+        "$@" < "$dir/in" >> "$dir/out" 2>&1 &
         pid=$!
-        exec 3>in
+        exec 3> "$dir/in"
         send() { echo "$1" >&3; }
         wait_for() { # <pattern> <count> <timeout in seconds>
           i=0
-          while [ "$(grep -c "$1" out)" -lt "$2" ]; do
+          while [ "$(grep -c "$1" "$dir/out")" -lt "$2" ]; do
             i=$((i + 1))
-            if [ $i -gt $3 ]; then echo "Timeout waiting for '$1' x$2"; cat out; kill $pid; exit 1; fi
+            if [ $i -gt $3 ]; then echo "Timeout waiting for '$1' x$2"; cat "$dir/out"; kill $pid; exit 1; fi
             sleep 1
           done
         }
@@ -189,9 +193,9 @@ jobs:
         exec 3>&-
         wait $pid
         rc=$?
-        cat out
+        cat "$dir/out"
         echo "Exit code: $rc"
-        [ $rc -eq 0 ] && ! grep -q -i -E 'exception|unhandled' out
+        [ $rc -eq 0 ] && ! grep -q -i -E 'exception|unhandled' "$dir/out"
         EOF
 
         # Runs on the host, once the emulator is up
@@ -204,7 +208,6 @@ jobs:
         adb shell mkdir -p /data/local/tmp/lynx
         adb push artifacts/Lynx-linux-bionic-x64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli
         adb push artifacts/Lynx-linux-bionic-arm64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
-        adb push "$RUNNER_TEMP/uci-session.sh" /data/local/tmp/lynx/uci-session.sh
         adb shell chmod 755 /data/local/tmp/lynx/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
 
         output=$(timeout 900 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli bench" | tr -d '\r')
@@ -215,7 +218,7 @@ jobs:
           exit 1
         fi
 
-        timeout 300 adb shell sh /data/local/tmp/lynx/uci-session.sh
+        timeout 300 bash "$RUNNER_TEMP/uci-session.sh" adb shell 'cd /data/local/tmp/lynx && ./Lynx.Cli'
 
         # Informative only: some x86_64 images can run arm64 executables through binary translation
         timeout 900 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli-arm64 bench" || echo "::warning::arm64 executable couldn't run in this x86_64 image"
