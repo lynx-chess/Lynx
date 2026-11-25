@@ -56,23 +56,7 @@ jobs:
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true ${{ matrix.instruction-set && format('/p:IlcInstructionSet={0}', matrix.instruction-set) || '' }} -o artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}
 
     - name: Check executable
-      run: |
-        exe=artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/Lynx.Cli
-        ls -la "$(dirname "$exe")"
-        readelf -hlW "$exe" | grep -E 'Machine:|interpreter|LOAD'
-        readelf -dW "$exe" | grep NEEDED
-        readelf -h "$exe" | grep -q 'Machine: .*${{ matrix.machine }}' || { echo "::error::ELF machine isn't ${{ matrix.machine }}"; exit 1; }
-        readelf -lW "$exe" | grep -q 'Requesting program interpreter: /system/bin/linker64' || { echo "::error::Program interpreter isn't /system/bin/linker64"; exit 1; }
-        # 16 KB page size devices (Android 15+) need every LOAD segment aligned to 16 KB
-        if readelf -lW "$exe" | awk '$1 == "LOAD" && $NF != "0x4000"' | grep -q .; then
-          echo "::error::LOAD segments aren't 16 KB aligned"
-          exit 1
-        fi
-        # Only Android system libraries
-        if readelf -dW "$exe" | grep NEEDED | grep -v -E '\[lib(c|m|dl|log|z)\.so\]'; then
-          echo "::error::Unexpected shared library dependency"
-          exit 1
-        fi
+      run: bash .github/scripts/android/check-executable.sh artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/Lynx.Cli ${{ matrix.machine }}
 
     - name: Upload ${{ matrix.artifact-name || matrix.runtime-identifier }} artifact
       uses: actions/upload-artifact@v7
@@ -140,69 +124,10 @@ jobs:
         fi
 
     - name: Stack needed by a deep search (arm64, NativeAOT)
-      working-directory: ./artifacts/linux-arm64-aot
-      run: |
-        # Informative: the smallest thread stack that the locked position search of android.yml's UCI session needs (76 plies deep).
-        # ulimit -s sets glibc's default thread stack size. Lynx searches up to 128 plies deep, and Android's default thread stack is ~1 MB
-        locked='k7/8/8/p1p1p1p1/P1P1P1P1/8/8/K7 w - - 0 1'
-        deep() { # <stack KB>: prints the deepest seldepth of a depth 128 search, fails if the engine crashes
-          ( ulimit -c 0; ulimit -s "$1"
-            d=$(mktemp -d); mkfifo "$d/in"; : > "$d/out"
-            ./Lynx.Cli < "$d/in" >> "$d/out" 2>&1 &
-            pid=$!
-            exec 3> "$d/in"
-            echo "position fen $locked" >&3; echo "go depth 128" >&3
-            for i in $(seq 600); do grep -q '^bestmove' "$d/out" && break; kill -0 $pid 2>/dev/null || exit 1; sleep 0.1; done
-            echo quit >&3; wait $pid || exit 1
-            grep -oE 'seldepth [0-9]+' "$d/out" | cut -d' ' -f2 | sort -n | tail -1 )
-        }
-        reference=$(deep 8192)
-        lo=64; hi=2048
-        while [ $((hi - lo)) -gt 8 ]; do
-          mid=$(( (lo + hi) / 2 ))
-          if [ "$(deep $mid)" = "$reference" ]; then hi=$mid; else lo=$mid; fi
-        done
-        echo "seldepth $reference needs ~$hi KB of thread stack, ~$(( hi * 1024 / reference )) bytes per ply"
+      run: bash .github/scripts/android/stack-needed.sh artifacts/linux-arm64-aot/Lynx.Cli
 
     - name: Instruction set variants (arm64, NativeAOT vs JIT)
-      run: |
-        # Prototype: the Android ARM64 variants (same ILC ARM64 code generation as linux-bionic-arm64) and the JIT on this runner's CPU.
-        # Each one must give the reference bench, unless the CPU lacks its instruction sets (NativeAOT then refuses to start). NPS is informative.
-        # v8.9 needs FEAT_CSSC ('cssc' in /proc/cpuinfo Features): without it, it's skipped. The JIT uses CSSC by itself where the CPU has it
-        grep -m1 '^Features' /proc/cpuinfo || true
-        lscpu | grep -E 'Vendor ID|Model name' || true
-        dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-arm64 --self-contained /p:Optimized=true -o variants/jit
-        for v in v8.2-dotprod:armv8.2-a%2Cdotprod v8.9:armv8.9-a; do
-          dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-arm64 --self-contained /p:Optimized=true /p:PublishAot=true "/p:IlcInstructionSet=${v#*:}" -o "variants/${v%%:*}"
-        done
-        cp -r artifacts/linux-arm64-aot variants/v8.0
-        expected=${{ needs.reference-bench.outputs.nodes }}
-        runnable=""
-        for n in jit v8.0 v8.2-dotprod v8.9; do
-          out=$(printf 'runtimeconfig\nquit\n' | timeout 30 "variants/$n/Lynx.Cli" 2>&1) || true
-          if echo "$out" | grep -q 'missing one or more'; then
-            echo "::warning::$n doesn't run on this CPU: $(echo "$out" | grep -m1 'missing')"
-            continue
-          fi
-          echo "$n: $(echo "$out" | grep -E -- '- (JIT|AdvSimd|Crc32|Rdm|Dp|Sve) =' | tr -d '\t' | sed 's/^- //' | tr '\n' ' ')"
-          runnable="$runnable $n"
-        done
-        # Interleaved rounds, so that runner noise affects all variants alike
-        : > nps.txt
-        for round in 1 2 3 4 5; do
-          for n in $runnable; do
-            line=$(timeout 300 "variants/$n/Lynx.Cli" bench | grep -E '^[0-9]+ nodes')
-            if [ "$(echo "$line" | cut -d' ' -f1)" != "$expected" ]; then
-              echo "::error::$n bench: $line, x64 JIT: $expected nodes"
-              exit 1
-            fi
-            echo "$n $(echo "$line" | cut -d' ' -f3)" >> nps.txt
-          done
-        done
-        echo "Median NPS of 5 rounds, and relative to v8.0 (NativeAOT default):"
-        for n in $runnable; do echo "$n $(grep "^$n " nps.txt | cut -d' ' -f2 | sort -n | sed -n 3p)"; done > medians.txt
-        base=$(grep '^v8.0 ' medians.txt | cut -d' ' -f2)
-        awk -v base="$base" '{ printf "  %-12s %9d nps  %+6.1f%%\n", $1, $2, base ? 100 * ($2 / base - 1) : 0 }' medians.txt
+      run: bash .github/scripts/android/instruction-set-variants.sh ${{ needs.reference-bench.outputs.nodes }}
 
     - name: Tests (arm64, JIT)
       run: dotnet test -c Release
@@ -227,172 +152,13 @@ jobs:
         sudo udevadm control --reload-rules
         sudo udevadm trigger --name-match=kvm
 
+    # Before download-artifact: checkout cleans the working directory
+    - uses: actions/checkout@v7
+
     - uses: actions/download-artifact@v8
       with:
         pattern: Lynx-linux-bionic-*
         path: artifacts/
-
-    - name: Write test scripts
-      run: |
-        # A UCI session that waits for each bestmove before sending the next command (Lynx doesn't exit on stdin EOF).
-        # Arguments: the engine command, i.e. adb shell '<command>'. PROBE (optional): a command run while the engine has 8 search threads.
-        # It runs on the host, and adb forwards the engine's stdin, since a FIFO can't be created on the device:
-        # Android 7 (API 24) has no mkfifo, and Android 16 (API 36) doesn't let adb's shell create FIFOs in /data/local/tmp (mkfifo: Permission denied)
-        cat > "$RUNNER_TEMP/uci-session.sh" <<'EOF'
-        set -u
-        dir=$(mktemp -d)
-        mkfifo "$dir/in"
-        : > "$dir/out"
-        "$@" < "$dir/in" >> "$dir/out" 2>&1 &
-        pid=$!
-        exec 3> "$dir/in"
-        gos=0   # go commands sent: each one must get exactly one bestmove
-        send() { echo "$1" >&3; }
-        fail() { echo "::error::$1"; kill $pid 2>/dev/null; cat "$dir/out"; exit 1; }
-        bestmoves() { grep -c '^bestmove' "$dir/out"; }
-        lines() { wc -l < "$dir/out"; }
-        wait_for() { # <pattern> <count> <timeout in seconds>
-          local i=0
-          while [ "$(grep -c "$1" "$dir/out")" -lt "$2" ]; do
-            kill -0 $pid 2>/dev/null || fail "Engine exited while waiting for '$1' x$2"
-            i=$((i + 1)); [ $i -le $(( $3 * 10 )) ] || fail "Timeout waiting for '$1' x$2"
-            sleep 0.1
-          done
-        }
-        go() { send "$1"; gos=$((gos + 1)); wait_for '^bestmove' $gos $2; }   # <go command> <timeout in seconds>
-        go_async() { send "$1"; gos=$((gos + 1)); }                          # go infinite/ponder: bestmove after stop/ponderhit
-        max_seldepth_since() { tail -n +$(( $1 + 1 )) "$dir/out" | grep -oE 'seldepth [0-9]+' | cut -d' ' -f2 | sort -n | tail -1; }
-
-        send uci; wait_for uciok 1 10
-        send isready; wait_for readyok 1 10
-        send runtimeconfig; send isready; wait_for readyok 2 10
-        send "position startpos"; go "go depth 12" 60
-
-        # Deep recursion: in a locked position (only the kings can move), iterative deepening gets to MaxDepth (128) in seconds
-        # and single-threaded search lines go 76 plies deep: ~600 KB of stack (~7.3 KB per ply), Android's default thread stack being ~1 MB
-        locked='k7/8/8/p1p1p1p1/P1P1P1P1/8/8/K7 w - - 0 1'
-        send ucinewgame; start=$(lines); send "position fen $locked"; go "go depth 128" 120
-        seldepth=$(max_seldepth_since $start); echo "Locked position, 1 thread: seldepth $seldepth"
-        [ "${seldepth:-0}" -ge 70 ] || fail "Locked position search only reached seldepth ${seldepth:-0} (76 expected)"
-        send "position fen 8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1"; go "go movetime 5000" 30   # Fine #70, a deep endgame search with a plan
-
-        # Multithreading: helper threads recursing deep too, then 8 threads (twice the emulator's cores) in a complex middlegame (Kiwipete)
-        send "setoption name Threads value 4"; send ucinewgame
-        start=$(lines); send "position fen $locked"; go "go depth 128" 120
-        echo "Locked position, 4 threads: seldepth $(max_seldepth_since $start)"
-        kiwipete='r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1'
-        send "setoption name Threads value 8"; send "setoption name Hash value 64"; send ucinewgame
-        send "position fen $kiwipete"; go "go movetime 3000" 30
-        [ -z "${PROBE:-}" ] || eval "$PROBE" || fail "Stack check failed"
-        # stop after 2 s of go infinite, and stop right after go, which can be processed before the search starts
-        send "position fen $kiwipete moves e2a6"; go_async "go infinite"; sleep 2; send stop; wait_for '^bestmove' $gos 10
-        go_async "go infinite"; send stop; wait_for '^bestmove' $gos 10
-        # Pondering: no bestmove until ponderhit or stop
-        send "setoption name Ponder value true"
-        send "position startpos moves e2e4 e7e5 g1f3"; go_async "go ponder wtime 10000 btime 10000 winc 100 binc 100"; sleep 1
-        [ "$(bestmoves)" -eq $((gos - 1)) ] || fail "bestmove sent before ponderhit"
-        send ponderhit; wait_for '^bestmove' $gos 30
-        send "position startpos moves e2e4 e7e5 g1f3 b8c6"; go_async "go ponder wtime 10000 btime 10000 winc 100 binc 100"; sleep 1
-        [ "$(bestmoves)" -eq $((gos - 1)) ] || fail "bestmove sent before stop"
-        send stop; wait_for '^bestmove' $gos 10
-        send "setoption name Ponder value false"
-
-        # Self-play game with a clock, changing the number of threads every 10 plies, as a GUI would
-        send ucinewgame; moves=""
-        for ply in $(seq 0 29); do
-          case $ply in 0) send "setoption name Threads value 2";; 10) send "setoption name Threads value 4";; 20) send "setoption name Threads value 1";; esac
-          send "position startpos${moves:+ moves$moves}"; go "go wtime 4000 btime 4000 winc 50 binc 50" 30
-          move=$(grep '^bestmove' "$dir/out" | tail -1 | cut -d' ' -f2)
-          case "$move" in [a-h][1-8][a-h][1-8]*) moves="$moves $move";; *) echo "Game over: bestmove $move"; break;; esac
-        done
-        echo "Self-play:$moves"
-
-        send quit
-        exec 3>&-
-        wait $pid
-        rc=$?
-        cat "$dir/out"
-        echo "Exit code: $rc, go commands: $gos, bestmoves: $(bestmoves)"
-        [ $rc -eq 0 ] || { echo "::error::Exit code $rc"; exit 1; }
-        [ "$(bestmoves)" -eq $gos ] || { echo "::error::Expected exactly one bestmove per go command"; exit 1; }
-        ! grep -q -i -E 'exception|unhandled' "$dir/out" || { echo "::error::Exception in the engine output"; exit 1; }
-        EOF
-
-        # Stack sizes of the engine's threads: /proc/<pid>/maps stack mappings, named after the thread id ([stack:<tid>] or [anon:stack_and_tls:<tid>]),
-        # joined with the thread names in /proc/<pid>/task/<tid>/comm.
-        # Arguments: <process name> [minimum KB]. With a minimum, it fails unless every thread that can search has at least that much stack:
-        # SearchWorker ('Lynx search worker #N', cut to 15 chars), .NET TP Worker (main search) and .NET Long Task (UCI listener, runs bench)
-        cat > "$RUNNER_TEMP/stack-probe.sh" <<'EOF'
-        process=$1; min_kb=${2:-}
-        pid=$(adb shell pidof "$process" | tr -d '\r' | grep -oE '[0-9]+' | head -1)
-        [ -n "$pid" ] || pid=$(adb shell pgrep -x "$process" | tr -d '\r' | grep -oE '[0-9]+' | head -1)   # pidof doesn't find translated processes
-        if [ -z "$pid" ]; then
-          echo "Stack probe: no $process process found"
-          [ -z "$min_kb" ]; exit
-        fi
-        threads=$(adb shell "cd /proc/$pid/task && for t in *; do echo \$t \$(cat \$t/comm); done" | tr -d '\r')
-        # Only anonymous [...stack...] mappings: file mappings such as /system/lib64/libunwindstack.so aren't stacks
-        stacks=$(adb shell "cat /proc/$pid/maps" | tr -d '\r' | grep -E '\[[^]]*stack[^]]*\]$' | while read -r range perms offset device inode mapping; do
-          tid=$(echo "$mapping" | grep -oE '[0-9]+\]$' | tr -d ']')
-          thread=$([ -z "$tid" ] || echo "$threads" | awk -v tid="$tid" '$1 == tid { $1 = ""; print substr($0, 2) }')
-          echo "$(( (0x${range#*-} - 0x${range%-*}) / 1024 )) KB | ${thread:--} | $mapping"
-        done)
-        echo "Stack mappings of $process (pid $pid): count, size | thread | mapping"
-        echo "$stacks" | sed -E 's/[0-9]+\]$/<tid>]/' | sort -n | uniq -c
-        [ -n "$min_kb" ] || exit 0
-        search='^(Lynx search|[.]NET TP Worker|[.]NET Long Task)'
-        count=$(echo "$stacks" | awk -F' [|] ' -v re="$search" '$2 ~ re' | wc -l)
-        small=$(echo "$stacks" | awk -F' [|] ' -v re="$search" -v min="$min_kb" '$2 ~ re && $1 + 0 < min')
-        [ "$count" -gt 0 ] || { echo "::error::No search thread stack mappings found"; exit 1; }
-        [ -z "$small" ] || { echo "::error::Search thread stacks smaller than $min_kb KB:"; echo "$small"; exit 1; }
-        echo "All $count search thread stacks have at least $min_kb KB"
-        EOF
-
-        # Runs on the host, once the emulator is up
-        cat > "$RUNNER_TEMP/android-test.sh" <<'EOF'
-        set -euxo pipefail
-        expected=$1
-        adb shell getprop ro.build.version.release
-        abis=$(adb shell getprop ro.product.cpu.abilist | tr -d '\r')
-        adb shell getconf PAGESIZE || true
-        adb shell mkdir -p /data/local/tmp/lynx
-        adb push artifacts/Lynx-linux-bionic-x64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli
-        adb push artifacts/Lynx-linux-bionic-arm64-v8.0/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
-        adb push artifacts/Lynx-linux-bionic-arm64-v8.2-dotprod/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64-v8.2-dotprod
-        adb push artifacts/Lynx-linux-bionic-arm64-v8.9/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64-v8.9
-        adb shell chmod 755 /data/local/tmp/lynx/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64 /data/local/tmp/lynx/Lynx.Cli-arm64-v8.2-dotprod /data/local/tmp/lynx/Lynx.Cli-arm64-v8.9
-
-        bench() { # <executable>
-          output=$(timeout 1800 adb shell "cd /data/local/tmp/lynx && ./$1 bench" | tr -d '\r')
-          echo "$output"
-          nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)
-          if [ "$nodes" != "$expected" ]; then
-            echo "::error::Android emulator bench ($1): $nodes nodes, x64 JIT: $expected nodes"
-            exit 1
-          fi
-        }
-        session() { # <executable> [minimum stack KB of search threads]
-          PROBE="bash $RUNNER_TEMP/stack-probe.sh $1 ${2:-}" timeout 1200 bash "$RUNNER_TEMP/uci-session.sh" adb shell "cd /data/local/tmp/lynx && ./$1"
-        }
-
-        bench Lynx.Cli
-        # Search threads must have the 8 MB stacks set in Lynx.Cli.csproj (Android's ~1 MB default is too tight for 128 plies)
-        session Lynx.Cli 4096
-
-        # The arm64 build, the one for phones, only runs in images with ARM translation (API 36's lists arm64-v8a, API 24's doesn't)
-        if [[ ",$abis," == *",arm64-v8a,"* ]]; then
-          bench Lynx.Cli-arm64
-          session Lynx.Cli-arm64   # Informative stack probe only: under translation, the translator allocates the guest stacks
-          # Informative: whether the translator supports the v8.2-dotprod and v8.9 variants. If it doesn't, NativeAOT refuses to start
-          # ('The current CPU is missing one or more of the required instruction sets'), as it would on a phone with an older CPU
-          for v in v8.2-dotprod v8.9; do
-            out=$(printf 'runtimeconfig\nquit\n' | timeout 120 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli-arm64-$v" 2>&1 | tr -d '\r') || true
-            echo "arm64-$v: $(echo "$out" | grep -E 'missing|- (RID|AdvSimd|Crc32|Rdm|Dp|Sve) =' | tr -d '\t' | tr '\n' ' ')"
-          done
-        else
-          echo "::warning::No ARM translation in this image ($abis): arm64 build not tested"
-        fi
-        EOF
 
     - name: Run tests in Android API ${{ matrix.api-level }} emulator (${{ matrix.target }})
       uses: reactivecircus/android-emulator-runner@v2
@@ -403,4 +169,4 @@ jobs:
         cores: 4
         disable-animations: true
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-        script: bash "$RUNNER_TEMP/android-test.sh" ${{ needs.reference-bench.outputs.nodes }}
+        script: bash .github/scripts/android/emulator-tests.sh ${{ needs.reference-bench.outputs.nodes }}
