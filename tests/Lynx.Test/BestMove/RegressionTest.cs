@@ -200,7 +200,7 @@ public class RegressionTest : BaseTest
         engine.AdjustPosition(positionCommand);
 
         var bestMove = engine.BestMove(new GoCommand($"go depth {Engine.DefaultMaxDepth}"));
-        Assert.NotZero(bestMove.Score);
+        Assert.AreNotEqual(EvaluationConstants.DrawScore, bestMove.Score);
 
         //engine.AdjustPosition(positionCommand);
         //bestMove = engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime}"));
