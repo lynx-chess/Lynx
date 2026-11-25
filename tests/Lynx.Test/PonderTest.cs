@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx.Test;
@@ -190,27 +191,35 @@ public class PonderTest
 
     /// <summary>
     /// After ponderhit a go ponder search is a regular one, which the end of input mustn't stop.
-    /// 100 ms delay: the end of input arrives while the search that follows the ponderhit is running (depth 18 takes longer than that)
+    /// 200 ms delay: the end of input arrives while the search that follows the ponderhit is running.
+    /// Time-based instead of depth-based, so that it doesn't depend on the build speed (Debug + code coverage in CI)
     /// </summary>
     [TestCase(0, 1)]
     [TestCase(0, 2)]
-    [TestCase(100, 1)]
-    [TestCase(100, 2)]
+    [TestCase(200, 1)]
+    [TestCase(200, 2)]
     public async Task EndOfInputAfterPonderHitLetsSearchFinish(int delayMs, int threads)
     {
-        const int depth = 18;
+        // >= PonderHitMinTimeToContinueSearch, so that the search always restarts after the ponderhit, with movetime as hard limit
+        const int moveTime = 500;
+
+        // Timer granularity (~15.6 ms on Windows), while a search cut short by the end of input would last ~delayMs
+        const int moveTimeMargin = 100;
+
         await using var scenario = new Scenario(threads);
 
         await scenario.Send("position startpos");
-        await scenario.Send($"go ponder depth {depth}");
+        await scenario.Send($"go ponder movetime {moveTime}");
+
+        var sw = Stopwatch.StartNew();
         await scenario.Send(PonderHitCommand.Id);
         await Task.Delay(delayMs);
 
         Assert.IsTrue(await scenario.EndOfInput(_timeout), "Search wasn't over after the end of input");
+        sw.Stop();
 
-        var bestMoves = await scenario.BestMovesUntilCompletion();
-        Assert.AreEqual(1, bestMoves.Count);
-        Assert.GreaterOrEqual(bestMoves[0].Depth, depth, "Search after ponderhit was cut short by the end of input");
+        Assert.AreEqual(1, (await scenario.BestMovesUntilCompletion()).Count);
+        Assert.GreaterOrEqual(sw.ElapsedMilliseconds, moveTime - moveTimeMargin, "Search after ponderhit was cut short by the end of input");
     }
 
     private sealed class Scenario : IAsyncDisposable
