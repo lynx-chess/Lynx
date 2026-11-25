@@ -282,7 +282,8 @@ jobs:
           [ -z "$min_kb" ]; exit
         fi
         threads=$(adb shell "cd /proc/$pid/task && for t in *; do echo \$t \$(cat \$t/comm); done" | tr -d '\r')
-        stacks=$(adb shell "cat /proc/$pid/maps" | tr -d '\r' | grep -i stack | while read -r range perms offset device inode mapping; do
+        # Only anonymous [...stack...] mappings: file mappings such as /system/lib64/libunwindstack.so aren't stacks
+        stacks=$(adb shell "cat /proc/$pid/maps" | tr -d '\r' | grep -E '\[[^]]*stack[^]]*\]$' | while read -r range perms offset device inode mapping; do
           tid=$(echo "$mapping" | grep -oE '[0-9]+\]$' | tr -d ']')
           thread=$([ -z "$tid" ] || echo "$threads" | awk -v tid="$tid" '$1 == tid { $1 = ""; print substr($0, 2) }')
           echo "$(( (0x${range#*-} - 0x${range%-*}) / 1024 )) KB | ${thread:--} | $mapping"

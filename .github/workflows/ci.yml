@@ -110,7 +110,12 @@ jobs:
       run: |
         exe=artifacts/${{ matrix.runtime-identifier }}/Lynx.Cli
         readelf -hlW "$exe" | grep -E 'Machine:|interpreter|LOAD'
-        readelf -h "$exe" | grep -q 'AArch64'
+        case "${{ matrix.runtime-identifier }}" in
+          *-arm64) machine=AArch64 ;;
+          *-x64) machine=X86-64 ;;
+          *) echo "::error::No expected ELF machine for ${{ matrix.runtime-identifier }}"; exit 1 ;;
+        esac
+        readelf -h "$exe" | grep -q "Machine: .*$machine" || { echo "::error::ELF machine isn't $machine"; exit 1; }
         readelf -lW "$exe" | grep -q 'Requesting program interpreter: /system/bin/linker64'
         # 16 KB page size devices (Android 15+) need every LOAD segment aligned to 16 KB
         if readelf -lW "$exe" | awk '$1 == "LOAD" && $NF != "0x4000"' | grep -q .; then
