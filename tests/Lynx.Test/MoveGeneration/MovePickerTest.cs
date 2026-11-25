@@ -74,8 +74,7 @@ public unsafe class MovePickerTest : BaseTest
         var isInCheck = position.IsInCheck();
         var oppositeSideAttacks = GetOppositeSideAttacks(position);
 
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var captures = MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).ToArray();
+        var captures = GenerateAllCaptures(position, oppositeSideAttacks);
         var allMoves = GenerateAllMoves(position, oppositeSideAttacks);
 
         Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
@@ -119,8 +118,7 @@ public unsafe class MovePickerTest : BaseTest
         var position = engine.Game.CurrentPosition;
         var oppositeSideAttacks = GetOppositeSideAttacks(position);
 
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        var captures = MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).ToArray();
+        var captures = GenerateAllCaptures(position, oppositeSideAttacks);
         var allMoves = GenerateAllMoves(position, oppositeSideAttacks);
 
         // No TT move, and every pseudo-legal move as TT move (including quiets, which must be ignored)
@@ -331,6 +329,14 @@ public unsafe class MovePickerTest : BaseTest
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         return MoveGenerator.GenerateAllMoves(position, movePool, oppositeSideAttacks).ToArray();
+    }
+
+    private static Move[] GenerateAllCaptures(Position position, Bitboard oppositeSideAttacks)
+    {
+        Move* movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var count = MoveGenerator.GenerateAllCaptures(position, movePool, Constants.MaxNumberOfPseudolegalMovesInAPosition, oppositeSideAttacks);
+
+        return new Span<Move>(movePool, count).ToArray();
     }
 
     internal static bool IsLegal(Position position, Move move)

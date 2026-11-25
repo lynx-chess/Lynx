@@ -82,12 +82,14 @@ public unsafe class QuietCaptureMoveGenerationTest
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
         Span<Move> allMovesPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Move> capturesPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<Move> quietsPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* capturesPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* quietsPool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         var allMoves = MoveGenerator.GenerateAllMoves(position, allMovesPool, oppositeSideAttacks).ToArray();
-        var splitMoves = MoveGenerator.GenerateAllCaptures(position, capturesPool, oppositeSideAttacks).ToArray()
-            .Concat(MoveGenerator.GenerateAllQuiets(position, quietsPool, oppositeSideAttacks).ToArray())
+        var capturesCount = MoveGenerator.GenerateAllCaptures(position, capturesPool, Constants.MaxNumberOfPseudolegalMovesInAPosition, oppositeSideAttacks);
+        var quietsCount = MoveGenerator.GenerateAllQuiets(position, quietsPool, Constants.MaxNumberOfPseudolegalMovesInAPosition, oppositeSideAttacks);
+        var splitMoves = new Span<Move>(capturesPool, capturesCount).ToArray()
+            .Concat(new Span<Move>(quietsPool, quietsCount).ToArray())
             .ToArray();
 
         Assert.That(splitMoves, Is.EquivalentTo(allMoves), $"All moves mismatch in position {fen}");

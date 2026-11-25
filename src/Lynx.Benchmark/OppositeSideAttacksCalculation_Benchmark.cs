@@ -151,12 +151,12 @@ public unsafe class OppositeSideAttacksCalculation_Benchmark : BaseBenchmark
     {
         var result = 0;
 
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         foreach (var position in Data)
         {
             const Bitboard oppositeSideAttacks = 0UL;
-            result += MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).Length;
+            result += MoveGenerator.GenerateAllCaptures(position, movePool, Constants.MaxNumberOfPseudolegalMovesInAPosition, oppositeSideAttacks);
         }
 
         return result;
@@ -167,7 +167,7 @@ public unsafe class OppositeSideAttacksCalculation_Benchmark : BaseBenchmark
     {
         var result = 0;
 
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
@@ -176,7 +176,7 @@ public unsafe class OppositeSideAttacksCalculation_Benchmark : BaseBenchmark
             position.CalculateThreats(ref evaluationContext);
             var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
-            result += MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).Length;
+            result += MoveGenerator.GenerateAllCaptures(position, movePool, Constants.MaxNumberOfPseudolegalMovesInAPosition, oppositeSideAttacks);
         }
 
         return result;
@@ -187,12 +187,12 @@ public unsafe class OppositeSideAttacksCalculation_Benchmark : BaseBenchmark
     {
         var result = 0;
 
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* movePool = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         foreach (var position in Data)
         {
             var oppositeSideAttacks = position.OppositeSideAttacks();
-            result += MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).Length;
+            result += MoveGenerator.GenerateAllCaptures(position, movePool, Constants.MaxNumberOfPseudolegalMovesInAPosition, oppositeSideAttacks);
         }
 
         return result;
