@@ -1,4 +1,5 @@
-﻿using Lynx.UCI.Commands.Engine;
+﻿using Lynx.Model;
+using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 using System.Threading.Channels;
@@ -140,6 +141,78 @@ public class PonderTest
         Assert.That(await scenario.NextBestMove(_timeout), Is.Not.Null, $"No 'bestmove' after '{resolution}'");
     }
 
+    /// <summary>
+    /// After stdin EOF no stop or ponderhit can arrive, so go infinite and go ponder searches need to be stopped for the engine to exit.
+    /// 0 ms delay: the go command is most likely still pending when the end of input is processed. 200 ms delay: the search is running
+    /// </summary>
+    [TestCase("go infinite", 0, 1)]
+    [TestCase("go infinite", 0, 2)]
+    [TestCase("go infinite", 200, 1)]
+    [TestCase("go infinite", 200, 2)]
+    [TestCase(GoPonder, 0, 1)]
+    [TestCase(GoPonder, 0, 2)]
+    [TestCase(GoPonder, 200, 1)]
+    [TestCase(GoPonder, 200, 2)]
+    public async Task EndOfInputStopsUnboundedSearch(string goCommand, int delayMs, int threads)
+    {
+        await using var scenario = new Scenario(threads);
+
+        await scenario.Send("position startpos");
+        await scenario.Send(goCommand);
+        await Task.Delay(delayMs);
+
+        Assert.IsTrue(await scenario.EndOfInput(_timeout), $"'{goCommand}' wasn't stopped by the end of input");
+        Assert.AreEqual(1, (await scenario.BestMovesUntilCompletion()).Count);
+    }
+
+    /// <summary>
+    /// Searches that end on their own aren't cut short by the end of input, a go infinite queued after them is stopped once it starts
+    /// </summary>
+    [TestCase(1)]
+    [TestCase(2)]
+    public async Task EndOfInputLetsBoundedSearchesFinish(int threads)
+    {
+        const int depth = 8;
+        await using var scenario = new Scenario(threads);
+
+        await scenario.Send("position startpos");
+        await scenario.Send($"go depth {depth}");
+        await scenario.Send("go infinite");
+
+        Assert.IsTrue(await scenario.EndOfInput(_timeout), "Searches weren't over after the end of input");
+
+        var bestMoves = await scenario.BestMovesUntilCompletion();
+        Assert.AreEqual(2, bestMoves.Count);
+
+        // >=: with threads > 1 the final result can come from a helper thread, which searches without depth limit
+        Assert.GreaterOrEqual(bestMoves[0].Depth, depth, "'go depth' search was cut short by the end of input");
+    }
+
+    /// <summary>
+    /// After ponderhit a go ponder search is a regular one, which the end of input mustn't stop.
+    /// 100 ms delay: the end of input arrives while the search that follows the ponderhit is running (depth 18 takes longer than that)
+    /// </summary>
+    [TestCase(0, 1)]
+    [TestCase(0, 2)]
+    [TestCase(100, 1)]
+    [TestCase(100, 2)]
+    public async Task EndOfInputAfterPonderHitLetsSearchFinish(int delayMs, int threads)
+    {
+        const int depth = 18;
+        await using var scenario = new Scenario(threads);
+
+        await scenario.Send("position startpos");
+        await scenario.Send($"go ponder depth {depth}");
+        await scenario.Send(PonderHitCommand.Id);
+        await Task.Delay(delayMs);
+
+        Assert.IsTrue(await scenario.EndOfInput(_timeout), "Search wasn't over after the end of input");
+
+        var bestMoves = await scenario.BestMovesUntilCompletion();
+        Assert.AreEqual(1, bestMoves.Count);
+        Assert.GreaterOrEqual(bestMoves[0].Depth, depth, "Search after ponderhit was cut short by the end of input");
+    }
+
     private sealed class Scenario : IAsyncDisposable
     {
         private readonly bool _previousIsPonder = Configuration.EngineSettings.IsPonder;
@@ -186,6 +259,44 @@ public class PonderTest
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Stdin EOF, handled like the listener does: <see cref="UCIHandler.HandleEndOfInput"/> blocks until the searches are over
+        /// and completes the engine channel
+        /// </summary>
+        /// <returns>Whether it returned within <paramref name="timeout"/></returns>
+        public async Task<bool> EndOfInput(TimeSpan timeout)
+        {
+            var endOfInput = Task.Run(_handler.HandleEndOfInput);
+
+            return await Task.WhenAny(endOfInput, Task.Delay(timeout)) == endOfInput;
+        }
+
+        /// <summary>
+        /// Only after <see cref="EndOfInput(TimeSpan)"/> returned <see langword="true"/>: reads the engine output until the channel completion
+        /// </summary>
+        /// <returns>Each bestmove move, with the depth of the last search result (info line) sent before it</returns>
+        public async Task<List<(string Move, int Depth)>> BestMovesUntilCompletion()
+        {
+            var bestMoves = new List<(string Move, int Depth)>();
+            var lastDepth = 0;
+
+            await foreach (var item in _engineChannel.Reader.ReadAllAsync())
+            {
+                switch (item)
+                {
+                    case SearchResult searchResult:
+                        lastDepth = searchResult.Depth;
+                        break;
+                    case BestMoveCommand bestMoveCommand:
+                        bestMoves.Add((bestMoveCommand.ToString().Split(' ')[1], lastDepth));
+                        lastDepth = 0;
+                        break;
+                }
+            }
+
+            return bestMoves;
         }
 
         public async ValueTask DisposeAsync()

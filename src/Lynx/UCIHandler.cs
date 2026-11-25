@@ -348,6 +348,14 @@ public sealed class UCIHandler
         _engineToUci.Writer.Complete();
     }
 
+    public void HandleEndOfInput()
+    {
+        _searcher.WaitForSearchesAtEndOfInput();
+
+        _searcher.Quit();
+        _engineToUci.Writer.TryComplete();
+    }
+
     private void HandlePerft(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
