@@ -1,0 +1,230 @@
+name: Android-emulator-checks
+
+on:
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: 11.0.x
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - runtime-identifier: linux-bionic-arm64
+            machine: AArch64
+          - runtime-identifier: linux-bionic-x64
+            machine: X86-64
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Add Android NDK (preinstalled in the runner) to PATH
+      run: |
+        # GITHUB_PATH prepends, so NDK's clang is found before the runner's own clang
+        echo "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
+        "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
+
+    - name: Check that NDK's clang is the first one in PATH
+      run: |
+        command -v clang
+        [ "$(command -v clang)" = "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" ]
+
+    - name: Publish ${{ matrix.runtime-identifier }}
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
+
+    - name: Check executable
+      run: |
+        exe=artifacts/${{ matrix.runtime-identifier }}/Lynx.Cli
+        ls -la "$(dirname "$exe")"
+        readelf -hlW "$exe" | grep -E 'Machine:|interpreter|LOAD'
+        readelf -dW "$exe" | grep NEEDED
+        readelf -h "$exe" | grep -q '${{ matrix.machine }}'
+        readelf -lW "$exe" | grep -q 'Requesting program interpreter: /system/bin/linker64'
+        # 16 KB page size devices (Android 15+) need every LOAD segment aligned to 16 KB
+        if readelf -lW "$exe" | awk '$1 == "LOAD" && $NF != "0x4000"' | grep -q .; then
+          echo "::error::LOAD segments aren't 16 KB aligned"
+          exit 1
+        fi
+        # Only Android system libraries
+        if readelf -dW "$exe" | grep NEEDED | grep -v -E '\[lib(c|m|dl|log|z)\.so\]'; then
+          echo "::error::Unexpected shared library dependency"
+          exit 1
+        fi
+
+    - name: Upload ${{ matrix.runtime-identifier }} artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: Lynx-${{ matrix.runtime-identifier }}
+        path: |
+          artifacts/${{ matrix.runtime-identifier }}/
+          !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
+        if-no-files-found: error
+
+  reference-bench:
+    runs-on: ubuntu-latest
+
+    outputs:
+      nodes: ${{ steps.bench.outputs.nodes }}
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Build
+      run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj
+
+    - name: Bench (x64, JIT)
+      id: bench
+      working-directory: ./src/Lynx.Cli
+      run: |
+        output=$(timeout 600 dotnet run -c Release --no-build bench)
+        echo "$output"
+        echo "nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+  arm64:
+    needs: reference-bench
+    runs-on: ubuntu-26.04-arm
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install clang (NativeAOT linker driver)
+      run: command -v clang || (sudo apt-get update && sudo apt-get install -y clang)
+
+    - name: Publish linux-arm64 with NativeAOT
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-arm64 --self-contained /p:Optimized=true /p:PublishAot=true -o artifacts/linux-arm64-aot
+
+    - name: Bench (arm64, NativeAOT)
+      working-directory: ./artifacts/linux-arm64-aot
+      run: |
+        printf 'runtimeconfig\nquit\n' | timeout 30 ./Lynx.Cli
+        output=$(timeout 600 ./Lynx.Cli bench)
+        echo "$output"
+        nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)
+        if [ "$nodes" != "${{ needs.reference-bench.outputs.nodes }}" ]; then
+          echo "::error::arm64 bench: $nodes nodes, x64 JIT: ${{ needs.reference-bench.outputs.nodes }} nodes"
+          exit 1
+        fi
+
+    - name: Tests (arm64, JIT)
+      run: dotnet test -c Release
+
+  emulator:
+    needs: [build, reference-bench]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - api-level: 24                # Minimum supported by .NET 11 NativeAOT
+            target: google_apis
+          - api-level: 36                # Android 16, 16 KB memory pages
+            target: google_apis_ps16k
+      fail-fast: false
+
+    steps:
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - uses: actions/download-artifact@v8
+      with:
+        pattern: Lynx-linux-bionic-*
+        path: artifacts/
+
+    - name: Write test scripts
+      run: |
+        # Runs on the device: a UCI session that waits for each bestmove before sending the next command (Lynx doesn't exit on stdin EOF)
+        cat > "$RUNNER_TEMP/uci-session.sh" <<'EOF'
+        cd /data/local/tmp/lynx
+        mkfifo in
+        : > out
+        ./Lynx.Cli < in >> out 2>&1 &
+        pid=$!
+        exec 3>in
+        send() { echo "$1" >&3; }
+        wait_for() { # <pattern> <count> <timeout in seconds>
+          i=0
+          while [ "$(grep -c "$1" out)" -lt "$2" ]; do
+            i=$((i + 1))
+            if [ $i -gt $3 ]; then echo "Timeout waiting for '$1' x$2"; cat out; kill $pid; exit 1; fi
+            sleep 1
+          done
+        }
+        send uci; wait_for uciok 1 10
+        send isready; wait_for readyok 1 10
+        send runtimeconfig; send isready; wait_for readyok 2 10
+        send "position startpos"; send "go depth 12"; wait_for '^bestmove' 1 60
+        # Deep search, for stack usage
+        send "position fen 8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1"; send "go movetime 5000"; wait_for '^bestmove' 2 30
+        send "setoption name Threads value 4"; send "position startpos moves e2e4 e7e5"; send "go movetime 2000"; wait_for '^bestmove' 3 30
+        send "setoption name Threads value 1"; send "ucinewgame"; send "position startpos moves d2d4"; send "go wtime 10000 btime 10000 winc 100 binc 100"; wait_for '^bestmove' 4 30
+        send quit
+        exec 3>&-
+        wait $pid
+        rc=$?
+        cat out
+        echo "Exit code: $rc"
+        [ $rc -eq 0 ] && ! grep -q -i -E 'exception|unhandled' out
+        EOF
+
+        # Runs on the host, once the emulator is up
+        cat > "$RUNNER_TEMP/android-test.sh" <<'EOF'
+        set -euxo pipefail
+        expected=$1
+        adb shell getprop ro.build.version.release
+        adb shell getprop ro.product.cpu.abilist
+        adb shell getconf PAGESIZE || true
+        adb shell mkdir -p /data/local/tmp/lynx
+        adb push artifacts/Lynx-linux-bionic-x64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli
+        adb push artifacts/Lynx-linux-bionic-arm64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
+        adb push "$RUNNER_TEMP/uci-session.sh" /data/local/tmp/lynx/uci-session.sh
+        adb shell chmod 755 /data/local/tmp/lynx/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
+
+        output=$(timeout 900 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli bench" | tr -d '\r')
+        echo "$output"
+        nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)
+        if [ "$nodes" != "$expected" ]; then
+          echo "::error::Android emulator bench: $nodes nodes, x64 JIT: $expected nodes"
+          exit 1
+        fi
+
+        timeout 300 adb shell sh /data/local/tmp/lynx/uci-session.sh
+
+        # Informative only: some x86_64 images can run arm64 executables through binary translation
+        timeout 900 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli-arm64 bench" || echo "::warning::arm64 executable couldn't run in this x86_64 image"
+        EOF
+
+    - name: Run tests in Android API ${{ matrix.api-level }} emulator (${{ matrix.target }})
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ matrix.target }}
+        arch: x86_64
+        cores: 4
+        disable-animations: true
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+        script: bash "$RUNNER_TEMP/android-test.sh" ${{ needs.reference-bench.outputs.nodes }}

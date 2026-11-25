@@ -41,7 +41,7 @@ jobs:
 
     strategy:
       matrix:
-        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, osx-x64, osx-arm64]
+        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, osx-x64, osx-arm64, linux-bionic-arm64]
         include:
           - runtime-identifier: win-x64
             os: windows-latest
@@ -59,6 +59,8 @@ jobs:
             os: macOS-15-intel
           - runtime-identifier: osx-arm64
             os: macos-latest
+          - runtime-identifier: linux-bionic-arm64
+            os: ubuntu-latest
       fail-fast: false
 
     steps:
@@ -89,6 +91,13 @@ jobs:
         $regex = "(?<=<Version>).*(?=</Version>)"
         (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
 
+    - name: Add Android NDK (preinstalled in the runner) to PATH
+      if: startsWith(matrix.runtime-identifier, 'linux-bionic')
+      run: |
+        # GITHUB_PATH prepends, so NDK's clang is found before the runner's own clang
+        echo "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
+        "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
+
     - name: Publish ${{ matrix.runtime-identifier }} version
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:ReleaseBuild=true -o artifacts/${{ matrix.runtime-identifier }}
 
@@ -100,6 +109,7 @@ jobs:
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
         if-no-files-found: error
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
@@ -110,6 +120,7 @@ jobs:
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
         if-no-files-found: error
 
     - name: Deterministic build
