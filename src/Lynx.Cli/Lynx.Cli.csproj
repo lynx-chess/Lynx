@@ -43,6 +43,8 @@
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('linux-bionic-'))">
     <!-- Android 15+ devices may use 16 KB memory pages. NativeAOT only aligns shared libraries to 16 KB, and NDK < r28 defaults to 4 KB -->
     <LinkerArg Include="-Wl,-z,max-page-size=16384" />
+    <!-- Increase default thread stack size from ~1 MB to the regular glibc default, 8MB. A search at MaxDepth (128 plies) needs ~970 KB (~32 KB + ~7.3 KB per ply, measured on x64 and arm64) -->
+    <RuntimeHostConfigurationOption Include="System.Threading.DefaultStackSize" Value="8388608" />
   </ItemGroup>
 
   <ItemGroup>
