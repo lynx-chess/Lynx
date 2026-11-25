@@ -49,18 +49,20 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        runtime-identifier: [linux-x64, linux-arm64, win-x64, osx-arm64, linux-bionic-arm64, linux-bionic-x64]
         include:
-          - os: ubuntu-latest
-            runtime-identifier: linux-x64
-          - os: ubuntu-26.04-arm
-            runtime-identifier: linux-arm64
-          - os: windows-latest
-            runtime-identifier: win-x64
-          - os: macOS-latest
-            runtime-identifier: osx-arm64
-          - os: ubuntu-latest
-            runtime-identifier: linux-bionic-arm64
+          - runtime-identifier: linux-x64
+            os: ubuntu-latest
+          - runtime-identifier: linux-arm64
+            os: ubuntu-26.04-arm
+          - runtime-identifier: win-x64
+            os: windows-latest
+          - runtime-identifier: osx-arm64
+            os: macOS-latest
+          - runtime-identifier: linux-bionic-arm64
+            os: ubuntu-latest
+          - runtime-identifier: linux-bionic-x64
+            os: ubuntu-latest
       fail-fast: false
 
     steps:
@@ -127,11 +129,11 @@ jobs:
         if-no-files-found: error
 
     - name: Publish library
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.runtime-identifier == 'linux-x64'
       run: dotnet pack --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }} NuGet package
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.runtime-identifier == 'linux-x64'
       uses: actions/upload-artifact@v7
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}

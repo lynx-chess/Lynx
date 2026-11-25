@@ -2,6 +2,9 @@ name: Android-emulator-checks
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - android-support
 
 env:
   DOTNET_VERSION: 11.0.x
