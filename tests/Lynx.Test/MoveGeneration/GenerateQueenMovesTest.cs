@@ -12,11 +12,12 @@ public class GenerateQueenMovesTest
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
-    private static IEnumerable<Move> GenerateQueenCaptures(Position position)
+    private static unsafe IEnumerable<Move> GenerateQueenCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var count = MoveGenerator.GenerateAllCaptures(position, moves, Constants.MaxNumberOfPseudolegalMovesInAPosition);
 
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        return new Span<Move>(moves, count).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

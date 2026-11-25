@@ -12,11 +12,12 @@ public class GenerateRookMovesTest
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
-    private static IEnumerable<Move> GenerateRookCaptures(Position position)
+    private static unsafe IEnumerable<Move> GenerateRookCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var count = MoveGenerator.GenerateAllCaptures(position, moves, Constants.MaxNumberOfPseudolegalMovesInAPosition);
 
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        return new Span<Move>(moves, count).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
