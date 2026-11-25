@@ -442,7 +442,7 @@ public sealed class UCIHandler
                 $"Crc32 = {Crc32.IsSupported}",
                 $"Rdm = {Rdm.IsSupported}",
                 $"Dp = {Dp.IsSupported}",
-#pragma warning disable SYSLIB5003
+#pragma warning disable SYSLIB5003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 $"Sve = {Sve.IsSupported}",
 #pragma warning restore SYSLIB5003
             ];

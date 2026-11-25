@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path=".github/workflows/android.yml" />
     <File Path=".github/workflows/bench.yml" />
     <File Path=".github/workflows/benchmarks-simd.yml" />
     <File Path=".github/workflows/benchmarks.yml" />

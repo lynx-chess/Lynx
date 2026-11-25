@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - android-support
+      - main
+      - 'release/**'
+  schedule:
+    - cron:  '1 0 * * 1'    # Mondays at 00:01
 
 env:
   DOTNET_VERSION: 11.0.x
