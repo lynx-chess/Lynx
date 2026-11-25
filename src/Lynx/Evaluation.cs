@@ -28,7 +28,10 @@ public unsafe partial class Position
         Span<Bitboard> buffer = stackalloc Bitboard[EvaluationContext.RequiredBufferSize];
         var evaluationContext = new EvaluationContext(buffer);
 
-        return StaticEvaluation(movesWithoutCaptureOrPawnMove, kingPawnTable, ref evaluationContext);
+        fixed (PawnTableElement* kingPawnTablePtr = kingPawnTable)
+        {
+            return StaticEvaluation(movesWithoutCaptureOrPawnMove, kingPawnTablePtr, ref evaluationContext);
+        }
     }
 
     /// <summary>
@@ -36,7 +39,7 @@ public unsafe partial class Position
     /// That is, positive scores always favour playing <see cref="_side"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove, PawnTableElement[] pawnEvalTable, ref EvaluationContext evaluationContext)
+    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove, PawnTableElement* pawnEvalTable, ref EvaluationContext evaluationContext)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
