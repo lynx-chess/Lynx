@@ -34,8 +34,8 @@ internal sealed unsafe class PerftMovePickerWalker
         position.CalculateThreats(ref evaluationContext);
         var oppositeSideAttacks = evaluationContext.AttacksBySide[Utils.OppositeSide((int)position.Side)];
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        int* moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         // Stale moves from other nodes: they're valid here sometimes, so all stages (and their deduplication) get exercised
         _engine._killerMoves.Pointer[ply * 2] = _lastQuietMoves[ply];
@@ -47,11 +47,11 @@ internal sealed unsafe class PerftMovePickerWalker
             _engine._counterMoves.Pointer[(previousMove.Piece() * 64) + previousMove.TargetSquare()] = _lastQuietMoves[ply];
         }
 
-        var movePicker = new MovePicker(_engine, position, (ShortMove)_lastMoves[ply], oppositeSideAttacks, ply, moves, moveScores, isInCheck: position.IsInCheck(), capturesOnly: false);
+        var movePicker = new MovePicker(position, (ShortMove)_lastMoves[ply], oppositeSideAttacks, ply, moves, moveScores, Constants.MaxNumberOfPseudolegalMovesInAPosition, isInCheck: position.IsInCheck(), capturesOnly: false);
 
         long nodes = 0;
 
-        while (movePicker.TryGetNext(out var move, out _))
+        while (movePicker.TryGetNext(_engine, position, out var move, out _))
         {
             var gameState = position.MakeMove(move);
 

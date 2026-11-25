@@ -5,7 +5,7 @@ namespace Lynx.Test.MoveGeneration;
 public class MoveGeneratorRegressionTest : BaseTest
 {
     [Test]
-    public void AllMovesAreGenerated()
+    public unsafe void AllMovesAreGenerated()
     {
         var position = new Position("r3k2r/pP1pqpb1/bn2pnp1/2pPN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq c6 0 1");
 
@@ -19,9 +19,10 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.PromotedPiece() != default && m.CapturedPiece() == (int)Piece.None));
         Assert.True(moves.Exists(m => m.IsDoublePawnPush()));
 
-        Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moveBuffer = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var capturesCount = MoveGenerator.GenerateAllCaptures(position, moveBuffer, Constants.MaxNumberOfPseudolegalMovesInAPosition);
 
-        var captures = MoveGenerator.GenerateAllCaptures(position, moveSpan).ToArray().ToList();
+        var captures = new Span<Move>(moveBuffer, capturesCount).ToArray().ToList();
 
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));

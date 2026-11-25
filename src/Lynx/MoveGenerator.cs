@@ -22,11 +22,11 @@ public static unsafe class MoveGenerator
     [Obsolete("dev and test only")]
     internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
         return (capturesOnly
-            ? GenerateAllCaptures(position, moves)
-            : GenerateAllMoves(position, moves)).ToArray();
+            ? new Span<Move>(moves, GenerateAllCaptures(position, moves, Constants.MaxNumberOfPseudolegalMovesInAPosition))
+            : GenerateAllMoves(position, new Span<Move>(moves, Constants.MaxNumberOfPseudolegalMovesInAPosition))).ToArray();
     }
 
     /// <summary>
@@ -208,13 +208,15 @@ public static unsafe class MoveGenerator
 
     /// <summary>
     /// Generates all pseudo-legal quiet moves from <paramref name="position"/>, castling included.
-    /// Complements <see cref="GenerateAllCaptures(Position, Span{int}, Bitboard)"/>.
+    /// Complements <see cref="GenerateAllCaptures(Position, Move*, int, Bitboard)"/>.
     /// </summary>
+    /// <returns>Number of moves written to <paramref name="moves"/></returns>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static Span<Move> GenerateAllQuiets(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks)
+    public static int GenerateAllQuiets(Position position, Move* buffer, int bufferLength, Bitboard oppositeSideAttacks)
     {
         Debug.Assert(position.Side != Side.Both);
 
+        var movePool = MemoryMarshal.CreateSpan(ref *buffer, bufferLength);
         int localIndex = 0;
 
         var offset = Utils.PieceOffset((int)position.Side);
@@ -227,18 +229,20 @@ public static unsafe class MoveGenerator
         GenerateQuietPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
         GenerateQuietPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position);
 
-        return movePool[..localIndex];
+        return localIndex;
     }
 
     /// <summary>
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>.
-    /// Complements <see cref="GenerateAllQuiets(Position, Span{int}, ulong)"/>.
+    /// Complements <see cref="GenerateAllQuiets(Position, Move*, int, ulong)"/>.
     /// </summary>
+    /// <returns>Number of moves written to <paramref name="moves"/></returns>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, Bitboard oppositeSideAttacks = 0)
+    public static int GenerateAllCaptures(Position position, Move* buffer, int bufferLength, Bitboard oppositeSideAttacks = 0)
     {
         Debug.Assert(position.Side != Side.Both);
 
+        var movePool = MemoryMarshal.CreateSpan(ref *buffer, bufferLength);
         int localIndex = 0;
 
         var offset = Utils.PieceOffset((int)position.Side);
@@ -250,7 +254,7 @@ public static unsafe class MoveGenerator
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
 
-        return movePool[..localIndex];
+        return localIndex;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

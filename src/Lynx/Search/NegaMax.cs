@@ -373,12 +373,12 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        int* moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: false);
+        var movePicker = new MovePicker(position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, Constants.MaxNumberOfPseudolegalMovesInAPosition, isInCheck: isInCheck, capturesOnly: false);
 
-        while (movePicker.TryGetNext(out var move, out var moveScore))
+        while (movePicker.TryGetNext(this, position, out var move, out var moveScore))
         {
             var isBestMove = (ShortMove)move == ttBestMove;
             if (isVerifyingSE && isBestMove)
@@ -948,10 +948,10 @@ public sealed partial class Engine
             ? Constants.MaxNumberOfPseudolegalMovesInAPosition
             : Constants.MaxNumberOfPseudolegalNoisyMovesInAPosition;
 
-        Span<Move> moves = stackalloc Move[poolSize];
-        Span<int> moveScores = stackalloc int[poolSize];
+        Move* moves = stackalloc Move[poolSize];
+        int* moveScores = stackalloc int[poolSize];
 
-        var movePicker = new MovePicker(this, position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: !isInCheck);
+        var movePicker = new MovePicker(position, ttBestMove, oppositeSideAttacks, ply, moves, moveScores, poolSize, isInCheck: isInCheck, capturesOnly: !isInCheck);
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
@@ -963,7 +963,7 @@ public sealed partial class Engine
         ref var visitedMovesRef = ref MemoryMarshal.GetReference(visitedMoves);
         int visitedMovesCounter = 0;
 
-        while (movePicker.TryGetNext(out var move, out var moveScore))
+        while (movePicker.TryGetNext(this, position, out var move, out var moveScore))
         {
             // 🔍 QSearch move count pruning: when not in check, only the first moves are searched
             // This helps dealing with some search explosions
