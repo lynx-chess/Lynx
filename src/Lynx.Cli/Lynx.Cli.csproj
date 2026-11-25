@@ -37,7 +37,6 @@
     <OptimizationPreference>Speed</OptimizationPreference>
     <PublishAotUsingRuntimePack>true</PublishAotUsingRuntimePack>
     <DisableUnsupportedError>true</DisableUnsupportedError>
-    <!-- TODO <IlcInstructionSet>native</IlcInstructionSet> -->
   </PropertyGroup>
 
   <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('linux-bionic-'))">

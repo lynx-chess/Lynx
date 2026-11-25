@@ -18,10 +18,19 @@ jobs:
     strategy:
       matrix:
         include:
-          - runtime-identifier: linux-bionic-arm64
-            machine: AArch64
           - runtime-identifier: linux-bionic-x64
             machine: X86-64
+          - runtime-identifier: linux-bionic-arm64
+            machine: AArch64
+            artifact-name: linux-bionic-arm64-v8.0
+          - runtime-identifier: linux-bionic-arm64
+            machine: AArch64
+            instruction-set: armv8.2-a%2Cdotprod
+            artifact-name: linux-bionic-arm64-v8.2-dotprod
+          - runtime-identifier: linux-bionic-arm64
+            machine: AArch64
+            instruction-set: armv8.9-a
+            artifact-name: linux-bionic-arm64-v8.9
       fail-fast: false
 
     steps:
@@ -43,12 +52,12 @@ jobs:
         command -v clang
         [ "$(command -v clang)" = "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" ]
 
-    - name: Publish ${{ matrix.runtime-identifier }}
-      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
+    - name: Publish ${{ matrix.artifact-name || matrix.runtime-identifier }}
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true ${{ matrix.instruction-set && format('/p:IlcInstructionSet={0}', matrix.instruction-set) || '' }} -o artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}
 
     - name: Check executable
       run: |
-        exe=artifacts/${{ matrix.runtime-identifier }}/Lynx.Cli
+        exe=artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/Lynx.Cli
         ls -la "$(dirname "$exe")"
         readelf -hlW "$exe" | grep -E 'Machine:|interpreter|LOAD'
         readelf -dW "$exe" | grep NEEDED
@@ -65,12 +74,12 @@ jobs:
           exit 1
         fi
 
-    - name: Upload ${{ matrix.runtime-identifier }} artifact
+    - name: Upload ${{ matrix.artifact-name || matrix.runtime-identifier }} artifact
       uses: actions/upload-artifact@v7
       with:
-        name: Lynx-${{ matrix.runtime-identifier }}
+        name: Lynx-${{ matrix.artifact-name || matrix.runtime-identifier }}
         path: |
-          artifacts/${{ matrix.runtime-identifier }}/
+          artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
           !artifacts/**/*.dbg
         if-no-files-found: error
@@ -154,6 +163,46 @@ jobs:
           if [ "$(deep $mid)" = "$reference" ]; then hi=$mid; else lo=$mid; fi
         done
         echo "seldepth $reference needs ~$hi KB of thread stack, ~$(( hi * 1024 / reference )) bytes per ply"
+
+    - name: Instruction set variants (arm64, NativeAOT vs JIT)
+      run: |
+        # Prototype: the Android ARM64 variants (same ILC ARM64 code generation as linux-bionic-arm64) and the JIT on this runner's CPU.
+        # Each one must give the reference bench, unless the CPU lacks its instruction sets (NativeAOT then refuses to start). NPS is informative.
+        # v8.9 needs FEAT_CSSC ('cssc' in /proc/cpuinfo Features): without it, it's skipped. The JIT uses CSSC by itself where the CPU has it
+        grep -m1 '^Features' /proc/cpuinfo || true
+        lscpu | grep -E 'Vendor ID|Model name' || true
+        dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-arm64 --self-contained /p:Optimized=true -o variants/jit
+        for v in v8.2-dotprod:armv8.2-a%2Cdotprod v8.9:armv8.9-a; do
+          dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-arm64 --self-contained /p:Optimized=true /p:PublishAot=true "/p:IlcInstructionSet=${v#*:}" -o "variants/${v%%:*}"
+        done
+        cp -r artifacts/linux-arm64-aot variants/v8.0
+        expected=${{ needs.reference-bench.outputs.nodes }}
+        runnable=""
+        for n in jit v8.0 v8.2-dotprod v8.9; do
+          out=$(printf 'runtimeconfig\nquit\n' | timeout 30 "variants/$n/Lynx.Cli" 2>&1) || true
+          if echo "$out" | grep -q 'missing one or more'; then
+            echo "::warning::$n doesn't run on this CPU: $(echo "$out" | grep -m1 'missing')"
+            continue
+          fi
+          echo "$n: $(echo "$out" | grep -E -- '- (JIT|AdvSimd|Crc32|Rdm|Dp|Sve) =' | tr -d '\t' | sed 's/^- //' | tr '\n' ' ')"
+          runnable="$runnable $n"
+        done
+        # Interleaved rounds, so that runner noise affects all variants alike
+        : > nps.txt
+        for round in 1 2 3 4 5; do
+          for n in $runnable; do
+            line=$(timeout 300 "variants/$n/Lynx.Cli" bench | grep -E '^[0-9]+ nodes')
+            if [ "$(echo "$line" | cut -d' ' -f1)" != "$expected" ]; then
+              echo "::error::$n bench: $line, x64 JIT: $expected nodes"
+              exit 1
+            fi
+            echo "$n $(echo "$line" | cut -d' ' -f3)" >> nps.txt
+          done
+        done
+        echo "Median NPS of 5 rounds, and relative to v8.0 (NativeAOT default):"
+        for n in $runnable; do echo "$n $(grep "^$n " nps.txt | cut -d' ' -f2 | sort -n | sed -n 3p)"; done > medians.txt
+        base=$(grep '^v8.0 ' medians.txt | cut -d' ' -f2)
+        awk -v base="$base" '{ printf "  %-12s %9d nps  %+6.1f%%\n", $1, $2, base ? 100 * ($2 / base - 1) : 0 }' medians.txt
 
     - name: Tests (arm64, JIT)
       run: dotnet test -c Release
@@ -308,8 +357,10 @@ jobs:
         adb shell getconf PAGESIZE || true
         adb shell mkdir -p /data/local/tmp/lynx
         adb push artifacts/Lynx-linux-bionic-x64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli
-        adb push artifacts/Lynx-linux-bionic-arm64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
-        adb shell chmod 755 /data/local/tmp/lynx/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
+        adb push artifacts/Lynx-linux-bionic-arm64-v8.0/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
+        adb push artifacts/Lynx-linux-bionic-arm64-v8.2-dotprod/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64-v8.2-dotprod
+        adb push artifacts/Lynx-linux-bionic-arm64-v8.9/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64-v8.9
+        adb shell chmod 755 /data/local/tmp/lynx/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64 /data/local/tmp/lynx/Lynx.Cli-arm64-v8.2-dotprod /data/local/tmp/lynx/Lynx.Cli-arm64-v8.9
 
         bench() { # <executable>
           output=$(timeout 1800 adb shell "cd /data/local/tmp/lynx && ./$1 bench" | tr -d '\r')
@@ -332,6 +383,12 @@ jobs:
         if [[ ",$abis," == *",arm64-v8a,"* ]]; then
           bench Lynx.Cli-arm64
           session Lynx.Cli-arm64   # Informative stack probe only: under translation, the translator allocates the guest stacks
+          # Informative: whether the translator supports the v8.2-dotprod and v8.9 variants. If it doesn't, NativeAOT refuses to start
+          # ('The current CPU is missing one or more of the required instruction sets'), as it would on a phone with an older CPU
+          for v in v8.2-dotprod v8.9; do
+            out=$(printf 'runtimeconfig\nquit\n' | timeout 120 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli-arm64-$v" 2>&1 | tr -d '\r') || true
+            echo "arm64-$v: $(echo "$out" | grep -E 'missing|- (RID|AdvSimd|Crc32|Rdm|Dp|Sve) =' | tr -d '\t' | tr '\n' ' ')"
+          done
         else
           echo "::warning::No ARM translation in this image ($abis): arm64 build not tested"
         fi

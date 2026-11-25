@@ -431,6 +431,12 @@ public sealed class UCIHandler
                 $"AVX2 = {Avx2.IsSupported}",
                 $"Avx512BW = {Avx512BW.IsSupported}",
                 $"AdvSimd = {AdvSimd.IsSupported}",
+                $"Crc32 = {Crc32.IsSupported}",
+                $"Rdm = {Rdm.IsSupported}",
+                $"Dp = {Dp.IsSupported}",
+#pragma warning disable SYSLIB5003
+                $"Sve = {Sve.IsSupported}",
+#pragma warning restore SYSLIB5003
             ];
 
             foreach (var instructionSet in intrinsics)
