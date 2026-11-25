@@ -155,20 +155,21 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ContinuationHistoryMoveIndex(int piece, int targetSquare)
     {
-        const int pieceOffset = 64 * 12 * 64;
-        const int targetSquareOffset = 12 * 64;
+        const int pieceOffset = 64;
 
         return (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset);
+            + targetSquare;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ContinuationHistoryPreviousMoveIndex(Move previousMove)
     {
-        const int previousMovePieceOffset = 64;
+        const int previousMovePieceOffset = 64 * 12 * 64;
+        const int previousMoveTargetSquareOffset = 12 * 64;
+        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryMoveIndex
 
         return (previousMove.Piece() * previousMovePieceOffset)
-            + previousMove.TargetSquare();
+            + (previousMove.TargetSquare() * previousMoveTargetSquareOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
