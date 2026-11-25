@@ -1,4 +1,4 @@
-name: Android-emulator-checks
+name: Android
 
 on:
   workflow_dispatch:
@@ -61,8 +61,8 @@ jobs:
         ls -la "$(dirname "$exe")"
         readelf -hlW "$exe" | grep -E 'Machine:|interpreter|LOAD'
         readelf -dW "$exe" | grep NEEDED
-        readelf -h "$exe" | grep -q '${{ matrix.machine }}'
-        readelf -lW "$exe" | grep -q 'Requesting program interpreter: /system/bin/linker64'
+        readelf -h "$exe" | grep -q 'Machine: .*${{ matrix.machine }}' || { echo "::error::ELF machine isn't ${{ matrix.machine }}"; exit 1; }
+        readelf -lW "$exe" | grep -q 'Requesting program interpreter: /system/bin/linker64' || { echo "::error::Program interpreter isn't /system/bin/linker64"; exit 1; }
         # 16 KB page size devices (Android 15+) need every LOAD segment aligned to 16 KB
         if readelf -lW "$exe" | awk '$1 == "LOAD" && $NF != "0x4000"' | grep -q .; then
           echo "::error::LOAD segments aren't 16 KB aligned"

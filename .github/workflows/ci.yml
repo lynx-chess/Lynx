@@ -49,7 +49,7 @@ jobs:
 
     strategy:
       matrix:
-        runtime-identifier: [linux-x64, linux-arm64, win-x64, osx-arm64, linux-bionic-arm64, linux-bionic-x64]
+        runtime-identifier: [linux-x64, linux-arm64, win-x64, osx-arm64]
         include:
           - runtime-identifier: linux-x64
             os: ubuntu-latest
@@ -59,10 +59,6 @@ jobs:
             os: windows-latest
           - runtime-identifier: osx-arm64
             os: macOS-latest
-          - runtime-identifier: linux-bionic-arm64
-            os: ubuntu-latest
-          - runtime-identifier: linux-bionic-x64
-            os: ubuntu-latest
       fail-fast: false
 
     steps:
@@ -95,33 +91,8 @@ jobs:
     - name: Build
       run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true
 
-    - name: '[Android] Add Android NDK (preinstalled in the runner) to PATH'
-      if: startsWith(matrix.runtime-identifier, 'linux-bionic')
-      run: |
-        # GITHUB_PATH prepends, so NDK's clang is found before the runner's own clang
-        echo "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
-        "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
-
     - name: Publish CLI
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
-
-    - name: '[Android] Check executable'
-      if: startsWith(matrix.runtime-identifier, 'linux-bionic')
-      run: |
-        exe=artifacts/${{ matrix.runtime-identifier }}/Lynx.Cli
-        readelf -hlW "$exe" | grep -E 'Machine:|interpreter|LOAD'
-        case "${{ matrix.runtime-identifier }}" in
-          *-arm64) machine=AArch64 ;;
-          *-x64) machine=X86-64 ;;
-          *) echo "::error::No expected ELF machine for ${{ matrix.runtime-identifier }}"; exit 1 ;;
-        esac
-        readelf -h "$exe" | grep -q "Machine: .*$machine" || { echo "::error::ELF machine isn't $machine"; exit 1; }
-        readelf -lW "$exe" | grep -q 'Requesting program interpreter: /system/bin/linker64'
-        # 16 KB page size devices (Android 15+) need every LOAD segment aligned to 16 KB
-        if readelf -lW "$exe" | awk '$1 == "LOAD" && $NF != "0x4000"' | grep -q .; then
-          echo "::error::LOAD segments aren't 16 KB aligned"
-          exit 1
-        fi
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG_URL }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
       uses: actions/upload-artifact@v7

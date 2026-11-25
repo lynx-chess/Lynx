@@ -620,7 +620,7 @@ public sealed class UCIHandler
     [UnconditionalSuppressMessage(
         "AOT",
         "IL3050",       // Members annotated with 'RequiresDynamicCodeAttribute' require dynamic access otherwise can break functionality when AOT compiling
-        Justification = "ViriformatFilter only has scalar properties, which the reflection binder handles without dynamic code (verified with a NativeAOT build). Development feature anyway")]
+        Justification = "ViriformatFilter only has scalar properties, which the reflection binder handles without dynamic code. Development feature anyway")]
     private void HandleVFtoEPD(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -642,9 +642,9 @@ public sealed class UCIHandler
 
             filter = new ViriformatFilter();
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+#pragma warning disable IL2026, IL3050 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code/AOT compiling
             config.Bind(filter);
-#pragma warning restore IL2026
+#pragma warning restore IL2026, IL3050
         }
 
         ViriformatLoader.LoadFile(path, filter);
