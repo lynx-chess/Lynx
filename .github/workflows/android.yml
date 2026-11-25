@@ -130,6 +130,31 @@ jobs:
           exit 1
         fi
 
+    - name: Stack needed by a deep search (arm64, NativeAOT)
+      working-directory: ./artifacts/linux-arm64-aot
+      run: |
+        # Informative: the smallest thread stack that the locked position search of android.yml's UCI session needs (76 plies deep).
+        # ulimit -s sets glibc's default thread stack size. Lynx searches up to 128 plies deep, and Android's default thread stack is ~1 MB
+        locked='k7/8/8/p1p1p1p1/P1P1P1P1/8/8/K7 w - - 0 1'
+        deep() { # <stack KB>: prints the deepest seldepth of a depth 128 search, fails if the engine crashes
+          ( ulimit -c 0; ulimit -s "$1"
+            d=$(mktemp -d); mkfifo "$d/in"; : > "$d/out"
+            ./Lynx.Cli < "$d/in" >> "$d/out" 2>&1 &
+            pid=$!
+            exec 3> "$d/in"
+            echo "position fen $locked" >&3; echo "go depth 128" >&3
+            for i in $(seq 600); do grep -q '^bestmove' "$d/out" && break; kill -0 $pid 2>/dev/null || exit 1; sleep 0.1; done
+            echo quit >&3; wait $pid || exit 1
+            grep -oE 'seldepth [0-9]+' "$d/out" | cut -d' ' -f2 | sort -n | tail -1 )
+        }
+        reference=$(deep 8192)
+        lo=64; hi=2048
+        while [ $((hi - lo)) -gt 8 ]; do
+          mid=$(( (lo + hi) / 2 ))
+          if [ "$(deep $mid)" = "$reference" ]; then hi=$mid; else lo=$mid; fi
+        done
+        echo "seldepth $reference needs ~$hi KB of thread stack, ~$(( hi * 1024 / reference )) bytes per ply"
+
     - name: Tests (arm64, JIT)
       run: dotnet test -c Release
 
@@ -161,7 +186,7 @@ jobs:
     - name: Write test scripts
       run: |
         # A UCI session that waits for each bestmove before sending the next command (Lynx doesn't exit on stdin EOF).
-        # Arguments: the engine command, i.e. adb shell '<command>'.
+        # Arguments: the engine command, i.e. adb shell '<command>'. PROBE (optional): a command run while the engine has 8 search threads.
         # It runs on the host, and adb forwards the engine's stdin, since a FIFO can't be created on the device:
         # Android 7 (API 24) has no mkfifo, and Android 16 (API 36) doesn't let adb's shell create FIFOs in /data/local/tmp (mkfifo: Permission denied)
         cat > "$RUNNER_TEMP/uci-session.sh" <<'EOF'
@@ -172,30 +197,86 @@ jobs:
         "$@" < "$dir/in" >> "$dir/out" 2>&1 &
         pid=$!
         exec 3> "$dir/in"
+        gos=0   # go commands sent: each one must get exactly one bestmove
         send() { echo "$1" >&3; }
+        fail() { echo "::error::$1"; kill $pid 2>/dev/null; cat "$dir/out"; exit 1; }
+        bestmoves() { grep -c '^bestmove' "$dir/out"; }
+        lines() { wc -l < "$dir/out"; }
         wait_for() { # <pattern> <count> <timeout in seconds>
-          i=0
+          local i=0
           while [ "$(grep -c "$1" "$dir/out")" -lt "$2" ]; do
-            i=$((i + 1))
-            if [ $i -gt $3 ]; then echo "Timeout waiting for '$1' x$2"; cat "$dir/out"; kill $pid; exit 1; fi
-            sleep 1
+            kill -0 $pid 2>/dev/null || fail "Engine exited while waiting for '$1' x$2"
+            i=$((i + 1)); [ $i -le $(( $3 * 10 )) ] || fail "Timeout waiting for '$1' x$2"
+            sleep 0.1
           done
         }
+        go() { send "$1"; gos=$((gos + 1)); wait_for '^bestmove' $gos $2; }   # <go command> <timeout in seconds>
+        go_async() { send "$1"; gos=$((gos + 1)); }                          # go infinite/ponder: bestmove after stop/ponderhit
+        max_seldepth_since() { tail -n +$(( $1 + 1 )) "$dir/out" | grep -oE 'seldepth [0-9]+' | cut -d' ' -f2 | sort -n | tail -1; }
+
         send uci; wait_for uciok 1 10
         send isready; wait_for readyok 1 10
         send runtimeconfig; send isready; wait_for readyok 2 10
-        send "position startpos"; send "go depth 12"; wait_for '^bestmove' 1 60
-        # Deep search, for stack usage
-        send "position fen 8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1"; send "go movetime 5000"; wait_for '^bestmove' 2 30
-        send "setoption name Threads value 4"; send "position startpos moves e2e4 e7e5"; send "go movetime 2000"; wait_for '^bestmove' 3 30
-        send "setoption name Threads value 1"; send "ucinewgame"; send "position startpos moves d2d4"; send "go wtime 10000 btime 10000 winc 100 binc 100"; wait_for '^bestmove' 4 30
+        send "position startpos"; go "go depth 12" 60
+
+        # Deep recursion: in a locked position (only the kings can move), iterative deepening gets to MaxDepth (128) in seconds
+        # and single-threaded search lines go 76 plies deep: ~600 KB of stack (~7.3 KB per ply), Android's default thread stack being ~1 MB
+        locked='k7/8/8/p1p1p1p1/P1P1P1P1/8/8/K7 w - - 0 1'
+        send ucinewgame; start=$(lines); send "position fen $locked"; go "go depth 128" 120
+        seldepth=$(max_seldepth_since $start); echo "Locked position, 1 thread: seldepth $seldepth"
+        [ "${seldepth:-0}" -ge 70 ] || fail "Locked position search only reached seldepth ${seldepth:-0} (76 expected)"
+        send "position fen 8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1"; go "go movetime 5000" 30   # Fine #70, a deep endgame search with a plan
+
+        # Multithreading: helper threads recursing deep too, then 8 threads (twice the emulator's cores) in a complex middlegame (Kiwipete)
+        send "setoption name Threads value 4"; send ucinewgame
+        start=$(lines); send "position fen $locked"; go "go depth 128" 120
+        echo "Locked position, 4 threads: seldepth $(max_seldepth_since $start)"
+        kiwipete='r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1'
+        send "setoption name Threads value 8"; send "setoption name Hash value 64"; send ucinewgame
+        send "position fen $kiwipete"; go "go movetime 3000" 30
+        [ -z "${PROBE:-}" ] || eval "$PROBE" || true
+        # stop after 2 s of go infinite, and stop right after go, which can be processed before the search starts
+        send "position fen $kiwipete moves e2a6"; go_async "go infinite"; sleep 2; send stop; wait_for '^bestmove' $gos 10
+        go_async "go infinite"; send stop; wait_for '^bestmove' $gos 10
+        # Pondering: no bestmove until ponderhit or stop
+        send "setoption name Ponder value true"
+        send "position startpos moves e2e4 e7e5 g1f3"; go_async "go ponder wtime 10000 btime 10000 winc 100 binc 100"; sleep 1
+        [ "$(bestmoves)" -eq $((gos - 1)) ] || fail "bestmove sent before ponderhit"
+        send ponderhit; wait_for '^bestmove' $gos 30
+        send "position startpos moves e2e4 e7e5 g1f3 b8c6"; go_async "go ponder wtime 10000 btime 10000 winc 100 binc 100"; sleep 1
+        [ "$(bestmoves)" -eq $((gos - 1)) ] || fail "bestmove sent before stop"
+        send stop; wait_for '^bestmove' $gos 10
+        send "setoption name Ponder value false"
+
+        # Self-play game with a clock, changing the number of threads every 10 plies, as a GUI would
+        send ucinewgame; moves=""
+        for ply in $(seq 0 29); do
+          case $ply in 0) send "setoption name Threads value 2";; 10) send "setoption name Threads value 4";; 20) send "setoption name Threads value 1";; esac
+          send "position startpos${moves:+ moves$moves}"; go "go wtime 4000 btime 4000 winc 50 binc 50" 30
+          move=$(grep '^bestmove' "$dir/out" | tail -1 | cut -d' ' -f2)
+          case "$move" in [a-h][1-8][a-h][1-8]*) moves="$moves $move";; *) echo "Game over: bestmove $move"; break;; esac
+        done
+        echo "Self-play:$moves"
+
         send quit
         exec 3>&-
         wait $pid
         rc=$?
         cat "$dir/out"
-        echo "Exit code: $rc"
-        [ $rc -eq 0 ] && ! grep -q -i -E 'exception|unhandled' "$dir/out"
+        echo "Exit code: $rc, go commands: $gos, bestmoves: $(bestmoves)"
+        [ $rc -eq 0 ] || { echo "::error::Exit code $rc"; exit 1; }
+        [ "$(bestmoves)" -eq $gos ] || { echo "::error::Expected exactly one bestmove per go command"; exit 1; }
+        ! grep -q -i -E 'exception|unhandled' "$dir/out" || { echo "::error::Exception in the engine output"; exit 1; }
+        EOF
+
+        # Informative: stack sizes of the engine's threads, from /proc/<pid>/maps
+        cat > "$RUNNER_TEMP/stack-probe.sh" <<'EOF'
+        pid=$(adb shell pidof "$1" | tr -d '\r' | grep -oE '[0-9]+' | head -1)
+        [ -n "$pid" ] || { echo "Stack probe: no $1 process found"; exit 0; }
+        echo "Stack mappings of $1 (pid $pid), size and count:"
+        adb shell "cat /proc/$pid/maps" | tr -d '\r' | grep -i stack | while read -r range perms offset device inode name; do
+          echo "$(( (0x${range#*-} - 0x${range%-*}) / 1024 )) KB ${name}"
+        done | sed -E 's/[0-9]+\]$/<tid>]/' | sort | uniq -c
         EOF
 
         # Runs on the host, once the emulator is up
@@ -203,25 +284,36 @@ jobs:
         set -euxo pipefail
         expected=$1
         adb shell getprop ro.build.version.release
-        adb shell getprop ro.product.cpu.abilist
+        abis=$(adb shell getprop ro.product.cpu.abilist | tr -d '\r')
         adb shell getconf PAGESIZE || true
         adb shell mkdir -p /data/local/tmp/lynx
         adb push artifacts/Lynx-linux-bionic-x64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli
         adb push artifacts/Lynx-linux-bionic-arm64/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
         adb shell chmod 755 /data/local/tmp/lynx/Lynx.Cli /data/local/tmp/lynx/Lynx.Cli-arm64
 
-        output=$(timeout 900 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli bench" | tr -d '\r')
-        echo "$output"
-        nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)
-        if [ "$nodes" != "$expected" ]; then
-          echo "::error::Android emulator bench: $nodes nodes, x64 JIT: $expected nodes"
-          exit 1
+        bench() { # <executable>
+          output=$(timeout 1800 adb shell "cd /data/local/tmp/lynx && ./$1 bench" | tr -d '\r')
+          echo "$output"
+          nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)
+          if [ "$nodes" != "$expected" ]; then
+            echo "::error::Android emulator bench ($1): $nodes nodes, x64 JIT: $expected nodes"
+            exit 1
+          fi
+        }
+        session() { # <executable>
+          PROBE="bash $RUNNER_TEMP/stack-probe.sh $1" timeout 1200 bash "$RUNNER_TEMP/uci-session.sh" adb shell "cd /data/local/tmp/lynx && ./$1"
+        }
+
+        bench Lynx.Cli
+        session Lynx.Cli
+
+        # The arm64 build, the one for phones, only runs in images with ARM translation (API 36's lists arm64-v8a, API 24's doesn't)
+        if [[ ",$abis," == *",arm64-v8a,"* ]]; then
+          bench Lynx.Cli-arm64
+          session Lynx.Cli-arm64
+        else
+          echo "::warning::No ARM translation in this image ($abis): arm64 build not tested"
         fi
-
-        timeout 300 bash "$RUNNER_TEMP/uci-session.sh" adb shell 'cd /data/local/tmp/lynx && ./Lynx.Cli'
-
-        # Informative only: some x86_64 images can run arm64 executables through binary translation
-        timeout 900 adb shell "cd /data/local/tmp/lynx && ./Lynx.Cli-arm64 bench" || echo "::warning::arm64 executable couldn't run in this x86_64 image"
         EOF
 
     - name: Run tests in Android API ${{ matrix.api-level }} emulator (${{ matrix.target }})
