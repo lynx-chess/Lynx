@@ -233,6 +233,8 @@ public unsafe class MovePickerTest : BaseTest
     {
         Scalar,
         Vector128,
+        Vector256,
+        Vector512,
 
         /// <summary>
         /// <see cref="MovePicker.IndexOfFirstMax"/>, which picks one of the others depending on the hardware
@@ -266,7 +268,9 @@ public unsafe class MovePickerTest : BaseTest
         {
             IndexOfFirstMaxImplementation.Scalar => 0,
             IndexOfFirstMaxImplementation.Vector128 => Vector128<int>.Count - 1,
-            IndexOfFirstMaxImplementation.HardwareDependent => Vector128<int>.Count - 1,   // The most any implementation needs
+            IndexOfFirstMaxImplementation.Vector256 => Vector256<int>.Count - 1,
+            IndexOfFirstMaxImplementation.Vector512 => Vector512<int>.Count - 1,
+            IndexOfFirstMaxImplementation.HardwareDependent => Vector512<int>.Count - 1,   // The most any implementation needs
             _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
         };
 
@@ -305,6 +309,8 @@ public unsafe class MovePickerTest : BaseTest
                     {
                         IndexOfFirstMaxImplementation.Scalar => MovePicker.IndexOfFirstMaxScalar(scores, start, count),
                         IndexOfFirstMaxImplementation.Vector128 => MovePicker.IndexOfFirstMaxVector128(scores, start, count),
+                        IndexOfFirstMaxImplementation.Vector256 => MovePicker.IndexOfFirstMaxVector256(scores, start, count),
+                        IndexOfFirstMaxImplementation.Vector512 => MovePicker.IndexOfFirstMaxVector512(scores, start, count),
                         IndexOfFirstMaxImplementation.HardwareDependent => MovePicker.IndexOfFirstMax(scores, start, count),
                         _ => throw new ArgumentOutOfRangeException(nameof(implementation), implementation, null)
                     };
