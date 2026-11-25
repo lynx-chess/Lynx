@@ -125,7 +125,7 @@ internal unsafe ref struct MovePicker
                     {
                         _stage = Stage.GoodNoisyMovesStage;
 
-                        _count = MoveGenerator.GenerateAllCaptures(position, _moves, _bufferLength, _oppositeSideAttacks);
+                        _count = MoveGenerator.GenerateAllCaptures(position, _moves, _bufferLength, _oppositeSideAttacks).Length;
 
                         if (_isInCheck)
                         {
