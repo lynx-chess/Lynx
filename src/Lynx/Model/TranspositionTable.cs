@@ -180,6 +180,12 @@ public unsafe readonly struct TranspositionTable
 
         TranspositionTableElement* entry = SelectEntry(bucket, key, age);
 
+        // Never replace full TT entries with static-eval-only ones. Specially relevant in root searches
+        if (entry->Key == key && entry->Type != NodeType.Unknown && entry->Age == age)
+        {
+            return;
+        }
+
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
         entry->Update(key, EvaluationConstants.NoScore, staticEval, depth: 0, NodeType.Unknown, wasPv ? 1 : 0, move: null, age);
     }
