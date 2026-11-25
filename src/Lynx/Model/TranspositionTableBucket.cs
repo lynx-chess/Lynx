@@ -1,3 +1,4 @@
+using Singulink.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
@@ -8,6 +9,7 @@ namespace Lynx.Model;
 /// A TranspositionTableBucket* can be cast to a TranspositionTableElement*, which can be indexed from 0 to
 /// <see cref="Constants.TranspositionTableEntriesPerBucket"/> - 1 to access each entry.
 /// </summary>
+[NonCopyable]
 [StructLayout(LayoutKind.Sequential, Size = Constants.TranspositionTableBucketSize)]
 public struct TranspositionTableBucket
 {

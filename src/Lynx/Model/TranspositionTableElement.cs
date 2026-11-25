@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Singulink.CodeAnalysis;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -26,6 +27,7 @@ public enum NodeType : byte
 /// <summary>
 /// 10 bytes
 /// </summary>
+[NonCopyable]
 [StructLayout(LayoutKind.Sequential)]
 public struct TranspositionTableElement
 {

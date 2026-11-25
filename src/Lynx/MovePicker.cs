@@ -1,4 +1,5 @@
 using Lynx.Model;
+using Singulink.CodeAnalysis;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -31,6 +32,7 @@ internal enum Stage
 /// This struct can't hold managed references or byrefs (<see cref="Span{T}"/>) to prevent JIT from zeroing the whole struct
 /// in <see cref="Engine.NegaMax"/> and <see cref="Engine.QuiescenceSearch"/> prologue on every call.
 /// </summary>
+[NonCopyable]
 internal unsafe ref struct MovePicker
 {
     private readonly Bitboard _oppositeSideAttacks;
