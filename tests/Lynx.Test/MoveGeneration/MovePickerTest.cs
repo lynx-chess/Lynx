@@ -78,13 +78,13 @@ public unsafe class MovePickerTest : BaseTest
         var captures = MoveGenerator.GenerateAllCaptures(position, movePool, oppositeSideAttacks).ToArray();
         var allMoves = GenerateAllMoves(position, oppositeSideAttacks);
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        int* moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, isInCheck: isInCheck, capturesOnly: !isInCheck);
+        var movePicker = new MovePicker(position, ttMove: 0, oppositeSideAttacks, ply: 0, moves, moveScores, Constants.MaxNumberOfPseudolegalMovesInAPosition, isInCheck: isInCheck, capturesOnly: !isInCheck);
 
         var returned = new List<Move>();
-        while (movePicker.TryGetNext(out var move, out _))
+        while (movePicker.TryGetNext(engine, position, out var move, out _))
         {
             returned.Add(move);
         }
@@ -386,14 +386,14 @@ public unsafe class MovePickerTest : BaseTest
 
     internal static List<(Move Move, int Score)> GetAllMovesFromMovePicker(Engine engine, Position position, Bitboard oppositeSideAttacks, ShortMove ttMove, int ply, bool isInCheck, bool capturesOnly)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
-        Span<int> moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        int* moveScores = stackalloc int[Constants.MaxNumberOfPseudolegalMovesInAPosition];
 
-        var movePicker = new MovePicker(engine, position, ttMove, oppositeSideAttacks, ply, moves, moveScores, isInCheck: isInCheck, capturesOnly: capturesOnly);
+        var movePicker = new MovePicker(position, ttMove, oppositeSideAttacks, ply, moves, moveScores, Constants.MaxNumberOfPseudolegalMovesInAPosition, isInCheck: isInCheck, capturesOnly: capturesOnly);
 
         var result = new List<(Move, int)>();
 
-        while (movePicker.TryGetNext(out var move, out var score))
+        while (movePicker.TryGetNext(engine, position, out var move, out var score))
         {
             result.Add((move, score));
         }
