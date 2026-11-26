@@ -1095,8 +1095,10 @@ public unsafe class PositionTest
     {
         var position = new Position(fen);
 
-        var winnigSideOffset = PieceOffset((int)position.Side);
-        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winnigSideOffset));
+        var winningSideOffset = PieceOffset((int)position.Side);
+        var winnigSidePawns = position.PieceBitboards[(int)Piece.P + winningSideOffset];
+        
+        Assert.AreEqual(isDraw, position.IsBishopPawnDraw(winningSideOffset, winnigSidePawns));
     }
 
     [TestCase("1k6/8/K7/8/8/2B5/P7/8 w - - 0 48", true)]

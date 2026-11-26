@@ -338,6 +338,13 @@ public unsafe partial class Position
 
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
+        var isWhiteWinning = eval > 0
+            || (eval >= 0 && _side == Side.White);
+
+        var winningSideOffset = Utils.PieceOffset(isWhiteWinning);
+
+        var winningSidePawns = PieceBitboards[(int)Piece.P + winningSideOffset];
+
         // Few pieces endgames
         if (gamePhase <= 5)
         {
@@ -369,8 +376,6 @@ public unsafe partial class Position
                         }
                     case 3:
                         {
-                            var winningSideOffset = Utils.PieceOffset(eval >= 0);
-
                             if (PieceBitboards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
                             {
                                 return (0, gamePhase);
@@ -404,14 +409,12 @@ public unsafe partial class Position
             }
             else
             {
-                var winningSideOffset = Utils.PieceOffset(eval >= 0);
-
                 if (gamePhase == 1)
                 {
                     if (PieceBitboards[(int)Piece.B + winningSideOffset].NotEmpty()
-                        && (PieceBitboards[(int)Piece.P + winningSideOffset] & Constants.NotAorH).Empty())
+                        && (winningSidePawns & Constants.NotAorH).Empty())
                     {
-                        if (IsBishopPawnDraw(winningSideOffset))
+                        if (IsBishopPawnDraw(winningSideOffset, winningSidePawns))
                         {
                             return (0, gamePhase);
                         }
@@ -1172,12 +1175,10 @@ public unsafe partial class Position
     /// if the defending one is closer enough, it's also a draw.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsBishopPawnDraw(int winningSideOffset)
+    internal bool IsBishopPawnDraw(int winningSideOffset, Bitboard winningSidePawns)
     {
-        var pawns = PieceBitboards[(int)Piece.P + winningSideOffset];
-
-        bool hasAFilePawn = (pawns & Constants.AFile).NotEmpty();
-        bool hasHFilePawn = (pawns & Constants.HFile).NotEmpty();
+        bool hasAFilePawn = (winningSidePawns & Constants.AFile).NotEmpty();
+        bool hasHFilePawn = (winningSidePawns & Constants.HFile).NotEmpty();
 
         // We filtered by Constants.NotAorH == 0 earlier, now we check that only one of those files has pawns
         if (hasAFilePawn == hasHFilePawn)
