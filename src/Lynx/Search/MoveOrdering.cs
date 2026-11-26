@@ -106,13 +106,15 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreQuietMove(Move move, int ply, Bitboard oppositeSideAttacks)
+    internal unsafe int ScoreQuietMove(Move move, int ply, Bitboard oppositeSideAttacks, short* ply1ContinuationHistory, short* ply2ContinuationHistory)
     {
         var score = BaseMoveScore + QuietHistoryEntry(move, oppositeSideAttacks);
 
         if(ply >= 1)
         {
-            score += ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply);
+            var commonContHistIndex = ContinuationHistoryMoveIndex(move.Piece(), move.TargetSquare());
+
+            score += ply1ContinuationHistory[commonContHistIndex] + ply2ContinuationHistory[commonContHistIndex];
         }
 
         return score;
