@@ -31,6 +31,11 @@
     <CETCompat>false</CETCompat>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(Optimized.ToLower())'=='true'">
+    <!--Default value is 100 ms after no new tier-0 JIT activity-->
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.CallCountingDelayMs" Value="0" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="NLog.Extensions.Logging" />
   </ItemGroup>
