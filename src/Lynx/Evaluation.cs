@@ -447,8 +447,12 @@ public unsafe partial class Position
             }
         }
 
-        // Endgame scaling with pawn count, formula yoinked from Sirius
-        eval = (int)(eval * ((80 + (winningSidePawns.CountBits() * 7)) / 128.0));
+        // Endgame scaling with winning side pawn count, idea from Sirius
+        var mg = Utils.UnpackMG(eval);
+        var eg = Utils.UnpackEG(eval);
+
+        var winningPawnsScale = 80 + (winningSidePawns.CountBits() * 7);
+        eval = Utils.Pack(mg, (short)(eg * winningPawnsScale / 128));
 
         // 50 moves rule distance scaling
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
