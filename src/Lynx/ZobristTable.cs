@@ -31,7 +31,7 @@ public static unsafe class ZobristTable
     {
         _pieceTable = CopyToPinnedArray(InitializeZobristTable());
 
-        _50mrTable = AllocatePinnedArray(Constants.MaxNumberMovesInAGame, out ulong[] fiftyMovesRuleTable);
+        _50mrTable = AllocatePinnedArray(Constants.HalfMovesCounterLength, out ulong[] fiftyMovesRuleTable);
         Initialize50mrTable(fiftyMovesRuleTable);
 
         _castleHashes = AllocatePinnedArray(CastleHashesLength, out ulong[] castleHashes);
@@ -68,7 +68,7 @@ public static unsafe class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong HalfMovesWithoutCaptureOrPawnMoveHash(int counter)
     {
-        Debug.Assert((uint)counter < Constants.MaxNumberMovesInAGame);
+        Debug.Assert((uint)counter < Constants.HalfMovesCounterLength);
 
         return _50mrTable[counter];
     }

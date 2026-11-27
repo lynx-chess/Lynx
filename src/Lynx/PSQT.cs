@@ -26,9 +26,9 @@ public static class EvaluationPSQTs
 #pragma warning restore S4663 // Comments should not be empty
 
     /// <summary>
-    /// 2 x PSQTBucketCount x PSQTBucketCount x 12 x 64
+    /// PSQTBucketCount x PSQTBucketCount x 12 x 64
     /// </summary>
-    internal static readonly int[] _packedPSQT = GC.AllocateArray<int>(2 * PSQTBucketCount * PSQTBucketCount * 12 * 64, pinned: true);
+    internal static readonly int[] _packedPSQT = GC.AllocateArray<int>(PSQTBucketCount * PSQTBucketCount * 12 * 64, pinned: true);
 
     static EvaluationPSQTs()
     {
@@ -108,7 +108,7 @@ public static class EvaluationPSQTs
     }
 
     /// <summary>
-    /// [2][PSQTBucketCount][PSQTBucketCount][12][64]
+    /// [PSQTBucketCount][PSQTBucketCount][12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ref int PSQT(int friendBucket, int enemyBucket, int piece, int square)

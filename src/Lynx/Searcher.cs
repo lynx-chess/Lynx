@@ -18,7 +18,7 @@ public sealed class Searcher : IDisposable
     #region UCI go command state
 
     /// <summary>
-    /// This guards go command state (<see cref="_pendingGoCommands"/>, <see cref="_isProcessingGoCommand"/>, <see cref="_stopRequestedForPendingGo"/>, <see cref="_isPondering"/> and <see cref="_isPonderHit"/>)
+    /// This guards go command state (<see cref="_pendingGoCommands"/>, <see cref="_isProcessingGoCommand"/>, <see cref="_stopRequestedForPendingGo"/>, <see cref="_isPondering"/>, <see cref="_isPonderHit"/>, <see cref="_isInfinite"/> and <see cref="_isEndOfInput"/>)
     private readonly Lock _goCommandStateLock = new();
 
     /// <summary>
@@ -32,6 +32,8 @@ public sealed class Searcher : IDisposable
 
     private bool _isPondering;
     private bool _isPonderHit;
+    private bool _isInfinite;
+    private bool _isEndOfInput;
 
     #endregion
 
@@ -87,16 +89,24 @@ public sealed class Searcher : IDisposable
         {
             while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
             {
-                try
+                if (_uciReader.TryRead(out var rawCommand))
                 {
-                    if (_uciReader.TryRead(out var rawCommand))
+                    try
                     {
-                        await OnGoCommand(new GoCommand(rawCommand));
+                        var goCommand = new GoCommand(rawCommand);
+
+                        BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder, goCommand.Infinite);
+
+                        await OnGoCommand(goCommand);
                     }
-                }
-                catch (Exception e)
-                {
-                    _logger.Error(e, "Error trying to read/parse UCI command");
+                    catch (Exception e)
+                    {
+                        _logger.Error(e, "Error processing UCI go command");
+                    }
+                    finally
+                    {
+                        EndGoCommand();
+                    }
                 }
             }
         }
@@ -112,7 +122,7 @@ public sealed class Searcher : IDisposable
 
     public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print(_mainEngine.Game.HalfMovesWithoutCaptureOrPawnMove, _mainEngine.Game.FullMoves);
 
-    private void BeginGoCommand(bool isPondering)
+    private void BeginGoCommand(bool isPondering, bool isInfinite)
     {
         // We lock the state to make sure not we don't process stop commands between go command being registed and its full processing here
         lock (_goCommandStateLock)
@@ -139,6 +149,7 @@ public sealed class Searcher : IDisposable
 #pragma warning restore S2952 // Classes should "Dispose" of members from the classes' own "Dispose" methods
 
             _isPondering = isPondering;
+            _isInfinite = isInfinite;
 
             if (!isPondering)
             {
@@ -161,14 +172,62 @@ public sealed class Searcher : IDisposable
                 // The search returns right away, with a 'bestmove' as every 'go' requires
                 _absoluteSearchCancellationTokenSource.Cancel();
             }
+
+            // Input is over, we either stop a go infinite/go ponder search or it'll run indefinitely
+            if (_isEndOfInput && (isPondering || isInfinite))
+            {
+                _absoluteSearchCancellationTokenSource.Cancel();
+            }
+        }
+    }
+
+    private void EndGoCommand()
+    {
+        lock (_goCommandStateLock)
+        {
+            _isProcessingGoCommand = false;
+
+            // Not necessarily consumed already if the search threw
+            _isPondering = false;
+            _isPonderHit = false;
+            _isInfinite = false;
+        }
+    }
+
+    /// <summary>
+    /// Meant to be invoked only by the listener thread
+    /// </summary>
+    public void WaitForSearchesAtEndOfInput()
+    {
+        lock (_goCommandStateLock)
+        {
+            _isEndOfInput = true;
+
+            // Input is over, we either stop a go infinite/go ponder search or it'll run indefinitely
+            if (_isProcessingGoCommand && (_isPondering || _isInfinite))
+            {
+                _absoluteSearchCancellationTokenSource.Cancel();
+            }
+        }
+
+        while (true)
+        {
+            lock (_goCommandStateLock)
+            {
+                if (_pendingGoCommands == 0 && !_isProcessingGoCommand)
+                {
+                    return;
+                }
+            }
+
+            // Blocking the listener thread is acceptable, since no more input will come
+            Thread.Sleep(10);
         }
     }
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
         _firstRun = false;
-
-        BeginGoCommand(Configuration.EngineSettings.IsPonder && goCommand.Ponder);
 
         // Originally before the search (instead of after) to prevent empty entries from competing in age vs depth 0 ones, altough that reason no longer applies
         _tt.BumpAge();
@@ -180,15 +239,6 @@ public sealed class Searcher : IDisposable
         else
         {
             await MultiThreadedSearch(goCommand);
-        }
-
-        lock (_goCommandStateLock)
-        {
-            _isProcessingGoCommand = false;
-
-            // Not necessarily consumed already if the search threw
-            _isPondering = false;
-            _isPonderHit = false;
         }
     }
 
@@ -324,7 +374,7 @@ public sealed class Searcher : IDisposable
 
         if (!isPondering)
         {
-            var finalSearchResult = MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints);
+            await MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints);
         }
         else
         {

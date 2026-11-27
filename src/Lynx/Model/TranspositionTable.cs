@@ -299,7 +299,7 @@ public unsafe readonly struct TranspositionTable
     private TranspositionTableElement* GetBucket(Position position, int halfMovesWithoutCaptureOrPawnMove)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, halfMovesWithoutCaptureOrPawnMove);
-        return (TranspositionTableElement*)&_buckets[(nint)ttIndex];
+        return (TranspositionTableElement*)&_buckets[ttIndex];
     }
 
     /// <summary>

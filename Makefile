@@ -1,65 +1,41 @@
 .DEFAULT_GOAL := publish
+.PHONY: build test test-default test-configuration test-longrunning test-perft publish run
 
-EXE=
+EXE =
 
-RUNTIME=
-PUBLISH_DIR=artifacts/Lynx/
-OUTPUT_DIR=
-
-ifeq ($(OS),Windows_NT)
-	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
-		RUNTIME=win-x64
-	else ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-		RUNTIME=win-x64
-	else ifeq ($(PROCESSOR_ARCHITEW6432),ARM64)
-		RUNTIME=win-arm64
-	else ifeq ($(PROCESSOR_ARCHITECTURE),ARM64)
-		RUNTIME=win-arm64
-	else
-		RUNTIME=win-x86
-	endif
-else
-	UNAME_S := $(shell uname -s)
-	UNAME_P := $(shell uname -p)
-	ifeq ($(UNAME_S),Linux)
-		RUNTIME=linux-x64
-		ifneq ($(filter aarch64%,$(UNAME_P)),)
-			RUNTIME=linux-arm64
-		else ifneq ($(filter armv8%,$(UNAME_P)),)
-			RUNTIME=linux-arm64
-		else ifneq ($(filter arm%,$(UNAME_P)),)
-			RUNTIME=linux-arm
-		else ifneq ($(filter ppc64le%,$(UNAME_P)),)
-			RUNTIME=linux-ppc64le
-		else ifneq ($(filter riscv64%,$(UNAME_P)),)
-			RUNTIME=linux-riscv64
-		else ifneq ($(filter s390x%,$(UNAME_P)),)
-			RUNTIME=linux-s390x
-		else 
-		endif
-	else ifneq ($(filter arm%,$(UNAME_P)),)
-		RUNTIME=osx-arm64
-	else
-		RUNTIME=osx-x64
-	endif
-endif
-
-ifndef RUNTIME
-	$(error RUNTIME is not set for $(OS) $(UNAME_S) $(UNAME_P), please fill an issue in https://github.com/lynx-chess/Lynx/issues/new/choose)
-endif
+PUBLISH_DIR = artifacts/Lynx/
+OUTPUT_DIR =
 
 ifdef EXE
-	OUTPUT_DIR=../../
+OUTPUT_DIR = ../../
 endif
+
+RUNTIME = $(shell dotnet build src/Lynx.Cli/Lynx.Cli.csproj -getProperty:NETCoreSdkPortableRuntimeIdentifier)
+
+checked_runtime = $(if $(and $(filter 1,$(words $1)),$(findstring -,$1)),$1,$(error Could not get the runtime identifier from the .NET SDK (got '$1'). You can try pass it explicitly, i.e. 'make RUNTIME=linux-x64'.))
 
 build:
 	dotnet build -c Release
 
-test:
-	dotnet test -c Release  & dotnet test -c Release --filter "TestCategory=Configuration" & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
-
 publish:
-	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:ExecutableName=$(EXE) -o ${PUBLISH_DIR} /p:FinalDestination=${OUTPUT_DIR} --tl:off
+	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime $(call checked_runtime,$(RUNTIME)) --self-contained /p:Optimized=true /p:ExecutableName=$(EXE) -o $(PUBLISH_DIR) /p:FinalDestination=$(OUTPUT_DIR) --tl:off
 
 run:
-	dotnet run --project src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME}
+	dotnet run --project src/Lynx.Cli/Lynx.Cli.csproj -c Release
+
+# 'make -j4 test' runs the four suites in parallel, after a single build
+test: test-default test-configuration test-longrunning test-perft
+
+test-default test-configuration test-longrunning test-perft: build
+
+test-default:
+	dotnet test -c Release --no-build
+
+test-configuration:
+	dotnet test -c Release --no-build --filter "TestCategory=Configuration"
+
+test-longrunning:
+	dotnet test -c Release --no-build --filter "TestCategory=LongRunning"
+
+test-perft:
+	dotnet test -c Release --no-build --filter "TestCategory=Perft"

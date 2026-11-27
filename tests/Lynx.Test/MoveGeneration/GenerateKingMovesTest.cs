@@ -12,11 +12,12 @@ public class GenerateKingMovesTest
         return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
     }
 
-    private static IEnumerable<Move> GenerateKingCaptures(Position position)
+    private static unsafe IEnumerable<Move> GenerateKingCaptures(Position position)
     {
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        Move* moves = stackalloc Move[Constants.MaxNumberOfPseudolegalMovesInAPosition];
+        var count = MoveGenerator.GenerateAllCaptures(position, moves, Constants.MaxNumberOfPseudolegalMovesInAPosition);
 
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+        return new Span<Move>(moves, count).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

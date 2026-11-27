@@ -29,7 +29,15 @@ public sealed class Listener
             {
                 var input = Console.ReadLine();
 
-                if (!string.IsNullOrEmpty(input))
+                // stdin closed (i.e. GUI crash)
+                if (input is null)
+                {
+                    _logger.Info("End of input detected");
+                    _uciHandler.HandleEndOfInput();
+                    break;
+                }
+
+                if (input.Length > 0)
                 {
                     await _uciHandler.Handle(input, cancellationToken);
                 }

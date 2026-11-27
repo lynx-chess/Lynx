@@ -364,7 +364,10 @@ public static class Constants
     /// </summary>
     public const int MaxNumberOfPseudolegalNoisyMovesInAPosition = 256;
 
-    public const int MaxNumberMovesInAGame = 2048;
+    public const int MaxNumberOfMovesInAGame = 1024;
+    public const int MaxNumberOfHalfMovesInAGame = MaxNumberOfMovesInAGame * 2;
+
+    public static int HalfMovesCounterLength => MaxNumberOfHalfMovesInAGame + Configuration.EngineSettings.MaxDepth + ArrayDepthMargin + 1;
 
     public static readonly int SideLimit = Enum.GetValues<Piece>().Length / 2;
 
