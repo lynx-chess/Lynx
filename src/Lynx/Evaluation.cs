@@ -332,11 +332,14 @@ public unsafe partial class Position
 
         int endGamePhase = MaxPhase - gamePhase;
 
-        var middleGameScore = Utils.UnpackMG(packedScore);
-        var endGameScore = Utils.UnpackEG(packedScore);
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / MaxPhase;
-
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
+
+        var middleGameScore = Utils.UnpackMG(packedScore);
+
+        // Endgame scaling with pawn count, idea from Sirius
+        var endGameScore = (int)(Utils.UnpackEG(packedScore) * ((80 + (totalPawnsCount * 7)) / 128.0));
+
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / MaxPhase;
 
         // Few pieces endgames
         if (gamePhase <= 5)
@@ -443,9 +446,6 @@ public unsafe partial class Position
                 }
             }
         }
-
-        // Endgame scaling with pawn count, formula yoinked from Sirius
-        eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
         // 50 moves rule distance scaling
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
