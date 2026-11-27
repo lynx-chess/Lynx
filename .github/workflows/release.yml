@@ -171,7 +171,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     permissions:
-      id-token: write
+      contents: write   # push commit and tag, create GitHub release
+      id-token: write   # NuGet Trusted Publishing (OIDC)
 
     steps:
 
