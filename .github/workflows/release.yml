@@ -223,6 +223,7 @@ jobs:
         path: artifacts/
 
     - name: NuGet login (OIDC → temp API key)
+      if: github.event.inputs.should_push_new_nuget_version == 'true'
       uses: NuGet/login@v1
       id: login
       with:
