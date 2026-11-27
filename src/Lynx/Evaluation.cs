@@ -338,8 +338,8 @@ public unsafe partial class Position
 
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
-        var isWhiteWinning = eval > 0
-            || (eval >= 0 && _side == Side.White);
+        var isWhiteWinning = endGameScore > 0
+            || (endGameScore >= 0 && _side == Side.White);
 
         var winningSideOffset = Utils.PieceOffset(isWhiteWinning);
 
