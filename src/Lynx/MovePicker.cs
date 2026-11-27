@@ -259,9 +259,17 @@ internal unsafe ref struct MovePicker
                             _moves[_count++] = quietMove;
                         }
 
-                        for (int i = 0; i < _count; ++i)
+                        var localMoves = _moves;
+                        var localMoveScores = _moveScores;
+                        var localCount = _count;
+                        var localPly = _ply;
+                        var localOppositeSideAttacks = _oppositeSideAttacks;
+                        var ply1ContinuationHistory = engine.ContinuationHistoryForPreviousMove(localPly - 1);
+                        var ply2ContinuationHistory = engine.ContinuationHistoryForPreviousMove(localPly - 2);
+
+                        for (int i = 0; i < localCount; ++i)
                         {
-                            _moveScores[i] = engine.ScoreQuietMove(_moves[i], _ply, _oppositeSideAttacks);
+                            localMoveScores[i] = engine.ScoreQuietMove(localMoves[i], localPly, localOppositeSideAttacks, ply1ContinuationHistory, ply2ContinuationHistory);
                         }
 
                         PadScores();

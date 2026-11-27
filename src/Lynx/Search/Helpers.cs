@@ -125,12 +125,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe int ContinuationHistoryEntry(int piece, int targetSquare, int ply)
     {
-        const int pieceOffset = 64 * 12 * 64;
-        const int targetSquareOffset = 12 * 64;
-        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
-
-        var commonIndex = (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset);
+        var commonIndex = ContinuationHistoryMoveIndex(piece, targetSquare);
 
         // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
         // Counter move history (continuation history, ply - 1)
@@ -146,24 +141,41 @@ public sealed partial class Engine
         return _continuationHistory.Pointer[ply1Index] + _continuationHistory.Pointer[ply2Index];
     }
 
+    /// <summary>
+    /// <see cref="_continuationHistory"/> shifted to the entries that follow the move stored in the stack at <paramref name="ply"/>,
+    /// to be indexed with <see cref="ContinuationHistoryMoveIndex(int, int)"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal unsafe short* ContinuationHistoryForPreviousMove(int ply)
+    {
+        // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
+        return _continuationHistory.Pointer + ContinuationHistoryPreviousMoveIndex(Game.ReadMoveFromStack(ply));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ContinuationHistoryMoveIndex(int piece, int targetSquare)
+    {
+        const int pieceOffset = 64;
+
+        return (piece * pieceOffset)
+            + targetSquare;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ContinuationHistoryPreviousMoveIndex(Move previousMove)
     {
-        const int previousMovePieceOffset = 64;
+        const int previousMovePieceOffset = 64 * 12 * 64;
+        const int previousMoveTargetSquareOffset = 12 * 64;
+        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryMoveIndex
 
         return (previousMove.Piece() * previousMovePieceOffset)
-            + previousMove.TargetSquare();
+            + (previousMove.TargetSquare() * previousMoveTargetSquareOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private unsafe void UpdateContinuationHistory(int piece, int targetSquare, int ply, int rawHistoryBonus)
     {
-        const int pieceOffset = 64 * 12 * 64;
-        const int targetSquareOffset = 12 * 64;
-        //const int previousMovePieceOffset = 64; // Used in ContinuationHistoryCommonIndex
-
-        var commonIndex = (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset);
+        var commonIndex = ContinuationHistoryMoveIndex(piece, targetSquare);
 
         // Since ContinuationHistoryPlyCount is used for stack indexing, there's never an overflow here
         if (ply >= 1)
