@@ -447,6 +447,9 @@ public unsafe partial class Position
         // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
+        // TODO integrate in the tuner - this restores middlegame eval units before the tuner change
+        eval = eval * 5 / 4;
+
         // 50 moves rule distance scaling
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
 
