@@ -26,4 +26,13 @@ public class ConfigurationValuesTest
 
         Assert.Greater(Configuration.EngineSettings.RFP_MaxDepth, Configuration.EngineSettings.Razoring_MaxDepth);
     }
+
+    [Test]
+    public void SingularExtensionsValues()
+    {
+        Assert.Greater(
+        Configuration.EngineSettings.SE_TTScore_Margin,
+        (Configuration.EngineSettings.MaxDepth * Configuration.EngineSettings.SE_DepthMultiplier)
+            + Configuration.EngineSettings.SE_NoPV);
+    }
 }

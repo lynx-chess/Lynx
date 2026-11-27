@@ -517,6 +517,12 @@ public sealed class EngineSettings
     [SPSA<int>(enabled: false)]
     public int SE_MinDepth { get; set; } = 7;
 
+    /// <summary>
+    /// Greater than <see cref="MaxDepth"/> x <see cref="SE_DepthMultiplier"/> + <see cref="SE_NoPV"/>
+    /// </summary>
+    [SPSA<int>(enabled: false)]
+    public int SE_TTScore_Margin { get; set; } = 256;
+
     [SPSA<int>(enabled: false)]
     public int SE_TTDepthOffset { get; set; } = 3;
 
