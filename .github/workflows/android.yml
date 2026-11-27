@@ -1,0 +1,175 @@
+name: Android
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  schedule:
+    - cron:  '1 0 * * 1'    # Mondays at 00:01
+
+env:
+  DOTNET_VERSION: 11.0.x
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - runtime-identifier: linux-bionic-x64
+            machine: X86-64
+          - runtime-identifier: linux-bionic-arm64
+            machine: AArch64
+            artifact-name: linux-bionic-arm64-v8.0
+          - runtime-identifier: linux-bionic-arm64
+            machine: AArch64
+            instruction-set: armv8.2-a%2Cdotprod
+            artifact-name: linux-bionic-arm64-v8.2-dotprod
+          - runtime-identifier: linux-bionic-arm64
+            machine: AArch64
+            instruction-set: armv8.9-a
+            artifact-name: linux-bionic-arm64-v8.9
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Add Android NDK (preinstalled in the runner) to PATH
+      run: |
+        # GITHUB_PATH prepends, so NDK's clang is found before the runner's own clang
+        echo "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
+        "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
+
+    - name: Check that NDK's clang is the first one in PATH
+      run: |
+        command -v clang
+        [ "$(command -v clang)" = "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" ]
+
+    - name: Publish ${{ matrix.artifact-name || matrix.runtime-identifier }}
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true ${{ matrix.instruction-set && format('/p:IlcInstructionSet={0}', matrix.instruction-set) || '' }} -o artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}
+
+    - name: Check executable
+      run: bash .github/scripts/android/check-executable.sh artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/Lynx.Cli ${{ matrix.machine }}
+
+    - name: Upload ${{ matrix.artifact-name || matrix.runtime-identifier }} artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: Lynx-${{ matrix.artifact-name || matrix.runtime-identifier }}
+        path: |
+          artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/
+          !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
+        if-no-files-found: error
+
+  reference-bench:
+    runs-on: ubuntu-latest
+
+    outputs:
+      nodes: ${{ steps.bench.outputs.nodes }}
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Build
+      run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj
+
+    - name: Bench (x64, JIT)
+      id: bench
+      working-directory: ./src/Lynx.Cli
+      run: |
+        output=$(timeout 600 dotnet run -c Release --no-build bench)
+        echo "$output"
+        echo "nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+  arm64:
+    needs: reference-bench
+    runs-on: ubuntu-26.04-arm
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install clang (NativeAOT linker driver)
+      run: command -v clang || (sudo apt-get update && sudo apt-get install -y clang)
+
+    - name: Publish linux-arm64 with NativeAOT
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-arm64 --self-contained /p:Optimized=true /p:PublishAot=true -o artifacts/linux-arm64-aot
+
+    - name: Bench (arm64, NativeAOT)
+      working-directory: ./artifacts/linux-arm64-aot
+      run: |
+        printf 'runtimeconfig\nquit\n' | timeout 30 ./Lynx.Cli
+        output=$(timeout 600 ./Lynx.Cli bench)
+        echo "$output"
+        nodes=$(echo "$output" | grep -oE '^[0-9]+ nodes' | cut -d' ' -f1)
+        if [ "$nodes" != "${{ needs.reference-bench.outputs.nodes }}" ]; then
+          echo "::error::arm64 bench: $nodes nodes, x64 JIT: ${{ needs.reference-bench.outputs.nodes }} nodes"
+          exit 1
+        fi
+
+    - name: Stack needed by a deep search (arm64, NativeAOT)
+      run: bash .github/scripts/android/stack-needed.sh artifacts/linux-arm64-aot/Lynx.Cli
+
+    - name: Instruction set variants (arm64, NativeAOT vs JIT)
+      run: bash .github/scripts/android/instruction-set-variants.sh ${{ needs.reference-bench.outputs.nodes }}
+
+    - name: Tests (arm64, JIT)
+      run: dotnet test -c Release
+
+  emulator:
+    needs: [build, reference-bench]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - api-level: 24                # Minimum supported by .NET 11 NativeAOT
+            target: google_apis
+          - api-level: 36                # Android 16, 16 KB memory pages
+            target: google_apis_ps16k
+      fail-fast: false
+
+    steps:
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    # Before download-artifact: checkout cleans the working directory
+    - uses: actions/checkout@v7
+
+    - uses: actions/download-artifact@v8
+      with:
+        pattern: Lynx-linux-bionic-*
+        path: artifacts/
+
+    - name: Run tests in Android API ${{ matrix.api-level }} emulator (${{ matrix.target }})
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ matrix.target }}
+        arch: x86_64
+        cores: 4
+        disable-animations: true
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+        script: bash .github/scripts/android/emulator-tests.sh ${{ needs.reference-bench.outputs.nodes }}

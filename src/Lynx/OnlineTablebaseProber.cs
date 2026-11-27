@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Lynx;
 
@@ -402,9 +403,9 @@ public static class OnlineTablebaseProber
             //var response = await _retryPolicy.ExecuteAsync(async (_) => await _client.GetAsync($"standard?fen={fen}", cancellationToken), cancellationToken);
             //return JsonSerializer.Deserialize(await response.Content.ReadAsStringAsync(cancellationToken), typeof(TablebaseEvaluation), _serializerOptions);
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code - TypeInfoResolver included in _serializerOptions
-            return await _client.GetFromJsonAsync<TablebaseEvaluation>($"standard?fen={fen}", _serializerOptions, cancellationToken);
-#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+            var typeInfo = (JsonTypeInfo<TablebaseEvaluation>)_serializerOptions.GetTypeInfo(typeof(TablebaseEvaluation));
+
+            return await _client.GetFromJsonAsync($"standard?fen={fen}", typeInfo, cancellationToken);
         }
         catch (OperationCanceledException)  // Also catches TaskCanceledException
         {
