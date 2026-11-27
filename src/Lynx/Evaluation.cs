@@ -369,7 +369,7 @@ public unsafe partial class Position
                         }
                     case 3:
                         {
-                            var winningSideOffset = Utils.PieceOffset(eval >= 0);
+                            var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
 
                             if (PieceBitboards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
                             {
@@ -404,7 +404,7 @@ public unsafe partial class Position
             }
             else
             {
-                var winningSideOffset = Utils.PieceOffset(eval >= 0);
+                var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
 
                 if (gamePhase == 1)
                 {
