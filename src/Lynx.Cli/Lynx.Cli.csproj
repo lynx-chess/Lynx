@@ -31,6 +31,21 @@
     <CETCompat>false</CETCompat>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('linux-bionic-'))">
+    <!-- NativeAOT is the only way of getting a single self-contained executable, since there's no single-file host for these RIDs -->
+    <PublishAot>true</PublishAot>
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <PublishAotUsingRuntimePack>true</PublishAotUsingRuntimePack>
+    <DisableUnsupportedError>true</DisableUnsupportedError>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('linux-bionic-'))">
+    <!-- Android 15+ devices may use 16 KB memory pages. NativeAOT only aligns shared libraries to 16 KB, and NDK < r28 defaults to 4 KB -->
+    <LinkerArg Include="-Wl,-z,max-page-size=16384" />
+    <!-- Increase default thread stack size from ~1 MB to the regular glibc default, 8MB. A search at MaxDepth (128 plies) needs ~970 KB (~32 KB + ~7.3 KB per ply, measured on x64 and arm64) -->
+    <RuntimeHostConfigurationOption Include="System.Threading.DefaultStackSize" Value="8388608" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="NLog.Extensions.Logging" />
   </ItemGroup>
@@ -56,6 +71,10 @@
     <Message Text="⚠️ $(RuntimeIdentifier) nuget packages aren't available in nuget.org." Importance="high" />
   </Target>
 
+  <Target Name="Android_info" BeforeTargets="Restore" Condition="$(RuntimeIdentifier.StartsWith('linux-bionic-'))">
+    <Message Text="ℹ️ $(RuntimeIdentifier) is built with NativeAOT and requires Android NDK's clang, which needs to be the first one found in PATH" Importance="high" />
+  </Target>
+
   <Target Name="RenameExe" AfterTargets="Publish" Condition="'$(ExecutableName)'!='' and '$(ExecutableName)'!='$(AssemblyName)'">
     <Message Text="Attempting to rename executable file from $(PublishDir)/$(AssemblyName) to $(PublishDir)/$(ExecutableName)" Importance="high" />
     <Move SourceFiles="$(PublishDir)/$(AssemblyName)" DestinationFiles="$(PublishDir)/$(ExecutableName)" ContinueOnError="true" />
@@ -69,7 +88,7 @@
     <ItemGroup>
       <FilesToMove Include="$(PublishDir)/**/*.*" />
     </ItemGroup>
-    
+
     <Message Text="Moving the content of $(PublishDir) to $(FinalDestination)" Importance="high" />
     <Copy SourceFiles="@(FilesToMove)" DestinationFolder="$(FinalDestination)" ContinueOnError="true" />
   </Target>
