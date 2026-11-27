@@ -41,7 +41,9 @@ jobs:
 
     strategy:
       matrix:
-        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, osx-x64, osx-arm64]
+        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, osx-x64, osx-arm64, linux-bionic-arm64, linux-bionic-x64]
+        # Listed, so that an include with a different instruction-set becomes a new job instead of being merged into its runtime-identifier's one
+        instruction-set: [default]
         include:
           - runtime-identifier: win-x64
             os: windows-latest
@@ -59,6 +61,19 @@ jobs:
             os: macOS-15-intel
           - runtime-identifier: osx-arm64
             os: macos-latest
+          - runtime-identifier: linux-bionic-x64
+            os: ubuntu-latest
+          - runtime-identifier: linux-bionic-arm64
+            artifact-name: linux-bionic-arm64-v8.0
+            os: ubuntu-latest
+          - runtime-identifier: linux-bionic-arm64
+            instruction-set: armv8.2-a%2Cdotprod
+            artifact-name: linux-bionic-arm64-v8.2-dotprod
+            os: ubuntu-latest
+          - runtime-identifier: linux-bionic-arm64
+            instruction-set: armv8.9-a
+            artifact-name: linux-bionic-arm64-v8.9
+            os: ubuntu-latest
       fail-fast: false
 
     steps:
@@ -89,27 +104,36 @@ jobs:
         $regex = "(?<=<Version>).*(?=</Version>)"
         (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
 
-    - name: Publish ${{ matrix.runtime-identifier }} version
-      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:ReleaseBuild=true -o artifacts/${{ matrix.runtime-identifier }}
+    - name: Add Android NDK (preinstalled in the runner) to PATH
+      if: startsWith(matrix.runtime-identifier, 'linux-bionic')
+      run: |
+        # GITHUB_PATH prepends, so NDK's clang is found before the runner's own clang
+        echo "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin" >> "$GITHUB_PATH"
+        "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" --version
 
-    - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
+    - name: Publish ${{ matrix.artifact-name || matrix.runtime-identifier }} version
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:ReleaseBuild=true ${{ matrix.instruction-set != 'default' && format('/p:IlcInstructionSet={0}', matrix.instruction-set) || '' }} -o artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}
+
+    - name: Upload Lynx-${{ matrix.artifact-name || matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version != ''
       uses: actions/upload-artifact@v7
       with:
-        name: Lynx-${{ github.event.inputs.new_engine_version }}-${{ matrix.runtime-identifier }}
+        name: Lynx-${{ github.event.inputs.new_engine_version }}-${{ matrix.artifact-name || matrix.runtime-identifier }}
         path: |
-          artifacts/${{ matrix.runtime-identifier }}/
+          artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
         if-no-files-found: error
 
-    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.artifact-name || matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version == ''
       uses: actions/upload-artifact@v7
       with:
-        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
+        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.artifact-name || matrix.runtime-identifier }}
         path: |
-          artifacts/${{ matrix.runtime-identifier }}/
+          artifacts/${{ matrix.artifact-name || matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
         if-no-files-found: error
 
     - name: Deterministic build
@@ -147,7 +171,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     permissions:
-      id-token: write
+      contents: write   # push commit and tag, create GitHub release
+      id-token: write   # NuGet Trusted Publishing (OIDC)
 
     steps:
 
@@ -199,6 +224,7 @@ jobs:
         path: artifacts/
 
     - name: NuGet login (OIDC → temp API key)
+      if: github.event.inputs.should_push_new_nuget_version == 'true'
       uses: NuGet/login@v1
       id: login
       with:

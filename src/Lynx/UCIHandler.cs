@@ -5,6 +5,10 @@ using Lynx.UCI.Commands.GUI;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json;
@@ -413,6 +417,20 @@ public sealed class UCIHandler
     {
         try
         {
+            await _engineToUci.Writer.WriteAsync("Runtime:");
+            string[] runtime =
+            [
+                $"RID = {RuntimeInformation.RuntimeIdentifier}",
+                $"OS = {RuntimeInformation.OSDescription}",
+                $"Architecture = {RuntimeInformation.ProcessArchitecture}",
+                $"JIT = {RuntimeFeature.IsDynamicCodeCompiled}",
+            ];
+
+            foreach (var item in runtime)
+            {
+                await _engineToUci.Writer.WriteAsync($"\t- {item}");
+            }
+
             await _engineToUci.Writer.WriteAsync("CPU flags:");
             string[] intrinsics =
             [
@@ -420,11 +438,23 @@ public sealed class UCIHandler
                 $"SSE4.2 = {Sse42.IsSupported}",
                 $"AVX2 = {Avx2.IsSupported}",
                 $"Avx512BW = {Avx512BW.IsSupported}",
+                $"AdvSimd = {AdvSimd.IsSupported}",
+                $"Crc32 = {Crc32.IsSupported}",
+                $"Rdm = {Rdm.IsSupported}",
+                $"Dp = {Dp.IsSupported}",
+#pragma warning disable SYSLIB5003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                $"Sve = {Sve.IsSupported}",
+#pragma warning restore SYSLIB5003
             ];
 
             foreach (var instructionSet in intrinsics)
             {
                 await _engineToUci.Writer.WriteAsync($"\t- {instructionSet}");
+            }
+
+            if (!RuntimeFeature.IsDynamicCodeCompiled)
+            {
+                await _engineToUci.Writer.WriteAsync("NativeAOT build: CPU flags are the ones the binary was compiled for, not necessarily all the ones the CPU supports");
             }
 
             if (Sse.IsSupported)
@@ -440,6 +470,11 @@ public sealed class UCIHandler
             if (Bmi2.IsSupported)
             {
                 await _engineToUci.Writer.WriteAsync("BMI2 supported, ParallelBitExtract (PEXT) will be used for slider pieces move generation");
+            }
+
+            if (Vector128.IsHardwareAccelerated)
+            {
+                await _engineToUci.Writer.WriteAsync("Vector128 hardware accelerated, it will be used for move ordering");
             }
 
             await _engineToUci.Writer.WriteAsync("Garbage Collector (GC) settings:");
@@ -590,6 +625,10 @@ public sealed class UCIHandler
         "Trimming",
         "IL2026",       // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         Justification = "Trimming doesn't make this fail, but it's development feature anyway")]
+    [UnconditionalSuppressMessage(
+        "AOT",
+        "IL3050",       // Members annotated with 'RequiresDynamicCodeAttribute' require dynamic access otherwise can break functionality when AOT compiling
+        Justification = "ViriformatFilter only has scalar properties, which the reflection binder handles without dynamic code. Development feature anyway")]
     private void HandleVFtoEPD(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -611,9 +650,9 @@ public sealed class UCIHandler
 
             filter = new ViriformatFilter();
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+#pragma warning disable IL2026, IL3050 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code/AOT compiling
             config.Bind(filter);
-#pragma warning restore IL2026
+#pragma warning restore IL2026, IL3050
         }
 
         ViriformatLoader.LoadFile(path, filter);
